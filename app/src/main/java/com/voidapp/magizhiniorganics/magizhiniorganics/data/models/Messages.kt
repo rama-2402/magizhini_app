@@ -1,0 +1,1 @@
+package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsimport android.os.Parcelableimport kotlinx.parcelize.Parcelize@Parcelizedata class Messages (    var id: String = "",    val fromId: String = "",    val toId: String = "",    val type: String = "",    val timeStamp: Long = 0L,    val message: String = "",    val seen: Boolean = false): Parcelable

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel" />
+    </data>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".ui.purchaseHistory.PurchaseHistoryActivity">
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/apbAppBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/green_base"
+        android:gravity="center"
+        android:layout_gravity="center"
+        app:iconTint="@color/white">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/tbToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivBackBtn"
+                android:padding="@dimen/material_size_4"
+                android:layout_width="32dp"
+                android:layout_height="@dimen/material_size_32"
+                android:src="@drawable/ic_back"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/white"
+                android:layout_marginEnd="@dimen/material_size_16"/>
+            <TextView
+                android:id="@+id/tvToolbarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Purchase History"
+                android:layout_marginStart="@dimen/material_size_8"
+                android:textSize="@dimen/text_size_large"
+                android:textColor="@color/white"
+                android:fontFamily="@font/roboto"/>
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPurchaseHistory"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+</LinearLayout>
+</layout>

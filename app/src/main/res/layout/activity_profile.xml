@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clProfile"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/ivHeader"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_bottom_rouded"
+                android:elevation="@dimen/material_size_16"
+                android:nestedScrollingEnabled="true"
+                app:layout_constraintBottom_toTopOf="@id/svProfileBody"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent=".28"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="1.0"
+
+                />
+
+            <TextView
+                android:id="@+id/tvProfile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_16"
+                android:elevation="@dimen/material_size_16"
+                android:fontFamily="@font/roboto"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:text="@string/profile_header"
+                android:textColor="@color/white"
+                android:textSize="32sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <ImageView
+                android:id="@+id/ivProfilePic"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="2dp"
+                android:background="@drawable/bg_transparent"
+                android:elevation="20dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_person"
+                app:layout_constraintBottom_toBottomOf="@id/ivHeader"
+                app:layout_constraintEnd_toStartOf="@id/llProfileName"
+                app:layout_constraintHeight_percent=".15"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvProfile"
+                app:layout_constraintWidth_percent=".30" />
+
+            <LinearLayout
+                android:id="@+id/llProfileName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:elevation="20dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="@id/ivProfilePic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ivProfilePic"
+                app:layout_constraintTop_toBottomOf="@id/tvProfile"
+                app:layout_constraintWidth_percent="0.6">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/etlProfileName"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Name"
+                    android:paddingRight="8dp"
+                    app:boxStrokeColor="@color/white"
+                    app:flow_wrapMode="aligned"
+                    app:endIconMode="clear_text"
+                    app:endIconTint="@color/white"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:startIconDrawable="@drawable/ic_person"
+                    app:hintTextColor="@color/white"
+                    app:startIconTint="@color/white">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etProfileName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:cursorVisible="true"
+                        android:inputType="textShortMessage"
+                        android:textColorHint="@color/white"
+                        android:textColor="@color/white"
+                        android:backgroundTint="@color/white"
+                        android:textCursorDrawable="@null"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/tvPhoneNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:elevation="20dp"
+                    android:fontFamily="@font/roboto"
+                    android:text="9486598819"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    app:layout_constraintWidth_percent="0.6"
+                    tools:text="9486598819" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvReferral"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="20dp"
+                android:fontFamily="@font/roboto"
+                android:text="referral code"
+                android:textColor="@color/white"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/ivProfilePic"
+                android:layout_marginEnd="@dimen/material_size_16"
+                android:layout_marginBottom="@dimen/material_size_16"
+                tools:text="9486598819" />
+
+            <ScrollView
+                android:id="@+id/svProfileBody"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:fillViewport="true"
+                android:foregroundGravity="bottom|center_vertical|fill_vertical|fill"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivHeader">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="@dimen/material_size_16">
+
+                    <LinearLayout
+                        android:id="@+id/llDob"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_margin="@dimen/material_size_8"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_material_box"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/roboto"
+                            android:text="Date Of Birth:"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/gray700"/>
+
+                        <TextView
+                            android:id="@+id/tvDob"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text=" DD / MM / YYYY "
+                            android:textColor="@color/gray700"/>
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlAlternateNumber"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:hint="Alternate Phone"
+                        app:boxStrokeColor="@color/green_base"
+                        app:flow_wrapMode="aligned"
+                        android:textColorHint="@color/green_base"
+                        app:endIconMode="clear_text"
+                        app:hintTextColor="@color/green_base"
+                        app:layout_constraintBottom_toTopOf="@id/etlEmailId"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/llDob"
+                        app:prefixText="+91"
+                        app:startIconDrawable="@drawable/ic_phone_msg"
+                        app:startIconTint="@color/green_base">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAlternateNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:cursorVisible="true"
+                            android:inputType="number"
+                            android:maxLength="10"
+                            android:textColorHint="@color/green_base"
+                            android:textColor="@color/gray700"
+                            android:textCursorDrawable="@null"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlEmailId"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        app:flow_wrapMode="aligned"
+                        android:textColorHint="@color/green_base"
+                        android:hint="Email ID"
+                        app:boxStrokeColor="@color/green_base"
+                        app:endIconMode="clear_text"
+                        app:hintTextColor="@color/green_base"
+                        app:layout_constraintBottom_toTopOf="@id/etlAddressOne"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etlAlternateNumber"
+                        app:startIconDrawable="@drawable/ic_email"
+                        app:startIconTint="@color/green_base">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEmailId"
+                            android:textColor="@color/gray700"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="textEmailAddress"
+                            android:textColorHint="@color/green_base"
+                            android:textCursorDrawable="@null"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlAddressOne"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginRight="8dp"
+                        android:textColorHint="@color/green_base"
+                        android:layout_weight="1"
+                        android:hint="Address Line 1"
+                        app:boxStrokeColor="@color/green_base"
+                        app:flow_wrapMode="aligned"
+                        app:endIconMode="clear_text"
+                        app:hintTextColor="@color/green_base"
+                        app:layout_constraintBottom_toTopOf="@id/etlAddressTwo"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etlEmailId"
+                        app:startIconDrawable="@drawable/ic_address"
+                        app:startIconTint="@color/green_base">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAddressOne"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/gray700"
+                            android:inputType="textLongMessage"
+                            android:textColorHint="@color/green_base"
+                            android:textCursorDrawable="@null" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlAddressTwo"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_weight="1"
+                        android:hint="Address Line 2"
+                        app:boxStrokeColor="@color/green_base"
+                        android:textColorHint="@color/green_base"
+                        app:flow_wrapMode="aligned"
+                        app:endIconMode="clear_text"
+                        app:hintTextColor="@color/green_base"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etlAddressOne"
+                        app:startIconDrawable="@drawable/ic_address"
+                        app:startIconTint="@color/green_base">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAddressTwo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="textLongMessage"
+                            android:textColor="@color/gray700"
+                            android:textColorHint="@color/green_base"
+                            android:textCursorDrawable="@null" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:id="@+id/llLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/material_size_8"
+                        android:paddingEnd="@dimen/material_size_8"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etlAddressTwo">
+
+                        <Spinner
+                            android:id="@+id/spArea"
+                            android:layout_width="0dp"
+                            android:layout_height="56dp"
+                            android:layout_weight="1"
+                            android:spinnerMode="dropdown"
+                            android:popupBackground="@drawable/shape_round_rectangle_8"
+                            android:theme="@style/mySpinnerItemStyle"
+                            android:entries="@array/chennai_codes"
+                            android:background="@drawable/bg_material_box"
+                            android:layout_marginEnd="@dimen/material_size_8"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:paddingEnd="@dimen/material_size_8"
+                            />
+                        <Spinner
+                            android:id="@+id/spCity"
+                            android:layout_width="0dp"
+                            android:layout_height="56dp"
+                            android:layout_weight="1"
+                            android:popupBackground="@drawable/shape_round_rectangle_8"
+                            android:theme="@style/mySpinnerItemStyle"
+                            android:entries="@array/city_names"
+                            android:spinnerMode="dropdown"
+                            android:background="@drawable/bg_material_box"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:paddingEnd="@dimen/material_size_8"
+                            />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/llGps"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:background="@drawable/bg_material_box"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/llLocation">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="@dimen/material_size_8"
+                            android:src="@drawable/ic_location"
+                            app:tint="@color/green_base" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/material_size_8"
+                            android:fontFamily="@font/roboto"
+                            android:text="GPS"
+                            android:textColor="@color/green_base"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvGps"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/material_size_16"
+                            android:fontFamily="@font/roboto"
+                            android:text="(Help us locate you better)"
+                            android:textColor="@color/gray600"
+                            android:textSize="16sp"
+                            android:textStyle="italic" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/llSaveProfile"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/llGps">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/material_size_24" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSaveProfile"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/material_size_16"
+                            android:layout_marginBottom="16dp"
+                            android:elevation="24dp"
+                            android:text="SAVE PROFILE"
+                            app:icon="@drawable/ic_save"
+                            android:textColor="@color/white"
+                            app:iconTint="@color/white"
+                            app:backgroundTint="@color/green_base"/>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="30dp" />
+
+
+                    </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

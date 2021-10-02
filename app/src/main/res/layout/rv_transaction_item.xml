@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?android:attr/selectableItemBackground"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:paddingTop="@dimen/material_size_8"
+    android:paddingStart="@dimen/material_size_8"
+    android:paddingEnd="@dimen/material_size_8">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lytTimestamp"
+        android:layout_width="0dp"
+        app:layout_constraintWidth_percent=".2"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+        <ImageView
+            android:id="@+id/ivTransactionType"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:src="@drawable/ic_received" />
+
+        <TextView
+            android:id="@+id/tvDateStamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:text="12/21/2021"
+            android:textColor="@color/gray700"
+            android:layout_marginTop="@dimen/material_size_2"
+            android:textSize="12dp"
+            app:layout_constraintTop_toBottomOf="@id/ivTransactionType"
+            app:layout_constraintStart_toStartOf="@id/ivTransactionType"
+            app:layout_constraintEnd_toEndOf="@id/ivTransactionType"/>
+        <TextView
+            android:id="@+id/tvTimestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:text="4:00:22 PM"
+            android:textColor="@color/gray700"
+            android:layout_marginTop="@dimen/material_size_2"
+            android:textSize="12dp"
+            app:layout_constraintTop_toBottomOf="@id/tvDateStamp"
+            app:layout_constraintStart_toStartOf="@id/tvDateStamp"
+            app:layout_constraintEnd_toEndOf="@id/tvDateStamp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tvTransactionIDText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="Transaction ID: "
+        android:textColor="@color/gray700"
+        android:textStyle="bold"
+        android:textSize="12dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTransactionID"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text=""
+        android:textIsSelectable="true"
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        android:ellipsize="end"
+        app:layout_constraintTop_toTopOf="@id/tvTransactionIDText"
+        app:layout_constraintStart_toEndOf="@id/tvTransactionIDText"
+        app:layout_constraintBottom_toBottomOf="@id/tvTransactionIDText"
+        app:layout_constraintEnd_toStartOf="@id/lytTimestamp"/>
+
+    <TextView
+        android:id="@+id/tvTransactionAmountText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:fontFamily="@font/roboto"
+        android:text="Paid: "
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        android:layout_marginTop="@dimen/material_size_8"
+        app:layout_constraintTop_toBottomOf="@id/tvTransactionIDText"
+        app:layout_constraintStart_toStartOf="@id/tvTransactionIDText" />
+
+    <TextView
+        android:id="@+id/tvTransactionAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="500"
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        app:layout_constraintTop_toTopOf="@id/tvTransactionAmountText"
+        app:layout_constraintStart_toEndOf="@id/tvTransactionAmountText"
+        app:layout_constraintBottom_toBottomOf="@id/tvTransactionAmountText"/>
+
+    <TextView
+        android:id="@+id/tvOrderTypeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:textStyle="bold"
+        android:text="Order Type: "
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        android:layout_marginStart="@dimen/material_size_24"
+        app:layout_constraintTop_toTopOf="@id/tvTransactionAmount"
+        app:layout_constraintStart_toEndOf="@id/tvTransactionAmount"
+        app:layout_constraintBottom_toBottomOf="@id/tvTransactionAmount"
+        />
+
+    <TextView
+        android:id="@+id/tvOrderType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="Subscription"
+        android:textColor="@color/gray700"
+        android:ellipsize="end"
+        android:textSize="12dp"
+        app:layout_constraintTop_toTopOf="@id/tvOrderTypeText"
+        app:layout_constraintStart_toEndOf="@id/tvOrderTypeText"
+        app:layout_constraintEnd_toStartOf="@id/lytTimestamp"
+        app:layout_constraintBottom_toBottomOf="@id/tvOrderTypeText"/>
+
+    <TextView
+        android:id="@+id/tvOrderIDText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="Order ID: "
+        android:textColor="@color/gray700"
+        android:textStyle="bold"
+        android:textSize="12dp"
+        android:layout_marginTop="@dimen/material_size_8"
+        app:layout_constraintTop_toBottomOf="@id/tvTransactionAmountText"
+        app:layout_constraintStart_toStartOf="@id/tvTransactionAmountText"
+/>
+
+    <TextView
+        android:id="@+id/tvOrderID"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text=""
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        android:textIsSelectable="true"
+        android:ellipsize="end"
+        app:layout_constraintTop_toTopOf="@id/tvOrderIDText"
+        app:layout_constraintEnd_toStartOf="@id/lytTimestamp"
+        app:layout_constraintStart_toEndOf="@id/tvOrderIDText"
+        app:layout_constraintBottom_toBottomOf="@id/tvOrderIDText"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.75dp"
+        android:background="@color/grey"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/tvOrderID"
+        android:layout_marginTop="@dimen/material_size_12"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

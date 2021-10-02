@@ -1,0 +1,1 @@
+package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class CustomerProfile(    val uid: String = "",    var name: String = "",    val image: String = "",    val recentMessages: Messages = Messages(),    val online: Boolean = false,    val typing: Boolean = false,    var timestamp: Long = 0L)

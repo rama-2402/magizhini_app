@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "591829034624",
+    "firebase_url": "https://magizhiniorganics-56636-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "magizhiniorganics-56636",
+    "storage_bucket": "magizhiniorganics-56636.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591829034624:android:1ab70af556fc6d9781a865",
+        "android_client_info": {
+          "package_name": "com.voidapp.magizhiniOrganics.store"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "591829034624-6s7ca2gpuih8qhf04m8enbc5c1bj0hdu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu9XksAFl5AzL5O10CwpnRz_dSzFrbC80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "591829034624-6s7ca2gpuih8qhf04m8enbc5c1bj0hdu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591829034624:android:a9cd55e9cd77757581a865",
+        "android_client_info": {
+          "package_name": "com.voidapp.magizhiniorganics.magizhiniorganics"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "591829034624-6s7ca2gpuih8qhf04m8enbc5c1bj0hdu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu9XksAFl5AzL5O10CwpnRz_dSzFrbC80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "591829034624-6s7ca2gpuih8qhf04m8enbc5c1bj0hdu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

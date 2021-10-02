@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:id="@+id/clBottomCart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:background="@drawable/shape_round_rectangle_16"
+        android:backgroundTint="@color/gray200"
+        android:elevation="@dimen/material_size_24"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="84dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+                <ImageView
+                    android:id="@+id/ivBottomSheetIndicator"
+                    android:layout_width="@dimen/material_size_48"
+                    android:layout_height="@dimen/material_size_4"
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:src="@drawable/bg_dialog_indicator" />
+
+                <LinearLayout
+                    android:id="@+id/llVisibleLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:elevation="@dimen/material_size_8"
+                    android:gravity="top"
+                    android:orientation="horizontal"
+                    >
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivCart"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_weight="1"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:backgroundTint="@color/white"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:elevation="@dimen/material_size_2"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_cart"
+                        app:tint="@color/green_base"
+                        />
+
+                    <LinearLayout
+                        android:id="@+id/rlCheckOutBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:layout_weight="5"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:elevation="@dimen/material_size_2"
+                        android:backgroundTint="@color/green_base"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        app:tint="@color/green_base"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        >
+
+                        <ImageView
+                            android:id="@+id/ivCheckOut"
+                            android:layout_width="45dp"
+                            android:layout_height="45dp"
+                            android:background="@drawable/shape_round_rectangle_8"
+                            android:backgroundTint="@color/green_base"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_order"
+                            app:tint="@color/white" />
+
+                        <TextView
+                            android:id="@+id/tvCheckOut"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignEnd="@id/ivCheckOut"
+                            android:layout_marginTop="@dimen/material_size_2"
+                            android:fontFamily="@font/baloo"
+                            android:text="CHECKOUT"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivFilter"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:layout_weight="1"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:elevation="@dimen/material_size_2"
+                        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                        android:backgroundTint="@color/white"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_filter"
+                        app:tint="@color/green_base"
+                        />
+
+                </LinearLayout>
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    android:elevation="@dimen/material_size_4" />
+
+                <View
+                    android:id="@+id/vBottomEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp" />
+    </LinearLayout>
+</layout>

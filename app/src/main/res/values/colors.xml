@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    //app color themes
+    <color name="green_base">#86C232</color>
+    <color name="green_base_transparent">#2386C232</color>
+    <color name="green_light">#E9FAD0</color>
+    <color name="green_base_dark">#254000</color>
+    <color name="matteRed">#FF5B5B</color>
+    <color name="matteGreen">#AED48B</color>
+
+    <color name="transparent">#00FFFFFF</color>
+    <color name="semiTransparent">#c6000000</color>
+    <color name="transparent_bg">#80131313</color>
+    <color name="flatGray">#7f8c8d</color>
+    <color name="grey">#B6B6B6</color>
+    <color name="lightGrey">#DFDFDF</color>
+</resources>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".ui.customerSupport.ChatActivity"
+        android:background="@color/white">
+
+        <!--    the header layout with back button, name and prof pic-->
+        <LinearLayout
+            android:id="@+id/llHeader"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="@color/green_base"
+            android:layout_marginBottom="@dimen/material_size_4">
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivBackBtn"
+                android:padding="@dimen/material_size_4"
+                android:layout_width="@dimen/material_size_32"
+                android:layout_height="@dimen/material_size_32"
+                android:src="@drawable/ic_back"
+                app:tint="@color/white"
+                android:layout_marginStart="@dimen/material_size_12"
+                android:layout_marginEnd="@dimen/material_size_12"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivProfileImage"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_profile_placeholder"
+                android:scaleType="centerCrop"
+                android:layout_marginStart="@dimen/material_size_8"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
+
+            <TextView
+                android:id="@+id/tvProfileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jane Doe"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/material_size_16"
+                android:textSize="20sp"
+                android:fontFamily="@font/roboto"
+                android:textColor="@color/white"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:lines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/llViewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/shape_round_rectangle_8"
+            app:layout_constraintTop_toBottomOf="@id/llHeader"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            >
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tlTabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:tabGravity="fill"
+                app:tabInlineLabel="true"
+                app:tabMode="fixed"
+                android:background="@color/green_base"
+                app:tabIndicatorColor="@color/white"
+                app:tabIconTint="@color/white"
+                app:tabSelectedTextColor="@color/white"
+                app:tabTextColor="@color/white"
+                />
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpFragmentContent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/shape_round_rectangle_8"/>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

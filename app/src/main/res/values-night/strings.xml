@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MagizhiniOrganics</string>
+
+    //onBoarding screen
+    <string name="page_one_title">FRESH</string>
+    <string name="body_one">FRESH</string>
+    <string name="body_two">FRESH</string>
+
+    //signIn Screen
+    <string name="register">REGISTER</string>
+    <string name="send_otp">SEND OTP</string>
+    <string name="verify">VERIFY</string>
+    <string name="resend_otp">RESEND OTP</string>
+    <string name="profile_header">PROFILE</string>
+    <string name="by_signing_in_you_indicate_that_you_have_read_and_agreed_to_our_terms_of_service_and_privacy_policy">By signing in you indicate that you have read and agreed to our Terms of Service and Privacy Policy</string>
+    <string name="msg_cancel_registration">Cancel Registration</string>
+    <string name="msg_profile_activated">Profile Activated</string>
+    <string name="msg_welcome">Welcome!</string>
+    <string name="submit">SUBMIT</string>
+    <string name="locating_first_time_might_take_some_time_please_wait">Locating first time might take some time. Please Wait</string>
+    <string name="msg_long_press_and_drag">Long press and drag the marker to change location</string>
+    <string name="err_longer_to_locate">Something went wrong. Please try later</string>
+    <string name="err_location_access_denied">Location Access Denied!</string>
+    <string name="msg_you_are_here">You are here !</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="product_categories">Product Categories</string>
+    <string name="product_thumbnail">product thumbnail</string>
+    <string name="favorites_icon">favorites icon</string>
+    <string name="add_comment_warning">OOPS! You can\'t review yet!</string>
+    <string name="add_comment_content">     To protect our customers from Fake Product Reviews, we have decided to provide access only to customers who have purchased to products. This is to make sure our customers get unbiased genuine review of our products either good or bad and make an informed decision. Hope you understand. Please purchase the product to review :)</string>
+    <string name="order_id">Order ID:</string>
+    <string name="purchase_date">Puchase Date: </string>
+    <string name="payment_method">Payment: </string>
+    <string name="transaction_history">Transaction History</string>
+
+    <!--    spinners-->
+    <string-array name="city_names">
+        <item>Chennai</item>
+    </string-array>
+
+<!--    order count-->
+    <string-array name="order_count">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+
+
+    <!--    months names filter-->
+    <string-array name="months_name">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+
+    <!--    Delivery preference selection-->
+    <string-array name="delivery_preference_array">
+        <item>Leave at door step</item>
+        <item>Leave at gate</item>
+        <item>In hand delivery</item>
+        <item>Leave with security</item>
+        <item>Call on delivery</item>
+        <item>Ring doorbell</item>
+    </string-array>
+
+    <!--    chennai codes-->
+    <string-array name="chennai_codes">
+        <item>Abiramapuram - 600018</item>
+        <item>Adyar - 600020</item>
+        <item>Agaram - 600082</item>
+        <item>Aminjikarai - 600029</item>
+        <item>Anna Nagar - 600040</item>
+        <item>Anna Nagar east - 600102</item>
+        <item>Anna Nagar western extn - 600101</item>
+        <item>Anna Road - 600002</item>
+        <item>Arumbakkam - 600106</item>
+        <item>Ashoknagar - 600083</item>
+        <item>Aynavaram - 600023</item>
+        <item>Besantnagar - 600090</item>
+        <item>Broadway - 600108</item>
+        <item>Cemetry Road - 600021</item>
+        <item>Central Institute of technolog - 600113</item>
+        <item>Central Leather research insti - 600020</item>
+        <item>Chamiers Road - 600018</item>
+        <item>Chennai Race course - 600032</item>
+        <item>Chennai. - 600001</item>
+        <item>Chepauk - 600005</item>
+        <item>Chetput - 600031</item>
+        <item>Chintadripet - 600002</item>
+        <item>Choolai - 600112</item>
+        <item>Choolaimedu - 600094</item>
+        <item>D G vaishnav college - 600106</item>
+        <item>Decosters Road - 600012</item>
+        <item>Defence Officers colony - 600032</item>
+        <item>Directorate Of tech education - 600025</item>
+        <item>Dr. ambedkar nagar - 600003</item>
+        <item>Edapalayam - 600003</item>
+        <item>Egmore - 600008</item>
+        <item>Ekkaduthangal - 600032</item>
+        <item>Eldams Road - 600018</item>
+        <item>Engineering College - 600025</item>
+        <item>Erukkancheri - 600118</item>
+        <item>Ethiraj Salai - 600008</item>
+        <item>Flowers Road - 600084</item>
+        <item>Foreshore Estate - 600028</item>
+        <item>Fort St george - 600009</item>
+        <item>G K m colony - 600082</item>
+        <item>Gaudiyamath Road - 600014</item>
+        <item>Golluvar Agraharam road - 600021</item>
+        <item>Gopalapuram - 600086</item>
+        <item>Government Estate - 600002</item>
+        <item>Govt Stanley hospital - 600001</item>
+        <item>Greams Road - 600006</item>
+        <item>Guindy Industrial estate - 600032</item>
+        <item>Guindy North - 600015</item>
+        <item>High Court building - 600104</item>
+        <item>Hindi Prachar sabha - 600017</item>
+        <item>Icf Colony - 600038</item>
+        <item>Indian Institute of technology - 600036</item>
+        <item>Indira Nagar - 600020</item>
+        <item>Jafferkhanpet - 600083</item>
+        <item>Jam Bazaar - 600014</item>
+        <item>Jawahar Nagar - 600082</item>
+        <item>Kalaignar Karunanidhi nagar - 600078</item>
+        <item>Kalmandapam - 600013</item>
+        <item>Kasturibai Nagar - 600020</item>
+        <item>Kdm West(mer with kdm) - 600024</item>
+        <item>Kilpauk - 600010</item>
+        <item>Kilpauk Medical college - 600010</item>
+        <item>Kodambakkam - 600024</item>
+        <item>Kodungaiyur - 600118</item>
+        <item>Korrukupet - 600021</item>
+        <item>Kosapet - 600012</item>
+        <item>Kotturpuram - 600085</item>
+        <item>Koyambedu - 600107</item>
+        <item>Koyambedu Wholesale market com - 600092</item>
+        <item>Krishnampet - 600005</item>
+        <item>Kumaran Nagar - 600033</item>
+        <item>Lloyds Estate - 600014</item>
+        <item>Loyola College - 600034</item>
+        <item>Madras Electricity system - 600002</item>
+        <item>Madras Medical college - 600003</item>
+        <item>Madras Presidency college - 600005</item>
+        <item>Madras University - 600005</item>
+        <item>Mambalam R.s. - 600033</item>
+        <item>Mandaveli - 600004</item>
+        <item>Mannady - 600001</item>
+        <item>Mettupalayam(mer With west mam - 600033</item>
+        <item>Mint Building - 600079</item>
+        <item>Mpt Ao - 600001</item>
+        <item>Muthialpet(ms) - 600001</item>
+        <item>Mylapore - 600004</item>
+        <item>Nandanam - 600035</item>
+        <item>Nerkundram - 600107</item>
+        <item>New Avadi road - 600010</item>
+        <item>Nungambakkam - 600034</item>
+        <item>Nungambakkam Bazaar - 600034</item>
+        <item>Nungambakkam High road - 600034</item>
+        <item>Old College buildings - 600006</item>
+        <item>P C hostel - 600030</item>
+        <item>Park Town - 600003</item>
+        <item>Parthasarathy Koil - 600005</item>
+        <item>Perambur - 600011</item>
+        <item>Perambur Barracks - 600012</item>
+        <item>Perambur High road - 600012</item>
+        <item>Perambur North - 600011</item>
+        <item>Pr. accountatn general - 600018</item>
+        <item>Pudupakkam - 600014</item>
+        <item>Pudupet - 600002</item>
+        <item>Puliyanthope - 600012</item>
+        <item>Purasawalkam - 600084</item>
+        <item>Raja Annamalaipuram - 600028</item>
+        <item>Rajathottam - 600082</item>
+        <item>Rajbhavan - 600022</item>
+        <item>Ramakrishna Nagar - 600028</item>
+        <item>Rangarajapuram - 600024</item>
+        <item>Rayapuram - 600013</item>
+        <item>Ripon Buildings - 600003</item>
+        <item>Royapettah - 600014</item>
+        <item>Royapettah High road - 600004</item>
+        <item>Royapuram Market - 600013</item>
+        <item>Rv Nagar - 600118</item>
+        <item>Saidapet - 600015</item>
+        <item>Saidapet North - 600015</item>
+        <item>Saidapet West(mer with sdp) - 600015</item>
+        <item>Saligramam - 600093</item>
+        <item>Santhome - 600004</item>
+        <item>Sembiam - 600011</item>
+        <item>Seven Wells - 600001</item>
+        <item>Shastri Bhavan - 600006</item>
+        <item>Shastri Nagar - 600020</item>
+        <item>Shenoy Nagar - 600030</item>
+        <item>Sowcarpet - 600079</item>
+        <item>Sri Ayyappa nagar - 600092</item>
+        <item>Strahans Road - 600012</item>
+        <item>Teynampet - 600018</item>
+        <item>Teynampet South - 600018</item>
+        <item>Teynampet West - 600006</item>
+        <item>Theosophical Society - 600020</item>
+        <item>Thygaraya Nagar - 600017</item>
+        <item>Thygaraya Nagar north - 600017</item>
+        <item>Thygaraya Nagar south - 600017</item>
+        <item>Tidel Park - 600113</item>
+        <item>Tiruvallikkeni - 600005</item>
+        <item>Tiruvanmiyur - 600041</item>
+        <item>Tiruvanmiyur North - 600041</item>
+        <item>Tondiarpet - 600081</item>
+        <item>Tondiarpet Bazaar - 600081</item>
+        <item>Tondiarpet West - 600081</item>
+        <item>Triplicane South - 600014</item>
+        <item>Ttti Taramani - 600113</item>
+        <item>Vadapalani - 600026</item>
+        <item>Velacheri - 600042</item>
+        <item>Venkatesapuram - 600012</item>
+        <item>Vepery - 600007</item>
+        <item>Virugambakkam - 600092</item>
+        <item>Vivekananda College madras - 600004</item>
+        <item>Vyasar Nagar colony - 600039</item>
+        <item>Vyasarpadi - 600039</item>
+        <item>Washermanpet - 600021</item>
+        <item>Washermanpet East - 600021</item>
+        <item>West Mambalam - 600033</item>
+        <item>World University centre - 600031</item>
+    </string-array>
+</resources>

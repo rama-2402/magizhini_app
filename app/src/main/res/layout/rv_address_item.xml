@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clytAddress"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/material_size_12"
+        android:layout_marginTop="@dimen/material_size_12"
+        android:layout_marginEnd="@dimen/material_size_12"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/shape_round_rectangle_8"
+        android:elevation="@dimen/material_size_8"
+        android:padding="@dimen/material_size_16"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/tvUserName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="Void"
+            android:textSize="24sp"
+            android:textColor="@color/gray700"
+            android:textStyle="normal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvAddressOne"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_size_16"
+            android:textColor="@color/gray700"
+            android:text="something something street name"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvUserName" />
+
+        <TextView
+            android:id="@+id/tvAddressTwo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_size_8"
+            android:textColor="@color/gray700"
+            android:text="something something street or area"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvAddressOne" />
+
+        <TextView
+            android:id="@+id/tvAddressCity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_size_8"
+            android:textColor="@color/gray700"
+            android:text="Chennai, "
+            android:textSize="14sp"
+            android:textStyle="normal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvAddressTwo" />
+
+        <TextView
+            android:id="@+id/tvAddressArea"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/material_size_8"
+            android:textColor="@color/gray700"
+            android:text="Items Purchased"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            app:layout_constraintBottom_toBottomOf="@id/tvAddressCity"
+            app:layout_constraintStart_toEndOf="@id/tvAddressCity"
+            app:layout_constraintTop_toTopOf="@id/tvAddressCity" />
+
+        <ImageView
+            android:id="@+id/ivEdit"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="@dimen/material_size_4"
+            android:layout_marginTop="@dimen/material_size_2"
+            android:background="@drawable/bg_transparent_round"
+            app:layout_constraintEnd_toStartOf="@id/ivUncheck"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="@dimen/material_size_8"
+            android:background="@drawable/ic_write_review"
+            app:layout_constraintBottom_toBottomOf="@id/ivEdit"
+            app:layout_constraintEnd_toEndOf="@id/ivEdit"
+            app:layout_constraintStart_toStartOf="@id/ivEdit"
+            app:layout_constraintTop_toTopOf="@id/ivEdit" />
+
+        <ImageView
+            android:id="@+id/ivDelete"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="@dimen/material_size_8"
+            android:layout_marginTop="@dimen/material_size_2"
+            android:background="@drawable/bg_transparent_round"
+            app:layout_constraintEnd_toStartOf="@id/ivEdit"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="@dimen/material_size_8"
+            android:background="@drawable/ic_delete"
+            app:layout_constraintBottom_toBottomOf="@id/ivDelete"
+            app:layout_constraintEnd_toEndOf="@id/ivDelete"
+            app:layout_constraintStart_toStartOf="@id/ivDelete"
+            app:layout_constraintTop_toTopOf="@id/ivDelete" />
+    <ImageView
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <ImageView
+        android:id="@+id/ivUncheck"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_uncheck"
+        app:tint="@color/green_base"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

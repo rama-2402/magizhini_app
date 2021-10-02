@@ -1,0 +1,2 @@
+rootProject.name = "MagizhiniOrganics"
+include ':app'

@@ -1,0 +1,1 @@
+package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class PushNotification(    var data: NotificationData,    var to: String = "")

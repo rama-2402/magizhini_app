@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_bottom_sheet_background"
+    android:padding="@dimen/material_size_16"
+    android:theme="@style/Theme.MaterialComponents.Light">
+
+    <ImageView
+        android:id="@+id/ivBottomSheetIndicator"
+        android:layout_width="@dimen/material_size_48"
+        android:layout_height="@dimen/material_size_4"
+        android:src="@drawable/bg_dialog_indicator"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/etlReferralNumber"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/material_size_16"
+        android:layout_marginEnd="@dimen/material_size_16"
+        android:layout_marginBottom="@dimen/material_size_16"
+        android:layout_weight="1"
+        android:hint="Referrer Phone"
+        app:boxStrokeColor="@color/green_base"
+        app:flow_wrapMode="aligned"
+        app:endIconMode="clear_text"
+        android:textColorHint="@color/grey"
+        app:hintTextColor="@color/green_base"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivBottomSheetIndicator"
+        app:layout_constraintEnd_toStartOf="@id/btnApply"
+        app:startIconDrawable="@drawable/ic_phone_msg"
+        app:startIconTint="@color/green_base">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etReferralNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:cursorVisible="true"
+            android:inputType="number"
+            android:maxLength="10"
+            android:textColorHint="@color/green_base"
+            android:textCursorDrawable="@null"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnApply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="apply"
+        app:backgroundTint="@color/green_base"
+        android:layout_marginEnd="@dimen/material_size_8"
+        app:layout_constraintTop_toTopOf="@id/etlReferralNumber"
+        app:layout_constraintBottom_toBottomOf="@id/etlReferralNumber"
+        app:layout_constraintStart_toEndOf="@id/etlReferralNumber"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

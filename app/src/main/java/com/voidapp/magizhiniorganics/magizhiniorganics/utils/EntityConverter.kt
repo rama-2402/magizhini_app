@@ -1,0 +1,197 @@
+package com.voidapp.magizhiniorganics.magizhiniorganics.utils
+
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+
+open class EntityConverter {
+
+    //data class to entity class converter
+
+    fun UserProfile.toUserProfileEntity() = UserProfileEntity (
+        id = id,
+        name = name,
+        phNumber = phNumber,
+        alternatePhNumber = alternatePhNumber,
+        dob = dob,
+        mailId = mailId,
+        address = address,
+        profilePicUrl = profilePicUrl,
+        referralId = referrerNumber,
+        defaultProductVariant = defaultProductVariant,
+        favorites = favorites,
+        purchaseHistory = purchaseHistory
+            )
+
+    fun ProductCategory.toProductCategoryEntity() = ProductCategoryEntity (
+        id = id,
+        name = name,
+        items = items,
+        thumbnailUrl = thumbnailUrl,
+        thumbnailName = thumbnailName,
+        isDiscounted = isDiscounted,
+        discountType = discountType,
+        discountAmount = discountAmount,
+        products = products,
+        activated = activated
+    )
+
+    fun Product.toProductEntity() = ProductEntity (
+        id = id,
+        name = name,
+        category = category,
+        thumbnailUrl = thumbnailUrl,
+        thumbnailName = thumbnailName,
+        rating = rating,
+        description =  description,
+        descType = descType,
+        status = status,
+        discountAvailable =  discountAvailable,
+        discountType = discountType,
+        discountAmt =  discountAmt,
+        defaultVariant = defaultVariant,
+        variants = variants,
+        activated = activated,
+        reviews = reviews
+    )
+
+    fun Coupon.toCouponEntity() = CouponEntity (
+        id = id,
+        name = name,
+        code = code,
+        description = description,
+        status = status,
+        type = type,
+        amount = amount,
+        purchaseLimit = purchaseLimit,
+        maxDiscount = maxDiscount,
+        from = from,
+        expiryDate = expiryDate,
+        categories = categories
+    )
+
+    fun Banner.toBannerEntity() = BannerEntity(
+        id = id,
+        url = url,
+        order = order,
+        type = type,
+        description = description,
+        imageId = imageId
+    )
+
+    fun Order.toOrderEntity() = OrderEntity(
+        orderId = orderId,
+        customerId = customerId,
+        cart = cart,
+        purchaseDate = purchaseDate,
+        isPaymentDone = isPaymentDone,
+        paymentMethod = paymentMethod,
+        deliveryPreference =  deliveryPreference,
+        deliveryNote = deliveryNote,
+        appliedCoupon = appliedCoupon,
+        address = address,
+        price = price,
+        orderStatus = orderStatus
+    )
+
+    fun Wallet.toWalletEntity() = WalletEntity(
+        id = id,
+        amount = amount,
+        reminder = reminder,
+        nextRecharge = nextRecharge,
+        transactionHistory = transactionHistory
+    )
+
+    fun PinCodes.toPinCodesEntity() = PinCodesEntity (
+        id = id,
+        areaCode = areaCode,
+        deliveryCharge = deliveryCharge
+    )
+
+    // Entity class to model data class converters
+
+    fun UserProfileEntity.toUserProfile() = UserProfile (
+        id = id,
+        name = name,
+        phNumber = phNumber,
+        alternatePhNumber = alternatePhNumber,
+        dob = dob,
+        mailId = mailId,
+        address = address,
+        profilePicUrl = profilePicUrl,
+        referrerNumber = referralId,
+        defaultProductVariant = defaultProductVariant,
+        favorites = favorites,
+        purchaseHistory = purchaseHistory
+    )
+
+    fun ProductCategoryEntity.toProductCategory() = ProductCategory (
+        id = id,
+        name = name,
+        items = items,
+        thumbnailUrl = thumbnailUrl,
+        thumbnailName = thumbnailName,
+        isDiscounted = isDiscounted,
+        discountType = discountType,
+        discountAmount = discountAmount,
+        products = products,
+        activated = activated
+    )
+
+    fun ProductEntity.toProduct() = Product (
+        id = id,
+        name = name,
+        category = category,
+        thumbnailUrl = thumbnailUrl,
+        thumbnailName = thumbnailName,
+        rating = rating,
+        description =  description,
+        descType = descType,
+        status = status,
+        discountAvailable =  discountAvailable,
+        discountType = discountType,
+        discountAmt =  discountAmt,
+        defaultVariant = defaultVariant,
+        variants = variants,
+        activated = activated,
+        reviews = reviews
+    )
+
+    fun CouponEntity.toCoupon() = Coupon (
+        id = id,
+        name = name,
+        code = code,
+        description = description,
+        status = status,
+        type = type,
+        amount = amount,
+        purchaseLimit = purchaseLimit,
+        maxDiscount = maxDiscount,
+        from = from,
+        expiryDate = expiryDate,
+        categories = categories
+    )
+
+    fun BannerEntity.toBanner() = Banner(
+        id = id,
+        url = url,
+        order = order,
+        type = type,
+        description = description,
+        imageId = imageId
+    )
+
+    fun OrderEntity.toOrder() = Order(
+        orderId = orderId,
+        customerId = customerId,
+        cart = cart,
+        purchaseDate = purchaseDate,
+        isPaymentDone = isPaymentDone,
+        paymentMethod = paymentMethod,
+        deliveryPreference =  deliveryPreference,
+        deliveryNote = deliveryNote,
+        appliedCoupon = appliedCoupon,
+        address = address,
+        price = price,
+        orderStatus = orderStatus
+    )
+}

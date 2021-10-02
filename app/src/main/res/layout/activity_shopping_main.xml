@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    >
+        <include
+            layout="@layout/dialog_bottom_cart"
+            />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        tools:context=".ui.shoppingMain.ShoppingMainActivity">
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/apbAppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green_base"
+            android:gravity="center"
+            android:layout_gravity="center"
+            app:iconTint="@color/white">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/tbToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:titleTextColor="@color/white"
+            >
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivBackBtn"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="@dimen/material_size_4"
+                android:src="@drawable/ic_back"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/white"
+                android:layout_marginEnd="@dimen/material_size_16"/>
+            <TextView
+                android:id="@+id/tvToolbarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Magizhini Store"
+                android:layout_marginStart="@dimen/material_size_8"
+                android:textSize="@dimen/text_size_large"
+                android:textColor="@color/white"
+                android:fontFamily="@font/roboto"/>
+
+<!--            <com.google.android.material.imageview.ShapeableImageView-->
+<!--                android:id="@+id/ivSearchBtn"-->
+<!--                android:layout_width="24dp"-->
+<!--                android:layout_height="24dp"-->
+<!--                android:src="@drawable/ic_search"-->
+<!--                android:background="?android:attr/selectableItemBackgroundBorderless"-->
+<!--                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"-->
+<!--                app:tint="@color/white"-->
+<!--                android:layout_gravity="end"-->
+<!--                android:layout_marginEnd="@dimen/material_size_16"/>-->
+
+<!--            <SearchView-->
+<!--                android:id="@+id/ivSearchBtn"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:src="@drawable/ic_search"-->
+<!--                android:background="?android:attr/selectableItemBackgroundBorderless"-->
+<!--                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"-->
+<!--                app:tint="@color/white"-->
+<!--                android:layout_gravity="end"-->
+<!--                android:layout_marginEnd="@dimen/material_size_16"/>-->
+        </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+        <HorizontalScrollView
+            android:id="@+id/svHorizontalChipScroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollIndicators="none"
+            android:scrollbars="none"
+            android:paddingEnd="@dimen/material_size_8"
+            >
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/cgFilterChipGroup"
+                style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                android:background="@color/white"
+                android:backgroundTint="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/material_size_8"
+                android:isScrollContainer="true"
+                android:orientation="horizontal"
+                android:overScrollMode="always"
+                android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                app:singleLine="true"
+                app:singleSelection="true"
+                app:checkedChip="@id/cpCategoryFilter"
+                >
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpAll"
+                    style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="All"
+                    android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    app:chipCornerRadius="@dimen/material_size_8" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpCategoryFilter"
+                    style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Category Filter"
+                    android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    app:chipCornerRadius="@dimen/material_size_8" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpFavorites"
+                    style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Favorites"
+                    android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    app:chipCornerRadius="@dimen/material_size_8" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpDiscounts"
+                    style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Discounts"
+                    android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    app:chipCornerRadius="@dimen/material_size_8" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpLimitedItems"
+                    style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Limited Items"
+                    android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    app:chipCornerRadius="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    />
+
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/flShimmerPlaceholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:shimmer_auto_start="true"
+            >
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <include
+                    layout="@layout/shimmer_shopping_main_placeholder"/>
+                <include
+                    layout="@layout/shimmer_shopping_main_placeholder"/>
+                <include
+                    layout="@layout/shimmer_shopping_main_placeholder"/>
+                <include
+                    layout="@layout/shimmer_shopping_main_placeholder"/>
+                <include
+                    layout="@layout/shimmer_shopping_main_placeholder"/>
+                <include
+                    layout="@layout/shimmer_shopping_main_placeholder"/>
+            </LinearLayout>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvShoppingItems"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            android:layout_marginBottom="82dp"/>
+        <View
+            android:id="@+id/vBottomEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="120dp"/>
+    </LinearLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewmodel"
+            type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel" />
+    </data>
+
+    <androidx.drawerlayout.widget.DrawerLayout
+        android:id="@+id/dlDrawerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        tools:openDrawer="start"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/apbAppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:gravity="center"
+            android:layout_gravity="center"
+            app:iconTint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            >
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/tbToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_gravity="center"
+                android:foregroundGravity="center"
+                android:background="@color/green_base"
+                android:gravity="center"
+                app:titleTextColor="@color/white"
+                app:iconTint="@color/white"
+                app:navigationIcon="@color/white"
+                >
+            </androidx.appcompat.widget.Toolbar>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:isScrollContainer="true"
+            android:nestedScrollingEnabled="false"
+            tools:context=".ui.home.HomeActivity">
+
+            <org.imaginativeworld.whynotimagecarousel.ImageCarousel
+                android:id="@+id/cvBanner"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:elevation="10dp"
+                app:autoPlay="true"
+                app:autoPlayDelay="2000"
+                app:autoWidthFixing="true"
+                app:bottomShadowHeight="36dp"
+                app:carouselType="BLOCK"
+                app:imagePlaceholder="@drawable/ic_app_placeholder"
+                app:imageScaleType="centerCrop"
+                app:indicatorMargin="0dp"
+                app:infiniteCarousel="true"
+                app:layout_constraintCircleRadius="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent=".28"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:showBottomShadow="true"
+                app:showCaption="false"
+                app:showIndicator="true"
+                app:showNavigationButtons="false"
+                app:showTopShadow="false" />
+
+            <TextView
+                android:id="@+id/tvCategoryHeading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/material_size_8"
+                android:fontFamily="@font/roboto"
+                android:paddingStart="@dimen/material_size_8"
+                android:text="@string/product_categories"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="italic"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cvBanner" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHomeItems"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/material_size_16"
+                android:isScrollContainer="true"
+                android:nestedScrollingEnabled="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvCategoryHeading" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/cpShowAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/material_size_4"
+                android:backgroundTint="@color/green_base"
+                android:text="Show All"
+                android:textColor="@color/white"
+                app:chipCornerRadius="@dimen/material_size_8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cvBanner" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabCart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="24dp"
+                android:src="@drawable/ic_cart"
+                app:backgroundTint="@color/green_base"
+                app:fabSize="normal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:tint="@color/white" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/nvNavigationView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:isScrollContainer="true"
+            android:overScrollMode="always"
+            android:scrollbars="vertical"
+            app:headerLayout="@layout/nav_header"
+            app:menu="@menu/nav_menu"
+            android:backgroundTint="@color/white"
+            app:itemTextColor="@color/gray700"
+            app:itemIconTint="@color/green_base"
+            />
+
+    </androidx.drawerlayout.widget.DrawerLayout>
+</layout>

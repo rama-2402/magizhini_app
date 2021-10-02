@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/shape_round_rectangle_16"
+        android:layout_margin="24dp"
+        >
+        <TextView
+            android:id="@+id/tvConfirmationText"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/eighty"
+            android:text="Exit"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:textColor="@color/matteRed"
+            android:layout_gravity="center"
+            android:background="?android:attr/selectableItemBackground"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.75dp"
+            android:background="@color/grey"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/material_size_16"
+            android:layout_marginEnd="@dimen/material_size_16"
+            />
+
+        <TextView
+            android:id="@+id/tvCancelText"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/eighty"
+            android:gravity="center"
+            android:text="Cancel"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:background="?android:attr/selectableItemBackground"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless"
+            />
+    </LinearLayout>
+</layout>
