@@ -3,8 +3,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 
-open class EntityConverter {
-
     //data class to entity class converter
 
     fun UserProfile.toUserProfileEntity() = UserProfileEntity (
@@ -90,7 +88,8 @@ open class EntityConverter {
         appliedCoupon = appliedCoupon,
         address = address,
         price = price,
-        orderStatus = orderStatus
+        orderStatus = orderStatus,
+        monthYear = monthYear
     )
 
     fun Wallet.toWalletEntity() = WalletEntity(
@@ -192,6 +191,6 @@ open class EntityConverter {
         appliedCoupon = appliedCoupon,
         address = address,
         price = price,
-        orderStatus = orderStatus
+        orderStatus = orderStatus,
+        monthYear = monthYear
     )
-}

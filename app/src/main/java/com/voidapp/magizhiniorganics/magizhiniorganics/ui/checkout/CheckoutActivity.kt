@@ -262,13 +262,14 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                                 customerId = mCurrentUserID,
                                 cart = mCartItems,
                                 purchaseDate = Time().getCurrentDate(),
-                                isPaymentDone = true,   //todo we have to get the boolean data from transaction success
+                                isPaymentDone = false,   //todo we have to get the boolean data from transaction success
                                 paymentMethod = mPaymentPreference,
                                 deliveryPreference = binding.spDeliveryPreference.selectedItem.toString(),
                                 deliveryNote = binding.etDeliveryNote.text.toString().trim(),
                                 appliedCoupon = mCurrentCoupon,
                                 address = mSelectedAddress,
-                                price = binding.tvTotalAmt.text.toString().toFloat()
+                                price = binding.tvTotalAmt.text.toString().toFloat(),
+                                monthYear = "${Time().getMonth()}${Time().getYear()}"
                             )
                             startWorkerThread(order)
                             viewModel.placeOrder(order)
@@ -373,8 +374,8 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
             rgPaymentType.setOnCheckedChangeListener { _, checkedId ->
                 val selectedId = findViewById<RadioButton>(checkedId)
                 mPaymentPreference = when(selectedId.text) {
-                    "UPI" -> "UPI"
-                    "COD" -> "Cash On Delivery"
+                    " UPI" -> "UPI"
+                    " COD" -> "COD"
                     else -> "Wallet"
                 }
             }

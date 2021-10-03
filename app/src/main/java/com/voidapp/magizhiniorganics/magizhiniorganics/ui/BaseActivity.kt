@@ -19,6 +19,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -257,6 +258,14 @@ open class BaseActivity : AppCompatActivity() {
                     is WalletActivity -> {
                         hideListBottomSheet()
                         activity.setMonthFilter(selectedItem)
+                    }
+                    is PurchaseHistoryActivity -> {
+                        hideListBottomSheet()
+                        if (data == "years") {
+                            activity.setYearFilter(selectedItem)
+                        } else if (data == "months") {
+                            activity.setMonthFilter(selectedItem)
+                        }
                     }
                 }
 

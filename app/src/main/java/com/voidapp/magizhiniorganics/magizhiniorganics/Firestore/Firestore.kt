@@ -4,6 +4,10 @@ import android.app.Activity
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.workDataOf
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.firestore.*
@@ -15,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetDataIntentService
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
@@ -28,7 +33,7 @@ import java.util.concurrent.ThreadPoolExecutor
 
 class Firestore(
     private val repository: DatabaseRepository
-) : EntityConverter() {
+) {
 
     private val mFirebaseAuth = FirebaseAuth.getInstance()
     private val mFireStore = FirebaseFirestore.getInstance()
@@ -94,20 +99,19 @@ class Firestore(
                 val userProfileEntity = profile!!.toUserProfileEntity()
                 repository.upsertProfile(userProfileEntity)
 
-                //TODO GET THE PURCHASE HISTORY FROM FIRESTORE
+                //calling a work manager background service to get the current month's order history from store
+                //since it is a long running background task we are calling a work manager to do the task
 
-//                if (userProfileEntity.purchaseHistory.isNotEmpty()) {
-//                    for (orderID in profile.purchaseHistory) {
-//                        val orderSnapshot =
-//                            mFireStore.collection(Constants.ORDER_HISTORY).document(orderID)
-//                                .get().await()
-////                    for (d in orderSnapshot.documents) {
-//                        val order = orderSnapshot.toObject(OrderEntity::class.java)
-//                        order!!.orderId = orderID
-//                        repository.upsertOrder(order)
-////                    }
-//                    }
-//                }
+                val currentMonthYear = "${Time().getMonth()}${Time().getYear()}"
+                val workRequest: WorkRequest =
+                    OneTimeWorkRequestBuilder<GetOrderHistoryService>()
+                        .setInputData(workDataOf(
+                            "filter" to currentMonthYear
+                        ))
+                        .build()
+
+                WorkManager.getInstance(activity.applicationContext).enqueue(workRequest)
+
                 //once the profile data is updated in the room database we skip the profile part and move the user to Home page
                 withContext(Dispatchers.Main) {
                     activity.hideProgressDialog()

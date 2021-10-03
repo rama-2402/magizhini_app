@@ -475,23 +475,23 @@
                         app:layout_constraintTop_toBottomOf="@id/etlDeliveryNote">
 
                         <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/rbUpi"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:buttonTint="@color/green_base"
-                            android:checked="true"
-                            android:text=" UPI"
-                            android:textSize="16sp"
-                            android:textColor="@color/gray700"/>
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
                             android:id="@+id/rbCod"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="@color/green_base"
                             android:text=" COD"
+                            android:textSize="16sp"
+                            android:checked="true"
+                            android:textColor="@color/gray700"/>
+
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/rbUpi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:buttonTint="@color/green_base"
+                            android:text=" UPI"
                             android:textSize="16sp"
                             android:textColor="@color/gray700"/>
 

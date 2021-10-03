@@ -31,5 +31,7 @@ data class OrderEntity(
     @ColumnInfo
     var price: Float = 0F,
     @ColumnInfo
-    var orderStatus: String = "pending"
+    var orderStatus: String = "pending",
+    @ColumnInfo
+    var monthYear: String = ""
 )

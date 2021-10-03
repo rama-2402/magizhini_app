@@ -10,6 +10,9 @@ import com.google.gson.reflect.TypeToken
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TotalOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class UpdateTotalOrderItemService(
     context: Context,
@@ -30,26 +33,28 @@ class UpdateTotalOrderItemService(
         try {
             for (cartItem in cartItems) {
                 val id = "${cartItem.productId}${cartItem.variantIndex}"
-                fireStore.runTransaction { transaction ->
-                    val item = transaction.get(path.document(id)).toObject(TotalOrder::class.java)
-                    if (item == null) {
-                        val orderItem = TotalOrder (
-                            id = id,
-                            productID = cartItem.productId,
-                            productName = cartItem.productName,
-                            variant = cartItem.variant,
-                            orderCount = cartItem.quantity
-                                )
-                        path
-                            .document(id)
-                            .set(orderItem, SetOptions.merge())
-                    } else {
-                        item.orderCount = item.orderCount + cartItem.quantity
-                        transaction.update(path.document(id), "orderCount", item.orderCount)
-                        null
+                val doc = path.document(id).get().await()
+                val item = doc.toObject(TotalOrder::class.java)
+                if (item == null) {
+                    val orderItem = TotalOrder (
+                        id = id,
+                        productID = cartItem.productId,
+                        productName = cartItem.productName,
+                        variant = cartItem.variant,
+                        orderCount = cartItem.quantity
+                    )
+                    path
+                        .document(id)
+                        .set(orderItem, SetOptions.merge())
+                } else {
+                    fireStore.runTransaction { transaction ->
+                        val transactionDoc = transaction.get(path.document(id)).toObject(TotalOrder::class.java)
+                            transactionDoc!!.orderCount = transactionDoc.orderCount + cartItem.quantity
+                            transaction.update(path.document(id), "orderCount", transactionDoc.orderCount)
+                            null
+                        }
                     }
                 }
-            }
             return Result.success()
         } catch (e: Exception) {
             return Result.retry()
