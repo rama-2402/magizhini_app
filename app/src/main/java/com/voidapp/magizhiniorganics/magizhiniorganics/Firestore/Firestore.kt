@@ -319,10 +319,8 @@ class Firestore(
     private fun updateEntityData() {
         try {
             val profile: UserProfileEntity? = repository.getProfileData()
-            if (profile != null) {
-                profile.favorites.forEach {
-                    repository.updateFavorites(it, status = true)
-                }
+            profile?.favorites?.forEach {
+                repository.updateFavorites(it, status = true)
             }
             repository.getAllCartItemsForEntityUpdate().forEach {
                 with(it) {
@@ -415,11 +413,14 @@ class Firestore(
                 val id = firebase.firestore.collection(Constants.ORDER_HISTORY).document().id
                 order.orderId = id
                 val updateOrderHistory = async { updateOrderHistory(order) }
-//                val updateOrderTransaction = async { updateOrderTransaction(order, id) }
-                val updateProfile = async { updateProfile(order) }
+                val updateProfileMonthYear = async { updateProfileMonthYear(order) }
+                val updateProfileOrderID = async { updateProfileOrderID(order) }
+                val updateLocalProfile = async { updateLocalProfile(order) }
 
                 updateOrderHistory.await()
-                updateProfile.await()
+                updateProfileOrderID.await()
+                updateProfileMonthYear.await()
+                updateLocalProfile.await()
 
                 withContext(Dispatchers.Main) {
                     viewModel.orderPlaced()
@@ -428,6 +429,25 @@ class Firestore(
                 viewModel.orderPlacementFailed(e.message.toString())
             }
         }
+
+    private suspend fun updateProfileOrderID(order: Order) = withContext(Dispatchers.IO) {
+        mFireStore.collection("users").document(order.customerId)
+            .update("purchaseHistory", FieldValue.arrayUnion(order.orderId)).await()
+    }
+
+    private suspend fun updateProfileMonthYear(order: Order) = withContext(Dispatchers.IO) {
+        mFireStore.collection("users").document(order.customerId)
+            .update("purchasedMonths", FieldValue.arrayUnion(order.monthYear)).await()
+    }
+
+    private suspend fun updateLocalProfile(order: Order) = withContext(Dispatchers.IO) {
+        val profile = repository.getProfileData()!!
+        profile.purchaseHistory.add(order.orderId)
+        if (!profile.purchasedMonths.contains(order.monthYear)) {
+            profile.purchasedMonths.add(order.monthYear)
+        }
+        repository.upsertProfile(profile)
+    }
 
     suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) {
         try {
@@ -459,36 +479,50 @@ class Firestore(
 
     //updating the recent purchase status from the store when app is opened everytime
     suspend fun updateRecentPurchases (recentPurchaseIDs: ArrayList<String>) = withContext(Dispatchers.Default) {
-        for (orderID in recentPurchaseIDs) {
-            withContext(Dispatchers.IO) {
-                val orderRepo = repository.getOrderByID(orderID)
-                orderRepo?.let {
-//                    val docID = orderRepo.monthYear
-                    val docID = "october2021"
-                    val date = orderRepo.purchaseDate.take(2)
-                    val doc = mFireStore.collection(Constants.ORDER_HISTORY)
-                        .document(docID)
-                        .collection(date)
-                        .document(orderID)
-                        .get().await()
-                    val orderEntity = doc.toObject(Order::class.java)?.toOrderEntity()
-                    if (orderEntity?.orderStatus !== Constants.PENDING) {
-                        val profile = repository.getProfileData()!!
-                        profile.purchaseHistory.remove(orderID)
-                        repository.upsertProfile(profile)
-                        orderEntity?.let { order -> repository.upsertOrder(order) }
+        try {
+            for (orderID in recentPurchaseIDs) {
+                withContext(Dispatchers.IO) {
+                    val orderRepo = repository.getOrderByID(orderID)
+                    orderRepo?.let {
+                        val docID = orderRepo.monthYear
+                        val date = orderRepo.purchaseDate.take(2)
+                        val doc = mFireStore.collection(Constants.ORDER_HISTORY)
+                            .document(docID)
+                            .collection(date)
+                            .document(orderID)
+                            .get().await()
+                        val orderEntity = doc.toObject(Order::class.java)?.toOrderEntity()
+                            orderEntity?.let { order ->
+                                if (order.orderStatus != Constants.PENDING) {
+                                    val updateLocalProfileRecentPurchases = async { updateLocalProfileRecentPurchases(order.orderId) }
+                                    val updateCloudProfileRecentPurchases = async { updateCloudProfileRecentPurchases(order.orderId, order.customerId) }
+                                    val updateLocalOrderRepository = async { updateLocalOrderRepository(order) }
+                                    updateLocalProfileRecentPurchases.await()
+                                    updateCloudProfileRecentPurchases.await()
+                                    updateLocalOrderRepository.await()
+                                }
+                        }
                     }
                 }
             }
+        } catch (e: Exception) {
+            Log.e("exception", "updateRecentPurchases: ${e.message}", )
         }
     }
 
-    private suspend fun updateProfile(order: Order) = withContext(Dispatchers.IO) {
-        mFireStore.collection("users").document(order.customerId)
-            .update("purchaseHistory", FieldValue.arrayUnion(order.orderId))
-        val profile = repository.getProfileData()
-        profile!!.purchaseHistory.add(order.orderId)
+    private suspend fun updateLocalOrderRepository(order: OrderEntity) = withContext(Dispatchers.IO) {
+        repository.upsertOrder(order)
+    }
+
+    private suspend fun updateLocalProfileRecentPurchases(id: String?) = withContext(Dispatchers.IO) {
+        val profile = repository.getProfileData()!!
+        profile.purchaseHistory.remove(id)
         repository.upsertProfile(profile)
+    }
+
+    private suspend fun updateCloudProfileRecentPurchases(item: String?, docID: String) = withContext(Dispatchers.IO) {
+        mFireStore.collection(Constants.USERS)
+            .document(docID).update("purchaseHistory", FieldValue.arrayRemove(item)).await()
     }
 
     fun addFavorites(id: String, item: String) = CoroutineScope(Dispatchers.IO).launch {

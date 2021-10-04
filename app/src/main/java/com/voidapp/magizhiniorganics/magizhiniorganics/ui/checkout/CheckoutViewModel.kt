@@ -176,7 +176,7 @@ class CheckoutViewModel(
         return isAvailable
     }
 
-    fun placeOrder(order: Order) {
+    fun placeOrder(order: Order) = viewModelScope.launch(Dispatchers.IO) {
         fbRepository.placeOrder(order, this@CheckoutViewModel)
     }
 

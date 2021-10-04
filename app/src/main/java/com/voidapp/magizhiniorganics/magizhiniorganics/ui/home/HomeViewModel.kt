@@ -50,7 +50,6 @@ class HomeViewModel (
 
     fun updateRecentPurchases() = viewModelScope.launch(Dispatchers.IO) {
         val recentPurchaseIDs = repository.getProfileData()!!.purchaseHistory
-        Log.e("qqqq", "updateRecentPurchases: $recentPurchaseIDs" )
         if (recentPurchaseIDs.isNotEmpty()) {
             firestoreRepository.updateRecentPurchases(recentPurchaseIDs)
         }

@@ -63,7 +63,7 @@ class DatabaseRepository(
 
     fun getAllActiveCoupons(status: String) = db.getUserProfileDao().getAllActiveCoupons(status)
 
-    fun getOrderHistory() = db.getUserProfileDao().getOrderHistory()
+    fun getOrderHistory(filter: String) = db.getUserProfileDao().getOrderHistory(filter)
 
     fun getOrderByID(id: String) = db.getUserProfileDao().getOrderByID(id)
 

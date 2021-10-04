@@ -56,7 +56,7 @@ class GetOrderHistoryService(
             }
             return Result.success()
         } catch (e: Exception) {
-            return Result.retry()
+            return Result.failure()
         }
     }
 }

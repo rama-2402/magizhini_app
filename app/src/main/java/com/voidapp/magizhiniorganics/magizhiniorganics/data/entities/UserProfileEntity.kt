@@ -31,5 +31,11 @@ data class UserProfileEntity (
     @ColumnInfo
     var favorites: ArrayList<String> = ArrayList(),
     @ColumnInfo
-    var purchaseHistory: ArrayList<String> = arrayListOf()
+    var purchaseHistory: ArrayList<String> = arrayListOf(),
+    @ColumnInfo
+    var purchasedMonths: ArrayList<String> = arrayListOf(),
+    @ColumnInfo
+    var member: Boolean = false,
+    @ColumnInfo
+    var membershipType: String = ""
 )

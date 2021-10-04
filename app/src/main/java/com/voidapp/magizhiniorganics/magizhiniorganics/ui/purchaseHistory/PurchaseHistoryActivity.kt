@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
@@ -9,10 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import androidx.work.workDataOf
+import androidx.work.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -21,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAd
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurchaseHistoryBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
@@ -36,6 +35,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.io.StringBufferInputStream
+import java.text.SimpleDateFormat
 
 class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     override val kodein: Kodein by kodein()
@@ -47,7 +47,6 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     private lateinit var ordersAdapter: PurchaseHistoryAdapter
     private lateinit var orderItemsAdapter: OrderItemsAdapter
     private var mOrderHistory: MutableList<OrderEntity> = mutableListOf()
-    private lateinit var mCartBottomSheetDialog: BottomSheetDialog
 
     private var mFilterMonth = "January"
     private var mFilterYear = "2021"
@@ -103,19 +102,51 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     fun setYearFilter(year: String) {
         mFilterYear = year
         binding.tvYearFilter.text = year
-        val filter = "${mFilterMonth}${year}"
-
+        fetchData()
     }
 
     fun setMonthFilter(month: String) {
         mFilterMonth = month
-        val filter = "${month}${mFilterYear}"
-
+        fetchData()
+//        val monthFormat = SimpleDateFormat("MM")
+//        val currentMonth = monthFormat.format(System.currentTimeMillis())
+//        if (getMonthNumber(month) <= currentMonth.toInt()) {
+//            mFilterMonth = month
+//            fetchData()
+//        } else {
+//            Toast.makeText(this, "No data available", Toast.LENGTH_SHORT).show()
+//        }
     }
 
+    private fun fetchData() {
+//        if (mFilterYear.toInt() <= Time().getYear().toInt() && getMonthNumber(month) <= currentMonth.toInt()) {
+            showShimmer()
+            viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
+//        }
+    }
+
+//    private fun getMonthNumber(month: String): Int {
+//       return when(month) {
+//           "January" -> 1
+//           "February" -> 2
+//           "March" -> 3
+//           "April" -> 4
+//           "May" -> 5
+//           "June" -> 6
+//           "July" -> 7
+//           "August" -> 8
+//           "September" -> 9
+//           "October" -> 10
+//           "November" -> 11
+//           else -> 12
+//       }
+//    }
+
     private fun initLiveData() {
+        viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
         viewModel.getFavorites()
-        viewModel.getAllPurchaseHistory().observe(this, { orderEntities ->
+
+        viewModel.purchaseHistory.observe(this, { orderEntities ->
             lifecycleScope.launch {
                 mOrderHistory.clear()
                 mOrderHistory.addAll(orderEntities)
@@ -166,6 +197,39 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
                 showErrorSnackBar("Cancellation failed! Please try again later", true)
             }
         })
+
+        viewModel.startWork.observe(this, {
+            val workRequest: WorkRequest =
+                OneTimeWorkRequestBuilder<GetOrderHistoryService>()
+                    .setInputData(workDataOf(
+                        "filter" to "${mFilterMonth}${mFilterYear}"
+                    ))
+                    .build()
+
+            WorkManager.getInstance(this).enqueue(workRequest)
+            WorkManager.getInstance(this)
+                .getWorkInfoByIdLiveData(workRequest.id)
+                .observe(this, {
+                    when (it.state) {
+                        WorkInfo.State.SUCCEEDED -> {
+                            viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
+                        }
+                        WorkInfo.State.CANCELLED -> {
+                            hideShimmer()
+                            showErrorSnackBar("Failed to get data! Please try again later", true)
+                        }
+                        WorkInfo.State.FAILED -> {
+                            hideShimmer()
+                            showErrorSnackBar("Failed to get data! Please try again later", true)
+                        }
+                    }
+                })
+        })
+
+        viewModel.errorMessage.observe(this, {
+            hideShimmer()
+            Toast.makeText(this, "No data available in the selected period", Toast.LENGTH_SHORT).show()
+        })
     }
 
     private fun startWorkerThread(order: OrderEntity) {
@@ -194,6 +258,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     }
 
     private fun moveToProductDetails(productId: String, productName: String) {
+        hideCartBottomSheet()
         Intent(this, ProductActivity::class.java).also {
             it.putExtra(Constants.PRODUCTS, productId)
             it.putExtra(Constants.PRODUCT_NAME, productName)
@@ -207,7 +272,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     }
 
     private fun hideCartBottomSheet() {
-        mCartBottomSheetDialog.dismiss()
+        ItemsBottomSheet(this, orderItemsAdapter).dismiss()
     }
 
     private fun initRecyclerView() {

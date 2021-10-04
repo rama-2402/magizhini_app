@@ -17,8 +17,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         referralId = referrerNumber,
         defaultProductVariant = defaultProductVariant,
         favorites = favorites,
-        purchaseHistory = purchaseHistory
-            )
+        purchaseHistory = purchaseHistory,
+        purchasedMonths = purchasedMonths,
+        member = member,
+        membershipType = membershipType
+    )
 
     fun ProductCategory.toProductCategoryEntity() = ProductCategoryEntity (
         id = id,
@@ -120,7 +123,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         referrerNumber = referralId,
         defaultProductVariant = defaultProductVariant,
         favorites = favorites,
-        purchaseHistory = purchaseHistory
+        purchaseHistory = purchaseHistory,
+        purchasedMonths = purchasedMonths,
+        member = member,
+        membershipType = membershipType
     )
 
     fun ProductCategoryEntity.toProductCategory() = ProductCategory (

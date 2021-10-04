@@ -96,8 +96,8 @@ interface UserProfileDao {
     @Query("SELECT * FROM CouponEntity WHERE status = :status")
     fun getAllActiveCoupons(status: String): List<CouponEntity>
 
-    @Query("SELECT * FROM OrderEntity ")
-    fun getOrderHistory(): LiveData<List<OrderEntity>>
+    @Query("SELECT * FROM OrderEntity WHERE monthYear = :filter ")
+    fun getOrderHistory(filter: String): List<OrderEntity>
 
     @Query("SELECT * FROM OrderEntity WHERE orderId = :id")
     fun getOrderByID(id: String): OrderEntity?

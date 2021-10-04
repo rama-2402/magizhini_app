@@ -212,7 +212,9 @@ class ProductViewModel(
         _isCouponApplied.value = false
     }
 
-    fun getOrderHistoryFromDb() = dbRepository.getOrderHistory()
+    fun getOrderHistoryFromDb() {
+//        = dbRepository.getOrderHistory()
+    }
 
     fun getPurchasedProductIdList(orders: List<OrderEntity>) = viewModelScope.launch {
         val productIds = arrayListOf<String>()

@@ -255,9 +255,9 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             }
         })
 
-        viewModel.getOrderHistoryFromDb().observe(this, {
-            viewModel.getPurchasedProductIdList(it)
-        })
+//        viewModel.getOrderHistoryFromDb().observe(this, {
+//            viewModel.getPurchasedProductIdList(it)
+//        })
 
         viewModel.getAllCoupons(Constants.ACTIVE)
 

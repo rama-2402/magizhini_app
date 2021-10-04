@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.models
 
 import android.os.Parcelable
+import androidx.room.ColumnInfo
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -17,4 +18,7 @@ data class UserProfile(
     var defaultProductVariant: ArrayList<DefaultVariant> = ArrayList(),
     var favorites: ArrayList<String> = ArrayList(),
     var purchaseHistory: ArrayList<String> = arrayListOf(),
+    var purchasedMonths: ArrayList<String> = arrayListOf(),
+    var member: Boolean = false,
+    var membershipType: String = ""
 ): Parcelable
