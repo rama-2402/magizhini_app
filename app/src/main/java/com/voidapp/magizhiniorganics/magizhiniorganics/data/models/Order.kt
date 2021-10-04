@@ -18,6 +18,6 @@ data class Order(
     var appliedCoupon: String = "",
     var address: Address = Address(),
     var price: Float = 0F,
-    var orderStatus: String = "pending",
+    var orderStatus: String = "Pending",
     var monthYear: String = ""
 ): Parcelable

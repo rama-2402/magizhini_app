@@ -15,6 +15,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
@@ -25,6 +26,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
@@ -417,7 +419,6 @@ class Firestore(
                 val updateProfile = async { updateProfile(order) }
 
                 updateOrderHistory.await()
-//                updateOrderTransaction.await()
                 updateProfile.await()
 
                 withContext(Dispatchers.Main) {
@@ -428,6 +429,23 @@ class Firestore(
             }
         }
 
+    suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) {
+        try {
+            withContext(Dispatchers.IO) {
+                mFireStore.collection(Constants.ORDER_HISTORY)
+                    .document(orderEntity.monthYear)
+                    .collection(orderEntity.purchaseDate.take(2))
+                    .document(orderEntity.orderId)
+                    .update("orderStatus", Constants.CANCELLED).await()
+                withContext(Dispatchers.Main) {
+                    viewModel.orderCancelledCallback(true)
+                }
+            }
+        } catch (e: Exception) {
+            viewModel.orderCancelledCallback(false)
+        }
+    }
+
     private suspend fun updateOrderHistory(order: Order) = withContext(Dispatchers.IO) {
         val date = Time().getCurrentDateNumber()
         val id = "${Time().getMonth()}${Time().getYear()}"
@@ -437,16 +455,33 @@ class Firestore(
             .document(order.orderId)
             .set(order, SetOptions.merge())
         repository.upsertOrder(order.toOrderEntity())
-//            .addOnSuccessListener {
-//                val orderEntity = order.toOrderEntity()
-//                viewModel.orderPlaced(orderEntity, id)
-//            }
     }
 
-//    private suspend fun updateOrderTransaction(order: Order, id: String) =
-//        withContext(Dispatchers.IO) {
-//            //run the transaction to update the total ordered items to display the number in the dashboard
-//        }
+    //updating the recent purchase status from the store when app is opened everytime
+    suspend fun updateRecentPurchases (recentPurchaseIDs: ArrayList<String>) = withContext(Dispatchers.Default) {
+        for (orderID in recentPurchaseIDs) {
+            withContext(Dispatchers.IO) {
+                val orderRepo = repository.getOrderByID(orderID)
+                orderRepo?.let {
+//                    val docID = orderRepo.monthYear
+                    val docID = "october2021"
+                    val date = orderRepo.purchaseDate.take(2)
+                    val doc = mFireStore.collection(Constants.ORDER_HISTORY)
+                        .document(docID)
+                        .collection(date)
+                        .document(orderID)
+                        .get().await()
+                    val orderEntity = doc.toObject(Order::class.java)?.toOrderEntity()
+                    if (orderEntity?.orderStatus !== Constants.PENDING) {
+                        val profile = repository.getProfileData()!!
+                        profile.purchaseHistory.remove(orderID)
+                        repository.upsertProfile(profile)
+                        orderEntity?.let { order -> repository.upsertOrder(order) }
+                    }
+                }
+            }
+        }
+    }
 
     private suspend fun updateProfile(order: Order) = withContext(Dispatchers.IO) {
         mFireStore.collection("users").document(order.customerId)
@@ -499,4 +534,6 @@ class Firestore(
         }
         return outOfStockItems
     }
+
+
 }

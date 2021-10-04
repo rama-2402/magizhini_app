@@ -269,6 +269,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                                 appliedCoupon = mCurrentCoupon,
                                 address = mSelectedAddress,
                                 price = binding.tvTotalAmt.text.toString().toFloat(),
+                                orderStatus = Constants.PENDING,
                                 monthYear = "${Time().getMonth()}${Time().getYear()}"
                             )
                             startWorkerThread(order)

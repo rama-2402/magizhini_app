@@ -48,6 +48,9 @@ interface UserProfileDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertOrder(orderEntity: OrderEntity)
 
+    @Query("UPDATE OrderEntity SET orderStatus = :status WHERE orderId = :id")
+    fun orderCancelled(id: String, status: String)
+
     @Query("UPDATE CartEntity SET quantity = :count WHERE id = :id")
     fun updateCartItem(id: Int, count: Int)
 
@@ -95,6 +98,9 @@ interface UserProfileDao {
 
     @Query("SELECT * FROM OrderEntity ")
     fun getOrderHistory(): LiveData<List<OrderEntity>>
+
+    @Query("SELECT * FROM OrderEntity WHERE orderId = :id")
+    fun getOrderByID(id: String): OrderEntity?
 
     //updating the entity based on the user preference
     @Query("UPDATE ProductEntity SET favorite = :status WHERE id = :favorites")

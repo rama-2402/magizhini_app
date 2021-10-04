@@ -84,17 +84,14 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         setRecyclerView()
         generateRecyclerView()
         clickListeners()
-        initiateWallet()
+        viewModel.updateRecentPurchases()
+        viewModel.getWallet()
 
         lifecycleScope.launch {
             delay(1000)
             SharedPref(this@HomeActivity).putData(Constants.DATE, Constants.STRING, Time().getCurrentDate())
             hideProgressDialog()
         }
-    }
-
-    private fun initiateWallet() {
-        viewModel.getWallet()
     }
 
     private fun clickListeners() {
@@ -221,7 +218,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     }
 
     override fun onBackPressed() {
-
         if (binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
         } else {

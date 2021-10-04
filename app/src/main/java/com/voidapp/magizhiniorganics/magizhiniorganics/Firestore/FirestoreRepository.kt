@@ -5,12 +5,14 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.PhoneAuthCredential
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 
 class FirestoreRepository (
     private val firestore: Firestore
@@ -51,6 +53,10 @@ class FirestoreRepository (
     fun updateAddress(id: String, address: ArrayList<Address>)  = firestore.updateAddress(id, address)
 
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> = firestore.validateItemAvailability(cartItems)
+
+    suspend fun updateRecentPurchases(recentPurchaseIDs: ArrayList<String>) = firestore.updateRecentPurchases(recentPurchaseIDs)
+
+    suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) = firestore.cancelOrder(orderEntity, viewModel)
 
 //    fun getAllData(viewModel: HomeViewModel) = firestore.getAllData(viewModel)
 

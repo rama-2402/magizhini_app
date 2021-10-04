@@ -9,12 +9,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.workDataOf
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.gson.Gson
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurchaseHistoryBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -44,6 +51,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
 
     private var mFilterMonth = "January"
     private var mFilterYear = "2021"
+    private var mCancelOrder = OrderEntity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,6 +143,54 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
             moveToProductDetails(viewModel.productId, viewModel.productName)
         })
 
+        viewModel.cancelOrder.observe(this, {
+            mCancelOrder = it
+            showExitSheet(this, "Confirm Cancellation")
+        })
+
+        viewModel.cancellationStatus.observe(this, {
+            if (it) {
+                startWorkerThread(mCancelOrder)
+                viewModel.orderCancelled(mCancelOrder)
+                for (i in mOrderHistory.indices) {
+                    if (mOrderHistory[i].orderId == mCancelOrder.orderId) {
+                        mOrderHistory[i].orderStatus = Constants.CANCELLED
+                        ordersAdapter.orders = mOrderHistory
+                        ordersAdapter.notifyItemChanged(i)
+                        hideProgressDialog()
+                        showErrorSnackBar("Order Cancelled", false)
+                    }
+                }
+            } else {
+                hideProgressDialog()
+                showErrorSnackBar("Cancellation failed! Please try again later", true)
+            }
+        })
+    }
+
+    private fun startWorkerThread(order: OrderEntity) {
+        val stringConvertedOrder = order.toStringConverter(order)
+        val workRequest: WorkRequest =
+            OneTimeWorkRequestBuilder<UpdateTotalOrderItemService>()
+                .setInputData(
+                    workDataOf(
+                    "order" to stringConvertedOrder,
+                        Constants.STATUS to false
+                    )
+                )
+                .build()
+
+        WorkManager.getInstance(this).enqueue(workRequest)
+    }
+
+    private fun OrderEntity.toStringConverter(order: OrderEntity): String {
+        return Gson().toJson(order)
+    }
+
+    fun cancellationConfirmed() {
+        hideExitSheet()
+        showProgressDialog()
+        viewModel.confirmCancellation(mCancelOrder)
     }
 
     private fun moveToProductDetails(productId: String, productName: String) {

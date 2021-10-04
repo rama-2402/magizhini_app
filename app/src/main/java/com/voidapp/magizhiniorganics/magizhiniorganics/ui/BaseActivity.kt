@@ -146,6 +146,7 @@ open class BaseActivity : AppCompatActivity() {
         view.tvConfirmationText.setOnClickListener {
             when(activity) {
                 is ProfileActivity -> activity.exitProfileWithoutChange()
+                is PurchaseHistoryActivity -> activity.cancellationConfirmed()
             }
         }
         view.tvCancelText.setOnClickListener {

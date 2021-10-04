@@ -1,6 +1,8 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.provider.SyncStateContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 
 class PurchaseHistoryAdapter(
     val context: Context,
@@ -38,7 +42,7 @@ class PurchaseHistoryAdapter(
 
         with(holder) {
             orderId.text = order.orderId
-            orderStatus.text = order.orderStatus
+
             purchaseDate.text = order.purchaseDate
             cartPrice.text = "Rs. ${order.price}"
 
@@ -53,10 +57,33 @@ class PurchaseHistoryAdapter(
                 }
             }
 
-            showCart.setOnClickListener {
-                when(viewModel) {
-                    is PurchaseHistoryViewModel -> viewModel.showCartDialog(order.cart)
+            when(order.orderStatus) {
+                Constants.PENDING -> {
+                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancel))
+                    showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
+                    orderStatus.text = "Cancel \n Order"
+                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
                 }
+                Constants.CANCELLED -> {
+                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancelled_order))
+                    showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
+                    orderStatus.text = "Cancelled"
+                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
+                }
+                Constants.SUCCESS -> {
+                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
+                    showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteGreen))
+                    orderStatus.text = "Delivered"
+                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteGreen))
+                }
+            }
+
+            showCart.setOnClickListener {
+                cancelOrder(viewModel, order)
+            }
+
+            orderStatus.setOnClickListener {
+                cancelOrder(viewModel, order)
             }
 
             itemView.setOnClickListener {
@@ -70,5 +97,13 @@ class PurchaseHistoryAdapter(
 
     override fun getItemCount(): Int {
         return orders.size
+    }
+
+    private fun cancelOrder(viewModel: ViewModel, order: OrderEntity) {
+        if (order.orderStatus == Constants.PENDING) {
+            when(viewModel) {
+                is PurchaseHistoryViewModel -> viewModel.cancelOrder(order)
+            }
+        }
     }
 }

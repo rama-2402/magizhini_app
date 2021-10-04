@@ -33,6 +33,8 @@ class DatabaseRepository(
 
     fun upsertOrder(orderEntity: OrderEntity) = db.getUserProfileDao().upsertOrder(orderEntity)
 
+    fun orderCancelled(id: String, status: String) = db.getUserProfileDao().orderCancelled(id, status)
+
     fun updateCartItem(id: Int, count: Int) = db.getUserProfileDao().updateCartItem(id, count)
 
     fun updateCartItemPrice(id: Int, price: Float) = db.getUserProfileDao().updateCartItemPrice(id, price)
@@ -62,6 +64,8 @@ class DatabaseRepository(
     fun getAllActiveCoupons(status: String) = db.getUserProfileDao().getAllActiveCoupons(status)
 
     fun getOrderHistory() = db.getUserProfileDao().getOrderHistory()
+
+    fun getOrderByID(id: String) = db.getUserProfileDao().getOrderByID(id)
 
     //updating the product entity with the user prefence favorites and cart items
     fun updateFavorites(favorites: String, status: Boolean) = db.getUserProfileDao().updateFavorties(favorites, status)

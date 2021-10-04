@@ -9,6 +9,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TotalOrder
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -21,6 +22,7 @@ class UpdateTotalOrderItemService(
 
     override suspend fun doWork(): Result {
         val stringConvertedOrder = inputData.getString("order")
+        val status = inputData.getBoolean(Constants.STATUS, true)
         val cartItems = toOrderConverter(stringConvertedOrder!!).cart
         val date = Time().getCurrentDateNumber()
         val docID = "${Time().getMonth()}${Time().getYear()}"
@@ -49,7 +51,11 @@ class UpdateTotalOrderItemService(
                 } else {
                     fireStore.runTransaction { transaction ->
                         val transactionDoc = transaction.get(path.document(id)).toObject(TotalOrder::class.java)
-                            transactionDoc!!.orderCount = transactionDoc.orderCount + cartItem.quantity
+                            if (status) {
+                                transactionDoc!!.orderCount = transactionDoc.orderCount + cartItem.quantity
+                            } else {
+                                transactionDoc!!.orderCount = transactionDoc.orderCount - cartItem.quantity
+                            }
                             transaction.update(path.document(id), "orderCount", transactionDoc.orderCount)
                             null
                         }
