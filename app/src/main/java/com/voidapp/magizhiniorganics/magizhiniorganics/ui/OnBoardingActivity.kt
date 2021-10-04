@@ -28,33 +28,16 @@ class OnBoardingActivity: BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val sRef = this.getSharedPreferences(Constants.USERS, Context.MODE_PRIVATE)
-        val isNewUser = sRef.getBoolean(Constants.LOGIN_STATUS, true)
-        val isNewDay = sRef.getString(Constants.DATE, Constants.DATE)
-
-        if (isNewUser) {
-            setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
             binding = DataBindingUtil.setContentView(
                 this@OnBoardingActivity,
                 R.layout.activity_on_boarding
             )
             postToList()
             activityInit()
-        } else {
-//            if (isNewDay != Time().getCurrentDateAndTime()) {
-                Intent(this, GetDataIntentService::class.java).also {
-                    startService(it)
-                }
-//            }
-            Intent(this@OnBoardingActivity, HomeActivity::class.java).also {
-                startActivity(it)
-            }
-        }
+
     }
 
     private fun activityInit() {
-
         binding.viewPager.adapter = ViewPagerAdapter(
             titleList,
             bodyOneList,
