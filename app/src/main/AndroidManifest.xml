@@ -25,6 +25,11 @@
         android:roundIcon="@mipmap/magizhini_round"
         android:supportsRtl="true">
         <activity
+            android:name=".ui.subscriptions.SubsscriptionProductActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".ui.SplashActivity"
             android:exported="true"
             android:screenOrientation="portrait"
@@ -35,7 +40,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.wallet.WalletActivity"
             android:exported="true"

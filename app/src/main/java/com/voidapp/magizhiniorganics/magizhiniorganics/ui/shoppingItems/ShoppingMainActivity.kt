@@ -24,6 +24,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -68,16 +69,15 @@ class ShoppingMainActivity :
         binding.viewmodel = viewModel
         viewModel.shoppingMainListener = this
 
-        setSupportActionBar(binding.tbToolbar)
-
         //getting the intent to check the type of chip we want to see
         categoryFilter = intent.getStringExtra(Constants.CATEGORY).toString()
 
-        checkoutText = findViewById<TextView>(R.id.tvCheckOut)
-
+        setSupportActionBar(binding.tbToolbar)
         title = ""
         setSupportActionBar(binding.tbToolbar)
         binding.tvToolbarTitle.text = categoryFilter
+
+        checkoutText = findViewById<TextView>(R.id.tvCheckOut)
 
         showProgressDialog()
 
@@ -95,6 +95,15 @@ class ShoppingMainActivity :
             adapter.limited = false
             adapter.setData(it)
             binding.cpAll.isChecked = true
+            lifecycleScope.launch(Dispatchers.Main) {
+                delay(1500)
+                hideShimmer()
+            }
+        })
+        viewModel.subscriptions.observe(this, {
+            viewModel.selectedChip = Constants.SUBSCRIPTION
+            adapter.limited = false
+            adapter.setData(it)
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(1500)
                 hideShimmer()
@@ -147,6 +156,15 @@ class ShoppingMainActivity :
                 }
             }
         })
+        viewModel.subscriptionProduct.observe(this, { product ->
+            Intent(this, SubscriptionProductActivity::class.java).also {
+                it.putExtra(Constants.PRODUCTS, product.id)
+                it.putExtra(Constants.PRODUCT_NAME, product.name)
+                startActivity(it)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+            }
+        })
     }
 
     private fun checkProductsToDisplay() {
@@ -188,6 +206,13 @@ class ShoppingMainActivity :
                     binding.flShimmerPlaceholder.startShimmer()
                     binding.tvToolbarTitle.text = "Product Store"
                     viewModel.getAllProductsStatic()
+                }
+                R.id.cpSubscriptions -> {
+                    showShimmer()
+                    isFiltered = false
+                    binding.flShimmerPlaceholder.startShimmer()
+                    binding.tvToolbarTitle.text = "Subscriptions"
+                    viewModel.getAllSubscriptions()
                 }
                 R.id.cpCategoryFilter -> {
                     //kept this chip as the default check in xml so that the bottom sheet wont be

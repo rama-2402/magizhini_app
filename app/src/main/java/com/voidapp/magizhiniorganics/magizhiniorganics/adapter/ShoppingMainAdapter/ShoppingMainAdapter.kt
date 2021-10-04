@@ -72,8 +72,6 @@ open class ShoppingMainAdapter(
 
         //setting the thumbnail
         GlideLoader().loadUserPicture(context, product.thumbnailUrl, holder.productThumbNail)
-//        holder.productThumbNail.clipToOutline = true
-
 
         //getting the current user id so that favorites can be added to firestore data
         val id: String =
@@ -210,41 +208,47 @@ open class ShoppingMainAdapter(
             }
 
             with(holder.addItem) {
-                if (text == "Add") {
-                    if (!limitedCheck) {
-                        text = "Remove"
-                        backgroundTintList =
-                            ColorStateList.valueOf(
-                                ContextCompat.getColor(
-                                    context,
-                                    R.color.matteRed
+                when(text) {
+                    "View" -> {
+                        viewModel.subscriptionItemToView(product)
+                    }
+                    "Add" -> {
+                        if (!limitedCheck) {
+                            text = "Remove"
+                            backgroundTintList =
+                                ColorStateList.valueOf(
+                                    ContextCompat.getColor(
+                                        context,
+                                        R.color.matteRed
+                                    )
                                 )
-                            )
-                        setBackgroundResource(R.drawable.shape_round_rectangle_8)
-                        Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
+                            setBackgroundResource(R.drawable.shape_round_rectangle_8)
+                            Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
 //                    product.variantInCart.add(variantName)
 //                    viewModel.upsertProduct(product)
-                        viewModel.upsertCartItem(
-                            productId,
-                            product.name,
-                            product.thumbnailUrl,
-                            variantName,
-                            1,
-                            holder.discountedAmount.text.toString().toFloat(),
-                            variantPrice,
-                            maximumOrderQuantity,
-                            variantInCartPosition
-                        )
+                            viewModel.upsertCartItem(
+                                productId,
+                                product.name,
+                                product.thumbnailUrl,
+                                variantName,
+                                1,
+                                holder.discountedAmount.text.toString().toFloat(),
+                                variantPrice,
+                                maximumOrderQuantity,
+                                variantInCartPosition
+                            )
+                        }
                     }
-                } else {
-                    text = "Add"
-                    backgroundTintList =
-                        ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
-                    setBackgroundResource(R.drawable.shape_round_rectangle_8)
-                    Toast.makeText(context, "Removed from Cart", Toast.LENGTH_SHORT).show()
+                    else -> {
+                        text = "Add"
+                        backgroundTintList =
+                            ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
+                        setBackgroundResource(R.drawable.shape_round_rectangle_8)
+                        Toast.makeText(context, "Removed from Cart", Toast.LENGTH_SHORT).show()
 //                    product.variantInCart.remove(variantName)
 //                    viewModel.upsertProduct(product)
-                    viewModel.deleteCartItemFromShoppingMain(productId, variantName)
+                        viewModel.deleteCartItemFromShoppingMain(productId, variantName)
+                    }
                 }
             }
         }
@@ -364,19 +368,28 @@ open class ShoppingMainAdapter(
         variantName: String,
         holder: ShoppingMainAdapter.ShoppingMainViewHolder
     ) {
-        if (product.variantInCart.contains(variantName)) {
+        if (product.appliedCoupon == Constants.SUBSCRIPTION) {
             with(holder.addItem) {
-                text = "Remove"
-                backgroundTintList =
-                    ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
-                setBackgroundResource(R.drawable.shape_round_rectangle_8)
-            }
-        } else {
-            with(holder.addItem) {
-                text = "Add"
+                text = "View"
                 backgroundTintList =
                     ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
                 setBackgroundResource(R.drawable.shape_round_rectangle_8)
+            }
+        } else {
+            if (product.variantInCart.contains(variantName)) {
+                with(holder.addItem) {
+                    text = "Remove"
+                    backgroundTintList =
+                        ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
+                    setBackgroundResource(R.drawable.shape_round_rectangle_8)
+                }
+            } else {
+                with(holder.addItem) {
+                    text = "Add"
+                    backgroundTintList =
+                        ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
+                    setBackgroundResource(R.drawable.shape_round_rectangle_8)
+                }
             }
         }
     }

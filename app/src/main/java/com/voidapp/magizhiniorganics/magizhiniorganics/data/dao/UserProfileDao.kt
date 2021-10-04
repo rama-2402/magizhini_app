@@ -115,8 +115,8 @@ interface UserProfileDao {
     @Query("SELECT * FROM productEntity WHERE id = :id")
     fun getProductWithIdForUpdate(id: String) : ProductEntity
 
-
-
+    @Query("SELECT * FROM ProductEntity WHERE appliedCoupon = :filter")
+    fun getAllSubscriptions(filter: String): List<ProductEntity>
 
     @Query("SELECT * FROM productentity WHERE favorite ORDER BY name")
     fun getFavorites(): LiveData<List<ProductEntity>>

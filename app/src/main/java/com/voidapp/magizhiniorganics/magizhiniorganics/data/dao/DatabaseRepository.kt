@@ -51,6 +51,8 @@ class DatabaseRepository(
 
     fun getProductWithId(id: String) = db.getUserProfileDao().getProductWithId(id)
 
+    fun getAllSubscriptions(filter: String) = db.getUserProfileDao().getAllSubscriptions(filter)
+
     fun getAllProductCategories() = db.getUserProfileDao().getAllProductCategories()
 
     fun getAllCoupons() = db.getUserProfileDao().getAllCoupons()

@@ -102,5 +102,8 @@
         <item name="android:listDivider">@color/grey</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
+    <style name="Theme.MagizhiniOrganics.AppBarOverlay"
+        parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.MagizhiniOrganics.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

@@ -33,6 +33,10 @@ class ShoppingMainViewModel(
     val availableCategoryNames: LiveData<List<String>> = _availableCategoryNames
     private var _discountAvailableProducts: MutableLiveData<List<ProductEntity>> = MutableLiveData()
     val discountAvailableProducts: LiveData<List<ProductEntity>> = _discountAvailableProducts
+    private var _subscriptions: MutableLiveData<List<ProductEntity>> = MutableLiveData()
+    val subscriptions: LiveData<List<ProductEntity>> = _subscriptions
+    private var _subscriptionProduct: MutableLiveData<ProductEntity> = MutableLiveData()
+    val subscriptionProduct: LiveData<ProductEntity> = _subscriptionProduct
 
     fun getAllCartItems() = dbRepository.getAllCartItems()
     fun getCartItemsPrice() = dbRepository.getCartPrice()
@@ -43,6 +47,14 @@ class ShoppingMainViewModel(
             _allProducts.value = products
         }
     }
+
+    fun getAllSubscriptions() = viewModelScope.launch(Dispatchers.IO) {
+        val products = dbRepository.getAllSubscriptions(Constants.SUBSCRIPTION)
+        withContext(Dispatchers.Main) {
+            _subscriptions.value = products
+        }
+    }
+
     fun getAllProductByCategoryStatic(categoryFilter: String) = viewModelScope.launch(Dispatchers.IO) {
         val products = dbRepository.getAllProductByCategoryStatic(categoryFilter)
         withContext(Dispatchers.Main) {
@@ -98,7 +110,12 @@ class ShoppingMainViewModel(
             Constants.CATEGORY -> getAllProductByCategoryStatic(selectedCategory)
             Constants.FAVORITES -> getAllFavoritesStatic()
             Constants.DISCOUNT -> getAllDiscountProducts()
+            Constants.SUBSCRIPTION -> getAllSubscriptions()
         }
+    }
+
+    fun subscriptionItemToView(product: ProductEntity) {
+        _subscriptionProduct.value = product
     }
 
     fun upsertCartItem(id: String, productName: String, thumbnailUrl: String,  variant: String, count: Int, price:

@@ -56,27 +56,6 @@
                 android:textColor="@color/white"
                 android:fontFamily="@font/roboto"/>
 
-<!--            <com.google.android.material.imageview.ShapeableImageView-->
-<!--                android:id="@+id/ivSearchBtn"-->
-<!--                android:layout_width="24dp"-->
-<!--                android:layout_height="24dp"-->
-<!--                android:src="@drawable/ic_search"-->
-<!--                android:background="?android:attr/selectableItemBackgroundBorderless"-->
-<!--                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"-->
-<!--                app:tint="@color/white"-->
-<!--                android:layout_gravity="end"-->
-<!--                android:layout_marginEnd="@dimen/material_size_16"/>-->
-
-<!--            <SearchView-->
-<!--                android:id="@+id/ivSearchBtn"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:src="@drawable/ic_search"-->
-<!--                android:background="?android:attr/selectableItemBackgroundBorderless"-->
-<!--                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"-->
-<!--                app:tint="@color/white"-->
-<!--                android:layout_gravity="end"-->
-<!--                android:layout_marginEnd="@dimen/material_size_16"/>-->
         </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
         <HorizontalScrollView
@@ -115,20 +94,11 @@
                     app:chipCornerRadius="@dimen/material_size_8" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/cpCategoryFilter"
+                    android:id="@+id/cpSubscriptions"
                     style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="Category Filter"
-                    android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
-                    app:chipCornerRadius="@dimen/material_size_8" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/cpFavorites"
-                    style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="Favorites"
+                    android:text="Subscriptions"
                     android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
                     app:chipCornerRadius="@dimen/material_size_8" />
 
@@ -146,11 +116,29 @@
                     style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="Limited Items"
+                    android:text="Limited"
                     android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
                     app:chipCornerRadius="@dimen/material_size_8"
-                    android:layout_marginEnd="@dimen/material_size_16"
                     />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpCategoryFilter"
+                    style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Category Filter"
+                    android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    app:chipCornerRadius="@dimen/material_size_8" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpFavorites"
+                    style="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Favorites"
+                    android:theme="@style/Theme.MagizhiniOrganics.CustomChipTheme"
+                    app:chipCornerRadius="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_16" />
 
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>

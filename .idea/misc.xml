@@ -30,7 +30,9 @@
         <entry key="app/src/main/res/layout/activity_shopping_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.48703703703703705" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.5432291666666667" />
+        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.5432291666666667" />
         <entry key="app/src/main/res/layout/activity_wallet.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/content_subscription_product.xml" value="0.5432291666666667" />
         <entry key="app/src/main/res/layout/cv_example_layout.xml" value="0.5312820512820513" />
         <entry key="app/src/main/res/layout/dialog_bottom_add_referral.xml" value="0.3907407407407407" />
         <entry key="app/src/main/res/layout/dialog_bottom_address.xml" value="0.375" />
