@@ -81,6 +81,14 @@
         <item>2030</item>
     </string-array>
 
+    <!--    subscription-types-->
+    <string-array name="subscription_types">
+        <item>Single Purchase</item>
+        <item>Week Days</item>
+        <item>Weekends</item>
+        <item>Monthly</item>
+    </string-array>
+
     <!--    dates filter-->
     <string-array name="dates">
         <item>01</item>

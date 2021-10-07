@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import com.hsalf.smilerating.SmileRating
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -18,7 +19,7 @@ import kotlin.collections.ArrayList
 class ReviewAdapter(
     val context: Context,
     var reviews: ArrayList<Review>,
-    val viewModel: ProductViewModel
+    val viewModel: ViewModel
 ): RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>() {
 
     inner class ReviewViewHolder(val itemView: View) : RecyclerView.ViewHolder(itemView) {

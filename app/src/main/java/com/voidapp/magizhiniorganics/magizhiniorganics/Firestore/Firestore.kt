@@ -28,6 +28,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatCo
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -473,7 +474,7 @@ class Firestore(
             .document(id)
             .collection(date)
             .document(order.orderId)
-            .set(order, SetOptions.merge())
+            .set(order, SetOptions.merge()).await()
         repository.upsertOrder(order.toOrderEntity())
     }
 
@@ -567,6 +568,46 @@ class Firestore(
             }
         }
         return outOfStockItems
+    }
+
+    suspend fun generateSubscription(viewModel: SubscriptionProductViewModel, subscription: Subscription) = withContext(Dispatchers.IO) {
+        val sub = subscription.toSubscriptionEntity()
+        try {
+            sub.id = mFireStore.collection(Constants.SUBSCRIPTION)
+                .document(Constants.SUB_ACTIVE)
+                .collection(subscription.monthYear)
+                .document().id
+
+            val updateStore = async { updateStoreSubscription(sub) }
+            val updateLocal = async { updateLocalSubscription(sub) }
+
+            updateStore.await()
+            updateLocal.await()
+
+            withContext(Dispatchers.Main) {
+                viewModel.subscriptionAdded(sub)
+            }
+        } catch (e: Exception) {
+            viewModel.subscriptionFailed("Server Error! Try again later")
+        }
+    }
+
+    private suspend fun updateLocalSubscription(sub: SubscriptionEntity) = withContext(Dispatchers.IO) {
+        val profile = repository.getProfileData()!!
+        profile.subscriptions.add(sub.id)
+        if (!profile.subscribedMonths.contains(sub.monthYear)) {
+            profile.subscribedMonths.add(sub.monthYear)
+        }
+        repository.upsertProfile(profile)
+    }
+
+    private suspend fun updateStoreSubscription(sub: SubscriptionEntity) {
+        mFireStore.collection(Constants.SUBSCRIPTION)
+            .document(Constants.SUB_ACTIVE)
+            .collection(sub.monthYear)
+            .document(sub.id)
+            .set(sub, SetOptions.merge()).await()
+
     }
 
 

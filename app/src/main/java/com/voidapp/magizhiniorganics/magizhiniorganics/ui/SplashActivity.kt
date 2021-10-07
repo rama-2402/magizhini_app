@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -16,7 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 
-class SplashActivity : BaseActivity() {
+class SplashActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySplashBinding
 
@@ -46,7 +47,7 @@ class SplashActivity : BaseActivity() {
             }
             lifecycleScope.launch {
                 delay(2500)
-                binding.progressCircular.hide()
+                binding.progressCircular.visibility = View.INVISIBLE
                 Intent(this@SplashActivity, HomeActivity::class.java).also {
                     startActivity(it)
 //                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)

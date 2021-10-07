@@ -115,7 +115,7 @@ interface UserProfileDao {
     @Query("SELECT * FROM productEntity WHERE id = :id")
     fun getProductWithIdForUpdate(id: String) : ProductEntity
 
-    @Query("SELECT * FROM ProductEntity WHERE appliedCoupon = :filter")
+    @Query("SELECT * FROM ProductEntity WHERE productType = :filter")
     fun getAllSubscriptions(filter: String): List<ProductEntity>
 
     @Query("SELECT * FROM productentity WHERE favorite ORDER BY name")
@@ -150,5 +150,10 @@ interface UserProfileDao {
 
     @Query("SELECT * FROM PinCodesEntity WHERE areaCode = :areaCode")
     fun getDeliveryCharge(areaCode: String): PinCodesEntity
+
+
+    //subscription
+    @Insert(onConflict =  OnConflictStrategy.REPLACE)
+    fun upsertSubscription(subscriptionEntity: SubscriptionEntity)
 
 }

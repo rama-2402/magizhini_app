@@ -64,20 +64,6 @@ class NewReviewFragment : Fragment(), KodeinAware {
         productViewModel.getProductById(mProductId).observe(viewLifecycleOwner, {
             mProduct = it
         })
-        productViewModel.orderHistory.observe(viewLifecycleOwner, { orders ->
-            mPurchasedProductIds.clear()
-            mPurchasedProductIds.addAll(orders)
-            initItems()
-            Log.e("qqqq", orders.toString())
-        })
-    }
-
-    private fun initItems() {
-        if (mPurchasedProductIds.contains(mProductId)) {
-            giveAccessToReview()
-        } else {
-            initViews()
-        }
     }
 
     private fun clickListeners() {
@@ -105,9 +91,14 @@ class NewReviewFragment : Fragment(), KodeinAware {
                 )
                 mProduct.reviews.add(review)
                 productViewModel.upsertProductReview(mProductId, review, mProduct)
-                Toast.makeText(requireContext(), "Thanks for the review :)", Toast.LENGTH_SHORT).show()
+                clearData()
             }
         }
+    }
+
+    private fun clearData() {
+        binding.edtDescription.setText("")
+        Toast.makeText(requireContext(), "Thanks for the review :)", Toast.LENGTH_SHORT).show()
     }
 
     private fun getReviewContent(): String {
@@ -117,25 +108,4 @@ class NewReviewFragment : Fragment(), KodeinAware {
             binding.edtDescription.text.toString().trim()
         }
     }
-
-    private fun giveAccessToReview() {
-        with(binding) {
-            tvAddCommentWarning.visibility = View.GONE
-            tvAddCommentContent.visibility = View.GONE
-            srSmileyRating.visibility = View.VISIBLE
-            etlDescription.visibility = View.VISIBLE
-            btnSaveReview.visibility = View.VISIBLE
-        }
-    }
-
-    private fun initViews() {
-        with(binding) {
-            tvAddCommentWarning.visibility = View.VISIBLE
-            tvAddCommentContent.visibility = View.VISIBLE
-            srSmileyRating.visibility = View.GONE
-            etlDescription.visibility = View.GONE
-            btnSaveReview.visibility = View.GONE
-        }
-    }
-
 }

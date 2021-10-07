@@ -19,6 +19,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         favorites = favorites,
         purchaseHistory = purchaseHistory,
         purchasedMonths = purchasedMonths,
+        subscribedMonths = subscribedMonths,
+        subscriptions = subscriptions,
         member = member,
         membershipType = membershipType
     )
@@ -50,6 +52,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         discountType = discountType,
         discountAmt =  discountAmt,
         defaultVariant = defaultVariant,
+        productType = productType,
         variants = variants,
         activated = activated,
         reviews = reviews
@@ -109,6 +112,23 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         deliveryCharge = deliveryCharge
     )
 
+fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
+    id = id,
+    productID = productID,
+    customerID = customerID,
+    address = address,
+    monthYear = monthYear,
+    startDate = startDate,
+    endDate = endDate,
+    autoPay = autoPay,
+    paymentMode = paymentMode,
+    estimateAmount = estimateAmount,
+    subType = subType,
+    status = status,
+    cancelledDates = cancelledDates,
+    notDeliveredDates = notDeliveredDates
+        )
+
     // Entity class to model data class converters
 
     fun UserProfileEntity.toUserProfile() = UserProfile (
@@ -125,6 +145,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         favorites = favorites,
         purchaseHistory = purchaseHistory,
         purchasedMonths = purchasedMonths,
+        subscribedMonths = subscribedMonths,
+        subscriptions = subscriptions,
         member = member,
         membershipType = membershipType
     )
@@ -156,6 +178,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         discountType = discountType,
         discountAmt =  discountAmt,
         defaultVariant = defaultVariant,
+        productType = productType,
         variants = variants,
         activated = activated,
         reviews = reviews
@@ -200,3 +223,21 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         orderStatus = orderStatus,
         monthYear = monthYear
     )
+
+
+fun SubscriptionEntity.toSubscription() = Subscription (
+    id = id,
+    productID = productID,
+    customerID = customerID,
+    address = address,
+    monthYear = monthYear,
+    startDate = startDate,
+    endDate = endDate,
+    autoPay = autoPay,
+    paymentMode = paymentMode,
+    estimateAmount = estimateAmount,
+    subType = subType,
+    status = status,
+    cancelledDates = cancelledDates,
+    notDeliveredDates = notDeliveredDates
+)

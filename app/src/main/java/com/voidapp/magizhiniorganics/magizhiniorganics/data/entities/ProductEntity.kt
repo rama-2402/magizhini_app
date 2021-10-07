@@ -42,6 +42,8 @@ data class ProductEntity(
     @ColumnInfo
     var defaultVariant: Int = 0,
     @ColumnInfo
+    var productType: String="",
+    @ColumnInfo
     var variants: ArrayList<ProductVariant> = arrayListOf(),
     @ColumnInfo
     var activated: Boolean = true,

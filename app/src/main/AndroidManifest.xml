@@ -23,17 +23,22 @@
         android:icon="@mipmap/magizhini"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/magizhini_round"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:theme="@style/splashScreenTheme">
         <activity
-            android:name=".ui.subscriptions.SubsscriptionProductActivity"
+            android:name=".ui.subscriptionHistory.SubscriptionHistoryActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.subscriptions.SubscriptionProductActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.SplashActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize">
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -44,20 +49,24 @@
             android:name=".ui.wallet.WalletActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.customerSupport.chatConversation.ConversationActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.customerSupport.ChatActivity"
             android:exported="true"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.purchaseHistory.PurchaseHistoryActivity"
             android:exported="true"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.checkout.CheckoutActivity"
             android:exported="true"

@@ -19,6 +19,8 @@ data class UserProfile(
     var favorites: ArrayList<String> = ArrayList(),
     var purchaseHistory: ArrayList<String> = arrayListOf(),
     var purchasedMonths: ArrayList<String> = arrayListOf(),
+    var subscribedMonths: ArrayList<String> = arrayListOf(),
+    var subscriptions: ArrayList<String> = arrayListOf(),
     var member: Boolean = false,
     var membershipType: String = ""
 ): Parcelable

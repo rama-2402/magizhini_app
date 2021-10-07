@@ -154,4 +154,7 @@ dependencies {
     //instruction   https://facebook.github.io/shimmer-android/
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
+    // swipe button to confirm      https://github.com/cortinico/slidetoact
+    implementation "com.ncorti:slidetoact:0.9.0"
+
 }

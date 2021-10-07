@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_top_rounded_32"
+    android:backgroundTint="@color/white"
+    android:orientation="vertical"
+    android:padding="@dimen/material_size_8">
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/swipe"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="6dp"
+        app:area_margin="4dp"
+        android:background="@drawable/shape_round_rectangle_16"
+        app:animation_duration="250"
+        app:outer_color="@color/green_base"
+        app:inner_color="@color/white"
+        app:text="Swipe right to Confirm"
+        app:text_style="bold"
+        app:text_size="18sp"
+        app:rotate_icon="false"
+        app:slider_height="64dp"
+        app:slider_locked="false" />
+</LinearLayout>
+</layout>

@@ -1,7 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
+import android.annotation.SuppressLint
 import java.text.SimpleDateFormat
 
+@SuppressLint("SimpleDateFormat")
 class Time {
 
     fun getCustomDate(dateFormat: String = "dd/MM/yyyy", dateLong: Long): String {

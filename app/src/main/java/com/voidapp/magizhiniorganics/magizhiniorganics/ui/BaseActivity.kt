@@ -17,10 +17,13 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import com.ncorti.slidetoact.SlideToActView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 
@@ -30,6 +33,7 @@ open class BaseActivity : AppCompatActivity() {
     private lateinit var ExitBottomSheetdialog: BottomSheetDialog
     private lateinit var mSuccessDialog: Dialog
     private lateinit var mDescriptionBottomSheet: BottomSheetDialog
+    private lateinit var mSwipeConfirmationBottomSheet: BottomSheetDialog
     private lateinit var listBottomSheetdialog: BottomSheetDialog
 
 
@@ -268,6 +272,10 @@ open class BaseActivity : AppCompatActivity() {
                             activity.setMonthFilter(selectedItem)
                         }
                     }
+                    is SubscriptionProductActivity -> {
+                        hideListBottomSheet()
+                        activity.setPaymentFilter(selectedItem)
+                    }
                 }
 
             }
@@ -278,7 +286,39 @@ open class BaseActivity : AppCompatActivity() {
     }
 
 
-    fun hideListBottomSheet() {
+    private fun hideListBottomSheet() {
         listBottomSheetdialog.dismiss()
+    }
+
+    fun showSwipeConfirmationDialog(activity: Activity) {
+        mSwipeConfirmationBottomSheet = BottomSheetDialog(this, R.style.BottomSheetDialog)
+        val view: DialogSwipeConfirmationBinding =
+            DataBindingUtil.inflate(
+                LayoutInflater.from(baseContext),
+                R.layout.dialog_swipe_confirmation,
+                null,
+                false)
+
+        view.swipe.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
+            override fun onSlideComplete(view: SlideToActView) {
+                when (activity) {
+                    is SubscriptionProductActivity -> {
+                        mSwipeConfirmationBottomSheet.hide()
+                        activity.approved(true)
+                    }
+                    is CheckoutActivity -> {
+                        mSwipeConfirmationBottomSheet.hide()
+                        activity.approved(true)
+                    }
+                }
+            }
+        }
+
+        mSwipeConfirmationBottomSheet.dismissWithAnimation = true
+        mSwipeConfirmationBottomSheet.setCancelable(true)
+        mSwipeConfirmationBottomSheet.setCanceledOnTouchOutside(true)
+        mSwipeConfirmationBottomSheet.setContentView(view.root)
+
+        mSwipeConfirmationBottomSheet.show()
     }
 }

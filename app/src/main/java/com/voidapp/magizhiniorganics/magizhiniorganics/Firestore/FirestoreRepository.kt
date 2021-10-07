@@ -9,10 +9,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 
 class FirestoreRepository (
     private val firestore: Firestore
@@ -57,6 +59,8 @@ class FirestoreRepository (
     suspend fun updateRecentPurchases(recentPurchaseIDs: ArrayList<String>) = firestore.updateRecentPurchases(recentPurchaseIDs)
 
     suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) = firestore.cancelOrder(orderEntity, viewModel)
+
+    suspend fun generateSubscription(viewModel: SubscriptionProductViewModel, subscription: Subscription) = firestore.generateSubscription(viewModel, subscription)
 
 //    fun getAllData(viewModel: HomeViewModel) = firestore.getAllData(viewModel)
 

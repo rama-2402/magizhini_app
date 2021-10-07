@@ -16,9 +16,10 @@
             android:src="@drawable/ic_app_shadow"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent=".5"
+            app:layout_constraintHeight_percent=".6"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.243"
             app:layout_constraintWidth_percent=".6" />
 
         <ProgressBar
@@ -26,6 +27,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:progressTint="@color/white"
+            android:indeterminate="true"
+            android:indeterminateTintMode="src_atop"
+            android:indeterminateTint="@color/white"
             app:layout_constraintTop_toBottomOf="@id/ivAppIcon"
             app:layout_constraintStart_toStartOf="@id/ivAppIcon"
             app:layout_constraintEnd_toEndOf="@id/ivAppIcon"

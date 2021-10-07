@@ -71,7 +71,7 @@ open class ShoppingMainAdapter(
         checkVariantAvailability(holder, product.variants[0])
 
         //setting the thumbnail
-        GlideLoader().loadUserPicture(context, product.thumbnailUrl, holder.productThumbNail)
+        GlideLoader().loadUserPicture(holder.productThumbNail.context, product.thumbnailUrl, holder.productThumbNail)
 
         //getting the current user id so that favorites can be added to firestore data
         val id: String =
@@ -254,7 +254,11 @@ open class ShoppingMainAdapter(
         }
 
         holder.productThumbNail.setOnClickListener {
-            viewModel.moveToProductDetails(productId, product.name)
+            if (product.productType == Constants.SUBSCRIPTION) {
+                viewModel.subscriptionItemToView(product)
+            } else {
+                viewModel.moveToProductDetails(productId, product.name)
+            }
         }
     }
 
@@ -368,7 +372,7 @@ open class ShoppingMainAdapter(
         variantName: String,
         holder: ShoppingMainAdapter.ShoppingMainViewHolder
     ) {
-        if (product.appliedCoupon == Constants.SUBSCRIPTION) {
+        if (product.productType == Constants.SUBSCRIPTION) {
             with(holder.addItem) {
                 text = "View"
                 backgroundTintList =

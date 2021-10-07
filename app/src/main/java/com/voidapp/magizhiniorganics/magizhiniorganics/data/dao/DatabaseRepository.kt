@@ -101,4 +101,7 @@ class DatabaseRepository(
     fun upsertPinCodes(pinCodes: PinCodesEntity) = db.getUserProfileDao().upsertPinCodes(pinCodes)
 
     fun getDeliveryCharge(areaCode: String) = db.getUserProfileDao().getDeliveryCharge(areaCode)
+
+    //subscription
+    fun upsertSubscription(subscriptionEntity: SubscriptionEntity) = db.getUserProfileDao().upsertSubscription(subscriptionEntity)
 }

@@ -10,7 +10,9 @@
         <entry key="app/src/main/res/drawable/bg_left_chat_head.xml" value="0.5324074074074074" />
         <entry key="app/src/main/res/drawable/bg_right_chat_head.xml" value="0.5324074074074074" />
         <entry key="app/src/main/res/drawable/bg_top_rounded_16.xml" value="0.55625" />
+        <entry key="app/src/main/res/drawable/bg_top_rounded_32.xml" value="0.39010416666666664" />
         <entry key="app/src/main/res/drawable/bg_transaprent_round.xml" value="0.35185185185185186" />
+        <entry key="app/src/main/res/drawable/bg_transparent_round.xml" value="0.39010416666666664" />
         <entry key="app/src/main/res/drawable/divider_line.xml" value="0.559375" />
         <entry key="app/src/main/res/drawable/ic_cart.xml" value="0.5" />
         <entry key="app/src/main/res/drawable/ic_chat.xml" value="0.5305555555555556" />
@@ -30,7 +32,8 @@
         <entry key="app/src/main/res/layout/activity_shopping_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.48703703703703705" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.5432291666666667" />
-        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.5432291666666667" />
+        <entry key="app/src/main/res/layout/activity_subscription_history.xml" value="0.5432291666666667" />
+        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_wallet.xml" value="0.5" />
         <entry key="app/src/main/res/layout/content_subscription_product.xml" value="0.5432291666666667" />
         <entry key="app/src/main/res/layout/cv_example_layout.xml" value="0.5312820512820513" />
@@ -42,6 +45,7 @@
         <entry key="app/src/main/res/layout/dialog_bottom_item_list.xml" value="0.25" />
         <entry key="app/src/main/res/layout/dialog_bottom_list.xml" value="0.5307692307692308" />
         <entry key="app/src/main/res/layout/dialog_success.xml" value="0.48703703703703705" />
+        <entry key="app/src/main/res/layout/dialog_swipe_confirmation.xml" value="0.5394021739130435" />
         <entry key="app/src/main/res/layout/fragment_chat.xml" value="0.4558303886925795" />
         <entry key="app/src/main/res/layout/fragment_contacts.xml" value="0.3416666666666667" />
         <entry key="app/src/main/res/layout/fragment_description.xml" value="0.33" />
@@ -77,5 +81,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.5394021739130435" />
+      </ProjectState>
+    </option>
   </component>
 </project>

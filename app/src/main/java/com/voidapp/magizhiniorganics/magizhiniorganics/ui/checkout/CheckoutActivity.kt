@@ -176,7 +176,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
 
         checkoutBtn.setOnClickListener {
             //TODO FUNCTION TO PLACE ORDER
-            validateItemAvailability()
+            showSwipeConfirmationDialog(this)
         }
 
     }
@@ -256,22 +256,21 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                     hideSuccessDialog()
                     showSuccessDialog("","Placing Order... ","order")
                     when(it) {
-                        "complete" -> {
-                            val order = Order(
-                                orderId = "",
-                                customerId = mCurrentUserID,
-                                cart = mCartItems,
-                                purchaseDate = Time().getCurrentDate(),
-                                isPaymentDone = false,   //todo we have to get the boolean data from transaction success
-                                paymentMethod = mPaymentPreference,
-                                deliveryPreference = binding.spDeliveryPreference.selectedItem.toString(),
-                                deliveryNote = binding.etDeliveryNote.text.toString().trim(),
-                                appliedCoupon = mCurrentCoupon,
-                                address = mSelectedAddress,
-                                price = binding.tvTotalAmt.text.toString().toFloat(),
-                                orderStatus = Constants.PENDING,
-                                monthYear = "${Time().getMonth()}${Time().getYear()}"
-                            )
+                        "complete" -> { val order = Order(
+                            orderId = "",
+                            customerId = mCurrentUserID,
+                            cart = mCartItems,
+                            purchaseDate = Time().getCurrentDate(),
+                            isPaymentDone = false,   //todo we have to get the boolean data from transaction success
+                            paymentMethod = mPaymentPreference,
+                            deliveryPreference = binding.spDeliveryPreference.selectedItem.toString(),
+                            deliveryNote = binding.etDeliveryNote.text.toString().trim(),
+                            appliedCoupon = mCurrentCoupon,
+                            address = mSelectedAddress,
+                            price = binding.tvTotalAmt.text.toString().toFloat(),
+                            orderStatus = Constants.PENDING,
+                            monthYear = "${Time().getMonth()}${Time().getYear()}"
+                        )
                             startWorkerThread(order)
                             viewModel.placeOrder(order)
                         }
@@ -300,6 +299,11 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                 }
             }
         })
+    }
+
+    fun approved(status: Boolean) = lifecycleScope.launch(Dispatchers.Main) {
+        delay(250)
+        validateItemAvailability()
     }
 
     private fun startWorkerThread(order: Order) {
@@ -562,7 +566,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
         //TODO GET THE DELIVERY CHARGE AFTER IMPLEMENTING IN THE STORE APP
         //TODO IMPLEMENT LOGIC FOR UPI TRANSACTION AFTER GETTING THE MERCHANT UPI ID
 
-        validateItemAvailability()
+        showSwipeConfirmationDialog(this)
 
 
 

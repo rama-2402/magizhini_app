@@ -58,7 +58,7 @@ class CartAdapter(
         val id = cartItem.id
 
         //loading the thumbnail
-        GlideLoader().loadUserPicture(context, cartItem.thumbnailUrl, holder.productThumbNail)
+        GlideLoader().loadUserPicture(holder.productThumbNail.context, cartItem.thumbnailUrl, holder.productThumbNail)
         holder.productThumbNail.clipToOutline = true
 
         holder.productName.text = cartItem.productName

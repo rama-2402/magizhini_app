@@ -15,6 +15,8 @@ import com.aminography.primedatepicker.picker.callback.MultipleDaysPickCallback
 import com.aminography.primedatepicker.picker.callback.RangeDaysPickCallback
 import com.aminography.primedatepicker.picker.callback.SingleDayPickCallback
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 
 
@@ -35,6 +37,19 @@ class DatePickerLib {
                 datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
         }
     fun pickSingleDate(activity: WalletActivity) {
+        //val themeFactory = object: DarkThemeFactory() {}
+
+            val callback = SingleDayPickCallback { date ->
+                activity.filterDate(date.timeInMillis)
+            }
+                val today = CivilCalendar()
+                val datePicker = PrimeDatePicker.dialogWith(today)
+                    .pickSingleDay(callback)
+                    //.applyTheme(themeFactory)
+                    .build()
+                datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
+        }
+    fun startSubscriptionDate(activity: SubscriptionProductActivity) {
         //val themeFactory = object: DarkThemeFactory() {}
 
             val callback = SingleDayPickCallback { date ->

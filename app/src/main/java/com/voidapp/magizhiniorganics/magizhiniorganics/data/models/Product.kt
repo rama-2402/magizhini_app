@@ -21,6 +21,7 @@ data class Product(
     var discountType: String = "Percentage",
     var discountAmt: Int = 0,
     var defaultVariant: Int = 0,
+    var productType: String="",
     var activated: Boolean = true,
     var reviews: ArrayList<Review> = ArrayList()
 ): Parcelable

@@ -121,4 +121,12 @@ object Constants {
     const val ADD_MONEY: String = "Add Money"
 
     const val DELIVERY_CHARGE = "Delivery Charge"
+
+    //subscriptions
+    const val SINGLE_PURCHASE = "Single Purchase"
+    const val WEEKDAYS = "Weekdays"
+    const val WEEKENDS = "Weekends"
+    const val MONTHLY = "Monthly"
+    const val SUB_ACTIVE = "Active"
+    const val SUB_CANCELLED = "Cancelled"
 }
