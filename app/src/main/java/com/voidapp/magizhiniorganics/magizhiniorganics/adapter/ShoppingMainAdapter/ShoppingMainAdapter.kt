@@ -71,7 +71,7 @@ open class ShoppingMainAdapter(
         checkVariantAvailability(holder, product.variants[0])
 
         //setting the thumbnail
-        GlideLoader().loadUserPicture(holder.productThumbNail.context, product.thumbnailUrl, holder.productThumbNail)
+        GlideLoader().loadUserPicture(context, product.thumbnailUrl, holder.productThumbNail)
 
         //getting the current user id so that favorites can be added to firestore data
         val id: String =
@@ -245,8 +245,6 @@ open class ShoppingMainAdapter(
                             ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
                         setBackgroundResource(R.drawable.shape_round_rectangle_8)
                         Toast.makeText(context, "Removed from Cart", Toast.LENGTH_SHORT).show()
-//                    product.variantInCart.remove(variantName)
-//                    viewModel.upsertProduct(product)
                         viewModel.deleteCartItemFromShoppingMain(productId, variantName)
                     }
                 }

@@ -73,6 +73,7 @@
         android:fontFamily="@font/roboto"
         android:text=""
         android:textIsSelectable="true"
+        android:longClickable="true"
         android:textColor="@color/gray700"
         android:textSize="12dp"
         android:ellipsize="end"

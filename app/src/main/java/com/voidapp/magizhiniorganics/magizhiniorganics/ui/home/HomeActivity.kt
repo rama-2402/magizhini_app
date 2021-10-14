@@ -27,6 +27,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActiv
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
@@ -269,6 +270,11 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             }
             R.id.menuWallet -> {
                 Intent(this, WalletActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
+            R.id.menuSubscriptions -> {
+                Intent(this, SubscriptionHistoryActivity::class.java).also {
                     startActivity(it)
                 }
             }

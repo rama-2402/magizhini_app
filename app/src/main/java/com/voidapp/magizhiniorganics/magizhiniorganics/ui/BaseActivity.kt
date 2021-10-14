@@ -23,6 +23,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -146,15 +147,17 @@ open class BaseActivity : AppCompatActivity() {
         ExitBottomSheetdialog.setCancelable(true)
         ExitBottomSheetdialog.setContentView(view.root)
 
+        if (data == "Cancel for some days") {
+            view.tvCancelText.text = data as String
+        }
+
         view.tvConfirmationText.text = confirmation
         view.tvConfirmationText.setOnClickListener {
             when(activity) {
                 is ProfileActivity -> activity.exitProfileWithoutChange()
                 is PurchaseHistoryActivity -> activity.cancellationConfirmed()
+                is SubscriptionHistoryActivity -> activity.confirmCancellation()
             }
-        }
-        view.tvCancelText.setOnClickListener {
-            hideExitSheet()
         }
 
         ExitBottomSheetdialog.show()
@@ -191,6 +194,10 @@ open class BaseActivity : AppCompatActivity() {
                 view.tvTitle.gone()
             }
             "complete" -> {
+                view.tvTitle.gone()
+            }
+            "dates" -> {
+                view.ltAnimImg.setAnimation(R.raw.validating_dates)
                 view.tvTitle.gone()
             }
         }
@@ -303,11 +310,11 @@ open class BaseActivity : AppCompatActivity() {
             override fun onSlideComplete(view: SlideToActView) {
                 when (activity) {
                     is SubscriptionProductActivity -> {
-                        mSwipeConfirmationBottomSheet.hide()
+                        mSwipeConfirmationBottomSheet.dismiss()
                         activity.approved(true)
                     }
                     is CheckoutActivity -> {
-                        mSwipeConfirmationBottomSheet.hide()
+                        mSwipeConfirmationBottomSheet.dismiss()
                         activity.approved(true)
                     }
                 }

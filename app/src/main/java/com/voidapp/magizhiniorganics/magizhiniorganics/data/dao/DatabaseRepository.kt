@@ -104,4 +104,11 @@ class DatabaseRepository(
 
     //subscription
     fun upsertSubscription(subscriptionEntity: SubscriptionEntity) = db.getUserProfileDao().upsertSubscription(subscriptionEntity)
+
+    fun getAllSubscriptionsHistory() = db.getUserProfileDao().getAllSubscriptionsHistory()
+
+    fun getSubscription(id: String): SubscriptionEntity = db.getUserProfileDao().getSubscription(id)
+
+    fun cancelSubscription(subscriptionEntity: SubscriptionEntity) = db.getUserProfileDao().cancelSubscription(subscriptionEntity)
+
 }

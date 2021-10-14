@@ -218,18 +218,15 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
 
-
 <!--        <com.google.android.material.button.MaterialButton-->
-<!--            android:id="@+id/btnAdd"-->
+<!--            android:id="@+id/btnCheckEstimate"-->
 <!--            android:layout_width="wrap_content"-->
 <!--            android:layout_height="wrap_content"-->
-<!--            android:text="SUBSCRIBE"-->
-<!--            app:icon="@drawable/ic_add_cart"-->
-<!--            android:backgroundTint="@color/matteRed"-->
+<!--            android:text="check estimate"-->
+<!--            android:backgroundTint="@color/green_base"-->
 <!--            android:textColor="@color/white"-->
 <!--            app:cornerRadius="@dimen/material_size_8"-->
-<!--            app:iconTint="@color/white"-->
-<!--            android:layout_marginEnd="@dimen/material_size_8"-->
+<!--            android:layout_marginStart="@dimen/material_size_8"-->
 <!--            app:layout_constraintStart_toEndOf="@id/spSubscriptionType"-->
 <!--            app:layout_constraintEnd_toEndOf="parent"-->
 <!--            app:layout_constraintTop_toTopOf="@id/spSubscriptionType"-->
@@ -246,11 +243,11 @@
             android:layout_height="44dp"
             android:entries="@array/subscription_types"
             android:layout_marginTop="@dimen/material_size_16"
-            android:layout_marginEnd="@dimen/material_size_16"
+            android:layout_marginEnd="@dimen/material_size_8"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvStart"
             app:layout_constraintTop_toBottomOf="@id/tvStart"
-            app:layout_constraintEnd_toStartOf="@id/tvEstimateAmount"
+            app:layout_constraintEnd_toStartOf="@id/tvEstimate"
             />
 
         <TextView
@@ -260,12 +257,12 @@
             android:ellipsize="end"
             android:fontFamily="@font/roboto"
             android:singleLine="true"
-            android:text="Estimate"
+            android:text="Estimate (single order)"
             android:textColor="@color/gray700"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/tvEstimateAmount"
-            app:layout_constraintEnd_toEndOf="@id/tvEstimateAmount"
+            app:layout_constraintStart_toEndOf="@id/spSubscriptionType"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/spSubscriptionType"
             app:layout_constraintBottom_toTopOf="@id/tvEstimateAmount"/>
 
@@ -276,14 +273,30 @@
             android:ellipsize="end"
             android:fontFamily="@font/roboto"
             android:singleLine="true"
-            android:text="Rs: 10000/month"
+            android:text="Rs: 10000"
             android:textColor="@color/gray700"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/spSubscriptionType"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvEstimate"
+            app:layout_constraintEnd_toEndOf="@id/tvEstimate"
             app:layout_constraintTop_toBottomOf="@id/tvEstimate"
             app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType"/>
+
+<!--        <TextView-->
+<!--            android:id="@+id/tvShowEstimateDates"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:ellipsize="end"-->
+<!--            android:fontFamily="@font/roboto"-->
+<!--            android:singleLine="true"-->
+<!--            android:text="show more"-->
+<!--            android:textColor="@color/blue900"-->
+<!--            android:textSize="10sp"-->
+<!--            android:textStyle="italic"-->
+<!--            app:layout_constraintStart_toEndOf="@id/tvEstimateAmount"-->
+<!--            app:layout_constraintEnd_toEndOf="@id/tvEstimate"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/tvEstimate"-->
+<!--            app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType"/>-->
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivInfo"

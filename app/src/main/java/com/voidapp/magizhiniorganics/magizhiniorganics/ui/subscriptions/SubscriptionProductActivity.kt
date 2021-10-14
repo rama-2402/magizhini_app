@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -42,6 +43,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils.generateSubscriptionDates
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
@@ -65,6 +67,9 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
     private var mProductId: String = ""
     private var mProductName: String = ""
     private var mRating: Int = 5
+    private var mStartDate: Long = 0L
+    private var mSubDates: MutableList<String> = mutableListOf()
+
     private var mProfile: UserProfileEntity = UserProfileEntity()
     private var mWallet: WalletEntity = WalletEntity()
 
@@ -93,6 +98,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
         binding.tvProductName.isSelected = true
 
         oSubscription.customerID = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
+        oSubscription.startDate = System.currentTimeMillis()
 
         initRecyclerView()
         initData()
@@ -115,7 +121,12 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
             showErrorSnackBar("Pick a valid date", true)
         } else {
             binding.tvFromDate.text = Time().getCustomDate(dateLong = date)
+            mStartDate = date
             oSubscription.startDate = date
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = date
+            cal.add(Calendar.DATE, 30)
+            oSubscription.endDate = cal.timeInMillis
         }
     }
 
@@ -203,7 +214,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
 
                 }
             }
-            binding.fabSubscribe.setOnClickListener {
+            fabSubscribe.setOnClickListener {
                 showAddressBs(mProfile.address[0])
             }
         }
@@ -259,10 +270,9 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
         mAddressBottomSheet.setContentView(view.root)
 
         mAddressBottomSheet.show()
-
     }
 
-    private fun hideAddressBs() = mAddressBottomSheet.hide()
+    private fun hideAddressBs() = mAddressBottomSheet.dismiss()
 
     fun setPaymentFilter(paymentMode: String) {
         if (paymentMode == "UPI") {
@@ -287,27 +297,18 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
     private fun generateEstimate(position: Int) {
         when(position) {
             0 -> {
-                binding.tvEstimateAmount.text = "Rs: ${mProduct.variants[0].variantPrice} / purchase"
+                oSubscription.subType = Constants.SINGLE_PURCHASE
                 oSubscription.estimateAmount = mProduct.variants[0].variantPrice.toFloat()
-                oSubscription.paymentMode = Constants.SINGLE_PURCHASE
+                binding.tvEstimate.text = "Estimate (single order)"
+                binding.tvEstimateAmount.text = "Rs: ${mProduct.variants[0].variantPrice}"
             }
             1 -> {
-                val price = mProduct.variants[0].variantPrice.toFloat() * 5
-                binding.tvEstimateAmount.text = "Rs: $price (5 days)"
+                oSubscription.subType = Constants.MONTHLY
+                binding.tvEstimate.text = "Estimate (30 days cycle)"
+                val price = mProduct.variants[0].variantPrice.toFloat() * 30
+                binding.tvEstimateAmount.text = "Rs: $price"
                 oSubscription.estimateAmount = price
                 oSubscription.paymentMode = Constants.WEEKDAYS
-            }
-            2 -> {
-                val price = mProduct.variants[0].variantPrice.toFloat() * 2
-                binding.tvEstimateAmount.text = "Rs: $price (2 days)"
-                oSubscription.estimateAmount = price
-                oSubscription.paymentMode = Constants.WEEKENDS
-            }
-            3 -> {
-                val price = mProduct.variants[0].variantPrice.toFloat() * 30
-                binding.tvEstimateAmount.text = "Rs: $price (30 days)"
-                oSubscription.estimateAmount = price
-                oSubscription.paymentMode = Constants.MONTHLY
             }
         }
     }
@@ -358,20 +359,22 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
             showErrorSnackBar(it, true)
         })
         viewModel.subStatus.observe(this, {
-            hideSuccessDialog()
-            lifecycleScope.launch {
-                delay(1500)
-                showSuccessDialog("","Creating Subscription... ","order")
-                delay(1500)
-                hideSuccessDialog()
-                showSuccessDialog("", "Subscription Created Successfully!", "complete")
+            if (it == "complete") {
+                lifecycleScope.launch {
+                    delay(1500)
+                    hideSuccessDialog()
+                    showSuccessDialog("","Creating Subscription... ","order")
+                    delay(1500)
+                    hideSuccessDialog()
+                    showSuccessDialog("", "Subscription Created Successfully!", "complete")
                     delay(2000)
                     hideSuccessDialog()
-                    Intent(this@SubscriptionProductActivity, SubscriptionHistoryActivity::class.java).also {
-                        startActivity(it)
+                    Intent(this@SubscriptionProductActivity, SubscriptionHistoryActivity::class.java).also { intent ->
+                        startActivity(intent)
                         finish()
                     }
                 }
+            }
         })
     }
 
@@ -379,7 +382,12 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
         if (status) {
             showSuccessDialog("","Validation Purchase...", "limited")
             oSubscription.productID = mProductId
+            oSubscription.productName = mProductName
             oSubscription.monthYear = "${Time().getMonth()}${Time().getYear()}"
+            oSubscription.status = Constants.SUB_ACTIVE
+            if (mStartDate == 0L) {
+                filterDate(System.currentTimeMillis() + (1000 * 60 * 60 * 24))
+            }
             viewModel.generateSubscription(oSubscription)
         } else {
             Toast.makeText(this, "Transaction cancelled", Toast.LENGTH_SHORT).show()

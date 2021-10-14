@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/lytSub"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:paddingStart="@dimen/material_size_8"
+    android:paddingTop="@dimen/material_size_8"
+    android:paddingEnd="@dimen/material_size_8">
+
+    <TextView
+        android:id="@+id/tvTransactionIDText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:fontFamily="@font/roboto"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:text="Transaction ID: "
+        android:textColor="@color/gray700"
+        android:textSize="@dimen/text_size_large"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvSubIDText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/material_size_8"
+        android:fontFamily="@font/roboto"
+        android:text="Subscription ID: "
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/tvTransactionIDText"
+        app:layout_constraintTop_toBottomOf="@id/tvTransactionIDText" />
+
+    <TextView
+        android:id="@+id/tvSubID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto"
+        android:longClickable="true"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:gravity="left"
+        android:text="skjdfslkdjfaskldfjalskdfjalksdfjaslkdfaskldfhaskldfhaskldfhaskdlj"
+        android:textColor="@color/gray700"
+        android:textIsSelectable="true"
+        android:textSize="12dp"
+        app:layout_constraintBottom_toBottomOf="@id/tvSubIDText"
+        app:layout_constraintStart_toEndOf="@id/tvSubIDText"
+        app:layout_constraintTop_toTopOf="@id/tvSubIDText" />
+
+    <TextView
+        android:id="@+id/tvStartSub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/material_size_8"
+        android:fontFamily="@font/roboto"
+        android:text="Starting: "
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/tvSubIDText"
+        app:layout_constraintTop_toBottomOf="@id/tvSubIDText" />
+
+    <TextView
+        android:id="@+id/tvStartSubDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto"
+        android:text="500"
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        app:layout_constraintBottom_toBottomOf="@id/tvStartSub"
+        app:layout_constraintStart_toEndOf="@id/tvStartSub"
+        app:layout_constraintTop_toTopOf="@id/tvStartSub" />
+
+    <TextView
+        android:id="@+id/tvSubTypeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/material_size_24"
+        android:fontFamily="@font/roboto"
+        android:text="Subscription Type: "
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/tvStartSubDate"
+        app:layout_constraintStart_toEndOf="@id/tvStartSubDate"
+        app:layout_constraintTop_toTopOf="@id/tvStartSubDate" />
+
+    <TextView
+        android:id="@+id/tvSubType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto"
+        android:text="Single Purchase"
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        app:layout_constraintBottom_toBottomOf="@id/tvSubTypeText"
+        app:layout_constraintStart_toEndOf="@id/tvSubTypeText"
+        app:layout_constraintTop_toTopOf="@id/tvSubTypeText" />
+
+    <TextView
+        android:id="@+id/tvDueDateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/material_size_8"
+        android:fontFamily="@font/roboto"
+        android:text="Due Date: "
+        android:textColor="@color/gray700"
+        android:textSize="12dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/tvStartSub"
+        app:layout_constraintTop_toBottomOf="@id/tvStartSub" />
+
+    <TextView
+        android:id="@+id/tvDueDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto"
+        android:text=""
+        android:textColor="@color/gray700"
+        android:textIsSelectable="true"
+        android:textSize="12dp"
+        app:layout_constraintBottom_toBottomOf="@id/tvDueDateText"
+        app:layout_constraintStart_toEndOf="@id/tvDueDateText"
+        app:layout_constraintTop_toTopOf="@id/tvDueDateText" />
+
+    <ImageView
+        android:id="@+id/ivSubStatus"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="@dimen/material_size_8"
+        app:layout_constraintTop_toTopOf="@id/tvTransactionIDText"
+        app:layout_constraintEnd_toEndOf="@id/tvSubStatus"
+        app:layout_constraintStart_toStartOf="@id/tvSubStatus"
+        app:layout_constraintBottom_toTopOf="@id/tvSubStatus"/>
+
+    <TextView
+        android:id="@+id/tvSubStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto"
+        android:text="Active"
+        android:textColor="@color/gray700"
+        android:textIsSelectable="true"
+        android:textSize="12dp"
+        android:layout_margin="@dimen/material_size_8"
+        app:layout_constraintBottom_toBottomOf="@id/tvDueDateText"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.75dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/material_size_12"
+        android:background="@color/grey"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvDueDate" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

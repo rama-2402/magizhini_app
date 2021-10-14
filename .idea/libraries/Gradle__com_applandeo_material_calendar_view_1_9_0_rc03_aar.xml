@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="Gradle: com.applandeo:material-calendar-view:1.9.0-rc03@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/1435eaab68298bacd9cba04b5ce083e6/transformed/jetified-material-calendar-view-1.9.0-rc03/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/1435eaab68298bacd9cba04b5ce083e6/transformed/jetified-material-calendar-view-1.9.0-rc03/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/1435eaab68298bacd9cba04b5ce083e6/transformed/jetified-material-calendar-view-1.9.0-rc03/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.applandeo/material-calendar-view/1.9.0-rc03/38348ce92721e0e0f2bbd744babb03a4b661ccee/material-calendar-view-1.9.0-rc03-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.applandeo/material-calendar-view/1.9.0-rc03/bff588caa630299b2b272480553387bb03f47791/material-calendar-view-1.9.0-rc03-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

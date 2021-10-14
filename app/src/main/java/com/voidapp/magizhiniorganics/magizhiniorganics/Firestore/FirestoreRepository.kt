@@ -3,9 +3,12 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 import android.app.Activity
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.aminography.primecalendar.PrimeCalendar
 import com.google.firebase.auth.PhoneAuthCredential
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
@@ -24,6 +27,8 @@ class FirestoreRepository (
 
     val phNumber = firestore.getPhoneNumer()
 
+    suspend fun getProfile(id: String): UserProfileEntity = firestore.getProfile(id)
+
     fun signInWithPhoneAuthCredential(activity: SignInActivity, credential: PhoneAuthCredential) = firestore.signInWithPhoneAuthCredential(activity, credential)
 
     fun checkUserProfileDetails(activity: ProfileActivity) = firestore.checkUserProfileDetails(activity)
@@ -34,7 +39,7 @@ class FirestoreRepository (
 
 //    fun getAllData() = firestore.getAllData()
 
-    fun getProductsAndCouponsData() = firestore.getProductAndCouponData()
+//    fun getUpdatedDeliveryDetails() = firestore.getUpdatedDeliveryDetails()
 
     fun getLimitedItems(viewModel: ViewModel) = firestore.getLimitedItems(viewModel)
 
@@ -56,12 +61,15 @@ class FirestoreRepository (
 
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> = firestore.validateItemAvailability(cartItems)
 
-    suspend fun updateRecentPurchases(recentPurchaseIDs: ArrayList<String>) = firestore.updateRecentPurchases(recentPurchaseIDs)
+    suspend fun updateRecentPurchases(recentPurchaseIDs: ArrayList<String>, subscriptionIDs: ArrayList<String>) = firestore.updateRecentPurchases(recentPurchaseIDs, subscriptionIDs)
 
     suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) = firestore.cancelOrder(orderEntity, viewModel)
 
     suspend fun generateSubscription(viewModel: SubscriptionProductViewModel, subscription: Subscription) = firestore.generateSubscription(viewModel, subscription)
 
+    suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean = firestore.addCancellationDates(sub, date)
+
+    suspend fun cancelSubscription(sub: SubscriptionEntity): Boolean = firestore.cancelSubscription(sub)
 //    fun getAllData(viewModel: HomeViewModel) = firestore.getAllData(viewModel)
 
 }

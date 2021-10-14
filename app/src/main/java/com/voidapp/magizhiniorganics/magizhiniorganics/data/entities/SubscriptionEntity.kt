@@ -12,6 +12,8 @@ data class SubscriptionEntity(
     @ColumnInfo
     var productID: String = "",
     @ColumnInfo
+    var productName: String = "",
+    @ColumnInfo
     var customerID: String = "",
     @ColumnInfo
     var address: Address = Address(),
@@ -31,6 +33,8 @@ data class SubscriptionEntity(
     var subType: String = "Single Purchase",
     @ColumnInfo
     var status: String = "Active",
+    @ColumnInfo
+    var deliveredDates: ArrayList<Long> = arrayListOf(),
     @ColumnInfo
     var cancelledDates: ArrayList<Long> = arrayListOf(),
     @ColumnInfo

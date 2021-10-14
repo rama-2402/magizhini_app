@@ -156,4 +156,15 @@ interface UserProfileDao {
     @Insert(onConflict =  OnConflictStrategy.REPLACE)
     fun upsertSubscription(subscriptionEntity: SubscriptionEntity)
 
+    @Query("SELECT * FROM SubscriptionEntity")
+    fun getAllSubscriptionsHistory(): List<SubscriptionEntity>
+
+    @Query("SELECT * FROM SubscriptionEntity WHERE id = :id")
+    fun getSubscription(id: String): SubscriptionEntity
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun cancelSubscription(subscriptionEntity: SubscriptionEntity)
+
+
+
 }

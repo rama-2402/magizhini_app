@@ -115,6 +115,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
     id = id,
     productID = productID,
+    productName = productName,
     customerID = customerID,
     address = address,
     monthYear = monthYear,
@@ -125,6 +126,7 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
     estimateAmount = estimateAmount,
     subType = subType,
     status = status,
+    deliveredDates = deliveredDates,
     cancelledDates = cancelledDates,
     notDeliveredDates = notDeliveredDates
         )
@@ -228,6 +230,7 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
 fun SubscriptionEntity.toSubscription() = Subscription (
     id = id,
     productID = productID,
+    productName = productName,
     customerID = customerID,
     address = address,
     monthYear = monthYear,
@@ -238,6 +241,7 @@ fun SubscriptionEntity.toSubscription() = Subscription (
     estimateAmount = estimateAmount,
     subType = subType,
     status = status,
+    deliveredDates = deliveredDates,
     cancelledDates = cancelledDates,
     notDeliveredDates = notDeliveredDates
 )

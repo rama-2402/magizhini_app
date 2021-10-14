@@ -23,12 +23,12 @@
         android:id="@+id/ciPageIndicator"
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        app:ci_drawable_unselected="@drawable/unselected_indicator"
+        app:ci_drawable="@drawable/selected_indicator"
         android:layout_marginBottom="@dimen/material_size_8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

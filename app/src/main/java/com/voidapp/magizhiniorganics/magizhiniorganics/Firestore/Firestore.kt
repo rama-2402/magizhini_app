@@ -15,11 +15,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetDataIntentService
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
@@ -32,7 +30,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.Subscrip
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
-import java.util.concurrent.ThreadPoolExecutor
 
 class Firestore(
     private val repository: DatabaseRepository
@@ -41,6 +38,12 @@ class Firestore(
     private val mFirebaseAuth = FirebaseAuth.getInstance()
     private val mFireStore = FirebaseFirestore.getInstance()
     private val mFireStoreStorage = FirebaseStorage.getInstance().reference
+
+    suspend fun getProfile(id: String): UserProfileEntity {
+        return mFireStore.collection(Constants.USERS)
+            .document(id)
+            .get().await().toObject(UserProfile::class.java)!!.toUserProfileEntity()
+    }
 
     fun signOut() = CoroutineScope(Dispatchers.IO).launch {
         repository.deleteUserProfile()
@@ -67,7 +70,6 @@ class Firestore(
 
     // Checks if the current entered phone number is already present in DB before sending the OTP
     fun getCurrentUserId(): String {
-        var currentUserId = ""
         val currentUser = mFirebaseAuth.currentUser
 //        if (currentUser != null) {
 //            currentUserId = currentUser.uid
@@ -108,9 +110,12 @@ class Firestore(
                 val currentMonthYear = "${Time().getMonth()}${Time().getYear()}"
                 val workRequest: WorkRequest =
                     OneTimeWorkRequestBuilder<GetOrderHistoryService>()
-                        .setInputData(workDataOf(
-                            "filter" to currentMonthYear
-                        ))
+                        .setInputData(
+                            workDataOf(
+                                "id" to profile.id,
+                                "filter" to currentMonthYear
+                            )
+                        )
                         .build()
 
                 WorkManager.getInstance(activity.applicationContext).enqueue(workRequest)
@@ -193,148 +198,6 @@ class Firestore(
                 }
             }
         }
-
-    fun getProductAndCouponData() = CoroutineScope(Dispatchers.IO).launch {
-        try {
-            val categoryData = async { getAllData(Constants.CATEGORY) }
-            val bannerData = async { getAllData(Constants.BANNER) }
-            val productData = async { getAllData(Constants.PRODUCTS) }
-            val couponData = async { getAllData(Constants.COUPON) }
-            val deliveryChargeData = async { getAllData(Constants.DELIVERY_CHARGE) }
-
-            val categorySnapshot = categoryData.await()
-            val bannerSnapshot = bannerData.await()
-            val productSnapshot = productData.await()
-            val couponSnapshot = couponData.await()
-            val deliveryChargeSnapshot = deliveryChargeData.await()
-
-            val updateCategory =
-                async { filterDataAndUpdateRoom(Constants.CATEGORY, categorySnapshot) }
-            val updateBanner = async { filterDataAndUpdateRoom(Constants.BANNER, bannerSnapshot) }
-            val updateProduct =
-                async { filterDataAndUpdateRoom(Constants.PRODUCTS, productSnapshot) }
-            val updateCoupon = async { filterDataAndUpdateRoom(Constants.COUPON, couponSnapshot) }
-            val updateDeliveryCharge =
-                async { filterDataAndUpdateRoom(Constants.DELIVERY_CHARGE, deliveryChargeSnapshot) }
-
-            updateCategory.await()
-            updateBanner.await()
-            updateProduct.await()
-            updateCoupon.await()
-            updateDeliveryCharge.await()
-
-            updateEntityData()
-            GetDataIntentService.stopService()
-        } catch (e: Exception) {
-            Log.e("exception", e.message.toString())
-        }
-
-    }
-
-    private suspend fun filterDataAndUpdateRoom(content: String, snapshot: QuerySnapshot) =
-        withContext(Dispatchers.Default) {
-            when (content) {
-                Constants.CATEGORY -> {
-                    for (d in snapshot.documents) {
-                        //getting the id of the category and converting to Category class
-                        val category = d.toObject(ProductCategory::class.java)
-                        category!!.id = d.id
-                        //converting the category onject to CategoryEntity for updating the field in the room database
-                        val categoryEntity = category.toProductCategoryEntity()
-                        //updating the room - this add the new category and updates the existing ones
-                        repository.upsertProductCategory(categoryEntity)
-                    }
-                }
-                Constants.BANNER -> {
-                    for (d in snapshot.documents) {
-                        val banner = d.toObject(Banner::class.java)
-                        banner!!.id = d.id
-                        //creating a generic banner items array
-                        val bannerEntity = banner.toBannerEntity()
-                        repository.upsertBanner(bannerEntity)
-                    }
-                }
-                Constants.PRODUCTS -> {
-                    for (d in snapshot.documents) {
-                        val product = d.toObject(Product::class.java)
-                        product!!.id = d.id
-                        val productEntity: ProductEntity = product.toProductEntity()
-                        repository.upsertProduct(productEntity)
-                    }
-                }
-                Constants.COUPON -> {
-                    for (d in snapshot.documents) {
-                        val coupon = d.toObject(Coupon::class.java)
-                        coupon!!.id = d.id
-                        val couponEntity = coupon.toCouponEntity()
-                        repository.upsertCoupon(couponEntity)
-                    }
-                }
-                Constants.DELIVERY_CHARGE -> {
-                    for (d in snapshot.documents) {
-                        val deliveryCode = d.toObject(PinCodes::class.java)
-                        deliveryCode!!.id = d.id
-                        val deliveryCodeEntity: PinCodesEntity = deliveryCode.toPinCodesEntity()
-                        repository.upsertPinCodes(deliveryCodeEntity)
-                    }
-                }
-            }
-        }
-
-    private suspend fun getAllData(content: String): QuerySnapshot = withContext(Dispatchers.IO) {
-        when (content) {
-            Constants.CATEGORY -> {
-                mFireStore.collection(Constants.CATEGORY)
-                    .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-                    .get().await()
-            }
-            Constants.PRODUCTS -> {
-                mFireStore.collection(Constants.PRODUCTS)
-                    .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-                    .get().await()
-            }
-            Constants.BANNER -> {
-                mFireStore.collection(Constants.BANNER)
-                    .orderBy(Constants.BANNER_ORDER, Query.Direction.ASCENDING)
-                    .get().await()
-            }
-            Constants.COUPON -> {
-                mFireStore.collection(Constants.COUPON)
-                    .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-                    .whereEqualTo(Constants.STATUS, Constants.ACTIVE)
-                    .get().await()
-            }
-            Constants.DELIVERY_CHARGE -> {
-                mFireStore.collection("pincode")
-                    .get().await()
-            }
-            else -> {
-                mFireStore.collection(Constants.CATEGORY)
-                    .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-                    .get().await()
-            }
-        }
-    }
-
-    //Function to update the products entity with user preferences like favorites, cart items and coupons added
-    private fun updateEntityData() {
-        try {
-            val profile: UserProfileEntity? = repository.getProfileData()
-            profile?.favorites?.forEach {
-                repository.updateFavorites(it, status = true)
-            }
-            repository.getAllCartItemsForEntityUpdate().forEach {
-                with(it) {
-                    val product = repository.getProductWithIdForUpdate(productId)
-                    product.variantInCart.add(it.variant)
-                    repository.upsertProduct(product)
-                    repository.updateCartItemsToEntity(productId, true, couponName)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("exception", e.message.toString())
-        }
-    }
 
     //live update of the limited items
     fun getLimitedItems(viewModel: ViewModel) {
@@ -479,52 +342,104 @@ class Firestore(
     }
 
     //updating the recent purchase status from the store when app is opened everytime
-    suspend fun updateRecentPurchases (recentPurchaseIDs: ArrayList<String>) = withContext(Dispatchers.Default) {
-        try {
-            for (orderID in recentPurchaseIDs) {
-                withContext(Dispatchers.IO) {
-                    val orderRepo = repository.getOrderByID(orderID)
-                    orderRepo?.let {
-                        val docID = orderRepo.monthYear
-                        val date = orderRepo.purchaseDate.take(2)
-                        val doc = mFireStore.collection(Constants.ORDER_HISTORY)
-                            .document(docID)
-                            .collection(date)
-                            .document(orderID)
-                            .get().await()
-                        val orderEntity = doc.toObject(Order::class.java)?.toOrderEntity()
-                            orderEntity?.let { order ->
-                                if (order.orderStatus != Constants.PENDING) {
-                                    val updateLocalProfileRecentPurchases = async { updateLocalProfileRecentPurchases(order.orderId) }
-                                    val updateCloudProfileRecentPurchases = async { updateCloudProfileRecentPurchases(order.orderId, order.customerId) }
-                                    val updateLocalOrderRepository = async { updateLocalOrderRepository(order) }
-                                    updateLocalProfileRecentPurchases.await()
-                                    updateCloudProfileRecentPurchases.await()
-                                    updateLocalOrderRepository.await()
+    suspend fun updateRecentPurchases(
+        recentPurchaseIDs: ArrayList<String>,
+        subscriptionIDs: ArrayList<String>
+    ) = withContext(Dispatchers.Default) {
+
+        val orders = async { getOrdersUpdate(recentPurchaseIDs) }
+        val subscriptions = async { getSubscriptionsUpdate(subscriptionIDs) }
+
+        orders.await()
+        subscriptions.await()
+    }
+
+    private suspend fun getOrdersUpdate(recentPurchaseIDs: ArrayList<String>) =
+        withContext(Dispatchers.IO) {
+            try {
+                if (recentPurchaseIDs.isNotEmpty()) {
+                    for (orderID in recentPurchaseIDs) {
+                        withContext(Dispatchers.IO) {
+                            val orderRepo = repository.getOrderByID(orderID)
+                            orderRepo?.let {
+                                val docID = orderRepo.monthYear
+                                val date = orderRepo.purchaseDate.take(2)
+                                val doc = mFireStore.collection(Constants.ORDER_HISTORY)
+                                    .document(docID)
+                                    .collection(date)
+                                    .document(orderID)
+                                    .get().await()
+                                val orderEntity = doc.toObject(Order::class.java)?.toOrderEntity()
+                                orderEntity?.let { order ->
+                                    if (order.orderStatus != Constants.PENDING) {
+                                        val updateLocalProfileRecentPurchases =
+                                            async { updateLocalProfileRecentPurchases(order.orderId) }
+                                        val updateCloudProfileRecentPurchases = async {
+                                            updateCloudProfileRecentPurchases(
+                                                order.orderId,
+                                                order.customerId
+                                            )
+                                        }
+                                        val updateLocalOrderRepository =
+                                            async { updateLocalOrderRepository(order) }
+                                        updateLocalProfileRecentPurchases.await()
+                                        updateCloudProfileRecentPurchases.await()
+                                        updateLocalOrderRepository.await()
+                                    }
                                 }
+                            }
                         }
                     }
+                } else {
+
                 }
+            } catch (e: Exception) {
+                Log.e("exception", "updateRecentPurchases: ${e.message}")
             }
-        } catch (e: Exception) {
-            Log.e("exception", "updateRecentPurchases: ${e.message}", )
         }
-    }
 
-    private suspend fun updateLocalOrderRepository(order: OrderEntity) = withContext(Dispatchers.IO) {
-        repository.upsertOrder(order)
-    }
+    private suspend fun getSubscriptionsUpdate(subscriptionIDs: ArrayList<String>) =
+        withContext(Dispatchers.IO) {
+            try {
+                if (subscriptionIDs.isNotEmpty()) {
+                    val profile = repository.getProfileData()!!
+                    val path = FirebaseFirestore.getInstance()
+                        .collection("Subscription")
+                        .document("Active")
+                    for (month in profile.subscribedMonths) {
+                        val documents = path
+                            .collection(month)
+                            .whereEqualTo("customerID", profile.id)
+                            .get().await()
+                        for (doc in documents) {
+                            val sub = doc.toObject(Subscription::class.java).toSubscriptionEntity()
+                            repository.upsertSubscription(sub)
+                        }
+                    }
+                } else {
+                }
+            } catch (e: Exception) {
+                Log.e("exception", "updateRecentPurchases: ${e.message}")
+            }
+        }
 
-    private suspend fun updateLocalProfileRecentPurchases(id: String?) = withContext(Dispatchers.IO) {
-        val profile = repository.getProfileData()!!
-        profile.purchaseHistory.remove(id)
-        repository.upsertProfile(profile)
-    }
+    private suspend fun updateLocalOrderRepository(order: OrderEntity) =
+        withContext(Dispatchers.IO) {
+            repository.upsertOrder(order)
+        }
 
-    private suspend fun updateCloudProfileRecentPurchases(item: String?, docID: String) = withContext(Dispatchers.IO) {
-        mFireStore.collection(Constants.USERS)
-            .document(docID).update("purchaseHistory", FieldValue.arrayRemove(item)).await()
-    }
+    private suspend fun updateLocalProfileRecentPurchases(id: String?) =
+        withContext(Dispatchers.IO) {
+            val profile = repository.getProfileData()!!
+            profile.purchaseHistory.remove(id)
+            repository.upsertProfile(profile)
+        }
+
+    private suspend fun updateCloudProfileRecentPurchases(item: String?, docID: String) =
+        withContext(Dispatchers.IO) {
+            mFireStore.collection(Constants.USERS)
+                .document(docID).update("purchaseHistory", FieldValue.arrayRemove(item)).await()
+        }
 
     fun addFavorites(id: String, item: String) = CoroutineScope(Dispatchers.IO).launch {
         //This function will add a new data if it is not present in the array
@@ -552,6 +467,55 @@ class Firestore(
             .document(id).update("address", address)
     }
 
+    suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean {
+        try {
+            mFireStore.collection(Constants.SUBSCRIPTION)
+                .document(Constants.SUB_ACTIVE).collection(sub.monthYear).document(sub.id)
+                .update("cancelledDates", FieldValue.arrayUnion(date)).await()
+            return true
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    suspend fun cancelSubscription(sub: SubscriptionEntity): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val deleteSub = async { deleteSubscription(sub) }
+            val createCancellationSub = async { createCancellationSub(sub) }
+            val removeActiveSubFromProfile = async { removeActiveSubFromProfile(sub) }
+
+            deleteSub.await()
+            createCancellationSub.await()
+            removeActiveSubFromProfile.await()
+
+            return@withContext true
+        } catch (e: Exception) {
+            return@withContext false
+        }
+    }
+
+    private suspend fun createCancellationSub(sub: SubscriptionEntity) {
+        mFireStore.collection(Constants.SUBSCRIPTION)
+            .document(Constants.SUB_CANCELLED)
+            .collection(sub.monthYear)
+            .document(sub.id)
+            .set(sub, SetOptions.merge())
+            .await()
+    }
+
+    private suspend fun deleteSubscription(sub: SubscriptionEntity) {
+        mFireStore.collection(Constants.SUBSCRIPTION)
+            .document(Constants.SUB_ACTIVE)
+            .collection(sub.monthYear)
+            .document(sub.id)
+            .delete().await()
+    }
+
+    private suspend fun removeActiveSubFromProfile(sub: SubscriptionEntity) {
+        mFireStore.collection(Constants.USERS)
+            .document(sub.customerID).update("subscriptions", FieldValue.arrayRemove(sub.id)).await()
+    }
+
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> {
         val outOfStockItems: MutableList<CartEntity> = mutableListOf()
         outOfStockItems.clear()
@@ -570,7 +534,10 @@ class Firestore(
         return outOfStockItems
     }
 
-    suspend fun generateSubscription(viewModel: SubscriptionProductViewModel, subscription: Subscription) = withContext(Dispatchers.IO) {
+    suspend fun generateSubscription(
+        viewModel: SubscriptionProductViewModel,
+        subscription: Subscription
+    ) = withContext(Dispatchers.IO) {
         val sub = subscription.toSubscriptionEntity()
         try {
             sub.id = mFireStore.collection(Constants.SUBSCRIPTION)
@@ -580,9 +547,11 @@ class Firestore(
 
             val updateStore = async { updateStoreSubscription(sub) }
             val updateLocal = async { updateLocalSubscription(sub) }
+            val updateCloud = async { updateCloudProfileSubscription(sub) }
 
             updateStore.await()
             updateLocal.await()
+            updateCloud.await()
 
             withContext(Dispatchers.Main) {
                 viewModel.subscriptionAdded(sub)
@@ -592,14 +561,15 @@ class Firestore(
         }
     }
 
-    private suspend fun updateLocalSubscription(sub: SubscriptionEntity) = withContext(Dispatchers.IO) {
-        val profile = repository.getProfileData()!!
-        profile.subscriptions.add(sub.id)
-        if (!profile.subscribedMonths.contains(sub.monthYear)) {
-            profile.subscribedMonths.add(sub.monthYear)
+    private suspend fun updateLocalSubscription(sub: SubscriptionEntity) =
+        withContext(Dispatchers.IO) {
+            val profile = repository.getProfileData()!!
+            profile.subscriptions.add(sub.id)
+            if (!profile.subscribedMonths.contains(sub.monthYear)) {
+                profile.subscribedMonths.add(sub.monthYear)
+            }
+            repository.upsertProfile(profile)
         }
-        repository.upsertProfile(profile)
-    }
 
     private suspend fun updateStoreSubscription(sub: SubscriptionEntity) {
         mFireStore.collection(Constants.SUBSCRIPTION)
@@ -610,5 +580,13 @@ class Firestore(
 
     }
 
-
+    private suspend fun updateCloudProfileSubscription(sub: SubscriptionEntity) =
+        withContext(Dispatchers.IO) {
+            mFireStore.collection(Constants.USERS)
+                .document(sub.customerID)
+                .update("subscribedMonths", FieldValue.arrayUnion(sub.monthYear)).await()
+            mFireStore.collection(Constants.USERS)
+                .document(sub.customerID).update("subscriptions", FieldValue.arrayUnion(sub.id))
+                .await()
+        }
 }

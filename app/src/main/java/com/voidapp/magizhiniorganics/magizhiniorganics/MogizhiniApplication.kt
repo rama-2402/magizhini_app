@@ -14,6 +14,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModelFact
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletViewModelFactory
 import org.kodein.di.Kodein
@@ -46,5 +47,6 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { ConversationViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { WalletViewModelFactory(instance(), instance()) }
         bind() from provider { SubscriptionProductViewModelFactory(instance(), instance()) }
+        bind() from provider { SubscriptionViewModelFactory(instance(), instance()) }
     }
 }

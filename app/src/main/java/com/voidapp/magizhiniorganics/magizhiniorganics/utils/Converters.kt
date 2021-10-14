@@ -21,6 +21,17 @@ class Converters {
     }
 
     @TypeConverter
+    fun fromStringToArrayListLong(value: String?): ArrayList<Long> {
+        val listType = object : TypeToken<ArrayList<Long>>() {}.type
+        return Gson().fromJson(value, listType)
+    }
+
+    @TypeConverter
+    fun fromArrayListLongToString(list: ArrayList<Long?>): String {
+        return Gson().toJson(list)
+    }
+
+    @TypeConverter
     fun fromStringtoProductEntity(value: String?): ProductEntity {
         val listType = object : TypeToken<ProductEntity>() {}.type
         return Gson().fromJson(value, listType)

@@ -39,6 +39,7 @@ class OnBoardingActivity: BaseActivity() {
 
     private fun activityInit() {
         binding.viewPager.adapter = ViewPagerAdapter(
+            this,
             titleList,
             bodyOneList,
             object : ViewPagerListener {
@@ -48,6 +49,10 @@ class OnBoardingActivity: BaseActivity() {
                         finish()
                         finishAffinity()
                     }
+                }
+
+                override fun nextPage(position: Int) {
+                    binding.viewPager.currentItem = position + 1
                 }
             }
         )
@@ -68,8 +73,8 @@ class OnBoardingActivity: BaseActivity() {
     }
 
     private fun postToList() {
-        addToList("Pure Organic", "Get Fresh, Organic Vegatables and groceries daily at your doorstep")
-        addToList("High Quality", "High Quality personally handpicked items just for you")
-        addToList("Affordable Price", "Farm Fresh groceries for your Good Health at Prices lower than market price")
+        addToList("Pure Organic", "Get a wide variety of Farm Fresh Organic Products in a single click")
+        addToList("Highest Quality", "High Quality Premium grade products personally handpicked just for you")
+        addToList("Affordable Price", "Get fresh Vegetables and groceries delivered daily at your doorstep at lower than market price")
     }
 }

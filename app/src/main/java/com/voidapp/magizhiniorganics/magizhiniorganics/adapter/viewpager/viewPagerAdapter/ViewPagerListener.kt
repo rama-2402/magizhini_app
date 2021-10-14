@@ -2,4 +2,5 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.viewPa
 
 interface ViewPagerListener {
     fun signIn()
+    fun nextPage(position: Int)
 }
