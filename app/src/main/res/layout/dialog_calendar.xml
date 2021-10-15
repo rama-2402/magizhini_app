@@ -83,67 +83,39 @@
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:gravity="center_vertical">-->
-<!--            <TextView-->
-<!--                android:id="@+id/tvStatusText"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="Status: "-->
-<!--                android:textStyle="bold"-->
-<!--                android:layout_marginStart="@dimen/material_size_16"-->
-<!--                android:textColor="@color/gray700"-->
-<!--                app:layout_constraintTop_toTopOf="@id/tvMonth"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintBottom_toBottomOf="@id/tvMonth"-->
-<!--                />-->
-<!--            <TextView-->
-<!--                android:id="@+id/tvStatus"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="Not Delivered"-->
-<!--                android:textStyle="normal"-->
-<!--                android:textColor="@color/gray700"-->
-<!--                app:layout_constraintTop_toTopOf="@id/tvStatusText"-->
-<!--                app:layout_constraintBottom_toBottomOf="@id/tvStatusText"-->
-<!--                app:layout_constraintStart_toEndOf="@id/tvStatusText"-->
-<!--                />-->
-<!--            <TextView-->
-<!--                android:id="@+id/tvMonth"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="September - 2022"-->
-<!--                android:textStyle="bold"-->
-<!--                android:textColor="@color/black"-->
-<!--                android:layout_margin="@dimen/material_size_8"-->
-<!--                android:elevation="@dimen/material_size_4"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                />-->
-<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-<!--        <com.github.sundeepk.compactcalendarview.CompactCalendarView-->
-<!--            android:id="@+id/calendar"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="250dp"-->
-<!--            app:compactCalendarTargetHeight="250dp"-->
-<!--            app:compactCalendarTextSize="12sp"-->
-<!--            app:compactCalendarTextColor="@color/white"-->
-<!--            app:compactCalendarOtherMonthDaysTextColor="@color/black"-->
-<!--            android:layout_marginTop="@dimen/material_size_4"-->
-<!--            app:compactCalendarCurrentSelectedDayBackgroundColor="@color/green200"-->
-<!--            app:compactCalendarCurrentDayBackgroundColor="@color/green200"-->
-<!--            app:compactCalendarMultiEventIndicatorColor="#fff"-->
-<!--            />-->
-
-        <com.applandeo.materialcalendarview.CalendarView
-            android:id="@+id/calendarView"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:headerColor="@color/white"
-            app:headerLabelColor="@color/gray700"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/tvMonth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="September - 2022"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_margin="@dimen/material_size_8"
+                android:elevation="@dimen/material_size_4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.github.sundeepk.compactcalendarview.CompactCalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="wrap_content"
+            android:layout_height="210dp"
+            app:compactCalendarTargetHeight="250dp"
+            app:compactCalendarTextSize="12sp"
+            app:compactCalendarShouldSelectFirstDayOfMonthOnScroll="false"
+            app:compactCalendarTextColor="@color/gray700"
+            app:compactCalendarOtherMonthDaysTextColor="@color/black"
+            android:layout_marginTop="@dimen/material_size_4"
+            app:compactCalendarCurrentSelectedDayBackgroundColor="@color/green_base"
+            app:compactCalendarCurrentDayBackgroundColor="@color/white"
+            app:compactCalendarCurrentSelectedDayTextColor="@color/white"
+            app:compactCalendarCurrentDayTextColor="@color/blue500"
+            app:compactCalendarMultiEventIndicatorColor="#fff"
             />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -152,13 +124,14 @@
             android:layout_marginStart="@dimen/material_size_4"
             android:layout_marginEnd="@dimen/material_size_4"
             android:layout_marginBottom="@dimen/material_size_16"
-            android:layout_marginTop="@dimen/material_size_4"
+            android:layout_marginTop="@dimen/material_size_16"
             >
             <ImageView
                 android:id="@+id/ivDelivered"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_delivered"
+                android:background="@drawable/shape_round_rectangle_16"
+                android:backgroundTint="@color/green_base"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
@@ -180,7 +153,8 @@
                 android:id="@+id/ivCancelled"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:src="@drawable/ic_delivery_cancelled"
+                android:background="@drawable/shape_round_rectangle_16"
+                android:backgroundTint="@color/matteRed"
                 android:layout_marginEnd="@dimen/material_size_4"
                 app:layout_constraintEnd_toStartOf="@id/tvCancelled"
                 app:layout_constraintTop_toTopOf="@id/tvCancelled"
@@ -206,7 +180,8 @@
                 android:id="@+id/ivNotDelivered"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:src="@drawable/ic_not_delivered"
+                android:background="@drawable/shape_round_rectangle_16"
+                android:backgroundTint="@color/orange200"
                 app:layout_constraintEnd_toStartOf="@id/tvNotDelivered"
                 android:layout_marginEnd="@dimen/material_size_8"
                 app:layout_constraintTop_toTopOf="parent"

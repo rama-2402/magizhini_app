@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.RaviKoradiya:ZoomableImageView:1.1.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/7fc4196691943cc5a020cb9c908177ab/transformed/jetified-ZoomableImageView-1.1.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/7fc4196691943cc5a020cb9c908177ab/transformed/jetified-ZoomableImageView-1.1.1/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/7fc4196691943cc5a020cb9c908177ab/transformed/jetified-ZoomableImageView-1.1.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/70a7ebac2413f8459e63039787bb9482/transformed/jetified-ZoomableImageView-1.1.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/70a7ebac2413f8459e63039787bb9482/transformed/jetified-ZoomableImageView-1.1.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/70a7ebac2413f8459e63039787bb9482/transformed/jetified-ZoomableImageView-1.1.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.RaviKoradiya/ZoomableImageView/1.1.1/9a64cbdbcea4ef078d78aab5c82758018799d2e0/ZoomableImageView-1.1.1-javadoc.jar!/" />

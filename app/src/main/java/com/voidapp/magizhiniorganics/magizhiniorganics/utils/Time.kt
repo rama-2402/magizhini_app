@@ -76,7 +76,7 @@ class Time {
         }
     }
 
-    private fun monthNameFromNumber(number: String) : String {
+    fun monthNameFromNumber(number: String) : String {
         return when(number) {
             "01" -> "January"
             "02" -> "February"

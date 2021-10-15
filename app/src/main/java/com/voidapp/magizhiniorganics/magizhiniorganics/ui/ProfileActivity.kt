@@ -28,7 +28,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CustomerProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetDataIntentService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
@@ -82,9 +81,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         val status = intent.getStringExtra(Constants.STATUS)
         if (status == "onBoard") {
             //updating the room data base with latest item from store
-            Intent(this, GetDataIntentService::class.java).also {
-                startService(it)
-            }
+//            TODO: create workmanger to get all the data
         }
 
         //checking if it is new user to get data from different place

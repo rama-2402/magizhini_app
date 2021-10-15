@@ -160,7 +160,4 @@ dependencies {
     // calendar view for subscription        https://github.com/SundeepK/CompactCalendarView
     implementation 'com.github.sundeepk:compact-calendar-view:3.0.0'
 
-    // material calendar for subscription       https://github.com/Applandeo/Material-Calendar-View
-    implementation 'com.applandeo:material-calendar-view:1.9.0-rc03'
-
 }

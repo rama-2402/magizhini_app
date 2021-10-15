@@ -20,8 +20,6 @@ class HomeViewModel (
 
     fun getALlCategories() = repository.getAllProductCategories()
 
-    fun getProductsAndCouponsData() = firestoreRepository.getProductsAndCouponsData()
-
     fun selectedCategory(category: String) {
         homeListener?.displaySelectedCategory(category)
     }

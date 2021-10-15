@@ -1,9 +1,10 @@
 <component name="libraryTable">
   <library name="Gradle: net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/fa1ecba2e8d3ca9bb2e15470e9cf2c97/transformed/jetified-keyboardvisibilityevent-2.1.0/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/fa1ecba2e8d3ca9bb2e15470e9cf2c97/transformed/jetified-keyboardvisibilityevent-2.1.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/fa1ecba2e8d3ca9bb2e15470e9cf2c97/transformed/jetified-keyboardvisibilityevent-2.1.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/f77eb7cfde509a47c0a6cf227865b26e/transformed/jetified-keyboardvisibilityevent-2.1.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/f77eb7cfde509a47c0a6cf227865b26e/transformed/jetified-keyboardvisibilityevent-2.1.0/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/f77eb7cfde509a47c0a6cf227865b26e/transformed/jetified-keyboardvisibilityevent-2.1.0/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.yslibrary.keyboardvisibilityevent/keyboardvisibilityevent/2.1.0/9b51b697b17550345c61dfe951c78c1e9a084a5e/keyboardvisibilityevent-2.1.0-javadoc.jar!/" />
