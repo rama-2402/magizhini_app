@@ -12,6 +12,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatVi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionViewModelFactory
@@ -39,6 +40,7 @@ class MagizhiniApplication: Application(), KodeinAware {
 
         //viewModels
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
+        bind() from provider { ProfileViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ShoppingMainViewModelFactory(instance(), instance()) }
         bind() from provider { ProductViewModelFactory(instance(), instance()) }
         bind() from provider { CheckoutViewModelFactory(instance(), instance()) }

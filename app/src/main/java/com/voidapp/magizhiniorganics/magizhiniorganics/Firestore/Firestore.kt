@@ -24,6 +24,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
@@ -87,14 +88,14 @@ class Firestore(
     }
 
     //check if the user profile exists and getting the data from store
-    fun checkUserProfileDetails(activity: ProfileActivity) = CoroutineScope(Dispatchers.IO).launch {
+    suspend fun checkUserProfileDetails(): Boolean = withContext(Dispatchers.IO) {
         try {
             //setting the user id to shared preference for later editing the profile data
-            SharedPref(activity.baseContext).putData(
-                Constants.USER_ID,
-                Constants.STRING,
-                mFirebaseAuth.currentUser!!.uid
-            )
+//            SharedPref().putData(
+//                Constants.USER_ID,
+//                Constants.STRING,
+//                mFirebaseAuth.currentUser!!.uid
+//            )
             val snapShot = mFireStore.collection(Constants.USERS)
                 .document(mFirebaseAuth.currentUser!!.uid).get().await()
             //getting the profile data and if exists we do the code below or we dismiss the progress dialog for new profile creation
@@ -103,99 +104,48 @@ class Firestore(
                 val profile = snapShot.toObject(UserProfile::class.java)
                 val userProfileEntity = profile!!.toUserProfileEntity()
                 repository.upsertProfile(userProfileEntity)
-
-                //calling a work manager background service to get the current month's order history from store
-                //since it is a long running background task we are calling a work manager to do the task
-
-                val currentMonthYear = "${Time().getMonth()}${Time().getYear()}"
-                val workRequest: WorkRequest =
-                    OneTimeWorkRequestBuilder<GetOrderHistoryService>()
-                        .setInputData(
-                            workDataOf(
-                                "id" to profile.id,
-                                "filter" to currentMonthYear
-                            )
-                        )
-                        .build()
-
-                WorkManager.getInstance(activity.applicationContext).enqueue(workRequest)
-
-                //once the profile data is updated in the room database we skip the profile part and move the user to Home page
-                withContext(Dispatchers.Main) {
-                    activity.hideProgressDialog()
-                    activity.newUserTransitionFromProfile()
-
-                }
+                return@withContext true
             } else {
-                activity.hideProgressDialog()
+                return@withContext false
             }
         } catch (e: Exception) {
             Log.e("exception", e.message.toString())
+            return@withContext false
         }
     }
 
-    fun uploadImage(activity: Activity, path: String, uri: Uri) =
-        CoroutineScope(Dispatchers.IO).launch {
-
-            when (activity) {
-                is ProfileActivity -> {
+    suspend fun uploadImage (
+        path: String,
+        uri: Uri,
+        extension: String
+    ): String = withContext(Dispatchers.IO) {
                     val name = getCurrentUserId()
                     try {
                         val sRef: StorageReference = mFireStoreStorage.child(
-                            "$path$name.${
-                                GlideLoader().imageExtension(activity, uri)
-                            }"
+                            "$path$name.$extension"
                         )
 
                         val url = sRef.putFile(uri)
                             .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
 
-                        activity.onSuccessfulImageUpload(url.toString())
+                       return@withContext url.toString()
 
                     } catch (e: Exception) {
-                        activity.onDataTransactionFailure(e.message.toString())
+                        return@withContext "failed"
                     }
                 }
-                is ConversationActivity -> {
-                    val name = getCurrentUserId()
-                    try {
-                        val sRef: StorageReference = mFireStoreStorage.child(
-                            "$path$name.${
-                                GlideLoader().imageExtension(activity, uri)
-                            }"
-                        )
 
-                        val url = sRef.putFile(uri)
-                            .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
-
-                        activity.onSuccessfulImageUpload(url.toString())
-
-                    } catch (e: Exception) {
-                        activity.onDataTransactionFailure(e.message.toString())
-                    }
-                }
-            }
-
-        }
-
-    fun uploadData(activity: Activity, data: Any, content: String = "") =
-        CoroutineScope(Dispatchers.IO).launch {
-            when (activity) {
-                is ProfileActivity -> {
-                    try {
-                        data as UserProfile
-                        mFireStore.collection(Constants.USERS)
-                            .document(data.id)
-                            .set(data, SetOptions.merge()).await()
-                        val userProfileEntity = data.toUserProfileEntity()
-                        repository.upsertProfile(userProfileEntity)
-                        withContext(Dispatchers.Main) {
-                            activity.onDataTransactionSuccess("")
-                        }
-                    } catch (e: Exception) {
-                        activity.onDataTransactionFailure(e.toString())
-                    }
-                }
+    suspend fun uploadProfile(profile: UserProfile): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                mFireStore.collection(Constants.USERS)
+                    .document(profile.id)
+                    .set(profile, SetOptions.merge()).await()
+                val userProfileEntity = profile.toUserProfileEntity()
+                repository.upsertProfile(userProfileEntity)
+                return@withContext true
+            } catch (e: Exception) {
+                return@withContext false
             }
         }
 

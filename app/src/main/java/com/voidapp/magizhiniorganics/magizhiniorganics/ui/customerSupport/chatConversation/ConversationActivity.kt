@@ -70,6 +70,15 @@ class ConversationActivity : BaseActivity(), KodeinAware {
         viewModel.keyboardVisibile.observe(this, {
             UIUtil.hideKeyboard(this@ConversationActivity)
         })
+        viewModel.imageUploadStatus.observe(this, {
+            if (it == "failed") {
+                hideProgressDialog()
+                showErrorSnackBar("Server Error! Image Update failed. Try later", true)
+            } else {
+                hideProgressDialog()
+                generateMessageObjectAndSend(Constants.IMAGE, it)
+            }
+        })
     }
 
     private fun checkTypingStatus(profile: SupportProfile) {
@@ -162,18 +171,6 @@ class ConversationActivity : BaseActivity(), KodeinAware {
         }
     }
 
-    //after image upload we initiate the firstore data upload
-    fun onSuccessfulImageUpload(url: String) {
-//        mImageMessageUrl = url
-        hideProgressDialog()
-        generateMessageObjectAndSend(Constants.IMAGE, url)
-    }
-
-    fun onDataTransactionFailure(message: String) {
-        hideProgressDialog()
-        showErrorSnackBar(message, true)
-    }
-
     override fun onBackPressed() {
         viewModel.updateTypingStatus(mCurrentUserId, false)
         Intent(this, ChatActivity::class.java).also {
@@ -208,7 +205,11 @@ class ConversationActivity : BaseActivity(), KodeinAware {
                     try {
                         // The uri of selected image from phone storage.
                         showProgressDialog()
-                        viewModel.uploadImageToStorage(this,mCurrentUserId ,data.data!!)
+                        viewModel.uploadImageToStorage(
+                            mCurrentUserId ,
+                            data.data!!,
+                            GlideLoader().imageExtension(this,  data.data!!)!!
+                        )
                     } catch (e: IOException) {
                         e.printStackTrace()
                         showErrorSnackBar("Image selection failed!", true)

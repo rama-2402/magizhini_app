@@ -16,7 +16,12 @@ import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.workDataOf
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirebaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
@@ -28,7 +33,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CustomerProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
 import org.kodein.di.KodeinAware
@@ -45,9 +55,12 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     lateinit var binding: ActivityProfileBinding
     override val kodein by kodein()
 
-    private val repository: FirestoreRepository by instance()
-    private val databaseRepository: DatabaseRepository by instance()
-    private val firebaseRepository: FirebaseRepository by instance()
+    private lateinit var viewModel: ProfileViewModel
+    private val factory: ProfileViewModelFactory by instance()
+//
+//    private val repository: FirestoreRepository by instance()
+//    private val databaseRepository: DatabaseRepository by instance()
+//    private val firebaseRepository: FirebaseRepository by instance()
 
     private var mProfile: UserProfile = UserProfile()
 
@@ -67,47 +80,56 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val sRef = this.getSharedPreferences(Constants.USERS, Context.MODE_PRIVATE)
+
+//        val sRef = this.getSharedPreferences(Constants.USERS, Context.MODE_PRIVATE)
         //we check if the userid is already in the shared preference if not it returns ""
-        mCurrentUserId = sRef.getString(Constants.USER_ID, "")
+//        mCurrentUserId = sRef.getString(Constants.USER_ID, "")
+
+        mCurrentUserId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "") as String
 
         //if there is no id in shared preference that means the user is new
         // and he came from the sign in activity.
         // So it will get the id from intent
         if (mCurrentUserId == "") {
             mCurrentUserId = intent.getStringExtra(Constants.USER_ID).toString()
+            SharedPref(this).putData(
+                Constants.USER_ID,
+                Constants.STRING,
+                mCurrentUserId!!
+            )
         }
         mPhoneNumber = intent.getStringExtra(Constants.PHONE_NUMBER).toString()
         val status = intent.getStringExtra(Constants.STATUS)
         if (status == "onBoard") {
             //updating the room data base with latest item from store
-//            TODO: create workmanger to get all the data
+            val workRequest: WorkRequest =
+                OneTimeWorkRequestBuilder<UpdateDataService>()
+                    .build()
+
+            WorkManager.getInstance(this).enqueue(workRequest)
         }
 
         //checking if it is new user to get data from different place
         isNewUser = SharedPref(this).getData(Constants.LOGIN_STATUS, Constants.BOOLEAN, true) as Boolean
 
+        //setting the theme and view binding
+        setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_profile)
+        viewModel = ViewModelProvider(this, factory).get(ProfileViewModel::class.java)
+        binding.viewmodel = viewModel
+
         //if new user then we check the store and get data if there is any
         //if existing user i.e logged in then we get the profile data from the DAO
         if(isNewUser) {
             showProgressDialog()
-            repository.checkUserProfileDetails(this)
+            viewModel.checkUserProfileDetails()
         } else {
-            CoroutineScope(Dispatchers.IO).launch {
-                //if the user is already inside the app we can get the data from the dao itself
-                val userData = databaseRepository.getProfileData()!!
-                withContext(Dispatchers.Main) {
-                    //setting the data from dao into profile screen fields
-                    setUserDetailsFromDao(userData)
-                }
-            }
+            viewModel.getUserProfile()
         }
 
-        //setting the theme and view binding
-        setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_profile)
-
         activityInit()
+        observers()
+        clickListeners()
 
         if (savedInstanceState != null) {
             mProfilePicUri = savedInstanceState.getString(Constants.PROFILE_PIC_URI)?.toUri()
@@ -116,11 +138,57 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     }
 
+    private fun observers() {
+        viewModel.isNewUser.observe(this, { userDataAvailable ->
+            if (userDataAvailable) {
+                //calling a work manager background service to get the current month's order history from store
+                //since it is a long running background task we are calling a work manager to do the task
+
+                val currentMonthYear = "${Time().getMonth()}${Time().getYear()}"
+                val workRequest: WorkRequest =
+                    OneTimeWorkRequestBuilder<GetOrderHistoryService>()
+                        .setInputData(
+                            workDataOf(
+                                "id" to mCurrentUserId,
+                                "filter" to currentMonthYear
+                            )
+                        )
+                        .build()
+
+                WorkManager.getInstance(this).enqueue(workRequest)
+
+                hideProgressDialog()
+                newUserTransitionFromProfile()
+            } else {
+                hideProgressDialog()
+            }
+        })
+        viewModel.userProfile.observe(this, { userData ->
+            setUserDetailsFromDao(userData)
+        })
+        viewModel.profileUploadStatus.observe(this, { status ->
+            if (status) {
+                hideProgressDialog()
+                successDialogAndTransition()
+            } else {
+                hideProgressDialog()
+                showErrorSnackBar("Server Error! Profile Creation failed. Try later", true)
+            }
+        })
+        viewModel.profileImageUploadStatus.observe(this, { status ->
+            if (status == "failed") {
+                hideProgressDialog()
+                showErrorSnackBar("Server Error! Image Update failed. Try later", true)
+            } else {
+                mProfile.profilePicUrl = status
+                viewModel.uploadProfile(mProfile)
+            }
+        })
+    }
+
     private fun activityInit() {
         binding.ivProfilePic.clipToOutline = true
         binding.tvPhoneNumber.text = mPhoneNumber
-
-        clickListeners()
     }
 
     private fun clickListeners() {
@@ -187,13 +255,12 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             tvReferral.gone()
             //hinding the referral code area for existing user
         }
-        GlideLoader().loadUserPicture(this,mProfilePicUrl,binding.ivProfilePic)
+        GlideLoader().loadUserPicture(this, mProfilePicUrl, binding.ivProfilePic)
     }
 
     //validating the data entered before uploading
     private fun profileDataValidation() {
         generateProfileModel()
-
         if (binding.etAddressOne.text.isNullOrEmpty()) {
                 binding.etlAddressOne.error = "* required"
                 return
@@ -221,12 +288,16 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                     mProfile.profilePicUrl = mProfilePicUrl
                     showProgressDialog()
                     //uploading only the changed data. since uri is empty profile pic is not changed
-                    repository.uploadData(this@ProfileActivity, mProfile)
+                    viewModel.uploadProfile(mProfile)
                 }
                 mProfilePicUri !== null -> {
                     showProgressDialog()
                     //uploading the profile pic first and thereby then chaining to upload the rest of the data
-                    repository.uploadImage(this@ProfileActivity, Constants.PROFILE_PIC_PATH, mProfilePicUri!!)
+                    viewModel.uploadProfilePic (
+                        Constants.PROFILE_PIC_PATH,
+                        mProfilePicUri!!,
+                        GlideLoader().imageExtension(this@ProfileActivity,  mProfilePicUri!!)!!
+                    )
                 }
             }
         }
@@ -236,38 +307,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     fun onDobSelected(date: String) {
         binding.tvDob.text = date
         mProfile.dob = date
-    }
-
-    //after image upload we initiate the firstore data upload
-    fun onSuccessfulImageUpload(url: String) {
-        mProfile.profilePicUrl = url
-        updateProfileDataToFirebase()
-        repository.uploadData(this@ProfileActivity, mProfile)
-
-    }
-
-    private fun updateProfileDataToFirebase() = lifecycleScope.launch (Dispatchers.IO) {
-        firebaseRepository.uploadUserProfile(generateCustomerProfileForChat())
-    }
-
-    private fun generateCustomerProfileForChat(): CustomerProfile {
-        return CustomerProfile(
-            mProfile.id,
-            mProfile.name,
-            mProfile.profilePicUrl
-        )
-    }
-
-    //after the firestore data upload we upload the data to local room db and then showing the success dialog
-    fun onDataTransactionSuccess(message: String) {
-        updateProfileDataToFirebase()
-        hideProgressDialog()
-        successDialogAndTransition()
-    }
-
-    fun onDataTransactionFailure(message: String) {
-        hideProgressDialog()
-        showErrorSnackBar(message, true)
     }
 
     fun exitProfileWithoutChange() {
@@ -305,7 +344,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             }
     }
 
-    fun newUserTransitionFromProfile() {
+    private fun newUserTransitionFromProfile() {
         //movement of profile to home activity for new users
         SharedPref(this).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)
 

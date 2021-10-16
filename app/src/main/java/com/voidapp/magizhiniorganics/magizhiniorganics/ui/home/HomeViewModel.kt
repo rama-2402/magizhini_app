@@ -45,10 +45,4 @@ class HomeViewModel (
             repository.upsertWallet(walletEntity)
         }
     }
-
-    fun updateRecentPurchases() = viewModelScope.launch(Dispatchers.IO) {
-        val recentPurchaseIDs = repository.getProfileData()!!.purchaseHistory
-        val subscriptionIDs = repository.getProfileData()!!.subscriptions
-        firestoreRepository.updateRecentPurchases(recentPurchaseIDs, subscriptionIDs)
-    }
 }

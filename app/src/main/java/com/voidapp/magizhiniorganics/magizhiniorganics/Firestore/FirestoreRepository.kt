@@ -9,15 +9,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
+import java.security.cert.Extension
 
 class FirestoreRepository (
     private val firestore: Firestore
@@ -31,11 +30,11 @@ class FirestoreRepository (
 
     fun signInWithPhoneAuthCredential(activity: SignInActivity, credential: PhoneAuthCredential) = firestore.signInWithPhoneAuthCredential(activity, credential)
 
-    fun checkUserProfileDetails(activity: ProfileActivity) = firestore.checkUserProfileDetails(activity)
+    suspend fun checkUserProfileDetails(): Boolean = firestore.checkUserProfileDetails()
 
-    fun uploadImage(activity: Activity, path: String, uri: Uri) = firestore.uploadImage(activity, path, uri)
+    suspend fun uploadImage(path: String, uri: Uri, extension: String): String = firestore.uploadImage(path, uri, extension)
 
-    fun uploadData(activity: Activity, data: Any, content: String = "") = firestore.uploadData(activity, data, content)
+    suspend fun uploadProfile(profile: UserProfile): Boolean = firestore.uploadProfile(profile)
 
 //    fun getAllData() = firestore.getAllData()
 

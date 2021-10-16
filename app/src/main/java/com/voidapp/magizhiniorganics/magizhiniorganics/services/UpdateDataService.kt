@@ -52,10 +52,12 @@ class UpdateDataService (
 
             val updateCategory =
                 async { filterDataAndUpdateRoom(Constants.CATEGORY, categorySnapshot) }
-            val updateBanner = async { filterDataAndUpdateRoom(Constants.BANNER, bannerSnapshot) }
+            val updateBanner =
+                async { filterDataAndUpdateRoom(Constants.BANNER, bannerSnapshot) }
             val updateProduct =
                 async { filterDataAndUpdateRoom(Constants.PRODUCTS, productSnapshot) }
-            val updateCoupon = async { filterDataAndUpdateRoom(Constants.COUPON, couponSnapshot) }
+            val updateCoupon =
+                async { filterDataAndUpdateRoom(Constants.COUPON, couponSnapshot) }
             val updateDeliveryCharge =
                 async { filterDataAndUpdateRoom(Constants.DELIVERY_CHARGE, deliveryChargeSnapshot) }
 
