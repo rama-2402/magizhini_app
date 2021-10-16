@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayoutMediator
 import com.hsalf.smileyrating.SmileyRating
@@ -55,6 +56,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.abs
 
 class SubscriptionProductActivity : BaseActivity(), KodeinAware {
 
@@ -94,6 +96,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        title = ""
         binding.tvProductName.text = mProductName
         binding.tvProductName.isSelected = true
 
@@ -217,6 +220,14 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
             fabSubscribe.setOnClickListener {
                 showAddressBs(mProfile.address[0])
             }
+
+            tbAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+                title = if (abs(verticalOffset) -appBarLayout.totalScrollRange == 0) {
+                    mProductName
+                } else {
+                    ""
+                }
+            })
         }
     }
 
@@ -239,6 +250,8 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
                 spArea.setSelection(address.LocationCodePosition)
             }
         }
+
+        view.btnSaveAddress.text = "Proceed to payment"
 
         view.btnSaveAddress.setOnClickListener {
             when {

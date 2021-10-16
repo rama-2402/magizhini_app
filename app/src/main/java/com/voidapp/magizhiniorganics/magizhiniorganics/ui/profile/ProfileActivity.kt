@@ -1,21 +1,17 @@
-package com.voidapp.magizhiniorganics.magizhiniorganics.ui
+package com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.util.EventLog
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.work.OneTimeWorkRequestBuilder
@@ -23,22 +19,15 @@ import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.workDataOf
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirebaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfileBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CustomerProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataService
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
 import org.kodein.di.KodeinAware
@@ -46,7 +35,6 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
 
 class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
@@ -74,7 +62,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private var mLatitude: String = ""
     private var mLongitude: String = ""
     private var mAddress:  String = ""
-    private var mReferralNumber: String = ""
 
     private lateinit var dialogBsAddReferral: BottomSheetDialog
 
@@ -99,8 +86,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             )
         }
         mPhoneNumber = intent.getStringExtra(Constants.PHONE_NUMBER).toString()
-        val status = intent.getStringExtra(Constants.STATUS)
-        if (status == "onBoard") {
+        if (intent.getStringExtra(Constants.STATUS) == "onBoard") {
             //updating the room data base with latest item from store
             val workRequest: WorkRequest =
                 OneTimeWorkRequestBuilder<UpdateDataService>()
@@ -155,7 +141,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                         )
                         .build()
 
-                WorkManager.getInstance(this).enqueue(workRequest)
+                WorkManager.getInstance(this.applicationContext).enqueue(workRequest)
 
                 hideProgressDialog()
                 newUserTransitionFromProfile()
@@ -164,6 +150,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             }
         })
         viewModel.userProfile.observe(this, { userData ->
+            mProfile = userData.toUserProfile()
             setUserDetailsFromDao(userData)
         })
         viewModel.profileUploadStatus.observe(this, { status ->
@@ -204,36 +191,33 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     //generating the profile model for uploading to firestore
     //and assigning it to mProfile variable for later use
     private fun generateProfileModel(): UserProfile {
-
-        val addressEntity = generateAddressObject()
-        val address: ArrayList<Address> = arrayListOf()
-        address.add(addressEntity)
-
-        mProfile = UserProfile(
-            mCurrentUserId!!,
-            binding.etProfileName.text.toString().trim(),
-            binding.tvPhoneNumber.text.toString().trim(),
-            binding.etAlternateNumber.text.toString().trim(),
-            binding.tvDob.text.toString(),
-            address = address,
-            profilePicUrl = mProfilePicUrl
-        )
-
+        if (isNewUser) {
+            viewModel.createNewUserWallet(mCurrentUserId!!)
+        }
+        generateAddressObject()
+        with(mProfile) {
+            id = mCurrentUserId!!
+            name = binding.etProfileName.text.toString().trim()
+            phNumber = binding.tvPhoneNumber.text.toString().trim()
+            alternatePhNumber = binding.etAlternateNumber.text.toString().trim()
+            dob = binding.tvDob.text.toString()
+            mailId = binding.etEmailId.text.toString().trim()
+        }
         return mProfile
     }
 
-    private fun generateAddressObject(): Address {
-        return Address(
-            userId = binding.etProfileName.text.toString().trim(),
-            addressLineOne = binding.etAddressOne.text.toString().trim(),
-            addressLineTwo = binding.etAddressTwo.text.toString().trim(),
-            city = binding.spCity.selectedItem.toString(),
-            LocationCode = binding.spArea.selectedItem.toString(),
-            LocationCodePosition = binding.spArea.selectedItemPosition,
-            gpsLatitude = mLatitude,
-            gpsLongitude = mLongitude,
-            gpsAddress = mAddress,
-            )
+    private fun generateAddressObject() {
+        with(mProfile.address[0]) {
+            userId = binding.etProfileName.text.toString().trim()
+            addressLineOne = binding.etAddressOne.text.toString().trim()
+            addressLineTwo = binding.etAddressTwo.text.toString().trim()
+            city = binding.spCity.selectedItem.toString()
+            LocationCode = binding.spArea.selectedItem.toString()
+            LocationCodePosition = binding.spArea.selectedItemPosition
+            gpsLatitude = mLatitude
+            gpsLongitude = mLongitude
+            gpsAddress = mAddress
+        }
     }
 
     //setting the user details that is received from DAO
@@ -371,7 +355,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                     view.etlReferralNumber.error = "* Enter a valid code"
                 return@setOnClickListener
                 } else {
-                    mReferralNumber = code
+                    mProfile.referrerNumber = code
                     dialogBsAddReferral.dismiss()
                     showToast(this@ProfileActivity, "Referral added", Constants.SHORT)
                 }

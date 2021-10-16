@@ -81,32 +81,19 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvAddress"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintHeight_percent=".3"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@id/nsvScrollBody"
             app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabAddAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabSize="mini"
-            android:src="@drawable/ic_add"
-            android:backgroundTint="@color/green_base"
-            app:backgroundTint="@color/green_base"
-            android:tint="@color/white"
-            app:tint="@color/white"
-            android:layout_margin="@dimen/material_size_16"
-            app:layout_constraintBottom_toBottomOf="@id/rvAddress"
-            app:layout_constraintEnd_toEndOf="@id/rvAddress" />
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nsvScrollBody"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:elevation="@dimen/material_size_8"
-            android:layout_marginTop="10dp"
+            android:layoutAnimation="@anim/slide_up_layout"
+            android:layout_marginTop="@dimen/material_size_4"
             app:layout_constraintTop_toBottomOf="@id/rvAddress"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -344,7 +331,6 @@
                         android:id="@+id/etlCoupon"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
-                        app:layout_constraintWidth_percent=".5"
                         android:layout_height="wrap_content"
                         android:hint="Coupon Code"
                         android:layout_margin="@dimen/material_size_8"
@@ -353,6 +339,7 @@
                         app:endIconMode="clear_text"
                         app:hintTextColor="@color/green_base"
                         android:textColorHint="@color/grey"
+                        app:layout_constraintEnd_toStartOf="@id/btnApplyCoupon"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         >
@@ -374,6 +361,7 @@
                         app:layout_constraintWidth_percent=".3"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
                         android:text="Apply"
                         android:textSize="14sp"
                         android:textColor="@color/white"
@@ -394,6 +382,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         android:src="@drawable/ic_info"
                         android:layout_marginEnd="@dimen/material_size_8"
+                        android:visibility="gone"
                         android:contentDescription="@string/favorites_icon"
                         app:tint="@color/green_base"
                         android:background="?android:attr/selectableItemBackgroundBorderless"

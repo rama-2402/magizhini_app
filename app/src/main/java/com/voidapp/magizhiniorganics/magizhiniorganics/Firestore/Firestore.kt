@@ -1,13 +1,8 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 
-import android.app.Activity
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import androidx.work.workDataOf
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.firestore.*
@@ -18,13 +13,9 @@ import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
@@ -90,12 +81,6 @@ class Firestore(
     //check if the user profile exists and getting the data from store
     suspend fun checkUserProfileDetails(): Boolean = withContext(Dispatchers.IO) {
         try {
-            //setting the user id to shared preference for later editing the profile data
-//            SharedPref().putData(
-//                Constants.USER_ID,
-//                Constants.STRING,
-//                mFirebaseAuth.currentUser!!.uid
-//            )
             val snapShot = mFireStore.collection(Constants.USERS)
                 .document(mFirebaseAuth.currentUser!!.uid).get().await()
             //getting the profile data and if exists we do the code below or we dismiss the progress dialog for new profile creation
@@ -112,6 +97,15 @@ class Firestore(
             Log.e("exception", e.message.toString())
             return@withContext false
         }
+    }
+
+    suspend fun createWallet(wallet: Wallet) {
+        try {
+            mFireStore.collection("Wallet")
+                .document(wallet.id)
+                .set(wallet, SetOptions.merge())
+                .await()
+        } catch (e: Exception) {}
     }
 
     suspend fun uploadImage (
@@ -266,11 +260,10 @@ class Firestore(
     suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) {
         try {
             withContext(Dispatchers.IO) {
-                mFireStore.collection(Constants.ORDER_HISTORY)
-                    .document(orderEntity.monthYear)
-                    .collection(orderEntity.purchaseDate.take(2))
-                    .document(orderEntity.orderId)
-                    .update("orderStatus", Constants.CANCELLED).await()
+                val cancelOrderStatus = async { cancelOrderStatus(orderEntity) }
+                val removeActiveOrderFromProfile = async { updateCloudProfileRecentPurchases(orderEntity.orderId, orderEntity.customerId) }
+                cancelOrderStatus.await()
+                removeActiveOrderFromProfile.await()
                 withContext(Dispatchers.Main) {
                     viewModel.orderCancelledCallback(true)
                 }
@@ -278,6 +271,14 @@ class Firestore(
         } catch (e: Exception) {
             viewModel.orderCancelledCallback(false)
         }
+    }
+
+    private suspend fun cancelOrderStatus(order: OrderEntity) = withContext(Dispatchers.IO) {
+        mFireStore.collection(Constants.ORDER_HISTORY)
+            .document(order.monthYear)
+            .collection(order.purchaseDate.take(2))
+            .document(order.orderId)
+            .update("orderStatus", Constants.CANCELLED).await()
     }
 
     private suspend fun updateOrderHistory(order: Order) = withContext(Dispatchers.IO) {

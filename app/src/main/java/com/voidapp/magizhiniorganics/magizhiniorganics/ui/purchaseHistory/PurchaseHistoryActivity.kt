@@ -63,6 +63,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         setSupportActionBar(binding.tbToolbar)
         mFilterMonth = Time().getMonth()
         mFilterYear = Time().getYear()
+        binding.fabMonthFilter.text = " $mFilterMonth"
 
         showShimmer()
 
@@ -107,6 +108,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
 
     fun setMonthFilter(month: String) {
         mFilterMonth = month
+        binding.fabMonthFilter.text = " $month"
         fetchData()
 //        val monthFormat = SimpleDateFormat("MM")
 //        val currentMonth = monthFormat.format(System.currentTimeMillis())

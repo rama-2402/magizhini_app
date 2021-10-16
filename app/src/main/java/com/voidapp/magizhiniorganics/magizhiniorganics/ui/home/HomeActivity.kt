@@ -22,7 +22,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.Cat
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
@@ -85,7 +85,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         //getting all the data from room database
         observers()
         clickListeners()
-        viewModel.getWallet()
 
         lifecycleScope.launch {
             delay(1000)

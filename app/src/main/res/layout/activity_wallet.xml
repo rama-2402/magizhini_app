@@ -1,293 +1,304 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.wallet.WalletActivity"
-    >
+    tools:context=".ui.wallet.WalletActivity">
+
     <data>
+
         <variable
             name="viewmodel"
             type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletViewModel" />
     </data>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/green100"
-    android:orientation="vertical"
-    android:weightSum="4">
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/apbAppBarLayout"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/green_base"
-        android:gravity="center"
-        android:layout_gravity="center"
-        app:iconTint="@color/white">
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/tbToolbar"
+        android:layout_height="match_parent"
+        android:background="@color/green100"
+        android:orientation="vertical"
+        android:weightSum="4">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/apbAppBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            >
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivBackBtn"
-                android:padding="@dimen/material_size_4"
-                android:layout_width="@dimen/material_size_32"
-                android:layout_height="@dimen/material_size_32"
-                android:src="@drawable/ic_back"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                app:tint="@color/white"
-                android:layout_marginEnd="@dimen/material_size_16"/>
-            <TextView
-                android:id="@+id/tvToolbarTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Magizhini Wallet"
-                android:layout_marginStart="@dimen/material_size_8"
-                android:textSize="@dimen/text_size_large"
-                android:textColor="@color/white"
-                android:fontFamily="@font/roboto"/>
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivCart"
-                android:layout_width="@dimen/material_size_24"
-                android:layout_height="@dimen/material_size_24"
-                android:layout_gravity="end"
-                android:src="@drawable/ic_cart"
-                android:layout_marginEnd="@dimen/material_size_16"
-                android:contentDescription="@string/favorites_icon"
-                app:tint="@color/white"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
-        </androidx.appcompat.widget.Toolbar>
-    </com.google.android.material.appbar.AppBarLayout>
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/material_size_8"
-        android:layout_marginEnd="@dimen/material_size_8"
-        android:layout_marginBottom="@dimen/material_size_8"
-        android:background="@color/white"
-        android:backgroundTint="@color/white"
-        android:layout_marginTop="@dimen/material_size_12"
-        android:layout_weight="1"
-        app:cardCornerRadius="@dimen/material_size_8"
-        app:cardElevation="@dimen/material_size_4">
-        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_gravity="center"
+            android:background="@color/green_base"
+            android:gravity="center"
+            app:iconTint="@color/white">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/tbToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivBackBtn"
+                    android:layout_width="@dimen/material_size_32"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="@dimen/material_size_4"
+                    android:src="@drawable/ic_back"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:id="@+id/tvToolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:fontFamily="@font/roboto"
+                    android:text="Magizhini Wallet"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_large" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivCart"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/favorites_icon"
+                    android:src="@drawable/ic_cart"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/white" />
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cvWalletCard"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/material_size_8"
-            >
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/ltAnimImg"
-                android:layout_width="150dp"
-                android:layout_height="match_parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:lottie_autoPlay="true"
-                app:lottie_loop="true"
-                app:lottie_rawRes="@raw/piggy_bank" />
-
-        <ImageView
-            android:id="@+id/ivRupee"
-            android:layout_width="@dimen/material_size_24"
-            android:layout_height="@dimen/material_size_24"
-            android:layout_margin="@dimen/material_size_16"
-            android:src="@drawable/ic_rupee"
-            app:layout_constraintTop_toTopOf="@id/tvWalletTotal"
-            app:layout_constraintBottom_toBottomOf="@id/tvWalletTotal"
-            app:layout_constraintStart_toEndOf="@id/ltAnimImg" />
-
-            <TextView
-                android:id="@+id/tvWalletTotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto"
-                android:paddingStart="@dimen/material_size_8"
-                android:text="5000"
-                android:textColor="@color/black"
-                android:textSize="24dp"
-                android:textStyle="bold"
-                android:layout_marginTop="@dimen/material_size_24"
-                app:layout_constraintStart_toEndOf="@id/ivRupee"
-                app:layout_constraintTop_toTopOf="@id/ltAnimImg"/>
-            <TextView
-                android:id="@+id/tvExpectedText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/material_size_16"
-                android:fontFamily="@font/roboto"
-                android:text="Next TopUp: "
-                android:textColor="@color/gray700"
-                android:textSize="14dp"
-                app:layout_constraintStart_toStartOf="@id/ivRupee"
-                app:layout_constraintTop_toBottomOf="@id/tvWalletTotal" />
-            <TextView
-                android:id="@+id/tvExpectedDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto"
-                android:text="21/12/2021"
-                android:layout_marginStart="@dimen/material_size_4"
-                android:textColor="@color/gray700"
-                android:textSize="14dp"
-                app:layout_constraintStart_toEndOf="@id/tvExpectedText"
-                app:layout_constraintTop_toTopOf="@id/tvExpectedText"
-                app:layout_constraintBottom_toBottomOf="@id/tvExpectedText"/>
-
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivReminder"
-                android:layout_width="@dimen/material_size_24"
-                android:layout_height="@dimen/material_size_24"
-                android:layout_gravity="end"
-                android:src="@drawable/ic_notify_off"
-                android:layout_marginEnd="@dimen/material_size_16"
-                android:contentDescription="@string/favorites_icon"
-                app:layout_constraintTop_toTopOf="@id/tvRemindMe"
-                app:layout_constraintEnd_toStartOf="@id/tvRemindMe"
-                app:layout_constraintBottom_toBottomOf="@id/tvRemindMe"
-                app:layout_constraintStart_toStartOf="@id/tvExpectedText"
-                app:tint="@color/gray700"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
-
-            <TextView
-                android:id="@+id/tvRemindMe"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/material_size_8"
-                android:layout_marginTop="@dimen/material_size_8"
-                android:fontFamily="@font/roboto"
-                android:text="Remind Me"
-                android:textColor="@color/gray700"
-                android:textSize="12dp"
-                app:layout_constraintStart_toEndOf="@id/ivReminder"
-                app:layout_constraintTop_toBottomOf="@+id/tvExpectedText" />
-
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivInfo"
-                android:layout_width="@dimen/material_size_24"
-                android:layout_height="@dimen/material_size_24"
-                android:layout_gravity="end"
-                android:src="@drawable/ic_info"
-                android:contentDescription="@string/favorites_icon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:tint="@color/green_base"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:layout_marginTop="@dimen/material_size_4"
-        android:elevation="@dimen/material_size_4"
-        android:background="@drawable/bg_top_rounded_16">
-
-        <TextView
-            android:id="@+id/tvHeading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/material_size_8"
-            android:fontFamily="@font/roboto"
-            android:paddingStart="@dimen/material_size_8"
-            android:text="@string/transaction_history"
-            android:textColor="@color/black"
-            android:textSize="18dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tvMonthFilter"
-            android:layout_width="wrap_content"
             android:layout_height="0dp"
+            android:layout_marginStart="@dimen/material_size_8"
+            android:layout_marginTop="@dimen/material_size_12"
             android:layout_marginEnd="@dimen/material_size_8"
-            android:text="September"
-            android:textColor="@color/gray700"
-            android:gravity="center_vertical"
-            android:textSize="@dimen/material_size_16"
-            android:paddingStart="@dimen/material_size_16"
-            android:paddingEnd="@dimen/material_size_16"
-            android:background="@drawable/bg_material_box"
-            app:layout_constraintEnd_toStartOf="@id/ivWalletFilter"
-            app:layout_constraintBottom_toBottomOf="@id/ivWalletFilter"
-            app:layout_constraintTop_toTopOf="@id/ivWalletFilter" />
+            android:layout_marginBottom="@dimen/material_size_8"
+            android:layout_weight="1"
+            android:background="@drawable/shape_round_rectangle_8"
+            android:backgroundTint="@color/white"
+            app:cardCornerRadius="@dimen/material_size_8"
+            app:cardElevation="@dimen/material_size_4">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ivWalletFilter"
-            android:layout_width="@dimen/material_size_32"
-            android:layout_height="@dimen/material_size_32"
-            android:layout_gravity="end"
-            android:src="@drawable/ic_filter"
-            android:layout_marginTop="@dimen/material_size_8"
-            android:layout_marginEnd="@dimen/material_size_16"
-            android:contentDescription="@string/favorites_icon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/green_base"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvTransactionHistory"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/ivWalletFilter"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            />
-
-        <com.facebook.shimmer.ShimmerFrameLayout
-            android:id="@+id/flShimmerPlaceholder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:shimmer_auto_start="true"
-            android:layout_marginTop="@dimen/material_size_4"
-            app:layout_constraintTop_toBottomOf="@id/ivWalletFilter"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            >
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
-                <include
-                    layout="@layout/shimmer_transaction_history"/>
-                <include
-                    layout="@layout/shimmer_transaction_history"/>
-                <include
-                    layout="@layout/shimmer_transaction_history"/>
-                <include
-                    layout="@layout/shimmer_transaction_history"/>
-                <include
-                    layout="@layout/shimmer_transaction_history"/>
-                <include
-                    layout="@layout/shimmer_transaction_history"/>
-                <include
-                    layout="@layout/shimmer_transaction_history"/>
-                <include
-                    layout="@layout/shimmer_transaction_history"/>
-            </LinearLayout>
-        </com.facebook.shimmer.ShimmerFrameLayout>
+                android:layout_margin="@dimen/material_size_8">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabAddMoney"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="24dp"
-            android:src="@drawable/ic_add"
-            app:backgroundTint="@color/green_base"
-            app:fabSize="auto"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:tint="@color/white" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</LinearLayout>
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/ltAnimImg"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/piggy_bank" />
+
+                <ImageView
+                    android:id="@+id/ivRupee"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
+                    android:layout_margin="@dimen/material_size_16"
+                    android:src="@drawable/ic_rupee"
+                    app:layout_constraintBottom_toBottomOf="@id/tvWalletTotal"
+                    app:layout_constraintStart_toEndOf="@id/ltAnimImg"
+                    app:layout_constraintTop_toTopOf="@id/tvWalletTotal" />
+
+                <TextView
+                    android:id="@+id/tvWalletTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/material_size_24"
+                    android:fontFamily="@font/roboto"
+                    android:paddingStart="@dimen/material_size_8"
+                    android:text="5000"
+                    android:textColor="@color/black"
+                    android:textSize="24dp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@id/ivRupee"
+                    app:layout_constraintTop_toTopOf="@id/ltAnimImg" />
+
+                <TextView
+                    android:id="@+id/tvExpectedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    android:fontFamily="@font/roboto"
+                    android:text="Next TopUp: "
+                    android:textColor="@color/gray700"
+                    android:textSize="14dp"
+                    app:layout_constraintStart_toStartOf="@id/ivRupee"
+                    app:layout_constraintTop_toBottomOf="@id/tvWalletTotal" />
+
+                <TextView
+                    android:id="@+id/tvExpectedDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_4"
+                    android:fontFamily="@font/roboto"
+                    android:text="21/12/2021"
+                    android:textColor="@color/gray700"
+                    android:textSize="14dp"
+                    app:layout_constraintBottom_toBottomOf="@id/tvExpectedText"
+                    app:layout_constraintStart_toEndOf="@id/tvExpectedText"
+                    app:layout_constraintTop_toTopOf="@id/tvExpectedText" />
+
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivReminder"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/favorites_icon"
+                    android:src="@drawable/ic_notify_off"
+                    app:layout_constraintBottom_toBottomOf="@id/tvRemindMe"
+                    app:layout_constraintEnd_toStartOf="@id/tvRemindMe"
+                    app:layout_constraintStart_toStartOf="@id/tvExpectedText"
+                    app:layout_constraintTop_toTopOf="@id/tvRemindMe"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/gray700" />
+
+                <TextView
+                    android:id="@+id/tvRemindMe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:fontFamily="@font/roboto"
+                    android:text="Remind Me"
+                    android:textColor="@color/gray700"
+                    android:textSize="12dp"
+                    app:layout_constraintStart_toEndOf="@id/ivReminder"
+                    app:layout_constraintTop_toBottomOf="@+id/tvExpectedText" />
+
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivInfo"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
+                    android:layout_gravity="end"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/favorites_icon"
+                    android:src="@drawable/ic_info"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/green_base" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layoutAnimation="@anim/slide_up_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/material_size_4"
+            android:layout_weight="3"
+            android:background="@drawable/bg_top_rounded_16"
+            android:elevation="@dimen/material_size_4">
+
+            <TextView
+                android:id="@+id/tvHeading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/material_size_8"
+                android:fontFamily="@font/roboto"
+                android:paddingStart="@dimen/material_size_8"
+                android:text="@string/transaction_history"
+                android:textColor="@color/black"
+                android:textSize="18dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvMonthFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginEnd="@dimen/material_size_8"
+                android:background="@drawable/bg_material_box"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/material_size_16"
+                android:paddingEnd="@dimen/material_size_16"
+                android:text="September"
+                android:textColor="@color/gray700"
+                android:textSize="@dimen/material_size_16"
+                app:layout_constraintBottom_toBottomOf="@id/ivWalletFilter"
+                app:layout_constraintEnd_toStartOf="@id/ivWalletFilter"
+                app:layout_constraintTop_toTopOf="@id/ivWalletFilter" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivWalletFilter"
+                android:layout_width="@dimen/material_size_32"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_gravity="end"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:layout_marginEnd="@dimen/material_size_16"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/favorites_icon"
+                android:src="@drawable/ic_filter"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTransactionHistory"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivWalletFilter" />
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/flShimmerPlaceholder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivWalletFilter"
+                app:shimmer_auto_start="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/shimmer_transaction_history" />
+
+                    <include layout="@layout/shimmer_transaction_history" />
+
+                    <include layout="@layout/shimmer_transaction_history" />
+
+                    <include layout="@layout/shimmer_transaction_history" />
+
+                    <include layout="@layout/shimmer_transaction_history" />
+
+                    <include layout="@layout/shimmer_transaction_history" />
+
+                    <include layout="@layout/shimmer_transaction_history" />
+
+                    <include layout="@layout/shimmer_transaction_history" />
+                </LinearLayout>
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabAddMoney"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="24dp"
+                android:src="@drawable/ic_add"
+                app:backgroundTint="@color/green_base"
+                app:fabSize="auto"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:tint="@color/white" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </layout>

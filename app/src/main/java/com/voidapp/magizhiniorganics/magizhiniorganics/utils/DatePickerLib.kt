@@ -1,29 +1,11 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.icu.text.SimpleDateFormat
-import android.os.Build
-import android.util.Log
-import android.widget.Toast
-import androidx.annotation.RequiresApi
-import com.aminography.primecalendar.PrimeCalendar
 import com.aminography.primecalendar.civil.CivilCalendar
-import com.aminography.primecalendar.common.CalendarFactory
-import com.aminography.primecalendar.common.CalendarType
-import com.aminography.primecalendar.common.operators.date
-import com.aminography.primecalendar.common.operators.dayOfYear
 import com.aminography.primedatepicker.picker.PrimeDatePicker
-import com.aminography.primedatepicker.picker.callback.MultipleDaysPickCallback
-import com.aminography.primedatepicker.picker.callback.RangeDaysPickCallback
 import com.aminography.primedatepicker.picker.callback.SingleDayPickCallback
-import com.google.type.DateTime
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
-import java.util.*
 
 
 class DatePickerLib {

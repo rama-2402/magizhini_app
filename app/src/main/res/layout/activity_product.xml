@@ -80,9 +80,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     app:contentInsetStart="16dp"
+                    app:title=""
                     app:contentInsetStartWithNavigation="0dp"
                     app:layout_collapseMode="pin"
-                    app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" />
+                    app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" >
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivWallet"
+                        android:layout_width="@dimen/material_size_24"
+                        android:layout_height="@dimen/material_size_24"
+                        android:layout_gravity="end"
+                        android:src="@drawable/ic_wallet"
+                        android:layout_marginEnd="@dimen/material_size_16"
+                        android:contentDescription="@string/favorites_icon"
+                        app:tint="@color/white"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+                </androidx.appcompat.widget.Toolbar>
             </com.google.android.material.appbar.CollapsingToolbarLayout>
         </com.google.android.material.appbar.AppBarLayout>
 

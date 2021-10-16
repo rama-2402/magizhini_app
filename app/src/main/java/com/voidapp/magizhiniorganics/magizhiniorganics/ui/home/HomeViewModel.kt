@@ -31,18 +31,4 @@ class HomeViewModel (
     fun onDataTransactionFailure(message: String){
         homeListener?.onDataTransactionFailure(message)
     }
-
-    fun getWallet() = viewModelScope.launch (Dispatchers.IO) {
-        val wallet = repository.getWallet()
-        if (wallet == null) {
-            val walletEntity = WalletEntity(
-                id = firestoreRepository.uid(),
-                amount = 0f,
-                reminder = true,
-                nextRecharge = 0,
-                listOf()
-            )
-            repository.upsertWallet(walletEntity)
-        }
-    }
 }

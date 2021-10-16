@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
+import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -49,6 +50,8 @@ class WalletActivity : BaseActivity(), KodeinAware {
 
         title = ""
         setSupportActionBar(binding.tbToolbar)
+
+        binding.cvWalletCard.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_right_bounce))
 
         showShimmer()
         clickListeners()

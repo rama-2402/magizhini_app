@@ -299,6 +299,10 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                 }
             }
         })
+
+        viewModel.addNewAddress.observe(this, {
+            showAddressBs()
+        })
     }
 
     fun approved(status: Boolean) = lifecycleScope.launch(Dispatchers.Main) {
@@ -340,6 +344,9 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
             tvSavingsInDiscountAmt.text = mDiscountedPrice.toString()
             val totalAfterCouponDiscount = viewModel.getCartPrice(mCartItems)-applyCouponDiscountToInvoice(mCoupon) + binding.tvDeliveryChargeAmt.text.toString().toFloat()
             tvTotalAmt.text = totalAfterCouponDiscount.toString()
+            if (etCoupon.text.toString().isEmpty()) {
+                ivCouponInfo.gone()
+            }
         }
     }
 
@@ -349,9 +356,6 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
             etDeliveryNote.setOnTouchListener { _, _ ->
                 binding.nsvScrollBody.requestDisallowInterceptTouchEvent(true)
                 false
-            }
-            fabAddAddress.setOnClickListener {
-                showAddressBs()
             }
             btnApplyCoupon.setOnClickListener {
                 val couponCode: String = binding.etCoupon.text.toString().trim()
@@ -489,9 +493,11 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
 //            if(!binding.etCoupon.text.isNullOrEmpty()) {
 //                showErrorSnackBar("Coupon Applied", false)
 //            }
+            binding.ivCouponInfo.show()
             return couponDiscount
         } else {
             if(!binding.etCoupon.text.isNullOrEmpty()) {
+                binding.ivCouponInfo.show()
                 showErrorSnackBar("Coupon Not Applicable! Check Info", true)
             }
             return couponDiscount
@@ -515,6 +521,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                 Constants.STRING,
                 ""
             )
+            ivCouponInfo.gone()
         }
     }
 

@@ -1,22 +1,17 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 
-import android.app.Activity
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.aminography.primecalendar.PrimeCalendar
 import com.google.firebase.auth.PhoneAuthCredential
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
-import java.security.cert.Extension
 
 class FirestoreRepository (
     private val firestore: Firestore
@@ -70,5 +65,8 @@ class FirestoreRepository (
 
     suspend fun cancelSubscription(sub: SubscriptionEntity): Boolean = firestore.cancelSubscription(sub)
 //    fun getAllData(viewModel: HomeViewModel) = firestore.getAllData(viewModel)
+
+    //wallet
+    suspend fun createWallet(wallet: Wallet) = firestore.createWallet(wallet)
 
 }

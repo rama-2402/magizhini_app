@@ -3,7 +3,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
@@ -15,6 +14,7 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySignInBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.CountdownTimer
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper

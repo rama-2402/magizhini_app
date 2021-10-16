@@ -14,6 +14,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayoutMediator
@@ -28,6 +29,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
@@ -36,6 +38,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import kotlin.math.abs
 
 //TODO CHECK LIMITED ITEMS COUNT BEFORE ORDERING MULTIPLE
 
@@ -80,6 +83,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        title = ""
         binding.tvProductName.text = mProductName
         binding.tvProductName.isSelected = true
 
@@ -321,7 +325,19 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
         binding.btnAdd.setOnClickListener(this)
 
-
+        binding.ivWallet.setOnClickListener {
+            Intent(this, WalletActivity::class.java).also {
+                startActivity(it)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
+        }
+        binding.tbAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            title = if (abs(verticalOffset) -appBarLayout.totalScrollRange == 0) {
+                mProductName
+            } else {
+                ""
+            }
+        })
     }
 
     private fun setAddButtonContent(variant: String) {

@@ -33,8 +33,6 @@ class GetOrderHistoryService(
     private val repository: DatabaseRepository by instance()
 
     override suspend fun doWork(): Result {
-        //TODO GET THE MONTHYEAR FROM THE FILTER AND FETCH THE REQUIRED MONTH'S DATA FROM STORE
-        //OUTPUT ALL THE LIST OF DATA FROM THE STORE
 
         val filter = inputData.getString("filter")!!
         val userID = inputData.getString("id")!!
@@ -115,13 +113,9 @@ class GetOrderHistoryService(
                         .get()
                         .await()
                     snapShot?.let { querySnapshot ->
-                        withContext(Dispatchers.Default) {
-                            for (doc in querySnapshot) {
-                                val order = doc.toObject(Order::class.java).toOrderEntity()
-                                withContext(Dispatchers.IO) {
-                                    repository.upsertOrder(order)
-                                }
-                            }
+                        for (doc in querySnapshot) {
+                            val order = doc.toObject(Order::class.java).toOrderEntity()
+                            repository.upsertOrder(order)
                         }
                     }
                 }

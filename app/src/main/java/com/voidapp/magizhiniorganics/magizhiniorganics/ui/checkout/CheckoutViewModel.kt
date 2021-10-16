@@ -43,12 +43,18 @@ class CheckoutViewModel(
     var limitedItemUpdateStatus: LiveData<String> = _limitedItemUpdateStatus
     private var _orderCompleted: MutableLiveData<Boolean> = MutableLiveData()
     var orderCompleted: LiveData<Boolean> = _orderCompleted
+    private var _addNewAddress: MutableLiveData<Int> = MutableLiveData()
+    var addNewAddress: LiveData<Int> = _addNewAddress
 
     fun getAddress() = viewModelScope.launch (Dispatchers.IO) {
         val address = dbRepository.getProfileData()!!.address
         withContext(Dispatchers.Main) {
             _addressList.value = address
         }
+    }
+
+    fun addNewAddress(position: Int) {
+        _addNewAddress.value = position
     }
 
     fun addAddress(id: String, newAddress: Address) = viewModelScope.launch (Dispatchers.IO) {

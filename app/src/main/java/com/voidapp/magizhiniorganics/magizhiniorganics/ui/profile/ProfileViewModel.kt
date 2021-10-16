@@ -9,8 +9,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirebaseReposit
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.WalletEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CustomerProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -85,6 +87,18 @@ class ProfileViewModel (
             withContext(Dispatchers.Main) {
                 _profileImageUploadStatus.value = status
             }
+        }
+    }
+
+    fun createNewUserWallet(id: String) = viewModelScope.launch(Dispatchers.IO) {
+        Wallet(
+            id = id,
+            amount = 0f,
+            reminder = false,
+            nextRecharge = 0,
+            listOf()
+        ).also {
+            fsRepository.createWallet(it)
         }
     }
 
