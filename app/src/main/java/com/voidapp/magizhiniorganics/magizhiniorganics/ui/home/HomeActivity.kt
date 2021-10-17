@@ -23,7 +23,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntit
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
@@ -232,7 +232,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
 //                    populateData()
                 }
                 binding.fabCart -> {
-                    Intent(this, CheckoutActivity::class.java).also {
+                    Intent(this, InvoiceActivity::class.java).also {
                         startActivity(it)
                         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                     }

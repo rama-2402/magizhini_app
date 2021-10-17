@@ -3,7 +3,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -28,13 +27,15 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import android.view.MenuItem
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
 import com.google.gson.Gson
+import com.razorpay.Checkout
+import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
@@ -43,11 +44,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
 import kotlinx.coroutines.*
+import org.json.JSONObject
 
 
-class CheckoutActivity : BaseActivity(), KodeinAware {
+class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
-    //TODO PLACE WALLET ICON IN TOOLBAR
+//TODO PLACE WALLET ICON IN TOOLBAR
     //TODO ERROR MESSAGE FOR EMPTY CART BEFORE PLACING ORDER
 
     override val kodein: Kodein by kodein()
@@ -69,10 +71,12 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
     private var mCurrentCoupon: String = ""
     private var mCheckedAddressPosition: Int = 0
     private var mSelectedAddress: Address = Address()
+    private var mOrder: Order = Order()
 
     private var mDiscountedPrice: Float = 0F
     private var mPaymentPreference: String = "COD"
     private var mCurrentUserID: String = ""
+    private var mTransactionID: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,10 +96,60 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
         mCurrentUserID =
             SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
 
+        with(binding) {
+            rvAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
+            nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_up))
+        }
+
+        Checkout.preload(applicationContext)
+
         initRecyclerView()
         setCartBottom()
         iniLiveData()
         listeners()
+    }
+
+    private fun startPayment() {
+        /*
+        *  You need to pass current activity in order to let Razorpay create CheckoutActivity
+        * */
+        val co = Checkout()
+
+        try {
+            val options = JSONObject()
+            options.put("name","Razorpay Corp")
+            options.put("description","Demoing Charges")
+            //You can omit the image option to fetch the image from dashboard
+            options.put("image","https://s3.amazonaws.com/rzp-mobile/images/rzp.png")
+            options.put("theme.color", "#86C232");
+            options.put("currency","INR");
+//            options.put("order_id", "orderIDkjhasgdfkjahsdf");
+            options.put("amount","100")//pass amount in currency subunits
+
+//            val retryObj = JSONObject();
+//            retryObj.put("enabled", true);
+//            retryObj.put("max_count", 4);
+//            options.put("retry", retryObj);
+
+            val prefill = JSONObject()
+            prefill.put("email","magizhiniorganics2018@gmail.com")  //this place should have customer name
+            prefill.put("contact","7299827393")     //this place should have customer phone number
+
+            options.put("prefill",prefill)
+            co.open(this,options)
+        }catch (e: Exception){
+            Toast.makeText(this,"Error in payment: "+ e.message,Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
+    }
+
+    override fun onPaymentSuccess(response: String?) {
+        mTransactionID = response!!
+        validateItemAvailability()
+    }
+
+    override fun onPaymentError(p0: Int, p1: String?) {
+        showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
     private fun checkExistingCoupon() {
@@ -177,6 +231,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
         checkoutBtn.setOnClickListener {
             //TODO FUNCTION TO PLACE ORDER
             showSwipeConfirmationDialog(this)
+//        calculateTotalPurchaseAmount()
         }
 
     }
@@ -256,23 +311,26 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                     hideSuccessDialog()
                     showSuccessDialog("","Placing Order... ","order")
                     when(it) {
-                        "complete" -> { val order = Order(
-                            orderId = "",
-                            customerId = mCurrentUserID,
-                            cart = mCartItems,
-                            purchaseDate = Time().getCurrentDate(),
-                            isPaymentDone = false,   //todo we have to get the boolean data from transaction success
-                            paymentMethod = mPaymentPreference,
-                            deliveryPreference = binding.spDeliveryPreference.selectedItem.toString(),
-                            deliveryNote = binding.etDeliveryNote.text.toString().trim(),
-                            appliedCoupon = mCurrentCoupon,
-                            address = mSelectedAddress,
-                            price = binding.tvTotalAmt.text.toString().toFloat(),
-                            orderStatus = Constants.PENDING,
-                            monthYear = "${Time().getMonth()}${Time().getYear()}"
-                        )
-                            startWorkerThread(order)
-                            viewModel.placeOrder(order)
+                        "complete" -> {
+                            with(mOrder) {
+                                orderId = ""
+                                customerId = mCurrentUserID
+                                cart = mCartItems
+                                purchaseDate = Time().getCurrentDate()
+                                isPaymentDone =
+                                    true   //todo we have to get the boolean data from transaction success
+                                paymentMethod = mPaymentPreference
+                                deliveryPreference =
+                                    binding.spDeliveryPreference.selectedItem.toString()
+                                deliveryNote = binding.etDeliveryNote.text.toString().trim()
+                                appliedCoupon = mCurrentCoupon
+                                address = mSelectedAddress
+                                price = binding.tvTotalAmt.text.toString().toFloat()
+                                orderStatus = Constants.PENDING
+                                monthYear = "${Time().getMonth()}${Time().getYear()}"
+                            }
+                            startWorkerThread(mOrder)
+                            viewModel.placeOrder(mOrder)
                         }
                     }
                 }
@@ -291,7 +349,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                         setAddButton()
                         delay(2000)
                         hideSuccessDialog()
-                        Intent(this@CheckoutActivity, PurchaseHistoryActivity::class.java).also {
+                        Intent(this@InvoiceActivity, PurchaseHistoryActivity::class.java).also {
                             startActivity(it)
                             finish()
                         }
@@ -307,7 +365,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
 
     fun approved(status: Boolean) = lifecycleScope.launch(Dispatchers.Main) {
         delay(250)
-        validateItemAvailability()
+        startPayment()
     }
 
     private fun startWorkerThread(order: Order) {
@@ -484,7 +542,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
                 }
                 tvSavingsInCoupon.setTextColor(
                     ContextCompat.getColor(
-                        this@CheckoutActivity,
+                        this@InvoiceActivity,
                         R.color.green_base
                     )
                 )
@@ -510,13 +568,13 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
             etlCoupon.isErrorEnabled = false
             tvSavingsInCoupon.setTextColor(
                 ContextCompat.getColor(
-                    this@CheckoutActivity,
+                    this@InvoiceActivity,
                     R.color.black
                 )
             )
             tvSavingsInCouponAmt.text = "0.00"
             mCoupon = CouponEntity()
-            SharedPref(this@CheckoutActivity).putData(
+            SharedPref(this@InvoiceActivity).putData(
                 Constants.CURRENT_COUPON,
                 Constants.STRING,
                 ""
@@ -573,7 +631,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
         //TODO GET THE DELIVERY CHARGE AFTER IMPLEMENTING IN THE STORE APP
         //TODO IMPLEMENT LOGIC FOR UPI TRANSACTION AFTER GETTING THE MERCHANT UPI ID
 
-        showSwipeConfirmationDialog(this)
+//        showSwipeConfirmationDialog(this)
 
 
 
@@ -583,7 +641,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
 //        val uri: Uri = Uri.Builder()
 //            .scheme("upi")
 //            .authority("pay")
-//            .appendQueryParameter("pa", "ganeshmuthu46@okhdfcbank")
+//            .appendQueryParameter("pa", "9486598819@okbizaxis")
 //            .appendQueryParameter("pn", "test")
 //            .appendQueryParameter("mc", "")
 //            .appendQueryParameter("tr", "12345")
@@ -598,7 +656,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
 //        startActivityForResult(chooser,GOOGLE_PAY_REQUEST_CODE)
 
 //        val easyUpiPayment = EasyUpiPayment(this) {
-//            this.payeeVpa = "ganeshmuthu46@okhdfcbank"
+//            this.payeeVpa = "9486598819@okbizaxis"
 //            this.payeeName = "test"
 //            this.payeeMerchantCode = "12345"
 //            this.transactionId = "T2020090212345"
@@ -608,7 +666,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
 //            PaymentApp.ALL
 //        }
 //        easyUpiPayment.startPayment()
-//        easyUpiPayment.setPaymentStatusListener(object: PaymentStatusListener{
+//        easyUpiPayment.setPaymentStatusListener(object: PaymentStatusListener {
 //            override fun onTransactionCancelled() {
 //                Toast.makeText(this@CheckoutActivity, "payment failed", Toast.LENGTH_SHORT).show()
 //            }
@@ -626,7 +684,7 @@ class CheckoutActivity : BaseActivity(), KodeinAware {
             withContext(Dispatchers.Main) {
                 val items = outOfStockItems.await()
                 if (items.isNotEmpty()) {
-                    Toast.makeText(this@CheckoutActivity, "Items Out of Stock", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@InvoiceActivity, "Items Out of Stock", Toast.LENGTH_LONG).show()
                     ootItemsDialog(items)
                 } else {
                     viewModel.limitedItemsUpdater(mCartItems)

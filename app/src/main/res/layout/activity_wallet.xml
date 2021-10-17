@@ -194,7 +194,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layoutAnimation="@anim/slide_up_layout"
+            android:id="@+id/clBody"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="@dimen/material_size_4"

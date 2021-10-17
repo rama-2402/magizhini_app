@@ -20,7 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.ncorti.slidetoact.SlideToActView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
@@ -314,7 +314,7 @@ open class BaseActivity : AppCompatActivity() {
                         mSwipeConfirmationBottomSheet.dismiss()
                         activity.approved(true)
                     }
-                    is CheckoutActivity -> {
+                    is InvoiceActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()
                         activity.approved(true)
                     }

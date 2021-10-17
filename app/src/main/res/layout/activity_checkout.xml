@@ -24,7 +24,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.checkout.CheckoutActivity"
+        tools:context=".ui.checkout.InvoiceActivity"
         android:background="@color/green100">
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/apbAppBarLayout"
@@ -92,7 +92,6 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:elevation="@dimen/material_size_8"
-            android:layoutAnimation="@anim/slide_up_layout"
             android:layout_marginTop="@dimen/material_size_4"
             app:layout_constraintTop_toBottomOf="@id/rvAddress"
             app:layout_constraintStart_toStartOf="parent"

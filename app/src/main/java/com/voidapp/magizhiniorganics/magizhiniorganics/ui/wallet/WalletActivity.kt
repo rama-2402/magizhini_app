@@ -3,27 +3,23 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.util.Log
 import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.WalletAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.WalletEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityWalletBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.DatePickerLib
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
 import kotlinx.coroutines.*
-import org.kodein.di.Constant
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -51,7 +47,10 @@ class WalletActivity : BaseActivity(), KodeinAware {
         title = ""
         setSupportActionBar(binding.tbToolbar)
 
-        binding.cvWalletCard.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_right_bounce))
+        with(binding) {
+            cvWalletCard.startAnimation(AnimationUtils.loadAnimation(cvWalletCard.context, R.anim.slide_in_right_bounce))
+            clBody.startAnimation(AnimationUtils.loadAnimation(clBody.context, R.anim.slide_up))
+        }
 
         showShimmer()
         clickListeners()
@@ -96,7 +95,7 @@ class WalletActivity : BaseActivity(), KodeinAware {
                 transactionFor = "pitBuPB3iiUpoydc65FXl3dUmel1"
             )
 
-            it.transactionHistory = listOf<TransactionHistory>(
+            it.transactionHistory = listOf(
                 transactSucc,
                 transactRecei,
                 transactFail,
@@ -160,7 +159,7 @@ class WalletActivity : BaseActivity(), KodeinAware {
         }
 
         binding.ivCart.setOnClickListener {
-            Intent(this, CheckoutActivity::class.java).also {
+            Intent(this, InvoiceActivity::class.java).also {
                 startActivity(it)
                 finish()
             }

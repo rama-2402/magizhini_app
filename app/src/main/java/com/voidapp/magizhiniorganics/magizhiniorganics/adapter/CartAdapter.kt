@@ -7,7 +7,9 @@ import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -28,6 +30,7 @@ class CartAdapter(
 
     inner class CartViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         //small discount layout in the thumbnail
+        val cart: ConstraintLayout = itemView.findViewById(R.id.clCart)
         val productThumbNail: ShapeableImageView = itemView.findViewById(R.id.ivProductThumbnail)
         val discountType: TextView = itemView.findViewById<TextView>(R.id.tvDiscountType)
 

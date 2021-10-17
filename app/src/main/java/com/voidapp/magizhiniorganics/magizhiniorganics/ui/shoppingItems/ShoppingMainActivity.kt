@@ -21,7 +21,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityShoppingMainBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
@@ -29,7 +29,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -363,7 +362,7 @@ class ShoppingMainActivity :
         }
 
         checkoutBtn.setOnClickListener {
-            Intent(this, CheckoutActivity::class.java).also {
+            Intent(this, InvoiceActivity::class.java).also {
                 startActivity(it)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()

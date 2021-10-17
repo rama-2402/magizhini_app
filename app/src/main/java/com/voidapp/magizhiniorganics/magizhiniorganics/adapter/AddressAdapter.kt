@@ -43,7 +43,7 @@ class AddressAdapter(
 
     override fun onBindViewHolder(holder: AddressViewHolder, position: Int) {
 
-            holder.card.startAnimation(AnimationUtils.loadAnimation(context, R.anim.slide_in_right_bounce))
+//            holder.card.startAnimation(AnimationUtils.loadAnimation(context, R.anim.slide_in_right_bounce))
 
             val address = addressList[position]
             val userID: String = SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()

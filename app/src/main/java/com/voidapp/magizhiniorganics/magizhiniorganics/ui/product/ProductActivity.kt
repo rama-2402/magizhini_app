@@ -27,7 +27,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEnti
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProductBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -147,7 +147,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             showAddCouponDialog()
         }
         checkoutBtn.setOnClickListener {
-            Intent(this, CheckoutActivity::class.java).also {
+            Intent(this, InvoiceActivity::class.java).also {
                 startActivity(it)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 finish()
