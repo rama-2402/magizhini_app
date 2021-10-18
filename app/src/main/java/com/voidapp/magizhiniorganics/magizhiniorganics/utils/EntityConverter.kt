@@ -85,6 +85,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
     fun Order.toOrderEntity() = OrderEntity(
         orderId = orderId,
         customerId = customerId,
+        transactionID = transactionID,
         cart = cart,
         purchaseDate = purchaseDate,
         isPaymentDone = isPaymentDone,
@@ -213,6 +214,7 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
     fun OrderEntity.toOrder() = Order(
         orderId = orderId,
         customerId = customerId,
+        transactionID = transactionID,
         cart = cart,
         purchaseDate = purchaseDate,
         isPaymentDone = isPaymentDone,

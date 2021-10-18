@@ -69,4 +69,16 @@ class FirestoreRepository (
     //wallet
     suspend fun createWallet(wallet: Wallet) = firestore.createWallet(wallet)
 
+    suspend fun getWalletAmount(id: String): Float = firestore.getWalletAmount(id)
+
+    suspend fun getWallet(id: String): Wallet = firestore.getWallet(id)
+
+    suspend fun getTransactions(id: String): List<TransactionHistory> = firestore.getTransactions(id)
+
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean = firestore.makeTransactionFromWallet(amount, id, status)
+
+    suspend fun generateOrderID(id: String): String = firestore.generateOrderID(id)
+
+    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
+
 }

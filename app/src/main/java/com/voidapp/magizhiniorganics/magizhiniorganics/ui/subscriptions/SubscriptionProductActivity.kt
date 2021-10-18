@@ -299,7 +299,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware {
         if (mWallet.amount < oSubscription.estimateAmount) {
             showErrorSnackBar("Insufficient wallet balance! Please recharge to continue", true)
         } else {
-            showSwipeConfirmationDialog(this)
+            showSwipeConfirmationDialog(this, "swipe right to make payment")
         }
     }
 

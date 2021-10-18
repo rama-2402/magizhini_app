@@ -13,6 +13,8 @@ data class OrderEntity(
     @ColumnInfo
     var customerId: String = "",
     @ColumnInfo
+    var transactionID: String = "",
+    @ColumnInfo
     var cart: List<CartEntity> = listOf(),
     @ColumnInfo
     var purchaseDate: String = "",

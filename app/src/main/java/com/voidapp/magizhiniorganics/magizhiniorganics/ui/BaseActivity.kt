@@ -201,6 +201,10 @@ open class BaseActivity : AppCompatActivity() {
                 view.ltAnimImg.setAnimation(R.raw.validating_dates)
                 view.tvTitle.gone()
             }
+            "wallet" -> {
+                view.ltAnimImg.setAnimation(R.raw.piggy_bank)
+                view.tvTitle.gone()
+            }
         }
 
         mSuccessDialog.show()
@@ -298,7 +302,7 @@ open class BaseActivity : AppCompatActivity() {
         listBottomSheetdialog.dismiss()
     }
 
-    fun showSwipeConfirmationDialog(activity: Activity) {
+    fun showSwipeConfirmationDialog(activity: Activity, content: String) {
         mSwipeConfirmationBottomSheet = BottomSheetDialog(this, R.style.BottomSheetDialog)
         val view: DialogSwipeConfirmationBinding =
             DataBindingUtil.inflate(
@@ -306,6 +310,8 @@ open class BaseActivity : AppCompatActivity() {
                 R.layout.dialog_swipe_confirmation,
                 null,
                 false)
+
+        view.swipe.text = content
 
         view.swipe.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
             override fun onSlideComplete(view: SlideToActView) {

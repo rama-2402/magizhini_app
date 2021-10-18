@@ -9,6 +9,7 @@ import kotlinx.parcelize.Parcelize
 data class Order(
     var orderId: String = "",
     var customerId: String = "",
+    var transactionID: String = "",
     var cart: List<CartEntity> = listOf(),
     var purchaseDate: String = "",
     var isPaymentDone: Boolean = false,

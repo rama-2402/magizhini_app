@@ -9,11 +9,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
 import kotlinx.coroutines.*
 
 class CheckoutViewModel(
@@ -195,9 +195,7 @@ class CheckoutViewModel(
             val limitedCartItems = mutableListOf<CartEntity>()
             for (cartItem in cartEntity) {
                 withContext(Dispatchers.IO) {
-                    Log.e("qqqq", cartItem.toString())
                     val product = dbRepository.getProductWithIdForUpdate(cartItem.productId)
-                    Log.e("qqqq", "limitedItemsUpdater: $product", )
                     if (product.variants[cartItem.variantIndex].status == Constants.LIMITED) {
                         limitedCartItems.add(cartItem)
                     }
@@ -219,9 +217,42 @@ class CheckoutViewModel(
         }
     }
 
-    fun getWallet() = dbRepository.getWallet()
+    suspend fun getWallet(id: String) = fbRepository.getWallet(id)
 
     suspend fun validateItemAvailability(cartItems: List<CartEntity>) : List<CartEntity> = withContext(Dispatchers.IO) {
         fbRepository.validateItemAvailability(cartItems)
+    }
+
+    suspend fun checkWalletForBalance(amount: Float, id: String): Boolean {
+        try {
+            val amountInWallet = fbRepository.getWalletAmount(id)
+            return amountInWallet >= amount
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String): String {
+        if (fbRepository.makeTransactionFromWallet(amount, id, "Remove")) {
+            val transaction = TransactionHistory (
+                orderID,
+                System.currentTimeMillis(),
+                Time().getMonth(),
+                Time().getYear().toLong(),
+                amount,
+                id,
+                id,
+                Constants.SUCCESS,
+                Constants.PURCHASE,
+                orderID
+                    )
+            return fbRepository.updateTransaction(transaction)
+        } else {
+            return "failed"
+        }
+    }
+
+    suspend fun generateOrderID(id: String): String = withContext(Dispatchers.IO) {
+        return@withContext fbRepository.generateOrderID(id)
     }
 }

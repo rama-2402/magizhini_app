@@ -242,6 +242,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
         when (item.itemId) {
             R.id.menuLogOut -> {
                 SharedPref(this).clearAllData()
@@ -250,32 +251,46 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                 finish()
             }
             R.id.menuProfile -> {
-                Intent(this, ProfileActivity::class.java).also {
-                    startActivity(it)
+                lifecycleScope.launch {
+                    delay(200)
+                    Intent(this@HomeActivity, ProfileActivity::class.java).also {
+                        startActivity(it)
+                    }
                 }
             }
             R.id.menuOrders -> {
-                Intent(this, PurchaseHistoryActivity::class.java).also {
-                    startActivity(it)
+                lifecycleScope.launch {
+                    delay(200)
+                    Intent(this@HomeActivity, PurchaseHistoryActivity::class.java).also {
+                        startActivity(it)
+                    }
                 }
             }
             R.id.menuContact -> {
-                Intent(this, ChatActivity::class.java).also {
-                    startActivity(it)
+                lifecycleScope.launch {
+                    delay(200)
+                    Intent(this@HomeActivity, ChatActivity::class.java).also {
+                        startActivity(it)
+                    }
                 }
             }
             R.id.menuWallet -> {
-                Intent(this, WalletActivity::class.java).also {
-                    startActivity(it)
+                lifecycleScope.launch {
+                    delay(200)
+                    Intent(this@HomeActivity, WalletActivity::class.java).also {
+                        startActivity(it)
+                    }
                 }
             }
             R.id.menuSubscriptions -> {
-                Intent(this, SubscriptionHistoryActivity::class.java).also {
-                    startActivity(it)
+                lifecycleScope.launch {
+                    delay(200)
+                    Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
+                        startActivity(it)
+                    }
                 }
             }
         }
-        binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 }

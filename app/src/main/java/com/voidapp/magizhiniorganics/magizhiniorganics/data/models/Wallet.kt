@@ -1,1 +1,1 @@
-package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class Wallet(    val id: String = "",    val amount: Float = 0F,    val reminder: Boolean = true,    val nextRecharge: Long = 0L,    val transactionHistory: List<TransactionHistory> = listOf())
+package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class Wallet(    var id: String = "",    var amount: Float = 0F,    var reminder: Boolean = true,    var nextRecharge: Long = 0L,    var transactionHistory: List<TransactionHistory> = listOf())

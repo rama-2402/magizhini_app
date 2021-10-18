@@ -3,29 +3,38 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.razorpay.Checkout
+import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.WalletAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.WalletEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityWalletBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.DatePickerLib
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
 import kotlinx.coroutines.*
+import org.json.JSONObject
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-class WalletActivity : BaseActivity(), KodeinAware {
+class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityWalletBinding
@@ -33,7 +42,13 @@ class WalletActivity : BaseActivity(), KodeinAware {
     private val factory: WalletViewModelFactory by instance()
 
     private lateinit var transactionAdapter: WalletAdapter
-    private var mWallet: WalletEntity = WalletEntity()
+    private var mWallet: Wallet = Wallet()
+    private val mTransactions = mutableListOf<TransactionHistory>()
+    private val mTransaction = TransactionHistory()
+    private var mUserName: String = ""
+    private var mUserID: String = ""
+    private var mUserPhoneNumber: String = ""
+    private var mMoneyToAddInWallet: Long = 0L
 
     private val TAG: String = "qqqq"
 
@@ -52,6 +67,8 @@ class WalletActivity : BaseActivity(), KodeinAware {
             clBody.startAnimation(AnimationUtils.loadAnimation(clBody.context, R.anim.slide_up))
         }
 
+        Checkout.preload(applicationContext)
+
         showShimmer()
         clickListeners()
         initLiveData()
@@ -60,56 +77,33 @@ class WalletActivity : BaseActivity(), KodeinAware {
     }
 
     private fun liveDataObservers() {
+        viewModel.getUserProfileData()
         viewModel.wallet.observe(this, {
-
-            val transactSucc = TransactionHistory(
-                id = "pitBuPB3iiUpoydc65FXl3dUmel1",
-                timestamp = System.currentTimeMillis(),
-                amount = 100f,
-                status = Constants.SUCCESS,
-                purpose = Constants.ADD_MONEY,
-                transactionFor = "pitBuPB3iiUpoydc65FXl3dUmel1"
-            )
-            val transactFail = TransactionHistory(
-                id = "pitBuPB3iiUpoydc65FXl3dUmel1",
-                timestamp = System.currentTimeMillis(),
-                amount = 100f,
-                status = Constants.FAILED,
-                purpose = Constants.PURCHASE,
-                transactionFor = "pitBuPB3iiUpoydc65FXl3dUmel1"
-            )
-            val transactRecei = TransactionHistory(
-                id = "pitBuPB3iiUpoydc65FXl3dUmel1",
-                timestamp = System.currentTimeMillis(),
-                amount = 100f,
-                status = Constants.SUCCESS,
-                purpose = Constants.SUBSCRIPTION,
-                transactionFor = "pitBuPB3iiUpoydc65FXl3dUmel1"
-            )
-            val transactPending = TransactionHistory(
-                id = "pitBuPB3iiUpoydc65FXl3dUmel1",
-                timestamp = System.currentTimeMillis(),
-                amount = 100f,
-                status = Constants.PENDING,
-                purpose = Constants.SUBSCRIPTION,
-                transactionFor = "pitBuPB3iiUpoydc65FXl3dUmel1"
-            )
-
-            it.transactionHistory = listOf(
-                transactSucc,
-                transactRecei,
-                transactFail,
-                transactPending
-            )
-
             mWallet = it
             displayWalletDataToScreen()
-            transactionAdapter.transactions = it.transactionHistory
+
+        })
+        viewModel.transactions.observe(this, {
+            mTransactions.clear()
+            mTransactions.addAll(it)
+            it.sortedBy { trans ->
+                trans.timestamp
+            }
+            transactionAdapter.transactions = it
             transactionAdapter.notifyDataSetChanged()
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(1500)
                 hideShimmer()
             }
+        })
+        viewModel.userID.observe(this, {
+            mUserID = it
+        })
+        viewModel.userName.observe(this, {
+            mUserName = it
+        })
+        viewModel.userPhoneNumber.observe(this, {
+            mUserPhoneNumber = it
         })
     }
 
@@ -135,7 +129,9 @@ class WalletActivity : BaseActivity(), KodeinAware {
     }
 
     private fun initLiveData() {
-        viewModel.getWallet()
+        val id = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
+        viewModel.getTransactions(id)
+        viewModel.getWallet(id)
     }
 
     private fun initRecyclerView() {
@@ -185,6 +181,111 @@ class WalletActivity : BaseActivity(), KodeinAware {
         binding.ivInfo.setOnClickListener {
             //TODO: Show some info about wallet and it's functions
         }
+        binding.fabAddMoney.setOnClickListener {
+            //BS to add Amount number
+            val dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
+
+            val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(LayoutInflater.from(applicationContext),R.layout.dialog_bottom_add_referral,null,false)
+            dialogBsAddReferral.setCancelable(true)
+            dialogBsAddReferral.setContentView(view.root)
+            dialogBsAddReferral.dismissWithAnimation = true
+
+            //verifying if the amount number is empty and sending for payment
+            view.btnApply.setOnClickListener {
+                val code = view.etReferralNumber.text.toString().trim()
+                if (code.isEmpty()) {
+                    view.etlReferralNumber.error = "* Enter valid Amount"
+                    return@setOnClickListener
+                } else {
+                    mMoneyToAddInWallet = view.etReferralNumber.text.toString().toLong()
+                    dialogBsAddReferral.dismiss()
+                    startPayment(mMoneyToAddInWallet)
+                }
+            }
+            dialogBsAddReferral.show()
+        }
+    }
+
+    private fun startPayment(amount: Long) {
+        /*
+        *  You need to pass current activity in order to let Razorpay create CheckoutActivity
+        * */
+        val co = Checkout()
+        val payment = amount * 100
+
+        try {
+            val options = JSONObject()
+            options.put("name","$mUserID")
+            options.put("description","Adding Money to Wallet")
+            //You can omit the image option to fetch the image from dashboard
+            options.put("image","https://s3.amazonaws.com/rzp-mobile/images/rzp.png")
+            options.put("theme.color", "#86C232");
+            options.put("currency","INR");
+//            options.put("order_id", "orderIDkjhasgdfkjahsdf");
+            options.put("amount","$payment")//pass amount in currency subunits
+
+//            val retryObj = JSONObject();
+//            retryObj.put("enabled", true);
+//            retryObj.put("max_count", 4);
+//            options.put("retry", retryObj);
+
+            val prefill = JSONObject()
+            prefill.put("email","${mUserPhoneNumber}@gmail.com")  //this place should have customer name
+            prefill.put("contact","${mUserPhoneNumber}")     //this place should have customer phone number
+
+            options.put("prefill",prefill)
+            co.open(this,options)
+        }catch (e: Exception){
+            Toast.makeText(this,"Error in payment: "+ e.message, Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
+    }
+
+
+    override fun onPaymentSuccess(orderID: String?) {
+        showSuccessDialog("","Adding Money to the Wallet...", "wallet")
+        showShimmer()
+        lifecycleScope.launch(Dispatchers.Main) {
+            val id = viewModel.createTransaction(mMoneyToAddInWallet.toFloat(), mUserID, orderID!!)
+            if (id == "failed") {
+                delay(1000)
+                hideSuccessDialog()
+                showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
+                return@launch
+            } else {
+                delay(1500)
+                hideSuccessDialog()
+                showSuccessDialog("", "Wallet Updated successfully!", "complete")
+                TransactionHistory (
+                    id,
+                    System.currentTimeMillis(),
+                    Time().getMonth(),
+                    Time().getYear().toLong(),
+                    mMoneyToAddInWallet.toFloat(),
+                    id,
+                    orderID!!,
+                    Constants.SUCCESS,
+                    Constants.ADD_MONEY,
+                    orderID
+                ).also {
+                    mTransactions.add(it)
+                    mTransactions.sortBy {
+                        it.timestamp
+                    }
+                    transactionAdapter.transactions = mTransactions
+                    transactionAdapter.notifyDataSetChanged()
+                    binding.tvWalletTotal.text = (mWallet.amount + mMoneyToAddInWallet).toString()
+                    delay(1500)
+                    hideSuccessDialog()
+                    hideShimmer()
+                }
+            }
+        }
+
+    }
+
+    override fun onPaymentError(p0: Int, p1: String?) {
+        showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
     fun filterDate(date: Long) = lifecycleScope.launch(Dispatchers.Default) {
@@ -192,7 +293,7 @@ class WalletActivity : BaseActivity(), KodeinAware {
             showShimmer()
         }
         val filteredTransactions = mutableListOf<TransactionHistory>()
-        for (transaction in mWallet.transactionHistory) {
+        for (transaction in mTransactions) {
             val transactionDate = Time().getCustomDate(dateLong = transaction.timestamp)
             val filteredDate = Time().getCustomDate(dateLong = date)
             if (transactionDate == filteredDate) {
@@ -200,6 +301,9 @@ class WalletActivity : BaseActivity(), KodeinAware {
             }
         }
         withContext(Dispatchers.Main) {
+            filteredTransactions.sortBy {
+                it.timestamp
+            }
             transactionAdapter.transactions = filteredTransactions
             transactionAdapter.notifyDataSetChanged()
             hideShimmer()
@@ -212,12 +316,15 @@ class WalletActivity : BaseActivity(), KodeinAware {
         }
         binding.tvMonthFilter.text = month
         val filteredTransactions = mutableListOf<TransactionHistory>()
-        for (transaction in mWallet.transactionHistory) {
+        for (transaction in mTransactions) {
             if (transaction.month == month) {
                 filteredTransactions.add(transaction)
             }
         }
         withContext(Dispatchers.Main) {
+            filteredTransactions.sortBy {
+                it.timestamp
+            }
             transactionAdapter.transactions = filteredTransactions
             transactionAdapter.notifyDataSetChanged()
             hideShimmer()

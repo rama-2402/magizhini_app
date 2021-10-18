@@ -102,6 +102,8 @@ class Firestore(
     suspend fun createWallet(wallet: Wallet) {
         try {
             mFireStore.collection("Wallet")
+                .document("Wallet")
+                .collection("Users")
                 .document(wallet.id)
                 .set(wallet, SetOptions.merge())
                 .await()
@@ -540,4 +542,75 @@ class Firestore(
                 .document(sub.customerID).update("subscriptions", FieldValue.arrayUnion(sub.id))
                 .await()
         }
+
+    suspend fun getWalletAmount(id: String): Float {
+        return mFireStore.collection("Wallet")
+            .document("Wallet")
+            .collection("Users")
+            .document(id).get().await().toObject(Wallet::class.java)!!.amount
+    }
+
+    suspend fun getWallet(id: String): Wallet =
+        mFireStore.collection("Wallet")
+            .document("Wallet")
+            .collection("Users")
+            .document(id).get().await().toObject(Wallet::class.java)!!
+
+    suspend fun getTransactions(id: String): List<TransactionHistory> = withContext(Dispatchers.IO) {
+        try {
+            val transactions = mutableListOf<TransactionHistory>()
+            val docs = mFireStore.collection("Wallet")
+                .document("Transaction")
+                .collection(id)
+                .get().await()
+            for (doc in docs) {
+                val transaction = doc.toObject(TransactionHistory::class.java)
+                transactions.add(transaction)
+            }
+            return@withContext transactions
+        } catch (e: Exception) {
+            return@withContext mutableListOf()
+        }
+    }
+
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean {
+        try {
+            withContext(Dispatchers.IO) {
+                val path = mFireStore.collection("Wallet")
+                    .document("Wallet")
+                    .collection("Users")
+                mFireStore.runTransaction { transaction ->
+                    val wallet = transaction.get(path.document(id)).toObject(Wallet::class.java)
+                    if (status == "Add") {
+                        wallet!!.amount = wallet.amount + amount
+                    } else {
+                        wallet!!.amount = wallet.amount - amount
+                    }
+                    transaction.update(path.document(id), "amount", wallet.amount)
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            return false
+        }
+        return true
+    }
+
+    suspend fun updateTransaction(transaction: TransactionHistory): String =
+        withContext(Dispatchers.IO) {
+            try {
+                val path = mFireStore.collection("Wallet")
+                    .document("Transaction")
+                    .collection(transaction.fromID)
+                transaction.id = path.document().id
+
+                path.document(transaction.id).set(transaction, SetOptions.merge()).await()
+                return@withContext path.id
+            } catch (e: Exception) {
+                return@withContext "failed"
+            }
+        }
+
+    suspend fun generateOrderID(id: String): String =
+        mFireStore.collection(Constants.ORDER_HISTORY).document().id
 }

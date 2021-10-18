@@ -18,9 +18,11 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.workDataOf
+import com.google.android.gms.dynamic.IFragmentWrapper
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfileBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
@@ -207,16 +209,40 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private fun generateAddressObject() {
-        with(mProfile.address[0]) {
-            userId = binding.etProfileName.text.toString().trim()
-            addressLineOne = binding.etAddressOne.text.toString().trim()
-            addressLineTwo = binding.etAddressTwo.text.toString().trim()
-            city = binding.spCity.selectedItem.toString()
-            LocationCode = binding.spArea.selectedItem.toString()
-            LocationCodePosition = binding.spArea.selectedItemPosition
-            gpsLatitude = mLatitude
-            gpsLongitude = mLongitude
-            gpsAddress = mAddress
+        if (mProfile.address.isNotEmpty()) {
+            with(mProfile.address[0]) {
+                userId = binding.etProfileName.text.toString().trim()
+                addressLineOne = binding.etAddressOne.text.toString().trim()
+                addressLineTwo = binding.etAddressTwo.text.toString().trim()
+                city = binding.spCity.selectedItem.toString()
+                LocationCode = binding.spArea.selectedItem.toString()
+                LocationCodePosition = binding.spArea.selectedItemPosition
+                gpsLatitude = mLatitude
+                gpsLongitude = mLongitude
+                gpsAddress = mAddress
+            }
+        } else {
+//            val address = Address()
+//            binding.etProfileName.text.toString().isNotEmpty().also {
+//                if (it) {
+//                    address.userId =
+//                } else {
+//
+//                }
+//            }
+            Address (
+                userId = binding.etProfileName.text.toString().trim(),
+                addressLineOne = binding.etAddressOne.text.toString().trim(),
+                addressLineTwo = binding.etAddressTwo.text.toString().trim(),
+                city = binding.spCity.selectedItem.toString(),
+                LocationCode = binding.spArea.selectedItem.toString(),
+                LocationCodePosition = binding.spArea.selectedItemPosition,
+                gpsLatitude = mLatitude,
+                gpsLongitude = mLongitude,
+                gpsAddress = mAddress
+            ).also {
+                mProfile.address.add(it)
+            }
         }
     }
 

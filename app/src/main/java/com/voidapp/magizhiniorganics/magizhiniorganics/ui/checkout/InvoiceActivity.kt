@@ -76,7 +76,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private var mDiscountedPrice: Float = 0F
     private var mPaymentPreference: String = "COD"
     private var mCurrentUserID: String = ""
-    private var mTransactionID: String = ""
+    private var mTransactionID: String = "COD"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,7 +145,8 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     override fun onPaymentSuccess(response: String?) {
         mTransactionID = response!!
-        validateItemAvailability()
+        showSuccessDialog("","Placing Order... ","order")
+        placeOrder()
     }
 
     override fun onPaymentError(p0: Int, p1: String?) {
@@ -181,7 +182,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     private fun setWalletAmountRadioButton() = lifecycleScope.launch(Dispatchers.IO) {
-        val wallet = async { viewModel.getWallet() }
+        val wallet = async { viewModel.getWallet(mCurrentUserID) }
         withContext(Dispatchers.Main) {
             binding.rbWallet.text = "Wallet (${wallet.await()!!.amount})"
         }
@@ -229,9 +230,11 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         }
 
         checkoutBtn.setOnClickListener {
-            //TODO FUNCTION TO PLACE ORDER
-            showSwipeConfirmationDialog(this)
-//        calculateTotalPurchaseAmount()
+            if (mPaymentPreference == "COD") {
+                showSwipeConfirmationDialog(this, "swipe right to place order")
+            } else {
+                showSwipeConfirmationDialog(this, "swipe right to make payment")
+            }
         }
 
     }
@@ -309,29 +312,8 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 delay(1500)
                 withContext(Dispatchers.Main) {
                     hideSuccessDialog()
-                    showSuccessDialog("","Placing Order... ","order")
-                    when(it) {
-                        "complete" -> {
-                            with(mOrder) {
-                                orderId = ""
-                                customerId = mCurrentUserID
-                                cart = mCartItems
-                                purchaseDate = Time().getCurrentDate()
-                                isPaymentDone =
-                                    true   //todo we have to get the boolean data from transaction success
-                                paymentMethod = mPaymentPreference
-                                deliveryPreference =
-                                    binding.spDeliveryPreference.selectedItem.toString()
-                                deliveryNote = binding.etDeliveryNote.text.toString().trim()
-                                appliedCoupon = mCurrentCoupon
-                                address = mSelectedAddress
-                                price = binding.tvTotalAmt.text.toString().toFloat()
-                                orderStatus = Constants.PENDING
-                                monthYear = "${Time().getMonth()}${Time().getYear()}"
-                            }
-                            startWorkerThread(mOrder)
-                            viewModel.placeOrder(mOrder)
-                        }
+                    if (it == "complete") {
+                        checkPaymentMode()
                     }
                 }
             }
@@ -363,9 +345,71 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         })
     }
 
+    private fun checkPaymentMode() {
+        when (mPaymentPreference) {
+            "Online" -> startPayment()
+            "COD" -> {
+                showSuccessDialog("","Placing Order... ","order")
+                placeOrder()
+                }
+            else -> {
+                val amount = binding.tvTotalAmt.text.toString().toFloat()
+                showSuccessDialog("", "Processing payment from Wallet...", "wallet")
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if (viewModel.checkWalletForBalance(amount, mCurrentUserID)) {
+                        val id = viewModel.makeTransactionFromWallet(amount, mCurrentUserID, mOrder.orderId)
+                        validatingTransactionBeforeOrder(id)
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            delay(1000)
+                            hideSuccessDialog()
+                            showErrorSnackBar("Insufficient balance in Wallet. Pick another payment method", true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun validatingTransactionBeforeOrder(id: String) = withContext(Dispatchers.Main) {
+        if ( id == "failed") {
+            showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
+            return@withContext
+        } else {
+            mTransactionID = id
+            delay(1500)
+            hideSuccessDialog()
+            showSuccessDialog("","Placing Order... ","order")
+            placeOrder()
+        }
+    }
+
+    private fun placeOrder() {
+        with(mOrder) {
+            customerId = mCurrentUserID
+            transactionID = mTransactionID
+            cart = mCartItems
+            purchaseDate = Time().getCurrentDate()
+            isPaymentDone =
+                true   //todo we have to get the boolean data from transaction success
+            paymentMethod = mPaymentPreference
+            deliveryPreference =
+                binding.spDeliveryPreference.selectedItem.toString()
+            deliveryNote = binding.etDeliveryNote.text.toString().trim()
+            appliedCoupon = mCurrentCoupon
+            address = mSelectedAddress
+            price = binding.tvTotalAmt.text.toString().toFloat()
+            orderStatus = Constants.PENDING
+            monthYear = "${Time().getMonth()}${Time().getYear()}"
+        }
+        startWorkerThread(mOrder)
+        viewModel.placeOrder(mOrder)
+    }
+
     fun approved(status: Boolean) = lifecycleScope.launch(Dispatchers.Main) {
+        mOrder.orderId = viewModel.generateOrderID(mCurrentUserID)
         delay(250)
-        startPayment()
+        validateItemAvailability()
     }
 
     private fun startWorkerThread(order: Order) {
@@ -441,7 +485,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             rgPaymentType.setOnCheckedChangeListener { _, checkedId ->
                 val selectedId = findViewById<RadioButton>(checkedId)
                 mPaymentPreference = when(selectedId.text) {
-                    " UPI" -> "UPI"
+                    " Online" -> "Online"
                     " COD" -> "COD"
                     else -> "Wallet"
                 }
