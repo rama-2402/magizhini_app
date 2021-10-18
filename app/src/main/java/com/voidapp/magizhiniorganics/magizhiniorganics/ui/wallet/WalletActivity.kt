@@ -18,6 +18,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.WalletAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.WalletEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityWalletBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
@@ -45,9 +46,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private var mWallet: Wallet = Wallet()
     private val mTransactions = mutableListOf<TransactionHistory>()
     private val mTransaction = TransactionHistory()
-    private var mUserName: String = ""
-    private var mUserID: String = ""
-    private var mUserPhoneNumber: String = ""
+    private var mProfile = UserProfile()
     private var mMoneyToAddInWallet: Long = 0L
 
     private val TAG: String = "qqqq"
@@ -77,7 +76,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     private fun liveDataObservers() {
-        viewModel.getUserProfileData()
         viewModel.wallet.observe(this, {
             mWallet = it
             displayWalletDataToScreen()
@@ -96,14 +94,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 hideShimmer()
             }
         })
-        viewModel.userID.observe(this, {
-            mUserID = it
-        })
-        viewModel.userName.observe(this, {
-            mUserName = it
-        })
-        viewModel.userPhoneNumber.observe(this, {
-            mUserPhoneNumber = it
+        viewModel.profile.observe(this, {
+            mProfile = it
         })
     }
 
@@ -132,6 +124,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         val id = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
         viewModel.getTransactions(id)
         viewModel.getWallet(id)
+        viewModel.getUserProfileData()
     }
 
     private fun initRecyclerView() {
@@ -190,6 +183,11 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             dialogBsAddReferral.setContentView(view.root)
             dialogBsAddReferral.dismissWithAnimation = true
 
+            view.etlReferralNumber.hint = "Amount"
+            view.etlReferralNumber.setStartIconDrawable(ContextCompat.getDrawable(view.etlReferralNumber.context, R.drawable.ic_wallet))
+//            view.etlReferralNumber.setStartIconTintList(ColorStateList.valueOf(ContextCompat.getColor(view.etlReferralNumber.context, R.color.green_base)))
+            view.btnApply.text = "PROCEED"
+
             //verifying if the amount number is empty and sending for payment
             view.btnApply.setOnClickListener {
                 val code = view.etReferralNumber.text.toString().trim()
@@ -213,12 +211,14 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         val co = Checkout()
         val payment = amount * 100
 
+        val email = if (mProfile.mailId.isEmpty()) "magizhiniorganics2018@gmail.com" else mProfile.mailId
+
         try {
             val options = JSONObject()
-            options.put("name","$mUserID")
-            options.put("description","Adding Money to Wallet")
+            options.put("name","${mProfile.name}")
+            options.put("description","Adding Money to Wallet for ${mProfile.id}")
             //You can omit the image option to fetch the image from dashboard
-            options.put("image","https://s3.amazonaws.com/rzp-mobile/images/rzp.png")
+            options.put("image","https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/icon_sh_4.png?alt=media&token=71cf0e67-2f00-4a0f-8950-15459ee02137")
             options.put("theme.color", "#86C232");
             options.put("currency","INR");
 //            options.put("order_id", "orderIDkjhasgdfkjahsdf");
@@ -230,8 +230,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 //            options.put("retry", retryObj);
 
             val prefill = JSONObject()
-            prefill.put("email","${mUserPhoneNumber}@gmail.com")  //this place should have customer name
-            prefill.put("contact","${mUserPhoneNumber}")     //this place should have customer phone number
+            prefill.put("email","$email")  //this place should have customer name
+            prefill.put("contact","${mProfile.phNumber}")     //this place should have customer phone number
 
             options.put("prefill",prefill)
             co.open(this,options)
@@ -246,7 +246,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         showSuccessDialog("","Adding Money to the Wallet...", "wallet")
         showShimmer()
         lifecycleScope.launch(Dispatchers.Main) {
-            val id = viewModel.createTransaction(mMoneyToAddInWallet.toFloat(), mUserID, orderID!!)
+            val id = viewModel.createTransaction(mMoneyToAddInWallet.toFloat(), mProfile.id, orderID!!)
             if (id == "failed") {
                 delay(1000)
                 hideSuccessDialog()

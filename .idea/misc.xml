@@ -28,6 +28,7 @@
         <entry key="app/src/main/res/drawable/ic_reviews.xml" value="0.39114583333333336" />
         <entry key="app/src/main/res/drawable/list_selector.xml" value="0.5317708333333333" />
         <entry key="app/src/main/res/drawable/normal.xml" value="0.5317708333333333" />
+        <entry key="app/src/main/res/drawable/popup_background.xml" value="0.5317948717948718" />
         <entry key="app/src/main/res/drawable/pressed.xml" value="0.5317708333333333" />
         <entry key="app/src/main/res/drawable/spalsh_screen.xml" value="0.559375" />
         <entry key="app/src/main/res/drawable/unselected_indicator.xml" value="0.559375" />
@@ -62,7 +63,7 @@
         <entry key="app/src/main/res/layout/fragment_description.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_new_review.xml" value="0.5" />
         <entry key="app/src/main/res/layout/fragment_reviews.xml" value="0.2791666666666667" />
-        <entry key="app/src/main/res/layout/nav_header.xml" value="0.25181159420289856" />
+        <entry key="app/src/main/res/layout/nav_header.xml" value="0.25" />
         <entry key="app/src/main/res/layout/onboarding_viewpager.xml" value="0.33" />
         <entry key="app/src/main/res/layout/rv_address_item.xml" value="0.5" />
         <entry key="app/src/main/res/layout/rv_cart_items.xml" value="0.5" />

@@ -61,6 +61,7 @@
                 android:elevation="20dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_person"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="@id/ivHeader"
                 app:layout_constraintEnd_toStartOf="@id/llProfileName"
                 app:layout_constraintHeight_percent=".15"

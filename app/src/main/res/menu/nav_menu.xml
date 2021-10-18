@@ -38,6 +38,10 @@
             android:id="@+id/menuPrivacyPolicy"
             android:title="PRIVACY POLICY"
             android:icon="@drawable/ic_privacy" />
+        <item
+            android:id="@+id/menuDisclaimer"
+            android:title="DISCLAIMER"
+            android:icon="@drawable/ic_disclaimer" />
     </group>
 
 

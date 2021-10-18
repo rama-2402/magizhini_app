@@ -35,7 +35,9 @@ import com.google.gson.Gson
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
@@ -72,6 +74,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private var mCheckedAddressPosition: Int = 0
     private var mSelectedAddress: Address = Address()
     private var mOrder: Order = Order()
+    private var mProfile: UserProfileEntity = UserProfileEntity()
 
     private var mDiscountedPrice: Float = 0F
     private var mPaymentPreference: String = "COD"
@@ -114,17 +117,19 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         *  You need to pass current activity in order to let Razorpay create CheckoutActivity
         * */
         val co = Checkout()
+        val email = if (mProfile.mailId.isEmpty()) "magizhiniorganics2018@gmail.com" else mProfile.mailId
+        val price = binding.tvTotalAmt.text.toString().toFloat() * 100
 
         try {
             val options = JSONObject()
-            options.put("name","Razorpay Corp")
-            options.put("description","Demoing Charges")
+            options.put("name","${mProfile.name}")
+            options.put("description","Purchasing from store for ${mProfile.id}")
             //You can omit the image option to fetch the image from dashboard
-            options.put("image","https://s3.amazonaws.com/rzp-mobile/images/rzp.png")
+            options.put("image","https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/icon_sh_4.png?alt=media&token=71cf0e67-2f00-4a0f-8950-15459ee02137")
             options.put("theme.color", "#86C232");
             options.put("currency","INR");
 //            options.put("order_id", "orderIDkjhasgdfkjahsdf");
-            options.put("amount","100")//pass amount in currency subunits
+            options.put("amount","$price")//pass amount in currency subunits
 
 //            val retryObj = JSONObject();
 //            retryObj.put("enabled", true);
@@ -132,8 +137,8 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 //            options.put("retry", retryObj);
 
             val prefill = JSONObject()
-            prefill.put("email","magizhiniorganics2018@gmail.com")  //this place should have customer name
-            prefill.put("contact","7299827393")     //this place should have customer phone number
+            prefill.put("email","$email")  //this place should have customer name
+            prefill.put("contact","${mProfile.phNumber}")     //this place should have customer phone number
 
             options.put("prefill",prefill)
             co.open(this,options)
@@ -247,6 +252,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private fun iniLiveData() {
         viewModel.getAddress()
         viewModel.getAllCoupons(Constants.ACTIVE)
+        viewModel.getUserProfileData()
 
         viewModel.addressList.observe(this, {
             adapter.addressList = it
@@ -342,6 +348,10 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
         viewModel.addNewAddress.observe(this, {
             showAddressBs()
+        })
+
+        viewModel.profile.observe(this, {
+            mProfile = it
         })
     }
 

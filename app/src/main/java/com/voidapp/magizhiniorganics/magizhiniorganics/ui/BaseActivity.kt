@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui
 
+import android.app.ActionBar
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
@@ -7,11 +8,15 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -172,16 +177,22 @@ open class BaseActivity : AppCompatActivity() {
                           body: String = getString(R.string.msg_welcome),
                           content: String = "") {
 
-        mSuccessDialog = Dialog(this)
+        mSuccessDialog = Dialog(this, R.style.CustomAlertDialog)
         val view: DialogSuccessBinding = DataBindingUtil.inflate(
                                             LayoutInflater.from(baseContext),
                                             R.layout.dialog_success,
                                             null,
                                             false)
 
+        val windowParams = WindowManager.LayoutParams()
+        windowParams.copyFrom(mSuccessDialog.window?.attributes)
+        windowParams.width = WindowManager.LayoutParams.WRAP_CONTENT
+        windowParams.height = WindowManager.LayoutParams.WRAP_CONTENT
+        windowParams.dimAmount = 0.7f
+        windowParams.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND
+
         mSuccessDialog.setContentView(view.root)
         mSuccessDialog.setCanceledOnTouchOutside(false)
-        mSuccessDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         view.tvTitle.text = title
         view.tvBody.text = body
@@ -208,6 +219,8 @@ open class BaseActivity : AppCompatActivity() {
         }
 
         mSuccessDialog.show()
+        mSuccessDialog.window?.attributes = windowParams
+//        mSuccessDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
     fun hideSuccessDialog() {

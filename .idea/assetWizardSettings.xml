@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:$USER_HOME$/Android/Sdk/icons/material/materialicons/error/baseline_error_24.xml" />
+                                      <entry key="url" value="file:$USER_HOME$/Android/Sdk/icons/material/materialicons/chrome_reader_mode/baseline_chrome_reader_mode_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,8 +28,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="ff5b5b" />
-                            <entry key="outputName" value="ic_not_delivered" />
+                            <entry key="color" value="585858" />
+                            <entry key="outputName" value="ic_disclaimer" />
                           </map>
                         </option>
                       </PersistentState>

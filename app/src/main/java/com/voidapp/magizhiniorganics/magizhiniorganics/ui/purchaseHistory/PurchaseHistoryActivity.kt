@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -87,9 +88,14 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
             override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
                 super.onScrolled(recyclerView, up, down)
                 if (down > 0 && binding.fabMonthFilter.isVisible) {
-                    binding.fabMonthFilter.hide()
+                    binding.fabMonthFilter.startAnimation(AnimationUtils.loadAnimation(this@PurchaseHistoryActivity, R.anim.slide_out_right))
+                    lifecycleScope.launch {
+                        delay(400)
+                        binding.fabMonthFilter.hide()
+                    }
                 } else if (down < 0 && binding.fabMonthFilter.isGone) {
                     binding.fabMonthFilter.show()
+                    binding.fabMonthFilter.startAnimation(AnimationUtils.loadAnimation(this@PurchaseHistoryActivity, R.anim.slide_in_right))
                 }
             }
         })

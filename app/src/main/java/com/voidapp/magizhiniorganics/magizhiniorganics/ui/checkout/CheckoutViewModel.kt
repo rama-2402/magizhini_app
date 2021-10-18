@@ -9,11 +9,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toUserProfile
 import kotlinx.coroutines.*
 
 class CheckoutViewModel(
@@ -45,6 +48,15 @@ class CheckoutViewModel(
     var orderCompleted: LiveData<Boolean> = _orderCompleted
     private var _addNewAddress: MutableLiveData<Int> = MutableLiveData()
     var addNewAddress: LiveData<Int> = _addNewAddress
+    private var _profile: MutableLiveData<UserProfileEntity> = MutableLiveData()
+    val profile: LiveData<UserProfileEntity> = _profile
+
+    fun getUserProfileData() = viewModelScope.launch(Dispatchers.IO) {
+        val profile = dbRepository.getProfileData()!!
+        withContext(Dispatchers.Main) {
+            _profile.value = profile
+        }
+    }
 
     fun getAddress() = viewModelScope.launch (Dispatchers.IO) {
         val address = dbRepository.getProfileData()!!.address
@@ -255,4 +267,6 @@ class CheckoutViewModel(
     suspend fun generateOrderID(id: String): String = withContext(Dispatchers.IO) {
         return@withContext fbRepository.generateOrderID(id)
     }
+
+
 }

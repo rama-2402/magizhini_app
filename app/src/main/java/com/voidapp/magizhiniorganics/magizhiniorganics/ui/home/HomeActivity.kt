@@ -190,7 +190,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                 try {
                     val intent = Intent(Intent.ACTION_VIEW)
                     intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                    intent.setData(Uri.parse(content))
+                    intent.data = Uri.parse(content)
                     startActivity(Intent.createChooser(intent, "Open link with"))
                 } catch (e: Exception) {
                     println("The current phone does not have a browser installed")
@@ -287,6 +287,45 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                     delay(200)
                     Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
                         startActivity(it)
+                    }
+                }
+            }
+            R.id.menuPrivacyPolicy -> {
+                lifecycleScope.launch {
+                    delay(200)
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                        intent.data = Uri.parse("https://rama-2402.github.io/privacy-policy/")
+                        startActivity(Intent.createChooser(intent, "Open link with"))
+                    } catch (e: Exception) {
+                        println("The current phone does not have a browser installed")
+                    }
+                }
+            }
+            R.id.menuDisclaimer -> {
+                lifecycleScope.launch {
+                    delay(200)
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                        intent.data = Uri.parse("https://rama-2402.github.io/disclaimer/")
+                        startActivity(Intent.createChooser(intent, "Open link with"))
+                    } catch (e: Exception) {
+                        println("The current phone does not have a browser installed")
+                    }
+                }
+            }
+            R.id.menuTermsOfUse -> {
+                lifecycleScope.launch {
+                    delay(200)
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                        intent.data = Uri.parse("https://rama-2402.github.io/terms-of-use/")
+                        startActivity(Intent.createChooser(intent, "Open link with"))
+                    } catch (e: Exception) {
+                        println("The current phone does not have a browser installed")
                     }
                 }
             }

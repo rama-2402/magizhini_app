@@ -9,6 +9,7 @@ import android.os.PersistableBundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
@@ -113,6 +114,18 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             viewModel.checkUserProfileDetails()
         } else {
             viewModel.getUserProfile()
+        }
+
+        with(binding) {
+            ivHeader.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
+            tvProfile.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
+            llProfileName.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
+            svProfileBody.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_up))
+        }
+
+        lifecycleScope.launch {
+            delay(1010)
+            binding.ivProfilePic.show()
         }
 
         activityInit()
