@@ -134,7 +134,9 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun activityInit() {
         binding.ivProfilePic.clipToOutline = true
         binding.tvPhoneNumber.text = mPhoneNumber
-        viewModel.getUserProfile()
+        if (!isNewUser) {
+            viewModel.getUserProfile()
+        }
     }
 
     private fun clickListeners() {
@@ -304,6 +306,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private fun newUserTransitionFromProfile() {
+        SharedPref(this).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
         Intent(this, HomeActivity::class.java).also {
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)

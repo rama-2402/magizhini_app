@@ -189,11 +189,9 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     fun loggedIn() {
 
         SharedPref(this).putData(Constants.USER_ID, Constants.STRING, mFirebaseAuth.currentUser!!.uid)
-
-        lifecycleScope.launch (Dispatchers.IO) {
+        startGetAllDataService()
+        lifecycleScope.launch (Dispatchers.Main) {
             if (repository.checkUserProfileDetails()) { //if user is old
-                SharedPref(this@SignInActivity).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
-                startGetAllDataService()
                 startGetProfileDataService()
                 delay(2000)
                 hideProgressDialog()
