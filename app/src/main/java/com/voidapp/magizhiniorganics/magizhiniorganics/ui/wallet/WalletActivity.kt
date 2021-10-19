@@ -100,19 +100,15 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private fun displayWalletDataToScreen() {
         with(binding) {
             tvWalletTotal.text = mWallet.amount.toString()
-            if (mWallet.reminder) {
-                ivReminder.setImageDrawable(ContextCompat.getDrawable(this@WalletActivity, R.drawable.ic_notify_on))
-                ivReminder.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@WalletActivity, R.color.green_base))
+            if (mWallet.lastRecharge == 0L) {
+                tvLastRechargeDate.text = "-"
             } else {
-                ivReminder.setImageDrawable(ContextCompat.getDrawable(this@WalletActivity, R.drawable.ic_notify_on))
-                ivReminder.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@WalletActivity, R.color.green_base))
+                tvLastRechargeDate.text = Time().getCustomDate(dateLong = mWallet.lastTransaction)
             }
-            if (mWallet.nextRecharge == 0L) {
-                tvExpectedDate.text = "-"
-                ivReminder.setImageDrawable(ContextCompat.getDrawable(this@WalletActivity, R.drawable.ic_notify_off))
-                ivReminder.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@WalletActivity, R.color.gray700))
+            if (mWallet.lastTransaction == 0L) {
+                tvTransactionDate.text = "-"
             } else {
-                tvExpectedDate.text = Time().getCustomDate(dateLong = mWallet.nextRecharge)
+                tvTransactionDate.text = Time().getCustomDate(dateLong = mWallet.lastTransaction)
             }
 
         }
@@ -155,13 +151,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         binding.ivWalletFilter.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             DatePickerLib().pickSingleDate(this)
-        }
-
-        binding.ivReminder.setOnClickListener {
-            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            binding.ivReminder.setImageResource(R.drawable.ic_notify_on)
-            binding.ivReminder.imageTintList =
-                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
         }
 
         binding.tvMonthFilter.setOnClickListener {
@@ -272,8 +261,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                     orderID
                 ).also {
                     mTransactions.add(it)
-                    mTransactions.sortBy {
-                        it.timestamp
+                    mTransactions.sortByDescending { transaction ->
+                        transaction.timestamp
                     }
                     transactionAdapter.transactions = mTransactions
                     transactionAdapter.notifyDataSetChanged()

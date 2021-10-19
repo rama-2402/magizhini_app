@@ -79,8 +79,8 @@ class ProfileViewModel (
         Wallet(
             id = id,
             amount = 0f,
-            reminder = false,
-            nextRecharge = 0,
+            0L,
+            0L,
             listOf()
         ).also {
             fsRepository.createWallet(it)

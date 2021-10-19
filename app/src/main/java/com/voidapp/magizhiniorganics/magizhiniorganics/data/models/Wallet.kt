@@ -1,1 +1,1 @@
-package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class Wallet(    var id: String = "",    var amount: Float = 0F,    var reminder: Boolean = true,    var nextRecharge: Long = 0L,    var transactionHistory: List<TransactionHistory> = listOf())
+package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class Wallet(    var id: String = "",    var amount: Float = 0F,    var lastTransaction: Long = 0L,    var lastRecharge: Long = 0L,    var transactionHistory: List<TransactionHistory> = listOf())

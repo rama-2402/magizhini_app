@@ -583,11 +583,15 @@ class Firestore(
                     val wallet = transaction.get(path.document(id)).toObject(Wallet::class.java)
                     if (status == "Add") {
                         wallet!!.amount = wallet.amount + amount
+                        wallet.lastRecharge = System.currentTimeMillis()
+                        transaction.update(path.document(id), "amount", wallet.amount, "lastRecharge", wallet.lastRecharge)
+                        null
                     } else {
                         wallet!!.amount = wallet.amount - amount
+                        wallet.lastTransaction = System.currentTimeMillis()
+                        transaction.update(path.document(id), "amount", wallet.amount, "lastTransaction", wallet.lastTransaction)
+                        null
                     }
-                    transaction.update(path.document(id), "amount", wallet.amount)
-                    null
                 }
             }
         } catch (e: Exception) {

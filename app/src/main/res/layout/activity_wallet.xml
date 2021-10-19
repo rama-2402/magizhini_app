@@ -122,19 +122,19 @@
                     app:layout_constraintTop_toTopOf="@id/ltAnimImg" />
 
                 <TextView
-                    android:id="@+id/tvExpectedText"
+                    android:id="@+id/tvTransactionText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/material_size_16"
                     android:fontFamily="@font/roboto"
-                    android:text="Next TopUp: "
+                    android:text="Last Transaction: "
                     android:textColor="@color/gray700"
                     android:textSize="14dp"
                     app:layout_constraintStart_toStartOf="@id/ivRupee"
                     app:layout_constraintTop_toBottomOf="@id/tvWalletTotal" />
 
                 <TextView
-                    android:id="@+id/tvExpectedDate"
+                    android:id="@+id/tvTransactionDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/material_size_4"
@@ -142,39 +142,38 @@
                     android:text="21/12/2021"
                     android:textColor="@color/gray700"
                     android:textSize="14dp"
-                    app:layout_constraintBottom_toBottomOf="@id/tvExpectedText"
-                    app:layout_constraintStart_toEndOf="@id/tvExpectedText"
-                    app:layout_constraintTop_toTopOf="@id/tvExpectedText" />
+                    app:layout_constraintBottom_toBottomOf="@id/tvTransactionText"
+                    app:layout_constraintStart_toEndOf="@id/tvTransactionText"
+                    app:layout_constraintTop_toTopOf="@id/tvTransactionText" />
 
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivReminder"
-                    android:layout_width="@dimen/material_size_24"
-                    android:layout_height="@dimen/material_size_24"
-                    android:layout_gravity="end"
-                    android:layout_marginEnd="@dimen/material_size_16"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/favorites_icon"
-                    android:src="@drawable/ic_notify_off"
-                    app:layout_constraintBottom_toBottomOf="@id/tvRemindMe"
-                    app:layout_constraintEnd_toStartOf="@id/tvRemindMe"
-                    app:layout_constraintStart_toStartOf="@id/tvExpectedText"
-                    app:layout_constraintTop_toTopOf="@id/tvRemindMe"
+                <TextView
+                    android:id="@+id/tvLastRecharge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto"
+                    android:text="Last Recharge: "
+                    android:textColor="@color/gray700"
+                    android:textSize="14dp"
+                    app:layout_constraintBottom_toBottomOf="@id/tvLastRechargeDate"
+                    app:layout_constraintEnd_toStartOf="@id/tvLastRechargeDate"
+                    app:layout_constraintStart_toStartOf="@id/tvTransactionText"
+                    app:layout_constraintTop_toTopOf="@id/tvLastRechargeDate"
                     app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
                     app:tint="@color/gray700" />
 
                 <TextView
-                    android:id="@+id/tvRemindMe"
+                    android:id="@+id/tvLastRechargeDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/material_size_8"
                     android:layout_marginTop="@dimen/material_size_8"
                     android:fontFamily="@font/roboto"
-                    android:text="Remind Me"
+                    android:text="21/12/2021"
                     android:textColor="@color/gray700"
                     android:textSize="12dp"
-                    app:layout_constraintStart_toEndOf="@id/ivReminder"
-                    app:layout_constraintTop_toBottomOf="@+id/tvExpectedText" />
+                    app:layout_constraintStart_toEndOf="@id/tvLastRecharge"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionText" />
 
 
                 <com.google.android.material.imageview.ShapeableImageView
