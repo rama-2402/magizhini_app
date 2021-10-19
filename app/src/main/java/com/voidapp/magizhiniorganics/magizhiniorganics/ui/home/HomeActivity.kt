@@ -329,6 +329,19 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                     }
                 }
             }
+            R.id.menuReturn -> {
+                lifecycleScope.launch {
+                    delay(200)
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                        intent.data = Uri.parse("https://rama-2402.github.io/return-policy/")
+                        startActivity(Intent.createChooser(intent, "Open link with"))
+                    } catch (e: Exception) {
+                        println("The current phone does not have a browser installed")
+                    }
+                }
+            }
         }
         return true
     }

@@ -60,7 +60,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     private var mCurrentUserId: String? = ""
     private var mPhoneNumber: String = ""
-    private var isNewUser: Boolean = true
+    private var isNewUser: Boolean = false
 
     private var mLatitude: String = ""
     private var mLongitude: String = ""
@@ -71,50 +71,17 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        val sRef = this.getSharedPreferences(Constants.USERS, Context.MODE_PRIVATE)
-        //we check if the userid is already in the shared preference if not it returns ""
-//        mCurrentUserId = sRef.getString(Constants.USER_ID, "")
-
         mCurrentUserId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "") as String
 
-        //if there is no id in shared preference that means the user is new
-        // and he came from the sign in activity.
-        // So it will get the id from intent
-        if (mCurrentUserId == "") {
-            mCurrentUserId = intent.getStringExtra(Constants.USER_ID).toString()
-            SharedPref(this).putData(
-                Constants.USER_ID,
-                Constants.STRING,
-                mCurrentUserId!!
-            )
-        }
         mPhoneNumber = intent.getStringExtra(Constants.PHONE_NUMBER).toString()
-        if (intent.getStringExtra(Constants.STATUS) == "onBoard") {
-            //updating the room data base with latest item from store
-            val workRequest: WorkRequest =
-                OneTimeWorkRequestBuilder<UpdateDataService>()
-                    .build()
 
-            WorkManager.getInstance(this).enqueue(workRequest)
-        }
-
-        //checking if it is new user to get data from different place
-        isNewUser = SharedPref(this).getData(Constants.LOGIN_STATUS, Constants.BOOLEAN, true) as Boolean
+        isNewUser = intent.getBooleanExtra(Constants.STATUS, false)
 
         //setting the theme and view binding
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_profile)
         viewModel = ViewModelProvider(this, factory).get(ProfileViewModel::class.java)
         binding.viewmodel = viewModel
-
-        //if new user then we check the store and get data if there is any
-        //if existing user i.e logged in then we get the profile data from the DAO
-        if(isNewUser) {
-            showProgressDialog()
-            viewModel.checkUserProfileDetails()
-        } else {
-            viewModel.getUserProfile()
-        }
 
         with(binding) {
             ivHeader.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
@@ -140,30 +107,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private fun observers() {
-        viewModel.isNewUser.observe(this, { userDataAvailable ->
-            if (userDataAvailable) {
-                //calling a work manager background service to get the current month's order history from store
-                //since it is a long running background task we are calling a work manager to do the task
-
-                val currentMonthYear = "${Time().getMonth()}${Time().getYear()}"
-                val workRequest: WorkRequest =
-                    OneTimeWorkRequestBuilder<GetOrderHistoryService>()
-                        .setInputData(
-                            workDataOf(
-                                "id" to mCurrentUserId,
-                                "filter" to currentMonthYear
-                            )
-                        )
-                        .build()
-
-                WorkManager.getInstance(this.applicationContext).enqueue(workRequest)
-
-                hideProgressDialog()
-                newUserTransitionFromProfile()
-            } else {
-                hideProgressDialog()
-            }
-        })
         viewModel.userProfile.observe(this, { userData ->
             mProfile = userData.toUserProfile()
             setUserDetailsFromDao(userData)
@@ -191,6 +134,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun activityInit() {
         binding.ivProfilePic.clipToOutline = true
         binding.tvPhoneNumber.text = mPhoneNumber
+        viewModel.getUserProfile()
     }
 
     private fun clickListeners() {
@@ -235,14 +179,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 gpsAddress = mAddress
             }
         } else {
-//            val address = Address()
-//            binding.etProfileName.text.toString().isNotEmpty().also {
-//                if (it) {
-//                    address.userId =
-//                } else {
-//
-//                }
-//            }
             Address (
                 userId = binding.etProfileName.text.toString().trim(),
                 addressLineOne = binding.etAddressOne.text.toString().trim(),
@@ -368,9 +304,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private fun newUserTransitionFromProfile() {
-        //movement of profile to home activity for new users
-        SharedPref(this).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)
-
         Intent(this, HomeActivity::class.java).also {
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)

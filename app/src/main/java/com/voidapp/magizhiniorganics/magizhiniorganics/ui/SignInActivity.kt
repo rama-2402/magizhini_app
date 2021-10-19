@@ -6,6 +6,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.workDataOf
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -14,10 +19,11 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySignInBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataService
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.CountdownTimer
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.KodeinAware
@@ -50,8 +56,6 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                repository.signInWithPhoneAuthCredential(
                     this@SignInActivity,
                     phoneAuthCredential)
-//                _status.value = repository.signIn(phoneAuthCredential) as Boolean
-
             }
 
             override fun onVerificationFailed(error: FirebaseException) {
@@ -132,7 +136,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         try {
             val options = PhoneAuthOptions.newBuilder(mFirebaseAuth)
                 .setPhoneNumber(phone)
-                .setTimeout(60L, TimeUnit.NANOSECONDS)
+                .setTimeout(120L, TimeUnit.NANOSECONDS)
                 .setActivity(this@SignInActivity)
                 .setCallbacks(mCallBacks!!)
                 .build()
@@ -173,30 +177,69 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             UIUtil.hideKeyboard(this)
             verifyPhoneNumberWithCode(mVerificationId, otp)
         }
-
     }
 
     private fun verifyPhoneNumberWithCode(verificationId: String?, code: String) {
-
         val credential = PhoneAuthProvider.getCredential(verificationId.toString(), code)
+        binding.cvTimer.stopTimer()
+        showProgressDialog()
         repository.signInWithPhoneAuthCredential(this ,credential)
-//        _status.value = repository.signIn(credential) as Boolean
-
     }
 
     fun loggedIn() {
-        binding.cvTimer.stopTimer()
-        Intent(this, ProfileActivity::class.java).also {
-            it.putExtra(Constants.PHONE_NUMBER, mFirebaseAuth.currentUser!!.phoneNumber)
-            it.putExtra(Constants.USER_ID, mFirebaseAuth.currentUser!!.uid)
-            it.putExtra(Constants.STATUS, "onBoard")
-            startActivity(it)
-            finish()
+
+        SharedPref(this).putData(Constants.USER_ID, Constants.STRING, mFirebaseAuth.currentUser!!.uid)
+
+        lifecycleScope.launch (Dispatchers.IO) {
+            if (repository.checkUserProfileDetails()) { //if user is old
+                SharedPref(this@SignInActivity).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
+                startGetAllDataService()
+                startGetProfileDataService()
+                delay(2000)
+                hideProgressDialog()
+                Intent(this@SignInActivity, HomeActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                }
+            } else {
+                Intent(this@SignInActivity, ProfileActivity::class.java).also {
+                    it.putExtra(Constants.PHONE_NUMBER, mFirebaseAuth.currentUser!!.phoneNumber)
+                    it.putExtra(Constants.USER_ID, mFirebaseAuth.currentUser!!.uid)
+                    it.putExtra(Constants.STATUS, true)
+                    startActivity(it)
+                    finish()
+                }
+
+            }
         }
+   }
+
+    private fun startGetProfileDataService() {
+        val currentMonthYear = "${Time().getMonth()}${Time().getYear()}"
+        val workRequest: WorkRequest =
+            OneTimeWorkRequestBuilder<GetOrderHistoryService>()
+                .setInputData(
+                    workDataOf(
+                        "id" to mFirebaseAuth.currentUser!!.uid,
+                        "filter" to currentMonthYear
+                    )
+                )
+                .build()
+
+        WorkManager.getInstance(this@SignInActivity.applicationContext).enqueue(workRequest)
     }
 
+    private fun startGetAllDataService() {
+        val workRequest: WorkRequest =
+            OneTimeWorkRequestBuilder<UpdateDataService>()
+                .build()
+
+        WorkManager.getInstance(this.applicationContext).enqueue(workRequest)
+    }
     //called by firestore when signin authentication is failed
     fun onFirestoreFailure(error: String) {
+        hideProgressDialog()
         showErrorSnackBar(error, true)
     }
 

@@ -33,19 +33,6 @@ class ProfileViewModel (
     private var _profileImageUploadStatus: MutableLiveData<String> = MutableLiveData()
     val profileImageUploadStatus: LiveData<String> = _profileImageUploadStatus
 
-
-      fun checkUserProfileDetails() = viewModelScope.launch (Dispatchers.IO) {
-          if (fsRepository.checkUserProfileDetails()) {
-              withContext(Dispatchers.Main) {
-                  _isNewUser.value = true
-              }
-          }else {
-           withContext(Dispatchers.Main) {
-               _isNewUser.value = false
-              }
-          }
-      }
-
     fun getUserProfile() = viewModelScope.launch (Dispatchers.IO) {
         val profile = dbRepository.getProfileData()!!
         withContext(Dispatchers.Main) {

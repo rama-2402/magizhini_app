@@ -380,6 +380,7 @@
                         android:layout_marginStart="@dimen/material_size_8"
                         android:layout_marginEnd="@dimen/material_size_8"
                         android:layout_marginTop="@dimen/material_size_8"
+                        android:visibility="gone"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:background="@drawable/bg_material_box"

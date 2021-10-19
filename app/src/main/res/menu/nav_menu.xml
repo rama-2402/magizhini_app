@@ -31,6 +31,10 @@
             android:title="CUSTOMER SUPPORT"
             android:icon="@drawable/ic_upport_agent"/>
         <item
+            android:id="@+id/menuReturn"
+            android:title="RETURN POLICY"
+            android:icon="@drawable/ic_return"/>
+        <item
             android:id="@+id/menuTermsOfUse"
             android:title="TERMS OF USE"
             android:icon="@drawable/ic_term_of_use" />
