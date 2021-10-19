@@ -150,11 +150,13 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     override fun onPaymentSuccess(response: String?) {
         mTransactionID = response!!
+        mOrder.isPaymentDone = true
         showSuccessDialog("","Placing Order... ","order")
         placeOrder()
     }
 
     override fun onPaymentError(p0: Int, p1: String?) {
+        mOrder.isPaymentDone = false
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
@@ -231,10 +233,12 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         })
 
         cartBtn.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             cartBottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
         checkoutBtn.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             if (mPaymentPreference == "COD") {
                 showSwipeConfirmationDialog(this, "swipe right to place order")
             } else {
@@ -359,6 +363,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         when (mPaymentPreference) {
             "Online" -> startPayment()
             "COD" -> {
+                mOrder.isPaymentDone = false
                 showSuccessDialog("","Placing Order... ","order")
                 placeOrder()
                 }
@@ -383,10 +388,13 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     private suspend fun validatingTransactionBeforeOrder(id: String) = withContext(Dispatchers.Main) {
         if ( id == "failed") {
+            hideSuccessDialog()
+            mOrder.isPaymentDone = false
             showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
             return@withContext
         } else {
             mTransactionID = id
+            mOrder.isPaymentDone = true
             delay(1500)
             hideSuccessDialog()
             showSuccessDialog("","Placing Order... ","order")
@@ -400,8 +408,6 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             transactionID = mTransactionID
             cart = mCartItems
             purchaseDate = Time().getCurrentDate()
-            isPaymentDone =
-                true   //todo we have to get the boolean data from transaction success
             paymentMethod = mPaymentPreference
             deliveryPreference =
                 binding.spDeliveryPreference.selectedItem.toString()
@@ -487,6 +493,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 }
             }
             ivCouponInfo.setOnClickListener {
+                ivCouponInfo.startAnimation(AnimationUtils.loadAnimation(ivCouponInfo.context, R.anim.bounce))
                 val content = "Minimum Purchase Amount: ${mCoupon.purchaseLimit} \n" +
                         "Maximum Discount Amount: ${mCoupon.maxDiscount}\n" +
                         "${mCoupon.description}"

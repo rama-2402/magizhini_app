@@ -9,14 +9,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirebaseReposit
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.WalletEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CustomerProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.kodein.di.android.subKodein
 
 class ProfileViewModel (
     val dbRepository: DatabaseRepository,

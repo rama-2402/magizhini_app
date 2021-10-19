@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -228,8 +229,11 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         if (v != null) {
             when (v) {
                 binding.cpShowAll -> {
-                    displaySelectedCategory(Constants.ALL_PRODUCTS)
-//                    populateData()
+                    lifecycleScope.launch {
+                        binding.cpShowAll.startAnimation(AnimationUtils.loadAnimation(binding.cpShowAll.context, R.anim.bounce))
+                        delay(150)
+                        displaySelectedCategory(Constants.ALL_PRODUCTS)
+                    }
                 }
                 binding.fabCart -> {
                     Intent(this, InvoiceActivity::class.java).also {

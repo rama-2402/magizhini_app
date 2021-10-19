@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -159,6 +160,7 @@ open class ShoppingMainAdapter(
 
         //favorites click listener
         holder.favorites.setOnClickListener {
+            holder.favorites.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             var removedItem: String = ""
             var addedItem: String = ""
 
@@ -182,6 +184,7 @@ open class ShoppingMainAdapter(
         }
 
         holder.addItem.setOnClickListener {
+            holder.addItem.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
 //            //checking if it is limited item. If yes, then item will not be added
 
             var limitedCheck: Boolean = false

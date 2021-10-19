@@ -136,14 +136,6 @@ interface UserProfileDao {
     @Query("SELECT * FROM CouponEntity WHERE code = :code")
     fun getCouponByCode(code: String): CouponEntity?
 
-
-    //wallet
-    @Query("SELECT * FROM WalletEntity")
-    fun getWallet(): WalletEntity?
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsertWallet(wallet: WalletEntity)
-
     //pincodes
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertPinCodes(PinCodes: PinCodesEntity)
@@ -156,8 +148,8 @@ interface UserProfileDao {
     @Insert(onConflict =  OnConflictStrategy.REPLACE)
     fun upsertSubscription(subscriptionEntity: SubscriptionEntity)
 
-    @Query("SELECT * FROM SubscriptionEntity")
-    fun getAllSubscriptionsHistory(): List<SubscriptionEntity>
+    @Query("SELECT * FROM SubscriptionEntity WHERE status = :status")
+    fun getAllSubscriptionsHistory(status: String): List<SubscriptionEntity>
 
     @Query("SELECT * FROM SubscriptionEntity WHERE id = :id")
     fun getSubscription(id: String): SubscriptionEntity

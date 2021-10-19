@@ -79,6 +79,8 @@ class FirestoreRepository (
 
     suspend fun generateOrderID(id: String): String = firestore.generateOrderID(id)
 
+    suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
+
     suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
 
 }

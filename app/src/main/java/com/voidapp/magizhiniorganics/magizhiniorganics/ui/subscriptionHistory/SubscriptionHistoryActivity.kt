@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.view.isGone
@@ -33,6 +34,7 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
     override val kodein: Kodein by kodein()
@@ -44,6 +46,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
 
     private var mSubscription: SubscriptionEntity = SubscriptionEntity()
     private var mAllSubscriptions: MutableList<SubscriptionEntity> = mutableListOf()
+    private val mSubscriptionStatusFilter: MutableList<String> = mutableListOf()
 
     private val TAG: String = "qqqq"
 
@@ -78,6 +81,10 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
                     }
                 }
             })
+
+            binding.fabMonthFilter.setOnClickListener {
+                showListBottomSheet(this@SubscriptionHistoryActivity, mSubscriptionStatusFilter as ArrayList<String>)
+            }
 
         }
     }
@@ -129,11 +136,28 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
         })
     }
 
-    private fun initLiveDate() {
-        viewModel.getSubscriptions()
+    fun setSubscriptionFilter(filter: String) {
+        when (filter) {
+            Constants.SUB_ACTIVE -> {
+                showShimmer()
+                viewModel.getSubscriptions(Constants.SUB_ACTIVE)
+            }
+            Constants.SUB_CANCELLED -> {
+                showShimmer()
+                viewModel.getSubscriptions(Constants.SUB_CANCELLED)
+            }
+        }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    private fun initLiveDate() {
+        viewModel.getSubscriptions(Constants.SUB_ACTIVE)
+        with (mSubscriptionStatusFilter) {
+            clear()
+            add(Constants.SUB_ACTIVE)
+            add(Constants.SUB_CANCELLED)
+        }
+    }
+
     fun showCalendarDialog(sub: SubscriptionEntity) {
         var unSubscribe: Boolean = true
         var cancelDate: Long = 0L
@@ -201,6 +225,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
         })
 
         view.unsubscribe.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(view.unsubscribe.context, R.anim.bounce))
             if (unSubscribe && sub.status == Constants.SUB_ACTIVE) {
                 calendarDialog.dismiss()
                 showExitSheet(this, "Cancel Subscription")

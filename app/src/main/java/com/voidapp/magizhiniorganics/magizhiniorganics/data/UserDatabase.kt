@@ -22,7 +22,6 @@ import org.kodein.di.Volatile
                 BannerEntity::class,
                 OrderEntity::class,
                 CartEntity::class,
-               WalletEntity::class,
                PinCodesEntity::class,
                SubscriptionEntity::class],
 

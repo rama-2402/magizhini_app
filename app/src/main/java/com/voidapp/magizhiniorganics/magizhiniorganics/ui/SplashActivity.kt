@@ -57,13 +57,13 @@ class SplashActivity : AppCompatActivity() {
 
             WorkManager.getInstance(this).enqueue(updateDeliveryWorkRequest)
 
-            if (isNewDay != Time().getCurrentDate()) {
+//            if (isNewDay != Time().getCurrentDate()) {
                 val workRequest: WorkRequest =
                     OneTimeWorkRequestBuilder<UpdateDataService>()
                         .build()
 
                 WorkManager.getInstance(this).enqueue(workRequest)
-            }
+//            }
 
             lifecycleScope.launch {
                 delay(2500)

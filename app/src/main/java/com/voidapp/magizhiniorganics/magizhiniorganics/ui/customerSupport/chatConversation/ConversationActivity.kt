@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -118,9 +119,11 @@ class ConversationActivity : BaseActivity(), KodeinAware {
                 onBackPressed()
             }
             ivAddAttachment.setOnClickListener {
+                ivAddAttachment.startAnimation(AnimationUtils.loadAnimation(ivAddAttachment.context, R.anim.bounce))
                 PermissionsUtil().checkStoragePermission(this@ConversationActivity)
             }
             ivsendMessage.setOnClickListener {
+                ivsendMessage.startAnimation(AnimationUtils.loadAnimation(ivsendMessage.context, R.anim.bounce))
                 validateText()
             }
             edtMessageInputBox.onFocusChangeListener =

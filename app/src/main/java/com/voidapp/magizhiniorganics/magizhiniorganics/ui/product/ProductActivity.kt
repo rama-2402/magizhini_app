@@ -8,6 +8,7 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -141,9 +142,11 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         })
 
         cartBtn.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             cartBottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
         }
         filterBtn.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             showAddCouponDialog()
         }
         checkoutBtn.setOnClickListener {
@@ -302,6 +305,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         }
 
         binding.ivFavourite.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             //favorites click listener
                 var removedItem: String = ""
                 var addedItem: String = ""

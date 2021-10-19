@@ -9,13 +9,15 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.WalletEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.kodein.di.bindings.WithContext
 
 class SubscriptionProductViewModel(
     private val dbRepository: DatabaseRepository,
@@ -27,8 +29,8 @@ class SubscriptionProductViewModel(
     val product: LiveData<ProductEntity> = _product
     private var _profile: MutableLiveData<UserProfileEntity> = MutableLiveData()
     val profile: LiveData<UserProfileEntity> = _profile
-    private var _wallet: MutableLiveData<WalletEntity> = MutableLiveData()
-    val wallet: LiveData<WalletEntity> = _wallet
+    private var _wallet: MutableLiveData<Wallet> = MutableLiveData()
+    val wallet: LiveData<Wallet> = _wallet
     private var _failed: MutableLiveData<String> = MutableLiveData()
     val failed: LiveData<String> = _failed
     private var _subStatus: MutableLiveData<String> = MutableLiveData()
@@ -55,11 +57,11 @@ class SubscriptionProductViewModel(
         }
     }
 
-    fun getWallet() {
+    fun getWallet(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val walletEntity = dbRepository.getWallet()
+            val wallet = fbRepository.getWallet(id)
             withContext(Dispatchers.Main) {
-                _wallet.value = walletEntity
+                _wallet.value = wallet
             }
         }
     }
@@ -77,5 +79,39 @@ class SubscriptionProductViewModel(
 
     fun subscriptionFailed(message: String) {
         _failed.value = message
+    }
+
+
+    suspend fun checkWalletForBalance(amount: Float, id: String): Boolean {
+        try {
+            val amountInWallet = fbRepository.getWalletAmount(id)
+            return amountInWallet >= amount
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String): String {
+        if (fbRepository.makeTransactionFromWallet(amount, id, "Remove")) {
+            val transaction = TransactionHistory (
+                orderID,
+                System.currentTimeMillis(),
+                Time().getMonth(),
+                Time().getYear().toLong(),
+                amount,
+                id,
+                id,
+                Constants.SUCCESS,
+                Constants.SUBSCRIPTION,
+                orderID
+            )
+            return fbRepository.updateTransaction(transaction)
+        } else {
+            return "failed"
+        }
+    }
+
+    suspend fun generateSubscriptionID(id: String): String = withContext(Dispatchers.IO) {
+        return@withContext fbRepository.generateSubscriptionID(id)
     }
 }

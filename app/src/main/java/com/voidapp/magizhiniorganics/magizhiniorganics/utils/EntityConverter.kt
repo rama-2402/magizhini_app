@@ -99,14 +99,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         monthYear = monthYear
     )
 
-    fun Wallet.toWalletEntity() = WalletEntity(
-        id = id,
-        amount = amount,
-        reminder = reminder,
-        nextRecharge = nextRecharge,
-        transactionHistory = transactionHistory
-    )
-
     fun PinCodes.toPinCodesEntity() = PinCodesEntity (
         id = id,
         areaCode = areaCode,

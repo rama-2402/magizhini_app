@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -89,6 +90,8 @@ open class BaseActivity : AppCompatActivity() {
         val snackBar =
             Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT)
         val snackBarView = snackBar.view
+        val text = snackBarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+        text.setTextColor(ContextCompat.getColor(text.context, R.color.white))
 
         if (errorMessage) {
             snackBarView.setBackgroundColor(
@@ -300,6 +303,10 @@ open class BaseActivity : AppCompatActivity() {
                     is SubscriptionProductActivity -> {
                         hideListBottomSheet()
                         activity.setPaymentFilter(selectedItem)
+                    }
+                    is SubscriptionHistoryActivity -> {
+                        hideListBottomSheet()
+                        activity.setSubscriptionFilter(selectedItem)
                     }
                 }
 

@@ -6,6 +6,7 @@ import android.provider.SyncStateContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
@@ -79,10 +80,12 @@ class PurchaseHistoryAdapter(
             }
 
             showCart.setOnClickListener {
+                showCart.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
                 cancelOrder(viewModel, order)
             }
 
             orderStatus.setOnClickListener {
+                orderStatus.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
                 cancelOrder(viewModel, order)
             }
 

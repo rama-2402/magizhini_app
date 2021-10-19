@@ -92,11 +92,6 @@ class DatabaseRepository(
 
     fun getCouponByCode(code: String) = db.getUserProfileDao().getCouponByCode(code)
 
-    //wallet
-    fun getWallet() = db.getUserProfileDao().getWallet()
-
-    fun upsertWallet(walletEntity: WalletEntity) = db.getUserProfileDao().upsertWallet(walletEntity)
-
     //pincodes
     fun upsertPinCodes(pinCodes: PinCodesEntity) = db.getUserProfileDao().upsertPinCodes(pinCodes)
 
@@ -105,7 +100,7 @@ class DatabaseRepository(
     //subscription
     fun upsertSubscription(subscriptionEntity: SubscriptionEntity) = db.getUserProfileDao().upsertSubscription(subscriptionEntity)
 
-    fun getAllSubscriptionsHistory() = db.getUserProfileDao().getAllSubscriptionsHistory()
+    fun getAllSubscriptionsHistory(status: String) = db.getUserProfileDao().getAllSubscriptionsHistory(status)
 
     fun getSubscription(id: String): SubscriptionEntity = db.getUserProfileDao().getSubscription(id)
 

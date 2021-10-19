@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -200,6 +201,9 @@ class ShoppingMainActivity :
             collapseSearchBar()
             when (checkedId) {
                 R.id.cpAll -> {
+                    binding.cpAll.also {
+                        it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                    }
                     showShimmer()
                     isFiltered = false
                     binding.flShimmerPlaceholder.startShimmer()
@@ -207,6 +211,9 @@ class ShoppingMainActivity :
                     viewModel.getAllProductsStatic()
                 }
                 R.id.cpSubscriptions -> {
+                    binding.cpSubscriptions.also {
+                        it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                    }
                     showShimmer()
                     isFiltered = false
                     binding.flShimmerPlaceholder.startShimmer()
@@ -216,11 +223,17 @@ class ShoppingMainActivity :
                 R.id.cpCategoryFilter -> {
                     //kept this chip as the default check in xml so that the bottom sheet wont be
                     //triggered when a category of product was selected from home screen
+                    binding.cpCategoryFilter.also {
+                        it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                    }
                     if (!isFiltered) {
                         openCategoryFilterDialog()
                     }
                 }
                 R.id.cpFavorites -> {
+                    binding.cpFavorites.also {
+                        it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                    }
                     showShimmer()
                     isFiltered = false
                     binding.flShimmerPlaceholder.startShimmer()
@@ -228,6 +241,9 @@ class ShoppingMainActivity :
                     viewModel.getAllFavoritesStatic()
                 }
                 R.id.cpDiscounts -> {
+                    binding.cpDiscounts.also {
+                        it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                    }
                     showShimmer()
                     isFiltered = false
                     binding.flShimmerPlaceholder.startShimmer()
@@ -236,6 +252,9 @@ class ShoppingMainActivity :
                     viewModel.getAllDiscountProducts()
                 }
                 R.id.cpLimitedItems -> {
+                    binding.cpLimitedItems.also {
+                        it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                    }
                     showShimmer()
                     isFiltered = false
                     binding.flShimmerPlaceholder.startShimmer()
@@ -353,10 +372,12 @@ class ShoppingMainActivity :
         })
 
         cartBtn.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             cartBottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
         filterBtn.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
             openCategoryFilterDialog()
         }

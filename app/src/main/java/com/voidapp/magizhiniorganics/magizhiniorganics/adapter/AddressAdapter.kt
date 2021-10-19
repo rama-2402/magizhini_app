@@ -66,20 +66,24 @@ class AddressAdapter(
             area.text = address.LocationCode
 
             add.setOnClickListener {
+                add.startAnimation(AnimationUtils.loadAnimation(add.context, R.anim.bounce))
                 viewModel.addNewAddress(position + 1)
             }
 
             card.setOnClickListener {
+                card.startAnimation(AnimationUtils.loadAnimation(card.context, R.anim.bounce))
                 viewModel.editAddress(address, position)
             }
 
             delete.setOnClickListener {
+                delete.startAnimation(AnimationUtils.loadAnimation(delete.context, R.anim.bounce))
                 viewModel.deleteAddress(userID, position)
             }
         }
 
         holder.uncheck.setOnClickListener {
             holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
+            holder.uncheck.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             viewModel.selectedAddress(address, position)
         }
     }

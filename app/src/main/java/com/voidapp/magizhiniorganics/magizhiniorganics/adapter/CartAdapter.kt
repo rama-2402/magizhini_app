@@ -104,6 +104,7 @@ class CartAdapter(
         }
 
         holder.add.setOnClickListener {
+            holder.add.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             val count = holder.orderCount.text.toString().toInt()
             if (count < limit) {
                 when(viewModel) {
@@ -114,6 +115,7 @@ class CartAdapter(
             }
         }
         holder.remove.setOnClickListener {
+            holder.remove.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             val count = holder.orderCount.text.toString().toInt()
             if (count > 1) {
                 when(viewModel) {
@@ -124,6 +126,7 @@ class CartAdapter(
             }
         }
         holder.delete.setOnClickListener {
+            holder.remove.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             when(viewModel) {
                 is ShoppingMainViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)
                 is ProductViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)

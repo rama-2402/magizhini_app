@@ -28,8 +28,8 @@ class SubscriptionHistoryViewModel(
     private var _subStatus: MutableLiveData<String> = MutableLiveData()
     val subStatus: LiveData<String> = _subStatus
 
-    fun getSubscriptions() = viewModelScope.launch(Dispatchers.IO) {
-        val subs = dbRepository.getAllSubscriptionsHistory()
+    fun getSubscriptions(status: String) = viewModelScope.launch(Dispatchers.IO) {
+        val subs = dbRepository.getAllSubscriptionsHistory(status)
         withContext(Dispatchers.Main) {
             _activeSubs.value = subs
         }

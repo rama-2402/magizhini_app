@@ -88,11 +88,8 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
             override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
                 super.onScrolled(recyclerView, up, down)
                 if (down > 0 && binding.fabMonthFilter.isVisible) {
-                    binding.fabMonthFilter.startAnimation(AnimationUtils.loadAnimation(this@PurchaseHistoryActivity, R.anim.slide_out_right))
-                    lifecycleScope.launch {
-                        delay(400)
-                        binding.fabMonthFilter.hide()
-                    }
+                    binding.fabMonthFilter.startAnimation(AnimationUtils.loadAnimation(binding.fabMonthFilter.context, R.anim.slide_out_right))
+                    binding.fabMonthFilter.hide()
                 } else if (down < 0 && binding.fabMonthFilter.isGone) {
                     binding.fabMonthFilter.show()
                     binding.fabMonthFilter.startAnimation(AnimationUtils.loadAnimation(this@PurchaseHistoryActivity, R.anim.slide_in_right))

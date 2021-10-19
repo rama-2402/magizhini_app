@@ -16,7 +16,6 @@ import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.WalletAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.WalletEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
@@ -45,7 +44,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private lateinit var transactionAdapter: WalletAdapter
     private var mWallet: Wallet = Wallet()
     private val mTransactions = mutableListOf<TransactionHistory>()
-    private val mTransaction = TransactionHistory()
     private var mProfile = UserProfile()
     private var mMoneyToAddInWallet: Long = 0L
 
@@ -155,16 +153,19 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         }
 
         binding.ivWalletFilter.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             DatePickerLib().pickSingleDate(this)
         }
 
         binding.ivReminder.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             binding.ivReminder.setImageResource(R.drawable.ic_notify_on)
             binding.ivReminder.imageTintList =
                 ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
         }
 
         binding.tvMonthFilter.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             showListBottomSheet(
                 this,
                 resources.getStringArray(R.array.months_name).toList() as ArrayList<String>
@@ -172,8 +173,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         }
 
         binding.ivInfo.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             //TODO: Show some info about wallet and it's functions
         }
+
         binding.fabAddMoney.setOnClickListener {
             //BS to add Amount number
             val dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
@@ -263,7 +266,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                     Time().getYear().toLong(),
                     mMoneyToAddInWallet.toFloat(),
                     id,
-                    orderID!!,
+                    orderID,
                     Constants.SUCCESS,
                     Constants.ADD_MONEY,
                     orderID

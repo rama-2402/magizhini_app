@@ -493,10 +493,10 @@ class Firestore(
     ) = withContext(Dispatchers.IO) {
         val sub = subscription.toSubscriptionEntity()
         try {
-            sub.id = mFireStore.collection(Constants.SUBSCRIPTION)
-                .document(Constants.SUB_ACTIVE)
-                .collection(subscription.monthYear)
-                .document().id
+//            sub.id = mFireStore.collection(Constants.SUBSCRIPTION)
+//                .document(Constants.SUB_ACTIVE)
+//                .collection(subscription.monthYear)
+//                .document().id
 
             val updateStore = async { updateStoreSubscription(sub) }
             val updateLocal = async { updateLocalSubscription(sub) }
@@ -613,4 +613,11 @@ class Firestore(
 
     suspend fun generateOrderID(id: String): String =
         mFireStore.collection(Constants.ORDER_HISTORY).document().id
+
+    suspend fun generateSubscriptionID(id: String): String =
+        mFireStore.collection(Constants.SUBSCRIPTION)
+            .document(Constants.SUB_ACTIVE)
+            .collection(id)
+            .document().id
+
 }

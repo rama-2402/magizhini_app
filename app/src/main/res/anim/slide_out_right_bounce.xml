@@ -5,7 +5,7 @@
 <translate
     android:fromXDelta="0"
     android:toXDelta="200%"
-    android:duration="1000"
+    android:duration="800"
     android:interpolator="@android:anim/bounce_interpolator"
     />
 
