@@ -23,7 +23,8 @@ import org.kodein.di.Volatile
                 OrderEntity::class,
                 CartEntity::class,
                PinCodesEntity::class,
-               SubscriptionEntity::class],
+               SubscriptionEntity::class,
+               Favorites::class],
 
     version = 2,
     exportSchema = false

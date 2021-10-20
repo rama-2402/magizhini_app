@@ -9,6 +9,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.coroutines.*
@@ -22,6 +24,7 @@ class ShoppingMainViewModel(
 
     var selectedChip: String = Constants.ALL
     var selectedCategory: String = ""
+    var profile = UserProfileEntity()
 
     private var _allProducts: MutableLiveData<List<ProductEntity>> = MutableLiveData()
     val allProduct: LiveData<List<ProductEntity>> = _allProducts
@@ -38,6 +41,9 @@ class ShoppingMainViewModel(
     private var _subscriptionProduct: MutableLiveData<ProductEntity> = MutableLiveData()
     val subscriptionProduct: LiveData<ProductEntity> = _subscriptionProduct
 
+    fun getProfile() {
+        profile = dbRepository.getProfileData()!!
+    }
     fun getAllCartItems() = dbRepository.getAllCartItems()
     fun getCartItemsPrice() = dbRepository.getCartPrice()
 
@@ -94,7 +100,7 @@ class ShoppingMainViewModel(
         getAllCartItems()
     }
 
-    private fun updatingTheCartInProduct(productId: String, variant: String) = viewModelScope.launch (Dispatchers.IO) {
+    private suspend fun updatingTheCartInProduct(productId: String, variant: String)  {
         val productEntity = dbRepository.getProductWithIdForUpdate(productId)
         productEntity.variantInCart.remove(variant)
         if (productEntity.variantInCart.isEmpty()) {
@@ -104,7 +110,8 @@ class ShoppingMainViewModel(
         updateShoppingMainPage()
     }
 
-    private fun updateShoppingMainPage() {
+    private suspend fun updateShoppingMainPage() {
+        delay(200)
         when(selectedChip) {
             Constants.ALL -> getAllProductsStatic()
             Constants.CATEGORY -> getAllProductByCategoryStatic(selectedCategory)
@@ -114,7 +121,8 @@ class ShoppingMainViewModel(
         }
     }
 
-    fun subscriptionItemToView(product: ProductEntity) {
+    fun subscriptionItemToView(product: ProductEntity) = viewModelScope.launch {
+        delay(150)
         _subscriptionProduct.value = product
     }
 
@@ -141,6 +149,7 @@ class ShoppingMainViewModel(
         product.variantInCart.add(variant)
         dbRepository.upsertProduct(product)
         getAllCartItems()
+        updateShoppingMainPage()
     }
 
     fun updateCartItem(id: Int, updatedCount: Int) = viewModelScope.launch (Dispatchers.IO) {
@@ -152,23 +161,58 @@ class ShoppingMainViewModel(
         dbRepository.upsertProduct(product)
     }
 
-    fun updateFavorites(id: String, position: Int, addedItem: String, removedItem:String) = viewModelScope.launch(Dispatchers.IO) {
-       //if if the passed on variable is empty then update will not take place indicating that it is not added or deleted
-        if (addedItem !== "") {
-            //we get the profile data and add/remove the item from the arraylist and then we update the profile data back
-           val profile = dbRepository.getProfileData()!!
-           profile.favorites.add(addedItem)
-           dbRepository.upsertProfile(profile)
-            //after the profile update in the database the update will be called for firestore data
-           fbRepository.addFavorties(id, addedItem)
-       }
-        if (removedItem !== "") {
-            val profile = dbRepository.getProfileData()!!
-            profile.favorites.remove(removedItem)
-            dbRepository.upsertProfile(profile)
-            fbRepository.removeFavorites(id, removedItem)
-            updateShoppingMainPage()
+//    fun updateFavorites(id: String, position: Int, addedItem: String, removedItem:String) = viewModelScope.launch(Dispatchers.IO) {
+//        delay(200)
+//       //if if the passed on variable is empty then update will not take place indicating that it is not added or deleted
+//        if (addedItem !== "") {
+//            //we get the profile data and add/remove the item from the arraylist and then we update the profile data back
+//           val profile = dbRepository.getProfileData()!!
+//           profile.favorites.add(addedItem)
+//           dbRepository.upsertProfile(profile)
+//            //after the profile update in the database the update will be called for firestore data
+//           fbRepository.addFavorties(id, addedItem)
+//       }
+//        if (removedItem !== "") {
+//            val profile = dbRepository.getProfileData()!!
+//            profile.favorites.remove(removedItem)
+//            dbRepository.upsertProfile(profile)
+//            fbRepository.removeFavorites(id, removedItem)
+//        }
+//        updateShoppingMainPage()
+//    }
+
+    fun updateFavorites(id: String, product: ProductEntity) = viewModelScope.launch(Dispatchers.IO) {
+        val localFavoritesUpdate = async { localFavoritesUpdate(product) }
+        val storeFavoritesUpdate = async { storeFavoritesUpdate(id, product) }
+        val updateProduct = async { updateProduct(product) }
+
+        localFavoritesUpdate.await()
+        storeFavoritesUpdate.await()
+        updateProduct.await()
+
+        updateShoppingMainPage()
+    }
+
+    private suspend fun localFavoritesUpdate(product: ProductEntity) = withContext(Dispatchers.IO) {
+        if (product.favorite) {
+            Favorites(product.id).also {
+                dbRepository.upsertFavorite(it)
+            }
+        } else {
+            dbRepository.deleteFavorite(product.id)
         }
+    }
+
+    private suspend fun storeFavoritesUpdate(id: String, product: ProductEntity) = withContext(Dispatchers.IO) {
+        if (product.favorite) {
+            fbRepository.addFavorties(id, product.id)
+        } else {
+            fbRepository.removeFavorites(id, product.id)
+        }
+    }
+
+    private suspend fun updateProduct(product: ProductEntity) = withContext(Dispatchers.IO) {
+        dbRepository.updateProductFavoriteStatus(product.id, product.favorite)
     }
 
     fun limitedItemsFilter() {
@@ -189,13 +233,12 @@ class ShoppingMainViewModel(
                 }
             }
         }
-        Log.e("qqqq", "limitedProducts: $products", )
         shoppingMainListener?.limitedItemList(products)
     }
 
     fun moveToProductDetails(id: String, name: String) {
         shoppingMainListener?.moveToProductDetails(id, name)
     }
-
-
 }
+
+

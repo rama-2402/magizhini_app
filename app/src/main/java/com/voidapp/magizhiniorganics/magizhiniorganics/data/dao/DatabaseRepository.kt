@@ -70,7 +70,7 @@ class DatabaseRepository(
     fun getOrderByID(id: String) = db.getUserProfileDao().getOrderByID(id)
 
     //updating the product entity with the user prefence favorites and cart items
-    fun updateFavorites(favorites: String, status: Boolean) = db.getUserProfileDao().updateFavorties(favorites, status)
+    fun updateProductFavoriteStatus(id: String, status: Boolean) = db.getUserProfileDao().updateProductFavoriteStatus(id, status)
 
     fun updateCartItemsToEntity(id: String, status: Boolean, coupon: String) = db.getUserProfileDao().updateCartItemsToEntity(id, status, coupon)
 
@@ -78,13 +78,17 @@ class DatabaseRepository(
 
     fun getProductWithIdForUpdate(id: String) = db.getUserProfileDao().getProductWithIdForUpdate(id)
 
-    fun getFavorites() = db.getUserProfileDao().getFavorites()
-
     fun getAllProductsStatic() = db.getUserProfileDao().getAllProductsStatic()
 
     fun getAllProductByCategoryStatic(category: String) = db.getUserProfileDao().getAllProductByCategoryStatic(category)
 
     fun getAllFavoritesStatic() = db.getUserProfileDao().getAllFavoritesStatic()
+
+    fun upsertFavorite(id: Favorites) = db.getUserProfileDao().upsertFavorite(id)
+
+    fun deleteFavorite(id: String) = db.getUserProfileDao().deleteFavorite(id)
+
+    fun getFavorites(): List<Favorites>? = db.getUserProfileDao().getFavorites()
 
     fun getAllCategoryNames() = db.getUserProfileDao().getAllCategoryNames()
 

@@ -306,24 +306,14 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
         binding.ivFavourite.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            //favorites click listener
-                var removedItem: String = ""
-                var addedItem: String = ""
-                //if the favorites array list that we got contains the clicked product id then it will be removed and notificatio will
-                //be sent to the view model with the current userID, position of the product so that itemchange can be notified only to that
-                //particular product once the product is added or remove from the favorites arraylist in the profile and then
-                // new array is added back to the adapter.
-
                 if (mProduct.favorite) {
-                    removedItem = mProductId
                     mProduct.favorite = false
                     binding.ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
                 } else {
-                    addedItem = mProductId
                     mProduct.favorite = true
                     binding.ivFavourite.setImageResource(R.drawable.ic_favorite_filled)
                 }
-                viewModel.updateFavorites(userId, addedItem, removedItem)
+                viewModel.updateFavorites(userId, mProduct)
                 viewModel.upsertProduct(productEntity = mProduct)
         }
 

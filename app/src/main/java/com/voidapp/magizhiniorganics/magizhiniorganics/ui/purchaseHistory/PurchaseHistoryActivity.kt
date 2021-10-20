@@ -173,6 +173,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         //observing the favorites livedata
         viewModel.favorites.observe(this, {
             orderItemsAdapter.favorites = it
+//            orderItemsAdapter.notifyDataSetChanged()
         })
 
         viewModel.moveToProductReview.observe(this, {

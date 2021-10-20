@@ -9,5 +9,6 @@ data class Review(
     var userProfilePicUrl: String = "",
     var timeStamp: Long = 0L,
     var rating: Int = 0,
-    var review: String = ""
+    var review: String = "",
+    var reviewImageUrl: String = ""
 ): Parcelable

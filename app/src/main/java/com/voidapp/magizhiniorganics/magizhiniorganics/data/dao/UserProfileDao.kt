@@ -69,7 +69,7 @@ interface UserProfileDao {
     @Query("SELECT * FROM VariantEntity")
     fun getAllDefaultVariantsList(): LiveData<List<VariantEntity>>
 
-    @Query("SELECT * FROM ProductEntity WHERE activated")
+    @Query("SELECT * FROM ProductEntity WHERE activated ORDER BY name")
     fun getAllProducts(): LiveData<List<ProductEntity>>
 
     @Query("SELECT * FROM ProductEntity WHERE activated ORDER BY name")
@@ -87,10 +87,10 @@ interface UserProfileDao {
     @Query("SELECT * FROM BannerEntity")
     fun getAllBanners(): LiveData<List<BannerEntity>>
 
-    @Query("SELECT * FROM PRODUCTENTITY WHERE category = :category AND activated")
+    @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated")
     fun getAllProductsInCategory(category: String): LiveData<List<ProductEntity>>
 
-    @Query("SELECT * FROM PRODUCTENTITY WHERE discountAvailable ORDER BY name")
+    @Query("SELECT * FROM ProductEntity WHERE discountAvailable ORDER BY name")
     fun getAllDiscountProducts(): List<ProductEntity>
 
     @Query("SELECT * FROM CouponEntity WHERE status = :status")
@@ -103,9 +103,6 @@ interface UserProfileDao {
     fun getOrderByID(id: String): OrderEntity?
 
     //updating the entity based on the user preference
-    @Query("UPDATE ProductEntity SET favorite = :status WHERE id = :favorites")
-    fun updateFavorties(favorites: String, status: Boolean)
-
     @Query("UPDATE ProductEntity SET inCart = :status , appliedCoupon = :coupon WHERE id = :id")
     fun updateCartItemsToEntity(id: String, status: Boolean, coupon: String)
 
@@ -118,10 +115,10 @@ interface UserProfileDao {
     @Query("SELECT * FROM ProductEntity WHERE productType = :filter")
     fun getAllSubscriptions(filter: String): List<ProductEntity>
 
-    @Query("SELECT * FROM productentity WHERE favorite ORDER BY name")
-    fun getFavorites(): LiveData<List<ProductEntity>>
+    @Query("UPDATE ProductEntity SET favorite = :status WHERE id = :id")
+    fun updateProductFavoriteStatus(id: String, status: Boolean)
 
-    @Query("SELECT * FROM PRODUCTENTITY WHERE category = :category AND activated ORDER BY name")
+    @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated ORDER BY name")
     fun getAllProductByCategoryStatic(category: String): List<ProductEntity>
 
     @Query("SELECT * FROM ProductEntity WHERE favorite ORDER BY name")
@@ -143,6 +140,14 @@ interface UserProfileDao {
     @Query("SELECT * FROM PinCodesEntity WHERE areaCode = :areaCode")
     fun getDeliveryCharge(areaCode: String): PinCodesEntity
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertFavorite(id: Favorites)
+
+    @Query("DELETE FROM Favorites WHERE id = :id")
+    fun deleteFavorite(id: String)
+
+    @Query("SELECT * FROM Favorites")
+    fun getFavorites(): List<Favorites>?
 
     //subscription
     @Insert(onConflict =  OnConflictStrategy.REPLACE)

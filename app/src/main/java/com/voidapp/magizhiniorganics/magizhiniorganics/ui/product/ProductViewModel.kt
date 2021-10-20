@@ -13,11 +13,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ProductViewModel(
     private val dbRepository: DatabaseRepository,
@@ -30,8 +27,6 @@ class ProductViewModel(
     val name: LiveData<String> = _name
     private var _profilePicUrl: MutableLiveData<String> = MutableLiveData()
     val profilePicUrl: LiveData<String> = _profilePicUrl
-    private var _orderHistory: MutableLiveData<ArrayList<String>> = MutableLiveData()
-    val orderHistory: LiveData<ArrayList<String>> = _orderHistory
     private var _reviews: MutableLiveData<ArrayList<Review>> = MutableLiveData()
     val reviews: LiveData<ArrayList<Review>> = _reviews
     private var _itemCount: MutableLiveData<ArrayList<ProductVariant>> = MutableLiveData()
@@ -44,8 +39,6 @@ class ProductViewModel(
     val isCouponApplied: LiveData<Boolean> = _isCouponApplied
 
     fun getCartItemsPrice() = dbRepository.getCartPrice()
-
-    fun getCouponByCode(code: String) = dbRepository.getCouponByCode(code)
 
     fun getProfileData() {
         viewModelScope.launch (Dispatchers.IO){
@@ -104,24 +97,39 @@ class ProductViewModel(
         dbRepository.upsertProduct(productEntity)
     }
 
-    fun updateFavorites(id: String, addedItem: String, removedItem:String) = viewModelScope.launch(Dispatchers.IO) {
-        //if if the passed on variable is empty then update will not take place indicating that it is not added or deleted
-        if (addedItem !== "") {
-            //we get the profile data and add/remove the item from the arraylist and then we update the profile data back
-            val profile = dbRepository.getProfileData()!!
-            profile.favorites.add(addedItem)
-            dbRepository.upsertProfile(profile)
-            //after the profile update in the database the update will be called for firestore data
-            fbRepository.addFavorties(id, addedItem)
-        }
-        if (removedItem !== "") {
-            val profile = dbRepository.getProfileData()!!
-            profile.favorites.remove(removedItem)
-            dbRepository.upsertProfile(profile)
-            fbRepository.removeFavorites(id, removedItem)
+
+    fun updateFavorites(id: String, product: ProductEntity) = viewModelScope.launch(Dispatchers.IO) {
+        val localFavoritesUpdate = async { localFavoritesUpdate(product) }
+        val storeFavoritesUpdate = async { storeFavoritesUpdate(id, product) }
+        val updateProduct = async { updateProduct(product) }
+
+        localFavoritesUpdate.await()
+        storeFavoritesUpdate.await()
+        updateProduct.await()
+
+    }
+
+    private suspend fun localFavoritesUpdate(product: ProductEntity) = withContext(Dispatchers.IO) {
+        if (product.favorite) {
+            Favorites(product.id).also {
+                dbRepository.upsertFavorite(it)
+            }
+        } else {
+            dbRepository.deleteFavorite(product.id)
         }
     }
 
+    private suspend fun storeFavoritesUpdate(id: String, product: ProductEntity) = withContext(Dispatchers.IO) {
+        if (product.favorite) {
+            fbRepository.addFavorties(id, product.id)
+        } else {
+            fbRepository.removeFavorites(id, product.id)
+        }
+    }
+
+    private suspend fun updateProduct(product: ProductEntity) = withContext(Dispatchers.IO) {
+        dbRepository.updateProductFavoriteStatus(product.id, product.favorite)
+    }
 
     //live data of the cart items
     fun getAllCartItems() = dbRepository.getAllCartItems()

@@ -89,6 +89,11 @@ class Firestore(
                 val profile = snapShot.toObject(UserProfile::class.java)
                 val userProfileEntity = profile!!.toUserProfileEntity()
                 repository.upsertProfile(userProfileEntity)
+                userProfileEntity.favorites.forEach { fav ->
+                    Favorites(fav).also {
+                        repository.upsertFavorite(it)
+                    }
+                }
                 return@withContext true
             } else {
                 return@withContext false
@@ -394,13 +399,13 @@ class Firestore(
                 .document(docID).update("purchaseHistory", FieldValue.arrayRemove(item)).await()
         }
 
-    fun addFavorites(id: String, item: String) = CoroutineScope(Dispatchers.IO).launch {
+    fun addFavorites(id: String, item: String) {
         //This function will add a new data if it is not present in the array
         mFireStore.collection(Constants.USERS)
             .document(id).update(Constants.FAVORITES, FieldValue.arrayUnion(item))
     }
 
-    fun removeFavorites(id: String, item: String) = CoroutineScope(Dispatchers.IO).launch {
+    fun removeFavorites(id: String, item: String) {
         mFireStore.collection(Constants.USERS)
             .document(id).update(Constants.FAVORITES, FieldValue.arrayRemove(item))
     }

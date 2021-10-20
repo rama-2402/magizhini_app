@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.PinCodesEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
@@ -165,9 +166,9 @@ class UpdateDataService (
     //Function to update the products entity with user preferences like favorites, cart items and coupons added
     private fun updateEntityData() {
         try {
-            val profile: UserProfileEntity? = repository.getProfileData()
-            profile?.favorites?.forEach {
-                repository.updateFavorites(it, status = true)
+            val favorites: List<Favorites>? = repository.getFavorites()
+            favorites?.forEach {
+                repository.updateProductFavoriteStatus(it.id, status = true)
             }
             repository.getAllCartItemsForEntityUpdate().forEach {
                 with(it) {

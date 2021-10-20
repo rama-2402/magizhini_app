@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityShoppingMainBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
@@ -89,6 +89,9 @@ class ShoppingMainActivity :
     }
 
     private fun observeLiveData() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.getProfile()
+        }
         viewModel.allProduct.observe(this, {
             viewModel.selectedChip = Constants.ALL
             mItems = it

@@ -31,6 +31,9 @@ open class ShoppingMainAdapter(
 
     //we are defining this as a global variable coz this has to be accesible by the extension function that calculated the discounted price
     var discountedPrice: Float = 0F
+    //getting the current user id so that favorites can be added to firestore data
+    val id: String =
+        SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
 
     inner class ShoppingMainViewHolder(val itemView: View) : RecyclerView.ViewHolder(itemView) {
         //small discount layout in the thumbnail
@@ -74,23 +77,8 @@ open class ShoppingMainAdapter(
         //setting the thumbnail
         GlideLoader().loadUserPicture(context, product.thumbnailUrl, holder.productThumbNail)
 
-        //getting the current user id so that favorites can be added to firestore data
-        val id: String =
-            SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
-
         //details view
         holder.productName.text = product.name
-
-        //if discount is available then we make the discount layout visible and set the discount amount and percentage
-        if (product.discountAvailable) {
-            holder.discountLayout.visibility = View.VISIBLE
-            holder.price.visibility = View.VISIBLE
-            setDiscountedValues(holder, product, variantPrice, 0)
-        } else {
-            holder.discountLayout.visibility = View.INVISIBLE
-            holder.price.visibility = View.INVISIBLE
-            holder.discountedAmount.text = variantPrice.toString()
-        }
 
         //setting the favorties icon for the products
         if (product.favorite) {
@@ -102,6 +90,9 @@ open class ShoppingMainAdapter(
         //create a mutable list of variant names for the spinner
         for (i in 0 until product.variants.size) {
             val variant = "${product.variants[i].variantName} ${product.variants[i].variantType}"
+            if (product.variantInCart.contains(variant)) {
+                variantInCartPosition = i
+            }
             variantNames.add(variant)
         }
 
@@ -112,6 +103,18 @@ open class ShoppingMainAdapter(
             variantNames
         )
         holder.variants.adapter = adapter
+        holder.variants.setSelection(variantInCartPosition)
+
+        //if discount is available then we make the discount layout visible and set the discount amount and percentage
+        if (product.discountAvailable) {
+            holder.discountLayout.visibility = View.VISIBLE
+            holder.price.visibility = View.VISIBLE
+            setDiscountedValues(holder, product, variantPrice, variantInCartPosition)
+        } else {
+            holder.discountLayout.visibility = View.INVISIBLE
+            holder.price.visibility = View.INVISIBLE
+            holder.discountedAmount.text = variantPrice.toString()
+        }
 
         setCartItems(product, variantName, holder)
 
@@ -161,26 +164,8 @@ open class ShoppingMainAdapter(
         //favorites click listener
         holder.favorites.setOnClickListener {
             holder.favorites.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-            var removedItem: String = ""
-            var addedItem: String = ""
-
-            //if the favorites array list that we got contains the clicked product id then it will be removed and notificatio will
-            //be sent to the view model with the current userID, position of the product so that itemchange can be notified only to that
-            //particular product once the product is added or remove from the favorites arraylist in the profile and then
-            // new array is added back to the adapter.
-
-            if (product.favorite) {
-                removedItem = product.id
-                holder.favorites.setImageResource(R.drawable.ic_favorite_outline)
-                product.favorite = false
-            } else {
-                addedItem = product.id
-                holder.favorites.setImageResource(R.drawable.ic_favorite_filled)
-                product.favorite = true
-            }
-            viewModel.upsertProduct(product)
-
-            viewModel.updateFavorites(id, position, addedItem, removedItem)
+            product.favorite = !product.favorite
+            viewModel.updateFavorites(id, product)
         }
 
         holder.addItem.setOnClickListener {
@@ -227,8 +212,6 @@ open class ShoppingMainAdapter(
                                 )
                             setBackgroundResource(R.drawable.shape_round_rectangle_8)
                             Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
-//                    product.variantInCart.add(variantName)
-//                    viewModel.upsertProduct(product)
                             viewModel.upsertCartItem(
                                 productId,
                                 product.name,

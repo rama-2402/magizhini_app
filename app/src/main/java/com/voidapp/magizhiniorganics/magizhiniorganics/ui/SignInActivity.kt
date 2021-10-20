@@ -187,7 +187,6 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     fun loggedIn() {
-
         SharedPref(this).putData(Constants.USER_ID, Constants.STRING, mFirebaseAuth.currentUser!!.uid)
         startGetAllDataService()
         lifecycleScope.launch (Dispatchers.Main) {
@@ -195,6 +194,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 startGetProfileDataService()
                 delay(2000)
                 hideProgressDialog()
+                SharedPref(this@SignInActivity).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
                 Intent(this@SignInActivity, HomeActivity::class.java).also {
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)

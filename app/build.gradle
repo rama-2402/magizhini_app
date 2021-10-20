@@ -167,4 +167,7 @@ dependencies {
 
     implementation 'com.razorpay:checkout:1.6.12'
 
+
+    implementation 'com.itextpdf:itextg:5.5.10'
+
 }
