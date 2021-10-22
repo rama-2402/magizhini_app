@@ -1,17 +1,20 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
+import android.media.Image
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
-import com.hsalf.smilerating.SmileRating
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
 import kotlin.collections.ArrayList
@@ -26,8 +29,10 @@ class ReviewAdapter(
         val profilePic: ImageView = itemView.findViewById(R.id.ivProfilePic)
         val profileName: TextView = itemView.findViewById(R.id.tvProfileName)
         val timeStamp: TextView = itemView.findViewById(R.id.tvTimestamp)
-        val ratings: SmileRating = itemView.findViewById(R.id.srRating)
+        val ratings: ImageView = itemView.findViewById(R.id.ivReview)
+        val reviewText: TextView = itemView.findViewById(R.id.tvReviewText)
         val reviewContent: TextView = itemView.findViewById(R.id.tvReview)
+        val reviewImage: ShapeableImageView = itemView.findViewById(R.id.ivReviewImage)
     }
 
     override fun onCreateViewHolder(
@@ -42,7 +47,13 @@ class ReviewAdapter(
     override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
         val review = reviews[position]
         with(holder) {
-            GlideLoader().loadUserPicture(context, review.userProfilePicUrl, profilePic)
+            GlideLoader().loadUserPicture(profilePic.context, review.userProfilePicUrl, profilePic)
+            if (review.reviewImageUrl.isEmpty()) {
+                reviewImage.visibility = View.GONE
+            } else {
+                reviewImage.visibility = View.VISIBLE
+                GlideLoader().loadUserPicture(reviewImage.context, review.reviewImageUrl, reviewImage)
+            }
             profileName.text = review.userName
             timeStamp.text = Time().getCustomDate(dateLong = review.timeStamp)
 //            Timer("SettingUp", false).schedule(1000) {
@@ -53,9 +64,37 @@ class ReviewAdapter(
 //            }
 //                ratings.setFaceColor(SmileyRating.Type.GREAT, Color.BLUE)
 
-            ratings.setSelectedSmile(review.rating-1, false)
+            when (review.rating) {
+                1 -> {
+                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_bad))
+                    reviewText.text = "Bad"
+                }
+                2 -> {
+                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_ok))
+                    reviewText.text = "Not Satisfied"
+                }
+                3 -> {
+                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_satisfied))
+                    reviewText.text = "Satisfied"
+                }
+                4 -> {
+                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_great))
+                    reviewText.text = "Great"
+                }
+                5 -> {
+                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_awesome))
+                    reviewText.text = "Awesome"
+                }
+            }
 
             reviewContent.text = getReviewContent(review.review)
+
+            reviewImage.setOnClickListener {
+                when (viewModel) {
+                    is ProductViewModel -> viewModel.previewImage(review.reviewImageUrl)
+                    is SubscriptionProductViewModel -> viewModel.previewImage(review.reviewImageUrl)
+                }
+            }
         }
     }
 

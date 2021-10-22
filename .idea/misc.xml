@@ -34,7 +34,7 @@
         <entry key="app/src/main/res/drawable/unselected_indicator.xml" value="0.559375" />
         <entry key="app/src/main/res/layout/activity_chat.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_checkout.xml" value="0.5" />
-        <entry key="app/src/main/res/layout/activity_conversation.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/activity_conversation.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_home.xml" value="0.18211752786220872" />
         <entry key="app/src/main/res/layout/activity_on_boarding.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_product.xml" value="0.33" />

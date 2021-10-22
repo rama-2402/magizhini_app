@@ -27,7 +27,7 @@ class FirestoreRepository (
 
     suspend fun checkUserProfileDetails(): Boolean = firestore.checkUserProfileDetails()
 
-    suspend fun uploadImage(path: String, uri: Uri, extension: String): String = firestore.uploadImage(path, uri, extension)
+    suspend fun uploadImage(path: String, uri: Uri, extension: String, data: String = ""): String = firestore.uploadImage(path, uri, extension, data)
 
     suspend fun uploadProfile(profile: UserProfile): Boolean = firestore.uploadProfile(profile)
 

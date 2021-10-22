@@ -118,23 +118,31 @@ class Firestore(
     suspend fun uploadImage (
         path: String,
         uri: Uri,
-        extension: String
+        extension: String,
+        data: String = ""
     ): String = withContext(Dispatchers.IO) {
-                    val name = getCurrentUserId()
-                    try {
-                        val sRef: StorageReference = mFireStoreStorage.child(
-                            "$path$name.$extension"
-                        )
+        val name = when(data) {
+            "review" -> {
+                val charset = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz0123456789"
+                "img_${(1..10).map { charset.random() }.joinToString("")}"
+            }
+            else -> getCurrentUserId()
+        }
 
-                        val url = sRef.putFile(uri)
-                            .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
+        try {
+            val sRef: StorageReference = mFireStoreStorage.child(
+                "$path$name.$extension"
+            )
 
-                       return@withContext url.toString()
+            val url = sRef.putFile(uri)
+                .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
 
-                    } catch (e: Exception) {
-                        return@withContext "failed"
-                    }
-                }
+           return@withContext url.toString()
+
+        } catch (e: Exception) {
+            return@withContext "failed"
+        }
+    }
 
     suspend fun uploadProfile(profile: UserProfile): Boolean =
         withContext(Dispatchers.IO) {

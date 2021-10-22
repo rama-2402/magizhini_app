@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.GlideBuilder
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ConversationAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Messages
@@ -37,6 +38,7 @@ class ConversationActivity : BaseActivity(), KodeinAware {
     private var mSelectedProfile: SupportProfile = SupportProfile()
     private var mCurrentUserId: String = ""
     private val mMessages: ArrayList<Messages> = arrayListOf()
+    private var isZoomed: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +81,12 @@ class ConversationActivity : BaseActivity(), KodeinAware {
                 hideProgressDialog()
                 generateMessageObjectAndSend(Constants.IMAGE, it)
             }
+        })
+        viewModel.imageUrl.observe(this, {
+            GlideLoader().loadUserPictureWithoutCrop(binding.ivReviewImageChat.context, it, binding.ivReviewImageChat)
+            binding.ivReviewImageChat.startAnimation(Animations.scaleBig)
+            binding.ivReviewImageChat.show()
+            isZoomed = true
         })
     }
 
@@ -137,6 +145,9 @@ class ConversationActivity : BaseActivity(), KodeinAware {
                         viewModel.updateTypingStatus(mCurrentUserId, false)
                     }
                 }
+            ivReviewImageChat.setOnClickListener {
+                onBackPressed()
+            }
         }
     }
 
@@ -175,12 +186,22 @@ class ConversationActivity : BaseActivity(), KodeinAware {
     }
 
     override fun onBackPressed() {
-        viewModel.updateTypingStatus(mCurrentUserId, false)
-        Intent(this, ChatActivity::class.java).also {
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-            finish()
+        when {
+            isZoomed -> {
+                binding.ivReviewImageChat.startAnimation(Animations.scaleSmall)
+                binding.ivReviewImageChat.gone()
+                isZoomed = false
+            }
+            else -> {
+                viewModel.updateTypingStatus(mCurrentUserId, false)
+                Intent(this, ChatActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                }
+            }
         }
+
     }
 
     override fun onRequestPermissionsResult(

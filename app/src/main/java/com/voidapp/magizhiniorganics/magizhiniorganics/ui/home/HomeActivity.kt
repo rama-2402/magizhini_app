@@ -80,6 +80,10 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
 
         binding.nvNavigationView.setNavigationItemSelectedListener(this)
 
+        if (binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
+        }
+
         showProgressDialog()
 
         generateRecyclerView()
@@ -246,7 +250,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
         when (item.itemId) {
             R.id.menuLogOut -> {
                 SharedPref(this).clearAllData()

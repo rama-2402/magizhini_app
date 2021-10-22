@@ -23,7 +23,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Subscriptio
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionHistoryBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCalendarBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Animations
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -134,6 +136,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
                 }
             }
         })
+
     }
 
     fun setSubscriptionFilter(filter: String) {

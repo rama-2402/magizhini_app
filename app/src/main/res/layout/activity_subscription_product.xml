@@ -13,6 +13,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.subscriptions.SubscriptionProductActivity">
+
+    <ImageView
+        android:id="@+id/ivPreviewImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:elevation="32dp"
+        android:visibility="gone"
+        />
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/tbAppBar"
         android:layout_width="match_parent"
@@ -359,11 +369,15 @@
                         android:visibility="gone"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        tools:context=".ui.product.fragments.NewReviewFragment"
                         android:orientation="vertical"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:gravity="center_horizontal"
+                        android:paddingBottom="@dimen/material_size_32"
                         app:layout_constraintTop_toBottomOf="@id/cpAddReview"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:gravity="center">
+                        >
 
                         <com.hsalf.smileyrating.SmileyRating
                             android:id="@+id/srSmileyRating"
@@ -371,57 +385,96 @@
                             android:layout_height="wrap_content"
                             android:layout_margin="@dimen/material_size_16" />
 
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/ivReviewImage"
+                            android:layout_width="match_parent"
+                            android:layout_marginStart="@dimen/material_size_16"
+                            android:layout_marginEnd="@dimen/material_size_16"
+                            android:elevation="@dimen/material_size_8"
+                            android:layout_marginTop="@dimen/material_size_8"
+                            android:layout_height="200dp"
+                            android:visibility="gone"
+                            android:scaleType="fitCenter"
+                            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                            />
+
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/etlDescription"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
-                            android:layout_height="150dp"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="true"
+                            android:gravity="top"
                             android:hint="Review"
-                            android:layout_marginTop="@dimen/material_size_16"
-                            android:layout_marginStart="@dimen/material_size_8"
-                            android:layout_marginEnd="@dimen/material_size_8"
                             app:boxStrokeColor="@color/green_base"
-                            app:flow_wrapMode="aligned"
-                            app:endIconMode="clear_text"
-                            android:scrollbars ="vertical"
                             android:textColorHint="@color/grey"
-                            android:isScrollContainer="true"
-                            android:overScrollMode="always"
+                            app:endIconMode="clear_text"
+                            app:endIconTint="@color/grey"
+                            app:flow_wrapMode="aligned"
                             app:hintTextColor="@color/green_base"
-                            app:layout_constraintTop_toBottomOf="@id/spDeliveryPreference"
-                            app:layout_constraintStart_toStartOf="parent">
+                            android:layout_margin="@dimen/material_size_16"
+                            >
 
                             <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etDescription"
+                                android:id="@+id/edtDescription"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:cursorVisible="true"
+                                android:textCursorDrawable="@null"
+                                android:gravity="top|left"
                                 android:inputType="textMultiLine"
-                                android:gravity="top"
-                                android:isScrollContainer="true"
-                                android:overScrollMode="always"
+                                android:overScrollMode="ifContentScrolls"
+                                android:nestedScrollingEnabled="true"
                                 android:scrollbars="vertical"
                                 android:textColorHint="@color/green_base"
-                                android:textColor="@color/black"
-                                android:textCursorDrawable="@null" />
+                                />
                         </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnSaveReview"
-                            android:layout_width="wrap_content"
+                        <!--    <com.google.android.material.button.MaterialButton-->
+                        <!--        android:id="@+id/btnSaveReview"-->
+                        <!--        android:layout_width="wrap_content"-->
+                        <!--        android:layout_height="wrap_content"-->
+                        <!--        android:layout_marginStart="8dp"-->
+                        <!--        android:layout_marginEnd="8dp"-->
+                        <!--        android:paddingStart="16dp"-->
+                        <!--        android:paddingEnd="16dp"-->
+                        <!--        android:elevation="8dp"-->
+                        <!--        app:elevation="8dp"-->
+                        <!--        android:textColor="@color/white"-->
+                        <!--        android:backgroundTint="@color/green_base"-->
+                        <!--        app:icon="@drawable/ic_save"-->
+                        <!--        android:text="save review"/>-->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp"
-                            android:elevation="8dp"
-                            app:elevation="8dp"
-                            android:textColor="@color/white"
-                            android:backgroundTint="@color/green_base"
-                            app:icon="@drawable/ic_save"
-                            android:text="save review"/>
-                    </LinearLayout>
+                            android:orientation="horizontal"
+                            android:gravity="center_horizontal">
+                            <TextView
+                                android:id="@+id/btnAddImage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Add Image"
+                                android:textColor="@color/white"
+                                android:textStyle="bold"
+                                android:background="@drawable/shape_round_rectangle_8"
+                                android:backgroundTint="@color/green_base"
+                                android:layout_margin="@dimen/material_size_8"
+                                android:elevation="6dp"
+                                android:padding="@dimen/material_size_8"/>
+                            <TextView
+                                android:id="@+id/btnSaveReview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Add Review"
+                                android:textColor="@color/white"
+                                android:textStyle="bold"
+                                android:background="@drawable/shape_round_rectangle_8"
+                                android:layout_margin="@dimen/material_size_8"
+                                android:backgroundTint="@color/green_base"
+                                android:elevation="6dp"
+                                android:padding="@dimen/material_size_8"/>
+                        </LinearLayout>
 
+                    </LinearLayout>
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvReviews"
                         android:layout_width="match_parent"

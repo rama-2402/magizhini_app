@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -24,6 +25,7 @@ class SubscriptionProductViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
     var mProductID = ""
+    var mUpdatedProductReview = ProductEntity()
 
     private var _product: MutableLiveData<ProductEntity> = MutableLiveData()
     val product: LiveData<ProductEntity> = _product
@@ -35,6 +37,16 @@ class SubscriptionProductViewModel(
     val failed: LiveData<String> = _failed
     private var _subStatus: MutableLiveData<String> = MutableLiveData()
     val subStatus: LiveData<String> = _subStatus
+    private var _previewImage: MutableLiveData<String> = MutableLiveData()
+    val reviewImage: LiveData<String> = _previewImage
+    private var _serverError: MutableLiveData<Boolean> = MutableLiveData()
+    val serverError: LiveData<Boolean> = _serverError
+    private var _uploadingReviewStatus: MutableLiveData<Int> = MutableLiveData()
+    val uploadingReviewStatus: LiveData<Int> = _uploadingReviewStatus
+
+    fun previewImage(url: String) {
+        _previewImage.value = url
+    }
 
     fun getProductByID(id: String) = viewModelScope.launch(Dispatchers.IO) {
         val product = dbRepository.getProductWithIdForUpdate(id)
@@ -43,10 +55,50 @@ class SubscriptionProductViewModel(
         }
     }
 
-    fun upsertProductReview(id: String, review: Review, productEntity: ProductEntity) = viewModelScope.launch (Dispatchers.IO) {
-        dbRepository.upsertProduct(productEntity)
-        fbRepository.addReview(id, review)
-    }
+    suspend fun upsertProductReview(
+        review: Review,
+        productEntity: ProductEntity,
+        uri: Uri?,
+        extension: String
+    ): Boolean =
+        withContext(Dispatchers.IO) {
+            if (uri == null) {
+                productEntity.reviews.add(review)
+                mUpdatedProductReview = productEntity
+                dbRepository.upsertProduct(productEntity)
+                fbRepository.addReview(productEntity.id, review)
+                return@withContext true
+            } else {
+                withContext(Dispatchers.Main) {
+                    _uploadingReviewStatus.value = +1
+                }
+                val imageUrl = fbRepository.uploadImage(
+                    "${Constants.REVIEW_IMAGE_PATH}${productEntity.id}/",
+                    uri,
+                    extension,
+                    "review"
+                )
+
+                if (imageUrl == "failed") {
+                    if (_serverError.value == true) {
+                        _serverError.value = false
+                    } else {
+                        _serverError.value = true
+                    }
+                    return@withContext false
+                } else {
+                    review.reviewImageUrl = imageUrl
+                    productEntity.reviews.add(review)
+                    mUpdatedProductReview = productEntity
+                    dbRepository.upsertProduct(productEntity)
+                    fbRepository.addReview(productEntity.id, review)
+                    withContext(Dispatchers.Main) {
+                        _uploadingReviewStatus.value = -5
+                    }
+                    return@withContext true
+                }
+            }
+        }
 
     fun getProfileData() {
         viewModelScope.launch (Dispatchers.IO){

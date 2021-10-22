@@ -202,15 +202,6 @@ open class ShoppingMainAdapter(
                     }
                     "Add" -> {
                         if (!limitedCheck) {
-                            text = "Remove"
-                            backgroundTintList =
-                                ColorStateList.valueOf(
-                                    ContextCompat.getColor(
-                                        context,
-                                        R.color.matteRed
-                                    )
-                                )
-                            setBackgroundResource(R.drawable.shape_round_rectangle_8)
                             Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
                             viewModel.upsertCartItem(
                                 productId,
@@ -226,10 +217,6 @@ open class ShoppingMainAdapter(
                         }
                     }
                     else -> {
-                        text = "Add"
-                        backgroundTintList =
-                            ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
-                        setBackgroundResource(R.drawable.shape_round_rectangle_8)
                         Toast.makeText(context, "Removed from Cart", Toast.LENGTH_SHORT).show()
                         viewModel.deleteCartItemFromShoppingMain(productId, variantName)
                     }
@@ -253,32 +240,6 @@ open class ShoppingMainAdapter(
         position: Int
     ) {
         if (product.discountAvailable) {
-            when (discountAvailability(product, position)) {
-                "product" -> {
-                    holder.discountAmount.text = product.discountAmt.toString()
-                    //setting up the product discount info
-                    if (product.discountType == "Percentage") {
-                        holder.discountType.text = "%"
-                        discountedPrice = calculateDiscountedAmount(
-                            "Percentage",
-                            product.discountAmt,
-                            product.variants[position].variantPrice
-                        ).toFloat()
-                        holder.discountedAmount.text =
-                            discountedPrice.toString()
-                    } else {
-                        holder.discountType.text = "Rs"
-                        discountedPrice = calculateDiscountedAmount(
-                            "rupees",
-                            product.discountAmt,
-                            product.variants[position].variantPrice
-                        ).toFloat()
-                        holder.discountedAmount.text =
-                            discountedPrice.toString()
-
-                    }
-                }
-                "variant" -> {
                     holder.discountAmount.text =
                         product.variants[position].discountPercent.toString()
                     //setting up the product discount info
@@ -300,8 +261,6 @@ open class ShoppingMainAdapter(
                         ).toFloat()
                         holder.discountedAmount.text = discountedPrice.toString()
                     }
-                }
-            }
         } else {
             holder.discountedAmount.text = variantPrice.toString()
             discountedPrice = variantPrice
@@ -380,13 +339,6 @@ open class ShoppingMainAdapter(
                 }
             }
         }
-    }
-
-    private fun discountAvailability(productEntity: ProductEntity, position: Int): String {
-        return if (productEntity.variants[position].variantDiscount) {
-            "variant"
-        } else
-            "product"
     }
 
     override fun getItemCount(): Int {

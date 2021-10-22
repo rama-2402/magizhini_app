@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.product
 
 import android.accessibilityservice.GestureDescription
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -37,15 +38,25 @@ class ProductViewModel(
     val couponIndex: LiveData<Int> = _couponIndex
     private var _isCouponApplied: MutableLiveData<Boolean> = MutableLiveData()
     val isCouponApplied: LiveData<Boolean> = _isCouponApplied
+    private var _serverError: MutableLiveData<Boolean> = MutableLiveData()
+    val serverError: LiveData<Boolean> = _serverError
+    private var _uplodaingReviewStatus: MutableLiveData<Int> = MutableLiveData()
+    val uplodaingReviewStatus: LiveData<Int> = _uplodaingReviewStatus
+    private var _previewImage: MutableLiveData<String> = MutableLiveData()
+    val reviewImage: LiveData<String> = _previewImage
 
     fun getCartItemsPrice() = dbRepository.getCartPrice()
 
+    fun previewImage(url: String) {
+        _previewImage.value = url
+    }
+
     fun getProfileData() {
-        viewModelScope.launch (Dispatchers.IO){
+        viewModelScope.launch(Dispatchers.IO) {
             val profile = dbRepository.getProfileData()!!
             val name = profile.name
             val url = profile.profilePicUrl
-        withContext(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
                 _name.value = name
                 _profilePicUrl.value = url
             }
@@ -62,14 +73,14 @@ class ProductViewModel(
         //it will take priority over the total product discount
         when (discountAvailability(productEntity, position)) {
             "variant" -> {
-                return if ( variant.discountType == "Percentage") {
+                return if (variant.discountType == "Percentage") {
                     "${(price - (price * discountAmount) / 100)}"
                 } else {
                     "${price - discountAmount}"
                 }
             }
             "product" -> {
-                return if ( productEntity.discountType == "Percentage") {
+                return if (productEntity.discountType == "Percentage") {
                     "${(price - (price * productEntity.discountAmt) / 100)}"
                 } else {
                     "${price - productEntity.discountAmt}"
@@ -88,15 +99,52 @@ class ProductViewModel(
             "product"
     }
 
-    fun upsertProductReview(id: String, review: Review, productEntity: ProductEntity) = viewModelScope.launch (Dispatchers.IO) {
-        dbRepository.upsertProduct(productEntity)
-        fbRepository.addReview(id, review)
-    }
+    suspend fun upsertProductReview(
+        review: Review,
+        productEntity: ProductEntity,
+        uri: Uri?,
+        extension: String
+    ): Boolean =
+        withContext(Dispatchers.IO) {
+            if (uri == null) {
+                productEntity.reviews.add(review)
+                dbRepository.upsertProduct(productEntity)
+                fbRepository.addReview(productEntity.id, review)
+                return@withContext true
+            } else {
+                withContext(Dispatchers.Main) {
+                    _uplodaingReviewStatus.value = +1
+                }
+                val imageUrl = fbRepository.uploadImage(
+                    "${Constants.REVIEW_IMAGE_PATH}${productEntity.id}/",
+                    uri,
+                    extension,
+                    "review"
+                )
+
+                if (imageUrl == "failed") {
+                    if (_serverError.value == true) {
+                        _serverError.value = false
+                    } else {
+                        _serverError.value = true
+                    }
+                    return@withContext false
+                } else {
+                    review.reviewImageUrl = imageUrl
+                    productEntity.reviews.add(review)
+                    dbRepository.upsertProduct(productEntity)
+                    fbRepository.addReview(productEntity.id, review)
+                    withContext(Dispatchers.Main) {
+                        _uplodaingReviewStatus.value = -5
+                    }
+                    return@withContext true
+                }
+            }
+        }
 
     fun upsertProduct(productEntity: ProductEntity) = viewModelScope.launch (Dispatchers.IO) {
         dbRepository.upsertProduct(productEntity)
     }
-
 
     fun updateFavorites(id: String, product: ProductEntity) = viewModelScope.launch(Dispatchers.IO) {
         val localFavoritesUpdate = async { localFavoritesUpdate(product) }
@@ -106,7 +154,6 @@ class ProductViewModel(
         localFavoritesUpdate.await()
         storeFavoritesUpdate.await()
         updateProduct.await()
-
     }
 
     private suspend fun localFavoritesUpdate(product: ProductEntity) = withContext(Dispatchers.IO) {
@@ -219,4 +266,6 @@ class ProductViewModel(
     fun removeCouponCode() {
         _isCouponApplied.value = false
     }
+
+
 }

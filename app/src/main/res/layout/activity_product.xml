@@ -19,7 +19,14 @@
         <include
             layout="@layout/dialog_bottom_cart"
             />
-
+        <ImageView
+            android:id="@+id/ivPreviewImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black"
+            android:elevation="32dp"
+            android:visibility="gone"
+            />
         <!--    TOOLBAR LAYOUT-->
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/tbAppBar"

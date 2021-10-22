@@ -19,7 +19,6 @@ class ProductViewPager (
             ReviewsFragment(),
             NewReviewFragment()
         )
-    private val mFragmentNamesList = ArrayList<String>()
 
     override fun getItemCount(): Int {
         return mFragmentList.size
@@ -27,9 +26,5 @@ class ProductViewPager (
 
     override fun createFragment(position: Int): Fragment {
         return mFragmentList[position]
-    }
-
-    fun addFragment(fragment: Fragment) {
-        mFragmentList.add(fragment)
     }
 }

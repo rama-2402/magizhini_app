@@ -72,6 +72,7 @@ object Constants {
 
     //image storage paths
     const val PROFILE_PIC_PATH: String = "users/profile-pic/"
+    const val REVIEW_IMAGE_PATH: String = "reviews/"
 
     //profile activity
     const val USERS: String = "users"

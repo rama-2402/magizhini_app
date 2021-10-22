@@ -31,18 +31,16 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import kotlin.math.abs
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+
 
 //TODO CHECK LIMITED ITEMS COUNT BEFORE ORDERING MULTIPLE
-
 class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     override val kodein: Kodein by kodein()
@@ -71,6 +69,8 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private var mCoupon: CouponEntity = CouponEntity()
     private var isCouponApplied: Boolean = false
 
+    private var isPreviewVisible: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
@@ -92,6 +92,8 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         initLiveData()
         initViewPager()
         initClickListeners()
+
+
 
         //getting the current user id so that favorites can be added to firestore data
         userId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
@@ -282,6 +284,28 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 setPrice(mSelectedVariant)
         })
 
+        viewModel.uplodaingReviewStatus.observe(this, {
+            if (it == -5) {
+                hideProgressDialog()
+            } else {
+                showProgressDialog()
+            }
+        })
+
+        viewModel.serverError.observe(this, {
+            hideProgressDialog()
+            showErrorSnackBar("Server Error! Please try again later", true)
+        })
+
+        viewModel.reviewImage.observe(this, {
+            isPreviewVisible = true
+            with(binding) {
+                GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, it, ivPreviewImage)
+                ivPreviewImage.show()
+                ivPreviewImage.startAnimation(Animations.scaleBig)
+            }
+        })
+
     }
 
     private fun initClickListeners() {
@@ -332,6 +356,9 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 ""
             }
         })
+        binding.ivPreviewImage.setOnClickListener {
+            onBackPressed()
+        }
     }
 
     private fun setAddButtonContent(variant: String) {
@@ -540,14 +567,22 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     override fun onBackPressed() {
-        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else {
-            Intent(this, ShoppingMainActivity::class.java).also {
-                it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                finish()
+        when {
+            isPreviewVisible -> {
+//            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.fade_in))
+                binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
+                binding.ivPreviewImage.visibility = View.GONE
+                isPreviewVisible = false
+            }
+            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED -> cartBottomSheet.state =
+                BottomSheetBehavior.STATE_COLLAPSED
+            else -> {
+                Intent(this, ShoppingMainActivity::class.java).also {
+                    it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                }
             }
         }
     }
@@ -563,5 +598,5 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             }
         }
     }
-
 }
+

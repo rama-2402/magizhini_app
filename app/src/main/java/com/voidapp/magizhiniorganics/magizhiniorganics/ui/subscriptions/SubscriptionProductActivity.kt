@@ -1,13 +1,18 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -47,6 +52,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
@@ -68,6 +74,9 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
     private var mWallet: Wallet = Wallet()
 
     private var newReview: Boolean = false
+    private var isPreviewVisible: Boolean = false
+    private var reviewImageUri: Uri? = null
+    private var reviewImageExtension: String = ""
 
     private lateinit var adapter: ReviewAdapter
     private lateinit var mAddressBottomSheet: BottomSheetDialog
@@ -187,7 +196,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                 DatePickerLib().startSubscriptionDate(this@SubscriptionProductActivity)
             }
 
-            etDescription.setOnTouchListener { _, _ ->
+            edtDescription.setOnTouchListener { _, _ ->
                 binding.svBody.requestDisallowInterceptTouchEvent(true)
                 false
             }
@@ -212,9 +221,11 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
             binding.svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
                 if (scrollY < oldScrollY && binding.fabSubscribe.isGone) {
-                    binding.fabSubscribe.visibility = View.VISIBLE
+                    fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
+                    fabSubscribe.visibility = View.VISIBLE
                 } else if (scrollY > oldScrollY && binding.fabSubscribe.isVisible) {
-                    binding.fabSubscribe.gone()
+                    fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
+                    fabSubscribe.visibility = View.GONE
                 }
             })
 
@@ -223,9 +234,11 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                 override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
                     super.onScrolled(recyclerView, up, down)
                     if (down > 0 && binding.fabSubscribe.isVisible) {
-                        binding.fabSubscribe.hide()
+                        fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
+                        fabSubscribe.visibility = View.GONE
                     } else if (down < 0 && binding.fabSubscribe.isGone) {
-                        binding.fabSubscribe.show()
+                        fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
+                        fabSubscribe.visibility = View.VISIBLE
                     }
                 }
             })
@@ -250,13 +263,9 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                     mRating,
                     reviewContent
                 )
-                mProduct.reviews.add(review)
-                adapter.reviews = mProduct.reviews
-                adapter.notifyDataSetChanged()
-                viewModel.upsertProductReview(mProductId, review, mProduct)
-                newReview = false
-                closeReview()
-                Toast.makeText(this@SubscriptionProductActivity, "Thanks for the review :)", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    viewModel.upsertProductReview(review, mProduct, reviewImageUri, reviewImageExtension)
+                }
             }
 
             spSubscriptionType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -288,6 +297,14 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                     ""
                 }
             })
+
+            ivPreviewImage.setOnClickListener {
+                onBackPressed()
+            }
+
+            btnAddImage.setOnClickListener {
+                PermissionsUtil().checkStoragePermission(this@SubscriptionProductActivity)
+            }
         }
     }
 
@@ -409,27 +426,40 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         with(binding) {
             cpAddReview.text = "cancel"
             cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_close_white_24dp)
-            llNewReview.show()
-            fabSubscribe.gone()
-            rvReviews.gone()
+            llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_in_right))
+            rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_out_left))
+            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
+            lifecycleScope.launch {
+                delay(400)
+                llNewReview.show()
+                fabSubscribe.gone()
+                rvReviews.gone()
+            }
         }
     }
 
     private fun closeReview() {
         with(binding) {
             cpAddReview.text = "Add Review"
+            edtDescription.setText("")
+            ivReviewImage.gone()
             cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_add)
-            llNewReview.gone()
-            fabSubscribe.show()
-            rvReviews.show()
+            llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_out_right))
+            rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_in_left))
+            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
+            lifecycleScope.launch {
+                delay(400)
+                llNewReview.gone()
+                rvReviews.show()
+            }
         }
     }
 
     private fun getReviewContent(): String {
-        return if (binding.etDescription.text.isNullOrEmpty()) {
+        return if (binding.edtDescription.text.isNullOrEmpty()) {
             ""
         } else {
-            binding.etDescription.text.toString().trim()
+            binding.edtDescription.text.toString().trim()
         }
     }
 
@@ -467,6 +497,34 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                         finish()
                     }
                 }
+            }
+        })
+        viewModel.reviewImage.observe(this, {
+            isPreviewVisible = true
+            with(binding) {
+                GlideLoader().loadUserPictureWithoutCrop(this@SubscriptionProductActivity, it, ivPreviewImage)
+                ivPreviewImage.show()
+                ivPreviewImage.startAnimation(Animations.scaleBig)
+            }
+        })
+        viewModel.serverError.observe(this, {
+            hideProgressDialog()
+            showErrorSnackBar("Server Error! Please try again later", true)
+        })
+        viewModel.uploadingReviewStatus.observe(this, {
+            if (it == -5) {
+                mProduct = viewModel.mUpdatedProductReview
+                adapter.reviews = mProduct.reviews
+                adapter.notifyDataSetChanged()
+                lifecycleScope.launch {
+                    delay(1000)
+                    hideProgressDialog()
+                    newReview = false
+                    closeReview()
+                    Toast.makeText(this@SubscriptionProductActivity, "Thanks for the review :)", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                showProgressDialog()
             }
         })
     }
@@ -525,6 +583,55 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
 //        generateEstimate(0)
     }
 
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == Constants.READ_STORAGE_PERMISSION_CODE) {
+            //If permission is granted
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                GlideLoader().showImageChooser(this)
+            } else {
+                //Displaying another toast if permission is not granted
+                showErrorSnackBar("Storage Permission Denied!", true)
+            }
+        }
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == Constants.PICK_IMAGE_REQUEST_CODE) {
+                if (data != null) {
+                    try {
+                        // The uri of selected image from phone storage.
+                        reviewImageUri = data.data!!
+
+                        binding.ivReviewImage.show()
+                        GlideLoader().loadUserPicture(
+                            binding.ivReviewImage.context,
+                            reviewImageUri!!,
+                            binding.ivReviewImage
+                        )
+
+                        reviewImageExtension = GlideLoader().imageExtension(this,  reviewImageUri)!!
+
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        showErrorSnackBar("Image selection failed!", true)
+                    }
+                }
+            }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            // A log is printed when user close or cancel the image selection.
+            Log.e("Request Cancelled", "Image selection cancelled")
+        }
+    }
+
+
     //Title bar back button press function
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -537,12 +644,22 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        Intent(this, ShoppingMainActivity::class.java).also {
-            it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-            finish()
+        when {
+            isPreviewVisible -> {
+//            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.fade_in))
+                binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
+                binding.ivPreviewImage.visibility = View.GONE
+                isPreviewVisible = false
+            }
+            else -> {
+                Intent(this, ShoppingMainActivity::class.java).also {
+                    it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+
+                }
+            }
         }
     }
 }
