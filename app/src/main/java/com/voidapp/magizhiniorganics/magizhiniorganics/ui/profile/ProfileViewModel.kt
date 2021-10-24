@@ -38,6 +38,10 @@ class ProfileViewModel (
         }
     }
 
+    fun getAllActiveOrders() = dbRepository.getAllActiveOrders()
+
+    fun getAllActiveSubscriptions() = dbRepository.getAllActiveSubscriptions()
+
     fun uploadProfile(profile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         if (fsRepository.uploadProfile(profile)) {
             CustomerProfile(

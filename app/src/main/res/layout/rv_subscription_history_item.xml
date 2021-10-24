@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/lytSub"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -40,7 +41,7 @@
 
     <TextView
         android:id="@+id/tvSubID"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:fontFamily="@font/roboto"
@@ -52,6 +53,7 @@
         android:textColor="@color/gray700"
         android:textIsSelectable="true"
         android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@id/tvRenew"
         app:layout_constraintBottom_toBottomOf="@id/tvSubIDText"
         app:layout_constraintStart_toEndOf="@id/tvSubIDText"
         app:layout_constraintTop_toTopOf="@id/tvSubIDText" />
@@ -85,15 +87,14 @@
         android:id="@+id/tvSubTypeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/material_size_24"
+        android:layout_marginTop="@dimen/material_size_8"
         android:fontFamily="@font/roboto"
         android:text="Subscription Type: "
         android:textColor="@color/gray700"
         android:textSize="12dp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/tvStartSubDate"
-        app:layout_constraintStart_toEndOf="@id/tvStartSubDate"
-        app:layout_constraintTop_toTopOf="@id/tvStartSubDate" />
+        app:layout_constraintStart_toStartOf="@id/tvStartSub"
+        app:layout_constraintTop_toBottomOf="@id/tvStartSub" />
 
     <TextView
         android:id="@+id/tvSubType"
@@ -112,14 +113,15 @@
         android:id="@+id/tvDueDateText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/material_size_8"
         android:fontFamily="@font/roboto"
+        android:layout_marginStart="@dimen/material_size_24"
         android:text="Due Date: "
         android:textColor="@color/gray700"
         android:textSize="12dp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@id/tvStartSub"
-        app:layout_constraintTop_toBottomOf="@id/tvStartSub" />
+        app:layout_constraintBottom_toBottomOf="@id/tvStartSubDate"
+        app:layout_constraintStart_toEndOf="@id/tvStartSubDate"
+        app:layout_constraintTop_toTopOf="@id/tvStartSubDate"/>
 
     <TextView
         android:id="@+id/tvDueDate"
@@ -127,7 +129,7 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:fontFamily="@font/roboto"
-        android:text=""
+        android:text="24/12/2222"
         android:textColor="@color/gray700"
         android:textIsSelectable="true"
         android:textSize="12dp"
@@ -151,15 +153,40 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:fontFamily="@font/roboto"
+        android:paddingTop="@dimen/material_size_4"
+        android:paddingBottom="@dimen/material_size_4"
+        android:paddingStart="@dimen/material_size_12"
+        android:paddingEnd="@dimen/material_size_12"
         android:text="Active"
         android:textColor="@color/gray700"
         android:textIsSelectable="true"
         android:textSize="12dp"
         android:layout_margin="@dimen/material_size_8"
-        app:layout_constraintBottom_toBottomOf="@id/tvDueDateText"
+        app:layout_constraintBottom_toBottomOf="@id/tvSubTypeText"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/tvRenew"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/material_size_8"
+        android:background="@drawable/shape_round_rectangle_8"
+        android:backgroundTint="@color/matteRed"
+        android:elevation="@dimen/material_size_4"
+        android:gravity="center"
+        android:paddingStart="@dimen/material_size_12"
+        android:paddingTop="@dimen/material_size_8"
+        android:paddingEnd="@dimen/material_size_12"
+        android:paddingBottom="@dimen/material_size_8"
+        android:text="Renew \n Subscription"
+        android:textColor="@color/white"
+        android:textSize="12dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tvSubTypeText"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <View
+        android:id="@+id/view2"
         android:layout_width="match_parent"
         android:layout_height="0.75dp"
         android:layout_gravity="center"
@@ -168,6 +195,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvDueDate" />
+        app:layout_constraintTop_toBottomOf="@id/tvSubTypeText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
 import com.google.android.material.navigation.NavigationView
+import com.itextpdf.text.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
@@ -32,7 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.Su
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.*
 import org.imaginativeworld.whynotimagecarousel.listener.CarouselListener
 import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
@@ -93,7 +94,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
 
         lifecycleScope.launch {
             delay(1000)
-            SharedPref(this@HomeActivity).putData(Constants.DATE, Constants.STRING, Time().getCurrentDate())
+            SharedPref(this@HomeActivity).putData(Constants.DATE, Constants.STRING, TimeUtil().getCurrentDate())
             hideProgressDialog()
         }
     }
@@ -229,14 +230,39 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         }
     }
 
+
+
+//    private var readPermissionGranted = false
+//    private var writePermissionGranted = false
+//    private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
+//
+
     override fun onClick(v: View?) {
         if (v != null) {
             when (v) {
                 binding.cpShowAll -> {
                     lifecycleScope.launch {
-                        binding.cpShowAll.startAnimation(AnimationUtils.loadAnimation(binding.cpShowAll.context, R.anim.bounce))
+                        binding.cpShowAll.startAnimation(
+                            AnimationUtils.loadAnimation(
+                                binding.cpShowAll.context,
+                                R.anim.bounce
+                            )
+                        )
                         delay(150)
                         displaySelectedCategory(Constants.ALL_PRODUCTS)
+//                    val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                        InvoiceGenerator().createPdf(this)
+//                    } else {
+//                        TODO("VERSION.SDK_INT < R")
+//                    }
+//
+//                    val target = Intent(Intent.ACTION_VIEW).also {
+//                        it.setDataAndType(uri, "application/pdf")
+//                        it.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+//                    }
+//                    val intent = Intent.createChooser(target, "Open PDF in")
+//                    startActivity(intent)
+
                     }
                 }
                 binding.fabCart -> {
@@ -248,6 +274,32 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             }
         }
     }
+//
+//    private fun updateOrRequestPermissions() {
+//        val hasReadPermission = ContextCompat.checkSelfPermission(
+//            this,
+//            Manifest.permission.READ_EXTERNAL_STORAGE
+//        ) == PackageManager.PERMISSION_GRANTED
+//        val hasWritePermission = ContextCompat.checkSelfPermission(
+//            this,
+//            Manifest.permission.WRITE_EXTERNAL_STORAGE
+//        ) == PackageManager.PERMISSION_GRANTED
+//        val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+//
+//        readPermissionGranted = hasReadPermission
+//        writePermissionGranted = hasWritePermission || minSdk29
+//
+//        val permissionsToRequest = mutableListOf<String>()
+//        if(!writePermissionGranted) {
+//            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//        }
+//        if(!readPermissionGranted) {
+//            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+//        }
+//        if(permissionsToRequest.isNotEmpty()) {
+//            permissionsLauncher.launch(permissionsToRequest.toTypedArray())
+//        }
+//    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {

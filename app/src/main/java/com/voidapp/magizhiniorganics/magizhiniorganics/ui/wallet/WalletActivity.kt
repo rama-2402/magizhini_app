@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.animation.AnimationUtils
@@ -23,12 +22,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityWalle
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.DatePickerLib
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
-import org.json.JSONObject
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -45,7 +40,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private var mWallet: Wallet = Wallet()
     private val mTransactions = mutableListOf<TransactionHistory>()
     private var mProfile = UserProfile()
-    private var mMoneyToAddInWallet: Long = 0L
+    private var mMoneyToAddInWallet: Float = 0f
 
     private val TAG: String = "qqqq"
 
@@ -103,12 +98,12 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             if (mWallet.lastRecharge == 0L) {
                 tvLastRechargeDate.text = "-"
             } else {
-                tvLastRechargeDate.text = Time().getCustomDate(dateLong = mWallet.lastTransaction)
+                tvLastRechargeDate.text = TimeUtil().getCustomDate(dateLong = mWallet.lastTransaction)
             }
             if (mWallet.lastTransaction == 0L) {
                 tvTransactionDate.text = "-"
             } else {
-                tvTransactionDate.text = Time().getCustomDate(dateLong = mWallet.lastTransaction)
+                tvTransactionDate.text = TimeUtil().getCustomDate(dateLong = mWallet.lastTransaction)
             }
 
         }
@@ -187,52 +182,31 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                     view.etlReferralNumber.error = "* Enter valid Amount"
                     return@setOnClickListener
                 } else {
-                    mMoneyToAddInWallet = view.etReferralNumber.text.toString().toLong()
+                    mMoneyToAddInWallet = view.etReferralNumber.text.toString().toFloat()
                     dialogBsAddReferral.dismiss()
-                    startPayment(mMoneyToAddInWallet)
+                    with(mProfile) {
+                        startPayment(
+                            this@WalletActivity,
+                            mailId,
+                            mMoneyToAddInWallet * 100,
+                            name,
+                            id,
+                            phNumber
+                        ).also { status ->
+                            if (!status) {
+                                Toast.makeText(
+                                    this@WalletActivity,
+                                    "Error in processing payment. Try Later ",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
                 }
             }
             dialogBsAddReferral.show()
         }
     }
-
-    private fun startPayment(amount: Long) {
-        /*
-        *  You need to pass current activity in order to let Razorpay create CheckoutActivity
-        * */
-        val co = Checkout()
-        val payment = amount * 100
-
-        val email = if (mProfile.mailId.isEmpty()) "magizhiniorganics2018@gmail.com" else mProfile.mailId
-
-        try {
-            val options = JSONObject()
-            options.put("name","${mProfile.name}")
-            options.put("description","Adding Money to Wallet for ${mProfile.id}")
-            //You can omit the image option to fetch the image from dashboard
-            options.put("image","https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/icon_sh_4.png?alt=media&token=71cf0e67-2f00-4a0f-8950-15459ee02137")
-            options.put("theme.color", "#86C232");
-            options.put("currency","INR");
-//            options.put("order_id", "orderIDkjhasgdfkjahsdf");
-            options.put("amount","$payment")//pass amount in currency subunits
-
-//            val retryObj = JSONObject();
-//            retryObj.put("enabled", true);
-//            retryObj.put("max_count", 4);
-//            options.put("retry", retryObj);
-
-            val prefill = JSONObject()
-            prefill.put("email","$email")  //this place should have customer name
-            prefill.put("contact","${mProfile.phNumber}")     //this place should have customer phone number
-
-            options.put("prefill",prefill)
-            co.open(this,options)
-        }catch (e: Exception){
-            Toast.makeText(this,"Error in payment: "+ e.message, Toast.LENGTH_LONG).show()
-            e.printStackTrace()
-        }
-    }
-
 
     override fun onPaymentSuccess(orderID: String?) {
         showSuccessDialog("","Adding Money to the Wallet...", "wallet")
@@ -251,8 +225,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 TransactionHistory (
                     id,
                     System.currentTimeMillis(),
-                    Time().getMonth(),
-                    Time().getYear().toLong(),
+                    TimeUtil().getMonth(),
+                    TimeUtil().getYear().toLong(),
                     mMoneyToAddInWallet.toFloat(),
                     id,
                     orderID,
@@ -286,8 +260,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         }
         val filteredTransactions = mutableListOf<TransactionHistory>()
         for (transaction in mTransactions) {
-            val transactionDate = Time().getCustomDate(dateLong = transaction.timestamp)
-            val filteredDate = Time().getCustomDate(dateLong = date)
+            val transactionDate = TimeUtil().getCustomDate(dateLong = transaction.timestamp)
+            val filteredDate = TimeUtil().getCustomDate(dateLong = date)
             if (transactionDate == filteredDate) {
                 filteredTransactions.add(transaction)
             }

@@ -12,7 +12,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -47,7 +46,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -110,45 +108,11 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         initData()
         initLiveData()
         clickListeners()
-    }
 
-    private fun startPayment() {
-        /*
-        *  You need to pass current activity in order to let Razorpay create CheckoutActivity
-        * */
-        val co = Checkout()
-        val email = if (mProfile.mailId.isEmpty()) "magizhiniorganics2018@gmail.com" else mProfile.mailId
-        val price = oSubscription.estimateAmount * 100
-
-        try {
-            val options = JSONObject()
-            options.put("name","${mProfile.name}")
-            options.put("description","Purchasing from store for ${mProfile.id}")
-            //You can omit the image option to fetch the image from dashboard
-            options.put("image","https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/icon_sh_4.png?alt=media&token=71cf0e67-2f00-4a0f-8950-15459ee02137")
-            options.put("theme.color", "#86C232");
-            options.put("currency","INR");
-//            options.put("order_id", "orderIDkjhasgdfkjahsdf");
-            options.put("amount","$price")//pass amount in currency subunits
-
-//            val retryObj = JSONObject();
-//            retryObj.put("enabled", true);
-//            retryObj.put("max_count", 4);
-//            options.put("retry", retryObj);
-
-            val prefill = JSONObject()
-            prefill.put("email","$email")  //this place should have customer name
-            prefill.put("contact","${mProfile.phNumber}")     //this place should have customer phone number
-
-            options.put("prefill",prefill)
-            co.open(this,options)
-        }catch (e: Exception){
-            Toast.makeText(this,"Error in payment: "+ e.message,Toast.LENGTH_LONG).show()
-            e.printStackTrace()
-        }
     }
 
     override fun onPaymentSuccess(response: String?) {
+        showSuccessDialog("", "Processing payment ...", "wallet")
         startTransaction()
     }
 
@@ -159,7 +123,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
     private fun startTransaction() {
         oSubscription.productID = mProductId
         oSubscription.productName = mProductName
-        oSubscription.monthYear = "${Time().getMonth()}${Time().getYear()}"
+        oSubscription.monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
         oSubscription.status = Constants.SUB_ACTIVE
         if (mStartDate == 0L) {
             filterDate(System.currentTimeMillis() + (1000 * 60 * 60 * 24))
@@ -182,9 +146,10 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         if (date < System.currentTimeMillis()) {
             showErrorSnackBar("Pick a valid date", true)
         } else {
-            binding.tvFromDate.text = Time().getCustomDate(dateLong = date)
+            binding.tvFromDate.text = TimeUtil().getCustomDate(dateLong = date)
             mStartDate = date
             oSubscription.startDate = date
+            setEndDate(binding.spSubscriptionType.selectedItemPosition)
         }
     }
 
@@ -275,7 +240,6 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                     position: Int,
                     id: Long) {
                     generateEstimate(position)
-
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -285,7 +249,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
             fabSubscribe.setOnClickListener {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    oSubscription.id = viewModel.generateSubscriptionID("${Time().getMonth()}${Time().getYear()}")
+                    oSubscription.id = viewModel.generateSubscriptionID("${TimeUtil().getMonth()}${TimeUtil().getYear()}")
                 }
                 showAddressBs(mProfile.address[0])
             }
@@ -367,7 +331,20 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
     fun setPaymentFilter(paymentMode: String) {
         oSubscription.paymentMode = paymentMode
         if (paymentMode == "Online") {
-            startPayment()
+            with(mProfile) {
+                startPayment(
+                    this@SubscriptionProductActivity,
+                    mailId,
+                    oSubscription.estimateAmount * 100,
+                    name,
+                    id,
+                    phNumber
+                ).also { status ->
+                    if (!status) {
+                        Toast.makeText(this@SubscriptionProductActivity,"Error in processing payment. Try Later ", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         } else {
             walletTransaction()
         }
@@ -385,7 +362,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         return text.isNullOrBlank()
     }
 
-    private fun generateEstimate(position: Int) {
+    private fun generateEstimate(position: Int = 0) {
         when(position) {
             0 -> {
                 oSubscription.subType = Constants.SINGLE_PURCHASE
@@ -407,12 +384,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
     private fun setEndDate(position: Int) {
         when(position) {
-            0 -> {
-                val cal = Calendar.getInstance()
-                cal.timeInMillis = oSubscription.startDate
-                cal.add(Calendar.DATE, 1)
-                oSubscription.endDate = cal.timeInMillis
-            }
+            0 -> oSubscription.endDate = oSubscription.startDate
             1 -> {
                 val cal = Calendar.getInstance()
                 cal.timeInMillis = oSubscription.startDate
@@ -573,14 +545,13 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
             adapter.notifyDataSetChanged()
             tvVariantName.text = "${mProduct.variants[0].variantName} ${mProduct.variants[0].variantType}"
             tvDiscountedPrice.text = "Rs. ${mProduct.variants[0].variantPrice}"
-            tvFromDate.text = Time().getCustomDate(dateLong = nextDate)
+            tvFromDate.text = TimeUtil().getCustomDate(dateLong = nextDate)
         }
     }
 
     private fun initData() {
         viewModel.getProductByID(mProductId)
         viewModel.getProfileData()
-//        generateEstimate(0)
     }
 
 
@@ -646,7 +617,6 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
     override fun onBackPressed() {
         when {
             isPreviewVisible -> {
-//            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.fade_in))
                 binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
                 binding.ivPreviewImage.visibility = View.GONE
                 isPreviewVisible = false

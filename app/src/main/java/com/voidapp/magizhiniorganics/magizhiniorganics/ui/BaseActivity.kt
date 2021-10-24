@@ -86,9 +86,13 @@ open class BaseActivity : AppCompatActivity() {
     /**
      * A function to show the success and error messages in snack bar component.
      */
-    fun showErrorSnackBar(message: String, errorMessage: Boolean) {
-        val snackBar =
+    fun showErrorSnackBar(message: String, errorMessage: Boolean, duration: String = "short") {
+        val snackBar = if (duration == "short") {
             Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT)
+        } else {
+            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+        }
+
         val snackBarView = snackBar.view
         val text = snackBarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
         text.setTextColor(ContextCompat.getColor(text.context, R.color.white))
@@ -306,7 +310,10 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     is SubscriptionHistoryActivity -> {
                         hideListBottomSheet()
-                        activity.setSubscriptionFilter(selectedItem)
+                        when(data) {
+                            "filter" -> activity.setSubscriptionFilter(selectedItem)
+                            "payment" -> activity.selectedPaymentMode(selectedItem)
+                        }
                     }
                 }
 
@@ -341,6 +348,10 @@ open class BaseActivity : AppCompatActivity() {
                         activity.approved(true)
                     }
                     is InvoiceActivity -> {
+                        mSwipeConfirmationBottomSheet.dismiss()
+                        activity.approved(true)
+                    }
+                    is SubscriptionHistoryActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()
                         activity.approved(true)
                     }

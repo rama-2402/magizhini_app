@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,10 +12,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toUserProfile
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.*
 
 class CheckoutViewModel(
@@ -249,8 +246,8 @@ class CheckoutViewModel(
             val transaction = TransactionHistory (
                 orderID,
                 System.currentTimeMillis(),
-                Time().getMonth(),
-                Time().getYear().toLong(),
+                TimeUtil().getMonth(),
+                TimeUtil().getYear().toLong(),
                 amount,
                 id,
                 id,

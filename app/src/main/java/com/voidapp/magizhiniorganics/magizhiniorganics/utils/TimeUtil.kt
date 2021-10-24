@@ -2,9 +2,10 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import android.annotation.SuppressLint
 import java.text.SimpleDateFormat
+import java.util.*
 
 @SuppressLint("SimpleDateFormat")
-class Time {
+class TimeUtil {
 
     fun getCustomDate(dateFormat: String = "dd/MM/yyyy", dateLong: Long): String {
         val simpleDateFormat = SimpleDateFormat(dateFormat)
@@ -35,6 +36,16 @@ class Time {
     fun getYear(): String {
         val year = SimpleDateFormat("yyyy")
         return year.format(System.currentTimeMillis())
+    }
+
+    fun getCustomDateFromDifference(
+        startDate: Long,
+        difference: Int
+    ): Long {
+        val cal = Calendar.getInstance()
+        cal.timeInMillis = startDate
+        cal.add(Calendar.DATE, difference)
+        return cal.timeInMillis
     }
 
     fun getTimeAgo(time: Long): String? {

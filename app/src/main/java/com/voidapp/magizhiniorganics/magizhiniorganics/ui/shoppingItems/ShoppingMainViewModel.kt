@@ -111,7 +111,7 @@ class ShoppingMainViewModel(
     }
 
     private suspend fun updateShoppingMainPage() {
-        delay(200)
+        delay(125)
         when(selectedChip) {
             Constants.ALL -> getAllProductsStatic()
             Constants.CATEGORY -> getAllProductByCategoryStatic(selectedCategory)

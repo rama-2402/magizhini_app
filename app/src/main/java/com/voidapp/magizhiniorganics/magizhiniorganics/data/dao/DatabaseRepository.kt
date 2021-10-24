@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.dao
 
+import androidx.lifecycle.LiveData
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.UserDatabase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 
@@ -109,5 +110,26 @@ class DatabaseRepository(
     fun getSubscription(id: String): SubscriptionEntity = db.getUserProfileDao().getSubscription(id)
 
     fun cancelSubscription(subscriptionEntity: SubscriptionEntity) = db.getUserProfileDao().cancelSubscription(subscriptionEntity)
+
+    fun updateSubscription(id: String, newDate: Long) = db.getUserProfileDao().updateSubscription(id, newDate)
+
+    //Active orders and subscriptions
+
+    fun upsertActiveOrders(id: ActiveOrders) = db.getUserProfileDao().upsertActiveOrders(id)
+
+    fun upsertActiveSubscription(id: ActiveSubscriptions) = db.getUserProfileDao().upsertActiveSubscription(id)
+
+    fun getAllActiveSubscriptions(): LiveData<List<String>> = db.getUserProfileDao().getAllActiveSubscriptions()
+
+    fun getAllActiveOrders(): LiveData<List<String>> = db.getUserProfileDao().getAllActiveOrders()
+
+    fun getAllActiveSubscriptionsStatic(): List<String> = db.getUserProfileDao().getAllActiveSubscriptionsStatic()
+
+    fun getAllActiveOrdersStatic(): List<String> = db.getUserProfileDao().getAllActiveOrdersStatic()
+
+    fun cancelActiveOrder(id: String) = db.getUserProfileDao().cancelActiveOrder(id)
+
+    fun cancelActiveSubscription(id: String) = db.getUserProfileDao().cancelActiveSubscription(id)
+
 
 }

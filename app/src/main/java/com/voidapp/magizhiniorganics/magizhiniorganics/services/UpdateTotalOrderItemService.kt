@@ -10,10 +10,8 @@ import com.google.gson.reflect.TypeToken
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TotalOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
-import kotlinx.coroutines.Dispatchers
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 class UpdateTotalOrderItemService(
     context: Context,
@@ -24,8 +22,8 @@ class UpdateTotalOrderItemService(
         val stringConvertedOrder = inputData.getString("order")
         val status = inputData.getBoolean(Constants.STATUS, true)
         val cartItems = toOrderConverter(stringConvertedOrder!!).cart
-        val date = Time().getCurrentDateNumber()
-        val docID = "${Time().getMonth()}${Time().getYear()}"
+        val date = TimeUtil().getCurrentDateNumber()
+        val docID = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
 
         val fireStore = FirebaseFirestore.getInstance()
         val path = fireStore.collection("totalOrders")

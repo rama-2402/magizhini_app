@@ -1,19 +1,23 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
+import android.content.res.ColorStateList
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvSubscriptionHistoryItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvTransactionItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Animations
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
-import org.imaginativeworld.whynotimagecarousel.listener.CarouselOnScrollListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 
 class SubscriptionHistoryAdapter(
     val activity: SubscriptionHistoryActivity,
@@ -35,21 +39,42 @@ class SubscriptionHistoryAdapter(
 
     override fun onBindViewHolder(holder: SubscriptionHistoryViewHolder, position: Int) {
         val subscription = subscriptions[position]
+        var renewal = false
         with(holder.binding) {
             tvTransactionIDText.text = subscription.productName
             tvSubID.text = subscription.id
-            tvStartSubDate.text = Time().getCustomDate(dateLong = subscription.startDate)
-            tvDueDate.text = Time().getCustomDate(dateLong = subscription.endDate)
+            tvStartSubDate.text = TimeUtil().getCustomDate(dateLong = subscription.startDate)
+            tvDueDate.text = TimeUtil().getCustomDate(dateLong = subscription.endDate)
             tvSubType.text = subscription.subType
             when (subscription.status) {
                 Constants.SUB_ACTIVE ->  {
                     ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivered))
-                    tvSubStatus.text = Constants.SUB_ACTIVE
+                    tvSubStatus.visibility = View.INVISIBLE
+                    tvRenew.visibility = View.VISIBLE
+                        renewal = if (
+                            subscription.subType != Constants.SINGLE_PURCHASE &&
+                            System.currentTimeMillis() > TimeUtil().getCustomDateFromDifference(subscription.endDate, -7)
+                        ) {
+                            tvRenew.text = "Renew \n Subscription"
+                            true
+                        } else {
+                            tvRenew.text = "Unsubscribe"
+                            false
+                        }
                 }
                 Constants.SUB_CANCELLED -> {
                     ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivery_cancelled))
-                    tvSubStatus.text = Constants.SUB_CANCELLED
+                    tvSubStatus.apply {
+                        visibility = View.VISIBLE
+                        text = Constants.SUB_CANCELLED
+                    }
+                    tvRenew.visibility = View.INVISIBLE
                 }
+            }
+
+            tvRenew.setOnClickListener {
+                it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                viewModel.renewSelectedSubscription(subscription, renewal)
             }
 
             lytSub.setOnClickListener {

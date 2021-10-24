@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
-import android.media.Image
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlin.collections.ArrayList
 
 class ReviewAdapter(
@@ -55,7 +54,7 @@ class ReviewAdapter(
                 GlideLoader().loadUserPicture(reviewImage.context, review.reviewImageUrl, reviewImage)
             }
             profileName.text = review.userName
-            timeStamp.text = Time().getCustomDate(dateLong = review.timeStamp)
+            timeStamp.text = TimeUtil().getCustomDate(dateLong = review.timeStamp)
 //            Timer("SettingUp", false).schedule(1000) {
 //            ratings.setRating(review.rating, false)
 //            ratings.disallowSelection(true)

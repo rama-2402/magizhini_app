@@ -12,31 +12,25 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.*
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurchaseHistoryBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.io.StringBufferInputStream
-import java.text.SimpleDateFormat
 
 class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     override val kodein: Kodein by kodein()
@@ -62,8 +56,8 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
 
         title = ""
         setSupportActionBar(binding.tbToolbar)
-        mFilterMonth = Time().getMonth()
-        mFilterYear = Time().getYear()
+        mFilterMonth = TimeUtil().getMonth()
+        mFilterYear = TimeUtil().getYear()
         binding.fabMonthFilter.text = " $mFilterMonth"
 
         showShimmer()

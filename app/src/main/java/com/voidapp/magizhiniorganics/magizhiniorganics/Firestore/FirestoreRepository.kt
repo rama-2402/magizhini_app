@@ -81,6 +81,8 @@ class FirestoreRepository (
 
     suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
 
+    suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): Boolean = firestore.renewSubscription(id, monthYear, newDate)
+
     suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
 
 }

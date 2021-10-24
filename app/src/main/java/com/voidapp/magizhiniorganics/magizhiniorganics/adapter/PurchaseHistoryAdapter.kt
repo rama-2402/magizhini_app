@@ -77,6 +77,12 @@ class PurchaseHistoryAdapter(
                     orderStatus.text = "Delivered"
                     orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteGreen))
                 }
+                Constants.FAILED -> {
+                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancelled_order))
+                    showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
+                    orderStatus.text = "Delivery \n Failed"
+                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
+                }
             }
 
             showCart.setOnClickListener {

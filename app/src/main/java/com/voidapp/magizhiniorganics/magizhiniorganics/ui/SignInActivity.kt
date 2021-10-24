@@ -168,7 +168,6 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     //validating otp to verify
     private fun otpValidation() {
-
         val otp = binding.etPhoneNumberPostOTP.text.toString()
 
         if (otp.isEmpty()) {
@@ -182,7 +181,6 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun verifyPhoneNumberWithCode(verificationId: String?, code: String) {
         val credential = PhoneAuthProvider.getCredential(verificationId.toString(), code)
         binding.cvTimer.stopTimer()
-        showProgressDialog()
         repository.signInWithPhoneAuthCredential(this ,credential)
     }
 
@@ -214,7 +212,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
    }
 
     private fun startGetProfileDataService() {
-        val currentMonthYear = "${Time().getMonth()}${Time().getYear()}"
+        val currentMonthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
         val workRequest: WorkRequest =
             OneTimeWorkRequestBuilder<GetOrderHistoryService>()
                 .setInputData(
@@ -268,6 +266,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                     resendVerificationCode(mPhoneNumber, forceResendingToken)
                 }
                 binding.btnVerify -> {
+                    showProgressDialog()
                     otpValidation()
                 }
                 binding.llPreOTP -> UIUtil.hideKeyboard(this)

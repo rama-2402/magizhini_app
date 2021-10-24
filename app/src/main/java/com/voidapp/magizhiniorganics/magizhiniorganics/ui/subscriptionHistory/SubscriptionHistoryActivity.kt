@@ -1,12 +1,10 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
@@ -17,19 +15,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.sundeepk.compactcalendarview.CompactCalendarView
 import com.github.sundeepk.compactcalendarview.domain.Event
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.SubscriptionHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionHistoryBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCalendarBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Animations
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -38,7 +40,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
+
+class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivitySubscriptionHistoryBinding
     private lateinit var viewModel: SubscriptionHistoryViewModel
@@ -50,6 +53,11 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
     private var mAllSubscriptions: MutableList<SubscriptionEntity> = mutableListOf()
     private val mSubscriptionStatusFilter: MutableList<String> = mutableListOf()
 
+    private var mWallet: Wallet = Wallet()
+    private var mProfile: UserProfileEntity = UserProfileEntity()
+    private val paymentList = mutableListOf<String>()
+    private var id: String = ""
+
     private val TAG: String = "qqqq"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +65,8 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_subscription_history)
         viewModel = ViewModelProvider(this, factory).get(SubscriptionHistoryViewModel::class.java)
         binding.viewmodel = viewModel
+
+        id = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
 
         showShimmer()
 
@@ -85,7 +95,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
             })
 
             binding.fabMonthFilter.setOnClickListener {
-                showListBottomSheet(this@SubscriptionHistoryActivity, mSubscriptionStatusFilter as ArrayList<String>)
+                showListBottomSheet(this@SubscriptionHistoryActivity, mSubscriptionStatusFilter as ArrayList<String>, "filter")
             }
 
         }
@@ -109,7 +119,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
                 subAdapter.subscriptions = it
                 subAdapter.notifyDataSetChanged()
                 delay(1500)
-                    hideShimmer()
+                hideShimmer()
             }
         })
         viewModel.error.observe(this, {
@@ -136,7 +146,21 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
                 }
             }
         })
-
+        viewModel.wallet.observe(this, {
+            mWallet = it
+            paymentList.clear()
+            paymentList.add("Online")
+            paymentList.add("Wallet - (${mWallet.amount})")
+        })
+        viewModel.renewSub.observe(this, {
+            renewSubscription(it)
+        })
+        viewModel.cancelSub.observe(this, {
+            unsubscribeSubscription(it)
+        })
+        viewModel.profile.observe(this, {
+            mProfile = it
+        })
     }
 
     fun setSubscriptionFilter(filter: String) {
@@ -154,6 +178,8 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
 
     private fun initLiveDate() {
         viewModel.getSubscriptions(Constants.SUB_ACTIVE)
+        viewModel.getWallet(id)
+        viewModel.getProfile()
         with (mSubscriptionStatusFilter) {
             clear()
             add(Constants.SUB_ACTIVE)
@@ -180,11 +206,16 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
             view.unsubscribe.visibility = View.GONE
         }
 
+        view.tvDueDate.text = TimeUtil().getCustomDate("", sub.endDate)
+
         view.calendarView.setUseThreeLetterAbbreviation(true)
+
+        val month = SimpleDateFormat("MMMM - yyyy")
+        view.tvMonth.text = month.format(System.currentTimeMillis())
 
         for (date in sub.cancelledDates) {
             val event = Event(resources.getColor(R.color.matteRed, theme), date, "Cancelled")
-            cancelDates.add(Time().getCustomDate(dateLong = date))      //we are creating list of date strings to check
+            cancelDates.add(TimeUtil().getCustomDate(dateLong = date))      //we are creating list of date strings to check
             view.calendarView.addEvent(event)
         }
 
@@ -198,32 +229,37 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
             view.calendarView.addEvent(event)
         }
 
+        val verificationTimeInMillis = if (System.currentTimeMillis() < sub.startDate) {
+            sub.startDate
+        } else {
+            System.currentTimeMillis()
+        }
+
         view.calendarView.setListener(object : CompactCalendarView.CompactCalendarViewListener {
             override fun onDayClick(dateClicked: Date?) {
                 val instanceToGetLongDate = Calendar.getInstance()
-                instanceToGetLongDate.time = dateClicked
-                    if (
-                        instanceToGetLongDate.timeInMillis > System.currentTimeMillis() &&
-                        instanceToGetLongDate.timeInMillis < sub.endDate &&
-                        !cancelDates.contains(Time().getCustomDate(dateLong = instanceToGetLongDate.timeInMillis)) &&
-                        sub.status == Constants.SUB_ACTIVE
-                    ) {
-                        cancelDate = instanceToGetLongDate.timeInMillis
-                        unSubscribe = false
-                        view.tvDueText.text = "Cancel Delivery on "
-                        view.tvDueAmount.text = "${Time().getCustomDate(dateLong = cancelDate)}?"
-                        view.tvUnsubscribe.text = "CONFIRM"
-                    } else {
-                        unSubscribe = true
-                        view.tvDueText.text = "Monthly Due: "
-                        view.tvDueAmount.text = "Rs: ${sub.estimateAmount}"
-                        view.tvUnsubscribe.text = "UNSUBSCRIBE"
-                    }
+                instanceToGetLongDate.time = dateClicked!!
+                if (
+                    instanceToGetLongDate.timeInMillis > verificationTimeInMillis &&
+                    instanceToGetLongDate.timeInMillis < sub.endDate &&
+                    !cancelDates.contains(TimeUtil().getCustomDate(dateLong = instanceToGetLongDate.timeInMillis)) &&
+                    sub.status == Constants.SUB_ACTIVE
+                ) {
+                    cancelDate = instanceToGetLongDate.timeInMillis
+                    unSubscribe = false
+                    view.tvDueText.text = "Cancel Delivery on "
+                    view.tvDueDate.text = "${TimeUtil().getCustomDate(dateLong = cancelDate)}?"
+                    view.tvUnsubscribe.text = "CONFIRM"
+                } else {
+                    unSubscribe = true
+                    view.tvDueText.text = "Due Date: "
+                    view.tvDueDate.text = TimeUtil().getCustomDate("", sub.endDate)
+                    view.tvUnsubscribe.text = "UNSUBSCRIBE"
+                }
             }
 
             override fun onMonthScroll(firstDayOfNewMonth: Date?) {
-                val month = SimpleDateFormat("MMMM - yyyy")
-                view.tvMonth.text = month.format(firstDayOfNewMonth)
+                view.tvMonth.text = month.format(firstDayOfNewMonth!!)
             }
         })
 
@@ -235,11 +271,11 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
             } else {
                 if (viewModel.cancelDate(sub, cancelDate)) {
                     val event = Event(resources.getColor(R.color.matteRed, theme), cancelDate, "Delivered")
-                    cancelDates.add(Time().getCustomDate(dateLong = cancelDate))      //we are creating list of date strings to check
+                    cancelDates.add(TimeUtil().getCustomDate(dateLong = cancelDate))      //we are creating list of date strings to check
                     view.calendarView.addEvent(event)
                     unSubscribe = true
-                    view.tvDueText.text = "Monthly Due: "
-                    view.tvDueAmount.text = "Rs: ${sub.estimateAmount}"
+                    view.tvDueText.text = "Due Date: "
+                    view.tvDueDate.text = TimeUtil().getCustomDate("", sub.endDate)
                     view.tvUnsubscribe.text = "UNSUBSCRIBE"
                     Toast.makeText(this, "Delivery Cancelled", Toast.LENGTH_SHORT).show()
                 } else {
@@ -281,5 +317,116 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware {
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
+    }
+
+    private fun unsubscribeSubscription(subscription: SubscriptionEntity) {
+        mSubscription = subscription
+        showExitSheet(this, "Cancel Subscription")
+    }
+
+    private fun renewSubscription(subscription: SubscriptionEntity) {
+        mSubscription = subscription
+        Toast.makeText(this, "Choose Payment Method", Toast.LENGTH_SHORT).show()
+        showListBottomSheet(this, paymentList as ArrayList<String>, "payment")
+    }
+
+    fun selectedPaymentMode(payment: String) {
+        when (payment) {
+            "Online" -> {
+                showSuccessDialog("", "Processing Payment...", "wallet")
+                with(mProfile) {
+                    startPayment(
+                        this@SubscriptionHistoryActivity,
+                        mailId,
+                        mSubscription.estimateAmount * 100,
+                        name,
+                        id,
+                        phNumber
+                    ).also { status ->
+                        if (!status) {
+                            Toast.makeText(
+                                this@SubscriptionHistoryActivity,
+                                "Error in processing payment. Try Later ",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
+            else -> {
+                showSwipeConfirmationDialog(this, "swipe right to make payment")
+            }
+        }
+    }
+
+    override fun onPaymentSuccess(response: String?) {
+        showSuccessDialog("", "Processing payment ...", "wallet")
+        lifecycleScope.launch {
+            startTransaction()
+        }
+    }
+
+    override fun onPaymentError(p0: Int, p1: String?) {
+        showErrorSnackBar("Payment Failed! Choose different payment method", true)
+    }
+
+
+    fun approved(status: Boolean) = lifecycleScope.launch (Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
+            showSuccessDialog("", "Processing payment from Wallet...", "wallet")
+        }
+        if (status) {
+            if (viewModel.checkWalletForBalance(mSubscription.estimateAmount, id)) {
+                val id = viewModel.makeTransactionFromWallet(mSubscription.estimateAmount, id, mSubscription.id)
+                validatingTransactionBeforeOrder(id)
+            } else {
+                withContext(Dispatchers.Main) {
+                    delay(1000)
+                    hideSuccessDialog()
+                    showErrorSnackBar(
+                        "Insufficient balance in Wallet. Pick another payment method",
+                        true
+                    )
+                }
+            }
+        } else {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@SubscriptionHistoryActivity, "Transaction cancelled", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private suspend fun validatingTransactionBeforeOrder(id: String) = withContext(Dispatchers.Main) {
+        if ( id == "failed") {
+            hideSuccessDialog()
+            showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
+            return@withContext
+        } else {
+            withContext(Dispatchers.Main) {
+                hideSuccessDialog()
+                showSuccessDialog("", "Updating Subscription...", "dates")
+                startTransaction()
+            }
+        }
+    }
+
+    private suspend fun startTransaction() = withContext (Dispatchers.IO) {
+        val renewedDate = TimeUtil().getCustomDateFromDifference(mSubscription.endDate, 30)
+        if(viewModel.renewSubscription(mSubscription.id, mSubscription.monthYear, renewedDate)) {
+            delay(1500)
+            withContext(Dispatchers.Main) {
+                hideSuccessDialog()
+                viewModel.getSubscriptions(Constants.SUB_ACTIVE)
+                showSuccessDialog("", "Subscription Updated Successfully...")
+                delay(1500)
+                hideSuccessDialog()
+            }
+        } else {
+            withContext(Dispatchers.Main) {
+                hideSuccessDialog()
+                showErrorSnackBar("Server Error! Subscription can't be created. If money is debited please contact customer support", false, "long")
+                return@withContext
+            }
+        }
     }
 }

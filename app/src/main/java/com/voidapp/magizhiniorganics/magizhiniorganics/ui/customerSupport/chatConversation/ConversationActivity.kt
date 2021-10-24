@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.GlideBuilder
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ConversationAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Messages
@@ -104,7 +103,7 @@ class ConversationActivity : BaseActivity(), KodeinAware {
             binding.tvStatus.text = "Online"
             binding.tvStatus.setTextColor(ContextCompat.getColor(this, R.color.green_base))
         } else {
-            binding.tvStatus.text = Time().getTimeAgo(profile.timestamp)
+            binding.tvStatus.text = TimeUtil().getTimeAgo(profile.timestamp)
             binding.tvStatus.setTextColor(ContextCompat.getColor(this, R.color.grey))
         }
     }

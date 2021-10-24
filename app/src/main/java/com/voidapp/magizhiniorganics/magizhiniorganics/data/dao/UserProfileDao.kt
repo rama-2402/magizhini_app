@@ -162,6 +162,31 @@ interface UserProfileDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun cancelSubscription(subscriptionEntity: SubscriptionEntity)
 
+    @Query("UPDATE SubscriptionEntity SET endDate = :newDate WHERE id = :id")
+    fun updateSubscription(id: String, newDate: Long)
 
+    //Active orders and active subscriptions
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertActiveOrders(id: ActiveOrders)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertActiveSubscription(id: ActiveSubscriptions)
+
+    @Query("SELECT id FROM ActiveOrders")
+    fun getAllActiveOrders(): LiveData<List<String>>
+
+    @Query("SELECT id FROM ActiveSubscriptions")
+    fun getAllActiveSubscriptions(): LiveData<List<String>>
+
+    @Query("SELECT id FROM ActiveOrders")
+    fun getAllActiveOrdersStatic(): List<String>
+
+    @Query("SELECT id FROM ActiveSubscriptions")
+    fun getAllActiveSubscriptionsStatic(): List<String>
+
+    @Query("DELETE FROM ActiveOrders WHERE id = :id")
+    fun cancelActiveOrder(id: String)
+
+    @Query("DELETE FROM ActiveSubscriptions WHERE id = :id")
+    fun cancelActiveSubscription(id: String)
 }

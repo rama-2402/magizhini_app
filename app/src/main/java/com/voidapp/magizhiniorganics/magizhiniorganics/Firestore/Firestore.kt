@@ -22,6 +22,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.Subscrip
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
+import java.io.IOException
 
 class Firestore(
     private val repository: DatabaseRepository
@@ -89,18 +90,60 @@ class Firestore(
                 val profile = snapShot.toObject(UserProfile::class.java)
                 val userProfileEntity = profile!!.toUserProfileEntity()
                 repository.upsertProfile(userProfileEntity)
-                userProfileEntity.favorites.forEach { fav ->
-                    Favorites(fav).also {
-                        repository.upsertFavorite(it)
-                    }
-                }
-                return@withContext true
+
+                val uploadFavorites =
+                    async { uploadFavorites(userProfileEntity.favorites) }
+                val uploadActiveOrders =
+                    async { uploadActiveOrders(userProfileEntity.purchaseHistory) }
+                val uploadActiveSubscriptions =
+                    async { uploadActiveSubscriptions(userProfileEntity.subscriptions) }
+
+                return@withContext !(!uploadFavorites.await() ||
+                        !uploadActiveOrders.await() ||
+                        !uploadActiveSubscriptions.await())
             } else {
                 return@withContext false
             }
         } catch (e: Exception) {
             Log.e("exception", e.message.toString())
             return@withContext false
+        }
+    }
+
+    private suspend fun uploadFavorites(favorites: List<String>) = withContext(Dispatchers.IO) {
+        return@withContext try {
+            favorites.forEach { fav ->
+                Favorites(fav).also {
+                    repository.upsertFavorite(it)
+                }
+            }
+            true
+        }catch (e: IOException) {
+            false
+        }
+    }
+    private suspend fun uploadActiveOrders(orders: List<String>) = withContext(Dispatchers.IO) {
+        return@withContext try {
+            orders.forEach { order ->
+                ActiveOrders(order).also {
+                    repository.upsertActiveOrders(it)
+                }
+            }
+            true
+        }catch (e: IOException) {
+            false
+        }
+    }
+    private suspend fun uploadActiveSubscriptions(subscriptions: List<String>) = withContext(Dispatchers.IO) {
+        return@withContext try {
+            subscriptions.forEach { sub ->
+                ActiveSubscriptions(sub).also {
+                    repository.upsertActiveSubscription(it)
+                }
+            }
+            true
+        }catch (e: IOException) {
+            false
         }
     }
 
@@ -264,12 +307,9 @@ class Firestore(
     }
 
     private suspend fun updateLocalProfile(order: Order) = withContext(Dispatchers.IO) {
-        val profile = repository.getProfileData()!!
-        profile.purchaseHistory.add(order.orderId)
-        if (!profile.purchasedMonths.contains(order.monthYear)) {
-            profile.purchasedMonths.add(order.monthYear)
+        ActiveOrders(order.orderId).also {
+            repository.upsertActiveOrders(it)
         }
-        repository.upsertProfile(profile)
     }
 
     suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) {
@@ -297,8 +337,8 @@ class Firestore(
     }
 
     private suspend fun updateOrderHistory(order: Order) = withContext(Dispatchers.IO) {
-        val date = Time().getCurrentDateNumber()
-        val id = "${Time().getMonth()}${Time().getYear()}"
+        val date = TimeUtil().getCurrentDateNumber()
+        val id = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
         mFireStore.collection(Constants.ORDER_HISTORY)
             .document(id)
             .collection(date)
@@ -480,6 +520,7 @@ class Firestore(
     private suspend fun removeActiveSubFromProfile(sub: SubscriptionEntity) {
         mFireStore.collection(Constants.USERS)
             .document(sub.customerID).update("subscriptions", FieldValue.arrayRemove(sub.id)).await()
+        repository.cancelActiveSubscription(sub.id)
     }
 
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> {
@@ -529,12 +570,9 @@ class Firestore(
 
     private suspend fun updateLocalSubscription(sub: SubscriptionEntity) =
         withContext(Dispatchers.IO) {
-            val profile = repository.getProfileData()!!
-            profile.subscriptions.add(sub.id)
-            if (!profile.subscribedMonths.contains(sub.monthYear)) {
-                profile.subscribedMonths.add(sub.monthYear)
+            ActiveSubscriptions(sub.id).also {
+                repository.upsertActiveSubscription(it)
             }
-            repository.upsertProfile(profile)
         }
 
     private suspend fun updateStoreSubscription(sub: SubscriptionEntity) {
@@ -554,6 +592,20 @@ class Firestore(
             mFireStore.collection(Constants.USERS)
                 .document(sub.customerID).update("subscriptions", FieldValue.arrayUnion(sub.id))
                 .await()
+        }
+
+    suspend fun renewSubscription(id: String, monthYear: String, newDate: Long):Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                mFireStore.collection(Constants.SUBSCRIPTION)
+                    .document(Constants.SUB_ACTIVE)
+                    .collection(monthYear)
+                    .document(id)
+                    .update("endDate", newDate).await()
+                true
+            }catch (e:Exception) {
+                false
+            }
         }
 
     suspend fun getWalletAmount(id: String): Float {

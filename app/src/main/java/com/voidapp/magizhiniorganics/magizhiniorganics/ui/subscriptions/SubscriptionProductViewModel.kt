@@ -15,7 +15,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -148,8 +148,8 @@ class SubscriptionProductViewModel(
             val transaction = TransactionHistory (
                 orderID,
                 System.currentTimeMillis(),
-                Time().getMonth(),
-                Time().getYear().toLong(),
+                TimeUtil().getMonth(),
+                TimeUtil().getYear().toLong(),
                 amount,
                 id,
                 id,

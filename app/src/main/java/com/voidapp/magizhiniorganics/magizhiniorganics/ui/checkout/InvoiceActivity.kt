@@ -37,16 +37,15 @@ import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
 import kotlinx.coroutines.*
-import org.json.JSONObject
 
 
 class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
@@ -110,42 +109,6 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         setCartBottom()
         iniLiveData()
         listeners()
-    }
-
-    private fun startPayment() {
-        /*
-        *  You need to pass current activity in order to let Razorpay create CheckoutActivity
-        * */
-        val co = Checkout()
-        val email = if (mProfile.mailId.isEmpty()) "magizhiniorganics2018@gmail.com" else mProfile.mailId
-        val price = binding.tvTotalAmt.text.toString().toFloat() * 100
-
-        try {
-            val options = JSONObject()
-            options.put("name","${mProfile.name}")
-            options.put("description","Purchasing from store for ${mProfile.id}")
-            //You can omit the image option to fetch the image from dashboard
-            options.put("image","https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/icon_sh_4.png?alt=media&token=71cf0e67-2f00-4a0f-8950-15459ee02137")
-            options.put("theme.color", "#86C232");
-            options.put("currency","INR");
-//            options.put("order_id", "orderIDkjhasgdfkjahsdf");
-            options.put("amount","$price")//pass amount in currency subunits
-
-//            val retryObj = JSONObject();
-//            retryObj.put("enabled", true);
-//            retryObj.put("max_count", 4);
-//            options.put("retry", retryObj);
-
-            val prefill = JSONObject()
-            prefill.put("email","$email")  //this place should have customer name
-            prefill.put("contact","${mProfile.phNumber}")     //this place should have customer phone number
-
-            options.put("prefill",prefill)
-            co.open(this,options)
-        }catch (e: Exception){
-            Toast.makeText(this,"Error in payment: "+ e.message,Toast.LENGTH_LONG).show()
-            e.printStackTrace()
-        }
     }
 
     override fun onPaymentSuccess(response: String?) {
@@ -361,7 +324,26 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     private fun checkPaymentMode() {
         when (mPaymentPreference) {
-            "Online" -> startPayment()
+            "Online" -> {
+                with(mProfile) {
+                    startPayment(
+                        this@InvoiceActivity,
+                        mailId,
+                        binding.tvTotalAmt.text.toString().toFloat() * 100,
+                        name,
+                        id,
+                        phNumber
+                    ).also { status ->
+                        if (!status) {
+                            Toast.makeText(
+                                this@InvoiceActivity,
+                                "Error in processing payment. Try Later ",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
             "COD" -> {
                 mOrder.isPaymentDone = false
                 showSuccessDialog("","Placing Order... ","order")
@@ -407,7 +389,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             customerId = mCurrentUserID
             transactionID = mTransactionID
             cart = mCartItems
-            purchaseDate = Time().getCurrentDate()
+            purchaseDate = TimeUtil().getCurrentDate()
             paymentMethod = mPaymentPreference
             deliveryPreference =
                 binding.spDeliveryPreference.selectedItem.toString()
@@ -416,7 +398,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             address = mSelectedAddress
             price = binding.tvTotalAmt.text.toString().toFloat()
             orderStatus = Constants.PENDING
-            monthYear = "${Time().getMonth()}${Time().getYear()}"
+            monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
         }
         startWorkerThread(mOrder)
         viewModel.placeOrder(mOrder)

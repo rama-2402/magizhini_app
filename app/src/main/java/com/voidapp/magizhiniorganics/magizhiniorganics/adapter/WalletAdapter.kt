@@ -2,18 +2,14 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.view.ViewParent
-import android.widget.ViewSwitcher
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvTransactionItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Time
-import kotlinx.coroutines.NonDisposableHandle.parent
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 
 class WalletAdapter (
     val context: Context,
@@ -36,8 +32,8 @@ class WalletAdapter (
         with(holder.binding) {
             tvTransactionID.text = transaction.id
             tvTransactionAmount.text = transaction.amount.toString()
-            tvDateStamp.text = Time().getCustomDate(dateLong = transaction.timestamp)
-            tvTimestamp.text = Time().timeStamp(transaction.timestamp)
+            tvDateStamp.text = TimeUtil().getCustomDate(dateLong = transaction.timestamp)
+            tvTimestamp.text = TimeUtil().timeStamp(transaction.timestamp)
             tvOrderID.text = transaction.transactionFor
             checkTransactionType(holder, transaction)
             displayTransactionType(holder, transaction)

@@ -31,7 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto"
-                android:text="Monthly Due: "
+                android:text="Due Date: "
                 android:textColor="@color/gray700"
                 android:textStyle="bold"
                 android:textSize="14dp"
@@ -41,7 +41,7 @@
                 app:layout_constraintBottom_toBottomOf="@id/unsubscribe"
                 />
             <TextView
-                android:id="@+id/tvDueAmount"
+                android:id="@+id/tvDueDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto"
