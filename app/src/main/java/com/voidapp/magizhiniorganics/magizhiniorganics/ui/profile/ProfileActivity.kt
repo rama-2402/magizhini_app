@@ -109,6 +109,14 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun observers() {
         viewModel.userProfile.observe(this, { userData ->
             mProfile = userData.toUserProfile()
+            viewModel.getAllActiveOrders().observe(this, {
+                mProfile.purchaseHistory.clear()
+                mProfile.purchaseHistory.addAll(it)
+            })
+            viewModel.getAllActiveSubscriptions().observe(this, {
+                mProfile.subscriptions.clear()
+                mProfile.subscriptions.addAll(it)
+            })
             setUserDetailsFromDao(userData)
         })
         viewModel.profileUploadStatus.observe(this, { status ->
@@ -129,16 +137,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 viewModel.uploadProfile(mProfile)
             }
         })
-        if (!isNewUser){
-            viewModel.getAllActiveOrders().observe(this, {
-                mProfile.purchaseHistory.clear()
-                mProfile.purchaseHistory.addAll(it)
-            })
-            viewModel.getAllActiveSubscriptions().observe(this, {
-                mProfile.subscriptions.clear()
-                mProfile.subscriptions.addAll(it)
-            })
-        }
     }
 
     private fun activityInit() {
