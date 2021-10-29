@@ -36,6 +36,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurch
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
@@ -152,39 +153,12 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         mFilterMonth = month
         binding.fabMonthFilter.text = " $month"
         fetchData()
-//        val monthFormat = SimpleDateFormat("MM")
-//        val currentMonth = monthFormat.format(System.currentTimeMillis())
-//        if (getMonthNumber(month) <= currentMonth.toInt()) {
-//            mFilterMonth = month
-//            fetchData()
-//        } else {
-//            Toast.makeText(this, "No data available", Toast.LENGTH_SHORT).show()
-//        }
     }
 
     private fun fetchData() {
-//        if (mFilterYear.toInt() <= Time().getYear().toInt() && getMonthNumber(month) <= currentMonth.toInt()) {
         showShimmer()
         viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
-//        }
     }
-
-//    private fun getMonthNumber(month: String): Int {
-//       return when(month) {
-//           "January" -> 1
-//           "February" -> 2
-//           "March" -> 3
-//           "April" -> 4
-//           "May" -> 5
-//           "June" -> 6
-//           "July" -> 7
-//           "August" -> 8
-//           "September" -> 9
-//           "October" -> 10
-//           "November" -> 11
-//           else -> 12
-//       }
-//    }
 
     private fun initLiveData() {
         viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
@@ -212,7 +186,6 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         //observing the favorites livedata
         viewModel.favorites.observe(this, {
             orderItemsAdapter.favorites = it
-//            orderItemsAdapter.notifyDataSetChanged()
         })
 
         viewModel.moveToProductReview.observe(this, {
@@ -220,8 +193,11 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         })
 
         viewModel.cancelOrder.observe(this, {
-//            mCancelOrder = it
-//            showExitSheet(this, "Confirm Cancellation")
+            mCancelOrder = it
+            showExitSheet(this, "Confirm Cancellation")
+        })
+
+        viewModel.invoiceOrder.observe(this, {
             createPDF(it)
         })
 
@@ -235,7 +211,8 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
                         ordersAdapter.orders = mOrderHistory
                         ordersAdapter.notifyItemChanged(i)
                         hideProgressDialog()
-                        showErrorSnackBar("Order Cancelled", false)
+                        showToast(this, "Order Cancelled", Constants.SHORT)
+                        showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. For further queries please click here to contact Customer Support", "cs")
                     }
                 }
             } else {
@@ -304,6 +281,15 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         hideExitSheet()
         showProgressDialog()
         viewModel.confirmCancellation(mCancelOrder)
+    }
+
+    fun moveToCustomerSupport() {
+        hideExitSheet()
+        Intent(this, ChatActivity::class.java).also {
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            finish()
+        }
     }
 
     private fun moveToProductDetails(productId: String, productName: String) {

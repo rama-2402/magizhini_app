@@ -12,15 +12,28 @@
         <TextView
             android:id="@+id/tvConfirmationText"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/eighty"
+            android:layout_height="wrap_content"
             android:text="Exit"
             android:textSize="16sp"
             android:gravity="center"
             android:textColor="@color/matteRed"
             android:layout_gravity="center"
+            android:padding="@dimen/material_size_24"
             android:background="?android:attr/selectableItemBackground"
             android:foreground="?android:attr/selectableItemBackgroundBorderless"
             />
+<!--        <TextView-->
+<!--            android:id="@+id/tvConfirmationText"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="@dimen/eighty"-->
+<!--            android:text="Exit"-->
+<!--            android:textSize="16sp"-->
+<!--            android:gravity="center"-->
+<!--            android:textColor="@color/matteRed"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:background="?android:attr/selectableItemBackground"-->
+<!--            android:foreground="?android:attr/selectableItemBackgroundBorderless"-->
+<!--            />-->
         <View
             android:layout_width="match_parent"
             android:layout_height="0.75dp"
@@ -33,7 +46,8 @@
         <TextView
             android:id="@+id/tvCancelText"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/eighty"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/material_size_24"
             android:gravity="center"
             android:text="Cancel"
             android:textSize="16sp"

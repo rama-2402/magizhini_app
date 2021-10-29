@@ -60,26 +60,29 @@ class PurchaseHistoryAdapter(
 
             when(order.orderStatus) {
                 Constants.PENDING -> {
-                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancel))
-                    showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
-                    orderStatus.text = "Cancel \n Order"
-                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
+                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.carbon_delivery))
+                    orderStatus.text = "Cancel"
                 }
                 Constants.CANCELLED -> {
                     showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancelled_order))
                     showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
                     orderStatus.text = "Cancelled"
+                    orderStatus.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+                    orderStatus.elevation = 0f
                     orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
                 }
                 Constants.SUCCESS -> {
                     showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
                     showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteGreen))
-                    orderStatus.text = "Delivered"
-                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteGreen))
+                    orderStatus.text = "Invoice"
+                    orderStatus.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
+                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.white))
                 }
                 Constants.FAILED -> {
                     showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancelled_order))
                     showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
+                    orderStatus.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+                    orderStatus.elevation = 0f
                     orderStatus.text = "Delivery \n Failed"
                     orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
                 }
@@ -109,9 +112,13 @@ class PurchaseHistoryAdapter(
     }
 
     private fun cancelOrder(viewModel: ViewModel, order: OrderEntity) {
-        if (order.orderStatus == Constants.PENDING) {
-            when(viewModel) {
-                is PurchaseHistoryViewModel -> viewModel.cancelOrder(order)
+        viewModel as PurchaseHistoryViewModel
+        when (order.orderStatus) {
+            Constants.PENDING -> {
+                viewModel.cancelOrder(order)
+            }
+            Constants.SUCCESS -> {
+                viewModel.generateInvoice(order)
             }
         }
     }

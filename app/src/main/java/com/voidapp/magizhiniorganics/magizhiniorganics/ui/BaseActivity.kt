@@ -160,17 +160,32 @@ open class BaseActivity : AppCompatActivity() {
         ExitBottomSheetdialog.setCancelable(true)
         ExitBottomSheetdialog.setContentView(view.root)
 
-        if (data == "Cancel for some days") {
-            view.tvCancelText.text = data as String
+        when (data) {
+            "Cancel for some days" -> view.tvCancelText.text = data as String
+            "cs" -> {
+                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvCancelText.text = "DONE"
+                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+            }
         }
 
         view.tvConfirmationText.text = confirmation
         view.tvConfirmationText.setOnClickListener {
             when(activity) {
                 is ProfileActivity -> activity.exitProfileWithoutChange()
-                is PurchaseHistoryActivity -> activity.cancellationConfirmed()
+                is PurchaseHistoryActivity -> {
+                    when(data) {
+                        "cs" -> activity.moveToCustomerSupport()
+                        else -> activity.cancellationConfirmed()
+
+                    }
+                }
                 is SubscriptionHistoryActivity -> activity.confirmCancellation()
             }
+        }
+
+        view.tvCancelText.setOnClickListener {
+            hideExitSheet()
         }
 
         ExitBottomSheetdialog.show()
