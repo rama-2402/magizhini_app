@@ -143,27 +143,9 @@
         android:layout_height="32dp"
         android:layout_margin="@dimen/material_size_8"
         app:layout_constraintTop_toTopOf="@id/tvTransactionIDText"
-        app:layout_constraintEnd_toEndOf="@id/tvSubStatus"
-        app:layout_constraintStart_toStartOf="@id/tvSubStatus"
-        app:layout_constraintBottom_toTopOf="@id/tvSubStatus"/>
-
-    <TextView
-        android:id="@+id/tvSubStatus"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto"
-        android:paddingTop="@dimen/material_size_4"
-        android:paddingBottom="@dimen/material_size_4"
-        android:paddingStart="@dimen/material_size_12"
-        android:paddingEnd="@dimen/material_size_12"
-        android:text="Active"
-        android:textColor="@color/gray700"
-        android:textIsSelectable="true"
-        android:textSize="12dp"
-        android:layout_margin="@dimen/material_size_8"
-        app:layout_constraintBottom_toBottomOf="@id/tvSubTypeText"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="@id/tvRenew"
+        app:layout_constraintStart_toStartOf="@id/tvRenew"
+        app:layout_constraintBottom_toTopOf="@id/tvRenew"/>
 
     <TextView
         android:id="@+id/tvRenew"

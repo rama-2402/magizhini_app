@@ -206,7 +206,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
             view.unsubscribe.visibility = View.GONE
         }
 
-        view.tvDueDate.text = TimeUtil().getCustomDate("", sub.endDate)
+        view.tvDueDate.text = TimeUtil().getCustomDate(dateLong = sub.endDate)
 
         view.calendarView.setUseThreeLetterAbbreviation(true)
 
