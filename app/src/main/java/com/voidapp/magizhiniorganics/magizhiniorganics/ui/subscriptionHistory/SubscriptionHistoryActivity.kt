@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +25,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionHistoryBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCalendarBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
@@ -143,6 +145,8 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
                     }
                     delay(2000)
                     hideSuccessDialog()
+                    showSuccessDialog(title = "",body = "Adding balance to the Wallet...", content = "wallet")
+                    viewModel.calculateBalance(mSubscription)
                 }
             }
         })
@@ -160,6 +164,19 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
         })
         viewModel.profile.observe(this, {
             mProfile = it
+        })
+        viewModel.walletTransactionStatus.observe(this, {
+            lifecycleScope.launch(Dispatchers.Main) {
+                delay(1500)
+                hideSuccessDialog()
+                if (it) {
+                    showExitSheet(this@SubscriptionHistoryActivity, "Outstanding Balance for Delivery Cancelled Dates, Delivery Failed Days and Remaining Days is Added to the Wallet Successfully!\n" +
+                            " \n" +
+                            " Please Click the message to contact Customer Support" , "cs")
+                } else {
+                    showExitSheet(this@SubscriptionHistoryActivity, "Server Error! Failed to add Balance to the Wallet. \n \n Please Click the message to contact Customer Support", "cs")
+                }
+            }
         })
     }
 
@@ -253,7 +270,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
                 } else {
                     unSubscribe = true
                     view.tvDueText.text = "Due Date: "
-                    view.tvDueDate.text = TimeUtil().getCustomDate("", sub.endDate)
+                    view.tvDueDate.text = TimeUtil().getCustomDate(dateLong = sub.endDate)
                     view.tvUnsubscribe.text = "UNSUBSCRIBE"
                 }
             }
@@ -275,7 +292,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
                     view.calendarView.addEvent(event)
                     unSubscribe = true
                     view.tvDueText.text = "Due Date: "
-                    view.tvDueDate.text = TimeUtil().getCustomDate("", sub.endDate)
+                    view.tvDueDate.text = TimeUtil().getCustomDate(dateLong = sub.endDate)
                     view.tvUnsubscribe.text = "UNSUBSCRIBE"
                     Toast.makeText(this, "Delivery Cancelled", Toast.LENGTH_SHORT).show()
                 } else {
@@ -298,6 +315,15 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
         hideExitSheet()
         showSuccessDialog("", "Cancelling Subscription...", "dates")
         viewModel.cancelSubscription(mSubscription)
+    }
+
+    fun moveToCustomerSupport() {
+        hideExitSheet()
+        Intent(this, ChatActivity::class.java).also {
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            finish()
+        }
     }
 
     private fun showShimmer() {

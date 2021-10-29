@@ -317,6 +317,28 @@
                         app:layout_constraintEnd_toEndOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="*2% of total bill is donated to Food For Homeless"
+                    android:singleLine="true"
+                    android:scrollbars="horizontal"
+                    android:layout_marginTop="@dimen/material_size_4"
+                    android:layout_marginBottom="@dimen/material_size_4"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:ellipsize="marquee"
+                    android:textColor="@color/gray700"
+                    android:textStyle="italic"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:scrollHorizontally="true"
+                    android:marqueeRepeatLimit ="marquee_forever"
+                    android:nestedScrollingEnabled="true"
+                    android:overScrollMode="always"
+                    android:isScrollContainer="true"
+                    />
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/llCoupons"
                     android:layout_width="match_parent"

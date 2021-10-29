@@ -201,7 +201,6 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         }
 
         checkoutBtn.setOnClickListener {
-            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             if (mPaymentPreference == "COD") {
                 showSwipeConfirmationDialog(this, "swipe right to place order")
             } else {

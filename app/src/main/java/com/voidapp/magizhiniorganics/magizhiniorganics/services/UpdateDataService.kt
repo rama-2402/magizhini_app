@@ -39,6 +39,9 @@ class UpdateDataService (
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
+
+            repository.deleteBanners()
+
             val categoryData = async { getAllData(Constants.CATEGORY) }
             val bannerData = async { getAllData(Constants.BANNER) }
             val productData = async { getAllData(Constants.PRODUCTS) }
@@ -63,10 +66,10 @@ class UpdateDataService (
                 async { filterDataAndUpdateRoom(Constants.DELIVERY_CHARGE, deliveryChargeSnapshot) }
 
             updateCategory.await()
-            updateBanner.await()
             updateProduct.await()
             updateCoupon.await()
             updateDeliveryCharge.await()
+            updateBanner.await()
 
             updateEntityData()
 

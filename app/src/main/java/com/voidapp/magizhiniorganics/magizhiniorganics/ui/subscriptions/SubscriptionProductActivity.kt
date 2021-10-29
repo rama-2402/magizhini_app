@@ -388,7 +388,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
             1 -> {
                 val cal = Calendar.getInstance()
                 cal.timeInMillis = oSubscription.startDate
-                cal.add(Calendar.DATE, 30)
+                cal.add(Calendar.DATE, 29)  //since we add the start date as well, we add remaining 29 days to get a total of 30 days
                 oSubscription.endDate = cal.timeInMillis
             }
         }

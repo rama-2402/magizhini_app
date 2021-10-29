@@ -40,6 +40,8 @@ import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 
 class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeListener, NavigationView.OnNavigationItemSelectedListener {

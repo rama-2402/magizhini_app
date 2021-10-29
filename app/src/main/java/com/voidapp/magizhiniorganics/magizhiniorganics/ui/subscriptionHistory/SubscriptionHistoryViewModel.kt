@@ -1,6 +1,8 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 
+import android.icu.util.TimeUnit
 import android.provider.SyncStateContract
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,6 +21,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.Period
+import java.time.temporal.ChronoUnit
 
 class SubscriptionHistoryViewModel(
     val fbRepository: FirestoreRepository,
@@ -39,6 +44,8 @@ class SubscriptionHistoryViewModel(
     val cancelSub: LiveData<SubscriptionEntity> = _cancelSub
     private var _profile: MutableLiveData<UserProfileEntity> = MutableLiveData()
     val profile: LiveData<UserProfileEntity> = _profile
+    private var _walletTransactionStatus: MutableLiveData<Boolean> = MutableLiveData()
+    val walletTransactionStatus: LiveData<Boolean> = _walletTransactionStatus
 
     fun getProfile() = viewModelScope.launch(Dispatchers.IO) {
         val profile = dbRepository.getProfileData()!!
@@ -58,7 +65,12 @@ class SubscriptionHistoryViewModel(
         sub.status = Constants.CANCELLED
         if (fbRepository.cancelSubscription(sub)) {
             try {
-                dbRepository.cancelSubscription(sub)
+                val cancelSub = async { dbRepository.cancelSubscription(sub) }
+                val removeActiveSubFromProfile = async { removeActiveSubFromProfile(sub) }
+
+                cancelSub.await()
+                removeActiveSubFromProfile.await()
+
                 withContext(Dispatchers.Main) {
                     _subStatus.value = "complete"
                 }
@@ -73,11 +85,7 @@ class SubscriptionHistoryViewModel(
             viewModelScope.launch(Dispatchers.IO) {
                 if (fbRepository.addCancellationDates(sub, cancelDate)) {
                     sub.cancelledDates.add(cancelDate)
-                    val cancelSub = async { dbRepository.upsertSubscription(sub) }
-                    val removeActiveSubFromProfile = async { removeActiveSubFromProfile(sub) }
-
-                    cancelSub.await()
-                    removeActiveSubFromProfile.await()
+                    dbRepository.upsertSubscription(sub)
                 }
             }
         } catch (e: Exception) {
@@ -100,11 +108,38 @@ class SubscriptionHistoryViewModel(
     }
 
     suspend fun checkWalletForBalance(amount: Float, id: String): Boolean {
-        try {
+        return try {
             val amountInWallet = fbRepository.getWalletAmount(id)
-            return amountInWallet >= amount
+            amountInWallet >= amount
         } catch (e: Exception) {
-            return false
+            false
+        }
+    }
+
+    suspend fun calculateBalance(sub: SubscriptionEntity) = withContext(Dispatchers.Default) {
+        val totalRefundAmount = if (System.currentTimeMillis() > sub.startDate) {
+            // we add plus one because the day will counted if exactly at 00:00. any timestamp past that point day will not be calculated. So to include that we add one to the total
+            val remainingDays = (sub.endDate - System.currentTimeMillis()) / (1000*60*60*24)
+            val cancelledDates = mutableListOf<Long>()
+            for (date in sub.cancelledDates.indices) {
+                if (sub.cancelledDates[date] < System.currentTimeMillis()) {
+                    cancelledDates.add(sub.cancelledDates[date])
+                }
+            }
+            val refundDays = cancelledDates.size + sub.notDeliveredDates.size + remainingDays + 1
+            val singleDayPrice = sub.estimateAmount/30f
+            refundDays * singleDayPrice
+        } else {
+            30f
+        }
+        if (fbRepository.makeTransactionFromWallet(totalRefundAmount, sub.customerID, "Add")) {
+            withContext(Dispatchers.Main) {
+                _walletTransactionStatus.value = true
+            }
+        } else {
+            withContext(Dispatchers.Main) {
+                _walletTransactionStatus.value = false
+            }
         }
     }
 

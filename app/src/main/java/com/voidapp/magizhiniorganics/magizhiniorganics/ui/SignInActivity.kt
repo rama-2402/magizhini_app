@@ -186,6 +186,11 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     fun loggedIn() {
         SharedPref(this).putData(Constants.USER_ID, Constants.STRING, mFirebaseAuth.currentUser!!.uid)
+        mFirebaseAuth.currentUser!!.phoneNumber?.let {
+            SharedPref(this).putData(Constants.PHONE_NUMBER, Constants.STRING,
+                it
+            )
+        }
         startGetAllDataService()
         lifecycleScope.launch (Dispatchers.Main) {
             if (repository.checkUserProfileDetails()) { //if user is old

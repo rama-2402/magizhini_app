@@ -180,7 +180,12 @@ open class BaseActivity : AppCompatActivity() {
 
                     }
                 }
-                is SubscriptionHistoryActivity -> activity.confirmCancellation()
+                is SubscriptionHistoryActivity -> {
+                    when (data) {
+                        "cs" -> activity.moveToCustomerSupport()
+                        else -> activity.confirmCancellation()
+                    }
+                }
             }
         }
 

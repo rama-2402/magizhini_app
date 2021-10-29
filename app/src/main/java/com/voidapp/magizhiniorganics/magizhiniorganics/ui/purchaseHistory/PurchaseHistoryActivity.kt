@@ -212,7 +212,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
                         ordersAdapter.notifyItemChanged(i)
                         hideProgressDialog()
                         showToast(this, "Order Cancelled", Constants.SHORT)
-                        showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. For further queries please click here to contact Customer Support", "cs")
+                        showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
                     }
                 }
             } else {

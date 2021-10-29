@@ -39,8 +39,17 @@ class Firestore(
     }
 
     fun signOut() = CoroutineScope(Dispatchers.IO).launch {
-        repository.deleteUserProfile()
+        val deleteLocalDB = async { deleteLocalDB() }
+        deleteLocalDB.await()
         mFirebaseAuth.signOut()
+    }
+
+    private suspend fun deleteLocalDB() {
+        repository.deleteUserProfile()
+        repository.deleteActiveOrdersTable()
+        repository.deleteActiveSubTable()
+        repository.deleteOrdersTable()
+        repository.deleteSubscriptionsTable()
     }
 
     fun signInWithPhoneAuthCredential(activity: SignInActivity, credential: PhoneAuthCredential) =
@@ -118,10 +127,11 @@ class Firestore(
                 }
             }
             true
-        }catch (e: IOException) {
+        } catch (e: IOException) {
             false
         }
     }
+
     private suspend fun uploadActiveOrders(orders: List<String>) = withContext(Dispatchers.IO) {
         return@withContext try {
             orders.forEach { order ->
@@ -130,22 +140,24 @@ class Firestore(
                 }
             }
             true
-        }catch (e: IOException) {
+        } catch (e: IOException) {
             false
         }
     }
-    private suspend fun uploadActiveSubscriptions(subscriptions: List<String>) = withContext(Dispatchers.IO) {
-        return@withContext try {
-            subscriptions.forEach { sub ->
-                ActiveSubscriptions(sub).also {
-                    repository.upsertActiveSubscription(it)
+
+    private suspend fun uploadActiveSubscriptions(subscriptions: List<String>) =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                subscriptions.forEach { sub ->
+                    ActiveSubscriptions(sub).also {
+                        repository.upsertActiveSubscription(it)
+                    }
                 }
+                true
+            } catch (e: IOException) {
+                false
             }
-            true
-        }catch (e: IOException) {
-            false
         }
-    }
 
     suspend fun createWallet(wallet: Wallet) {
         try {
@@ -155,16 +167,17 @@ class Firestore(
                 .document(wallet.id)
                 .set(wallet, SetOptions.merge())
                 .await()
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
     }
 
-    suspend fun uploadImage (
+    suspend fun uploadImage(
         path: String,
         uri: Uri,
         extension: String,
         data: String = ""
     ): String = withContext(Dispatchers.IO) {
-        val name = when(data) {
+        val name = when (data) {
             "review" -> {
                 val charset = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz0123456789"
                 "img_${(1..10).map { charset.random() }.joinToString("")}"
@@ -180,7 +193,7 @@ class Firestore(
             val url = sRef.putFile(uri)
                 .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
 
-           return@withContext url.toString()
+            return@withContext url.toString()
 
         } catch (e: Exception) {
             return@withContext "failed"
@@ -316,7 +329,12 @@ class Firestore(
         try {
             withContext(Dispatchers.IO) {
                 val cancelOrderStatus = async { cancelOrderStatus(orderEntity) }
-                val removeActiveOrderFromProfile = async { updateCloudProfileRecentPurchases(orderEntity.orderId, orderEntity.customerId) }
+                val removeActiveOrderFromProfile = async {
+                    updateCloudProfileRecentPurchases(
+                        orderEntity.orderId,
+                        orderEntity.customerId
+                    )
+                }
                 cancelOrderStatus.await()
                 removeActiveOrderFromProfile.await()
                 withContext(Dispatchers.Main) {
@@ -519,7 +537,8 @@ class Firestore(
 
     private suspend fun removeActiveSubFromProfile(sub: SubscriptionEntity) {
         mFireStore.collection(Constants.USERS)
-            .document(sub.customerID).update("subscriptions", FieldValue.arrayRemove(sub.id)).await()
+            .document(sub.customerID).update("subscriptions", FieldValue.arrayRemove(sub.id))
+            .await()
         repository.cancelActiveSubscription(sub.id)
     }
 
@@ -547,11 +566,6 @@ class Firestore(
     ) = withContext(Dispatchers.IO) {
         val sub = subscription.toSubscriptionEntity()
         try {
-//            sub.id = mFireStore.collection(Constants.SUBSCRIPTION)
-//                .document(Constants.SUB_ACTIVE)
-//                .collection(subscription.monthYear)
-//                .document().id
-
             val updateStore = async { updateStoreSubscription(sub) }
             val updateLocal = async { updateLocalSubscription(sub) }
             val updateCloud = async { updateCloudProfileSubscription(sub) }
@@ -568,12 +582,11 @@ class Firestore(
         }
     }
 
-    private suspend fun updateLocalSubscription(sub: SubscriptionEntity) =
-        withContext(Dispatchers.IO) {
-            ActiveSubscriptions(sub.id).also {
-                repository.upsertActiveSubscription(it)
-            }
+    private suspend fun updateLocalSubscription(sub: SubscriptionEntity) {
+        ActiveSubscriptions(sub.id).also {
+            repository.upsertActiveSubscription(it)
         }
+    }
 
     private suspend fun updateStoreSubscription(sub: SubscriptionEntity) {
         mFireStore.collection(Constants.SUBSCRIPTION)
@@ -581,7 +594,6 @@ class Firestore(
             .collection(sub.monthYear)
             .document(sub.id)
             .set(sub, SetOptions.merge()).await()
-
     }
 
     private suspend fun updateCloudProfileSubscription(sub: SubscriptionEntity) =

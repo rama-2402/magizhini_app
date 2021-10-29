@@ -71,7 +71,6 @@ class AddressAdapter(
             }
 
             card.setOnClickListener {
-                card.startAnimation(AnimationUtils.loadAnimation(card.context, R.anim.bounce))
                 viewModel.editAddress(address, position)
             }
 
