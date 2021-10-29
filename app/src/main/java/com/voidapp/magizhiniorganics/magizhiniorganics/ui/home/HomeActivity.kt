@@ -230,13 +230,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         }
     }
 
-
-
-//    private var readPermissionGranted = false
-//    private var writePermissionGranted = false
-//    private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
-//
-
     override fun onClick(v: View?) {
         if (v != null) {
             when (v) {
@@ -250,19 +243,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                         )
                         delay(150)
                         displaySelectedCategory(Constants.ALL_PRODUCTS)
-//                    val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//                        InvoiceGenerator().createPdf(this)
-//                    } else {
-//                        TODO("VERSION.SDK_INT < R")
-//                    }
-//
-//                    val target = Intent(Intent.ACTION_VIEW).also {
-//                        it.setDataAndType(uri, "application/pdf")
-//                        it.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-//                    }
-//                    val intent = Intent.createChooser(target, "Open PDF in")
-//                    startActivity(intent)
-
                     }
                 }
                 binding.fabCart -> {
@@ -274,32 +254,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             }
         }
     }
-//
-//    private fun updateOrRequestPermissions() {
-//        val hasReadPermission = ContextCompat.checkSelfPermission(
-//            this,
-//            Manifest.permission.READ_EXTERNAL_STORAGE
-//        ) == PackageManager.PERMISSION_GRANTED
-//        val hasWritePermission = ContextCompat.checkSelfPermission(
-//            this,
-//            Manifest.permission.WRITE_EXTERNAL_STORAGE
-//        ) == PackageManager.PERMISSION_GRANTED
-//        val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-//
-//        readPermissionGranted = hasReadPermission
-//        writePermissionGranted = hasWritePermission || minSdk29
-//
-//        val permissionsToRequest = mutableListOf<String>()
-//        if(!writePermissionGranted) {
-//            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//        }
-//        if(!readPermissionGranted) {
-//            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-//        }
-//        if(permissionsToRequest.isNotEmpty()) {
-//            permissionsLauncher.launch(permissionsToRequest.toTypedArray())
-//        }
-//    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
