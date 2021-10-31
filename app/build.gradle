@@ -158,6 +158,6 @@ dependencies {
     // Razor pay as payment gateway for the app
     implementation 'com.razorpay:checkout:1.6.12'
 
-
-    implementation 'com.itextpdf:itextg:5.5.10'
+    //sticky header for the scrollview in the homepage      https://github.com/didikk/sticky-nestedscrollview
+    implementation 'com.github.didikk:sticky-nestedscrollview:1.0.1'
 }

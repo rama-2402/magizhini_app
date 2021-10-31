@@ -15,55 +15,42 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:openDrawer="start"
-        >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/apbAppBarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:gravity="center"
-            android:layout_gravity="center"
-            app:iconTint="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            >
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/tbToolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_gravity="center"
-                android:foregroundGravity="center"
-                android:background="@color/green_base"
-                android:gravity="center"
-                app:titleTextColor="@color/white"
-                app:iconTint="@color/white"
-                app:navigationIcon="@color/white"
-                >
-            </androidx.appcompat.widget.Toolbar>
-
-        </com.google.android.material.appbar.AppBarLayout>
+        tools:openDrawer="start">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:isScrollContainer="true"
-            android:nestedScrollingEnabled="false"
-            tools:context=".ui.home.HomeActivity">
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/apbAppBarLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/white"
+                android:gravity="center"
+                app:iconTint="@color/white"
+                app:layout_constraintBottom_toTopOf="@id/cvBanner"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/tbToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_gravity="center"
+                    android:background="@color/green_base"
+                    android:foregroundGravity="center"
+                    android:gravity="center"
+                    app:iconTint="@color/white"
+                    app:navigationIcon="@color/white"
+                    app:titleTextColor="@color/white" />
+            </com.google.android.material.appbar.AppBarLayout>
 
             <org.imaginativeworld.whynotimagecarousel.ImageCarousel
                 android:id="@+id/cvBanner"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="225dp"
                 android:elevation="10dp"
                 app:autoPlay="true"
                 app:autoPlayDelay="2000"
@@ -76,53 +63,442 @@
                 app:infiniteCarousel="true"
                 app:layout_constraintCircleRadius="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent=".28"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
                 app:showBottomShadow="true"
                 app:showCaption="false"
                 app:showIndicator="true"
                 app:showNavigationButtons="false"
                 app:showTopShadow="false" />
 
-            <TextView
-                android:id="@+id/tvCategoryHeading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/material_size_8"
-                android:fontFamily="@font/roboto"
-                android:paddingStart="@dimen/material_size_8"
-                android:text="@string/product_categories"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="italic"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cvBanner" />
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvHomeItems"
+            <me.didik.component.StickyNestedScrollView
+                android:id="@+id/svBody"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="@dimen/material_size_16"
-                android:isScrollContainer="true"
-                android:nestedScrollingEnabled="false"
+                android:background="@android:color/white"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvCategoryHeading" />
+                app:layout_constraintTop_toBottomOf="@id/cvBanner"
+                tools:context=".ui.home.HomeActivity"
+                tools:showIn="@layout/activity_home">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/cpShowAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/material_size_4"
-                android:backgroundTint="@color/green_base"
-                android:text="Show All"
-                android:textColor="@color/white"
-                app:chipCornerRadius="@dimen/material_size_8"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cvBanner" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/stickyCategory"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:background="@color/white"
+                        android:tag="sticky"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:id="@+id/tvCategoryHeading"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="@dimen/material_size_8"
+                            android:layout_weight="4"
+                            android:fontFamily="@font/roboto"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:text="@string/product_categories"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="italic" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/cpShowAll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/material_size_4"
+                            android:backgroundTint="@color/green_base"
+                            android:text="Show All"
+                            android:textColor="@color/white"
+                            app:chipCornerRadius="@dimen/material_size_8" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvHomeItems"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:isScrollContainer="true"
+                        android:nestedScrollingEnabled="false" />
+
+                    <LinearLayout
+                        android:id="@+id/stickyBestSellers"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:tag="sticky"
+                        android:background="@color/white"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:id="@+id/tvBestSellers"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="@dimen/material_size_8"
+                            android:layout_weight="4"
+                            android:fontFamily="@font/roboto"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:text="Top Customer Purchases"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="italic" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/cpBestSellers"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/material_size_4"
+                            app:rippleColor="@color/green_base"
+                            android:backgroundTint="@color/green_base"
+                            android:text="Show All"
+                            android:textColor="@color/white"
+                            app:chipCornerRadius="@dimen/material_size_8"
+                            />
+
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvTopPurchases"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:isScrollContainer="true"
+                        android:nestedScrollingEnabled="false" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerOne"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        android:elevation="@dimen/material_size_4"
+                        />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerTwo"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:elevation="@dimen/material_size_4"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerThree"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:elevation="@dimen/material_size_4"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+
+                    <LinearLayout
+                        android:id="@+id/stickySpecialsOne"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:background="@color/white"
+                        android:orientation="horizontal"
+                        android:tag="sticky"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:id="@+id/tvSpecialsOne"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="@dimen/material_size_8"
+                            android:layout_weight="4"
+                            android:fontFamily="@font/roboto"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:text="Specials One"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="italic" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/cpSpecialOne"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/material_size_4"
+                            app:rippleColor="@color/green_base"
+                            android:backgroundTint="@color/green_base"
+                            android:text="Show All"
+                            android:textColor="@color/white"
+                            app:chipCornerRadius="@dimen/material_size_8"
+                            />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvSpecialsOne"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:isScrollContainer="true"
+                        android:nestedScrollingEnabled="false" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerFour"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:elevation="@dimen/material_size_4"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerFive"
+                        android:layout_width="match_parent"
+                        android:elevation="@dimen/material_size_4"
+                        android:layout_height="100dp"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerSix"
+                        android:layout_width="match_parent"
+                        android:elevation="@dimen/material_size_4"
+                        android:layout_height="100dp"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <LinearLayout
+                        android:id="@+id/stickySpecialsTwo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:background="@color/white"
+                        android:orientation="horizontal"
+                        android:tag="sticky"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:id="@+id/tvSpecialsTwo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="@dimen/material_size_8"
+                            android:layout_weight="4"
+                            android:fontFamily="@font/roboto"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:text="Specials One"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="italic" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/cpSpecialTwo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/material_size_4"
+                            app:rippleColor="@color/green_base"
+                            android:backgroundTint="@color/green_base"
+                            android:text="Show All"
+                            android:textColor="@color/white"
+                            app:chipCornerRadius="@dimen/material_size_8"
+                            />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvSpecialsTwo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:isScrollContainer="true"
+                        android:nestedScrollingEnabled="false" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerSeven"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:elevation="@dimen/material_size_4"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerEight"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:elevation="@dimen/material_size_4"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerNine"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:elevation="@dimen/material_size_4"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <LinearLayout
+                        android:id="@+id/stickySpecialsThree"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:background="@color/white"
+                        android:orientation="horizontal"
+                        android:tag="sticky"
+                        android:weightSum="4">
+
+                        <TextView
+                            android:id="@+id/tvSpecialsThree"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="@dimen/material_size_8"
+                            android:layout_weight="4"
+                            android:fontFamily="@font/roboto"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:text="Specials One"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="italic" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/cpSpecialThree"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/material_size_4"
+                            app:rippleColor="@color/green_base"
+                            android:backgroundTint="@color/green_base"
+                            android:text="Show All"
+                            android:textColor="@color/white"
+                            app:chipCornerRadius="@dimen/material_size_8"
+                            />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvSpecialsThree"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:isScrollContainer="true"
+                        android:nestedScrollingEnabled="false" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerTen"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:elevation="@dimen/material_size_4"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerEleven"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:elevation="@dimen/material_size_4"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBannerTwelve"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:elevation="@dimen/material_size_4"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="@dimen/material_size_4"
+                        android:layout_marginBottom="@dimen/material_size_4"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+                        android:contentDescription="@string/product_thumbnail"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_app_placeholder"
+                        />
+
+                </LinearLayout>
+            </me.didik.component.StickyNestedScrollView>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabCart"
@@ -135,24 +511,22 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:tint="@color/white" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-        </LinearLayout>
 
-        <com.google.android.material.navigation.NavigationView
-            android:id="@+id/nvNavigationView"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:isScrollContainer="true"
-            android:overScrollMode="always"
-            android:scrollbars="vertical"
-            app:headerLayout="@layout/nav_header"
-            app:menu="@menu/nav_menu"
-            android:backgroundTint="@color/white"
-            app:itemTextColor="@color/gray700"
-            app:itemIconTint="@color/green_base"
-            />
+                        <com.google.android.material.navigation.NavigationView
+                            android:id="@+id/nvNavigationView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="start"
+                            android:isScrollContainer="true"
+                            android:overScrollMode="always"
+                            android:scrollbars="vertical"
+                            app:headerLayout="@layout/nav_header"
+                            app:menu="@menu/nav_menu"
+                            android:backgroundTint="@color/white"
+                            app:itemTextColor="@color/gray700"
+                            app:itemIconTint="@color/green_base"
+                            />
 
     </androidx.drawerlayout.widget.DrawerLayout>
 </layout>

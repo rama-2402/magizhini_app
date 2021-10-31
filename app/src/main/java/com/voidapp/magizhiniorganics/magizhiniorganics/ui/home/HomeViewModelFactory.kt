@@ -6,11 +6,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 
 class HomeViewModelFactory(
-    private val repository: DatabaseRepository,
-    private val firestoreRepository: FirestoreRepository
+    private val fbRepository: FirestoreRepository,
+    private val dbRepository: DatabaseRepository
 ) : ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return HomeViewModel(repository, firestoreRepository) as T
+        return HomeViewModel(fbRepository, dbRepository) as T
     }
 }

@@ -59,7 +59,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             }
 
             override fun onVerificationFailed(error: FirebaseException) {
-                onFirestoreFailure("Something went wrong. Try Later")
+                showErrorSnackBar("Server error! Please Try Later", true)
             }
 
             override fun onCodeSent(
@@ -147,7 +147,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             PhoneAuthProvider.verifyPhoneNumber(options)
         } catch (e: Exception) {
             // Failed
-            onFirestoreFailure("Something went wrong! Try Later")
+            showErrorSnackBar("Server error! Please Try Later", true)
         }
 
     }
@@ -171,6 +171,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         val otp = binding.etPhoneNumberPostOTP.text.toString()
 
         if (otp.isEmpty()) {
+            hideProgressDialog()
             showErrorSnackBar("Enter a valid OTP", true)
         } else {
             UIUtil.hideKeyboard(this)
@@ -204,6 +205,8 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                     finish()
                 }
             } else {
+                delay(2000)
+                hideProgressDialog()
                 Intent(this@SignInActivity, ProfileActivity::class.java).also {
                     it.putExtra(Constants.PHONE_NUMBER, mFirebaseAuth.currentUser!!.phoneNumber)
                     it.putExtra(Constants.USER_ID, mFirebaseAuth.currentUser!!.uid)

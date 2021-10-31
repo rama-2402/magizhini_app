@@ -136,5 +136,22 @@ class DatabaseRepository(
 
     fun cancelActiveSubscription(id: String) = db.getUserProfileDao().cancelActiveSubscription(id)
 
+    //specials
+    fun upsertBestSellers(bestSellers: BestSellers) = db.getUserProfileDao().upsertBestSellers(bestSellers)
+    fun upsertSpecialsOne(bestSellers: SpecialsOne) = db.getUserProfileDao().upsertSpecialsOne(bestSellers)
+    fun upsertSpecialsTwo(bestSellers: SpecialsTwo) = db.getUserProfileDao().upsertSpecialsTwo(bestSellers)
+    fun upsertSpecialsThree(bestSellers: SpecialsThree) = db.getUserProfileDao().upsertSpecialsThree(bestSellers)
+    fun upsertSpecialBanners(banners: SpecialBanners) = db.getUserProfileDao().upsertSpecialBanners(banners)
 
+    fun deleteBestSellers() = db.getUserProfileDao().deleteBestSellers()
+    fun deleteSpecialsOne() = db.getUserProfileDao().deleteSpecialsOne()
+    fun deleteSpecialsTwo() = db.getUserProfileDao().deleteSpecialsTwo()
+    fun deleteSpecialsThree() = db.getUserProfileDao().deleteSpecialsThree()
+    fun deleteSpecialBanners() = db.getUserProfileDao().deleteSpecialBanners()
+
+    fun getBestSellers(): BestSellers = db.getUserProfileDao().getBestSellers()
+    fun getSpecialsOne(): SpecialsOne = db.getUserProfileDao().getSpecialsOne()
+    fun getSpecialsTwo(): SpecialsTwo = db.getUserProfileDao().getSpecialsTwo()
+    fun getSpecialsThree(): SpecialsThree = db.getUserProfileDao().getSpecialsThree()
+    fun getSpecialBanners(): List<SpecialBanners> = db.getUserProfileDao().getSpecialBanners()
 }

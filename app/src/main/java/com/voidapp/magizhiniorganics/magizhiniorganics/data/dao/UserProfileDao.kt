@@ -199,4 +199,38 @@ interface UserProfileDao {
 
     @Query("DELETE FROM ActiveSubscriptions WHERE id = :id")
     fun cancelActiveSubscription(id: String)
+
+    //specials
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertBestSellers(bestSeller: BestSellers)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertSpecialsOne(bestSeller: SpecialsOne)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertSpecialsTwo(bestSeller: SpecialsTwo)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertSpecialsThree(bestSeller: SpecialsThree)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertSpecialBanners(banners: SpecialBanners)
+
+    @Query("DELETE FROM BestSellers")
+    fun deleteBestSellers()
+    @Query("DELETE FROM SpecialsOne")
+    fun deleteSpecialsOne()
+    @Query("DELETE FROM SpecialsTwo")
+    fun deleteSpecialsTwo()
+    @Query("DELETE FROM SpecialsThree")
+    fun deleteSpecialsThree()
+    @Query("DELETE FROM SpecialBanners")
+    fun deleteSpecialBanners()
+
+    @Query("SELECT * FROM BestSellers")
+    fun getBestSellers(): BestSellers
+    @Query("SELECT * FROM SpecialsOne")
+    fun getSpecialsOne(): SpecialsOne
+    @Query("SELECT * FROM SpecialsTwo")
+    fun getSpecialsTwo(): SpecialsTwo
+    @Query("SELECT * FROM SpecialsThree")
+    fun getSpecialsThree(): SpecialsThree
+    @Query("SELECT * FROM SpecialBanners")
+    fun getSpecialBanners(): List<SpecialBanners>
 }

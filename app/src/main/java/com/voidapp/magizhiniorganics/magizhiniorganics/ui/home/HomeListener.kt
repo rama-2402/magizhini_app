@@ -8,4 +8,5 @@ import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
 interface HomeListener {
     fun onDataTransactionFailure(message: String)
     fun displaySelectedCategory(category: String)
+    fun moveToProductDetails(id: String, name: String)
 }

@@ -35,7 +35,7 @@
         <entry key="app/src/main/res/layout/activity_chat.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_checkout.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_conversation.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/activity_home.xml" value="0.18211752786220872" />
+        <entry key="app/src/main/res/layout/activity_home.xml" value="0.23856358645928638" />
         <entry key="app/src/main/res/layout/activity_on_boarding.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_product.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_profile.xml" value="0.25" />
@@ -71,6 +71,7 @@
         <entry key="app/src/main/res/layout/rv_chat_item.xml" value="0.5401041666666667" />
         <entry key="app/src/main/res/layout/rv_home_category_items.xml" value="0.2833333333333333" />
         <entry key="app/src/main/res/layout/rv_home_product_items.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/rv_home_top_sellers.xml" value="0.5432291666666667" />
         <entry key="app/src/main/res/layout/rv_left_chathead.xml" value="0.4786458333333333" />
         <entry key="app/src/main/res/layout/rv_list_item.xml" value="0.2833333333333333" />
         <entry key="app/src/main/res/layout/rv_order_item.xml" value="0.5401041666666667" />

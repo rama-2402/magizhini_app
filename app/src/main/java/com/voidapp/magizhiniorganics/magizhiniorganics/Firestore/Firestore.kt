@@ -62,7 +62,7 @@ class Firestore(
                     }
                     .addOnFailureListener { _ ->
                         // Failed
-                        activity.onFirestoreFailure("Log In Failed Try Later")
+                        activity.onFirestoreFailure("Log In Failed. Please Check OTP Again")
                     }
             } catch (e: Exception) {
                 // Failed

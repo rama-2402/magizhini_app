@@ -55,13 +55,6 @@ class ReviewAdapter(
             }
             profileName.text = review.userName
             timeStamp.text = TimeUtil().getCustomDate(dateLong = review.timeStamp)
-//            Timer("SettingUp", false).schedule(1000) {
-//            ratings.setRating(review.rating, false)
-//            ratings.disallowSelection(true)
-//            ratings.setFaceColor(SmileyRating.Type.GREAT, Color.BLACK)
-//            ratings.setFaceBackgroundColor(SmileyRating.Type.GREAT, Color.YELLOW)
-//            }
-//                ratings.setFaceColor(SmileyRating.Type.GREAT, Color.BLUE)
 
             when (review.rating) {
                 1 -> {

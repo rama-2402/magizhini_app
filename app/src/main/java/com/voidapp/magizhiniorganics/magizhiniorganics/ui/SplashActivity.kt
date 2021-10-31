@@ -17,6 +17,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataServic
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.updateDeliveryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -50,13 +51,13 @@ class SplashActivity : AppCompatActivity() {
 
             WorkManager.getInstance(this).enqueue(updateDeliveryWorkRequest)
 
-//            if (isNewDay != Time().getCurrentDate()) {
+            if (isNewDay != TimeUtil().getCurrentDate()) {
                 val workRequest: WorkRequest =
                     OneTimeWorkRequestBuilder<UpdateDataService>()
                         .build()
 
                 WorkManager.getInstance(this).enqueue(workRequest)
-//            }
+            }
 
             lifecycleScope.launch {
                 delay(2500)

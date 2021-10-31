@@ -124,6 +124,27 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
     notDeliveredDates = notDeliveredDates
         )
 
+    fun ProductSpecials.toBestSellers() = BestSellers(
+        name = name,
+        id = id
+    )
+    fun ProductSpecials.toSpecialsOne() = SpecialsOne(
+        name = name,
+        id = id
+    )
+    fun ProductSpecials.toSpecialsTwo() = SpecialsTwo(
+        name = name,
+        id = id
+    )
+    fun ProductSpecials.toSpecialsThree() = SpecialsThree(
+        name = name,
+        id = id
+    )
+    fun SpecialBannersData.toSpecialBanners() = SpecialBanners(
+        id = id,
+        url = url
+    )
+
     // Entity class to model data class converters
 
     fun UserProfileEntity.toUserProfile() = UserProfile (

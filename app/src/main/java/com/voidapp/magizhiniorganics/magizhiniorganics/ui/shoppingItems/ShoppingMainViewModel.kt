@@ -161,26 +161,6 @@ class ShoppingMainViewModel(
         dbRepository.upsertProduct(product)
     }
 
-//    fun updateFavorites(id: String, position: Int, addedItem: String, removedItem:String) = viewModelScope.launch(Dispatchers.IO) {
-//        delay(200)
-//       //if if the passed on variable is empty then update will not take place indicating that it is not added or deleted
-//        if (addedItem !== "") {
-//            //we get the profile data and add/remove the item from the arraylist and then we update the profile data back
-//           val profile = dbRepository.getProfileData()!!
-//           profile.favorites.add(addedItem)
-//           dbRepository.upsertProfile(profile)
-//            //after the profile update in the database the update will be called for firestore data
-//           fbRepository.addFavorties(id, addedItem)
-//       }
-//        if (removedItem !== "") {
-//            val profile = dbRepository.getProfileData()!!
-//            profile.favorites.remove(removedItem)
-//            dbRepository.upsertProfile(profile)
-//            fbRepository.removeFavorites(id, removedItem)
-//        }
-//        updateShoppingMainPage()
-//    }
-
     fun updateFavorites(id: String, product: ProductEntity) = viewModelScope.launch(Dispatchers.IO) {
         val localFavoritesUpdate = async { localFavoritesUpdate(product) }
         val storeFavoritesUpdate = async { storeFavoritesUpdate(id, product) }

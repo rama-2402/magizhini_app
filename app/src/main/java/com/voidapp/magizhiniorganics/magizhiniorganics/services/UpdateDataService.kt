@@ -22,7 +22,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.lang.Exception
+import kotlin.Exception
 
 class UpdateDataService (
     context: Context,
@@ -45,12 +45,24 @@ class UpdateDataService (
             val categoryData = async { getAllData(Constants.CATEGORY) }
             val bannerData = async { getAllData(Constants.BANNER) }
             val productData = async { getAllData(Constants.PRODUCTS) }
+            val getBestSellers = async { getBestSellers() }
+            val getSpecialsOne = async { specialsOne() }
+            val getSpecialsTwo = async { specialsTwo() }
+            val getSpecialsThree = async { specialsThree() }
+            val getSpecialsBanners = async { specialBanners() }
             val couponData = async { getAllData(Constants.COUPON) }
             val deliveryChargeData = async { getAllData(Constants.DELIVERY_CHARGE) }
+
+
 
             val categorySnapshot = categoryData.await()
             val bannerSnapshot = bannerData.await()
             val productSnapshot = productData.await()
+            getBestSellers.await()
+            getSpecialsOne.await()
+            getSpecialsTwo.await()
+            getSpecialsThree.await()
+            getSpecialsBanners.await()
             val couponSnapshot = couponData.await()
             val deliveryChargeSnapshot = deliveryChargeData.await()
 
@@ -80,11 +92,69 @@ class UpdateDataService (
         return@withContext Result.success()
     }
 
+    private suspend fun specialBanners() {
+        try {
+            val snapshot = mFireStore.collection("specialBanner")
+                .get().await()
+            for (doc in snapshot.documents) {
+//            repository.deleteSpecialsOne()
+                repository.upsertSpecialBanners(doc.toObject(SpecialBannersData::class.java)!!.toSpecialBanners())
+            }
+        } catch (e: Exception) {
+            Log.e("TAG", "one:${e.message} ", )
+        }
+    }
+
+    private suspend fun specialsOne() {
+        try {
+            val doc = mFireStore.collection("specialsOne")
+                .document("One").get().await().toObject(ProductSpecials::class.java)!!.toSpecialsOne()
+//            repository.deleteSpecialsOne()
+            repository.upsertSpecialsOne(doc)
+        } catch (e: Exception) {
+            Log.e("TAG", "one:${e.message} ", )
+        }
+    }
+    private suspend fun specialsTwo() {
+        try {
+            val doc = mFireStore.collection("specialsOne")
+                .document("two").get().await().toObject(ProductSpecials::class.java)!!.toSpecialsTwo()
+//            repository.deleteSpecialsTwo()
+            repository.upsertSpecialsTwo(doc)
+        } catch (e: Exception) {
+            Log.e("TAG", "two:${e.message} ", )
+        }
+    }
+    private suspend fun specialsThree() {
+        try {
+            val doc = mFireStore.collection("specialsOne")
+                .document("three").get().await().toObject(ProductSpecials::class.java)!!.toSpecialsThree()
+//            repository.deleteSpecialsThree()
+            Log.e("TAG", "three: $doc", )
+            repository.upsertSpecialsThree(doc)
+        } catch (e: Exception) {
+            Log.e("TAG", "three:${e.message} ", )
+        }
+    }
+
+    private suspend fun getBestSellers() {
+        try {
+            val doc = mFireStore.collection("bestSellers")
+                .document("2LVakx7dzw1zjKmPFy6m").get().await().toObject(ProductSpecials::class.java)!!.toBestSellers()
+            Log.e("TAG", "bs: $doc", )
+//            repository.deleteBestSellers()
+            repository.upsertBestSellers(doc)
+        } catch (e: Exception) {
+            Log.e("TAG", "bserror:${e.message} ", )
+        }
+    }
+
 
     private suspend fun filterDataAndUpdateRoom(content: String, snapshot: QuerySnapshot) =
         withContext(Dispatchers.Default) {
             when (content) {
                 Constants.CATEGORY -> {
+                    Log.e("TAG", "getBestSellers: Cat", )
                     for (d in snapshot.documents) {
                         //getting the id of the category and converting to Category class
                         val category = d.toObject(ProductCategory::class.java)

@@ -26,7 +26,12 @@ import org.kodein.di.Volatile
                SubscriptionEntity::class,
                Favorites::class,
                ActiveOrders::class,
-               ActiveSubscriptions::class],
+               ActiveSubscriptions::class,
+               BestSellers::class,
+               SpecialsOne::class,
+               SpecialsTwo::class,
+               SpecialsThree::class,
+               SpecialBanners::class],
 
     version = 2,
     exportSchema = false
