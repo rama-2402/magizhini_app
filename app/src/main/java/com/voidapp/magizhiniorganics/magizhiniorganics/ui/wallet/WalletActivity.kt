@@ -77,13 +77,17 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         viewModel.transactions.observe(this, {
             mTransactions.clear()
             mTransactions.addAll(it)
-            it.sortedBy { trans ->
+            val history = it.filter { transactions ->
+                transactions.month == TimeUtil().getMonth()
+            }
+            history.sortedByDescending { trans ->
                 trans.timestamp
             }
-            transactionAdapter.transactions = it
+            transactionAdapter.transactions = history
             transactionAdapter.notifyDataSetChanged()
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(1500)
+                binding.tvMonthFilter.text = TimeUtil().getMonth()
                 hideShimmer()
             }
         })

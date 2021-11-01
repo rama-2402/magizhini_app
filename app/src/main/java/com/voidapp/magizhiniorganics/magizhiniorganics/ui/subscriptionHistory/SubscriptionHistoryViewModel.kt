@@ -133,8 +133,27 @@ class SubscriptionHistoryViewModel(
             30f * singleDayPrice
         }
         if (fbRepository.makeTransactionFromWallet(totalRefundAmount, sub.customerID, "Add")) {
-            withContext(Dispatchers.Main) {
-                _walletTransactionStatus.value = true
+           TransactionHistory (
+                sub.id,
+                System.currentTimeMillis(),
+                TimeUtil().getMonth(),
+                TimeUtil().getYear().toLong(),
+                totalRefundAmount,
+                sub.customerID,
+                "Subscription Refund",
+                Constants.SUCCESS,
+                Constants.ADD_MONEY,
+                sub.id
+            ).also {
+                if (fbRepository.updateTransaction(it) == "failed") {
+                    withContext(Dispatchers.Main) {
+                        _walletTransactionStatus.value = false
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        _walletTransactionStatus.value = true
+                    }
+                }
             }
         } else {
             withContext(Dispatchers.Main) {
