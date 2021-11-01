@@ -45,7 +45,7 @@ class SubscriptionHistoryAdapter(
             tvSubID.text = subscription.id
             tvStartSubDate.text = TimeUtil().getCustomDate(dateLong = subscription.startDate)
             tvDueDate.text = TimeUtil().getCustomDate(dateLong = subscription.endDate)
-            tvSubType.text = subscription.subType
+            tvSubType.text = "Rs: ${subscription.estimateAmount}"
             when (subscription.status) {
                 Constants.SUB_ACTIVE ->  {
                     ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivered))

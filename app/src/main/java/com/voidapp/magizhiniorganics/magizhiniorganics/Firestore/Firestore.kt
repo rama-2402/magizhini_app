@@ -21,8 +21,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.tasks.await
 import java.io.IOException
+import java.text.SimpleDateFormat
 
 class Firestore(
     private val repository: DatabaseRepository
@@ -295,11 +297,14 @@ class Firestore(
                 val updateProfileMonthYear = async { updateProfileMonthYear(order) }
                 val updateProfileOrderID = async { updateProfileOrderID(order) }
                 val updateLocalProfile = async { updateLocalProfile(order) }
+                val updateLocalOrderRepository =
+                    async { updateLocalOrderRepository(order.toOrderEntity()) }
 
                 updateOrderHistory.await()
                 updateProfileOrderID.await()
                 updateProfileMonthYear.await()
                 updateLocalProfile.await()
+                updateLocalOrderRepository.await()
 
                 withContext(Dispatchers.Main) {
                     viewModel.orderPlaced()
@@ -323,6 +328,11 @@ class Firestore(
         ActiveOrders(order.orderId).also {
             repository.upsertActiveOrders(it)
         }
+        val profile = repository.getProfileData()!!
+        if (!profile.purchasedMonths.contains(order.monthYear)) {
+            profile.purchasedMonths.add(order.monthYear)
+        }
+        repository.upsertProfile(profile)
     }
 
     suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) {
@@ -492,13 +502,19 @@ class Firestore(
     }
 
     suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean {
-        try {
+        return try {
             mFireStore.collection(Constants.SUBSCRIPTION)
                 .document(Constants.SUB_ACTIVE).collection(sub.monthYear).document(sub.id)
                 .update("cancelledDates", FieldValue.arrayUnion(date)).await()
-            return true
+
+            val collectionID = SimpleDateFormat("dd")
+            val docID = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
+
+            mFireStore.collection("cancelledSubDelivery")
+                .document(docID).collection(collectionID.format(date)).document(sub.id).set("").await()
+            true
         } catch (e: Exception) {
-            return false
+            false
         }
     }
 
@@ -586,6 +602,11 @@ class Firestore(
         ActiveSubscriptions(sub.id).also {
             repository.upsertActiveSubscription(it)
         }
+        val profile = repository.getProfileData()!!
+        if (!profile.subscribedMonths.contains(sub.monthYear)) {
+            profile.subscribedMonths.add(sub.monthYear)
+        }
+        repository.upsertProfile(profile)
     }
 
     private suspend fun updateStoreSubscription(sub: SubscriptionEntity) {

@@ -40,4 +40,9 @@ object NetworkHelper {
         }
             return false
     }
+
+    //checking the network connection before proceeding
+    fun isOnline(context: Context):Boolean {
+        return NetworkHelper.isNetworkConnected(context)
+    }
 }

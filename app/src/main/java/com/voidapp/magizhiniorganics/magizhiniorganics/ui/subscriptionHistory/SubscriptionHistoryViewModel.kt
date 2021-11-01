@@ -117,6 +117,7 @@ class SubscriptionHistoryViewModel(
     }
 
     suspend fun calculateBalance(sub: SubscriptionEntity) = withContext(Dispatchers.Default) {
+        val singleDayPrice = sub.estimateAmount/30f
         val totalRefundAmount = if (System.currentTimeMillis() > sub.startDate) {
             // we add plus one because the day will counted if exactly at 00:00. any timestamp past that point day will not be calculated. So to include that we add one to the total
             val remainingDays = (sub.endDate - System.currentTimeMillis()) / (1000*60*60*24)
@@ -127,10 +128,9 @@ class SubscriptionHistoryViewModel(
                 }
             }
             val refundDays = cancelledDates.size + sub.notDeliveredDates.size + remainingDays + 1
-            val singleDayPrice = sub.estimateAmount/30f
             refundDays * singleDayPrice
         } else {
-            30f
+            30f * singleDayPrice
         }
         if (fbRepository.makeTransactionFromWallet(totalRefundAmount, sub.customerID, "Add")) {
             withContext(Dispatchers.Main) {

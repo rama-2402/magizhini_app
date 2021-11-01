@@ -77,7 +77,8 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             this,
             binding.dlDrawerLayout,
             binding.tbToolbar,
-            0, 0)
+            0, 0
+        )
 
         binding.dlDrawerLayout.addDrawerListener(menuToggle)
         menuToggle.syncState()
@@ -98,7 +99,11 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
 
         lifecycleScope.launch {
             delay(1000)
-            SharedPref(this@HomeActivity).putData(Constants.DATE, Constants.STRING, TimeUtil().getCurrentDate())
+            SharedPref(this@HomeActivity).putData(
+                Constants.DATE,
+                Constants.STRING,
+                TimeUtil().getCurrentDate()
+            )
             hideProgressDialog()
         }
     }
@@ -122,8 +127,9 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             val bannersCarousel: MutableList<CarouselItem> = mutableListOf()
             for (banner in banners) {
                 //creating a mutable list baaner carousel item
-                bannersCarousel.add(CarouselItem(
-                    imageUrl = banner.url
+                bannersCarousel.add(
+                    CarouselItem(
+                        imageUrl = banner.url
                     )
                 )
             }
@@ -161,7 +167,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             specialsThreeAdapter.notifyDataSetChanged()
         })
         viewModel.recyclerPosition.observe(this, {
-            when(viewModel.recyclerToRefresh) {
+            when (viewModel.recyclerToRefresh) {
                 "bestSeller" -> {
 //                    bestSellersAdapter.products[it] = viewModel.productToUpdate
                     bestSellersAdapter.notifyItemChanged(it)
@@ -199,18 +205,18 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         })
         viewModel.specialBanners.observe(this, {
             with(binding) {
-                GlideLoader().loadUserPicture(this@HomeActivity, it[0],ivBannerOne)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[1],ivBannerTwo)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[2],ivBannerThree)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[3],ivBannerFour)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[4],ivBannerFive)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[5],ivBannerSix)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[6],ivBannerSeven)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[7],ivBannerEight)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[8],ivBannerNine)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[9],ivBannerTen)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[10],ivBannerEleven)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[11],ivBannerTwelve)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[0], ivBannerOne)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[1], ivBannerTwo)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[2], ivBannerThree)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[3], ivBannerFour)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[4], ivBannerFive)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[5], ivBannerSix)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[6], ivBannerSeven)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[7], ivBannerEight)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[8], ivBannerNine)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[9], ivBannerTen)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[10], ivBannerEleven)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[11], ivBannerTwelve)
             }
         })
 
@@ -238,7 +244,10 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     }
 
     //after generating the banners from the viewModel we are assigning the classes to carousel items and settnig click listeners for it
-    private fun generateBanners(bannerCarouselItems: MutableList<CarouselItem>, bannerItems: List<BannerEntity>) {
+    private fun generateBanners(
+        bannerCarouselItems: MutableList<CarouselItem>,
+        bannerItems: List<BannerEntity>
+    ) {
 
         mItems.addAll(bannerCarouselItems)
 
@@ -251,10 +260,17 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                 try {
                     //we are using try catch because there is a bug in the library where it sometimes returns larger index numbers causing app crash
                     //checking the click response content type
-                    when(bannerItems[position].type) {
-                        Constants.OPEN_LINK -> bannerDescriptionClickAction(bannerItems[position].description, Constants.OPEN_LINK)
-                        Constants.SHOW_DETAILS -> bannerDescriptionClickAction(bannerItems[position].description, Constants.SHOW_DETAILS)
-                        else -> {}
+                    when (bannerItems[position].type) {
+                        Constants.OPEN_LINK -> bannerDescriptionClickAction(
+                            bannerItems[position].description,
+                            Constants.OPEN_LINK
+                        )
+                        Constants.SHOW_DETAILS -> bannerDescriptionClickAction(
+                            bannerItems[position].description,
+                            Constants.SHOW_DETAILS
+                        )
+                        else -> {
+                        }
                     }
                 } catch (e: Exception) {
                     Log.e("void", e.message.toString())
@@ -263,7 +279,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         }
     }
 
-    private fun generateRecyclerView(){
+    private fun generateRecyclerView() {
 
         adapter = CategoryHomeAdapter(
             this,
@@ -298,13 +314,17 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
 
         binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
         binding.rvHomeItems.adapter = adapter
-        binding.rvTopPurchases.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvTopPurchases.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvTopPurchases.adapter = bestSellersAdapter
-        binding.rvSpecialsOne.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvSpecialsOne.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvSpecialsOne.adapter = specialsOneAdapter
-        binding.rvSpecialsTwo.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvSpecialsTwo.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvSpecialsTwo.adapter = specialsTwoAdapter
-        binding.rvSpecialsThree.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvSpecialsThree.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvSpecialsThree.adapter = specialsThreeAdapter
 //        val snapHelper: SnapHelper = GravitySnapHelper(Gravity.TOP)
 //        snapHelper.attachToRecyclerView(binding.rvHomeItems)
@@ -328,7 +348,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     }
 
     fun bannerDescriptionClickAction(content: String, type: String) {
-        when(type) {
+        when (type) {
             //show a bottom sheet dialog with the description
             Constants.SHOW_DETAILS -> showDescriptionBs(content)
             //open a link in browser when pressed
@@ -344,7 +364,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             }
 
         }
-
 
 
 /*
@@ -419,9 +438,13 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                     moveToAllProducts()
                 }
                 binding.fabCart -> {
-                    Intent(this, InvoiceActivity::class.java).also {
-                        startActivity(it)
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    if (NetworkHelper.isOnline(this)) {
+                        Intent(this, InvoiceActivity::class.java).also {
+                            startActivity(it)
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        }
+                    } else {
+                        showErrorSnackBar("Please check network connection", true)
                     }
                 }
             }
@@ -436,106 +459,111 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menuLogOut -> {
-                SharedPref(this).clearAllData()
-                viewModel.signOut()
-                finishAffinity()
-                finish()
-            }
-            R.id.menuProfile -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    Intent(this@HomeActivity, ProfileActivity::class.java).also {
-                        startActivity(it)
+        if (NetworkHelper.isOnline(this)) {
+            when (item.itemId) {
+                R.id.menuLogOut -> {
+                    SharedPref(this).clearAllData()
+                    viewModel.signOut()
+                    finishAffinity()
+                    finish()
+                }
+                R.id.menuProfile -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        Intent(this@HomeActivity, ProfileActivity::class.java).also {
+                            startActivity(it)
+                        }
+                    }
+                }
+                R.id.menuOrders -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        Intent(this@HomeActivity, PurchaseHistoryActivity::class.java).also {
+                            startActivity(it)
+                        }
+                    }
+                }
+                R.id.menuContact -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        Intent(this@HomeActivity, ChatActivity::class.java).also {
+                            startActivity(it)
+                        }
+                    }
+                }
+                R.id.menuWallet -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        Intent(this@HomeActivity, WalletActivity::class.java).also {
+                            startActivity(it)
+                        }
+                    }
+                }
+                R.id.menuSubscriptions -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
+                            startActivity(it)
+                        }
+                    }
+                }
+                R.id.menuPrivacyPolicy -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                            intent.data = Uri.parse("https://rama-2402.github.io/privacy-policy/")
+                            startActivity(Intent.createChooser(intent, "Open link with"))
+                        } catch (e: Exception) {
+                            println("The current phone does not have a browser installed")
+                        }
+                    }
+                }
+                R.id.menuDisclaimer -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                            intent.data = Uri.parse("https://rama-2402.github.io/disclaimer/")
+                            startActivity(Intent.createChooser(intent, "Open link with"))
+                        } catch (e: Exception) {
+                            println("The current phone does not have a browser installed")
+                        }
+                    }
+                }
+                R.id.menuTermsOfUse -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                            intent.data = Uri.parse("https://rama-2402.github.io/terms-of-use/")
+                            startActivity(Intent.createChooser(intent, "Open link with"))
+                        } catch (e: Exception) {
+                            println("The current phone does not have a browser installed")
+                        }
+                    }
+                }
+                R.id.menuReturn -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                            intent.data = Uri.parse("https://rama-2402.github.io/return-policy/")
+                            startActivity(Intent.createChooser(intent, "Open link with"))
+                        } catch (e: Exception) {
+                            println("The current phone does not have a browser installed")
+                        }
                     }
                 }
             }
-            R.id.menuOrders -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    Intent(this@HomeActivity, PurchaseHistoryActivity::class.java).also {
-                        startActivity(it)
-                    }
-                }
-            }
-            R.id.menuContact -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    Intent(this@HomeActivity, ChatActivity::class.java).also {
-                        startActivity(it)
-                    }
-                }
-            }
-            R.id.menuWallet -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    Intent(this@HomeActivity, WalletActivity::class.java).also {
-                        startActivity(it)
-                    }
-                }
-            }
-            R.id.menuSubscriptions -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
-                        startActivity(it)
-                    }
-                }
-            }
-            R.id.menuPrivacyPolicy -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                        intent.data = Uri.parse("https://rama-2402.github.io/privacy-policy/")
-                        startActivity(Intent.createChooser(intent, "Open link with"))
-                    } catch (e: Exception) {
-                        println("The current phone does not have a browser installed")
-                    }
-                }
-            }
-            R.id.menuDisclaimer -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                        intent.data = Uri.parse("https://rama-2402.github.io/disclaimer/")
-                        startActivity(Intent.createChooser(intent, "Open link with"))
-                    } catch (e: Exception) {
-                        println("The current phone does not have a browser installed")
-                    }
-                }
-            }
-            R.id.menuTermsOfUse -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                        intent.data = Uri.parse("https://rama-2402.github.io/terms-of-use/")
-                        startActivity(Intent.createChooser(intent, "Open link with"))
-                    } catch (e: Exception) {
-                        println("The current phone does not have a browser installed")
-                    }
-                }
-            }
-            R.id.menuReturn -> {
-                lifecycleScope.launch {
-                    delay(200)
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                        intent.data = Uri.parse("https://rama-2402.github.io/return-policy/")
-                        startActivity(Intent.createChooser(intent, "Open link with"))
-                    } catch (e: Exception) {
-                        println("The current phone does not have a browser installed")
-                    }
-                }
-            }
+            return true
+        } else {
+            showErrorSnackBar("Please check network connection", true)
+            return false
         }
-        return true
     }
 }

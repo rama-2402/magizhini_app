@@ -27,6 +27,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -79,8 +80,11 @@ class ShoppingMainActivity :
 
         checkoutText = findViewById<TextView>(R.id.tvCheckOut)
 
-        showProgressDialog()
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check network connection", true)
+        }
 
+        showProgressDialog()
         initRecyclerView()
         observeLiveData()
         clickListeners()
@@ -386,10 +390,14 @@ class ShoppingMainActivity :
         }
 
         checkoutBtn.setOnClickListener {
-            Intent(this, InvoiceActivity::class.java).also {
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
+            if (NetworkHelper.isOnline(this)) {
+                Intent(this, InvoiceActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                }
+            } else {
+                showErrorSnackBar("Please check network connection", true)
             }
         }
 
@@ -413,12 +421,16 @@ class ShoppingMainActivity :
     }
 
     override fun moveToProductDetails(id: String, name: String) {
-        Intent(this, ProductActivity::class.java).also {
-            it.putExtra(Constants.PRODUCTS, id)
-            it.putExtra(Constants.PRODUCT_NAME, name)
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-            finish()
+        if (NetworkHelper.isOnline(this)) {
+            Intent(this, ProductActivity::class.java).also {
+                it.putExtra(Constants.PRODUCTS, id)
+                it.putExtra(Constants.PRODUCT_NAME, name)
+                startActivity(it)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+            }
+        } else {
+            showErrorSnackBar("Please check network connection", true)
         }
     }
 

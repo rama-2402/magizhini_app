@@ -86,16 +86,6 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         mFilterYear = TimeUtil().getYear()
         binding.fabMonthFilter.text = " $mFilterMonth"
 
-        permissionsLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                readPermissionGranted =
-                    permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
-                writePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE]
-                    ?: writePermissionGranted
-            }
-
-        checkPermissions()
-
         showShimmer()
 
         initRecyclerView()
@@ -158,6 +148,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     private fun fetchData() {
         showShimmer()
         viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
+        Log.e("TAG", "fetchData: ${mFilterMonth}${mFilterYear}", )
     }
 
     private fun initLiveData() {
@@ -198,6 +189,17 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         })
 
         viewModel.invoiceOrder.observe(this, {
+//
+//            permissionsLauncher =
+//                registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+//                    readPermissionGranted =
+//                        permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+//                    writePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE]
+//                        ?: writePermissionGranted
+//                }
+//
+//            checkPermissions()
+
             createPDF(it)
         })
 

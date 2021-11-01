@@ -201,10 +201,14 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         }
 
         checkoutBtn.setOnClickListener {
-            if (mPaymentPreference == "COD") {
+            if (mCartItems.isEmpty()) {
+                showErrorSnackBar("Add some Items to Cart to proceed", true)
+            } else {
+                if (mPaymentPreference == "COD") {
                 showSwipeConfirmationDialog(this, "swipe right to place order")
             } else {
                 showSwipeConfirmationDialog(this, "swipe right to make payment")
+            }
             }
         }
 

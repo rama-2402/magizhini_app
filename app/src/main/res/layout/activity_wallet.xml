@@ -114,7 +114,7 @@
                     android:layout_marginTop="@dimen/material_size_24"
                     android:fontFamily="@font/roboto"
                     android:paddingStart="@dimen/material_size_8"
-                    android:text="5000"
+                    android:text="0.00"
                     android:textColor="@color/black"
                     android:textSize="24dp"
                     android:textStyle="bold"
