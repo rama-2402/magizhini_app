@@ -29,7 +29,7 @@
                 android:background="@color/white"
                 android:gravity="center"
                 app:iconTint="@color/white"
-                app:layout_constraintBottom_toTopOf="@id/cvBanner"
+                app:layout_constraintBottom_toTopOf="@id/svBody"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -47,30 +47,6 @@
                     app:titleTextColor="@color/white" />
             </com.google.android.material.appbar.AppBarLayout>
 
-            <org.imaginativeworld.whynotimagecarousel.ImageCarousel
-                android:id="@+id/cvBanner"
-                android:layout_width="match_parent"
-                android:layout_height="225dp"
-                android:elevation="10dp"
-                app:autoPlay="true"
-                app:autoPlayDelay="2000"
-                app:autoWidthFixing="true"
-                app:bottomShadowHeight="36dp"
-                app:carouselType="BLOCK"
-                app:imagePlaceholder="@drawable/ic_app_placeholder"
-                app:imageScaleType="centerCrop"
-                app:indicatorMargin="0dp"
-                app:infiniteCarousel="true"
-                app:layout_constraintCircleRadius="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
-                app:showBottomShadow="true"
-                app:showCaption="false"
-                app:showIndicator="true"
-                app:showNavigationButtons="false"
-                app:showTopShadow="false" />
-
             <me.didik.component.StickyNestedScrollView
                 android:id="@+id/svBody"
                 android:layout_width="match_parent"
@@ -80,7 +56,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cvBanner"
+                app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
                 tools:context=".ui.home.HomeActivity"
                 tools:showIn="@layout/activity_home">
 
@@ -88,6 +64,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+                    <org.imaginativeworld.whynotimagecarousel.ImageCarousel
+                        android:id="@+id/cvBanner"
+                        android:layout_width="match_parent"
+                        android:layout_height="225dp"
+                        android:elevation="10dp"
+                        app:autoPlay="true"
+                        app:autoPlayDelay="2000"
+                        app:autoWidthFixing="true"
+                        app:bottomShadowHeight="36dp"
+                        app:carouselType="BLOCK"
+                        app:imagePlaceholder="@drawable/ic_app_placeholder"
+                        app:imageScaleType="centerCrop"
+                        app:indicatorMargin="0dp"
+                        app:infiniteCarousel="true"
+                        app:layout_constraintCircleRadius="16dp"
+                        app:showBottomShadow="true"
+                        app:showCaption="false"
+                        app:showIndicator="true"
+                        app:showNavigationButtons="false"
+                        app:showTopShadow="false" />
 
                     <LinearLayout
                         android:id="@+id/stickyCategory"

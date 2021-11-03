@@ -299,6 +299,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         //a delay of 2 seconds for the success dialog to fully display the animation
         lifecycleScope.launch {
             delay(2000)
+            hideSuccessDialog()
             newUserTransitionFromProfile()
         }
 

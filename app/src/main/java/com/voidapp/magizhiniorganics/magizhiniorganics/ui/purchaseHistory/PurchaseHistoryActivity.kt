@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory
 
 import android.Manifest
+import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,6 +13,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,6 +29,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.*
 import com.google.gson.Gson
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.karumi.dexter.listener.single.PermissionListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
@@ -39,6 +48,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
@@ -68,10 +78,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     private var mFilterMonth = "January"
     private var mFilterYear = "2021"
     private var mCancelOrder = OrderEntity()
-
-    private var readPermissionGranted = false
-    private var writePermissionGranted = false
-    private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
+    private var mInvoiceOrder = OrderEntity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -189,18 +196,8 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         })
 
         viewModel.invoiceOrder.observe(this, {
-//
-//            permissionsLauncher =
-//                registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-//                    readPermissionGranted =
-//                        permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
-//                    writePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE]
-//                        ?: writePermissionGranted
-//                }
-//
-//            checkPermissions()
-
-            createPDF(it)
+            mInvoiceOrder = it
+            createPDF(mInvoiceOrder)
         })
 
         viewModel.cancellationStatus.observe(this, {
@@ -228,7 +225,8 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
                 OneTimeWorkRequestBuilder<GetOrderHistoryService>()
                     .setInputData(
                         workDataOf(
-                            "filter" to "${mFilterMonth}${mFilterYear}"
+                            "filter" to "${mFilterMonth}${mFilterYear}",
+                            "id" to SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
                         )
                     )
                     .build()
@@ -258,6 +256,43 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
             Toast.makeText(this, "No data available in the selected period", Toast.LENGTH_SHORT)
                 .show()
         })
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == Constants.READ_STORAGE_PERMISSION_CODE) {
+            //If permission is granted
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                GlideLoader().showImageChooser(this)
+            } else {
+                //Displaying another toast if permission is not granted
+                showErrorSnackBar("Storage Permission Denied!", true)
+            }
+        }
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == Constants.PICK_IMAGE_REQUEST_CODE) {
+                if (data != null) {
+                    try {
+
+
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        showErrorSnackBar("Image selection failed!", true)
+                    }
+                }
+            }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            // A log is printed when user close or cancel the image selection.
+            Log.e("Request Cancelled", "Image selection cancelled")
+        }
     }
 
     private fun startWorkerThread(order: OrderEntity) {
@@ -356,29 +391,27 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     }
 
     private fun checkPermissions() {
-        val hasReadPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-        val hasWritePermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
-        val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        Dexter.withContext(this)
+            .withPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+                    createPDF(mInvoiceOrder)
+                }
 
-        readPermissionGranted = hasReadPermission
-        writePermissionGranted = hasWritePermission || minSdk29
+                override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
+                    Toast.makeText(this@PurchaseHistoryActivity, "Permission Denied", Toast.LENGTH_SHORT).show()
+                }
 
-        val permissionsToRequest = mutableListOf<String>()
-        if (!writePermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-        if (!readPermissionGranted) {
-            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        if (permissionsToRequest.isNotEmpty()) {
-            permissionsLauncher.launch(permissionsToRequest.toTypedArray())
-        }
+                override fun onPermissionRationaleShouldBeShown(
+                    request: PermissionRequest?,
+                    token: PermissionToken?
+                ) {
+                    token?.continuePermissionRequest()
+                }
+            })
+            .check()
     }
 
     private fun singlePageDoc(

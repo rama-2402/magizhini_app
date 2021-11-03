@@ -80,10 +80,9 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             val history = it.filter { transactions ->
                 transactions.month == TimeUtil().getMonth()
             }
-            history.sortedByDescending { trans ->
+            transactionAdapter.transactions = history.sortedByDescending { trans ->
                 trans.timestamp
             }
-            transactionAdapter.transactions = history
             transactionAdapter.notifyDataSetChanged()
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(1500)

@@ -44,7 +44,6 @@ open class BaseActivity : AppCompatActivity() {
     private lateinit var mSwipeConfirmationBottomSheet: BottomSheetDialog
     private lateinit var listBottomSheetdialog: BottomSheetDialog
 
-
     fun View.show() {
         this.visibility = View.VISIBLE
     }
