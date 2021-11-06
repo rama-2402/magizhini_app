@@ -28,8 +28,8 @@ class BestSellersAdapter(
     inner class ProductHomeViewHolder(val binding: RvHomeTopSellersBinding) :
         RecyclerView.ViewHolder(binding.root)
 
-    var discountedPrice = 0f
-    var variantDisplayName = ""
+    private var variantDisplayName = ""
+    var discountAppliedPrice = 0f
     val id: String =
         SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
 
@@ -43,18 +43,27 @@ class BestSellersAdapter(
     override fun onBindViewHolder(holder: ProductHomeViewHolder, position: Int) {
         val product = products[position]
         val productID = product.id
-        val variantName = "${product.variants[0].variantName} ${product.variants[0].variantType}"
-        variantDisplayName = when (product.variants[0].variantType) {
-            "Kilogram" -> "${product.variants[0].variantName} Kg"
-            "Gram" -> "${product.variants[0].variantName} G"
-            "Liter" -> "${product.variants[0].variantName} L"
-            else -> "${product.variants[0].variantName} mL"
+        var variantInCartPosition: Int = 0
+        for (i in product.variants.indices) {
+            if (product.variants[0].status != Constants.LIMITED) {
+                variantInCartPosition = i
+                break
+            }
         }
-        var variantInCartPosition: Int = product.defaultVariant
-        var variantPrice: Float = product.variants[0].variantPrice.toFloat()
+        val variantName = "${product.variants[variantInCartPosition].variantName} ${product.variants[variantInCartPosition].variantType}"
+        variantDisplayName = when (product.variants[variantInCartPosition].variantType) {
+            "Kilogram" -> "${product.variants[variantInCartPosition].variantName} Kg"
+            "Gram" -> "${product.variants[variantInCartPosition].variantName} G"
+            "Liter" -> "${product.variants[variantInCartPosition].variantName} L"
+            else -> "${product.variants[variantInCartPosition].variantName} mL"
+        }
+
+        getVariantPrice(product.variants[variantInCartPosition])
+
+//        var variantPrice: Float = product.variants[0].variantPrice.toFloat()
         with(holder.binding) {
             tvProductName.text = product.name
-            checkVariantAvailability(holder, product.variants[0])
+            checkVariantAvailability(holder, product.variants[variantInCartPosition])
             GlideLoader().loadUserPicture(context, product.thumbnailUrl, ivProductThumbnail)
 
 //            //setting the favorties icon for the products
@@ -75,7 +84,6 @@ class BestSellersAdapter(
                     )
                 }
             } else {
-                variantInCartPosition = 0
                 ivAdd.backgroundTintList = ColorStateList.valueOf((ContextCompat.getColor(ivAdd.context, R.color.matteRed)))
                 ivAdd.setImageDrawable(
                     ContextCompat.getDrawable(
@@ -86,12 +94,20 @@ class BestSellersAdapter(
             }
 
             //if discount is available then we make the discount layout visible and set the discount amount and percentage
-            if (product.discountAvailable) {
+            if (product.variants[variantInCartPosition].discountPrice != 0f) {
                 clDiscountLayout.visibility = View.VISIBLE
-                setDiscountedValues(holder, product, variantPrice, variantInCartPosition)
+//                setDiscountedValues(holder, product, variantPrice, variantInCartPosition)
+
+                with(product.variants[variantInCartPosition]) {
+                    tvDiscountAmt.text =
+                        getDiscountPercent(variantPrice, discountPrice).toString()
+                    if (discountPrice != 0f) {
+                        tvPrice.text = "$variantDisplayName - Rs: ${discountPrice}"
+                    }
+                }
             } else {
                 clDiscountLayout.visibility = View.INVISIBLE
-                tvPrice.text = "$variantDisplayName - Rs: $variantPrice"
+                tvPrice.text = "$variantDisplayName - Rs: ${product.variants[variantInCartPosition].variantPrice}"
             }
 //
 //            //favorites click listener
@@ -111,7 +127,7 @@ class BestSellersAdapter(
                     removeItem(product, viewModel, position)
                 } else {
                     product.variantInCart.add(variantName)
-                    addItem(product, viewModel, position)
+                    addItem(product, viewModel, position, variantInCartPosition)
                 }
             }
 
@@ -126,22 +142,35 @@ class BestSellersAdapter(
         return products.size
     }
 
+    private fun getDiscountPercent(price: Float, discountPrice: Float): Float
+            = ((price-discountPrice)/price)*100
+
     private fun addItem(
         product: ProductEntity,
         viewModel: HomeViewModel,
-        position: Int
+        position: Int,
+        variantPosition: Int
     ) {
         Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
         viewModel.upsertCartItem(
             product,
-            "${product.variants[0].variantName} ${product.variants[0].variantType}",
+            "${product.variants[variantPosition].variantName} ${product.variants[variantPosition].variantType}",
             1,
-            discountedPrice,
-            product.variants[0].variantPrice.toFloat(),
+            discountAppliedPrice,
+            product.variants[variantPosition].variantPrice,
             0,
             position,
             recycler
         )
+    }
+
+    private fun getVariantPrice(variant: ProductVariant) : Float {
+        discountAppliedPrice = if (variant.discountPrice != 0f) {
+            variant.variantPrice
+        } else {
+            variant.discountPrice
+        }
+        return discountAppliedPrice
     }
 
     private fun removeItem(
@@ -182,57 +211,4 @@ class BestSellersAdapter(
             }
         }
     }
-
-    private fun setDiscountedValues(
-        holder: BestSellersAdapter.ProductHomeViewHolder,
-        product: ProductEntity,
-        variantPrice: Float,
-        position: Int
-    ) {
-        with(holder.binding) {
-            if (product.discountAvailable) {
-                tvDiscountAmt.text =
-                    product.variants[position].discountPercent.toString()
-                //setting up the product discount info
-                if (product.variants[position].discountType == "Percentage") {
-                    tvDiscountType.text = "%"
-                    discountedPrice = calculateDiscountedAmount(
-                        "Percentage",
-                        product.variants[position].discountPercent,
-                        product.variants[position].variantPrice
-                    ).toFloat()
-                    tvPrice.text =
-                        "$variantDisplayName - Rs: $discountedPrice"
-                } else {
-                    tvDiscountType.text = "Rs"
-                    discountedPrice = calculateDiscountedAmount(
-                        "rupees",
-                        product.variants[position].discountPercent,
-                        product.variants[position].variantPrice
-                    ).toFloat()
-                    tvPrice.text = "$variantDisplayName - Rs: $discountedPrice"
-                }
-            } else {
-                tvPrice.text = "$variantDisplayName - Rs: $variantPrice"
-                discountedPrice = variantPrice
-            }
-        }
-    }
-
-    private fun calculateDiscountedAmount(
-        discountType: String,
-        discount: Int,
-        price: String
-    ): String {
-        return when (discountType) {
-            "Percentage" -> {
-                "${(price.toFloat() - (price.toFloat() * discount) / 100)}"
-            }
-            "rupees" -> {
-                "${price.toFloat() - discount}"
-            }
-            else -> "0"
-        }
-    }
-
 }

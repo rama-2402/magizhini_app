@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import android.text.BoringLayout
+import android.view.View
 
 object Constants {
 
@@ -96,7 +97,7 @@ object Constants {
     const val FAVORITES: String = "favorites"
 
     //product status
-    const val PRODUCTS: String = "products"
+    const val PRODUCTS: String = "Products"
     const val PRODUCT_NAME: String = "productName"
     const val AVAILABLE: String = "Available"
     const val OUT_OF_STOCK: String = "Out of Stock"

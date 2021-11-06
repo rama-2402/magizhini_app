@@ -8,10 +8,8 @@ import kotlinx.parcelize.Parcelize
 data class ProductVariant(
     var variantName: String = "",
     var variantType: String = "",
-    var variantPrice: String = "0",
-    var variantDiscount: Boolean = false,
-    var discountPercent: Int = 0,
-    var discountType: String = "Percentage",
+    var variantPrice: Float = 0F,
+    var discountPrice: Float = 0F,
     var inventory: Int = 0,
     var status: String = Constants.NO_LIMIT
 ): Parcelable

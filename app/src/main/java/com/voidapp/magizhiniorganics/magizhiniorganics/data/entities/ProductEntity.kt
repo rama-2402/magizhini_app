@@ -32,23 +32,19 @@ data class ProductEntity(
     @ColumnInfo
     var descType: String = "none",
     @ColumnInfo
-    var status: String = Constants.AVAILABLE,
+    var variants: ArrayList<ProductVariant> = ArrayList(),
+    @ColumnInfo
+    var status: String = "Available",
     @ColumnInfo
     var discountAvailable: Boolean = false,
-    @ColumnInfo
-    var discountType: String = "Percentage",
-    @ColumnInfo
-    var discountAmt: Int = 0,
     @ColumnInfo
     var defaultVariant: Int = 0,
     @ColumnInfo
     var productType: String="",
     @ColumnInfo
-    var variants: ArrayList<ProductVariant> = arrayListOf(),
-    @ColumnInfo
     var activated: Boolean = true,
     @ColumnInfo
-    var reviews: ArrayList<Review> = arrayListOf(),
+    var reviews: ArrayList<Review> = ArrayList(),
     @ColumnInfo
     var favorite: Boolean = false,
     @ColumnInfo
@@ -58,7 +54,7 @@ data class ProductEntity(
     @ColumnInfo
     var coupon: Boolean = false,
     @ColumnInfo
-    var appliedCoupon: String = "",
+    var appliedCoupon: String = ""
 ): Parcelable
 
 

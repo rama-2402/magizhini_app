@@ -80,7 +80,7 @@ open class ShoppingMainAdapter(
         //details view
         holder.productName.text = product.name
 
-        //setting the favorties icon for the products
+        //setting the favorites icon for the products
         if (product.favorite) {
             holder.favorites.setImageResource(R.drawable.ic_favorite_filled)
         } else {
@@ -107,9 +107,7 @@ open class ShoppingMainAdapter(
 
         //if discount is available then we make the discount layout visible and set the discount amount and percentage
         if (product.discountAvailable) {
-            holder.discountLayout.visibility = View.VISIBLE
-            holder.price.visibility = View.VISIBLE
-            setDiscountedValues(holder, product, variantPrice, variantInCartPosition)
+            setDiscountedValues(holder, product, variantInCartPosition)
         } else {
             holder.discountLayout.visibility = View.INVISIBLE
             holder.price.visibility = View.INVISIBLE
@@ -144,7 +142,7 @@ open class ShoppingMainAdapter(
                 if (!product.discountAvailable) {
                     discountedPrice = variantPrice.toString().toFloat()
                 }
-                setDiscountedValues(holder, product, variantPrice, variantposition)
+                setDiscountedValues(holder, product, variantposition)
                 checkVariantAvailability(holder, variant)
             }
 
@@ -157,7 +155,7 @@ open class ShoppingMainAdapter(
                 if (!product.discountAvailable) {
                     discountedPrice = variantPrice.toString().toFloat()
                 }
-                setDiscountedValues(holder, product, variantPrice, 0)
+                setDiscountedValues(holder, product, 0)
             }
         }
 
@@ -236,52 +234,29 @@ open class ShoppingMainAdapter(
     private fun setDiscountedValues(
         holder: ShoppingMainAdapter.ShoppingMainViewHolder,
         product: ProductEntity,
-        variantPrice: Float,
         position: Int
     ) {
-        if (product.discountAvailable) {
-                    holder.discountAmount.text =
-                        product.variants[position].discountPercent.toString()
-                    //setting up the product discount info
-                    if (product.variants[position].discountType == "Percentage") {
-                        holder.discountType.text = "%"
-                        discountedPrice = calculateDiscountedAmount(
-                            "Percentage",
-                            product.variants[position].discountPercent,
-                            product.variants[position].variantPrice
-                        ).toFloat()
-                        holder.discountedAmount.text =
-                            discountedPrice.toString()
-                    } else {
-                        holder.discountType.text = "Rs"
-                        discountedPrice = calculateDiscountedAmount(
-                            "rupees",
-                            product.variants[position].discountPercent,
-                            product.variants[position].variantPrice
-                        ).toFloat()
-                        holder.discountedAmount.text = discountedPrice.toString()
-                    }
+        val currentVariant = product.variants[position]
+//        if (product.discountAvailable) {
+
+        //setting up the product discount info
+        if (currentVariant.discountPrice != 0f) {
+            holder.discountAmount.text =
+                    getDiscountPercent(currentVariant.variantPrice, currentVariant.discountPrice).toString()
+                discountedPrice = currentVariant.discountPrice
+            holder.discountedAmount.text = currentVariant.discountPrice.toString()
+            holder.discountLayout.visibility = View.VISIBLE
+            holder.price.visibility = View.VISIBLE
         } else {
-            holder.discountedAmount.text = variantPrice.toString()
-            discountedPrice = variantPrice
+            discountedPrice = currentVariant.variantPrice
+            holder.discountedAmount.text = currentVariant.variantPrice.toString()
+            holder.discountLayout.visibility = View.GONE
+            holder.price.visibility = View.INVISIBLE
         }
     }
 
-    private fun calculateDiscountedAmount(
-        discountType: String,
-        discount: Int,
-        price: String
-    ): String {
-        return when (discountType) {
-            "Percentage" -> {
-                "${(price.toFloat() - (price.toFloat() * discount) / 100)}"
-            }
-            "rupees" -> {
-                "${price.toFloat() - discount}"
-            }
-            else -> "0"
-        }
-    }
+    private fun getDiscountPercent(price: Float, discountPrice: Float): Float
+            = ((price-discountPrice)/price)*100
 
     private fun checkVariantAvailability(
         holder: ShoppingMainAdapter.ShoppingMainViewHolder,

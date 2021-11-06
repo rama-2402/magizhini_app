@@ -93,8 +93,6 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         initViewPager()
         initClickListeners()
 
-
-
         //getting the current user id so that favorites can be added to firestore data
         userId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
 
@@ -432,13 +430,16 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     @SuppressLint("SetTextI18n")
     private fun setPrice(position: Int) {
-        if (mProduct.discountAvailable) {
-            binding.tvOriginalPrice.text = "Rs. ${getVariantPrice(position)} "
+        if (mProduct.discountAvailable && mProduct.variants[position].discountPrice != 0f) {
+            binding.tvOriginalPrice.show()
+            binding.tvDiscount.show()
+            binding.tvDiscountPercent.show()
+            binding.tvOriginalPrice.text = "Rs. ${getVariantOriginalPrice(position)} "
 //            binding.tvDiscountedPrice.text = "Rs. ${viewModel.getDiscountedPrice(mProduct, position)} "
             //we get the discounted price from viewmodel if there is any and passing it to check if there is coupon discount available
             //here we are checking if the coupon is applied. If applied then we will update with coupon amount else
             //we return the same original amount with or without discount
-            mFinalPrice = updatedPriceWithCouponApplied(viewModel.getDiscountedPrice(mProduct, position).toFloat())
+            mFinalPrice = updatedPriceWithCouponApplied(getVariantPrice(position))
             binding.tvDiscountedPrice.text = "Rs. $mFinalPrice"
             setDiscountPercent()
         } else {
@@ -456,30 +457,29 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         val variant = mProduct.variants[mSelectedVariant]
         //if the variant has discount then that percent will be displayed if not the
         //products general discount percent will be displayed
-        when (viewModel.discountAvailability(mProduct, mSelectedVariant)) {
-            "variant" -> {
-                if(variant.discountType == "Percentage" ) {
-                    binding.tvDiscountPercent.text = "${variant.discountPercent} % "
-                } else {
-                    binding.tvDiscountPercent.text = "Rs. ${variant.discountPercent} "
-                }
-            }
-            "product" -> {
-                if(mProduct.discountType == "Percentage" ) {
-                    binding.tvDiscountPercent.text = "${mProduct.discountAmt} % "
-                } else {
-                    binding.tvDiscountPercent.text = "Rs. ${mProduct.discountAmt} "
-                }
-            }
+
+        if (variant.discountPrice != 0f) {
+            binding.tvDiscountPercent.text = "${getDiscountPercent(variant.variantPrice, variant.discountPrice)}% Off"
         }
     }
+
+    private fun getDiscountPercent(price: Float, discountPrice: Float): Float
+        = ((price-discountPrice)/price)*100
 
     private fun getVariantName(position: Int): String
         = "${mProduct.variants[position].variantName} ${mProduct.variants[position].variantType}"
 
 
-    private fun getVariantPrice(position: Int)
+    private fun getVariantOriginalPrice(position: Int)
         = mProduct.variants[position].variantPrice.toFloat()
+
+    private fun getVariantPrice(position: Int): Float {
+        return if (mProduct.variants[position].discountPrice == 0f) {
+            mProduct.variants[position].variantPrice
+        } else {
+            mProduct.variants[position].discountPrice
+        }
+    }
 
 
     private fun addToCart() {
@@ -491,7 +491,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 getVariantName(mSelectedVariant),
                 1,
                 mFinalPrice ,
-                getVariantPrice(mSelectedVariant),
+                getVariantOriginalPrice(mSelectedVariant),
                 mCoupon.code,
                 mProduct.variants[mSelectedVariant].inventory,
                 mSelectedVariant

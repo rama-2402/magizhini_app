@@ -64,40 +64,41 @@ class ProductViewModel(
     }
 
     fun getProductById(id: String) = dbRepository.getProductWithId(id)
+//
+//    fun getDiscountedPrice(productEntity: ProductEntity, position: Int): String {
+//        val variant = productEntity.variants[position]
+//        val price = variant.variantPrice.toFloat()
+//        val discountAmount = variant.discountPrice
+//        //checking if the selected variant has any discount. If the variant has discount then
+//        //it will take priority over the total product discount
+//        when (discountAvailability(productEntity, position)) {
+//            "variant" -> {
+//                return if (variant.discountType == "Percentage") {
+//                    "${(price - (price * discountAmount) / 100)}"
+//                } else {
+//                    "${price - discountAmount}"
+//                }
+//            }
+//            "product" -> {
+//                return if (productEntity.discountType == "Percentage") {
+//                    "${(price - (price * productEntity.discountAmt) / 100)}"
+//                } else {
+//                    "${price - productEntity.discountAmt}"
+//                }
+//            }
+//            else -> {
+//                return "0"
+//            }
+//        }
+//    }
 
-    fun getDiscountedPrice(productEntity: ProductEntity, position: Int): String {
-        val variant = productEntity.variants[position]
-        val price = variant.variantPrice.toFloat()
-        val discountAmount = variant.discountPercent
-        //checking if the selected variant has any discount. If the variant has discount then
-        //it will take priority over the total product discount
-        when (discountAvailability(productEntity, position)) {
-            "variant" -> {
-                return if (variant.discountType == "Percentage") {
-                    "${(price - (price * discountAmount) / 100)}"
-                } else {
-                    "${price - discountAmount}"
-                }
-            }
-            "product" -> {
-                return if (productEntity.discountType == "Percentage") {
-                    "${(price - (price * productEntity.discountAmt) / 100)}"
-                } else {
-                    "${price - productEntity.discountAmt}"
-                }
-            }
-            else -> {
-                return "0"
-            }
-        }
-    }
+//    fun discountAvailability(productEntity: ProductEntity, position: Int): String {
+//        return if (productEntity.variants[position].variantDiscount) {
+//            "variant"
+//        } else
+//            "product"
+//    }
 
-    fun discountAvailability(productEntity: ProductEntity, position: Int): String {
-        return if (productEntity.variants[position].variantDiscount) {
-            "variant"
-        } else
-            "product"
-    }
 
     suspend fun upsertProductReview(
         review: Review,

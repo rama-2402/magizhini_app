@@ -49,8 +49,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         descType = descType,
         status = status,
         discountAvailable =  discountAvailable,
-        discountType = discountType,
-        discountAmt =  discountAmt,
         defaultVariant = defaultVariant,
         productType = productType,
         variants = variants,
@@ -96,7 +94,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         address = address,
         price = price,
         orderStatus = orderStatus,
-        monthYear = monthYear
+        monthYear = monthYear,
+        phoneNumber = phoneNumber
     )
 
     fun PinCodes.toPinCodesEntity() = PinCodesEntity (
@@ -191,8 +190,6 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
         descType = descType,
         status = status,
         discountAvailable =  discountAvailable,
-        discountType = discountType,
-        discountAmt =  discountAmt,
         defaultVariant = defaultVariant,
         productType = productType,
         variants = variants,
@@ -238,7 +235,8 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
         address = address,
         price = price,
         orderStatus = orderStatus,
-        monthYear = monthYear
+        monthYear = monthYear,
+        phoneNumber = phoneNumber
     )
 
 

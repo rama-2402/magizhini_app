@@ -15,7 +15,6 @@ import org.kodein.di.Volatile
 
 @Database(
     entities = [UserProfileEntity::class,
-                VariantEntity::class,
                 ProductEntity::class,
                 ProductCategoryEntity::class,
                 CouponEntity::class,

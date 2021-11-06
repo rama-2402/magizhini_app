@@ -50,9 +50,6 @@ import kotlinx.coroutines.*
 
 class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
-//TODO PLACE WALLET ICON IN TOOLBAR
-    //TODO ERROR MESSAGE FOR EMPTY CART BEFORE PLACING ORDER
-
     override val kodein: Kodein by kodein()
     private val factory: CheckoutViewModelFactory by instance()
     private lateinit var binding: ActivityCheckoutBinding
@@ -79,6 +76,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private var mPaymentPreference: String = "COD"
     private var mCurrentUserID: String = ""
     private var mTransactionID: String = "COD"
+    private var mPhoneNumber: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,10 +91,11 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             onBackPressed()
         }
 
-        mCurrentCoupon =
-            SharedPref(this).getData(Constants.CURRENT_COUPON, Constants.STRING, "").toString()
-        mCurrentUserID =
-            SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
+        SharedPref(this).apply {
+            mCurrentCoupon = getData(Constants.CURRENT_COUPON, Constants.STRING, "").toString()
+            mCurrentUserID = getData(Constants.USER_ID, Constants.STRING, "").toString()
+            mPhoneNumber = getData(Constants.PHONE_NUMBER, Constants.STRING, "").toString()
+        }
 
         with(binding) {
             rvAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
@@ -402,6 +401,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             price = binding.tvTotalAmt.text.toString().toFloat()
             orderStatus = Constants.PENDING
             monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
+            phoneNumber = mPhoneNumber
         }
         startWorkerThread(mOrder)
         viewModel.placeOrder(mOrder)

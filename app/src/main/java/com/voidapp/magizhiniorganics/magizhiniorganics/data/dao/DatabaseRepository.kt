@@ -27,7 +27,7 @@ class DatabaseRepository(
 
     fun upsertCart(cartEntity: CartEntity) = db.getUserProfileDao().upsertCartItem(cartEntity)
 
-    fun upsertDefaultVariant(variant: VariantEntity) = db.getUserProfileDao().upsertDefaultVariant(variant)
+//    fun upsertDefaultVariant(variant: VariantEntity) = db.getUserProfileDao().upsertDefaultVariant(variant)
 
     fun upsertProduct(product: ProductEntity) = db.getUserProfileDao().upsertProduct(product)
 
@@ -51,7 +51,7 @@ class DatabaseRepository(
 
     fun getCartItem(id: Int) = db.getUserProfileDao().getCartItem(id)
 
-    fun getAllDefaultVariantsList() = db.getUserProfileDao().getAllDefaultVariantsList()
+//    fun getAllDefaultVariantsList() = db.getUserProfileDao().getAllDefaultVariantsList()
 
     fun getAllproducts() = db.getUserProfileDao().getAllProducts()
 

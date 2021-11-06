@@ -127,7 +127,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     //setting the otp timeout and sending the OTP
-    private fun startPhoneNumberVerification(phone: String) = CoroutineScope(Dispatchers.IO).launch {
+    private fun startPhoneNumberVerification(phone: String) = lifecycleScope.launch(Dispatchers.IO) {
 
         withContext(Dispatchers.Main){
             Toast.makeText(this@SignInActivity, "Please wait for Auto-Verification", Toast.LENGTH_LONG).show()

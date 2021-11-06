@@ -258,43 +258,6 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         })
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == Constants.READ_STORAGE_PERMISSION_CODE) {
-            //If permission is granted
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                GlideLoader().showImageChooser(this)
-            } else {
-                //Displaying another toast if permission is not granted
-                showErrorSnackBar("Storage Permission Denied!", true)
-            }
-        }
-    }
-
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == Constants.PICK_IMAGE_REQUEST_CODE) {
-                if (data != null) {
-                    try {
-
-
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                        showErrorSnackBar("Image selection failed!", true)
-                    }
-                }
-            }
-        } else if (resultCode == Activity.RESULT_CANCELED) {
-            // A log is printed when user close or cancel the image selection.
-            Log.e("Request Cancelled", "Image selection cancelled")
-        }
-    }
-
     private fun startWorkerThread(order: OrderEntity) {
         val stringConvertedOrder = order.toStringConverter(order)
         val workRequest: WorkRequest =

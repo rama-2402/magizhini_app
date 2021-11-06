@@ -35,5 +35,7 @@ data class OrderEntity(
     @ColumnInfo
     var orderStatus: String = "pending",
     @ColumnInfo
-    var monthYear: String = ""
+    var monthYear: String = "",
+    @ColumnInfo
+    var phoneNumber: String = ""
 )

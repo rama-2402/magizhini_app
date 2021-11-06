@@ -40,8 +40,8 @@ interface UserProfileDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertCartItem(cartEntity: CartEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsertDefaultVariant(variant: VariantEntity)
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    fun upsertDefaultVariant(variant: VariantEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertProduct(product: ProductEntity)
@@ -76,8 +76,8 @@ interface UserProfileDao {
     @Query("SELECT * FROM CartEntity")
     fun getAllCartItems(): LiveData<List<CartEntity>>
 
-    @Query("SELECT * FROM VariantEntity")
-    fun getAllDefaultVariantsList(): LiveData<List<VariantEntity>>
+//    @Query("SELECT * FROM VariantEntity")
+//    fun getAllDefaultVariantsList(): LiveData<List<VariantEntity>>
 
     @Query("SELECT * FROM ProductEntity WHERE activated ORDER BY name")
     fun getAllProducts(): LiveData<List<ProductEntity>>

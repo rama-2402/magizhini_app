@@ -54,12 +54,6 @@ class DiffUtils(
             oldList[oldItemPosition].discountAvailable !== newList[newItemPosition].discountAvailable -> {
                 false
             }
-            oldList[oldItemPosition].discountType !== newList[newItemPosition].discountType -> {
-                false
-            }
-            oldList[oldItemPosition].discountAmt !== newList[newItemPosition].discountAmt -> {
-                false
-            }
             oldList[oldItemPosition].defaultVariant !== newList[newItemPosition].defaultVariant -> {
                 false
             }

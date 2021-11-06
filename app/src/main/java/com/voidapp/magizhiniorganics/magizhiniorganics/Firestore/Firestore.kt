@@ -258,7 +258,7 @@ class Firestore(
                 for (cartItem in cart) {
                     mFireStore.runTransaction { transaction ->
                         val productRef =
-                            mFireStore.collection("products").document(cartItem.productId)
+                            mFireStore.collection(Constants.PRODUCTS).document(cartItem.productId)
                         val product = transaction.get(productRef).toObject(Product::class.java)
                         val variants = product!!.variants
                         variants[cartItem.variantIndex].inventory =

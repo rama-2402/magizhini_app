@@ -20,5 +20,6 @@ data class Order(
     var address: Address = Address(),
     var price: Float = 0F,
     var orderStatus: String = "Pending",
-    var monthYear: String = ""
+    var monthYear: String = "",
+    var phoneNumber: String = ""
 ): Parcelable
