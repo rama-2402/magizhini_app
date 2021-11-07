@@ -8,7 +8,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
@@ -17,15 +17,16 @@ class FirestoreRepository (
     private val firestore: Firestore
 ) {
 
-    fun uid(): String = firestore.getCurrentUserId()
 
-    val phNumber = firestore.getPhoneNumer()
+    fun getPhoneNumber(): String? = firestore.getPhoneNumber()
+
+    fun getCurrentUserId(): String? = firestore.getCurrentUserId()
 
     suspend fun getProfile(id: String): UserProfileEntity = firestore.getProfile(id)
 
-    fun signInWithPhoneAuthCredential(activity: SignInActivity, credential: PhoneAuthCredential) = firestore.signInWithPhoneAuthCredential(activity, credential)
+    suspend fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential): Boolean = firestore.signInWithPhoneAuthCredential(credential)
 
-    suspend fun checkUserProfileDetails(): Boolean = firestore.checkUserProfileDetails()
+    suspend fun checkUserProfileDetails(): String = firestore.checkUserProfileDetails()
 
     suspend fun uploadImage(path: String, uri: Uri, extension: String, data: String = ""): String = firestore.uploadImage(path, uri, extension, data)
 

@@ -15,11 +15,6 @@ import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import androidx.work.workDataOf
-import com.google.android.gms.dynamic.IFragmentWrapper
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
@@ -27,8 +22,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfileBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
@@ -92,7 +85,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
         lifecycleScope.launch {
             delay(1010)
-            binding.ivProfilePic.show()
+            binding.ivProfilePic.visible()
         }
 
         activityInit()
@@ -221,7 +214,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             mLatitude = userProfile.address[0].gpsLatitude
             mLongitude = userProfile.address[0].gpsLongitude
             mAddress = userProfile.address[0].gpsAddress
-            tvReferral.gone()
+            tvReferral.remove()
             //hinding the referral code area for existing user
         }
         GlideLoader().loadUserPicture(this, mProfilePicUrl, binding.ivProfilePic)

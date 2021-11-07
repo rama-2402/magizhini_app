@@ -299,7 +299,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             isPreviewVisible = true
             with(binding) {
                 GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, it, ivPreviewImage)
-                ivPreviewImage.show()
+                ivPreviewImage.visible()
                 ivPreviewImage.startAnimation(Animations.scaleBig)
             }
         })
@@ -415,11 +415,11 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 binding.tvLimited.hide()
             }
             Constants.OUT_OF_STOCK -> {
-                binding.tvLimited.show()
+                binding.tvLimited.visible()
                 binding.tvLimited.text = "Out of Stock "
             }
             Constants.LIMITED -> {
-                binding.tvLimited.show()
+                binding.tvLimited.visible()
                 binding.tvLimited.text = "(Only ${variant.inventory} in Stock) "
             }
             else -> {
@@ -430,10 +430,10 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     @SuppressLint("SetTextI18n")
     private fun setPrice(position: Int) {
-        if (mProduct.discountAvailable && mProduct.variants[position].discountPrice != 0f) {
-            binding.tvOriginalPrice.show()
-            binding.tvDiscount.show()
-            binding.tvDiscountPercent.show()
+        if (mProduct.discountAvailable && mProduct.variants[position].discountPrice != 0.0) {
+            binding.tvOriginalPrice.visible()
+            binding.tvDiscount.visible()
+            binding.tvDiscountPercent.visible()
             binding.tvOriginalPrice.text = "Rs. ${getVariantOriginalPrice(position)} "
 //            binding.tvDiscountedPrice.text = "Rs. ${viewModel.getDiscountedPrice(mProduct, position)} "
             //we get the discounted price from viewmodel if there is any and passing it to check if there is coupon discount available
@@ -443,9 +443,9 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             binding.tvDiscountedPrice.text = "Rs. $mFinalPrice"
             setDiscountPercent()
         } else {
-            binding.tvOriginalPrice.gone()
-            binding.tvDiscount.gone()
-            binding.tvDiscountPercent.gone()
+            binding.tvOriginalPrice.remove()
+            binding.tvDiscount.remove()
+            binding.tvDiscountPercent.remove()
             binding.tvPrice.text = "MRP : "
             mFinalPrice = updatedPriceWithCouponApplied(getVariantPrice(position))
             binding.tvDiscountedPrice.text = "Rs. $mFinalPrice "
@@ -458,8 +458,8 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         //if the variant has discount then that percent will be displayed if not the
         //products general discount percent will be displayed
 
-        if (variant.discountPrice != 0f) {
-            binding.tvDiscountPercent.text = "${getDiscountPercent(variant.variantPrice, variant.discountPrice)}% Off"
+        if (variant.discountPrice != 0.0) {
+            binding.tvDiscountPercent.text = "${getDiscountPercent(variant.variantPrice.toFloat(), variant.discountPrice.toFloat())}% Off"
         }
     }
 
@@ -474,10 +474,10 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         = mProduct.variants[position].variantPrice.toFloat()
 
     private fun getVariantPrice(position: Int): Float {
-        return if (mProduct.variants[position].discountPrice == 0f) {
-            mProduct.variants[position].variantPrice
+        return if (mProduct.variants[position].discountPrice == 0.0) {
+            mProduct.variants[position].variantPrice.toFloat()
         } else {
-            mProduct.variants[position].discountPrice
+            mProduct.variants[position].discountPrice.toFloat()
         }
     }
 

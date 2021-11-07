@@ -15,6 +15,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewMod
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletViewModelFactory
@@ -39,6 +40,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from singleton { FirebaseRepository(instance()) }
 
         //viewModels
+        bind() from provider { SignInViewModelFactory(instance(), instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
         bind() from provider { ProfileViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ShoppingMainViewModelFactory(instance(), instance()) }

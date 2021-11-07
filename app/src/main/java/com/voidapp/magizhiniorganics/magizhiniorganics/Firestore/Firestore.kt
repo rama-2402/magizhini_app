@@ -13,7 +13,7 @@ import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SignInActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
@@ -21,7 +21,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.tasks.await
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -54,44 +53,47 @@ class Firestore(
         repository.deleteSubscriptionsTable()
     }
 
-    fun signInWithPhoneAuthCredential(activity: SignInActivity, credential: PhoneAuthCredential) =
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                mFirebaseAuth.signInWithCredential(credential)
-                    .addOnSuccessListener {
-                        // Logged In
-                        activity.loggedIn()
-                    }
-                    .addOnFailureListener { _ ->
-                        // Failed
-                        activity.onFirestoreFailure("Log In Failed. Please Check OTP Again")
-                    }
-            } catch (e: Exception) {
-                // Failed
-                activity.onFirestoreFailure("Log In Failed Try Later")
-            }
+    suspend fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential):Boolean {
+        return try {
+            var status: Boolean = false
+            mFirebaseAuth.signInWithCredential(credential)
+                .addOnSuccessListener { status = true }
+                .addOnCanceledListener { status = false }.await()
+            status
+        } catch (e: Exception) {
+            // Failed
+            //                activity.onFirestoreFailure("Log In Failed Try Later")
+            false
         }
+    }
+
+//    fun signInWithPhoneAuthCredential(activity: SignInActivity, credential: PhoneAuthCredential) =
+//        CoroutineScope(Dispatchers.IO).launch {
+//            try {
+//                mFirebaseAuth.signInWithCredential(credential)
+//                    .addOnSuccessListener {
+//                        // Logged In
+//                        activity.loggedIn()
+//                    }
+//                    .addOnFailureListener { _ ->
+//                        // Failed
+//                        activity.onFirestoreFailure("Log In Failed. Please Check OTP Again")
+//                    }
+//            } catch (e: Exception) {
+//                // Failed
+//                activity.onFirestoreFailure("Log In Failed Try Later")
+//            }
+//        }
 
     // Checks if the current entered phone number is already present in DB before sending the OTP
-    fun getCurrentUserId(): String {
-        val currentUser = mFirebaseAuth.currentUser
-//        if (currentUser != null) {
-//            currentUserId = currentUser.uid
-//        }
-        return currentUser!!.uid
-    }
+    fun getPhoneNumber(): String? =
+        mFirebaseAuth.currentUser!!.phoneNumber
 
-    fun getPhoneNumer(): String {
-        val currentUser = mFirebaseAuth.currentUser
-        var phNumber = ""
-        if (currentUser != null) {
-            phNumber = currentUser.phoneNumber.toString()
-        }
-        return phNumber
-    }
+    fun getCurrentUserId(): String? =
+        mFirebaseAuth.currentUser?.uid
 
     //check if the user profile exists and getting the data from store
-    suspend fun checkUserProfileDetails(): Boolean = withContext(Dispatchers.IO) {
+    suspend fun checkUserProfileDetails(): String = withContext(Dispatchers.IO) {
         try {
             val snapShot = mFireStore.collection(Constants.USERS)
                 .document(mFirebaseAuth.currentUser!!.uid).get().await()
@@ -109,15 +111,19 @@ class Firestore(
                 val uploadActiveSubscriptions =
                     async { uploadActiveSubscriptions(userProfileEntity.subscriptions) }
 
-                return@withContext !(!uploadFavorites.await() ||
+                return@withContext if(!(!uploadFavorites.await() ||
                         !uploadActiveOrders.await() ||
-                        !uploadActiveSubscriptions.await())
+                        !uploadActiveSubscriptions.await())) {
+                    profile.id
+                } else {
+                    "Failed"
+                }
             } else {
-                return@withContext false
+                return@withContext ""
             }
         } catch (e: Exception) {
             Log.e("exception", e.message.toString())
-            return@withContext false
+            return@withContext "Failed"
         }
     }
 
@@ -170,6 +176,7 @@ class Firestore(
                 .set(wallet, SetOptions.merge())
                 .await()
         } catch (e: Exception) {
+            Log.e("TAG", "createWallet: ${e.message}", )
         }
     }
 
@@ -287,6 +294,7 @@ class Firestore(
         }
     }
 
+    //order placement
     fun placeOrder(order: Order, viewModel: CheckoutViewModel) =
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -314,6 +322,16 @@ class Firestore(
             }
         }
 
+    private suspend fun updateOrderHistory(order: Order) = withContext(Dispatchers.IO) {
+        mFireStore.collection(Constants.ORDER_HISTORY)
+            .document(order.monthYear)
+            .collection("Active")
+            .document(order.orderId)
+            .set(order, SetOptions.merge())
+            .await()
+        repository.upsertOrder(order.toOrderEntity())
+    }
+
     private suspend fun updateProfileOrderID(order: Order) = withContext(Dispatchers.IO) {
         mFireStore.collection("users").document(order.customerId)
             .update("purchaseHistory", FieldValue.arrayUnion(order.orderId)).await()
@@ -335,17 +353,30 @@ class Firestore(
         repository.upsertProfile(profile)
     }
 
+    private suspend fun updateLocalOrderRepository(order: OrderEntity) =
+        withContext(Dispatchers.IO) {
+            repository.upsertOrder(order)
+        }
+
+    suspend fun generateOrderID(id: String): String =
+        mFireStore.collection(Constants.ORDER_HISTORY).document().id
+
+
+    //cancelling order
     suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) {
         try {
             withContext(Dispatchers.IO) {
-                val cancelOrderStatus = async { cancelOrderStatus(orderEntity) }
+                val removeFromActiveOrder = async { removeFromActiveOrder(orderEntity) }
+                val addToCancelledOrder = async { addToCancelledOrder(orderEntity) }
                 val removeActiveOrderFromProfile = async {
                     updateCloudProfileRecentPurchases(
                         orderEntity.orderId,
                         orderEntity.customerId
                     )
                 }
-                cancelOrderStatus.await()
+
+                removeFromActiveOrder.await()
+                addToCancelledOrder.await()
                 removeActiveOrderFromProfile.await()
                 withContext(Dispatchers.Main) {
                     viewModel.orderCancelledCallback(true)
@@ -356,24 +387,28 @@ class Firestore(
         }
     }
 
-    private suspend fun cancelOrderStatus(order: OrderEntity) = withContext(Dispatchers.IO) {
+    private suspend fun removeFromActiveOrder(order: OrderEntity) = withContext(Dispatchers.IO) {
+        order.orderStatus = Constants.CANCELLED
         mFireStore.collection(Constants.ORDER_HISTORY)
-            .document(order.monthYear)
-            .collection(order.purchaseDate.take(2))
-            .document(order.orderId)
-            .update("orderStatus", Constants.CANCELLED).await()
+                .document(order.monthYear)
+                .collection("Cancelled")
+                .document(order.orderId)
+                .set(order, SetOptions.merge())
     }
 
-    private suspend fun updateOrderHistory(order: Order) = withContext(Dispatchers.IO) {
-        val date = TimeUtil().getCurrentDateNumber()
-        val id = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
+    private suspend fun addToCancelledOrder(order: OrderEntity) = withContext(Dispatchers.IO) {
         mFireStore.collection(Constants.ORDER_HISTORY)
-            .document(id)
-            .collection(date)
+            .document(order.monthYear)
+            .collection("Active")
             .document(order.orderId)
-            .set(order, SetOptions.merge()).await()
-        repository.upsertOrder(order.toOrderEntity())
+            .delete()
     }
+
+    private suspend fun updateCloudProfileRecentPurchases(item: String?, docID: String) =
+        withContext(Dispatchers.IO) {
+            mFireStore.collection(Constants.USERS)
+                .document(docID).update("purchaseHistory", FieldValue.arrayRemove(item)).await()
+        }
 
     //updating the recent purchase status from the store when app is opened everytime
     suspend fun updateRecentPurchases(
@@ -457,11 +492,6 @@ class Firestore(
             }
         }
 
-    private suspend fun updateLocalOrderRepository(order: OrderEntity) =
-        withContext(Dispatchers.IO) {
-            repository.upsertOrder(order)
-        }
-
     private suspend fun updateLocalProfileRecentPurchases(id: String?) =
         withContext(Dispatchers.IO) {
             val profile = repository.getProfileData()!!
@@ -469,12 +499,7 @@ class Firestore(
             repository.upsertProfile(profile)
         }
 
-    private suspend fun updateCloudProfileRecentPurchases(item: String?, docID: String) =
-        withContext(Dispatchers.IO) {
-            mFireStore.collection(Constants.USERS)
-                .document(docID).update("purchaseHistory", FieldValue.arrayRemove(item)).await()
-        }
-
+    //favorites
     fun addFavorites(id: String, item: String) {
         //This function will add a new data if it is not present in the array
         mFireStore.collection(Constants.USERS)
@@ -486,11 +511,13 @@ class Firestore(
             .document(id).update(Constants.FAVORITES, FieldValue.arrayRemove(item))
     }
 
+    //reviews
     fun addReview(id: String, review: Review) = CoroutineScope(Dispatchers.IO).launch {
         mFireStore.collection(Constants.PRODUCTS)
             .document(id).update(Constants.REVIEWS, FieldValue.arrayUnion(review))
     }
 
+    //address
     fun addAddress(id: String, address: Address) = CoroutineScope(Dispatchers.IO).launch {
         mFireStore.collection(Constants.USERS)
             .document(id).update(Constants.ADDRESS, FieldValue.arrayUnion(address))
@@ -641,6 +668,7 @@ class Firestore(
             }
         }
 
+    //wallet
     suspend fun getWalletAmount(id: String): Float {
         return mFireStore.collection("Wallet")
             .document("Wallet")
@@ -654,6 +682,7 @@ class Firestore(
             .collection("Users")
             .document(id).get().await().toObject(Wallet::class.java)!!
 
+    //wallet transactions
     suspend fun getTransactions(id: String): List<TransactionHistory> = withContext(Dispatchers.IO) {
         try {
             val transactions = mutableListOf<TransactionHistory>()
@@ -712,9 +741,6 @@ class Firestore(
                 return@withContext "failed"
             }
         }
-
-    suspend fun generateOrderID(id: String): String =
-        mFireStore.collection(Constants.ORDER_HISTORY).document().id
 
     suspend fun generateSubscriptionID(id: String): String =
         mFireStore.collection(Constants.SUBSCRIPTION)

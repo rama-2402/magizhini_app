@@ -20,6 +20,5 @@ data class Product(
     var discountAvailable: Boolean = false,
     var defaultVariant: Int = 0,
     var productType: String="",
-    var activated: Boolean = true,
-    var reviews: ArrayList<Review> = ArrayList()
+    var activated: Boolean = true
 ): Parcelable

@@ -44,8 +44,6 @@ data class ProductEntity(
     @ColumnInfo
     var activated: Boolean = true,
     @ColumnInfo
-    var reviews: ArrayList<Review> = ArrayList(),
-    @ColumnInfo
     var favorite: Boolean = false,
     @ColumnInfo
     var inCart: Boolean = false,
@@ -54,7 +52,9 @@ data class ProductEntity(
     @ColumnInfo
     var coupon: Boolean = false,
     @ColumnInfo
-    var appliedCoupon: String = ""
+    var appliedCoupon: String = "",
+    @ColumnInfo
+    var reviews: ArrayList<Review> = arrayListOf()
 ): Parcelable
 
 

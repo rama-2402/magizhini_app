@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui
 
-import android.app.ActionBar
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
@@ -8,16 +7,15 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import android.os.Build
+import android.provider.MediaStore
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -34,6 +32,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.Su
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 
 open class BaseActivity : AppCompatActivity() {
 
@@ -44,7 +44,7 @@ open class BaseActivity : AppCompatActivity() {
     private lateinit var mSwipeConfirmationBottomSheet: BottomSheetDialog
     private lateinit var listBottomSheetdialog: BottomSheetDialog
 
-    fun View.show() {
+    fun View.visible() {
         this.visibility = View.VISIBLE
     }
 
@@ -52,7 +52,7 @@ open class BaseActivity : AppCompatActivity() {
         this.visibility = View.INVISIBLE
     }
 
-    fun View.gone() {
+    fun View.remove() {
         this.visibility = View.GONE
     }
 
@@ -63,6 +63,27 @@ open class BaseActivity : AppCompatActivity() {
     fun View.disable() {
         this.isEnabled = false
     }
+
+    val pickImageIntent = Intent(
+        Intent.ACTION_PICK,
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    )
+
+    fun Activity.openAppSettingsIntent() = Intent(
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Uri.parse("package:${this.packageName}")
+    ).apply {
+        addCategory(Intent.CATEGORY_DEFAULT)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(this)
+    }
+
+    fun Activity.callNumberIntent(number: String) = Intent(Intent.ACTION_DIAL).also {
+        it.data = Uri.parse("tel:$number")
+        startActivity(it)
+    }
+
+    fun Activity.hideKeyboard() = UIUtil.hideKeyboard(this)
 
     fun showToast(context: Context ,message: String, type: String) {
         when(type) {
@@ -85,8 +106,8 @@ open class BaseActivity : AppCompatActivity() {
     /**
      * A function to show the success and error messages in snack bar component.
      */
-    fun showErrorSnackBar(message: String, errorMessage: Boolean, duration: String = "short") {
-        val snackBar = if (duration == "short") {
+    fun showErrorSnackBar(message: String, errorMessage: Boolean, duration: String = SHORT) {
+        val snackBar = if (duration == SHORT) {
             Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT)
         } else {
             Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
@@ -225,22 +246,22 @@ open class BaseActivity : AppCompatActivity() {
         when(content) {
             "limited" -> {
                 view.ltAnimImg.setAnimation(R.raw.validating_purchase)
-                view.tvTitle.gone()
+                view.tvTitle.remove()
             }
             "order" -> {
                 view.ltAnimImg.setAnimation(R.raw.placing_order)
-                view.tvTitle.gone()
+                view.tvTitle.remove()
             }
             "complete" -> {
-                view.tvTitle.gone()
+                view.tvTitle.remove()
             }
             "dates" -> {
                 view.ltAnimImg.setAnimation(R.raw.validating_dates)
-                view.tvTitle.gone()
+                view.tvTitle.remove()
             }
             "wallet" -> {
                 view.ltAnimImg.setAnimation(R.raw.piggy_bank)
-                view.tvTitle.gone()
+                view.tvTitle.remove()
             }
         }
 

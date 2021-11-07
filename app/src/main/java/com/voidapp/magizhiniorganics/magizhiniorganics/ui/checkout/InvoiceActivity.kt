@@ -448,7 +448,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             val totalAfterCouponDiscount = viewModel.getCartPrice(mCartItems)-applyCouponDiscountToInvoice(mCoupon) + binding.tvDeliveryChargeAmt.text.toString().toFloat()
             tvTotalAmt.text = totalAfterCouponDiscount.toString()
             if (etCoupon.text.toString().isEmpty()) {
-                ivCouponInfo.gone()
+                ivCouponInfo.remove()
             }
         }
     }
@@ -597,11 +597,11 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 //            if(!binding.etCoupon.text.isNullOrEmpty()) {
 //                showErrorSnackBar("Coupon Applied", false)
 //            }
-            binding.ivCouponInfo.show()
+            binding.ivCouponInfo.visible()
             return couponDiscount
         } else {
             if(!binding.etCoupon.text.isNullOrEmpty()) {
-                binding.ivCouponInfo.show()
+                binding.ivCouponInfo.visible()
                 showErrorSnackBar("Coupon Not Applicable! Check Info", true)
             }
             return couponDiscount
@@ -625,7 +625,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 Constants.STRING,
                 ""
             )
-            ivCouponInfo.gone()
+            ivCouponInfo.remove()
         }
     }
 

@@ -185,15 +185,15 @@ class ShoppingMainActivity :
 
     private fun showShimmer() {
         with(binding) {
-            flShimmerPlaceholder.show()
+            flShimmerPlaceholder.visible()
             rvShoppingItems.hide()
         }
     }
 
     private fun hideShimmer() {
         with(binding) {
-            flShimmerPlaceholder.gone()
-            rvShoppingItems.show()
+            flShimmerPlaceholder.remove()
+            rvShoppingItems.visible()
         }
     }
 

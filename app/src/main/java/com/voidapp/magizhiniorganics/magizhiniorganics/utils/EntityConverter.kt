@@ -52,8 +52,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         defaultVariant = defaultVariant,
         productType = productType,
         variants = variants,
-        activated = activated,
-        reviews = reviews
+        activated = activated
     )
 
     fun Coupon.toCouponEntity() = CouponEntity (
@@ -193,8 +192,7 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
         defaultVariant = defaultVariant,
         productType = productType,
         variants = variants,
-        activated = activated,
-        reviews = reviews
+        activated = activated
     )
 
     fun CouponEntity.toCoupon() = Coupon (

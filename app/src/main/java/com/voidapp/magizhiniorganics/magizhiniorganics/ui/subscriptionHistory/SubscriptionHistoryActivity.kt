@@ -328,15 +328,15 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
     private fun showShimmer() {
         with(binding) {
-            flShimmerPlaceholder.show()
-            rvSubscriptionHistory.gone()
+            flShimmerPlaceholder.visible()
+            rvSubscriptionHistory.remove()
         }
     }
 
     private fun hideShimmer() {
         with(binding) {
-            flShimmerPlaceholder.gone()
-            rvSubscriptionHistory.show()
+            flShimmerPlaceholder.remove()
+            rvSubscriptionHistory.visible()
         }
     }
 

@@ -8,6 +8,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.viewPagerAdapter.ViewPagerAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.viewPagerAdapter.ViewPagerListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityOnBoardingBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import kotlinx.coroutines.*
 
 class OnBoardingActivity: BaseActivity() {

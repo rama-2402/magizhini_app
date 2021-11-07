@@ -403,9 +403,9 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
             fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
             lifecycleScope.launch {
                 delay(400)
-                llNewReview.show()
-                fabSubscribe.gone()
-                rvReviews.gone()
+                llNewReview.visible()
+                fabSubscribe.remove()
+                rvReviews.remove()
             }
         }
     }
@@ -414,15 +414,15 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         with(binding) {
             cpAddReview.text = "Add Review"
             edtDescription.setText("")
-            ivReviewImage.gone()
+            ivReviewImage.remove()
             cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_add)
             llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_out_right))
             rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_in_left))
             fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
             lifecycleScope.launch {
                 delay(400)
-                llNewReview.gone()
-                rvReviews.show()
+                llNewReview.remove()
+                rvReviews.visible()
             }
         }
     }
@@ -475,7 +475,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
             isPreviewVisible = true
             with(binding) {
                 GlideLoader().loadUserPictureWithoutCrop(this@SubscriptionProductActivity, it, ivPreviewImage)
-                ivPreviewImage.show()
+                ivPreviewImage.visible()
                 ivPreviewImage.startAnimation(Animations.scaleBig)
             }
         })
@@ -581,7 +581,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                         // The uri of selected image from phone storage.
                         reviewImageUri = data.data!!
 
-                        binding.ivReviewImage.show()
+                        binding.ivReviewImage.visible()
                         GlideLoader().loadUserPicture(
                             binding.ivReviewImage.context,
                             reviewImageUri!!,

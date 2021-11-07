@@ -97,7 +97,7 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
-            android:name=".ui.SignInActivity"
+            android:name=".ui.signin.SignInActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity

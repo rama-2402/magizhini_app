@@ -240,15 +240,15 @@ open class ShoppingMainAdapter(
 //        if (product.discountAvailable) {
 
         //setting up the product discount info
-        if (currentVariant.discountPrice != 0f) {
+        if (currentVariant.discountPrice != 0.0) {
             holder.discountAmount.text =
-                    getDiscountPercent(currentVariant.variantPrice, currentVariant.discountPrice).toString()
-                discountedPrice = currentVariant.discountPrice
+                    getDiscountPercent(currentVariant.variantPrice.toFloat(), currentVariant.discountPrice.toFloat()).toString()
+                discountedPrice = currentVariant.discountPrice.toFloat()
             holder.discountedAmount.text = currentVariant.discountPrice.toString()
             holder.discountLayout.visibility = View.VISIBLE
             holder.price.visibility = View.VISIBLE
         } else {
-            discountedPrice = currentVariant.variantPrice
+            discountedPrice = currentVariant.variantPrice.toFloat()
             holder.discountedAmount.text = currentVariant.variantPrice.toString()
             holder.discountLayout.visibility = View.GONE
             holder.price.visibility = View.INVISIBLE

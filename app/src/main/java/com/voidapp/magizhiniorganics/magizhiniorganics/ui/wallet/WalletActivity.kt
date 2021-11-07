@@ -302,15 +302,15 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     private fun showShimmer() {
         with(binding) {
-            flShimmerPlaceholder.show()
+            flShimmerPlaceholder.visible()
             rvTransactionHistory.hide()
         }
     }
 
     private fun hideShimmer() {
         with(binding) {
-            flShimmerPlaceholder.gone()
-            rvTransactionHistory.show()
+            flShimmerPlaceholder.remove()
+            rvTransactionHistory.visible()
         }
     }
 }

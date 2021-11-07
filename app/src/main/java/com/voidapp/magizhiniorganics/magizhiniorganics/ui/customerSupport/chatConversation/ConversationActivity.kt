@@ -84,7 +84,7 @@ class ConversationActivity : BaseActivity(), KodeinAware {
         viewModel.imageUrl.observe(this, {
             GlideLoader().loadUserPictureWithoutCrop(binding.ivReviewImageChat.context, it, binding.ivReviewImageChat)
             binding.ivReviewImageChat.startAnimation(Animations.scaleBig)
-            binding.ivReviewImageChat.show()
+            binding.ivReviewImageChat.visible()
             isZoomed = true
         })
     }
@@ -188,7 +188,7 @@ class ConversationActivity : BaseActivity(), KodeinAware {
         when {
             isZoomed -> {
                 binding.ivReviewImageChat.startAnimation(Animations.scaleSmall)
-                binding.ivReviewImageChat.gone()
+                binding.ivReviewImageChat.remove()
                 isZoomed = false
             }
             else -> {

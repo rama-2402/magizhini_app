@@ -1,10 +1,8 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory
 
 import android.Manifest
-import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
@@ -13,13 +11,8 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
@@ -34,7 +27,6 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.karumi.dexter.listener.single.PermissionListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
@@ -48,7 +40,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
@@ -61,7 +52,6 @@ import org.kodein.di.generic.instance
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.URI
 import kotlin.math.ceil
 
 class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
@@ -330,15 +320,15 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
 
     private fun showShimmer() {
         with(binding) {
-            flShimmerPlaceholder.show()
-            rvPurchaseHistory.gone()
+            flShimmerPlaceholder.visible()
+            rvPurchaseHistory.remove()
         }
     }
 
     private fun hideShimmer() {
         with(binding) {
-            flShimmerPlaceholder.gone()
-            rvPurchaseHistory.show()
+            flShimmerPlaceholder.remove()
+            rvPurchaseHistory.visible()
         }
     }
 

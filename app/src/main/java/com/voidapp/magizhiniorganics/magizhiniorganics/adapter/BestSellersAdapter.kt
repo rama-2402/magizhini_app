@@ -94,14 +94,14 @@ class BestSellersAdapter(
             }
 
             //if discount is available then we make the discount layout visible and set the discount amount and percentage
-            if (product.variants[variantInCartPosition].discountPrice != 0f) {
+            if (product.variants[variantInCartPosition].discountPrice != 0.0) {
                 clDiscountLayout.visibility = View.VISIBLE
 //                setDiscountedValues(holder, product, variantPrice, variantInCartPosition)
 
                 with(product.variants[variantInCartPosition]) {
                     tvDiscountAmt.text =
-                        getDiscountPercent(variantPrice, discountPrice).toString()
-                    if (discountPrice != 0f) {
+                        getDiscountPercent(variantPrice.toFloat(), discountPrice.toFloat()).toString()
+                    if (discountPrice != 0.0) {
                         tvPrice.text = "$variantDisplayName - Rs: ${discountPrice}"
                     }
                 }
@@ -157,7 +157,7 @@ class BestSellersAdapter(
             "${product.variants[variantPosition].variantName} ${product.variants[variantPosition].variantType}",
             1,
             discountAppliedPrice,
-            product.variants[variantPosition].variantPrice,
+            product.variants[variantPosition].variantPrice.toFloat(),
             0,
             position,
             recycler
@@ -165,10 +165,10 @@ class BestSellersAdapter(
     }
 
     private fun getVariantPrice(variant: ProductVariant) : Float {
-        discountAppliedPrice = if (variant.discountPrice != 0f) {
-            variant.variantPrice
+        discountAppliedPrice = if (variant.discountPrice != 0.0) {
+            variant.variantPrice.toFloat()
         } else {
-            variant.discountPrice
+            variant.discountPrice.toFloat()
         }
         return discountAppliedPrice
     }

@@ -32,7 +32,7 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromStringtoProductEntity(value: String?): ProductEntity {
+    fun fromStringToProductEntity(value: String?): ProductEntity {
         val listType = object : TypeToken<ProductEntity>() {}.type
         return Gson().fromJson(value, listType)
     }

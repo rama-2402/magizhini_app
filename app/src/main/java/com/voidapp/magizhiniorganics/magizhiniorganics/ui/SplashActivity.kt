@@ -33,10 +33,10 @@ class SplashActivity : AppCompatActivity() {
         binding.progressCircular.animate()
 
         val sRef = this.getSharedPreferences(Constants.USERS, Context.MODE_PRIVATE)
-        val isNewUser = sRef.getBoolean(Constants.LOGIN_STATUS, true)
+        val isNewUser = sRef.getString(Constants.USER_ID, "")
         val isNewDay = sRef.getString(Constants.DATE, Constants.DATE)
 
-        if (isNewUser) {
+        if (isNewUser == "") {
             lifecycleScope.launch {
                 delay(1500)
                 Intent(this@SplashActivity, OnBoardingActivity::class.java).also {
