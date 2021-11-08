@@ -56,52 +56,64 @@ class HomeViewModel (
     fun upsertCartItem(product: ProductEntity, variant: String, count: Int, price:
     Float, originalPrice: Float, variantIndex: Int, position: Int, recycler: String) = viewModelScope.launch(
         Dispatchers.IO) {
-        val orderQuantity = if (product.variants[0].inventory == 0) {
-            10
-        } else {
-            product.variants[0].inventory
-        }
-        val cartEntity = CartEntity(
-            productId = product.id,
-            productName = product.name,
-            thumbnailUrl = product.thumbnailUrl,
-            variant = variant,
-            quantity = count,
-            maxOrderQuantity = orderQuantity,
-            price = price,
-            originalPrice = originalPrice,
-            variantIndex = variantIndex
-        )
-        dbRepository.upsertCart(cartEntity)
-        val productEntity = dbRepository.getProductWithIdForUpdate(product.id)
-        productEntity.variantInCart.add(variant)
-        dbRepository.upsertProduct(productEntity)
-        withContext(Dispatchers.Main) {
-            recyclerToRefresh = recycler
-            _recyclerPosition.value = position
-        }
-    }
-
-    fun deleteCartItemFromShoppingMain(productEntity: ProductEntity, variantName: String, position: Int, recycler: String) = viewModelScope.launch (Dispatchers.IO) {
-        val product = dbRepository.getProductWithIdForUpdate(productEntity.id)
-        product.variantInCart.remove(variantName)
-        dbRepository.upsertProduct(product)
-        dbRepository.deleteCartItemFromShoppingMain(productEntity.id, variantName)
-        updatingTheCartInProduct(productEntity.id , variantName, position, recycler)
-    }
-
-    private suspend fun updatingTheCartInProduct(productId: String, variant: String, position: Int, recycler: String) =
-        withContext(Dispatchers.IO){
-        val productEntity = dbRepository.getProductWithIdForUpdate(productId)
-        productEntity.variantInCart.remove(variant)
-        if (productEntity.variantInCart.isEmpty()) {
-            productEntity.inCart = false
-        }
-        dbRepository.upsertProduct(productEntity)
+        try {
+            val orderQuantity = if (product.variants[0].inventory == 0) {
+                10
+            } else {
+                product.variants[0].inventory
+            }
+            val cartEntity = CartEntity(
+                productId = product.id,
+                productName = product.name,
+                thumbnailUrl = product.thumbnailUrl,
+                variant = variant,
+                quantity = count,
+                maxOrderQuantity = orderQuantity,
+                price = price,
+                originalPrice = originalPrice,
+                variantIndex = variantIndex
+            )
+            dbRepository.upsertCart(cartEntity)
+            val productEntity = dbRepository.getProductWithIdForUpdate(product.id)
+            productEntity.variantInCart.add(variant)
+            dbRepository.upsertProduct(productEntity)
             withContext(Dispatchers.Main) {
                 recyclerToRefresh = recycler
                 _recyclerPosition.value = position
             }
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("Home: add item to cart", it) }
+        }
+    }
+
+    fun deleteCartItemFromShoppingMain(productEntity: ProductEntity, variantName: String, position: Int, recycler: String) = viewModelScope.launch (Dispatchers.IO) {
+        try {
+            val product = dbRepository.getProductWithIdForUpdate(productEntity.id)
+            product.variantInCart.remove(variantName)
+            dbRepository.upsertProduct(product)
+            dbRepository.deleteCartItemFromShoppingMain(productEntity.id, variantName)
+            updatingTheCartInProduct(productEntity.id , variantName, position, recycler)
+        } catch (e: IOException) {
+            e.message?.let { fbRepository.logCrash("Home: delete item to cart", it) }
+        }
+    }
+
+    private suspend fun updatingTheCartInProduct(productId: String, variant: String, position: Int, recycler: String) =
+        withContext(Dispatchers.IO){
+        try {
+            val productEntity = dbRepository.getProductWithIdForUpdate(productId)
+            productEntity.variantInCart.remove(variant)
+            if (productEntity.variantInCart.isEmpty()) {
+                productEntity.inCart = false
+            }
+            dbRepository.upsertProduct(productEntity)
+            withContext(Dispatchers.Main) {
+                recyclerToRefresh = recycler
+                _recyclerPosition.value = position
+            }
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("Home: updating product after delete from cart", it) }
+        }
     }
 
     fun updateFavorites(id: String, product: ProductEntity) = viewModelScope.launch(Dispatchers.IO) {
@@ -115,12 +127,16 @@ class HomeViewModel (
     }
 
     private suspend fun localFavoritesUpdate(product: ProductEntity) = withContext(Dispatchers.IO) {
-        if (product.favorite) {
-            Favorites(product.id).also {
-                dbRepository.upsertFavorite(it)
+        try {
+            if (product.favorite) {
+                Favorites(product.id).also {
+                    dbRepository.upsertFavorite(it)
+                }
+            } else {
+                dbRepository.deleteFavorite(product.id)
             }
-        } else {
-            dbRepository.deleteFavorite(product.id)
+        } catch (e: IOException) {
+            e.message?.let { fbRepository.logCrash("Home: updating favorites to db", it) }
         }
     }
 
@@ -133,7 +149,11 @@ class HomeViewModel (
     }
 
     private suspend fun updateProduct(product: ProductEntity) = withContext(Dispatchers.IO) {
-        dbRepository.updateProductFavoriteStatus(product.id, product.favorite)
+        try {
+            dbRepository.updateProductFavoriteStatus(product.id, product.favorite)
+        } catch (e: IOException) {
+            e.message?.let { fbRepository.logCrash("Home: update product fav boolean status", it) }
+        }
     }
 
     fun moveToProductDetails(id: String, name: String) {
@@ -166,7 +186,7 @@ class HomeViewModel (
                 _specialBanners.value = bannerUrls
             }
         } catch (e: IOException) {
-            Log.e("TAG", "getBestSellers: ${e.message}", )
+            e.message?.let { fbRepository.logCrash("Home: populating spl banners from db", it) }
         }
     }
 
@@ -184,7 +204,7 @@ class HomeViewModel (
                 _bestSellers.value = products
             }
         } catch (e: IOException) {
-            Log.e("TAG", "getBestSellers: ${e.message}", )
+            e.message?.let { fbRepository.logCrash("Home: populating best sellers from db", it) }
         }
     }
     private suspend fun getSpecialsOne() {
@@ -201,7 +221,7 @@ class HomeViewModel (
                 _specialsOne.value = products
             }
         } catch (e: IOException) {
-            Log.e("TAG", "getBestSellers: ${e.message}", )
+            e.message?.let { fbRepository.logCrash("Home: populating spl one from db", it) }
         }
     }
     private suspend fun getSpecialsTwo() {
@@ -218,7 +238,7 @@ class HomeViewModel (
                 _specialsTwo.value = products
             }
         } catch (e: IOException) {
-            Log.e("TAG", "getBestSellers: ${e.message}", )
+            e.message?.let { fbRepository.logCrash("Home: populating spl two from db", it) }
         }
     }
     private suspend fun getSpecialsThree() {
@@ -235,7 +255,7 @@ class HomeViewModel (
                 _specialsThree.value = products
             }
         } catch (e: IOException) {
-            Log.e("TAG", "getBestSellers: ${e.message}", )
+            e.message?.let { fbRepository.logCrash("Home: populating spl three from db", it) }
         }
     }
 

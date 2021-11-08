@@ -19,6 +19,8 @@ class FirestoreRepository (
 
     fun signOut() = firestore.signOut()
 
+    suspend fun logCrash(location: String, message: String) = firestore.logCrash(location, message)
+
     fun getPhoneNumber(): String? = firestore.getPhoneNumber()
 
     fun getCurrentUserId(): String? = firestore.getCurrentUserId()

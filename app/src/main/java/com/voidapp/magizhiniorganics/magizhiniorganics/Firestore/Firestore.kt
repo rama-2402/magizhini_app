@@ -743,7 +743,7 @@ class Firestore(
             .collection(id)
             .document().id
 
-    private suspend fun logCrash(location: String, message: String) {
+    suspend fun logCrash(location: String, message: String) {
         CrashLog(
             getCurrentUserId()!!,
             "${ Build.MANUFACTURER } ${ Build.MODEL } ${Build.VERSION.RELEASE} ${ Build.VERSION_CODES::class.java.fields[Build.VERSION.SDK_INT].name }",

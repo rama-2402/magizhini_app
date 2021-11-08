@@ -169,7 +169,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         viewModel.recyclerPosition.observe(this, {
             when (viewModel.recyclerToRefresh) {
                 "bestSeller" -> {
-//                    bestSellersAdapter.products[it] = viewModel.productToUpdate
                     bestSellersAdapter.notifyItemChanged(it)
                     with(viewModel) {
                         getUpdatedSpecialsOne()
