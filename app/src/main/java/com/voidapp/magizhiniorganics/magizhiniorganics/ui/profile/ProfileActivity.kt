@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -41,10 +42,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     private lateinit var viewModel: ProfileViewModel
     private val factory: ProfileViewModelFactory by instance()
-//
-//    private val repository: FirestoreRepository by instance()
-//    private val databaseRepository: DatabaseRepository by instance()
-//    private val firebaseRepository: FirebaseRepository by instance()
 
     private var mProfile: UserProfile = UserProfile()
 
@@ -67,7 +64,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         mCurrentUserId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "") as String
 
         mPhoneNumber = intent.getStringExtra(Constants.PHONE_NUMBER).toString()
-
         isNewUser = intent.getBooleanExtra(Constants.STATUS, false)
 
         //setting the theme and view binding
@@ -222,7 +218,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     //validating the data entered before uploading
     private fun profileDataValidation() {
-        generateProfileModel()
+
         if (binding.etAddressOne.text.isNullOrEmpty()) {
                 binding.etlAddressOne.error = "* required"
                 return
@@ -231,7 +227,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
              binding.etlAddressTwo.error = "* required"
              return
         }
-
+        generateProfileModel()
         //address lines, name, dob, are mandatory
         //if mProfilePicUri is null that means the user didnot select any pic from storage so
         //if it is for the first time url will be empty and that will be assigned to mProfile class
@@ -244,6 +240,8 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 }
                 dob == " DD / MM / YYYY " -> {
                     binding.tvDob.error = "* required"
+                    this@ProfileActivity.hideKeyboard()
+                    showToast(this@ProfileActivity, "Please select Date of Birth")
                     return@with
                 }
                 mProfilePicUri == null -> {
@@ -272,7 +270,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     fun exitProfileWithoutChange() {
-        hideExitSheet()
         //on back pressed if it is new user the app is closed if not it means the user is already logged in so it will move to home activity
         if(isNewUser) {
             finish()
@@ -341,53 +338,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         dialogBsAddReferral.show()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == Constants.READ_STORAGE_PERMISSION_CODE) {
-            //If permission is granted
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                GlideLoader().showImageChooser(this)
-            } else {
-                //Displaying another toast if permission is not granted
-                showErrorSnackBar("Storage Permission Denied!", true)
-            }
-        }
-    }
-
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == Constants.PICK_IMAGE_REQUEST_CODE) {
-                if (data != null) {
-                    try {
-                        // The uri of selected image from phone storage.
-                        mProfilePicUri = data.data!!
-
-                        GlideLoader().loadUserPicture(
-                            this,
-                            mProfilePicUri!!,
-                            binding.ivProfilePic
-                        )
-
-                        binding.ivProfilePic.scaleType = ImageView.ScaleType.CENTER_CROP
-//                        Firestore().uploadImage(this, Constants.PROFILE_PIC_PATH, mProfilePicUri!!)
-
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                        showErrorSnackBar("Image selection failed!", true)
-                    }
-                }
-            }
-        } else if (resultCode == Activity.RESULT_CANCELED) {
-            // A log is printed when user close or cancel the image selection.
-            Log.e("Request Cancelled", "Image selection cancelled")
-        }
-    }
-
     override fun onBackPressed() {
         if (isNewUser) {
             showExitSheet(this, "Cancel Registration")
@@ -401,11 +351,45 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         super.onSaveInstanceState(outState, outPersistentState)
     }
 
+    fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
+
+    fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
+
+    private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        mProfilePicUri = result.data?.data
+        mProfilePicUri?.let { uri -> GlideLoader().loadUserPicture(this, uri, binding.ivProfilePic) }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
+            if(
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                showToast(this, "Storage Permission Granted")
+                getAction.launch(pickImageIntent)
+            } else {
+                showToast(this, "Storage Permission Denied")
+                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
+            }
+        }
+    }
+
     override fun onClick(v: View?) {
         if (v != null) {
             when (v) {
                 binding.ivProfilePic -> {
-                    PermissionsUtil().checkStoragePermission(this)
+//                    PermissionsUtil().checkStoragePermission(this)
+                    if (PermissionsUtil.hasStoragePermission(this)) {
+                        getAction.launch(pickImageIntent)
+                    } else {
+                        showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                    }
                 }
                 binding.btnSaveProfile -> {
                     profileDataValidation()

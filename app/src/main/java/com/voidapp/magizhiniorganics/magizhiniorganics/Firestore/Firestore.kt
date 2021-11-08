@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -33,12 +34,6 @@ class Firestore(
     private val mFireStore = FirebaseFirestore.getInstance()
     private val mFireStoreStorage = FirebaseStorage.getInstance().reference
 
-    suspend fun getProfile(id: String): UserProfileEntity {
-        return mFireStore.collection(Constants.USERS)
-            .document(id)
-            .get().await().toObject(UserProfile::class.java)!!.toUserProfileEntity()
-    }
-
     fun signOut() = CoroutineScope(Dispatchers.IO).launch {
         val deleteLocalDB = async { deleteLocalDB() }
         deleteLocalDB.await()
@@ -61,29 +56,10 @@ class Firestore(
                 .addOnCanceledListener { status = false }.await()
             status
         } catch (e: Exception) {
-            // Failed
-            //                activity.onFirestoreFailure("Log In Failed Try Later")
+            e.message?.let { logCrash("signIn - phone Auth", it) }
             false
         }
     }
-
-//    fun signInWithPhoneAuthCredential(activity: SignInActivity, credential: PhoneAuthCredential) =
-//        CoroutineScope(Dispatchers.IO).launch {
-//            try {
-//                mFirebaseAuth.signInWithCredential(credential)
-//                    .addOnSuccessListener {
-//                        // Logged In
-//                        activity.loggedIn()
-//                    }
-//                    .addOnFailureListener { _ ->
-//                        // Failed
-//                        activity.onFirestoreFailure("Log In Failed. Please Check OTP Again")
-//                    }
-//            } catch (e: Exception) {
-//                // Failed
-//                activity.onFirestoreFailure("Log In Failed Try Later")
-//            }
-//        }
 
     // Checks if the current entered phone number is already present in DB before sending the OTP
     fun getPhoneNumber(): String? =
@@ -91,6 +67,37 @@ class Firestore(
 
     fun getCurrentUserId(): String? =
         mFirebaseAuth.currentUser?.uid
+
+    //image upload
+    suspend fun uploadImage(
+        path: String,
+        uri: Uri,
+        extension: String,
+        data: String = ""
+    ): String = withContext(Dispatchers.IO) {
+        val name = when (data) {
+            "review" -> {
+                val charset = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz0123456789"
+                "img_${(1..10).map { charset.random() }.joinToString("")}"
+            }
+            else -> getCurrentUserId()
+        }
+
+        try {
+            val sRef: StorageReference = mFireStoreStorage.child(
+                "$path$name.$extension"
+            )
+
+            val url = sRef.putFile(uri)
+                .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
+
+            return@withContext url.toString()
+
+        } catch (e: Exception) {
+            e.message?.let { logCrash("image upload", it) }
+            return@withContext "failed"
+        }
+    }
 
     //check if the user profile exists and getting the data from store
     suspend fun checkUserProfileDetails(): String = withContext(Dispatchers.IO) {
@@ -122,7 +129,7 @@ class Firestore(
                 return@withContext ""
             }
         } catch (e: Exception) {
-            Log.e("exception", e.message.toString())
+            e.message?.let { logCrash("checking user profile details", it) }
             return@withContext "Failed"
         }
     }
@@ -136,6 +143,7 @@ class Firestore(
             }
             true
         } catch (e: IOException) {
+            e.message?.let { logCrash("uploading favorites to table in db", it) }
             false
         }
     }
@@ -149,6 +157,7 @@ class Firestore(
             }
             true
         } catch (e: IOException) {
+            e.message?.let { logCrash("uploading active orders to table in db", it) }
             false
         }
     }
@@ -163,49 +172,20 @@ class Firestore(
                 }
                 true
             } catch (e: IOException) {
+                e.message?.let { logCrash("uploading active subs to table in db", it) }
                 false
             }
         }
 
-    suspend fun createWallet(wallet: Wallet) {
-        try {
-            mFireStore.collection("Wallet")
-                .document("Wallet")
-                .collection("Users")
-                .document(wallet.id)
-                .set(wallet, SetOptions.merge())
-                .await()
+    //profile
+    suspend fun getProfile(id: String): UserProfileEntity {
+        return try {
+            mFireStore.collection(Constants.USERS)
+                .document(id)
+                .get().await().toObject(UserProfile::class.java)!!.toUserProfileEntity()
         } catch (e: Exception) {
-            Log.e("TAG", "createWallet: ${e.message}", )
-        }
-    }
-
-    suspend fun uploadImage(
-        path: String,
-        uri: Uri,
-        extension: String,
-        data: String = ""
-    ): String = withContext(Dispatchers.IO) {
-        val name = when (data) {
-            "review" -> {
-                val charset = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz0123456789"
-                "img_${(1..10).map { charset.random() }.joinToString("")}"
-            }
-            else -> getCurrentUserId()
-        }
-
-        try {
-            val sRef: StorageReference = mFireStoreStorage.child(
-                "$path$name.$extension"
-            )
-
-            val url = sRef.putFile(uri)
-                .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
-
-            return@withContext url.toString()
-
-        } catch (e: Exception) {
-            return@withContext "failed"
+            e.message?.let { logCrash("getting profile", it) }
+            UserProfileEntity()
         }
     }
 
@@ -219,9 +199,24 @@ class Firestore(
                 repository.upsertProfile(userProfileEntity)
                 return@withContext true
             } catch (e: Exception) {
+                e.message?.let { logCrash("uploading profile", it) }
                 return@withContext false
             }
         }
+
+    //wallet
+    suspend fun createWallet(wallet: Wallet) {
+        try {
+            mFireStore.collection("Wallet")
+                .document("Wallet")
+                .collection("Users")
+                .document(wallet.id)
+                .set(wallet, SetOptions.merge())
+                .await()
+        } catch (e: Exception) {
+            e.message?.let { logCrash("creating wallet", it) }
+        }
+    }
 
     //live update of the limited items
     fun getLimitedItems(viewModel: ViewModel) {
@@ -747,5 +742,25 @@ class Firestore(
             .document(Constants.SUB_ACTIVE)
             .collection(id)
             .document().id
+
+    private suspend fun logCrash(location: String, message: String) {
+        CrashLog(
+            getCurrentUserId()!!,
+            "${ Build.MANUFACTURER } ${ Build.MODEL } ${Build.VERSION.RELEASE} ${ Build.VERSION_CODES::class.java.fields[Build.VERSION.SDK_INT].name }",
+            System.currentTimeMillis(),
+            location,
+            message
+        ).let {
+            try {
+                mFireStore.collection("crashLog")
+                    .document(getCurrentUserId()!!)
+                    .collection("MagizhiniApp")
+                    .document()
+                    .set(it, SetOptions.merge()).await()
+            } catch (e: Exception) {
+                Log.e("Magizhini", "logCrash: $it ", )
+            }
+        }
+    }
 
 }

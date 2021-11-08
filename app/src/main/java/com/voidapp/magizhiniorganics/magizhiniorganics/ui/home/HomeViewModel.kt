@@ -126,7 +126,7 @@ class HomeViewModel (
 
     private suspend fun storeFavoritesUpdate(id: String, product: ProductEntity) = withContext(Dispatchers.IO) {
         if (product.favorite) {
-            fbRepository.addFavorties(id, product.id)
+            fbRepository.addFavorites(id, product.id)
         } else {
             fbRepository.removeFavorites(id, product.id)
         }

@@ -33,6 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.Subscrip
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 
 open class BaseActivity : AppCompatActivity() {
@@ -85,7 +86,7 @@ open class BaseActivity : AppCompatActivity() {
 
     fun Activity.hideKeyboard() = UIUtil.hideKeyboard(this)
 
-    fun showToast(context: Context ,message: String, type: String) {
+    fun showToast(context: Context ,message: String, type: String = Constants.SHORT) {
         when(type) {
             Constants.SHORT -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             Constants.LONG -> Toast.makeText(context, message, Toast.LENGTH_LONG).show()
@@ -187,12 +188,27 @@ open class BaseActivity : AppCompatActivity() {
                 view.tvCancelText.text = "DONE"
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
             }
+            "permission" -> {
+                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvCancelText.text = "Proceed"
+                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+            }
+            "setting" -> {
+                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvCancelText.text = "Proceed"
+                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+            }
         }
 
         view.tvConfirmationText.text = confirmation
         view.tvConfirmationText.setOnClickListener {
             when(activity) {
-                is ProfileActivity -> activity.exitProfileWithoutChange()
+                is ProfileActivity -> {
+                    if (data == "") {
+                        hideExitSheet()
+                        activity.exitProfileWithoutChange()
+                    }
+                }
                 is PurchaseHistoryActivity -> {
                     when(data) {
                         "cs" -> activity.moveToCustomerSupport()
@@ -211,6 +227,14 @@ open class BaseActivity : AppCompatActivity() {
 
         view.tvCancelText.setOnClickListener {
             hideExitSheet()
+            when(activity) {
+                is ProfileActivity -> {
+                    when(data) {
+                        "permission" -> activity.proceedToRequestPermission()
+                        "setting" -> activity.proceedToRequestManualPermission()
+                    }
+                }
+            }
         }
 
         ExitBottomSheetdialog.show()

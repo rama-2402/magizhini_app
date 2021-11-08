@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -185,7 +184,7 @@ class ShoppingMainViewModel(
 
     private suspend fun storeFavoritesUpdate(id: String, product: ProductEntity) = withContext(Dispatchers.IO) {
         if (product.favorite) {
-            fbRepository.addFavorties(id, product.id)
+            fbRepository.addFavorites(id, product.id)
         } else {
             fbRepository.removeFavorites(id, product.id)
         }

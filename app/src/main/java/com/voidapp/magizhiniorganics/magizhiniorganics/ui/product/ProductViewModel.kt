@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.product
 
-import android.accessibilityservice.GestureDescription
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -10,12 +9,10 @@ import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.produce
 
 class ProductViewModel(
     private val dbRepository: DatabaseRepository,
@@ -169,7 +166,7 @@ class ProductViewModel(
 
     private suspend fun storeFavoritesUpdate(id: String, product: ProductEntity) = withContext(Dispatchers.IO) {
         if (product.favorite) {
-            fbRepository.addFavorties(id, product.id)
+            fbRepository.addFavorites(id, product.id)
         } else {
             fbRepository.removeFavorites(id, product.id)
         }

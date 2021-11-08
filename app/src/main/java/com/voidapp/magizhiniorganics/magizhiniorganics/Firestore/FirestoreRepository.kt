@@ -17,32 +17,36 @@ class FirestoreRepository (
     private val firestore: Firestore
 ) {
 
+    fun signOut() = firestore.signOut()
 
     fun getPhoneNumber(): String? = firestore.getPhoneNumber()
 
     fun getCurrentUserId(): String? = firestore.getCurrentUserId()
 
-    suspend fun getProfile(id: String): UserProfileEntity = firestore.getProfile(id)
+    //upload image
+    suspend fun uploadImage(path: String, uri: Uri, extension: String, data: String = ""): String = firestore.uploadImage(path, uri, extension, data)
 
+    //sign in check
     suspend fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential): Boolean = firestore.signInWithPhoneAuthCredential(credential)
 
     suspend fun checkUserProfileDetails(): String = firestore.checkUserProfileDetails()
 
-    suspend fun uploadImage(path: String, uri: Uri, extension: String, data: String = ""): String = firestore.uploadImage(path, uri, extension, data)
+    //profile
+    suspend fun getProfile(id: String): UserProfileEntity = firestore.getProfile(id)
 
     suspend fun uploadProfile(profile: UserProfile): Boolean = firestore.uploadProfile(profile)
 
-//    fun getAllData() = firestore.getAllData()
+    fun addFavorites(id: String, item: String) = firestore.addFavorites(id, item)
 
-//    fun getUpdatedDeliveryDetails() = firestore.getUpdatedDeliveryDetails()
-
-    fun getLimitedItems(viewModel: ViewModel) = firestore.getLimitedItems(viewModel)
-
-    fun addFavorties(id: String, item: String) = firestore.addFavorites(id, item)
+    fun removeFavorites(id: String, item: String) = firestore.removeFavorites(id, item)
 
     fun addAddress(id: String ,address: Address) = firestore.addAddress(id, address)
 
-    fun removeFavorites(id: String, item: String) = firestore.removeFavorites(id, item)
+    fun updateAddress(id: String, address: ArrayList<Address>)  = firestore.updateAddress(id, address)
+
+
+
+    fun getLimitedItems(viewModel: ViewModel) = firestore.getLimitedItems(viewModel)
 
     fun addReview(id: String, review: Review) = firestore.addReview(id, review)
 
@@ -50,9 +54,7 @@ class FirestoreRepository (
 
     fun placeOrder(order: Order, viewModel: CheckoutViewModel) = firestore.placeOrder(order, viewModel)
 
-    fun signOut() = firestore.signOut()
 
-    fun updateAddress(id: String, address: ArrayList<Address>)  = firestore.updateAddress(id, address)
 
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> = firestore.validateItemAvailability(cartItems)
 

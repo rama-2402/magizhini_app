@@ -127,7 +127,7 @@ class ConversationActivity : BaseActivity(), KodeinAware {
             }
             ivAddAttachment.setOnClickListener {
                 ivAddAttachment.startAnimation(AnimationUtils.loadAnimation(ivAddAttachment.context, R.anim.bounce))
-                PermissionsUtil().checkStoragePermission(this@ConversationActivity)
+                PermissionsUtil.checkStoragePermission(this@ConversationActivity)
             }
             ivsendMessage.setOnClickListener {
                 ivsendMessage.startAnimation(AnimationUtils.loadAnimation(ivsendMessage.context, R.anim.bounce))
