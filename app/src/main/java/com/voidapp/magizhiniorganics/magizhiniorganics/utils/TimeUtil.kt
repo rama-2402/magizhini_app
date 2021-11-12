@@ -12,6 +12,11 @@ class TimeUtil {
         return simpleDateFormat.format(dateLong)
     }
 
+    fun getTimeInHMS(dateFormat: String = "HH:mm:ss", dateLong: Long): String {
+        val simpleDateFormat = SimpleDateFormat(dateFormat)
+        return simpleDateFormat.format(dateLong)
+    }
+
     fun getCurrentDate(): String {
         val timeLong =  System.currentTimeMillis()
         return getCustomDate(dateLong = timeLong)

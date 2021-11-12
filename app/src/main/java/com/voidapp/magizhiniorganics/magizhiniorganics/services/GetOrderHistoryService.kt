@@ -29,17 +29,15 @@ class GetOrderHistoryService(
 ) : CoroutineWorker(context, workerParameters), KodeinAware {
     val baseContext = context
     override val kodein: Kodein by kodein(baseContext)
-    private val fireStore: FirestoreRepository by instance()
     private val repository: DatabaseRepository by instance()
 
     override suspend fun doWork(): Result {
 
-        val filter = inputData.getString("filter")!!
         val userID = inputData.getString("id")!!
 
         try {
             withContext(Dispatchers.IO) {
-                val getOrders = async { getOrders(userID, filter) }
+                val getOrders = async { getOrders(userID) }
                 val getSubscriptions = async { getSubscriptions(userID) }
                 val getCancelledSubscriptions = async { getCancelledSubscriptions(userID) }
 
@@ -56,7 +54,6 @@ class GetOrderHistoryService(
     private suspend fun getSubscriptions(userID: String) {
         try {
             withContext(Dispatchers.IO) {
-//                val profile = fireStore.getProfile(userID)
                 for (year in 2021..TimeUtil().getYear().toInt()) {
                     val docs = FirebaseFirestore.getInstance()
                         .collection("Subscription")
@@ -70,16 +67,6 @@ class GetOrderHistoryService(
                         subscription?.let { repository.upsertSubscription(it) }
                     }
                 }
-//                for (month in profile.subscribedMonths) {
-//                    val documents = path
-//                        .collection(month)
-//                        .whereEqualTo("customerID", profile.id)
-//                        .get().await()
-//                    for (doc in documents) {
-//                        val sub = doc.toObject(Subscription::class.java).toSubscriptionEntity()
-//                        repository.upsertSubscription(sub)
-//                    }
-//                }
             }
         } catch (e: Exception) {
             e.message?.let {
@@ -93,7 +80,6 @@ class GetOrderHistoryService(
     private suspend fun getCancelledSubscriptions (userID: String) {
         try {
             withContext(Dispatchers.IO) {
-//                val profile = fireStore.getProfile(userID)
                 val docs = FirebaseFirestore.getInstance()
                     .collection("Subscription")
                     .document("Cancelled")
@@ -105,16 +91,6 @@ class GetOrderHistoryService(
                     val subscription = doc.toObject(Subscription::class.java)?.toSubscriptionEntity()
                     subscription?.let { repository.upsertSubscription(it) }
                 }
-//                for (month in profile.subscribedMonths) {
-//                    val documents = path
-//                        .collection(month)
-//                        .whereEqualTo("customerID", profile.id)
-//                        .get().await()
-//                    for (doc in documents) {
-//                        val sub = doc.toObject(Subscription::class.java).toSubscriptionEntity()
-//                        repository.upsertSubscription(sub)
-//                    }
-//                }
             }
         } catch (e: Exception) {
             e.message?.let {
@@ -125,44 +101,20 @@ class GetOrderHistoryService(
         }
     }
 
-    private suspend fun getOrders(userID: String, filter: String) {
-        val dates = baseContext.resources.getStringArray(R.array.dates)
+    private suspend fun getOrders(userID: String) {
         try {
-//            val path = FirebaseFirestore.getInstance()
-//                .collection("orderHistory")
-//                .document(filter)
-//            withContext(Dispatchers.IO) {
-//                for (i in dates) {
-//                    val snapShot = path
-//                        .collection(i)
-//                        .whereEqualTo("customerId", userID)
-//                        .get()
-//                        .await()
-//                    snapShot?.let { querySnapshot ->
-//                        for (doc in querySnapshot) {
-//                            val order = doc.toObject(Order::class.java).toOrderEntity()
-//                            repository.upsertOrder(order)
-//                        }
-//                    }
-//                }
-//            }
             val path = FirebaseFirestore.getInstance().collection("orderHistory")
             val months = path.get().await()
-            for (a in months.documents) {
-                Log.e("TAG", "getOrders: ${a.id}", )
-            }
-//            for (month in months.documents) {
-//                Log.e("TAG", "month: ${month}", )
-                val docs = path.document("November2021")
+            for (month in months.documents) {
+                val docs = path.document(month.id)
                     .collection("Active")
                     .whereEqualTo("customerId", userID)
                     .get().await()
                 for (doc in docs.documents) {
                     val order = doc.toObject(Order::class.java)?.toOrderEntity()
-                    Log.e("TAG", "getOrders: $order", )
                     order?.let { repository.upsertOrder(it) }
                 }
-//            }
+            }
         } catch (e: Exception) {
             e.message?.let {
                 logCrash(userID, "GetOrderService: getting all the active orders",
@@ -177,6 +129,7 @@ class GetOrderHistoryService(
             userID,
             "${ Build.MANUFACTURER } ${ Build.MODEL } ${Build.VERSION.RELEASE} ${ Build.VERSION_CODES::class.java.fields[Build.VERSION.SDK_INT].name }",
             TimeUtil().getCustomDate("",System.currentTimeMillis()),
+            TimeUtil().getTimeInHMS(dateLong = System.currentTimeMillis()),
             location,
             message
         ).let {

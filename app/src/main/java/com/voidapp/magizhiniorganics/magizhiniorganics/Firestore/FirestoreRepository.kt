@@ -35,8 +35,6 @@ class FirestoreRepository (
     suspend fun checkUserProfileDetails(): String = firestore.checkUserProfileDetails()
 
     //profile
-//    suspend fun getProfile(id: String): UserProfileEntity = firestore.getProfile(id)
-
     suspend fun uploadProfile(profile: UserProfile): Boolean = firestore.uploadProfile(profile)
 
     fun addFavorites(id: String, item: String) = firestore.addFavorites(id, item)
@@ -53,23 +51,20 @@ class FirestoreRepository (
 
     fun addReview(id: String, review: Review) = firestore.addReview(id, review)
 
+    //checkout
     suspend fun limitedItemsUpdater(cartEntity: List<CartEntity>): NetworkResult = firestore.limitedItemsUpdater(cartEntity)
-//    suspend fun limitedItemsUpdater(cartEntity: List<CartEntity>, viewModel: CheckoutViewModel) = firestore.limitedItemsUpdater(cartEntity, viewModel)
 
     suspend fun placeOrder(order: Order): NetworkResult = firestore.placeOrder(order)
-//    fun placeOrder(order: Order, viewModel: CheckoutViewModel) = firestore.placeOrder(order, viewModel)
-
-
 
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): NetworkResult = firestore.validateItemAvailability(cartItems)
-//    suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> = firestore.validateItemAvailability(cartItems)
 
-    suspend fun updateRecentPurchases(recentPurchaseIDs: ArrayList<String>, subscriptionIDs: ArrayList<String>) = firestore.updateRecentPurchases(recentPurchaseIDs, subscriptionIDs)
-
+    //purchase history
     suspend fun cancelOrder(orderEntity: OrderEntity): NetworkResult = firestore.cancelOrder(orderEntity)
 
+    //subscription
     suspend fun generateSubscription(viewModel: SubscriptionProductViewModel, subscription: Subscription) = firestore.generateSubscription(viewModel, subscription)
 
+    //subscription history
     suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean = firestore.addCancellationDates(sub, date)
 
     suspend fun cancelSubscription(sub: SubscriptionEntity): Boolean = firestore.cancelSubscription(sub)

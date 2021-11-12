@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.firestore.*
@@ -288,7 +289,10 @@ class Firestore(
     suspend fun placeOrder(order: Order): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                val updateOrderHistory = async { updateOrderHistory(order) }
+                val path = mFireStore.collection(Constants.ORDER_HISTORY)
+                    .document(order.monthYear).get().await()
+
+                val updateOrderHistory = async { updateOrderHistory(path, order) }
                 val updateProfileOrderID = async { updateProfileOrderID(order) }
                 val updateProfileMonthYear = async { updateProfileMonthYear(order) }
                 val updateLocalProfile = async { updateLocalProfile(order) }
@@ -312,14 +316,26 @@ class Firestore(
             }
         }
 
-    private suspend fun updateOrderHistory(order: Order): Boolean {
+    private suspend fun updateOrderHistory(path: DocumentSnapshot, order: Order): Boolean {
         return try {
-            mFireStore.collection(Constants.ORDER_HISTORY)
-                .document(order.monthYear)
-                .collection("Active")
-                .document(order.orderId)
-                .set(order, SetOptions.merge())
-                .await()
+            if (path.exists()){
+                mFireStore.collection(Constants.ORDER_HISTORY)
+                    .document(order.monthYear)
+                    .collection("Active")
+                    .document(order.orderId)
+                    .set(order, SetOptions.merge())
+                    .await()
+            } else {
+                val dummyData = ActiveSubscriptions("")
+                mFireStore.collection(Constants.ORDER_HISTORY)
+                    .document(order.monthYear).set(dummyData, SetOptions.merge()).await()
+                mFireStore.collection(Constants.ORDER_HISTORY)
+                    .document(order.monthYear)
+                    .collection("Active")
+                    .document(order.orderId)
+                    .set(order, SetOptions.merge())
+                    .await()
+            }
             true
         } catch (e: IOException) {
             e.message?.let {
@@ -470,88 +486,6 @@ class Firestore(
             false
         }
     }
-
-    //updating the recent purchase status from the store when app is opened everytime
-    suspend fun updateRecentPurchases(
-        recentPurchaseIDs: ArrayList<String>,
-        subscriptionIDs: ArrayList<String>
-    ) = withContext(Dispatchers.Default) {
-
-        val orders = async { getOrdersUpdate(recentPurchaseIDs) }
-        val subscriptions = async { getSubscriptionsUpdate(subscriptionIDs) }
-
-        orders.await()
-        subscriptions.await()
-    }
-
-    private suspend fun getOrdersUpdate(recentPurchaseIDs: ArrayList<String>) =
-        withContext(Dispatchers.IO) {
-            try {
-                if (recentPurchaseIDs.isNotEmpty()) {
-                    for (orderID in recentPurchaseIDs) {
-                        withContext(Dispatchers.IO) {
-                            val orderRepo = repository.getOrderByID(orderID)
-                            orderRepo?.let {
-                                val docID = orderRepo.monthYear
-                                val date = orderRepo.purchaseDate.take(2)
-                                val doc = mFireStore.collection(Constants.ORDER_HISTORY)
-                                    .document(docID)
-                                    .collection(date)
-                                    .document(orderID)
-                                    .get().await()
-                                val orderEntity = doc.toObject(Order::class.java)?.toOrderEntity()
-                                orderEntity?.let { order ->
-                                    if (order.orderStatus != Constants.PENDING) {
-                                        val updateLocalProfileRecentPurchases =
-                                            async { updateLocalProfileRecentPurchases(order.orderId) }
-                                        val updateCloudProfileRecentPurchases = async {
-                                            updateCloudProfileRecentPurchases(
-                                                order.orderId,
-                                                order.customerId
-                                            )
-                                        }
-                                        val updateLocalOrderRepository =
-                                            async { updateLocalOrderRepository(order) }
-                                        updateLocalProfileRecentPurchases.await()
-                                        updateCloudProfileRecentPurchases.await()
-                                        updateLocalOrderRepository.await()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-
-                }
-            } catch (e: Exception) {
-                Log.e("exception", "updateRecentPurchases: ${e.message}")
-            }
-        }
-
-    private suspend fun getSubscriptionsUpdate(subscriptionIDs: ArrayList<String>) =
-        withContext(Dispatchers.IO) {
-            try {
-                if (subscriptionIDs.isNotEmpty()) {
-                    val profile = repository.getProfileData()!!
-                    val path = FirebaseFirestore.getInstance()
-                        .collection("Subscription")
-                        .document("Active")
-                    for (month in profile.subscribedMonths) {
-                        val documents = path
-                            .collection(month)
-                            .whereEqualTo("customerID", profile.id)
-                            .get().await()
-                        for (doc in documents) {
-                            val sub = doc.toObject(Subscription::class.java).toSubscriptionEntity()
-                            repository.upsertSubscription(sub)
-                        }
-                    }
-                } else {
-                }
-            } catch (e: Exception) {
-                Log.e("exception", "updateRecentPurchases: ${e.message}")
-            }
-        }
 
     private suspend fun updateLocalProfileRecentPurchases(id: String?) =
         withContext(Dispatchers.IO) {
@@ -866,7 +800,8 @@ class Firestore(
         CrashLog(
             getCurrentUserId()!!,
             "${ Build.MANUFACTURER } ${ Build.MODEL } ${Build.VERSION.RELEASE} ${ Build.VERSION_CODES::class.java.fields[Build.VERSION.SDK_INT].name }",
-            TimeUtil().getCustomDate("",System.currentTimeMillis()),
+            TimeUtil().getCustomDate(dateLong = System.currentTimeMillis()),
+            TimeUtil().getTimeInHMS(dateLong = System.currentTimeMillis()),
             location,
             message
         ).let {

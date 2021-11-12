@@ -4,6 +4,7 @@ data class CrashLog(
     var id: String,
     var details: String,
     var date: String,
+    var timeStamp: String,
     var location: String,
     var error: String
 )
