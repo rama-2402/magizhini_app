@@ -34,21 +34,35 @@ import androidx.work.*
 import com.google.gson.Gson
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ChatAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 
 
-class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
+class InvoiceActivity :
+    BaseActivity(),
+    KodeinAware,
+    PaymentResultListener,
+    AddressAdapter.OnAddressClickListener
+{
+
+    //TODO WRONG COUPON WHEN APPLIED AFTER RIGHT COUPON MAKES COUPON INFO WONKY
 
     override val kodein: Kodein by kodein()
     private val factory: CheckoutViewModelFactory by instance()
@@ -71,6 +85,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private var mSelectedAddress: Address = Address()
     private var mOrder: Order = Order()
     private var mProfile: UserProfileEntity = UserProfileEntity()
+    private var mWallet: Wallet = Wallet()
 
     private var mDiscountedPrice: Float = 0F
     private var mPaymentPreference: String = "COD"
@@ -97,7 +112,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             mPhoneNumber = getData(Constants.PHONE_NUMBER, Constants.STRING, "").toString()
         }
 
-        with(binding) {
+        binding.apply {
             rvAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
             nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_up))
         }
@@ -142,19 +157,11 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             this,
             mCheckedAddressPosition,
             arrayListOf(),
-            viewModel
+            this
         )
         binding.rvAddress.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvAddress.adapter = adapter
-        setWalletAmountRadioButton()
-    }
-
-    private fun setWalletAmountRadioButton() = lifecycleScope.launch(Dispatchers.IO) {
-        val wallet = async { viewModel.getWallet(mCurrentUserID) }
-        withContext(Dispatchers.Main) {
-            binding.rbWallet.text = "Wallet (${wallet.await()!!.amount})"
-        }
     }
 
     private fun setCartBottom() {
@@ -204,10 +211,10 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 showErrorSnackBar("Add some Items to Cart to proceed", true)
             } else {
                 if (mPaymentPreference == "COD") {
-                showSwipeConfirmationDialog(this, "swipe right to place order")
-            } else {
-                showSwipeConfirmationDialog(this, "swipe right to make payment")
-            }
+                    showSwipeConfirmationDialog(this, "swipe right to place order")
+                } else {
+                    showSwipeConfirmationDialog(this, "swipe right to make payment")
+                }
             }
         }
 
@@ -219,20 +226,9 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun iniLiveData() {
-        viewModel.getAddress()
         viewModel.getAllCoupons(Constants.ACTIVE)
         viewModel.getUserProfileData()
-
-        viewModel.addressList.observe(this, {
-            adapter.addressList = it
-            mSelectedAddress = it[0]
-            adapter.notifyDataSetChanged()
-            setUpDeliveryChargeForTheLocation(mSelectedAddress)
-        })
-
-        viewModel.address.observe(this, {
-            showAddressBs(it)
-        })
+        viewModel.getWallet(mCurrentUserID)
 
         //we are getting all the items in cart and creating an array of id's that contains the variant names
         //so in setting the recycler view, if the variant name is in that array then it will be considered as part of cart
@@ -240,11 +236,6 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         viewModel.getAllCartItems().observe(this, {
             mCartItems = it
             viewModel.itemsInCart = mCartItems
-            val itemNames = arrayListOf<String>()
-            mCartItems.forEach { cartItem ->
-                itemNames.add(cartItem.variant)
-            }
-
             cartAdapter.setCartData(mCartItems)
 
             setDataToViews()
@@ -266,62 +257,30 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             setDataToViews()
         })
 
-        viewModel.selectedAddress.observe(this, {
-            mSelectedAddress = it
+        viewModel.profile.observe(this, {
+            mProfile = it
+            adapter.addressList = it.address
+            mSelectedAddress = it.address[0]
+            adapter.notifyDataSetChanged()
             setUpDeliveryChargeForTheLocation(mSelectedAddress)
         })
 
-        viewModel.selectedAddressPosition.observe(this, {
-            mCheckedAddressPosition = it
-            adapter.checkedAddressPosition = mCheckedAddressPosition
-            adapter.notifyDataSetChanged()
-        })
-
-        viewModel.orderPlacementFailed.observe(this, {
-            hideSuccessDialog()
-            showErrorSnackBar(it, true)
-        })
-
-        viewModel.limitedItemUpdateStatus.observe(this, {
-            lifecycleScope.launch {
-                delay(1500)
-                withContext(Dispatchers.Main) {
-                    hideSuccessDialog()
-                    if (it == "complete") {
-                        checkPaymentMode()
-                    }
-                }
-            }
-        })
-
-        viewModel.orderCompleted.observe(this, {
-            lifecycleScope.launch() {
-                delay(1500)
-                withContext(Dispatchers.Main) {
-                    hideSuccessDialog()
-                    showSuccessDialog("", "Order Placed Successfully!", "complete")
-                    lifecycleScope.launch {
-                        viewModel.clearCart(mCartItems)
-                        removeCouponDiscountFromInvoice()
-                        setAddButton()
-                        delay(2000)
-                        hideSuccessDialog()
-                        Intent(this@InvoiceActivity, PurchaseHistoryActivity::class.java).also {
-                            startActivity(it)
-                            finish()
+        lifecycleScope.launchWhenStarted {
+            viewModel.status.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
+                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
+                    is NetworkResult.Loading -> {
+                        if (result.message == "") {
+                            showProgressDialog()
+                        } else {
+                            showSuccessDialog("", result.message, result.data)
                         }
                     }
+                    else -> Unit
                 }
             }
-        })
-
-        viewModel.addNewAddress.observe(this, {
-            showAddressBs()
-        })
-
-        viewModel.profile.observe(this, {
-            mProfile = it
-        })
+        }
     }
 
     private fun checkPaymentMode() {
@@ -350,44 +309,36 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 mOrder.isPaymentDone = false
                 showSuccessDialog("","Placing Order... ","order")
                 placeOrder()
-                }
+            }
             else -> {
                 val amount = binding.tvTotalAmt.text.toString().toFloat()
                 showSuccessDialog("", "Processing payment from Wallet...", "wallet")
-                lifecycleScope.launch(Dispatchers.IO) {
-                    if (viewModel.checkWalletForBalance(amount, mCurrentUserID)) {
-                        val id = viewModel.makeTransactionFromWallet(amount, mCurrentUserID, mOrder.orderId)
-                        validatingTransactionBeforeOrder(id)
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            delay(1000)
-                            hideSuccessDialog()
-                            showErrorSnackBar("Insufficient balance in Wallet. Pick another payment method", true)
+                lifecycleScope.launch {
+                    if (mWallet.amount > amount) {
+                        withContext(Dispatchers.IO) {
+                            viewModel.makeTransactionFromWallet(amount, mCurrentUserID, mOrder.orderId)
                         }
+                    } else {
+                        delay(1000)
+                        hideSuccessDialog()
+                        showErrorSnackBar("Insufficient balance in Wallet. Pick another payment method", true)
                     }
                 }
             }
         }
     }
 
-    private suspend fun validatingTransactionBeforeOrder(id: String) = withContext(Dispatchers.Main) {
-        if ( id == "failed") {
-            hideSuccessDialog()
-            mOrder.isPaymentDone = false
-            showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
-            return@withContext
-        } else {
-            mTransactionID = id
-            mOrder.isPaymentDone = true
-            delay(1500)
-            hideSuccessDialog()
-            showSuccessDialog("","Placing Order... ","order")
-            placeOrder()
-        }
+    private fun validatingTransactionBeforeOrder(id: String) = lifecycleScope.launch {
+        mTransactionID = id
+        mOrder.isPaymentDone = true
+        delay(1500)
+        hideSuccessDialog()
+        showSuccessDialog("","Placing Order... ","order")
+        placeOrder()
     }
 
     private fun placeOrder() {
-        with(mOrder) {
+        mOrder.apply {
             customerId = mCurrentUserID
             transactionID = mTransactionID
             cart = mCartItems
@@ -407,10 +358,13 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         viewModel.placeOrder(mOrder)
     }
 
-    fun approved(status: Boolean) = lifecycleScope.launch(Dispatchers.Main) {
-        mOrder.orderId = viewModel.generateOrderID(mCurrentUserID)
+    fun approved(status: Boolean) = lifecycleScope.launch {
+        val orderID = async { viewModel.generateOrderID(mCurrentUserID) }
+        mOrder.orderId = orderID.await()
         delay(250)
-        validateItemAvailability()
+        withContext(Dispatchers.IO) {
+            viewModel.validateItemAvailability(mCartItems)
+        }
     }
 
     private fun startWorkerThread(order: Order) {
@@ -429,24 +383,24 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         return Gson().toJson(order)
     }
 
-    private fun setUpDeliveryChargeForTheLocation(address: Address) = lifecycleScope.launch {
-        val code = async {
-            withContext(Dispatchers.IO) {
-                viewModel.getDeliveryChargeForTheLocation(address.LocationCode)
-            }}
-        binding.tvDeliveryChargeAmt.text = code.await().deliveryCharge.toString()
-        setDataToViews()
+    private fun setUpDeliveryChargeForTheLocation(address: Address) = lifecycleScope.launch (Dispatchers.IO) {
+        val getAreaCodeJob = async { viewModel.getDeliveryChargeForTheLocation(address.LocationCode) }
+        val areaCode = getAreaCodeJob.await()
+        withContext(Dispatchers.Main) {
+            binding.tvDeliveryChargeAmt.text = areaCode.deliveryCharge.toString()
+            setDataToViews()
+        }
     }
 
     private fun setDataToViews() {
-        with(binding) {
+        val cartPrice = viewModel.getCartPrice(mCartItems)
+       with(binding) {
             tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(mCartItems).toString()
             tvMrpAmount.text = viewModel.getCartOriginalPrice(mCartItems).toString()
             mDiscountedPrice =
-                viewModel.getCartOriginalPrice(mCartItems) - viewModel.getCartPrice(mCartItems)
+                viewModel.getCartOriginalPrice(mCartItems) - cartPrice
             tvSavingsInDiscountAmt.text = mDiscountedPrice.toString()
-            val totalAfterCouponDiscount = viewModel.getCartPrice(mCartItems)-applyCouponDiscountToInvoice(mCoupon) + binding.tvDeliveryChargeAmt.text.toString().toFloat()
-            tvTotalAmt.text = totalAfterCouponDiscount.toString()
+           tvTotalAmt.text = "${cartPrice - applyCouponDiscountToInvoice(cartPrice, mCoupon) + binding.tvDeliveryChargeAmt.text.toString().toFloat()}"
             if (etCoupon.text.toString().isEmpty()) {
                 ivCouponInfo.remove()
             }
@@ -455,21 +409,26 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun listeners() {
-        with(binding) {
+        binding.apply {
             etDeliveryNote.setOnTouchListener { _, _ ->
                 binding.nsvScrollBody.requestDisallowInterceptTouchEvent(true)
                 false
             }
             btnApplyCoupon.setOnClickListener {
                 val couponCode: String = binding.etCoupon.text.toString().trim()
+                if (couponCode.isEmpty()) {
+                    binding.etlCoupon.isErrorEnabled = false
+                    showToast(this@InvoiceActivity, "Enter a valid coupon code")
+                    return@setOnClickListener
+                }
                 if (binding.btnApplyCoupon.text == "Apply") {
                     if (viewModel.isCouponAvailable(mCoupons, couponCode)) {
                         binding.etlCoupon.isErrorEnabled = false
-//                        Toast.makeText(this@CheckoutActivity, "Coupon Applied", Toast.LENGTH_SHORT)
-//                            .show()
                         setRemoveButton()
                     } else {
+                        binding.ivCouponInfo.remove()
                         binding.etlCoupon.error = "Coupon expired or does not exists. Check Again"
+                        return@setOnClickListener
                     }
                 } else if (binding.btnApplyCoupon.text == "Remove") {
                     removeCouponDiscountFromInvoice()
@@ -479,7 +438,7 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             }
             ivCouponInfo.setOnClickListener {
                 ivCouponInfo.startAnimation(AnimationUtils.loadAnimation(ivCouponInfo.context, R.anim.bounce))
-                val content = "Minimum Purchase Amount: ${mCoupon.purchaseLimit} \n" +
+                val content = "\nThe Coupon code ${mCoupon.code} only applies for the following criteria \n \n Minimum Purchase Amount: ${mCoupon.purchaseLimit} \n " +
                         "Maximum Discount Amount: ${mCoupon.maxDiscount}\n" +
                         "${mCoupon.description}"
                 showDescriptionBs(content)
@@ -572,9 +531,8 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     //this will return a value after applying the coupon discount to the price of the cart items including the coupon and discounts
-    private fun applyCouponDiscountToInvoice(coupon: CouponEntity): Float {
+    private fun applyCouponDiscountToInvoice(cartPrice: Float, coupon: CouponEntity): Float {
         var couponDiscount: Float = 0f
-        val cartPrice = viewModel.getCartPrice(mCartItems)
         if(cartPrice > coupon.purchaseLimit.toFloat()) {
             with(binding) {
                 //setting up the product discount info based on the discount type
@@ -594,14 +552,12 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 )
                 tvSavingsInCouponAmt.text = couponDiscount.toString()
             }
-//            if(!binding.etCoupon.text.isNullOrEmpty()) {
-//                showErrorSnackBar("Coupon Applied", false)
-//            }
             binding.ivCouponInfo.visible()
             return couponDiscount
         } else {
             if(!binding.etCoupon.text.isNullOrEmpty()) {
                 binding.ivCouponInfo.visible()
+                this.hideKeyboard()
                 showErrorSnackBar("Coupon Not Applicable! Check Info", true)
             }
             return couponDiscount
@@ -630,7 +586,6 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     //this is to get the applied coupon details on app restart or activity restart
-
     private fun validateAddress(text: String?): Boolean {
         return text.isNullOrBlank()
     }
@@ -672,70 +627,13 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         }
     }
 
-    private fun calculateTotalPurchaseAmount() {
-
-        //TODO GET THE DELIVERY CHARGE AFTER IMPLEMENTING IN THE STORE APP
-        //TODO IMPLEMENT LOGIC FOR UPI TRANSACTION AFTER GETTING THE MERCHANT UPI ID
-
-//        showSwipeConfirmationDialog(this)
-
-
-
-//        val GOOGLE_PAY_PACKAGE_NAME = "com.google.android.apps.nbu.paisa.user"
-//        val GOOGLE_PAY_REQUEST_CODE = 123
-//
-//        val uri: Uri = Uri.Builder()
-//            .scheme("upi")
-//            .authority("pay")
-//            .appendQueryParameter("pa", "9486598819@okbizaxis")
-//            .appendQueryParameter("pn", "test")
-//            .appendQueryParameter("mc", "")
-//            .appendQueryParameter("tr", "12345")
-//            .appendQueryParameter("tn", "test-transaction")
-//            .appendQueryParameter("am", "1")
-//            .appendQueryParameter("cu", "INR")
-////            .appendQueryParameter("url", "your-transaction-url")
-//            .build()
-//        val intent = Intent(Intent.ACTION_VIEW)
-//        intent.data = uri
-//        val chooser: Intent = Intent.createChooser(intent, "pay with")
-//        startActivityForResult(chooser,GOOGLE_PAY_REQUEST_CODE)
-
-//        val easyUpiPayment = EasyUpiPayment(this) {
-//            this.payeeVpa = "9486598819@okbizaxis"
-//            this.payeeName = "test"
-//            this.payeeMerchantCode = "12345"
-//            this.transactionId = "T2020090212345"
-//            this.transactionRefId = "T2020090212345"
-//            this.description = "Description"
-//            this.amount = "1.00"
-//            PaymentApp.ALL
-//        }
-//        easyUpiPayment.startPayment()
-//        easyUpiPayment.setPaymentStatusListener(object: PaymentStatusListener {
-//            override fun onTransactionCancelled() {
-//                Toast.makeText(this@CheckoutActivity, "payment failed", Toast.LENGTH_SHORT).show()
-//            }
-//
-//            override fun onTransactionCompleted(transactionDetails: TransactionDetails) {
-//                Toast.makeText(this@CheckoutActivity, "payment done", Toast.LENGTH_SHORT).show()
-//            }
-//        })
-    }
-
-    private fun validateItemAvailability() {
-        showSuccessDialog("","Validating Purchase... ", "limited")
-        lifecycleScope.launch (Dispatchers.IO) {
-            val outOfStockItems = async { viewModel.validateItemAvailability(mCartItems) }
-            withContext(Dispatchers.Main) {
-                val items = outOfStockItems.await()
-                if (items.isNotEmpty()) {
-                    Toast.makeText(this@InvoiceActivity, "Items Out of Stock", Toast.LENGTH_LONG).show()
-                    ootItemsDialog(items)
-                } else {
-                    viewModel.limitedItemsUpdater(mCartItems)
-                }
-            }
+    private fun validateItemAvailability(items: List<CartEntity>) {
+        if (items.isNotEmpty()) {
+            hideSuccessDialog()
+            Toast.makeText(this@InvoiceActivity, "Items Out of Stock", Toast.LENGTH_LONG).show()
+            ootItemsDialog(items)
+        } else {
+            viewModel.limitedItemsUpdater(mCartItems)
         }
     }
 
@@ -764,13 +662,111 @@ class InvoiceActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         }
     }
 
+    private fun onSuccessCallback(message: String, data: Any?) {
+        when(message) {
+            "wallet" -> {
+                data as Wallet
+                mWallet = data
+                binding.rbWallet.text = "Wallet (${data.amount})"
+            }
+            "ootItems" -> {
+                data as List<CartEntity>
+                validateItemAvailability(data)
+            }
+            "limitedItems" -> {
+                lifecycleScope.launch {
+                    delay(1500)
+                    hideSuccessDialog()
+                    checkPaymentMode()
+                }
+            }
+            "orderPlacing" -> {
+                lifecycleScope.launch {
+                    delay(1500)
+                        hideSuccessDialog()
+                        showSuccessDialog("", "Order Placed Successfully!", "complete")
+                        viewModel.clearCart(mCartItems)
+                }
+            }
+            "orderPlaced" -> {
+                lifecycleScope.launch {
+                    removeCouponDiscountFromInvoice()
+                    setAddButton()
+                    delay(2000)
+                    hideSuccessDialog()
+                    Intent(this@InvoiceActivity, PurchaseHistoryActivity::class.java).also {
+                        startActivity(it)
+                        finish()
+                    }
+                }
+            }
+            "transaction" -> viewModel.updateTransaction(data as TransactionHistory)
+            "transactionID" -> validatingTransactionBeforeOrder(data as String)
+            "toast" -> {
+                showToast(this, data as String)
+            }
+        }
+    }
 
-//    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        if (requestCode==123 && resultCode == RESULT_OK && data?.data !== null ) {
-//            Toast.makeText(this, "payment done", Toast.LENGTH_SHORT).show()
-//        } else {
-//            Toast.makeText(this, "payment failed", Toast.LENGTH_SHORT).show()
-//        }
-//    }
+    private fun onFailedCallback(message: String, data: Any?) {
+        when(message) {
+            "wallet" -> showErrorSnackBar(data!! as String, true)
+            "ootItems" -> {
+                hideSuccessDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+            "limitedItems" -> {
+                hideSuccessDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+            "orderPlacing" -> {
+                hideSuccessDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+            "orderPlaced" -> {
+                hideSuccessDialog()
+                showExitSheet(this, "Order Placed Successfully! \n \n There are some internal errors recorded while placing order. Please report this to customer support for further updates", "cs")
+            }
+            "transaction" -> {
+                hideSuccessDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+            "transactionID" -> {
+                hideSuccessDialog()
+                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
+            }
+            "toast" -> {
+                showToast(this, data as String)
+            }
+        }
+    }
+
+    fun moveToCustomerSupport() {
+        Intent(this, ChatActivity::class.java).also {
+            startActivity(it)
+            finish()
+        }
+    }
+
+    override fun selectedAddress(position: Int) {
+        setUpDeliveryChargeForTheLocation(mSelectedAddress)
+        mSelectedAddress = mProfile.address[position]
+        mCheckedAddressPosition = position
+        adapter.checkedAddressPosition = position
+        adapter.notifyDataSetChanged()
+    }
+
+    override fun addAddress(position: Int) = showAddressBs()
+
+    override fun deleteAddress(position: Int) {
+        viewModel.deleteAddress(position)
+        adapter.checkedAddressPosition = 0
+        adapter.notifyDataSetChanged()
+    }
+
+    override fun updateAddress(position: Int) {
+        viewModel.addressPosition = position
+        showAddressBs(mProfile.address[position])
+    }
+
 }

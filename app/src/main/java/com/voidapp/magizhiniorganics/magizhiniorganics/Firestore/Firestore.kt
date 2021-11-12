@@ -21,6 +21,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.Purcha
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import java.io.IOException
@@ -254,8 +255,8 @@ class Firestore(
             }
     }
 
-    suspend fun limitedItemsUpdater(cart: List<CartEntity>, viewModel: CheckoutViewModel) {
-        try {
+    suspend fun limitedItemsUpdater(cart: List<CartEntity>): NetworkResult {
+        return try {
             withContext(Dispatchers.IO) {
                 for (cartItem in cart) {
                     mFireStore.runTransaction { transaction ->
@@ -278,21 +279,18 @@ class Firestore(
                         null
                     }
                 }
-                withContext(Dispatchers.Main) {
-                    viewModel.limitedItemsUpdated()
-                }
+                NetworkResult.Success("limitedItems", "updated")
             }
         } catch (e: Exception) {
-            withContext(Dispatchers.Main) {
-                viewModel.orderPlacementFailed(e.message.toString())
-            }
+            e.message?.let { logCrash("firestore: fetching limited item count", it) }
+            NetworkResult.Failed("limitedItems", "Server Error! Failed to Validate Items Purchase")
         }
     }
 
     //order placement
-    fun placeOrder(order: Order, viewModel: CheckoutViewModel) =
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
+    suspend fun placeOrder(order: Order): NetworkResult =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
                 val firebase: Firebase = Firebase
                 val id = firebase.firestore.collection(Constants.ORDER_HISTORY).document().id
                 order.orderId = id
@@ -309,11 +307,10 @@ class Firestore(
                 updateLocalProfile.await()
                 updateLocalOrderRepository.await()
 
-                withContext(Dispatchers.Main) {
-                    viewModel.orderPlaced()
-                }
+                NetworkResult.Success("orderPlacing", null)
             } catch (e: Exception) {
-                viewModel.orderPlacementFailed(e.message.toString())
+                e.message?.let { logCrash("firestore: order placement", it) }
+                NetworkResult.Failed("orderPlacing", "Server Error! Failed to Place Order")
             }
         }
 
@@ -513,14 +510,22 @@ class Firestore(
     }
 
     //address
-    fun addAddress(id: String, address: Address) = CoroutineScope(Dispatchers.IO).launch {
-        mFireStore.collection(Constants.USERS)
-            .document(id).update(Constants.ADDRESS, FieldValue.arrayUnion(address))
+    suspend fun addAddress(id: String, address: Address) = CoroutineScope(Dispatchers.IO).launch {
+        try {
+            mFireStore.collection(Constants.USERS)
+                .document(id).update(Constants.ADDRESS, FieldValue.arrayUnion(address))
+        } catch (e: Exception) {
+            e.message?.let { logCrash("Firestore: adding address", it) }
+        }
     }
 
-    fun updateAddress(id: String, address: ArrayList<Address>) {
-        mFireStore.collection(Constants.USERS)
-            .document(id).update("address", address)
+    suspend fun updateAddress(id: String, address: ArrayList<Address>) {
+        try {
+            mFireStore.collection(Constants.USERS)
+                .document(id).update("address", address)
+        } catch (e: Exception) {
+            e.message?.let { logCrash("Firestore: updating address", it) }
+        }
     }
 
     suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean {
@@ -580,23 +585,45 @@ class Firestore(
         repository.cancelActiveSubscription(sub.id)
     }
 
-    suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> {
+    suspend fun validateItemAvailability(cartItems: List<CartEntity>): NetworkResult {
         val outOfStockItems: MutableList<CartEntity> = mutableListOf()
         outOfStockItems.clear()
-        for (cartItem in cartItems) {
-            val product =
-                mFireStore.collection(Constants.PRODUCTS).document(cartItem.productId).get().await()
-                    .toObject(Product::class.java)
-            for (variant in product!!.variants) {
-                val variantName = "${variant.variantName} ${variant.variantType}"
-                if (cartItem.variant == variantName && variant.status == Constants.OUT_OF_STOCK) {
-                    outOfStockItems.add(cartItem)
-                    break
+        try {
+            for (cartItem in cartItems) {
+                val product =
+                    mFireStore.collection(Constants.PRODUCTS).document(cartItem.productId).get().await()
+                        .toObject(Product::class.java)
+                for (variant in product!!.variants) {
+                    val variantName = "${variant.variantName} ${variant.variantType}"
+                    if (cartItem.variant == variantName && variant.status == Constants.OUT_OF_STOCK) {
+                        outOfStockItems.add(cartItem)
+                        break
+                    }
                 }
             }
+            return NetworkResult.Success("ootItems", outOfStockItems as List<CartEntity>)
+        } catch (e: Exception) {
+            e.message?.let { logCrash("checkout: getting limited Items", it) }
+            return NetworkResult.Failed("ootItems", "Server Error! Failed to validate purchase")
         }
-        return outOfStockItems
     }
+//    suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> {
+//        val outOfStockItems: MutableList<CartEntity> = mutableListOf()
+//        outOfStockItems.clear()
+//        for (cartItem in cartItems) {
+//            val product =
+//                mFireStore.collection(Constants.PRODUCTS).document(cartItem.productId).get().await()
+//                    .toObject(Product::class.java)
+//            for (variant in product!!.variants) {
+//                val variantName = "${variant.variantName} ${variant.variantType}"
+//                if (cartItem.variant == variantName && variant.status == Constants.OUT_OF_STOCK) {
+//                    outOfStockItems.add(cartItem)
+//                    break
+//                }
+//            }
+//        }
+//        return outOfStockItems
+//    }
 
     suspend fun generateSubscription(
         viewModel: SubscriptionProductViewModel,
@@ -671,11 +698,18 @@ class Firestore(
             .document(id).get().await().toObject(Wallet::class.java)!!.amount
     }
 
-    suspend fun getWallet(id: String): Wallet =
-        mFireStore.collection("Wallet")
-            .document("Wallet")
-            .collection("Users")
-            .document(id).get().await().toObject(Wallet::class.java)!!
+    suspend fun getWallet(id: String): NetworkResult {
+        return try {
+            val wallet = mFireStore.collection("Wallet")
+                .document("Wallet")
+                .collection("Users")
+                .document(id).get().await().toObject(Wallet::class.java)!!
+                NetworkResult.Success("wallet", wallet)
+        } catch (e: Exception) {
+            e.message?.let { logCrash("checkout: getting wallet", it) }
+            NetworkResult.Failed("wallet", "Server Error. Failed to fetch Wallet.")
+        }
+    }
 
     //wallet transactions
     suspend fun getTransactions(id: String): List<TransactionHistory> = withContext(Dispatchers.IO) {
@@ -696,7 +730,7 @@ class Firestore(
     }
 
     suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean {
-        try {
+        return try {
             withContext(Dispatchers.IO) {
                 val path = mFireStore.collection("Wallet")
                     .document("Wallet")
@@ -715,27 +749,43 @@ class Firestore(
                         null
                     }
                 }
+                return@withContext true
             }
         } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: Making transaction for purchase", it) }
             return false
         }
-        return true
     }
 
-    suspend fun updateTransaction(transaction: TransactionHistory): String =
+    suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult =
         withContext(Dispatchers.IO) {
-            try {
+           try {
                 val path = mFireStore.collection("Wallet")
                     .document("Transaction")
                     .collection(transaction.fromID)
                 transaction.id = path.document().id
 
                 path.document(transaction.id).set(transaction, SetOptions.merge()).await()
-                return@withContext path.id
+                return@withContext NetworkResult.Success("transactionID", path.id)
             } catch (e: Exception) {
-                return@withContext "failed"
+               e.message?.let { logCrash("firestore: updating the wallet transaction", it) }
+                return@withContext NetworkResult.Failed("transactionID", null)
             }
         }
+//    suspend fun updateTransaction(transaction: TransactionHistory): String =
+//        withContext(Dispatchers.IO) {
+//            try {
+//                val path = mFireStore.collection("Wallet")
+//                    .document("Transaction")
+//                    .collection(transaction.fromID)
+//                transaction.id = path.document().id
+//
+//                path.document(transaction.id).set(transaction, SetOptions.merge()).await()
+//                return@withContext path.id
+//            } catch (e: Exception) {
+//                return@withContext "failed"
+//            }
+//        }
 
     suspend fun generateSubscriptionID(id: String): String =
         mFireStore.collection(Constants.SUBSCRIPTION)
@@ -747,7 +797,7 @@ class Firestore(
         CrashLog(
             getCurrentUserId()!!,
             "${ Build.MANUFACTURER } ${ Build.MODEL } ${Build.VERSION.RELEASE} ${ Build.VERSION_CODES::class.java.fields[Build.VERSION.SDK_INT].name }",
-            System.currentTimeMillis(),
+            TimeUtil().getCustomDate("",System.currentTimeMillis()),
             location,
             message
         ).let {

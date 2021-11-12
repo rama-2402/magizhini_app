@@ -195,7 +195,7 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
     private fun initLiveDate() {
         viewModel.getSubscriptions(Constants.SUB_ACTIVE)
-        viewModel.getWallet(id)
+//        viewModel.getWallet(id)
         viewModel.getProfile()
         with (mSubscriptionStatusFilter) {
             clear()

@@ -110,12 +110,12 @@ class SubscriptionProductViewModel(
     }
 
     fun getWallet(id: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val wallet = fbRepository.getWallet(id)
-            withContext(Dispatchers.Main) {
-                _wallet.value = wallet
-            }
-        }
+//        viewModelScope.launch(Dispatchers.IO) {
+//            val wallet = fbRepository.getWallet(id)
+//            withContext(Dispatchers.Main) {
+//                _wallet.value = wallet
+//            }
+//        }
     }
 
     fun generateSubscription(subscription: Subscription) = viewModelScope.launch(Dispatchers.IO) {
@@ -157,7 +157,8 @@ class SubscriptionProductViewModel(
                 Constants.SUBSCRIPTION,
                 orderID
             )
-            return fbRepository.updateTransaction(transaction)
+//            return fbRepository.updateTransaction(transaction)
+        return  ""
         } else {
             return "failed"
         }

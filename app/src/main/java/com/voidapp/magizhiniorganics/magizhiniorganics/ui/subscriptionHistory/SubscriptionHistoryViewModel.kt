@@ -98,14 +98,14 @@ class SubscriptionHistoryViewModel(
         dbRepository.cancelActiveSubscription(sub.id)
     }
 
-    fun getWallet(id: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val wallet = fbRepository.getWallet(id)
-            withContext(Dispatchers.Main) {
-                _wallet.value = wallet
-            }
-        }
-    }
+//    fun getWallet(id: String) {
+//        viewModelScope.launch(Dispatchers.IO) {
+//            val wallet = fbRepository.getWallet(id)
+//            withContext(Dispatchers.Main) {
+//                _wallet.value = wallet
+//            }
+//        }
+//    }
 
     suspend fun checkWalletForBalance(amount: Float, id: String): Boolean {
         return try {
@@ -132,54 +132,54 @@ class SubscriptionHistoryViewModel(
         } else {
             30f * singleDayPrice
         }
-        if (fbRepository.makeTransactionFromWallet(totalRefundAmount, sub.customerID, "Add")) {
-           TransactionHistory (
-                sub.id,
-                System.currentTimeMillis(),
-                TimeUtil().getMonth(),
-                TimeUtil().getYear().toLong(),
-                totalRefundAmount,
-                sub.customerID,
-                "Subscription Refund",
-                Constants.SUCCESS,
-                Constants.ADD_MONEY,
-                sub.id
-            ).also {
-                if (fbRepository.updateTransaction(it) == "failed") {
-                    withContext(Dispatchers.Main) {
-                        _walletTransactionStatus.value = false
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        _walletTransactionStatus.value = true
-                    }
-                }
-            }
-        } else {
-            withContext(Dispatchers.Main) {
-                _walletTransactionStatus.value = false
-            }
-        }
+//        if (fbRepository.makeTransactionFromWallet(totalRefundAmount, sub.customerID, "Add")) {
+//           TransactionHistory (
+//                sub.id,
+//                System.currentTimeMillis(),
+//                TimeUtil().getMonth(),
+//                TimeUtil().getYear().toLong(),
+//                totalRefundAmount,
+//                sub.customerID,
+//                "Subscription Refund",
+//                Constants.SUCCESS,
+//                Constants.ADD_MONEY,
+//                sub.id
+//            ).also {
+//                if (fbRepository.updateTransaction(it) == "failed") {
+//                    withContext(Dispatchers.Main) {
+//                        _walletTransactionStatus.value = false
+//                    }
+//                } else {
+//                    withContext(Dispatchers.Main) {
+//                        _walletTransactionStatus.value = true
+//                    }
+//                }
+//            }
+//        } else {
+//            withContext(Dispatchers.Main) {
+//                _walletTransactionStatus.value = false
+//            }
+//        }
     }
 
     suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String): String {
-        if (fbRepository.makeTransactionFromWallet(amount, id, "Remove")) {
-            val transaction = TransactionHistory (
-                orderID,
-                System.currentTimeMillis(),
-                TimeUtil().getMonth(),
-                TimeUtil().getYear().toLong(),
-                amount,
-                id,
-                id,
-                Constants.SUCCESS,
-                Constants.SUBSCRIPTION,
-                orderID
-            )
-            return fbRepository.updateTransaction(transaction)
-        } else {
+//        if (fbRepository.makeTransactionFromWallet(amount, id, "Remove")) {
+//            val transaction = TransactionHistory (
+//                orderID,
+//                System.currentTimeMillis(),
+//                TimeUtil().getMonth(),
+//                TimeUtil().getYear().toLong(),
+//                amount,
+//                id,
+//                id,
+//                Constants.SUCCESS,
+//                Constants.SUBSCRIPTION,
+//                orderID
+//            )
+//            return fbRepository.updateTransaction(transaction)
+//        } else {
             return "failed"
-        }
+//        }
     }
 
     fun renewSelectedSubscription(sub: SubscriptionEntity, renewal: Boolean) {

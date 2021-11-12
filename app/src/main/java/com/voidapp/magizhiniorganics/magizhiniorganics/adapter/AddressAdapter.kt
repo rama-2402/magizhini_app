@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.view.animation.LayoutAnimationController
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -14,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 
@@ -22,7 +20,7 @@ class AddressAdapter(
     val context: Context,
     var checkedAddressPosition: Int,
     var addressList: ArrayList<Address>,
-    val viewModel: CheckoutViewModel
+    private val onItemClickListener: OnAddressClickListener
 ): RecyclerView.Adapter<AddressAdapter.AddressViewHolder>() {
 
     inner class AddressViewHolder(val itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -42,8 +40,6 @@ class AddressAdapter(
     }
 
     override fun onBindViewHolder(holder: AddressViewHolder, position: Int) {
-
-//            holder.card.startAnimation(AnimationUtils.loadAnimation(context, R.anim.slide_in_right_bounce))
 
             val address = addressList[position]
             val userID: String = SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
@@ -67,27 +63,38 @@ class AddressAdapter(
 
             add.setOnClickListener {
                 add.startAnimation(AnimationUtils.loadAnimation(add.context, R.anim.bounce))
-                viewModel.addNewAddress(position + 1)
+                onItemClickListener.addAddress(position)
+//                viewModel.addNewAddress(position + 1)
             }
 
             card.setOnClickListener {
-                viewModel.editAddress(address, position)
+//                viewModel.editAddress(address, position)
+                onItemClickListener.updateAddress(position)
             }
 
             delete.setOnClickListener {
                 delete.startAnimation(AnimationUtils.loadAnimation(delete.context, R.anim.bounce))
-                viewModel.deleteAddress(userID, position)
+//                viewModel.deleteAddress(userID, position)
+                onItemClickListener.deleteAddress(position)
             }
         }
 
         holder.uncheck.setOnClickListener {
             holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
             holder.uncheck.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-            viewModel.selectedAddress(address, position)
+//            viewModel.selectedAddress(address, position)
+            onItemClickListener.selectedAddress(position)
         }
     }
 
     override fun getItemCount(): Int {
         return addressList.size
+    }
+
+    interface OnAddressClickListener {
+        fun selectedAddress(position: Int)
+        fun addAddress(position: Int)
+        fun deleteAddress(position: Int)
+        fun updateAddress(position: Int)
     }
 }

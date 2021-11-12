@@ -450,11 +450,12 @@
                         app:boxStrokeColor="@color/green_base"
                         app:flow_wrapMode="aligned"
                         app:endIconMode="clear_text"
-                        android:scrollbars ="vertical"
                         android:textColorHint="@color/grey"
                         android:isScrollContainer="true"
-                        android:overScrollMode="always"
                         app:hintTextColor="@color/green_base"
+                        android:scrollbarStyle="insideInset"
+                        android:scrollbars="vertical"
+                        android:overScrollMode="always"
                         app:layout_constraintTop_toBottomOf="@id/spDeliveryPreference"
                         app:layout_constraintStart_toStartOf="parent">
 

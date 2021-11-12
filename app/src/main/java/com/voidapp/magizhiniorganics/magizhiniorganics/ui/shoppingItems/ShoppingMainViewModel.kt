@@ -39,6 +39,12 @@ class ShoppingMainViewModel(
     val subscriptions: LiveData<List<ProductEntity>> = _subscriptions
     private var _subscriptionProduct: MutableLiveData<ProductEntity> = MutableLiveData()
     val subscriptionProduct: LiveData<ProductEntity> = _subscriptionProduct
+    private var _position: MutableLiveData<Int> = MutableLiveData()
+    val position: LiveData<Int> = _position
+    private var _refreshProduct: MutableLiveData<ProductEntity> = MutableLiveData()
+    val refreshProduct: LiveData<ProductEntity> = _refreshProduct
+
+    var productToRefresh = ProductEntity()
 
     fun getProfile() {
         profile = dbRepository.getProfileData()!!
@@ -125,7 +131,7 @@ class ShoppingMainViewModel(
         _subscriptionProduct.value = product
     }
 
-    fun upsertCartItem(id: String, productName: String, thumbnailUrl: String,  variant: String, count: Int, price:
+    fun upsertCartItem(product: ProductEntity, position: Int , variant: String, count: Int, price:
     Float, originalPrice: Float, maximumOrderQuantity: Int, variantIndex: Int) = viewModelScope.launch(Dispatchers.IO) {
         val orderQuantity = if (maximumOrderQuantity == 0) {
             10
@@ -133,9 +139,9 @@ class ShoppingMainViewModel(
             maximumOrderQuantity
         }
         val cartEntity = CartEntity(
-            productId = id,
-            productName = productName,
-            thumbnailUrl = thumbnailUrl,
+            productId = product.id,
+            productName = product.name,
+            thumbnailUrl = product.thumbnailUrl,
             variant = variant,
             quantity = count,
             maxOrderQuantity = orderQuantity,
@@ -144,11 +150,15 @@ class ShoppingMainViewModel(
             variantIndex = variantIndex
         )
         dbRepository.upsertCart(cartEntity)
-        val product = dbRepository.getProductWithIdForUpdate(id)
-        product.variantInCart.add(variant)
-        dbRepository.upsertProduct(product)
+        val productEntity = dbRepository.getProductWithIdForUpdate(product.id)
+        productEntity.variantInCart.add(variant)
+        dbRepository.upsertProduct(productEntity)
         getAllCartItems()
-        updateShoppingMainPage()
+//        updateShoppingMainPage()
+        withContext(Dispatchers.Main) {
+            productToRefresh = productEntity
+            _position.value = position
+        }
     }
 
     fun updateCartItem(id: Int, updatedCount: Int) = viewModelScope.launch (Dispatchers.IO) {
@@ -160,7 +170,7 @@ class ShoppingMainViewModel(
         dbRepository.upsertProduct(product)
     }
 
-    fun updateFavorites(id: String, product: ProductEntity) = viewModelScope.launch(Dispatchers.IO) {
+    fun updateFavorites(id: String, product: ProductEntity, position: Int) = viewModelScope.launch(Dispatchers.IO) {
         val localFavoritesUpdate = async { localFavoritesUpdate(product) }
         val storeFavoritesUpdate = async { storeFavoritesUpdate(id, product) }
         val updateProduct = async { updateProduct(product) }
@@ -169,7 +179,11 @@ class ShoppingMainViewModel(
         storeFavoritesUpdate.await()
         updateProduct.await()
 
-        updateShoppingMainPage()
+        withContext(Dispatchers.Main) {
+            productToRefresh = product
+            _position.value = position
+        }
+//        updateShoppingMainPage()
     }
 
     private suspend fun localFavoritesUpdate(product: ProductEntity) = withContext(Dispatchers.IO) {

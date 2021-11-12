@@ -267,7 +267,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
             }
 
             btnAddImage.setOnClickListener {
-                PermissionsUtil().checkStoragePermission(this@SubscriptionProductActivity)
+//                PermissionsUtil().checkStoragePermission(this@SubscriptionProductActivity)
             }
         }
     }

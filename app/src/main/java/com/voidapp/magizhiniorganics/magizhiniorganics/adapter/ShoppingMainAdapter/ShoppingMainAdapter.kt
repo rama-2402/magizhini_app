@@ -24,7 +24,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.DiffUtils
 
 open class ShoppingMainAdapter(
     private val context: Context,
-    var products: List<ProductEntity>,
+    var products: MutableList<ProductEntity>,
     var limited: Boolean = false,
     private val viewModel: ShoppingMainViewModel
 ) : RecyclerView.Adapter<ShoppingMainAdapter.ShoppingMainViewHolder>() {
@@ -163,7 +163,7 @@ open class ShoppingMainAdapter(
         holder.favorites.setOnClickListener {
             holder.favorites.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             product.favorite = !product.favorite
-            viewModel.updateFavorites(id, product)
+            viewModel.updateFavorites(id, product, position)
         }
 
         holder.addItem.setOnClickListener {
@@ -202,9 +202,8 @@ open class ShoppingMainAdapter(
                         if (!limitedCheck) {
                             Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
                             viewModel.upsertCartItem(
-                                productId,
-                                product.name,
-                                product.thumbnailUrl,
+                                product,
+                                position,
                                 variantName,
                                 1,
                                 holder.discountedAmount.text.toString().toFloat(),
@@ -320,7 +319,7 @@ open class ShoppingMainAdapter(
         return products.size
     }
 
-    fun setData(newList: List<ProductEntity>) {
+    fun setData(newList: MutableList<ProductEntity>) {
         val diffUtil = DiffUtils(products, newList)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
         products = newList

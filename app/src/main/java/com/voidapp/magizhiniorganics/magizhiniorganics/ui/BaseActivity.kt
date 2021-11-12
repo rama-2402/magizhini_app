@@ -185,7 +185,7 @@ open class BaseActivity : AppCompatActivity() {
             "Cancel for some days" -> view.tvCancelText.text = data as String
             "cs" -> {
                 view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
-                view.tvCancelText.text = "DONE"
+                view.tvCancelText.text = "Contact Support"
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
             }
             "permission" -> {
@@ -229,10 +229,15 @@ open class BaseActivity : AppCompatActivity() {
             hideExitSheet()
             when(activity) {
                 is ProfileActivity -> {
+                    hideExitSheet()
                     when(data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                     }
+                }
+                is InvoiceActivity -> {
+                    hideExitSheet()
+                    activity.moveToCustomerSupport()
                 }
             }
         }

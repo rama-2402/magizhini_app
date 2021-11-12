@@ -59,8 +59,12 @@ class ShoppingMainActivity :
     private var mCartPrice: Float? = 0f
     private var isFiltered: Boolean = false
 
-    private var mItems: List<ProductEntity> = listOf()
+    private var mItems: MutableList<ProductEntity> = mutableListOf()
     private val mFilteredItems: MutableList<ProductEntity> = mutableListOf()
+    private val mCategoryFilteredItems: MutableList<ProductEntity> = mutableListOf()
+    private val mFavoriteItems: MutableList<ProductEntity> = mutableListOf()
+    private val mSubscriptionItems: MutableList<ProductEntity> = mutableListOf()
+    private val mLimitedItems: MutableList<ProductEntity> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,12 +97,17 @@ class ShoppingMainActivity :
     }
 
     private fun observeLiveData() {
+        viewModel.position.observe(this, {
+            adapter.products[it] = viewModel.productToRefresh
+            adapter.notifyItemChanged(it)
+        })
+
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.getProfile()
         }
         viewModel.allProduct.observe(this, {
             viewModel.selectedChip = Constants.ALL
-            mItems = it
+            mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             adapter.setData(it)
             binding.cpAll.isChecked = true
@@ -110,7 +119,7 @@ class ShoppingMainActivity :
         viewModel.subscriptions.observe(this, {
             viewModel.selectedChip = Constants.SUBSCRIPTION
             adapter.limited = false
-            adapter.setData(it)
+            adapter.setData(it as MutableList<ProductEntity>)
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(1500)
                 hideShimmer()
@@ -120,7 +129,7 @@ class ShoppingMainActivity :
             viewModel.selectedChip = Constants.CATEGORY
             viewModel.selectedCategory = categoryFilter
             adapter.limited = false
-            adapter.setData(it)
+            adapter.setData(it as MutableList<ProductEntity>)
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(1500)
                 hideShimmer()
@@ -129,7 +138,7 @@ class ShoppingMainActivity :
         viewModel.allFavorites.observe(this, {
             viewModel.selectedChip = Constants.FAVORITES
             adapter.limited = false
-            adapter.setData(it)
+            adapter.setData(it as MutableList<ProductEntity>)
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(1500)
                 hideShimmer()
@@ -138,7 +147,7 @@ class ShoppingMainActivity :
         viewModel.discountAvailableProducts.observe(this, {
             viewModel.selectedChip = Constants.DISCOUNT
             adapter.limited = false
-            adapter.setData(it)
+            adapter.setData(it as MutableList<ProductEntity>)
             lifecycleScope.launch(Dispatchers.Main) {
                 delay(1500)
                 hideShimmer()
@@ -331,13 +340,13 @@ class ShoppingMainActivity :
 
         cartAdapter = CartAdapter(
             this,
-            listOf(),
+            mutableListOf(),
             viewModel
         )
 
         adapter = ShoppingMainAdapter(
             this,
-            listOf(),
+            mutableListOf(),
             false,
             viewModel
         )
@@ -416,7 +425,7 @@ class ShoppingMainActivity :
     //updating the limited items products list
     override fun limitedItemList(products: List<ProductEntity>) {
         adapter.limited = true
-        adapter.setData(products)
+        adapter.setData(products as MutableList<ProductEntity>)
         hideShimmer()
     }
 

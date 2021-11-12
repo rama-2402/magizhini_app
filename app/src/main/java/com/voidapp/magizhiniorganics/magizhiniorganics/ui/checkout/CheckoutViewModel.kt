@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.ListenableWorker
+import com.google.firebase.firestore.ktx.firestoreSettings
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
@@ -14,7 +16,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.io.IOException
 
 class CheckoutViewModel(
     private val dbRepository: DatabaseRepository,
@@ -23,87 +29,106 @@ class CheckoutViewModel(
 
     var userId: String = ""
     var itemsInCart: List<CartEntity> = listOf()
+    var addressPosition = 0
+    private var localProfile = UserProfileEntity()
 
-    private var _addressList: MutableLiveData<ArrayList<Address>> = MutableLiveData()
-    val addressList: LiveData<ArrayList<Address>> = _addressList
-    private var _address: MutableLiveData<Address> = MutableLiveData()
-    val address: LiveData<Address> = _address
     private var _coupons: MutableLiveData<List<CouponEntity>> = MutableLiveData()
     val coupons: LiveData<List<CouponEntity>> = _coupons
     private var _couponIndex: MutableLiveData<Int> = MutableLiveData()
     val couponIndex: LiveData<Int> = _couponIndex
-    private var _selectedAddress: MutableLiveData<Address> = MutableLiveData()
-    val selectedAddress: LiveData<Address> = _selectedAddress
-    private var _orderPlacementFailed: MutableLiveData<String> = MutableLiveData()
-    val orderPlacementFailed: LiveData<String> = _orderPlacementFailed
-    private var _selectedAddressPosition: MutableLiveData<Int> = MutableLiveData()
-    var selectedAddressPosition: LiveData<Int> = _selectedAddressPosition
-    private var addressPosition = 0
-    private var _limitedItemUpdateStatus: MutableLiveData<String> = MutableLiveData()
-    var limitedItemUpdateStatus: LiveData<String> = _limitedItemUpdateStatus
-    private var _orderCompleted: MutableLiveData<Boolean> = MutableLiveData()
-    var orderCompleted: LiveData<Boolean> = _orderCompleted
-    private var _addNewAddress: MutableLiveData<Int> = MutableLiveData()
-    var addNewAddress: LiveData<Int> = _addNewAddress
     private var _profile: MutableLiveData<UserProfileEntity> = MutableLiveData()
     val profile: LiveData<UserProfileEntity> = _profile
 
+    private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(NetworkResult.Empty)
+    val status: StateFlow<NetworkResult> = _status
+
     fun getUserProfileData() = viewModelScope.launch(Dispatchers.IO) {
-        val profile = dbRepository.getProfileData()!!
-        withContext(Dispatchers.Main) {
-            _profile.value = profile
+        try {
+            val profile = dbRepository.getProfileData()!!
+            withContext(Dispatchers.Main) {
+                localProfile = profile
+                _profile.value = profile
+            }
+        } catch (e: IOException) {
+            e.message?.let { fbRepository.logCrash("checkout: getting profile from db", it) }
         }
     }
 
-    fun getAddress() = viewModelScope.launch (Dispatchers.IO) {
-        val address = dbRepository.getProfileData()!!.address
-        withContext(Dispatchers.Main) {
-            _addressList.value = address
+    private suspend fun updateAddress(id: String, address: ArrayList<Address>, status: String) {
+        if(status == "add") {
+            fbRepository.addAddress(id, address[0])
+        } else {
+            fbRepository.updateAddress(id, address)
         }
-    }
-
-    fun addNewAddress(position: Int) {
-        _addNewAddress.value = position
     }
 
     fun addAddress(id: String, newAddress: Address) = viewModelScope.launch (Dispatchers.IO) {
-        val profile = dbRepository.getProfileData()
-        profile!!.address.add(newAddress)
-        dbRepository.upsertProfile(profile)
-        getAddress()
-        fbRepository.addAddress(id, newAddress)
-    }
+        try {
+            val list = arrayListOf<Address>(newAddress)
 
-    fun editAddress(address: Address, position: Int) {
-        addressPosition = position
-        _address.value = address
+            val localUpdate = async {
+                localProfile.address.add(newAddress)
+                dbRepository.upsertProfile(localProfile)
+                withContext(Dispatchers.Main) {
+                    _profile.value = localProfile
+                }
+            }
+
+            val cloudUpdate = async { updateAddress(id, list,"add") }
+
+            localUpdate.await()
+            cloudUpdate.await()
+            _status.value = NetworkResult.Success("toast", "Address added")
+        } catch (e: IOException) {
+            _status.value = NetworkResult.Success("toast", "Failed to add address. Try later")
+            e.message?.let { fbRepository.logCrash("checkout: add address to profile from db", it) }
+        }
     }
 
     fun updateAddress(address: Address) = viewModelScope.launch (Dispatchers.IO){
-        val profile = dbRepository.getProfileData()!!
-        with(profile.address[addressPosition]) {
-            userId = address.userId
-            addressLineOne = address.addressLineOne
-            addressLineTwo = address.addressLineTwo
-            LocationCode = address.LocationCode
-            LocationCodePosition = address.LocationCodePosition
+        try {
+            val localUpdate = async {
+                with(localProfile.address[addressPosition]) {
+                    userId = address.userId
+                    addressLineOne = address.addressLineOne
+                    addressLineTwo = address.addressLineTwo
+                    LocationCode = address.LocationCode
+                    LocationCodePosition = address.LocationCodePosition
+                }
+                dbRepository.upsertProfile(localProfile)
+                withContext(Dispatchers.Main) {
+                    _profile.value = localProfile
+                }
+            }
+            val cloudUpdate = async { updateAddress(localProfile.id, localProfile.address,"update") }
+
+            localUpdate.await()
+            cloudUpdate.await()
+            _status.value = NetworkResult.Success("toast", "Address updated")
+        } catch (e: IOException) {
+            _status.value = NetworkResult.Success("toast", "Failed to update address. Try later")
+            e.message?.let { fbRepository.logCrash("checkout: update address to profile from db", it) }
         }
-        dbRepository.upsertProfile(profile)
-        getAddress()
-        fbRepository.updateAddress(profile.id, profile.address)
     }
 
-    fun deleteAddress(id: String, position: Int) = viewModelScope.launch (Dispatchers.IO){
-        val profile = dbRepository.getProfileData()!!
-        profile.address.removeAt(position)
-        dbRepository.upsertProfile(profile)
-        getAddress()
-        fbRepository.updateAddress(id, profile.address)
-    }
+    fun deleteAddress(position: Int) = viewModelScope.launch (Dispatchers.IO){
+        try {
+            val localUpdate = async {
+                localProfile.address.removeAt(position)
+                dbRepository.upsertProfile(localProfile)
+                withContext(Dispatchers.Main) {
+                    _profile.value = localProfile
+                }
+            }
+            val cloudUpdate = async { updateAddress(localProfile.id, localProfile.address,"update") }
 
-    fun selectedAddress(address: Address, position: Int) {
-        _selectedAddress.value = address
-        _selectedAddressPosition.value = position
+            localUpdate.await()
+            cloudUpdate.await()
+            _status.value = NetworkResult.Success("toast", "Address Deleted")
+        } catch (e: IOException) {
+            _status.value = NetworkResult.Success("toast", "Failed to delete address. Try later")
+            e.message?.let { fbRepository.logCrash("checkout: update address to profile from db", it) }
+        }
     }
 
     suspend fun getDeliveryChargeForTheLocation(areacode: String) = dbRepository.getDeliveryCharge(areacode)
@@ -112,22 +137,34 @@ class CheckoutViewModel(
     fun getAllCartItems() = dbRepository.getAllCartItems()
 
     fun deleteCartItem(id: Int, productId: String, variant: String) = viewModelScope.launch (Dispatchers.IO) {
-        dbRepository.deleteCartItem(id)
-        getAllCartItems()
-        updatingTheCartInProduct(productId, variant)
+        try {
+            dbRepository.deleteCartItem(id)
+            updatingTheCartInProduct(productId, variant)
+            getAllCartItems()
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("checkout: deleting cart item in db", it) }
+        }
     }
 
     fun updateCartItem(id: Int, updatedCount: Int) = viewModelScope.launch (Dispatchers.IO) {
-        dbRepository.updateCartItem(id, updatedCount)
+        try {
+            dbRepository.updateCartItem(id, updatedCount)
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("checkout: updating cart item in db", it) }
+        }
     }
 
     private fun updatingTheCartInProduct(productId: String, variant: String) = viewModelScope.launch (Dispatchers.IO) {
-        val productEntity = dbRepository.getProductWithIdForUpdate(productId)
-        productEntity.variantInCart.remove(variant)
-        if (productEntity.variantInCart.isEmpty()) {
-            productEntity.inCart = false
+        try {
+            val productEntity = dbRepository.getProductWithIdForUpdate(productId)
+            productEntity.variantInCart.remove(variant)
+            if (productEntity.variantInCart.isEmpty()) {
+                productEntity.inCart = false
+            }
+            dbRepository.upsertProduct(productEntity)
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("checkout: updating the product in cart in db", it) }
         }
-        dbRepository.upsertProduct(productEntity)
     }
 
     //extracting the sum of cart items price sent from shopping activity and cartitems observer
@@ -155,33 +192,41 @@ class CheckoutViewModel(
         return quantities
     }
 
-    fun clearCart(cartItems: List<CartEntity>) = viewModelScope.launch (Dispatchers.Default) {
-        for (cartItem in cartItems) {
-            withContext(Dispatchers.IO) {
+    fun clearCart(cartItems: List<CartEntity>) = viewModelScope.launch (Dispatchers.IO) {
+        try {
+            for (cartItem in cartItems) {
                 val product = dbRepository.getProductWithIdForUpdate(cartItem.productId)
                 product.inCart = false
                 product.variantInCart.clear()
                 dbRepository.upsertProduct(product)
             }
-        }
-        withContext(Dispatchers.IO) {
             dbRepository.clearCart()
+            _status.value = NetworkResult.Success("orderPlaced", null)
+        } catch (e: Exception) {
+            _status.value = NetworkResult.Failed("orderPlaced", null)
+            e.message?.let { fbRepository.logCrash("checkout: clearing cart from db", it) }
         }
     }
 
     //Coupons
     fun getAllCoupons(status: String) = viewModelScope.launch (Dispatchers.IO) {
-        val coupons = dbRepository.getAllActiveCoupons(status)
-        withContext(Dispatchers.Main) {
-            _coupons.value = coupons
+        try {
+            val coupons = dbRepository.getAllActiveCoupons(status)
+            withContext(Dispatchers.Main) {
+                _coupons.value = coupons
+            }
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("checkout: getting all active coupons from db", it) }
+            _status.value = NetworkResult.Failed("toast", "Failed to fetch coupon details")
         }
     }
 
     fun isCouponAvailable(mCoupons: List<CouponEntity>, couponCode: String): Boolean {
         var isAvailable: Boolean = false
         for (i in mCoupons.indices) {
-            if ( mCoupons[i].code == couponCode &&
-                 mCoupons[i].categories.contains(Constants.ALL)
+            if (
+                mCoupons[i].code == couponCode &&
+                mCoupons[i].categories.contains(Constants.ALL)
             ) {
                 isAvailable = true
                 _couponIndex.value = i
@@ -192,15 +237,11 @@ class CheckoutViewModel(
     }
 
     fun placeOrder(order: Order) = viewModelScope.launch(Dispatchers.IO) {
-        fbRepository.placeOrder(order, this@CheckoutViewModel)
-    }
-
-    fun orderPlacementFailed(message: String) {
-        _orderPlacementFailed.value = message
+        _status.value = fbRepository.placeOrder(order)
     }
 
     fun limitedItemsUpdater(cartEntity: List<CartEntity>) = viewModelScope.launch {
-        withContext(Dispatchers.Default) {
+        try {
             val limitedCartItems = mutableListOf<CartEntity>()
             for (cartItem in cartEntity) {
                 withContext(Dispatchers.IO) {
@@ -210,40 +251,29 @@ class CheckoutViewModel(
                     }
                 }
             }
-            withContext(Dispatchers.IO) {
-                fbRepository.limitedItemsUpdater(limitedCartItems, this@CheckoutViewModel)
-            }
-        }
-    }
-
-    fun limitedItemsUpdated() {
-        _limitedItemUpdateStatus.value = "complete"
-    }
-
-    fun orderPlaced() = viewModelScope.launch(Dispatchers.IO) {
-        withContext(Dispatchers.Main) {
-            _orderCompleted.value = true
-        }
-    }
-
-    suspend fun getWallet(id: String) = fbRepository.getWallet(id)
-
-    suspend fun validateItemAvailability(cartItems: List<CartEntity>) : List<CartEntity> = withContext(Dispatchers.IO) {
-        fbRepository.validateItemAvailability(cartItems)
-    }
-
-    suspend fun checkWalletForBalance(amount: Float, id: String): Boolean {
-        try {
-            val amountInWallet = fbRepository.getWalletAmount(id)
-            return amountInWallet >= amount
+            _status.value = fbRepository.limitedItemsUpdater(limitedCartItems)
         } catch (e: Exception) {
-            return false
+            e.message?.let {
+                fbRepository.logCrash("checkout: getting Items from db for limited item validation",
+                    it
+                )
+            }
+            NetworkResult.Failed("ootItems", "Failed to validated Purchases. Please try again later")
         }
     }
 
-    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String): String {
+    fun getWallet(id: String) = viewModelScope.launch(Dispatchers.IO) {
+        _status.value = fbRepository.getWallet(id)
+    }
+
+    suspend fun validateItemAvailability(cartItems: List<CartEntity>) {
+        _status.value = NetworkResult.Loading("Validating Purchase...", "limited")
+        _status.value = fbRepository.validateItemAvailability(cartItems)
+    }
+
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String) {
         if (fbRepository.makeTransactionFromWallet(amount, id, "Remove")) {
-            val transaction = TransactionHistory (
+            TransactionHistory (
                 orderID,
                 System.currentTimeMillis(),
                 TimeUtil().getMonth(),
@@ -254,16 +284,19 @@ class CheckoutViewModel(
                 Constants.SUCCESS,
                 Constants.PURCHASE,
                 orderID
-                    )
-            return fbRepository.updateTransaction(transaction)
+            ).let {
+              _status.value = NetworkResult.Success("transaction", it)
+            }
         } else {
-            return "failed"
+            _status.value = NetworkResult.Failed("transaction", "Server Error. Failed to make transaction from Wallet. Try other payment method")
         }
+    }
+
+    fun updateTransaction(transaction: TransactionHistory) = viewModelScope.launch (Dispatchers.IO) {
+        _status.value = fbRepository.updateTransaction(transaction)
     }
 
     suspend fun generateOrderID(id: String): String = withContext(Dispatchers.IO) {
         return@withContext fbRepository.generateOrderID(id)
     }
-
-
 }

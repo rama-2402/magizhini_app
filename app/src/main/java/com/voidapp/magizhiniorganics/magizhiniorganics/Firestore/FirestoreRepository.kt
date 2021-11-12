@@ -12,6 +12,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 
 class FirestoreRepository (
     private val firestore: Firestore
@@ -42,9 +43,9 @@ class FirestoreRepository (
 
     fun removeFavorites(id: String, item: String) = firestore.removeFavorites(id, item)
 
-    fun addAddress(id: String ,address: Address) = firestore.addAddress(id, address)
+    suspend fun addAddress(id: String ,address: Address) = firestore.addAddress(id, address)
 
-    fun updateAddress(id: String, address: ArrayList<Address>)  = firestore.updateAddress(id, address)
+    suspend fun updateAddress(id: String, address: ArrayList<Address>)  = firestore.updateAddress(id, address)
 
 
 
@@ -52,13 +53,16 @@ class FirestoreRepository (
 
     fun addReview(id: String, review: Review) = firestore.addReview(id, review)
 
-    suspend fun limitedItemsUpdater(cartEntity: List<CartEntity>, viewModel: CheckoutViewModel) = firestore.limitedItemsUpdater(cartEntity, viewModel)
+    suspend fun limitedItemsUpdater(cartEntity: List<CartEntity>): NetworkResult = firestore.limitedItemsUpdater(cartEntity)
+//    suspend fun limitedItemsUpdater(cartEntity: List<CartEntity>, viewModel: CheckoutViewModel) = firestore.limitedItemsUpdater(cartEntity, viewModel)
 
-    fun placeOrder(order: Order, viewModel: CheckoutViewModel) = firestore.placeOrder(order, viewModel)
+    suspend fun placeOrder(order: Order): NetworkResult = firestore.placeOrder(order)
+//    fun placeOrder(order: Order, viewModel: CheckoutViewModel) = firestore.placeOrder(order, viewModel)
 
 
 
-    suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> = firestore.validateItemAvailability(cartItems)
+    suspend fun validateItemAvailability(cartItems: List<CartEntity>): NetworkResult = firestore.validateItemAvailability(cartItems)
+//    suspend fun validateItemAvailability(cartItems: List<CartEntity>): List<CartEntity> = firestore.validateItemAvailability(cartItems)
 
     suspend fun updateRecentPurchases(recentPurchaseIDs: ArrayList<String>, subscriptionIDs: ArrayList<String>) = firestore.updateRecentPurchases(recentPurchaseIDs, subscriptionIDs)
 
@@ -76,7 +80,8 @@ class FirestoreRepository (
 
     suspend fun getWalletAmount(id: String): Float = firestore.getWalletAmount(id)
 
-    suspend fun getWallet(id: String): Wallet = firestore.getWallet(id)
+//    suspend fun getWallet(id: String): Wallet = firestore.getWallet(id)
+    suspend fun getWallet(id: String): NetworkResult = firestore.getWallet(id)
 
     suspend fun getTransactions(id: String): List<TransactionHistory> = firestore.getTransactions(id)
 
@@ -88,6 +93,7 @@ class FirestoreRepository (
 
     suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): Boolean = firestore.renewSubscription(id, monthYear, newDate)
 
-    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
+    suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult = firestore.updateTransaction(transaction)
+//    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
 
 }
