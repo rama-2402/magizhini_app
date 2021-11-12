@@ -296,7 +296,7 @@ class CheckoutViewModel(
         _status.value = fbRepository.updateTransaction(transaction)
     }
 
-    suspend fun generateOrderID(id: String): String = withContext(Dispatchers.IO) {
-        return@withContext fbRepository.generateOrderID(id)
+    suspend fun generateOrderID(): String = withContext(Dispatchers.IO) {
+        return@withContext fbRepository.generateOrderID()
     }
 }

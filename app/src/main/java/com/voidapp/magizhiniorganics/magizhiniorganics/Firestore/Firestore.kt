@@ -14,10 +14,7 @@ import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
@@ -179,16 +176,16 @@ class Firestore(
         }
 
     //profile
-    suspend fun getProfile(id: String): UserProfileEntity {
-        return try {
-            mFireStore.collection(Constants.USERS)
-                .document(id)
-                .get().await().toObject(UserProfile::class.java)!!.toUserProfileEntity()
-        } catch (e: Exception) {
-            e.message?.let { logCrash("getting profile", it) }
-            UserProfileEntity()
-        }
-    }
+//    suspend fun getProfile(id: String): UserProfileEntity {
+//        return try {
+//            mFireStore.collection(Constants.USERS)
+//                .document(id)
+//                .get().await().toObject(UserProfile::class.java)!!.toUserProfileEntity()
+//        } catch (e: Exception) {
+//            e.message?.let { logCrash("getting profile", it) }
+//            UserProfileEntity()
+//        }
+//    }
 
     suspend fun uploadProfile(profile: UserProfile): Boolean =
         withContext(Dispatchers.IO) {
@@ -291,116 +288,188 @@ class Firestore(
     suspend fun placeOrder(order: Order): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                val firebase: Firebase = Firebase
-                val id = firebase.firestore.collection(Constants.ORDER_HISTORY).document().id
-                order.orderId = id
                 val updateOrderHistory = async { updateOrderHistory(order) }
-                val updateProfileMonthYear = async { updateProfileMonthYear(order) }
                 val updateProfileOrderID = async { updateProfileOrderID(order) }
+                val updateProfileMonthYear = async { updateProfileMonthYear(order) }
                 val updateLocalProfile = async { updateLocalProfile(order) }
                 val updateLocalOrderRepository =
                     async { updateLocalOrderRepository(order.toOrderEntity()) }
 
-                updateOrderHistory.await()
-                updateProfileOrderID.await()
-                updateProfileMonthYear.await()
-                updateLocalProfile.await()
-                updateLocalOrderRepository.await()
-
-                NetworkResult.Success("orderPlacing", null)
+                if (
+                    updateOrderHistory.await() &&
+                    updateProfileOrderID.await() &&
+                    updateProfileMonthYear.await() &&
+                    updateLocalProfile.await() &&
+                    updateLocalOrderRepository.await()
+                ) {
+                    NetworkResult.Success("orderPlacing", null)
+                } else {
+                    NetworkResult.Failed("orderPlacing", "Server Error! Failed to Place Order")
+                }
             } catch (e: Exception) {
                 e.message?.let { logCrash("firestore: order placement", it) }
                 NetworkResult.Failed("orderPlacing", "Server Error! Failed to Place Order")
             }
         }
 
-    private suspend fun updateOrderHistory(order: Order) = withContext(Dispatchers.IO) {
-        mFireStore.collection(Constants.ORDER_HISTORY)
-            .document(order.monthYear)
-            .collection("Active")
-            .document(order.orderId)
-            .set(order, SetOptions.merge())
-            .await()
-        repository.upsertOrder(order.toOrderEntity())
-    }
-
-    private suspend fun updateProfileOrderID(order: Order) = withContext(Dispatchers.IO) {
-        mFireStore.collection("users").document(order.customerId)
-            .update("purchaseHistory", FieldValue.arrayUnion(order.orderId)).await()
-    }
-
-    private suspend fun updateProfileMonthYear(order: Order) = withContext(Dispatchers.IO) {
-        mFireStore.collection("users").document(order.customerId)
-            .update("purchasedMonths", FieldValue.arrayUnion(order.monthYear)).await()
-    }
-
-    private suspend fun updateLocalProfile(order: Order) = withContext(Dispatchers.IO) {
-        ActiveOrders(order.orderId).also {
-            repository.upsertActiveOrders(it)
+    private suspend fun updateOrderHistory(order: Order): Boolean {
+        return try {
+            mFireStore.collection(Constants.ORDER_HISTORY)
+                .document(order.monthYear)
+                .collection("Active")
+                .document(order.orderId)
+                .set(order, SetOptions.merge())
+                .await()
+            true
+        } catch (e: IOException) {
+            e.message?.let {
+                logCrash("firestore: placing order cloud and db",
+                    it
+                )
+            }
+            false
         }
-        val profile = repository.getProfileData()!!
-        if (!profile.purchasedMonths.contains(order.monthYear)) {
-            profile.purchasedMonths.add(order.monthYear)
-        }
-        repository.upsertProfile(profile)
     }
 
-    private suspend fun updateLocalOrderRepository(order: OrderEntity) =
-        withContext(Dispatchers.IO) {
+    private suspend fun updateProfileOrderID(order: Order): Boolean {
+        return try {
+            mFireStore.collection("users").document(order.customerId)
+                .update("purchaseHistory", FieldValue.arrayUnion(order.orderId)).await()
+            true
+        } catch (e: IOException) {
+            e.message?.let {
+                logCrash(
+                    "firestore: adding orderID to profile in cloud",
+                    it
+                )
+            }
+            false
+        }
+    }
+
+    private suspend fun updateProfileMonthYear(order: Order): Boolean {
+        return try {
+            mFireStore.collection("users").document(order.customerId)
+                .update("purchasedMonths", FieldValue.arrayUnion(order.monthYear)).await()
+            true
+        } catch (e: IOException) {
+            e.message?.let {
+                logCrash(
+                    "firestore: adding month in profile cloud",
+                    it
+                )
+            }
+            false
+        }
+    }
+
+    private suspend fun updateLocalProfile(order: Order): Boolean {
+        return try {
+            ActiveOrders(order.orderId).also {
+                repository.upsertActiveOrders(it)
+            }
+            val profile = repository.getProfileData()!!
+            if (!profile.purchasedMonths.contains(order.monthYear)) {
+                profile.purchasedMonths.add(order.monthYear)
+            }
+            repository.upsertProfile(profile)
+            true
+        } catch (e: IOException) {
+            e.message?.let {
+                logCrash(
+                    "firestore: placing order cloud and db",
+                    it
+                )
+            }
+            false
+        }
+    }
+
+    private suspend fun updateLocalOrderRepository(order: OrderEntity): Boolean {
+        return try {
             repository.upsertOrder(order)
+            true
+        }catch (e: IOException) {
+            e.message?.let {
+                logCrash(
+                    "firestore: adding order to order entitty db",
+                    it
+                )
+            }
+            false
         }
+    }
 
-    suspend fun generateOrderID(id: String): String =
-        mFireStore.collection(Constants.ORDER_HISTORY).document().id
-
+    suspend fun generateOrderID(): String =
+        mFireStore.collection(Constants.ORDER_HISTORY)
+            .document("${TimeUtil().getMonth()}${TimeUtil().getYear()}")
+            .collection("Active")
+            .document().id
 
     //cancelling order
-    suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) {
-        try {
+    suspend fun cancelOrder(orderEntity: OrderEntity): NetworkResult {
+        return try {
             withContext(Dispatchers.IO) {
-                val removeFromActiveOrder = async { removeFromActiveOrder(orderEntity) }
-                val addToCancelledOrder = async { addToCancelledOrder(orderEntity) }
+                val changeToCancelStatus = async { changeToCancelStatus(orderEntity) }
                 val removeActiveOrderFromProfile = async {
                     updateCloudProfileRecentPurchases(
                         orderEntity.orderId,
                         orderEntity.customerId
                     )
                 }
+                val removeFromLocalDb = async { cancelOrderFromLocalDB(orderEntity.orderId) }
 
-                removeFromActiveOrder.await()
-                addToCancelledOrder.await()
-                removeActiveOrderFromProfile.await()
-                withContext(Dispatchers.Main) {
-                    viewModel.orderCancelledCallback(true)
+                if (
+                    changeToCancelStatus.await() &&
+                    removeActiveOrderFromProfile.await() &&
+                    removeFromLocalDb.await()
+                ) {
+                    NetworkResult.Success("cancel", true)
+                } else {
+                    NetworkResult.Failed("cancel", false)
                 }
             }
         } catch (e: Exception) {
-            viewModel.orderCancelledCallback(false)
+            e.message?.let { logCrash("firestore: cancelling order", it) }
+            NetworkResult.Failed("cancel", false)
         }
     }
 
-    private suspend fun removeFromActiveOrder(order: OrderEntity) = withContext(Dispatchers.IO) {
-        order.orderStatus = Constants.CANCELLED
-        mFireStore.collection(Constants.ORDER_HISTORY)
+    private suspend fun changeToCancelStatus(order: OrderEntity): Boolean {
+        return try {
+            mFireStore.collection(Constants.ORDER_HISTORY)
                 .document(order.monthYear)
-                .collection("Cancelled")
+                .collection("Active")
                 .document(order.orderId)
-                .set(order, SetOptions.merge())
+                .update("orderStatus", Constants.CANCELLED).await()
+            true
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: change the order cancel status in cloud", it) }
+            false
+        }
     }
 
-    private suspend fun addToCancelledOrder(order: OrderEntity) = withContext(Dispatchers.IO) {
-        mFireStore.collection(Constants.ORDER_HISTORY)
-            .document(order.monthYear)
-            .collection("Active")
-            .document(order.orderId)
-            .delete()
-    }
-
-    private suspend fun updateCloudProfileRecentPurchases(item: String?, docID: String) =
-        withContext(Dispatchers.IO) {
+    private suspend fun updateCloudProfileRecentPurchases(item: String?, docID: String): Boolean {
+        return try {
             mFireStore.collection(Constants.USERS)
                 .document(docID).update("purchaseHistory", FieldValue.arrayRemove(item)).await()
+            true
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: removing the order id from profile in cloud", it) }
+            false
         }
+    }
+
+    private suspend fun cancelOrderFromLocalDB(id: String): Boolean {
+        return try {
+            repository.orderCancelled(id, Constants.CANCELLED)
+            repository.cancelActiveOrder(id)
+            true
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: making changes in the local db", it) }
+            false
+        }
+    }
 
     //updating the recent purchase status from the store when app is opened everytime
     suspend fun updateRecentPurchases(

@@ -359,7 +359,7 @@ class InvoiceActivity :
     }
 
     fun approved(status: Boolean) = lifecycleScope.launch {
-        val orderID = async { viewModel.generateOrderID(mCurrentUserID) }
+        val orderID = async { viewModel.generateOrderID() }
         mOrder.orderId = orderID.await()
         delay(250)
         withContext(Dispatchers.IO) {

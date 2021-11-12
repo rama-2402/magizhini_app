@@ -35,7 +35,7 @@ class FirestoreRepository (
     suspend fun checkUserProfileDetails(): String = firestore.checkUserProfileDetails()
 
     //profile
-    suspend fun getProfile(id: String): UserProfileEntity = firestore.getProfile(id)
+//    suspend fun getProfile(id: String): UserProfileEntity = firestore.getProfile(id)
 
     suspend fun uploadProfile(profile: UserProfile): Boolean = firestore.uploadProfile(profile)
 
@@ -66,7 +66,7 @@ class FirestoreRepository (
 
     suspend fun updateRecentPurchases(recentPurchaseIDs: ArrayList<String>, subscriptionIDs: ArrayList<String>) = firestore.updateRecentPurchases(recentPurchaseIDs, subscriptionIDs)
 
-    suspend fun cancelOrder(orderEntity: OrderEntity, viewModel: PurchaseHistoryViewModel) = firestore.cancelOrder(orderEntity, viewModel)
+    suspend fun cancelOrder(orderEntity: OrderEntity): NetworkResult = firestore.cancelOrder(orderEntity)
 
     suspend fun generateSubscription(viewModel: SubscriptionProductViewModel, subscription: Subscription) = firestore.generateSubscription(viewModel, subscription)
 
@@ -87,7 +87,7 @@ class FirestoreRepository (
 
     suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean = firestore.makeTransactionFromWallet(amount, id, status)
 
-    suspend fun generateOrderID(id: String): String = firestore.generateOrderID(id)
+    suspend fun generateOrderID(): String = firestore.generateOrderID()
 
     suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
 

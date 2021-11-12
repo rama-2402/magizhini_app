@@ -7,21 +7,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.AdapterView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 
 class PurchaseHistoryAdapter(
-    val context: Context,
-    var orders: List<OrderEntity>,
-    val viewModel: ViewModel
+    private val context: Context,
+    var orders: MutableList<OrderEntity>,
+    private val onItemClickListener: PurchaseHistoryListener
 ): RecyclerView.Adapter<PurchaseHistoryAdapter.PurchaseHistoryViewHolder>() {
 
     inner class PurchaseHistoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -31,6 +33,7 @@ class PurchaseHistoryAdapter(
         val cartPrice: TextView = itemView.findViewById(R.id.tvCartPrice)
         val paymentStatus: TextView = itemView.findViewById(R.id.tvPaymentStatus)
         val showCart: ShapeableImageView = itemView.findViewById(R.id.ivShowCart)
+        val liveStatus: TextView = itemView.findViewById(R.id.tvStatusText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PurchaseHistoryViewHolder {
@@ -59,10 +62,6 @@ class PurchaseHistoryAdapter(
             }
 
             when(order.orderStatus) {
-                Constants.PENDING -> {
-                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.carbon_delivery))
-                    orderStatus.text = "Cancel"
-                }
                 Constants.CANCELLED -> {
                     showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancelled_order))
                     showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
@@ -70,6 +69,8 @@ class PurchaseHistoryAdapter(
                     orderStatus.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
                     orderStatus.elevation = 0f
                     orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
+                    liveStatus.text = "Order Cancelled"
+
                 }
                 Constants.SUCCESS -> {
                     showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
@@ -77,6 +78,7 @@ class PurchaseHistoryAdapter(
                     orderStatus.text = "Invoice"
                     orderStatus.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
                     orderStatus.setTextColor(ContextCompat.getColor(context, R.color.white))
+                    liveStatus.text = "Products Delivered"
                 }
                 Constants.FAILED -> {
                     showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancelled_order))
@@ -85,23 +87,32 @@ class PurchaseHistoryAdapter(
                     orderStatus.elevation = 0f
                     orderStatus.text = "Delivery \n Failed"
                     orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
+                    liveStatus.text = "Failed to Deliver"
+                }
+                Constants.PENDING -> {
+                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.carbon_delivery))
+                    orderStatus.text = "Cancel"
+                    liveStatus.text = "Getting ready to be packed"
+                }
+                else -> {
+                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.carbon_delivery))
+                    orderStatus.text = "Cancel"
+                    liveStatus.text = order.orderStatus
                 }
             }
 
             showCart.setOnClickListener {
                 showCart.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-                cancelOrder(viewModel, order)
+                cancelOrder(position, order.orderStatus)
             }
 
             orderStatus.setOnClickListener {
                 orderStatus.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-                cancelOrder(viewModel, order)
+                cancelOrder(position, order.orderStatus)
             }
 
             itemView.setOnClickListener {
-                when(viewModel) {
-                    is PurchaseHistoryViewModel -> viewModel.showCartDialog(order.cart)
-                }
+                onItemClickListener.showCart(order.cart)
             }
 
         }
@@ -111,15 +122,20 @@ class PurchaseHistoryAdapter(
         return orders.size
     }
 
-    private fun cancelOrder(viewModel: ViewModel, order: OrderEntity) {
-        viewModel as PurchaseHistoryViewModel
-        when (order.orderStatus) {
-            Constants.PENDING -> {
-                viewModel.cancelOrder(order)
-            }
+    private fun cancelOrder(position: Int, status: String) {
+        when (status) {
             Constants.SUCCESS -> {
-                viewModel.generateInvoice(order)
+                onItemClickListener.generateInvoice(position)
+            }
+            else -> {
+                onItemClickListener.cancelOrder(position)
             }
         }
+    }
+
+    interface PurchaseHistoryListener {
+        fun showCart(cart: List<CartEntity>)
+        fun cancelOrder(position: Int)
+        fun generateInvoice(position: Int)
     }
 }

@@ -64,17 +64,14 @@ class AddressAdapter(
             add.setOnClickListener {
                 add.startAnimation(AnimationUtils.loadAnimation(add.context, R.anim.bounce))
                 onItemClickListener.addAddress(position)
-//                viewModel.addNewAddress(position + 1)
             }
 
             card.setOnClickListener {
-//                viewModel.editAddress(address, position)
                 onItemClickListener.updateAddress(position)
             }
 
             delete.setOnClickListener {
                 delete.startAnimation(AnimationUtils.loadAnimation(delete.context, R.anim.bounce))
-//                viewModel.deleteAddress(userID, position)
                 onItemClickListener.deleteAddress(position)
             }
         }
@@ -82,7 +79,6 @@ class AddressAdapter(
         holder.uncheck.setOnClickListener {
             holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
             holder.uncheck.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-//            viewModel.selectedAddress(address, position)
             onItemClickListener.selectedAddress(position)
         }
     }

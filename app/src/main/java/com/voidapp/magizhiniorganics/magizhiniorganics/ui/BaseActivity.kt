@@ -211,9 +211,7 @@ open class BaseActivity : AppCompatActivity() {
                 }
                 is PurchaseHistoryActivity -> {
                     when(data) {
-                        "cs" -> activity.moveToCustomerSupport()
-                        else -> activity.cancellationConfirmed()
-
+                        "" -> activity.cancellationConfirmed()
                     }
                 }
                 is SubscriptionHistoryActivity -> {
@@ -235,13 +233,20 @@ open class BaseActivity : AppCompatActivity() {
                         "setting" -> activity.proceedToRequestManualPermission()
                     }
                 }
+                is PurchaseHistoryActivity -> {
+                    hideExitSheet()
+                    when(data) {
+                        "cs" -> activity.moveToCustomerSupport()
+                        "permission" -> activity.proceedToRequestPermission()
+                        "setting" -> activity.proceedToRequestManualPermission()
+                    }
+                }
                 is InvoiceActivity -> {
                     hideExitSheet()
                     activity.moveToCustomerSupport()
                 }
             }
         }
-
         ExitBottomSheetdialog.show()
     }
 

@@ -3,11 +3,13 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory
 import android.Manifest
 import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Message
 import android.provider.MediaStore
 import android.util.Log
 import android.view.animation.AnimationUtils
@@ -40,10 +42,13 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -54,7 +59,11 @@ import java.io.FileOutputStream
 import java.io.IOException
 import kotlin.math.ceil
 
-class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
+class PurchaseHistoryActivity :
+    BaseActivity(),
+    KodeinAware,
+    PurchaseHistoryAdapter.PurchaseHistoryListener
+{
     override val kodein: Kodein by kodein()
 
     private lateinit var binding: ActivityPurchaseHistoryBinding
@@ -68,6 +77,7 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     private var mFilterMonth = "January"
     private var mFilterYear = "2021"
     private var mCancelOrder = OrderEntity()
+    private var mCancelOrderPosition = 0
     private var mInvoiceOrder = OrderEntity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,103 +159,105 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     }
 
     private fun initLiveData() {
-        viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
-        viewModel.getFavorites()
+        viewModel.getProfileData("${mFilterMonth}${mFilterYear}")
+//        viewModel.getFavorites()
 
-        viewModel.purchaseHistory.observe(this, { orderEntities ->
-            lifecycleScope.launch {
-                mOrderHistory.clear()
-                mOrderHistory.addAll(orderEntities)
-                mOrderHistory.sortByDescending {
-                    it.purchaseDate
-                }
-                ordersAdapter.orders = mOrderHistory
-                ordersAdapter.notifyDataSetChanged()
-                delay(1500)
-                hideShimmer()
-            }
-        })
-
-        viewModel.showCartBottomSheet.observe(this, {
-            orderItemsAdapter.cartItems = it
-            showCartBottomSheet()
-        })
+//        viewModel.showCartBottomSheet.observe(this, {
+//            orderItemsAdapter.cartItems = it
+//            showCartBottomSheet()
+//        })
 
         //observing the favorites livedata
-        viewModel.favorites.observe(this, {
-            orderItemsAdapter.favorites = it
-        })
+//        viewModel.favorites.observe(this, {
+//            orderItemsAdapter.favorites = it
+//        })
 
         viewModel.moveToProductReview.observe(this, {
             moveToProductDetails(viewModel.productId, viewModel.productName)
         })
 
-        viewModel.cancelOrder.observe(this, {
-            mCancelOrder = it
-            showExitSheet(this, "Confirm Cancellation")
-        })
+//        viewModel.cancelOrder.observe(this, {
+//            mCancelOrder = it
+//            showExitSheet(this, "Confirm Cancellation")
+//        })
 
-        viewModel.invoiceOrder.observe(this, {
-            mInvoiceOrder = it
-            createPDF(mInvoiceOrder)
-        })
+//        viewModel.invoiceOrder.observe(this, {
+//            mInvoiceOrder = it
+//            createPDF(mInvoiceOrder)
+//            if (PermissionsUtil.hasStoragePermission(this)) {
+//                createPDF(mInvoiceOrder)
+//            } else {
+//                showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+//            }
+//        })
+//
+//        viewModel.cancellationStatus.observe(this, {
+//            if (it) {
+//                startWorkerThread(mCancelOrder)
+//                viewModel.orderCancelled(mCancelOrder)
+//                for (i in mOrderHistory.indices) {
+//                    if (mOrderHistory[i].orderId == mCancelOrder.orderId) {
+//                        mOrderHistory[i].orderStatus = Constants.CANCELLED
+//                        ordersAdapter.orders = mOrderHistory
+//                        ordersAdapter.notifyItemChanged(i)
+//                        hideProgressDialog()
+//                        showToast(this, "Order Cancelled", Constants.SHORT)
+//                        showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
+//                    }
+//                }
+//            } else {
+//                hideProgressDialog()
+//                showErrorSnackBar("Cancellation failed! Please try again later", true)
+//            }
+//        })
 
-        viewModel.cancellationStatus.observe(this, {
-            if (it) {
-                startWorkerThread(mCancelOrder)
-                viewModel.orderCancelled(mCancelOrder)
-                for (i in mOrderHistory.indices) {
-                    if (mOrderHistory[i].orderId == mCancelOrder.orderId) {
-                        mOrderHistory[i].orderStatus = Constants.CANCELLED
-                        ordersAdapter.orders = mOrderHistory
-                        ordersAdapter.notifyItemChanged(i)
-                        hideProgressDialog()
-                        showToast(this, "Order Cancelled", Constants.SHORT)
-                        showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
+//        viewModel.startWork.observe(this, {
+//            val workRequest: WorkRequest =
+//                OneTimeWorkRequestBuilder<GetOrderHistoryService>()
+//                    .setInputData(
+//                        workDataOf(
+//                            "filter" to "${mFilterMonth}${mFilterYear}",
+//                            "id" to SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
+//                        )
+//                    )
+//                    .build()
+//
+//            WorkManager.getInstance(this).enqueue(workRequest)
+//            WorkManager.getInstance(this)
+//                .getWorkInfoByIdLiveData(workRequest.id)
+//                .observe(this, {
+//                    when (it.state) {
+//                        WorkInfo.State.SUCCEEDED -> {
+//                            viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
+//                        }
+//                        WorkInfo.State.CANCELLED -> {
+//                            hideShimmer()
+//                            showErrorSnackBar("Failed to get data! Please try again later", true)
+//                        }
+//                        WorkInfo.State.FAILED -> {
+//                            hideShimmer()
+//                            showErrorSnackBar("Failed to get data! Please try again later", true)
+//                        }
+//                    }
+//                })
+//        })
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.status.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
+                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
+                    is NetworkResult.Loading -> {
+                        if (result.message == "") {
+                            showProgressDialog()
+                        } else {
+                            showSuccessDialog("", result.message, result.data)
+                        }
                     }
+                    else -> Unit
                 }
-            } else {
-                hideProgressDialog()
-                showErrorSnackBar("Cancellation failed! Please try again later", true)
             }
-        })
-
-        viewModel.startWork.observe(this, {
-            val workRequest: WorkRequest =
-                OneTimeWorkRequestBuilder<GetOrderHistoryService>()
-                    .setInputData(
-                        workDataOf(
-                            "filter" to "${mFilterMonth}${mFilterYear}",
-                            "id" to SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
-                        )
-                    )
-                    .build()
-
-            WorkManager.getInstance(this).enqueue(workRequest)
-            WorkManager.getInstance(this)
-                .getWorkInfoByIdLiveData(workRequest.id)
-                .observe(this, {
-                    when (it.state) {
-                        WorkInfo.State.SUCCEEDED -> {
-                            viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
-                        }
-                        WorkInfo.State.CANCELLED -> {
-                            hideShimmer()
-                            showErrorSnackBar("Failed to get data! Please try again later", true)
-                        }
-                        WorkInfo.State.FAILED -> {
-                            hideShimmer()
-                            showErrorSnackBar("Failed to get data! Please try again later", true)
-                        }
-                    }
-                })
-        })
-
-        viewModel.errorMessage.observe(this, {
-            hideShimmer()
-            Toast.makeText(this, "No data available in the selected period", Toast.LENGTH_SHORT)
-                .show()
-        })
+        }
     }
 
     private fun startWorkerThread(order: OrderEntity) {
@@ -268,7 +280,6 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
     }
 
     fun cancellationConfirmed() {
-        hideExitSheet()
         showProgressDialog()
         viewModel.confirmCancellation(mCancelOrder)
     }
@@ -292,19 +303,17 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         }
     }
 
-    private fun showCartBottomSheet() {
+    private fun showCartBottomSheet() =
         ItemsBottomSheet(this, orderItemsAdapter).show()
-    }
 
-    private fun hideCartBottomSheet() {
+    private fun hideCartBottomSheet() =
         ItemsBottomSheet(this, orderItemsAdapter).dismiss()
-    }
 
     private fun initRecyclerView() {
         ordersAdapter = PurchaseHistoryAdapter(
             this,
-            listOf(),
-            viewModel
+            mutableListOf(),
+            this
         )
         binding.rvPurchaseHistory.layoutManager = LinearLayoutManager(this)
         binding.rvPurchaseHistory.adapter = ordersAdapter
@@ -343,28 +352,94 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
         singlePageDoc(order, items, 0)
     }
 
-    private fun checkPermissions() {
-        Dexter.withContext(this)
-            .withPermission(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            .withListener(object : PermissionListener {
-                override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-                    createPDF(mInvoiceOrder)
-                }
+    fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
 
-                override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
-                    Toast.makeText(this@PurchaseHistoryActivity, "Permission Denied", Toast.LENGTH_SHORT).show()
-                }
+    fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
 
-                override fun onPermissionRationaleShouldBeShown(
-                    request: PermissionRequest?,
-                    token: PermissionToken?
-                ) {
-                    token?.continuePermissionRequest()
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
+            if(
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                showToast(this, "Storage Permission Granted")
+                createPDF(mInvoiceOrder)
+            } else {
+                showToast(this, "Storage Permission Denied")
+                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
+            }
+        }
+    }
+
+    private fun onSuccessCallback(message: String, data: Any?) {
+        when(message) {
+            "orders" -> {
+                lifecycleScope.launch {
+                    if (data == null) {
+                        hideShimmer()
+                        binding.llEmptyLayout.visible()
+                    } else {
+                        binding.llEmptyLayout.remove()
+                        data as MutableList<OrderEntity>
+                        mOrderHistory.clear()
+                        mOrderHistory.sortByDescending {
+                            it.purchaseDate
+                        }
+                        mOrderHistory.addAll(data)
+                        ordersAdapter.orders = mOrderHistory
+                        ordersAdapter.notifyDataSetChanged()
+                        delay(1000)
+                        hideShimmer()
+                    }
                 }
-            })
-            .check()
+            }
+            "cancel" -> {
+                startWorkerThread(mCancelOrder)
+                for (i in mOrderHistory.indices) {
+                    mOrderHistory[mCancelOrderPosition].orderStatus = Constants.CANCELLED
+                    ordersAdapter.orders[mCancelOrderPosition] = mOrderHistory[mCancelOrderPosition]
+                    ordersAdapter.notifyItemChanged(i)
+                    hideProgressDialog()
+                    showToast(this, "Order Cancelled", Constants.SHORT)
+                    showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
+                }
+            }
+        }
+    }
+
+    private fun onFailedCallback(message: String, data: Any?) {
+        when(message) {
+            "cancel" -> {
+                hideProgressDialog()
+                showErrorSnackBar("Server Error! Order cancellation failed. Try later", true)
+            }
+        }
+    }
+
+    override fun showCart(cart: List<CartEntity>) {
+        orderItemsAdapter.cartItems = cart
+        showCartBottomSheet()
+    }
+
+    override fun cancelOrder(position: Int) {
+        mCancelOrderPosition = position
+        mCancelOrder = mOrderHistory[position]
+        showExitSheet(this, "Confirm Cancellation")
+    }
+
+    override fun generateInvoice(position: Int) {
+        mInvoiceOrder = mOrderHistory[position]
+//        createPDF(mInvoiceOrder)
+        if (PermissionsUtil.hasStoragePermission(this)) {
+            createPDF(mInvoiceOrder)
+        } else {
+            showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+        }
     }
 
     private fun singlePageDoc(
@@ -617,7 +692,6 @@ class PurchaseHistoryActivity : BaseActivity(), KodeinAware {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 
-                    pdfDocument.finishPage(pageOne)
                     val values = ContentValues().apply {
                         put(MediaStore.Downloads.DISPLAY_NAME, "Invoice.pdf")
                         put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
