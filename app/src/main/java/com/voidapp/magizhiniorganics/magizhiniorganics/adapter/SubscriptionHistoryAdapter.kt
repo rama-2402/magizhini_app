@@ -20,14 +20,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 
 class SubscriptionHistoryAdapter(
-    val activity: SubscriptionHistoryActivity,
-    val viewModel: SubscriptionHistoryViewModel,
-    var subscriptions: List<SubscriptionEntity>
+    var subscriptions: MutableList<SubscriptionEntity>,
+    private val onItemClickListener: SubscriptionHistoryListener
 ): RecyclerView.Adapter<SubscriptionHistoryAdapter.SubscriptionHistoryViewHolder>() {
 
-    inner class SubscriptionHistoryViewHolder(val binding: RvSubscriptionHistoryItemBinding) : RecyclerView.ViewHolder(binding.root) {
-
-    }
+    inner class SubscriptionHistoryViewHolder(val binding: RvSubscriptionHistoryItemBinding) : RecyclerView.ViewHolder(binding.root) {    }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -48,7 +45,7 @@ class SubscriptionHistoryAdapter(
             tvSubType.text = "Rs: ${subscription.estimateAmount}"
             when (subscription.status) {
                 Constants.SUB_ACTIVE ->  {
-                    ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivered))
+//                    ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivered))
                         renewal = if (
                             subscription.subType != Constants.SINGLE_PURCHASE &&
                             System.currentTimeMillis() > TimeUtil().getCustomDateFromDifference(subscription.endDate, -7)
@@ -59,6 +56,10 @@ class SubscriptionHistoryAdapter(
                             tvRenew.text = "Unsubscribe"
                             false
                         }
+                    tvRenew.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(tvRenew.context, R.color.matteRed))
+                    tvRenew.elevation = 4f
+                    tvRenew.setTextColor(ContextCompat.getColor(tvRenew.context, R.color.white))
+
                 }
                 Constants.SUB_CANCELLED -> {
                     ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivery_cancelled))
@@ -71,19 +72,30 @@ class SubscriptionHistoryAdapter(
 
             tvRenew.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                if (subscription.status == Constants.SUB_ACTIVE) {
-                    viewModel.renewSelectedSubscription(subscription, renewal)
+                if (tvRenew.text == "Unsubscribe") {
+                    onItemClickListener.cancelSub(position)
+                //                    viewModel.renewSelectedSubscription(subscription, renewal)
+                } else {
+                    onItemClickListener.renewSub(position)
                 }
             }
 
             lytSub.setOnClickListener {
-                activity.showProgressDialog()
-                activity.showCalendarDialog(subscription)
+//                activity.showProgressDialog()
+//                activity.showCalendarDialog(subscription)
+                onItemClickListener.showCalendar(position)
             }
         }
     }
 
     override fun getItemCount(): Int {
         return subscriptions.size
+    }
+
+    interface SubscriptionHistoryListener {
+        fun renewSub(position: Int)
+        fun showCalendar(position: Int)
+        fun cancelSub(position: Int)
+
     }
 }

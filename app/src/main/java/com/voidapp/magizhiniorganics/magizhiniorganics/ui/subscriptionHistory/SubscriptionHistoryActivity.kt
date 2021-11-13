@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Message
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -21,6 +22,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.SubscriptionHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionHistoryBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCalendarBinding
@@ -29,21 +31,24 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatAc
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
-class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultListener {
+class SubscriptionHistoryActivity :
+    BaseActivity(),
+    KodeinAware,
+    PaymentResultListener,
+    SubscriptionHistoryAdapter.SubscriptionHistoryListener
+{
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivitySubscriptionHistoryBinding
     private lateinit var viewModel: SubscriptionHistoryViewModel
@@ -53,10 +58,13 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
     private var mSubscription: SubscriptionEntity = SubscriptionEntity()
     private var mAllSubscriptions: MutableList<SubscriptionEntity> = mutableListOf()
-    private val mSubscriptionStatusFilter: MutableList<String> = mutableListOf()
+    private val mSubscriptionStatusFilter: MutableList<String> = mutableListOf(
+        Constants.SUB_ACTIVE,
+        Constants.SUB_CANCELLED
+    )
 
-    private var mWallet: Wallet = Wallet()
-    private var mProfile: UserProfileEntity = UserProfileEntity()
+    private var mSubscriptionPosition: Int = 0
+
     private val paymentList = mutableListOf<String>()
     private var id: String = ""
 
@@ -85,7 +93,8 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
             }
 
             //scroll change listener to hide the fab when scrolling down
-            binding.rvSubscriptionHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            binding.rvSubscriptionHistory.addOnScrollListener(object :
+                RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
                     super.onScrolled(recyclerView, up, down)
                     if (down > 0 && binding.fabMonthFilter.isVisible) {
@@ -97,7 +106,11 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
             })
 
             binding.fabMonthFilter.setOnClickListener {
-                showListBottomSheet(this@SubscriptionHistoryActivity, mSubscriptionStatusFilter as ArrayList<String>, "filter")
+                showListBottomSheet(
+                    this@SubscriptionHistoryActivity,
+                    mSubscriptionStatusFilter as ArrayList<String>,
+                    "filter"
+                )
             }
 
         }
@@ -105,9 +118,8 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
     private fun initRecyclerView() {
         subAdapter = SubscriptionHistoryAdapter(
-            this,
-            viewModel,
-            listOf()
+            mutableListOf(),
+            this
         )
         binding.rvSubscriptionHistory.layoutManager = LinearLayoutManager(this)
         binding.rvSubscriptionHistory.adapter = subAdapter
@@ -117,70 +129,39 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
         viewModel.activeSub.observe(this, {
             mAllSubscriptions.clear()
             lifecycleScope.launch {
-                mAllSubscriptions.addAll(it)
-                subAdapter.subscriptions = it
-                subAdapter.notifyDataSetChanged()
-                delay(1500)
-                hideShimmer()
+                if (it.isEmpty()) {
+                    binding.llEmptyLayout.visible()
+                } else {
+                    binding.llEmptyLayout.remove()
+                    mAllSubscriptions.addAll(it)
+                    subAdapter.subscriptions = it
+                    subAdapter.notifyDataSetChanged()
+                    delay(1500)
+                    hideShimmer()
+                }
             }
         })
-        viewModel.error.observe(this, {
-            lifecycleScope.launch {
-                delay(1500)
-                hideSuccessDialog()
-                showErrorSnackBar(it, true)
-            }
-        })
-        viewModel.subStatus.observe(this, {
-            lifecycleScope.launch (Dispatchers.Main) {
-                delay(1500)
-                if (it == "complete") {
-                    hideSuccessDialog()
-                    showSuccessDialog(title = "", body = "Unsubscribed successfully!", content = "complete")
-                    for (i in 0 until mAllSubscriptions.size) {
-                        if (mSubscription.id == mAllSubscriptions[i].id) {
-                            subAdapter.subscriptions[i].status = Constants.CANCELLED
-                            subAdapter.notifyItemChanged(i)
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.status.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
+                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
+                    is NetworkResult.Loading -> {
+                        if (result.message == "") {
+                            showProgressDialog()
+                        } else {
+                            showSuccessDialog("", result.message, result.data)
                         }
                     }
-                    delay(2000)
-                    hideSuccessDialog()
-                    showSuccessDialog(title = "",body = "Adding balance to the Wallet...", content = "wallet")
-                    viewModel.calculateBalance(mSubscription)
+                    else -> Unit
                 }
             }
-        })
-        viewModel.wallet.observe(this, {
-            mWallet = it
-            paymentList.clear()
-            paymentList.add("Online")
-            paymentList.add("Wallet - (${mWallet.amount})")
-        })
-        viewModel.renewSub.observe(this, {
-            renewSubscription(it)
-        })
-        viewModel.cancelSub.observe(this, {
-            unsubscribeSubscription(it)
-        })
-        viewModel.profile.observe(this, {
-            mProfile = it
-        })
-        viewModel.walletTransactionStatus.observe(this, {
-            lifecycleScope.launch(Dispatchers.Main) {
-                delay(1500)
-                hideSuccessDialog()
-                if (it) {
-                    showExitSheet(this@SubscriptionHistoryActivity, "Outstanding Balance for Delivery Cancelled Dates, Delivery Failed Days and Remaining Days is Added to the Wallet Successfully!\n" +
-                            " \n" +
-                            " Please Click the message to contact Customer Support" , "cs")
-                } else {
-                    showExitSheet(this@SubscriptionHistoryActivity, "Server Error! Failed to add Balance to the Wallet. \n \n Please Click the message to contact Customer Support", "cs")
-                }
-            }
-        })
+        }
     }
 
     fun setSubscriptionFilter(filter: String) {
+        binding.tvEmptyMessage.text = "You don't have any $filter subscriptions !"
         when (filter) {
             Constants.SUB_ACTIVE -> {
                 showShimmer()
@@ -197,14 +178,9 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
         viewModel.getSubscriptions(Constants.SUB_ACTIVE)
 //        viewModel.getWallet(id)
         viewModel.getProfile()
-        with (mSubscriptionStatusFilter) {
-            clear()
-            add(Constants.SUB_ACTIVE)
-            add(Constants.SUB_CANCELLED)
-        }
     }
 
-    fun showCalendarDialog(sub: SubscriptionEntity) {
+    private fun showCalendarDialog(sub: SubscriptionEntity) {
         var unSubscribe: Boolean = true
         var cancelDate: Long = 0L
         val cancelDates: MutableList<String> = mutableListOf()
@@ -217,7 +193,8 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
                 LayoutInflater.from(baseContext),
                 R.layout.dialog_calendar,
                 null,
-                false)
+                false
+            )
 
         if (sub.status == Constants.SUB_CANCELLED) {
             view.unsubscribe.visibility = View.GONE
@@ -286,17 +263,22 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
                 calendarDialog.dismiss()
                 showExitSheet(this, "Cancel Subscription")
             } else {
-                if (viewModel.cancelDate(sub, cancelDate)) {
-                    val event = Event(resources.getColor(R.color.matteRed, theme), cancelDate, "Delivered")
-                    cancelDates.add(TimeUtil().getCustomDate(dateLong = cancelDate))      //we are creating list of date strings to check
-                    view.calendarView.addEvent(event)
-                    unSubscribe = true
-                    view.tvDueText.text = "Due Date: "
-                    view.tvDueDate.text = TimeUtil().getCustomDate(dateLong = sub.endDate)
-                    view.tvUnsubscribe.text = "UNSUBSCRIBE"
-                    Toast.makeText(this, "Delivery Cancelled", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Cancellation failed! Try later", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    val cancel = async { viewModel.cancelDate(sub, cancelDate) }
+                    if (cancel.await()) {
+                        val event =
+                            Event(resources.getColor(R.color.matteRed, theme), cancelDate, "Delivered")
+                        cancelDates.add(TimeUtil().getCustomDate(dateLong = cancelDate))      //we are creating list of date strings to check
+                        view.calendarView.addEvent(event)
+                        unSubscribe = true
+                        view.tvDueText.text = "Due Date: "
+                        view.tvDueDate.text = TimeUtil().getCustomDate(dateLong = sub.endDate)
+                        view.tvUnsubscribe.text = "UNSUBSCRIBE"
+                        Toast.makeText(this@SubscriptionHistoryActivity, "Delivery Cancelled", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@SubscriptionHistoryActivity, "Cancellation failed! Try later", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
         }
@@ -311,14 +293,11 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
     }
 
     fun confirmCancellation() {
-        //logic to cancel the current subscription
-        hideExitSheet()
         showSuccessDialog("", "Cancelling Subscription...", "dates")
         viewModel.cancelSubscription(mSubscription)
     }
 
     fun moveToCustomerSupport() {
-        hideExitSheet()
         Intent(this, ChatActivity::class.java).also {
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
@@ -345,22 +324,11 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
         finish()
     }
 
-    private fun unsubscribeSubscription(subscription: SubscriptionEntity) {
-        mSubscription = subscription
-        showExitSheet(this, "Cancel Subscription")
-    }
-
-    private fun renewSubscription(subscription: SubscriptionEntity) {
-        mSubscription = subscription
-        Toast.makeText(this, "Choose Payment Method", Toast.LENGTH_SHORT).show()
-        showListBottomSheet(this, paymentList as ArrayList<String>, "payment")
-    }
-
     fun selectedPaymentMode(payment: String) {
         when (payment) {
             "Online" -> {
                 showSuccessDialog("", "Processing Payment...", "wallet")
-                with(mProfile) {
+                with(viewModel.currentUserProfile) {
                     startPayment(
                         this@SubscriptionHistoryActivity,
                         mailId,
@@ -397,62 +365,131 @@ class SubscriptionHistoryActivity : BaseActivity(), KodeinAware, PaymentResultLi
     }
 
 
-    fun approved(status: Boolean) = lifecycleScope.launch (Dispatchers.IO) {
-        withContext(Dispatchers.Main) {
-            showSuccessDialog("", "Processing payment from Wallet...", "wallet")
-        }
-        if (status) {
-            if (viewModel.checkWalletForBalance(mSubscription.estimateAmount, id)) {
-                val id = viewModel.makeTransactionFromWallet(mSubscription.estimateAmount, id, mSubscription.id)
-                validatingTransactionBeforeOrder(id)
+    fun approved(status: Boolean) {
+        showSuccessDialog("", "Processing payment from Wallet...", "wallet")
+        lifecycleScope.launch {
+            if (viewModel.checkWalletForBalance(mSubscription.estimateAmount)) {
+                withContext(Dispatchers.IO) {
+                    with(mSubscription) {
+                        viewModel.makeTransactionFromWallet(
+                            estimateAmount,
+                            customerID,
+                            id,
+                            "Remove"
+                        )
+                    }
+                }
             } else {
-                withContext(Dispatchers.Main) {
-                    delay(1000)
+                delay(1000)
+                hideSuccessDialog()
+                showErrorSnackBar(
+                    "Insufficient balance in Wallet. Pick another payment method",
+                    true
+                )
+            }
+        }
+    }
+
+    private fun startTransaction() = lifecycleScope.launch(Dispatchers.IO) {
+        val renewedDate = TimeUtil().getCustomDateFromDifference(mSubscription.endDate, 30)
+        viewModel.renewSubscription(mSubscription.id, mSubscription.monthYear, renewedDate)
+    }
+
+    private fun onSuccessCallback(message: String, data: Any?) {
+        when(message) {
+            "wallet" -> {
+                viewModel.liveWallet = data as Wallet
+                paymentList.clear()
+                paymentList.add("Online")
+                paymentList.add("Wallet - (${data.amount})")
+            }
+            "transaction" -> viewModel.updateTransaction(data as TransactionHistory)
+            "transactionID" -> lifecycleScope.launch {
+                if (mSubscription.status == Constants.CANCELLED) {
+                    delay(1500)
                     hideSuccessDialog()
-                    showErrorSnackBar(
-                        "Insufficient balance in Wallet. Pick another payment method",
-                        true
+                    showExitSheet(
+                        this@SubscriptionHistoryActivity,
+                        "Outstanding Balance for Delivery Cancelled Dates, Delivery Failed Days and Remaining Days is Added to the Wallet Successfully!\n" +
+                                " \n" +
+                                " Please Click the message to contact Customer Support for any queries or further assistance",
+                        "cs"
                     )
+                } else {
+                    startTransaction()
                 }
             }
-        } else {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(this@SubscriptionHistoryActivity, "Transaction cancelled", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private suspend fun validatingTransactionBeforeOrder(id: String) = withContext(Dispatchers.Main) {
-        if ( id == "failed") {
-            hideSuccessDialog()
-            showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
-            return@withContext
-        } else {
-            withContext(Dispatchers.Main) {
-                hideSuccessDialog()
-                showSuccessDialog("", "Updating Subscription...", "dates")
-                startTransaction()
-            }
-        }
-    }
-
-    private suspend fun startTransaction() = withContext (Dispatchers.IO) {
-        val renewedDate = TimeUtil().getCustomDateFromDifference(mSubscription.endDate, 30)
-        if(viewModel.renewSubscription(mSubscription.id, mSubscription.monthYear, renewedDate)) {
-            delay(1500)
-            withContext(Dispatchers.Main) {
+            "renew" -> lifecycleScope.launch {
+                delay(1500)
                 hideSuccessDialog()
                 viewModel.getSubscriptions(Constants.SUB_ACTIVE)
-                showSuccessDialog("", "Subscription Updated Successfully...")
+                showSuccessDialog("", "Subscription renewed Successfully...")
                 delay(1500)
                 hideSuccessDialog()
             }
-        } else {
-            withContext(Dispatchers.Main) {
+            "cancelled" -> lifecycleScope.launch {
+                delay(1500)
                 hideSuccessDialog()
-                showErrorSnackBar("Server Error! Subscription can't be created. If money is debited please contact customer support", false, "long")
-                return@withContext
+                showSuccessDialog(
+                    title = "",
+                    body = "Unsubscribed successfully!",
+                    content = "complete"
+                )
+                subAdapter.subscriptions[mSubscriptionPosition].status = Constants.CANCELLED
+                subAdapter.notifyItemChanged(mSubscriptionPosition)
+                delay(2000)
+                hideSuccessDialog()
+                showSuccessDialog(
+                    title = "",
+                    body = "Adding balance to the Wallet... Please wait",
+                    content = "wallet"
+                )
+                val refundAmount = viewModel.calculateBalance(mSubscription)
+                with(mSubscription) {
+                    viewModel.makeTransactionFromWallet(refundAmount, customerID, id, "Add")
+                }
             }
         }
     }
+
+    private fun onFailedCallback(message: String, data: Any?) {
+        when(message) {
+            "wallet" -> showErrorSnackBar(data!! as String, true)
+            "transaction" -> {
+                hideSuccessDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+            "transactionID" -> {
+                hideSuccessDialog()
+                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
+            }
+            "renew" -> {
+                hideSuccessDialog()
+                showExitSheet(this, "Server Error! Subscription renewal failed. If money is debited please contact customer support. \n \n For further queries please click this message to contact Customer Support", "cs")
+            }
+            "cancelled" -> {
+                hideSuccessDialog()
+                showExitSheet(this, "Server Error! Subscription cancellation failed. \n \n For further queries please click this message to contact Customer Support", "cs")
+            }
+        }
+    }
+
+    override fun renewSub(position: Int) {
+        mSubscription = mAllSubscriptions[position]
+        Toast.makeText(this, "Choose Payment Method", Toast.LENGTH_SHORT).show()
+        showListBottomSheet(this, paymentList as ArrayList<String>, "payment")
+    }
+
+    override fun cancelSub(position: Int) {
+        mSubscriptionPosition = position
+        mSubscription = mAllSubscriptions[position]
+        mSubscription.status = Constants.CANCELLED
+        showExitSheet(this, "Cancel Subscription")
+    }
+
+    override fun showCalendar(position: Int) {
+        showProgressDialog()
+        showCalendarDialog(mAllSubscriptions[position])
+    }
+
 }

@@ -169,9 +169,6 @@ interface UserProfileDao {
     @Query("SELECT * FROM SubscriptionEntity WHERE id = :id")
     fun getSubscription(id: String): SubscriptionEntity
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun cancelSubscription(subscriptionEntity: SubscriptionEntity)
-
     @Query("UPDATE SubscriptionEntity SET endDate = :newDate WHERE id = :id")
     fun updateSubscription(id: String, newDate: Long)
 

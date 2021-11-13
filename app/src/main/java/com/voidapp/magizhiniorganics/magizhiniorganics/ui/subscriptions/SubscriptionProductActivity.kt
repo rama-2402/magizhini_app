@@ -81,7 +81,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
     //sub class variables
     private var oSubscription = Subscription()
-    private val paymentList = mutableListOf<String>()
+    private val paymentList = mutableListOf<String>("Online", "Wallet")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

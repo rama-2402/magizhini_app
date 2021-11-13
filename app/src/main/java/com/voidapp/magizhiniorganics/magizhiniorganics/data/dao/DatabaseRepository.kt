@@ -114,8 +114,6 @@ class DatabaseRepository(
 
     fun getSubscription(id: String): SubscriptionEntity = db.getUserProfileDao().getSubscription(id)
 
-    fun cancelSubscription(subscriptionEntity: SubscriptionEntity) = db.getUserProfileDao().cancelSubscription(subscriptionEntity)
-
     fun updateSubscription(id: String, newDate: Long) = db.getUserProfileDao().updateSubscription(id, newDate)
 
     //Active orders and subscriptions

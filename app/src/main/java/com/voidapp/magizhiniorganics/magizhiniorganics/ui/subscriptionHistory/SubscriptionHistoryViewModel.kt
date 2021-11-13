@@ -17,8 +17,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -30,95 +33,65 @@ class SubscriptionHistoryViewModel(
     val dbRepository: DatabaseRepository
 ): ViewModel() {
 
-    private var _activeSubs: MutableLiveData<List<SubscriptionEntity>> = MutableLiveData()
-    val activeSub: LiveData<List<SubscriptionEntity>> = _activeSubs
-    private var _error: MutableLiveData<String> = MutableLiveData()
-    val error: LiveData<String> = _error
-    private var _subStatus: MutableLiveData<String> = MutableLiveData()
-    val subStatus: LiveData<String> = _subStatus
-    private var _wallet: MutableLiveData<Wallet> = MutableLiveData()
-    val wallet: LiveData<Wallet> = _wallet
-    private var _renewSub: MutableLiveData<SubscriptionEntity> = MutableLiveData()
-    val renewSub: LiveData<SubscriptionEntity> = _renewSub
-    private var _cancelSub: MutableLiveData<SubscriptionEntity> = MutableLiveData()
-    val cancelSub: LiveData<SubscriptionEntity> = _cancelSub
-    private var _profile: MutableLiveData<UserProfileEntity> = MutableLiveData()
-    val profile: LiveData<UserProfileEntity> = _profile
-    private var _walletTransactionStatus: MutableLiveData<Boolean> = MutableLiveData()
-    val walletTransactionStatus: LiveData<Boolean> = _walletTransactionStatus
+    var liveWallet: Wallet = Wallet()
+    var currentUserProfile: UserProfileEntity = UserProfileEntity()
+
+    private var _activeSubs: MutableLiveData<MutableList<SubscriptionEntity>> = MutableLiveData()
+    val activeSub: LiveData<MutableList<SubscriptionEntity>> = _activeSubs
+
+    private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(
+        NetworkResult.Empty)
+    val status: StateFlow<NetworkResult> = _status
 
     fun getProfile() = viewModelScope.launch(Dispatchers.IO) {
         val profile = dbRepository.getProfileData()!!
+        getWallet(profile.id)
         withContext(Dispatchers.Main) {
-            _profile.value = profile
+            currentUserProfile = profile
         }
+    }
+
+    private suspend fun getWallet(id: String) {
+        val suspendProfile = dbRepository.getProfileData()!!
+        Log.e("TAG", "getWallet: $suspendProfile", )
+        _status.value = fbRepository.getWallet(id)
     }
 
     fun getSubscriptions(status: String) = viewModelScope.launch(Dispatchers.IO) {
         val subs = dbRepository.getAllSubscriptionsHistory(status)
         withContext(Dispatchers.Main) {
-            _activeSubs.value = subs
+            _activeSubs.value = subs as MutableList<SubscriptionEntity>
         }
     }
 
     fun cancelSubscription(sub: SubscriptionEntity) = viewModelScope.launch(Dispatchers.IO) {
         sub.status = Constants.CANCELLED
-        if (fbRepository.cancelSubscription(sub)) {
-            try {
-                val cancelSub = async { dbRepository.cancelSubscription(sub) }
-                val removeActiveSubFromProfile = async { removeActiveSubFromProfile(sub) }
-
-                cancelSub.await()
-                removeActiveSubFromProfile.await()
-
-                withContext(Dispatchers.Main) {
-                    _subStatus.value = "complete"
-                }
-            } catch (e: Exception) {}
-        } else {
-            _error.value = "Server Error! Failed to cancel subscription"
-        }
+        _status.value = fbRepository.cancelSubscription(sub)
     }
 
-    fun cancelDate(sub: SubscriptionEntity ,cancelDate: Long): Boolean {
-        try {
-            viewModelScope.launch(Dispatchers.IO) {
+    suspend fun cancelDate(sub: SubscriptionEntity ,cancelDate: Long) =
+        withContext(Dispatchers.IO) {
+              try {
                 if (fbRepository.addCancellationDates(sub, cancelDate)) {
                     sub.cancelledDates.add(cancelDate)
                     dbRepository.upsertSubscription(sub)
+                    true
+                } else {
+                    false
                 }
+            } catch (e: Exception) {
+                false
             }
-        } catch (e: Exception) {
-            return false
         }
-        return true
+
+
+    fun checkWalletForBalance(amount: Float): Boolean {
+        return liveWallet.amount >= amount
     }
 
-    private suspend fun removeActiveSubFromProfile(sub: SubscriptionEntity) = withContext(Dispatchers.IO) {
-        dbRepository.cancelActiveSubscription(sub.id)
-    }
-
-//    fun getWallet(id: String) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            val wallet = fbRepository.getWallet(id)
-//            withContext(Dispatchers.Main) {
-//                _wallet.value = wallet
-//            }
-//        }
-//    }
-
-    suspend fun checkWalletForBalance(amount: Float, id: String): Boolean {
-        return try {
-            val amountInWallet = fbRepository.getWalletAmount(id)
-            amountInWallet >= amount
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    suspend fun calculateBalance(sub: SubscriptionEntity) = withContext(Dispatchers.Default) {
+    suspend fun calculateBalance(sub: SubscriptionEntity): Float = withContext(Dispatchers.Default) {
         val singleDayPrice = sub.estimateAmount/30f
-        val totalRefundAmount = if (System.currentTimeMillis() > sub.startDate) {
+        if (System.currentTimeMillis() > sub.startDate) {
             // we add plus one because the day will counted if exactly at 00:00. any timestamp past that point day will not be calculated. So to include that we add one to the total
             val remainingDays = (sub.endDate - System.currentTimeMillis()) / (1000*60*60*24)
             val cancelledDates = mutableListOf<Long>()
@@ -128,82 +101,42 @@ class SubscriptionHistoryViewModel(
                 }
             }
             val refundDays = cancelledDates.size + sub.notDeliveredDates.size + remainingDays + 1
-            refundDays * singleDayPrice
+            return@withContext (refundDays * singleDayPrice)
         } else {
-            30f * singleDayPrice
+            return@withContext (30f * singleDayPrice)
         }
-//        if (fbRepository.makeTransactionFromWallet(totalRefundAmount, sub.customerID, "Add")) {
-//           TransactionHistory (
-//                sub.id,
-//                System.currentTimeMillis(),
-//                TimeUtil().getMonth(),
-//                TimeUtil().getYear().toLong(),
-//                totalRefundAmount,
-//                sub.customerID,
-//                "Subscription Refund",
-//                Constants.SUCCESS,
-//                Constants.ADD_MONEY,
-//                sub.id
-//            ).also {
-//                if (fbRepository.updateTransaction(it) == "failed") {
-//                    withContext(Dispatchers.Main) {
-//                        _walletTransactionStatus.value = false
-//                    }
-//                } else {
-//                    withContext(Dispatchers.Main) {
-//                        _walletTransactionStatus.value = true
-//                    }
-//                }
-//            }
-//        } else {
-//            withContext(Dispatchers.Main) {
-//                _walletTransactionStatus.value = false
-//            }
-//        }
     }
 
-    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String): String {
-//        if (fbRepository.makeTransactionFromWallet(amount, id, "Remove")) {
-//            val transaction = TransactionHistory (
-//                orderID,
-//                System.currentTimeMillis(),
-//                TimeUtil().getMonth(),
-//                TimeUtil().getYear().toLong(),
-//                amount,
-//                id,
-//                id,
-//                Constants.SUCCESS,
-//                Constants.SUBSCRIPTION,
-//                orderID
-//            )
-//            return fbRepository.updateTransaction(transaction)
-//        } else {
-            return "failed"
-//        }
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String, transactionType: String) {
+        if (fbRepository.makeTransactionFromWallet(amount, id, transactionType)) {
+            TransactionHistory (
+                orderID,
+                System.currentTimeMillis(),
+                TimeUtil().getMonth(),
+                TimeUtil().getYear().toLong(),
+                amount,
+                id,
+                id,
+                Constants.SUCCESS,
+                Constants.PURCHASE,
+                orderID
+            ).let {
+                _status.value = NetworkResult.Success("transaction", it)
+            }
+        } else {
+            _status.value = NetworkResult.Failed("transaction", "Server Error. Failed to make transaction from Wallet. Try other payment method")
+        }
     }
 
-    fun renewSelectedSubscription(sub: SubscriptionEntity, renewal: Boolean) {
-        if (renewal) {
-            _renewSub.value = sub
-        } else {
-            _cancelSub.value = sub
-        }
+    fun updateTransaction(transaction: TransactionHistory) = viewModelScope.launch (Dispatchers.IO) {
+        _status.value = fbRepository.updateTransaction(transaction)
     }
 
     suspend fun renewSubscription(
         id: String,
         monthYear: String,
         newDate: Long
-    ): Boolean {
-            return try {
-                if (fbRepository.renewSubscription(id, monthYear, newDate)) {
-                    dbRepository.updateSubscription(id, newDate)
-                    true
-                } else {
-                    false
-                }
-            } catch (e: Exception) {
-                false
-            }
-        }
+    ) {
+        _status.value = fbRepository.renewSubscription(id, monthYear, newDate)
+    }
 }

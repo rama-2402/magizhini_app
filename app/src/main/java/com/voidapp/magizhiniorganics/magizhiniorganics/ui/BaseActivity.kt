@@ -202,10 +202,10 @@ open class BaseActivity : AppCompatActivity() {
 
         view.tvConfirmationText.text = confirmation
         view.tvConfirmationText.setOnClickListener {
+            hideExitSheet()
             when(activity) {
                 is ProfileActivity -> {
                     if (data == "") {
-                        hideExitSheet()
                         activity.exitProfileWithoutChange()
                     }
                 }
@@ -216,8 +216,7 @@ open class BaseActivity : AppCompatActivity() {
                 }
                 is SubscriptionHistoryActivity -> {
                     when (data) {
-                        "cs" -> activity.moveToCustomerSupport()
-                        else -> activity.confirmCancellation()
+                        "" -> activity.confirmCancellation()
                     }
                 }
             }
@@ -227,24 +226,24 @@ open class BaseActivity : AppCompatActivity() {
             hideExitSheet()
             when(activity) {
                 is ProfileActivity -> {
-                    hideExitSheet()
                     when(data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                     }
                 }
                 is PurchaseHistoryActivity -> {
-                    hideExitSheet()
                     when(data) {
                         "cs" -> activity.moveToCustomerSupport()
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                     }
                 }
-                is InvoiceActivity -> {
-                    hideExitSheet()
-                    activity.moveToCustomerSupport()
+                is SubscriptionHistoryActivity -> {
+                    when(data) {
+                        "cs" -> activity.moveToCustomerSupport()
+                    }
                 }
+                is InvoiceActivity -> activity.moveToCustomerSupport()
             }
         }
         ExitBottomSheetdialog.show()

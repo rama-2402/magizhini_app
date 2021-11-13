@@ -67,7 +67,7 @@ class FirestoreRepository (
     //subscription history
     suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean = firestore.addCancellationDates(sub, date)
 
-    suspend fun cancelSubscription(sub: SubscriptionEntity): Boolean = firestore.cancelSubscription(sub)
+    suspend fun cancelSubscription(sub: SubscriptionEntity): NetworkResult = firestore.cancelSubscription(sub)
 //    fun getAllData(viewModel: HomeViewModel) = firestore.getAllData(viewModel)
 
     //wallet
@@ -86,7 +86,7 @@ class FirestoreRepository (
 
     suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
 
-    suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): Boolean = firestore.renewSubscription(id, monthYear, newDate)
+    suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): NetworkResult = firestore.renewSubscription(id, monthYear, newDate)
 
     suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult = firestore.updateTransaction(transaction)
 //    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
