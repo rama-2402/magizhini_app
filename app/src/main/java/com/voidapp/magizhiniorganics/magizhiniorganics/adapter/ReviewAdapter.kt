@@ -8,20 +8,24 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Messages
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.ChatDiffUtils
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.ReviewDiffUtil
 import kotlin.collections.ArrayList
 
 class ReviewAdapter(
     val context: Context,
     var reviews: ArrayList<Review>,
-    val viewModel: ViewModel
+    private val onItemClickListener: ReviewItemClickListener
 ): RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>() {
 
     inner class ReviewViewHolder(val itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -82,10 +86,14 @@ class ReviewAdapter(
             reviewContent.text = getReviewContent(review.review)
 
             reviewImage.setOnClickListener {
-                when (viewModel) {
-                    is ProductViewModel -> viewModel.previewImage(review.reviewImageUrl)
-                    is SubscriptionProductViewModel -> viewModel.previewImage(review.reviewImageUrl)
-                }
+                onItemClickListener.previewImage(review.reviewImageUrl)
+//                when (viewModel) {
+//                    is ProductViewModel -> viewModel.previewImage(review.reviewImageUrl)
+//                    is SubscriptionProductViewModel -> viewModel.previewImage(review.reviewImageUrl)
+//                }
+            }
+            profilePic.setOnClickListener {
+                onItemClickListener.previewImage(review.userProfilePicUrl)
             }
         }
     }
@@ -100,5 +108,16 @@ class ReviewAdapter(
 
     override fun getItemCount(): Int {
         return reviews.size
+    }
+
+    fun setData(newList: ArrayList<Review>) {
+        val chatDiffUtil = ReviewDiffUtil(reviews, newList)
+        val diffResult = DiffUtil.calculateDiff(chatDiffUtil)
+        reviews = newList
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    interface ReviewItemClickListener {
+        fun previewImage(url: String)
     }
 }

@@ -176,7 +176,6 @@ class SubscriptionHistoryActivity :
 
     private fun initLiveDate() {
         viewModel.getSubscriptions(Constants.SUB_ACTIVE)
-//        viewModel.getWallet(id)
         viewModel.getProfile()
     }
 

@@ -43,6 +43,7 @@ class SubscriptionHistoryAdapter(
             tvStartSubDate.text = TimeUtil().getCustomDate(dateLong = subscription.startDate)
             tvDueDate.text = TimeUtil().getCustomDate(dateLong = subscription.endDate)
             tvSubType.text = "Rs: ${subscription.estimateAmount}"
+            ivSubStatus.visibility = View.INVISIBLE
             when (subscription.status) {
                 Constants.SUB_ACTIVE ->  {
 //                    ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivered))
@@ -62,7 +63,7 @@ class SubscriptionHistoryAdapter(
 
                 }
                 Constants.SUB_CANCELLED -> {
-                    ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivery_cancelled))
+//                    ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivery_cancelled))
                     tvRenew.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(tvRenew.context, R.color.white))
                     tvRenew.elevation = 0f
                     tvRenew.text = "Subscription \n Cancelled"
@@ -74,15 +75,12 @@ class SubscriptionHistoryAdapter(
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                 if (tvRenew.text == "Unsubscribe") {
                     onItemClickListener.cancelSub(position)
-                //                    viewModel.renewSelectedSubscription(subscription, renewal)
                 } else {
                     onItemClickListener.renewSub(position)
                 }
             }
 
             lytSub.setOnClickListener {
-//                activity.showProgressDialog()
-//                activity.showCalendarDialog(subscription)
                 onItemClickListener.showCalendar(position)
             }
         }

@@ -49,7 +49,7 @@ class FirestoreRepository (
 
     fun getLimitedItems(viewModel: ViewModel) = firestore.getLimitedItems(viewModel)
 
-    fun addReview(id: String, review: Review) = firestore.addReview(id, review)
+    suspend fun addReview(id: String, review: Review): NetworkResult = firestore.addReview(id, review)
 
     //checkout
     suspend fun limitedItemsUpdater(cartEntity: List<CartEntity>): NetworkResult = firestore.limitedItemsUpdater(cartEntity)
@@ -62,7 +62,11 @@ class FirestoreRepository (
     suspend fun cancelOrder(orderEntity: OrderEntity): NetworkResult = firestore.cancelOrder(orderEntity)
 
     //subscription
-    suspend fun generateSubscription(viewModel: SubscriptionProductViewModel, subscription: Subscription) = firestore.generateSubscription(viewModel, subscription)
+    suspend fun generateSubscription(subscription: Subscription): NetworkResult = firestore.generateSubscription(subscription)
+
+    suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
+
+    suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): NetworkResult = firestore.renewSubscription(id, monthYear, newDate)
 
     //subscription history
     suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean = firestore.addCancellationDates(sub, date)
@@ -75,6 +79,9 @@ class FirestoreRepository (
 
     suspend fun getWalletAmount(id: String): Float = firestore.getWalletAmount(id)
 
+    //review listener
+    suspend fun productReviewsListener(id: String, viewModel: ViewModel) = firestore.productReviewsListener(id, viewModel)
+
 //    suspend fun getWallet(id: String): Wallet = firestore.getWallet(id)
     suspend fun getWallet(id: String): NetworkResult = firestore.getWallet(id)
 
@@ -83,10 +90,6 @@ class FirestoreRepository (
     suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean = firestore.makeTransactionFromWallet(amount, id, status)
 
     suspend fun generateOrderID(): String = firestore.generateOrderID()
-
-    suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
-
-    suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): NetworkResult = firestore.renewSubscription(id, monthYear, newDate)
 
     suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult = firestore.updateTransaction(transaction)
 //    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)

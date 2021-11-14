@@ -121,6 +121,7 @@ class NewReviewFragment : Fragment(), KodeinAware {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                 val reviewContent: String = getReviewContent()
                 val review = Review(
+                    "",
                     mUserName,
                     mProfilePicUrl,
                     System.currentTimeMillis(),

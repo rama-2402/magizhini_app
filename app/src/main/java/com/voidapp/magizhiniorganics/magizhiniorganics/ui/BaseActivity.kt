@@ -188,12 +188,27 @@ open class BaseActivity : AppCompatActivity() {
                 view.tvCancelText.text = "Contact Support"
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
             }
-            "permission" -> {
-                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
-                view.tvCancelText.text = "Proceed"
-                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
-            }
-            "setting" -> {
+//            "permission" -> {
+//                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+//                view.tvCancelText.text = "Proceed"
+//                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+//            }
+//            "setting" -> {
+//                view.tvConfirmationText.setTextColor(
+//                    ContextCompat.getColor(
+//                        view.tvConfirmationText.context,
+//                        R.color.gray700
+//                    )
+//                )
+//                view.tvCancelText.text = "Proceed"
+//                view.tvCancelText.setTextColor(
+//                    ContextCompat.getColor(
+//                        view.tvConfirmationText.context,
+//                        R.color.matteRed
+//                    )
+//                )
+//            }
+            else -> {
                 view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
                 view.tvCancelText.text = "Proceed"
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
@@ -229,6 +244,13 @@ open class BaseActivity : AppCompatActivity() {
                     when(data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
+                    }
+                }
+                is SubscriptionProductActivity -> {
+                    when(data) {
+                        "permission" -> activity.proceedToRequestPermission()
+                        "setting" -> activity.proceedToRequestManualPermission()
+                        "purchaseHistory" -> activity.navigateToOtherPage(data as String)
                     }
                 }
                 is PurchaseHistoryActivity -> {
@@ -379,7 +401,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     is SubscriptionProductActivity -> {
                         hideListBottomSheet()
-                        activity.setPaymentFilter(selectedItem)
+                        activity.selectedPaymentMode(selectedItem)
                     }
                     is SubscriptionHistoryActivity -> {
                         hideListBottomSheet()

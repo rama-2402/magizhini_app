@@ -13,6 +13,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -31,19 +32,20 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionProductBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddressBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.Kodein
@@ -55,7 +57,14 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
-class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultListener {
+class SubscriptionProductActivity :
+    BaseActivity(),
+    KodeinAware,
+    PaymentResultListener,
+    ReviewAdapter.ReviewItemClickListener
+{
+
+    //TODO CREATE AN INFO ABOUT WHAT SUB IS
 
     override val kodein: Kodein by kodein()
     private val factory: SubscriptionProductViewModelFactory by instance()
@@ -68,20 +77,16 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
     private var mRating: Int = 5
     private var mStartDate: Long = 0L
 
-    private var mProfile: UserProfileEntity = UserProfileEntity()
-    private var mWallet: Wallet = Wallet()
-
     private var newReview: Boolean = false
     private var isPreviewVisible: Boolean = false
     private var reviewImageUri: Uri? = null
-    private var reviewImageExtension: String = ""
 
     private lateinit var adapter: ReviewAdapter
     private lateinit var mAddressBottomSheet: BottomSheetDialog
 
     //sub class variables
     private var oSubscription = Subscription()
-    private val paymentList = mutableListOf<String>("Online", "Wallet")
+    private val paymentList = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,8 +112,6 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         initRecyclerView()
         initData()
         initLiveData()
-        clickListeners()
-
     }
 
     override fun onPaymentSuccess(response: String?) {
@@ -131,12 +134,11 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         viewModel.generateSubscription(oSubscription)
     }
 
-
     private fun initRecyclerView() {
         adapter = ReviewAdapter(
             this,
             arrayListOf(),
-            viewModel
+            this
         )
         binding.rvReviews.layoutManager = LinearLayoutManager(this)
         binding.rvReviews.adapter = adapter
@@ -150,6 +152,18 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
             mStartDate = date
             oSubscription.startDate = date
             setEndDate(binding.spSubscriptionType.selectedItemPosition)
+        }
+    }
+
+    private fun setEndDate(position: Int) {
+        when(position) {
+            0 -> oSubscription.endDate = oSubscription.startDate
+            1 -> {
+                val cal = Calendar.getInstance()
+                cal.timeInMillis = oSubscription.startDate
+                cal.add(Calendar.DATE, 29)  //since we add the start date as well, we add remaining 29 days to get a total of 30 days
+                oSubscription.endDate = cal.timeInMillis
+            }
         }
     }
 
@@ -184,7 +198,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                 }
             }
 
-            binding.svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
                 if (scrollY < oldScrollY && binding.fabSubscribe.isGone) {
                     fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
                     fabSubscribe.visibility = View.VISIBLE
@@ -208,30 +222,6 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                 }
             })
 
-            srSmileyRating.setSmileySelectedListener { type ->
-                mRating = when (type) {
-                    SmileyRating.Type.TERRIBLE -> 1
-                    SmileyRating.Type.BAD -> 2
-                    SmileyRating.Type.OKAY -> 3
-                    SmileyRating.Type.GOOD -> 4
-                    SmileyRating.Type.GREAT -> 5
-                    else -> 5
-                }
-            }
-
-            btnSaveReview.setOnClickListener {
-                val reviewContent: String = getReviewContent()
-                val review = Review(
-                    mProfile.name,
-                    mProfile.profilePicUrl,
-                    System.currentTimeMillis(),
-                    mRating,
-                    reviewContent
-                )
-                lifecycleScope.launch {
-                    viewModel.upsertProductReview(review, mProduct, reviewImageUri, reviewImageExtension)
-                }
-            }
 
             spSubscriptionType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
@@ -251,7 +241,7 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                 lifecycleScope.launch(Dispatchers.IO) {
                     oSubscription.id = viewModel.generateSubscriptionID("${TimeUtil().getMonth()}${TimeUtil().getYear()}")
                 }
-                showAddressBs(mProfile.address[0])
+                showAddressBs(viewModel.userProfile.address[0])
             }
 
             tbAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
@@ -267,7 +257,44 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
             }
 
             btnAddImage.setOnClickListener {
-//                PermissionsUtil().checkStoragePermission(this@SubscriptionProductActivity)
+                it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                if (PermissionsUtil.hasStoragePermission(this@SubscriptionProductActivity)) {
+                    getAction.launch(pickImageIntent)
+                } else {
+                    showExitSheet(this@SubscriptionProductActivity, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                }
+            }
+
+            srSmileyRating.setSmileySelectedListener { type ->
+                mRating = when (type) {
+                    SmileyRating.Type.TERRIBLE -> 1
+                    SmileyRating.Type.BAD -> 2
+                    SmileyRating.Type.OKAY -> 3
+                    SmileyRating.Type.GOOD -> 4
+                    SmileyRating.Type.GREAT -> 5
+                    else -> 5
+                }
+            }
+
+            btnSaveReview.setOnClickListener {
+                it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                val reviewContent: String = getReviewContent()
+                Review(
+                    "",
+                    viewModel.userProfile.name,
+                    viewModel.userProfile.profilePicUrl,
+                    System.currentTimeMillis(),
+                    mRating,
+                    reviewContent
+                ).also { review ->
+                    showProgressDialog()
+                    viewModel.upsertProductReview(
+                        review,
+                        mProduct.id,
+                        reviewImageUri,
+                        reviewImageUri?.let { GlideLoader().imageExtension(this@SubscriptionProductActivity,  reviewImageUri)!! } ?: ""
+                    )
+                }
             }
         }
     }
@@ -328,10 +355,10 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
 
     private fun hideAddressBs() = mAddressBottomSheet.dismiss()
 
-    fun setPaymentFilter(paymentMode: String) {
+    fun selectedPaymentMode(paymentMode: String) {
         oSubscription.paymentMode = paymentMode
         if (paymentMode == "Online") {
-            with(mProfile) {
+            with(viewModel.userProfile) {
                 startPayment(
                     this@SubscriptionProductActivity,
                     mailId,
@@ -345,14 +372,6 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
                     }
                 }
             }
-        } else {
-            walletTransaction()
-        }
-    }
-
-    private fun walletTransaction() {
-        if (mWallet.amount < oSubscription.estimateAmount) {
-            showErrorSnackBar("Insufficient wallet balance! Please recharge to continue", true)
         } else {
             showSwipeConfirmationDialog(this, "swipe right to make payment")
         }
@@ -382,51 +401,6 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         }
     }
 
-    private fun setEndDate(position: Int) {
-        when(position) {
-            0 -> oSubscription.endDate = oSubscription.startDate
-            1 -> {
-                val cal = Calendar.getInstance()
-                cal.timeInMillis = oSubscription.startDate
-                cal.add(Calendar.DATE, 29)  //since we add the start date as well, we add remaining 29 days to get a total of 30 days
-                oSubscription.endDate = cal.timeInMillis
-            }
-        }
-    }
-
-    private fun addReview() {
-        with(binding) {
-            cpAddReview.text = "cancel"
-            cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_close_white_24dp)
-            llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_in_right))
-            rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_out_left))
-            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
-            lifecycleScope.launch {
-                delay(400)
-                llNewReview.visible()
-                fabSubscribe.remove()
-                rvReviews.remove()
-            }
-        }
-    }
-
-    private fun closeReview() {
-        with(binding) {
-            cpAddReview.text = "Add Review"
-            edtDescription.setText("")
-            ivReviewImage.remove()
-            cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_add)
-            llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_out_right))
-            rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_in_left))
-            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
-            lifecycleScope.launch {
-                delay(400)
-                llNewReview.remove()
-                rvReviews.visible()
-            }
-        }
-    }
-
     private fun getReviewContent(): String {
         return if (binding.edtDescription.text.isNullOrEmpty()) {
             ""
@@ -435,107 +409,67 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         }
     }
 
+    private fun initData() {
+        showShimmer()
+        viewModel.getProductByID(mProductId)
+        viewModel.getProfileData()
+    }
+
     private fun initLiveData() {
         viewModel.product.observe(this, {
             mProduct = it
             setDataToDisplay()
+            clickListeners()
         })
-        viewModel.profile.observe(this, {
-            mProfile = it
-            viewModel.getWallet(mProfile.id)
+
+        viewModel.reviews.observe(this, {
+            if (it.isEmpty()) {
+                hideShimmer()
+                binding.llEmptyLayout.visible()
+            } else {
+                hideShimmer()
+                it.sortByDescending { review ->
+                    review.timeStamp
+                }
+                binding.llEmptyLayout.remove()
+                adapter.setData(it)
+            }
         })
-        viewModel.wallet.observe(this, {
-            mWallet = it
-            paymentList.clear()
-            paymentList.add("Online")
-            paymentList.add("Wallet - (${mWallet.amount})")
-        })
-        viewModel.failed.observe(this, {
-            showErrorSnackBar(it, true)
-        })
-        viewModel.subStatus.observe(this, {
-            if (it == "complete") {
-                lifecycleScope.launch {
-                    delay(1500)
-                    hideSuccessDialog()
-                    showSuccessDialog("","Creating Subscription... ","order")
-                    delay(1500)
-                    hideSuccessDialog()
-                    showSuccessDialog("", "Subscription Created Successfully!", "complete")
-                    delay(2000)
-                    hideSuccessDialog()
-                    Intent(this@SubscriptionProductActivity, SubscriptionHistoryActivity::class.java).also { intent ->
-                        startActivity(intent)
-                        finish()
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.wallet.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> {
+                        with(result.data as Wallet) {
+                            viewModel.liveWallet = this
+                            paymentList.clear()
+                            paymentList.add("Online")
+                            paymentList.add("Wallet - (${this.amount})")
+                        }
                     }
+                    is NetworkResult.Failed -> showErrorSnackBar(result.data as String, true)
+                    else -> Unit
                 }
             }
-        })
-        viewModel.reviewImage.observe(this, {
-            isPreviewVisible = true
-            with(binding) {
-                GlideLoader().loadUserPictureWithoutCrop(this@SubscriptionProductActivity, it, ivPreviewImage)
-                ivPreviewImage.visible()
-                ivPreviewImage.startAnimation(Animations.scaleBig)
-            }
-        })
-        viewModel.serverError.observe(this, {
-            hideProgressDialog()
-            showErrorSnackBar("Server Error! Please try again later", true)
-        })
-        viewModel.uploadingReviewStatus.observe(this, {
-            if (it == -5) {
-                mProduct = viewModel.mUpdatedProductReview
-                adapter.reviews = mProduct.reviews
-                adapter.notifyDataSetChanged()
-                lifecycleScope.launch {
-                    delay(1000)
-                    hideProgressDialog()
-                    newReview = false
-                    closeReview()
-                    Toast.makeText(this@SubscriptionProductActivity, "Thanks for the review :)", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                showProgressDialog()
-            }
-        })
-    }
-
-    fun approved(status: Boolean) = lifecycleScope.launch (Dispatchers.IO) {
-        withContext(Dispatchers.Main) {
-            showSuccessDialog("", "Processing payment from Wallet...", "wallet")
         }
-        if (status) {
-            if (viewModel.checkWalletForBalance(oSubscription.estimateAmount, mProfile.id)) {
-                val id = viewModel.makeTransactionFromWallet(oSubscription.estimateAmount, mProfile.id, oSubscription.id)
-                validatingTransactionBeforeOrder(id)
-            } else {
-                withContext(Dispatchers.Main) {
-                    delay(1000)
-                    hideSuccessDialog()
-                    showErrorSnackBar(
-                        "Insufficient balance in Wallet. Pick another payment method",
-                        true
-                    )
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.status.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
+                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
+                    is NetworkResult.Loading -> {
+                        if (result.message == "") {
+                            showProgressDialog()
+                        } else {
+                            showSuccessDialog("", result.message, result.data)
+                        }
+                    }
+                    else -> Unit
                 }
-            }
-        } else {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(this@SubscriptionProductActivity, "Transaction cancelled", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-    private suspend fun validatingTransactionBeforeOrder(id: String) = withContext(Dispatchers.Main) {
-        if ( id == "failed") {
-            hideSuccessDialog()
-            showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
-            return@withContext
-        } else {
-            startTransaction()
-        }
-    }
-
 
     private fun setDataToDisplay() {
         val nextDate = System.currentTimeMillis() + (1000 * 60 * 60 * 24)
@@ -549,59 +483,69 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         }
     }
 
-    private fun initData() {
-        viewModel.getProductByID(mProductId)
-        viewModel.getProfileData()
-    }
-
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == Constants.READ_STORAGE_PERMISSION_CODE) {
-            //If permission is granted
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                GlideLoader().showImageChooser(this)
-            } else {
-                //Displaying another toast if permission is not granted
-                showErrorSnackBar("Storage Permission Denied!", true)
-            }
-        }
-    }
-
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == Constants.PICK_IMAGE_REQUEST_CODE) {
-                if (data != null) {
-                    try {
-                        // The uri of selected image from phone storage.
-                        reviewImageUri = data.data!!
-
-                        binding.ivReviewImage.visible()
-                        GlideLoader().loadUserPicture(
-                            binding.ivReviewImage.context,
-                            reviewImageUri!!,
-                            binding.ivReviewImage
+    fun approved(status: Boolean) {
+        showSuccessDialog("", "Processing payment from Wallet...", "wallet")
+        lifecycleScope.launch {
+            if (viewModel.checkWalletForBalance(oSubscription.estimateAmount)) {
+                withContext(Dispatchers.IO) {
+                    with(oSubscription) {
+                        viewModel.makeTransactionFromWallet(
+                            estimateAmount,
+                            customerID,
+                            id,
+                            "Remove"
                         )
-
-                        reviewImageExtension = GlideLoader().imageExtension(this,  reviewImageUri)!!
-
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                        showErrorSnackBar("Image selection failed!", true)
                     }
                 }
+            } else {
+                delay(1000)
+                hideSuccessDialog()
+                showErrorSnackBar(
+                    "Insufficient balance in Wallet. Pick another payment method",
+                    true
+                )
             }
-        } else if (resultCode == Activity.RESULT_CANCELED) {
-            // A log is printed when user close or cancel the image selection.
-            Log.e("Request Cancelled", "Image selection cancelled")
         }
     }
 
+    private fun addReview() {
+        with(binding) {
+            cpAddReview.text = "cancel"
+            cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_close_white_24dp)
+            cpAddReview.chipBackgroundColor = ContextCompat.getColorStateList(cpAddReview.context, R.color.matteRed)
+            llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_in_right))
+            llEmptyLayout.startAnimation(AnimationUtils.loadAnimation(llEmptyLayout.context, R.anim.slide_out_left))
+            rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_out_left))
+            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
+            lifecycleScope.launch {
+                delay(400)
+                llNewReview.visible()
+                fabSubscribe.remove()
+                rvReviews.remove()
+                llEmptyLayout.remove()
+            }
+        }
+    }
+
+    private fun closeReview() {
+        with(binding) {
+            cpAddReview.text = "Add Review"
+            edtDescription.setText("")
+            ivReviewImage.remove()
+            cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_add)
+            cpAddReview.chipBackgroundColor = ContextCompat.getColorStateList(cpAddReview.context, R.color.green_base)
+            llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_out_right))
+            llEmptyLayout.startAnimation(AnimationUtils.loadAnimation(llEmptyLayout.context, R.anim.slide_in_left))
+            rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_in_left))
+            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
+            lifecycleScope.launch {
+                delay(400)
+                llNewReview.remove()
+                rvReviews.visible()
+                llEmptyLayout.visible()
+            }
+        }
+    }
 
     //Title bar back button press function
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -614,11 +558,86 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
         }
     }
 
+    private fun onSuccessCallback(message: String, data: Any?) {
+        when(message) {
+            "review" -> {
+                hideProgressDialog()
+                showToast(this, data as String)
+                closeReview()
+            }
+            "transaction" -> viewModel.updateTransaction(data as TransactionHistory)
+            "transactionID" -> lifecycleScope.launch {
+                if (oSubscription.status == Constants.CANCELLED) {
+                    delay(1500)
+                    hideSuccessDialog()
+                    showExitSheet(
+                        this@SubscriptionProductActivity,
+                        "Outstanding Balance for Delivery Cancelled Dates, Delivery Failed Days and Remaining Days is Added to the Wallet Successfully!\n" +
+                                " \n" +
+                                " Please Click the message to contact Customer Support for any queries or further assistance",
+                        "cs"
+                    )
+                } else {
+                    startTransaction()
+                }
+            }
+            "sub" -> lifecycleScope.launch {
+                delay(1500)
+                hideSuccessDialog()
+                showSuccessDialog("", data as String)
+                delay(1500)
+                hideSuccessDialog()
+                showExitSheet(this@SubscriptionProductActivity, "Subscription created Successfully! \n\n You can manager your subscriptions in Subscription History page. To go to Subscription History click PROCEED below. ", "purchaseHistory")
+            }
+        }
+
+        viewModel.emptyResult()
+    }
+
+    private fun onFailedCallback(message: String, data: Any?) {
+        when(message) {
+            "review" -> {
+                hideProgressDialog()
+                showToast(this, data as String)
+            }
+            "transaction" -> {
+                hideSuccessDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+            "transactionID" -> {
+                hideSuccessDialog()
+                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
+            }
+        }
+        viewModel.emptyResult()
+    }
+
+    private fun showShimmer() {
+        with(binding) {
+            flShimmerPlaceholder.visible()
+            rvReviews.remove()
+        }
+    }
+
+    private fun hideShimmer() {
+        with(binding) {
+            flShimmerPlaceholder.remove()
+            rvReviews.visible()
+        }
+    }
+
+    override fun previewImage(url: String) {
+        GlideLoader().loadUserPicture(binding.ivReviewImage.context, url, binding.ivReviewImage)
+        binding.ivPreviewImage.startAnimation(Animations.scaleBig)
+        binding.ivPreviewImage.visible()
+        isPreviewVisible = true
+    }
+
     override fun onBackPressed() {
         when {
             isPreviewVisible -> {
                 binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
-                binding.ivPreviewImage.visibility = View.GONE
+                binding.ivPreviewImage.remove()
                 isPreviewVisible = false
             }
             else -> {
@@ -632,4 +651,47 @@ class SubscriptionProductActivity : BaseActivity(), KodeinAware, PaymentResultLi
             }
         }
     }
+
+    fun navigateToOtherPage(content: String) {
+        when(content) {
+            "purchaseHistory" -> {
+                Intent(this, SubscriptionHistoryActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
+        }
+    }
+
+    fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
+
+    fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
+
+    private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        reviewImageUri = result.data?.data
+        reviewImageUri?.let { uri ->
+            GlideLoader().loadUserPicture(this, uri, binding.ivReviewImage)
+            binding.ivReviewImage.visible()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
+            if(
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                showToast(this, "Storage Permission Granted")
+                getAction.launch(pickImageIntent)
+            } else {
+                showToast(this, "Storage Permission Denied")
+                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
+            }
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,136 +17,114 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
 
 class SubscriptionProductViewModel(
     private val dbRepository: DatabaseRepository,
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
     var mProductID = ""
-    var mUpdatedProductReview = ProductEntity()
+    var subscriptionItem = ProductEntity()
+    var userProfile = UserProfileEntity()
+    var liveWallet = Wallet()
 
     private var _product: MutableLiveData<ProductEntity> = MutableLiveData()
     val product: LiveData<ProductEntity> = _product
-    private var _profile: MutableLiveData<UserProfileEntity> = MutableLiveData()
-    val profile: LiveData<UserProfileEntity> = _profile
-    private var _wallet: MutableLiveData<Wallet> = MutableLiveData()
-    val wallet: LiveData<Wallet> = _wallet
     private var _failed: MutableLiveData<String> = MutableLiveData()
     val failed: LiveData<String> = _failed
-    private var _subStatus: MutableLiveData<String> = MutableLiveData()
-    val subStatus: LiveData<String> = _subStatus
-    private var _previewImage: MutableLiveData<String> = MutableLiveData()
-    val reviewImage: LiveData<String> = _previewImage
-    private var _serverError: MutableLiveData<Boolean> = MutableLiveData()
-    val serverError: LiveData<Boolean> = _serverError
-    private var _uploadingReviewStatus: MutableLiveData<Int> = MutableLiveData()
-    val uploadingReviewStatus: LiveData<Int> = _uploadingReviewStatus
+    private var _reviews: MutableLiveData<ArrayList<Review>> = MutableLiveData()
+    val reviews: LiveData<ArrayList<Review>> = _reviews
 
-    fun previewImage(url: String) {
-        _previewImage.value = url
+    private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(
+        NetworkResult.Empty)
+    val status: StateFlow<NetworkResult> = _status
+    private val _wallet: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(NetworkResult.Empty)
+    val wallet: StateFlow<NetworkResult> = _wallet
+
+    fun emptyResult() {
+        _status.value = NetworkResult.Empty
     }
 
     fun getProductByID(id: String) = viewModelScope.launch(Dispatchers.IO) {
-        val product = dbRepository.getProductWithIdForUpdate(id)
-        withContext(Dispatchers.Main) {
-            _product.value = product
+        try {
+            val product = dbRepository.getProductWithIdForUpdate(id)
+            withContext(Dispatchers.Main) {
+                subscriptionItem = product
+                getProductReviews(product.id)
+                _product.value = product
+            }
+        } catch (e: IOException) {
+            e.message?.let { fbRepository.logCrash("sub product: getting the sub product from DB", it) }
         }
     }
 
-    suspend fun upsertProductReview(
+    fun getProfileData() = viewModelScope.launch (Dispatchers.IO){
+        try {
+            val profileEntity = dbRepository.getProfileData()!!
+            withContext(Dispatchers.Main) {
+                userProfile = profileEntity
+                getWallet(profileEntity.id)
+            }
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("sub product: getting the profile from DB", it) }
+        }
+    }
+
+    private suspend fun getProductReviews(id: String) = fbRepository.productReviewsListener(id, this)
+
+    fun reviewListener(reviews: ArrayList<Review>) {
+        reviews.sortedByDescending {
+            it.timeStamp
+        }
+        _reviews.value = reviews
+    }
+
+    fun upsertProductReview(
         review: Review,
-        productEntity: ProductEntity,
+        id: String,
         uri: Uri?,
         extension: String
-    ): Boolean =
-        withContext(Dispatchers.IO) {
+    ) = viewModelScope.launch(Dispatchers.IO) {
             if (uri == null) {
-                productEntity.reviews.add(review)
-                mUpdatedProductReview = productEntity
-                dbRepository.upsertProduct(productEntity)
-                fbRepository.addReview(productEntity.id, review)
-                return@withContext true
+                _status.value = fbRepository.addReview(id, review)
             } else {
-                withContext(Dispatchers.Main) {
-                    _uploadingReviewStatus.value = +1
-                }
                 val imageUrl = fbRepository.uploadImage(
-                    "${Constants.REVIEW_IMAGE_PATH}${productEntity.id}/",
+                    "${Constants.REVIEW_IMAGE_PATH}${id}/",
                     uri,
                     extension,
                     "review"
                 )
 
                 if (imageUrl == "failed") {
-                    if (_serverError.value == true) {
-                        _serverError.value = false
-                    } else {
-                        _serverError.value = true
-                    }
-                    return@withContext false
+                    _status.value = NetworkResult.Failed("review", "Server error! Review image could not be added")
                 } else {
                     review.reviewImageUrl = imageUrl
-                    productEntity.reviews.add(review)
-                    mUpdatedProductReview = productEntity
-                    dbRepository.upsertProduct(productEntity)
-                    fbRepository.addReview(productEntity.id, review)
-                    withContext(Dispatchers.Main) {
-                        _uploadingReviewStatus.value = -5
-                    }
-                    return@withContext true
+                    _status.value = fbRepository.addReview(id, review)
                 }
             }
         }
 
-    fun getProfileData() {
-        viewModelScope.launch (Dispatchers.IO){
-            val profileEntity = dbRepository.getProfileData()!!
-            withContext(Dispatchers.Main) {
-                _profile.value = profileEntity
-            }
-        }
-    }
-
-    fun getWallet(id: String) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            val wallet = fbRepository.getWallet(id)
-//            withContext(Dispatchers.Main) {
-//                _wallet.value = wallet
-//            }
-//        }
+    private fun getWallet(id: String) = viewModelScope.launch(Dispatchers.IO) {
+        _wallet.value = fbRepository.getWallet(id)
     }
 
     fun generateSubscription(subscription: Subscription) = viewModelScope.launch(Dispatchers.IO) {
-        fbRepository.generateSubscription(this@SubscriptionProductViewModel, subscription)
+        _status.value = fbRepository.generateSubscription(subscription)
     }
 
-    suspend fun subscriptionAdded(subscription: SubscriptionEntity) = withContext(Dispatchers.IO) {
-        dbRepository.upsertSubscription(subscription)
-        withContext(Dispatchers.Main) {
-            _subStatus.value = "complete"
-        }
+    fun checkWalletForBalance(amount: Float): Boolean {
+        return liveWallet.amount >= amount
     }
 
-    fun subscriptionFailed(message: String) {
-        _failed.value = message
-    }
-
-
-    suspend fun checkWalletForBalance(amount: Float, id: String): Boolean {
-        try {
-            val amountInWallet = fbRepository.getWalletAmount(id)
-            return amountInWallet >= amount
-        } catch (e: Exception) {
-            return false
-        }
-    }
-
-    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String): String {
-        if (fbRepository.makeTransactionFromWallet(amount, id, "Remove")) {
-            val transaction = TransactionHistory (
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String, transactionType: String) {
+        if (fbRepository.makeTransactionFromWallet(amount, id, transactionType)) {
+            TransactionHistory (
                 orderID,
                 System.currentTimeMillis(),
                 TimeUtil().getMonth(),
@@ -154,17 +133,22 @@ class SubscriptionProductViewModel(
                 id,
                 id,
                 Constants.SUCCESS,
-                Constants.SUBSCRIPTION,
+                Constants.PURCHASE,
                 orderID
-            )
-//            return fbRepository.updateTransaction(transaction)
-        return  ""
+            ).let {
+                _status.value = NetworkResult.Success("transaction", it)
+            }
         } else {
-            return "failed"
+            _status.value = NetworkResult.Failed("transaction", "Server Error. Failed to make transaction from Wallet. Try other payment method")
         }
+    }
+
+    fun updateTransaction(transaction: TransactionHistory) = viewModelScope.launch (Dispatchers.IO) {
+        _status.value = fbRepository.updateTransaction(transaction)
     }
 
     suspend fun generateSubscriptionID(id: String): String = withContext(Dispatchers.IO) {
         return@withContext fbRepository.generateSubscriptionID(id)
     }
 }
+

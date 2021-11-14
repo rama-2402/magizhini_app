@@ -44,7 +44,7 @@
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.48703703703703705" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_subscription_history.xml" value="0.44880546075085326" />
-        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_wallet.xml" value="0.5" />
         <entry key="app/src/main/res/layout/content_subscription_product.xml" value="0.5432291666666667" />
         <entry key="app/src/main/res/layout/custom_snackbar.xml" value="0.33" />

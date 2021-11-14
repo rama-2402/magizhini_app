@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.work.ListenableWorker
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.firestore.*
@@ -95,6 +96,8 @@ class Firestore(
         }
     }
 
+
+
     //check if the user profile exists and getting the data from store
     suspend fun checkUserProfileDetails(): String = withContext(Dispatchers.IO) {
         try {
@@ -174,18 +177,6 @@ class Firestore(
             }
         }
 
-    //profile
-//    suspend fun getProfile(id: String): UserProfileEntity {
-//        return try {
-//            mFireStore.collection(Constants.USERS)
-//                .document(id)
-//                .get().await().toObject(UserProfile::class.java)!!.toUserProfileEntity()
-//        } catch (e: Exception) {
-//            e.message?.let { logCrash("getting profile", it) }
-//            UserProfileEntity()
-//        }
-//    }
-
     suspend fun uploadProfile(profile: UserProfile): Boolean =
         withContext(Dispatchers.IO) {
             try {
@@ -201,6 +192,9 @@ class Firestore(
             }
         }
 
+
+
+
     //wallet
     suspend fun createWallet(wallet: Wallet) = withContext(Dispatchers.IO) {
         try {
@@ -214,6 +208,8 @@ class Firestore(
             e.message?.let { logCrash("creating wallet", it) }
         }
     }
+
+
 
     //live update of the limited items
     fun getLimitedItems(viewModel: ViewModel) {
@@ -250,6 +246,8 @@ class Firestore(
                 }
             }
     }
+
+
 
     //invoice - checking if all the products are available
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): NetworkResult =
@@ -532,7 +530,6 @@ class Firestore(
 
 
 
-
     //favorites
     fun addFavorites(id: String, item: String) {
         //This function will add a new data if it is not present in the array
@@ -545,10 +542,50 @@ class Firestore(
             .document(id).update(Constants.FAVORITES, FieldValue.arrayRemove(item))
     }
 
+
+
     //reviews
-    fun addReview(id: String, review: Review) = CoroutineScope(Dispatchers.IO).launch {
-        mFireStore.collection(Constants.PRODUCTS)
-            .document(id).update(Constants.REVIEWS, FieldValue.arrayUnion(review))
+    suspend fun productReviewsListener(id: String, viewModel: ViewModel) = withContext(Dispatchers.IO) {
+        try {
+            mFireStore
+                .collection("Reviews")
+                .document("Products")
+                .collection(id)
+                .addSnapshotListener { snapshot, fireSnapshotFailure ->
+                    //error handling
+                    fireSnapshotFailure?.let { e ->
+                        throw e
+                    }
+                    snapshot?.let {
+                        val reviews = arrayListOf<Review>()
+                        reviews.clear()
+                        for (doc in it) {
+                            val review = doc.toObject(Review::class.java)
+                            review.id = doc.id
+                            reviews.add(review)
+                        }
+                        when(viewModel) {
+                            is SubscriptionProductViewModel -> viewModel.reviewListener(reviews)
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: getting product reviews", it) }
+        }
+    }
+
+    suspend fun addReview(id: String, review: Review): NetworkResult = withContext(Dispatchers.IO) {
+        try {
+            mFireStore.collection("Reviews")
+                .document("Products")
+                .collection(id)
+                .document()
+                .set(review, SetOptions.merge()).await()
+            NetworkResult.Success("review", "Thanks for the review :)")
+        }catch (e: Exception) {
+            e.message?.let { logCrash("firestore: add product review", it) }
+            NetworkResult.Failed("review", "Server Error! Please try again later")
+        }
     }
 
 
@@ -708,57 +745,81 @@ class Firestore(
 
 
 
-    suspend fun generateSubscription(
-        viewModel: SubscriptionProductViewModel,
-        subscription: Subscription
-    ) = withContext(Dispatchers.IO) {
+    suspend fun generateSubscription(subscription: Subscription):NetworkResult = withContext(Dispatchers.IO) {
         val sub = subscription.toSubscriptionEntity()
         try {
-            val updateStore = async { updateStoreSubscription(sub) }
             val updateLocal = async { updateLocalSubscription(sub) }
+            val updateStore = async { updateStoreSubscription(sub) }
             val updateCloud = async { updateCloudProfileSubscription(sub) }
+            val createSubInDB = async { try {
+                repository.upsertSubscription(sub)
+                true
+            } catch (e: IOException) {
+                e.message?.let { logCrash("firestore: uploading the generated sub to local Db", it) }
+                false
+            } }
 
-            updateStore.await()
-            updateLocal.await()
-            updateCloud.await()
-
-            withContext(Dispatchers.Main) {
-                viewModel.subscriptionAdded(sub)
+            if (
+                updateStore.await() &&
+                updateLocal.await() &&
+                updateCloud.await() &&
+                createSubInDB.await()
+            ) {
+                NetworkResult.Success("sub", "Subscription Created Successfully")
+            } else {
+                NetworkResult.Failed("sub", "Server Error! Failed to create Subscription. Try Later")
             }
         } catch (e: Exception) {
-            viewModel.subscriptionFailed("Server Error! Try again later")
+            e.message?.let { logCrash("firestore: Creating subscription parent job", it) }
+            NetworkResult.Failed("sub", "Server Error! Failed to create Subscription. Try Later")
         }
     }
 
-    private suspend fun updateLocalSubscription(sub: SubscriptionEntity) {
-        ActiveSubscriptions(sub.id).also {
-            repository.upsertActiveSubscription(it)
+    private suspend fun updateLocalSubscription(sub: SubscriptionEntity): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+            ActiveSubscriptions(sub.id).also {
+                repository.upsertActiveSubscription(it)
+            }
+            val profile = repository.getProfileData()!!
+            if (!profile.subscribedMonths.contains(sub.monthYear)) {
+                profile.subscribedMonths.add(sub.monthYear)
+            }
+            repository.upsertProfile(profile)
+            true
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: uploading subscription in local db", it) }
+            false
         }
-        val profile = repository.getProfileData()!!
-        if (!profile.subscribedMonths.contains(sub.monthYear)) {
-            profile.subscribedMonths.add(sub.monthYear)
-        }
-        repository.upsertProfile(profile)
     }
 
-    private suspend fun updateStoreSubscription(sub: SubscriptionEntity) {
-        mFireStore.collection(Constants.SUBSCRIPTION)
-            .document(Constants.SUB_ACTIVE)
-            .collection(sub.monthYear)
-            .document(sub.id)
-            .set(sub, SetOptions.merge()).await()
+    private suspend fun updateStoreSubscription(sub: SubscriptionEntity): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+            mFireStore.collection(Constants.SUBSCRIPTION)
+                .document(Constants.SUB_ACTIVE)
+                .collection(sub.monthYear)
+                .document(sub.id)
+                .set(sub, SetOptions.merge()).await()
+            true
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: uploading subscription to store", it) }
+            false
+        }
     }
 
-    private suspend fun updateCloudProfileSubscription(sub: SubscriptionEntity) =
-        withContext(Dispatchers.IO) {
+    private suspend fun updateCloudProfileSubscription(sub: SubscriptionEntity): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
             mFireStore.collection(Constants.USERS)
                 .document(sub.customerID)
                 .update("subscribedMonths", FieldValue.arrayUnion(sub.monthYear)).await()
             mFireStore.collection(Constants.USERS)
                 .document(sub.customerID).update("subscriptions", FieldValue.arrayUnion(sub.id))
                 .await()
+            true
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: uploading subscription numbers in store profile", it) }
+            false
         }
-
+    }
     //Renew subscription
     suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): NetworkResult =
         withContext(Dispatchers.IO) {

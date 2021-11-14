@@ -13,12 +13,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentReviewsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Animations
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
 
-class ReviewsFragment : Fragment(), KodeinAware {
+class ReviewsFragment : Fragment(), KodeinAware, ReviewAdapter.ReviewItemClickListener {
 
     override val kodein: Kodein by kodein()
     private val factory: ProductViewModelFactory by instance()
@@ -48,6 +50,14 @@ class ReviewsFragment : Fragment(), KodeinAware {
         return binding.root
     }
 
+    override fun previewImage(url: String) {
+//        productViewModel.reviewImage.value = url
+//        GlideLoader().loadUserPicture(binding.iv.context, url, binding.ivReviewImage)
+//        binding.ivPreviewImage.startAnimation(Animations.scaleBig)
+//        binding.ivPreviewImage.visible()
+//        isPreviewVisible = true
+    }
+
     private fun initRecyclerView() {
         val smileyActiveIndicator = SmileyActiveIndicator()
 //        binding.rvReviews.layoutManager = LinearLayoutManager(requireContext())
@@ -56,7 +66,7 @@ class ReviewsFragment : Fragment(), KodeinAware {
         adapter = ReviewAdapter(
             requireContext(),
             arrayListOf(),
-            productViewModel
+            this
         )
         binding.rvReviews.adapter = adapter
     }

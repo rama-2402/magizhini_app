@@ -5,6 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Review(
+    var id: String = "",
     var userName: String = "",
     var userProfilePicUrl: String = "",
     var timeStamp: Long = 0L,
