@@ -25,6 +25,7 @@ import com.ncorti.slidetoact.SlideToActView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
@@ -253,6 +254,12 @@ open class BaseActivity : AppCompatActivity() {
                         "purchaseHistory" -> activity.navigateToOtherPage(data as String)
                     }
                 }
+                is ProductActivity -> {
+                    when(data) {
+                        "permission" -> activity.proceedToRequestPermission()
+                        "setting" -> activity.proceedToRequestManualPermission()
+                    }
+                }
                 is PurchaseHistoryActivity -> {
                     when(data) {
                         "cs" -> activity.moveToCustomerSupport()
@@ -271,7 +278,7 @@ open class BaseActivity : AppCompatActivity() {
         ExitBottomSheetdialog.show()
     }
 
-    fun hideExitSheet() {
+    private fun hideExitSheet() {
         ExitBottomSheetdialog.dismiss()
     }
 

@@ -95,7 +95,7 @@ class ShoppingMainViewModel(
         val product = dbRepository.getProductWithIdForUpdate(productId)
         product.variantInCart.remove(variantName)
         dbRepository.upsertProduct(product)
-        dbRepository.deleteCartItemFromShoppingMain(productId, variantName)
+        dbRepository.deleteProductFromCart(productId, variantName)
         updatingTheCartInProduct(productId, variantName)
     }
 

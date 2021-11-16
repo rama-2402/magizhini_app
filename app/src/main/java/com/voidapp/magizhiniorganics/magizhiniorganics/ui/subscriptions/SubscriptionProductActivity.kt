@@ -278,14 +278,13 @@ class SubscriptionProductActivity :
 
             btnSaveReview.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                val reviewContent: String = getReviewContent()
                 Review(
                     "",
                     viewModel.userProfile.name,
                     viewModel.userProfile.profilePicUrl,
                     System.currentTimeMillis(),
                     mRating,
-                    reviewContent
+                    getReviewContent()
                 ).also { review ->
                     showProgressDialog()
                     viewModel.upsertProductReview(

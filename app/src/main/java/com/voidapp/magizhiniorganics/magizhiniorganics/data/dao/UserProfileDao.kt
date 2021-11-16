@@ -29,7 +29,7 @@ interface UserProfileDao {
     fun deleteCartItem(id: Int)
 
     @Query("DELETE FROM CartEntity WHERE productId = :productId AND variant = :variantName")
-    fun deleteCartItemFromShoppingMain(productId: String, variantName: String)
+    fun deleteProductFromCart(productId: String, variantName: String)
 
     @Query("DELETE FROM CartEntity")
     fun clearCart()
@@ -39,9 +39,6 @@ interface UserProfileDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertCartItem(cartEntity: CartEntity)
-
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    fun upsertDefaultVariant(variant: VariantEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertProduct(product: ProductEntity)

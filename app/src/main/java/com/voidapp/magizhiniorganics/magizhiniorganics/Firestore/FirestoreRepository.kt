@@ -10,7 +10,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 
@@ -37,9 +39,9 @@ class FirestoreRepository (
     //profile
     suspend fun uploadProfile(profile: UserProfile): Boolean = firestore.uploadProfile(profile)
 
-    fun addFavorites(id: String, item: String) = firestore.addFavorites(id, item)
+    suspend fun addFavorites(id: String, item: String): Boolean = firestore.addFavorites(id, item)
 
-    fun removeFavorites(id: String, item: String) = firestore.removeFavorites(id, item)
+    suspend fun removeFavorites(id: String, item: String): Boolean = firestore.removeFavorites(id, item)
 
     suspend fun addAddress(id: String ,address: Address) = firestore.addAddress(id, address)
 
@@ -47,7 +49,9 @@ class FirestoreRepository (
 
 
 
-    fun getLimitedItems(viewModel: ViewModel) = firestore.getLimitedItems(viewModel)
+    fun getLimitedItems(viewModel: ShoppingMainViewModel) = firestore.getLimitedItems(viewModel)
+
+    suspend fun productListener(id: String, viewModel: ProductViewModel) = firestore.productListener(id, viewModel)
 
     suspend fun addReview(id: String, review: Review): NetworkResult = firestore.addReview(id, review)
 

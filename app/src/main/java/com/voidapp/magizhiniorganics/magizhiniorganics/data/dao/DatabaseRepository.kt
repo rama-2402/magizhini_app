@@ -19,7 +19,7 @@ class DatabaseRepository(
 
     fun deleteCartItem(id: Int) = db.getUserProfileDao().deleteCartItem(id)
 
-    fun deleteCartItemFromShoppingMain(productId: String, variantName: String) = db.getUserProfileDao().deleteCartItemFromShoppingMain(productId, variantName)
+    fun deleteProductFromCart(productId: String, variantName: String) = db.getUserProfileDao().deleteProductFromCart(productId, variantName)
 
     fun clearCart() = db.getUserProfileDao().clearCart()
 

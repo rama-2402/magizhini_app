@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.product
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.os.Bundle
 import android.text.InputType
@@ -13,6 +14,7 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
@@ -21,6 +23,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
@@ -38,10 +41,16 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import kotlin.math.abs
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import kotlinx.coroutines.flow.collect
 
 
 //TODO CHECK LIMITED ITEMS COUNT BEFORE ORDERING MULTIPLE
-class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
+
+class ProductActivity :
+    BaseActivity(),
+    KodeinAware
+{
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityProductBinding
@@ -65,7 +74,6 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private lateinit var checkoutText: TextView
 
     private lateinit var dialogAddCouponBs: BottomSheetDialog
-    private var mCoupons: List<CouponEntity> = listOf()
     private var mCoupon: CouponEntity = CouponEntity()
     private var isCouponApplied: Boolean = false
 
@@ -80,7 +88,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
         mProductId = intent.getStringExtra(Constants.PRODUCTS).toString()
         mProductName = intent.getStringExtra(Constants.PRODUCT_NAME).toString()
-        viewModel.mProducts = mProductId
+        viewModel.productID = mProductId
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -95,7 +103,6 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
         //getting the current user id so that favorites can be added to firestore data
         userId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -198,7 +205,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                     Toast.makeText(this, "Coupon Removed", Toast.LENGTH_SHORT).show()
                 }
                 !isCouponApplied -> {
-                    if(viewModel.isCouponAvailable(mCoupons, code, mProduct.category)) {
+                    if(viewModel.isCouponAvailable(code, mProduct.category)) {
                         view.etlReferralNumber.isErrorEnabled = false
                         Toast.makeText(this, "Coupon Applied", Toast.LENGTH_SHORT).show()
                         view.btnApply.text = "Remove"
@@ -226,11 +233,15 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun initLiveData() {
 
         viewModel.getProfileData()
+        viewModel.getAllCoupons(Constants.ACTIVE)
 
         viewModel.getProductById(mProductId).observe(this, {
+            viewModel.product = it
             mProduct = it
             setProductDetailsToScreen()
             refreshLimitedItemCount()
+            viewModel.setUpProductListener(it.id)
+            viewModel.getProductReviews(it.id)
         })
 
         viewModel.itemCount.observe(this, {
@@ -242,9 +253,6 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         viewModel.getAllCartItems().observe(this, { it ->
             mCartItems = it
             cartAdapter.setCartData(mCartItems)
-//            cartAdapter.cartItems = mCartItems
-//            cartAdapter.notifyDataSetChanged()
-
             setCheckoutText()
         })
 
@@ -262,19 +270,9 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             }
         })
 
-//        viewModel.getOrderHistoryFromDb().observe(this, {
-//            viewModel.getPurchasedProductIdList(it)
-//        })
-
-        viewModel.getAllCoupons(Constants.ACTIVE)
-
         //getting all the coupons
-        viewModel.coupons.observe(this, {
-            mCoupons = it
-        })
-
         viewModel.couponIndex.observe(this, {
-            mCoupon = mCoupons[it]
+            mCoupon = viewModel.coupons[it]
         })
 
         viewModel.isCouponApplied.observe(this, {
@@ -282,28 +280,16 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 setPrice(mSelectedVariant)
         })
 
-        viewModel.uplodaingReviewStatus.observe(this, {
-            if (it == -5) {
-                hideProgressDialog()
-            } else {
-                showProgressDialog()
+        lifecycleScope.launchWhenStarted {
+            viewModel.status.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
+                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
+                    is NetworkResult.Loading -> showProgressDialog()
+                    else -> Unit
+                }
             }
-        })
-
-        viewModel.serverError.observe(this, {
-            hideProgressDialog()
-            showErrorSnackBar("Server Error! Please try again later", true)
-        })
-
-        viewModel.reviewImage.observe(this, {
-            isPreviewVisible = true
-            with(binding) {
-                GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, it, ivPreviewImage)
-                ivPreviewImage.visible()
-                ivPreviewImage.startAnimation(Animations.scaleBig)
-            }
-        })
-
+        }
     }
 
     private fun initClickListeners() {
@@ -315,7 +301,6 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 id: Long
             ) {
                 mSelectedVariant = variantposition
-                viewModel.getLimitedItems()
                 setPrice(mSelectedVariant)
                 refreshLimitedItemCount()
                 setAddButtonContent(getVariantName(mSelectedVariant))
@@ -328,18 +313,17 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
         binding.ivFavourite.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                if (mProduct.favorite) {
-                    mProduct.favorite = false
-                    binding.ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
-                } else {
-                    mProduct.favorite = true
-                    binding.ivFavourite.setImageResource(R.drawable.ic_favorite_filled)
-                }
-                viewModel.updateFavorites(userId, mProduct)
-                viewModel.upsertProduct(productEntity = mProduct)
+            mProduct.favorite = !mProduct.favorite
+            viewModel.updateFavorites(userId, mProduct)
         }
 
-        binding.btnAdd.setOnClickListener(this)
+        binding.btnAdd.setOnClickListener {
+            if (binding.btnAdd.text == "Add") {
+                addToCart()
+            } else if (binding.btnAdd.text == "Remove") {
+                removeFromCart()
+            }
+        }
 
         binding.ivWallet.setOnClickListener {
             Intent(this, WalletActivity::class.java).also {
@@ -347,6 +331,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
         }
+
         binding.tbAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
             title = if (abs(verticalOffset) -appBarLayout.totalScrollRange == 0) {
                 mProductName
@@ -354,16 +339,9 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 ""
             }
         })
+
         binding.ivPreviewImage.setOnClickListener {
             onBackPressed()
-        }
-    }
-
-    private fun setAddButtonContent(variant: String) {
-        if (mProduct.variantInCart.contains(variant)) {
-           setRemoveButton()
-        } else {
-            setAddButton()
         }
     }
 
@@ -375,15 +353,6 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         }
     }
 
-    private fun setFavorites() {
-        //setting the favorties icon for the products
-        if (mProduct.favorite) {
-            binding.ivFavourite.setImageResource(R.drawable.ic_favorite_filled)
-        } else {
-            binding.ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
-        }
-    }
-
     private fun setProductDetailsToScreen() {
         GlideLoader().loadUserPicture(this, mProduct.thumbnailUrl, binding.ivProductThumbnail)
         binding.tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
@@ -391,6 +360,15 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         setFavorites()
         setVariantAdapter()
         setAddButtonContent(getVariantName(mSelectedVariant))
+    }
+
+    private fun setFavorites() {
+        //setting the favorties icon for the products
+        if (mProduct.favorite) {
+            binding.ivFavourite.setImageResource(R.drawable.ic_favorite_filled)
+        } else {
+            binding.ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
+        }
     }
 
     private fun setVariantAdapter() {
@@ -404,6 +382,14 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 mVariants
             )
             binding.spProductVariant.adapter = spinnerAdapter
+        }
+    }
+
+    private fun setAddButtonContent(variant: String) {
+        if (mProduct.variantInCart.contains(variant)) {
+            setRemoveButton()
+        } else {
+            setAddButton()
         }
     }
 
@@ -498,7 +484,6 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             )
             mProduct.variantInCart.add(getVariantName(mSelectedVariant))
             viewModel.upsertProduct(mProduct)
-            Toast.makeText(baseContext, "Added to Cart", Toast.LENGTH_SHORT).show()
             setRemoveButton()
         } else {
             showErrorSnackBar("Product Out of Stock", true)
@@ -510,8 +495,7 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private fun removeFromCart() {
-        viewModel.deleteCartItemFromShoppingMain(mProductId, getVariantName(mSelectedVariant))
-        Toast.makeText(baseContext, "Removed from Cart", Toast.LENGTH_SHORT).show()
+        viewModel.deleteProductFromCart(mProduct, getVariantName(mSelectedVariant))
         setAddButton()
     }
 
@@ -569,7 +553,6 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     override fun onBackPressed() {
         when {
             isPreviewVisible -> {
-//            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.fade_in))
                 binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
                 binding.ivPreviewImage.visibility = View.GONE
                 isPreviewVisible = false
@@ -587,14 +570,64 @@ class ProductActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         }
     }
 
-    override fun onClick(v: View?) {
-        when(v){
-            binding.btnAdd -> {
-                if (binding.btnAdd.text == "Add") {
-                    addToCart()
-                } else if (binding.btnAdd.text == "Remove") {
-                    removeFromCart()
+    fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
+
+    fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
+            if(
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                showToast(this, "Storage Permission Granted")
+                viewModel.previewImage("granted")
+            } else {
+                showToast(this, "Storage Permission Denied")
+                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
+            }
+        }
+    }
+
+    private fun onSuccessCallback(message: String, data: Any?) {
+        when(message) {
+            "toast" -> showToast(this, data as String)
+            "permission" -> {
+                if (PermissionsUtil.hasStoragePermission(this)) {
+                    showToast(this, "Storage Permission Granted")
+                    viewModel.previewImage("granted")
+                } else {
+                    showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
                 }
+            }
+            "review" -> {
+                hideProgressDialog()
+                showToast(this, data as String)
+                viewModel.previewImage("added")
+            }
+            "preview" -> {
+                isPreviewVisible = true
+                with(binding) {
+                    GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, data as String, ivPreviewImage)
+                    ivPreviewImage.visible()
+                    ivPreviewImage.startAnimation(Animations.scaleBig)
+                }
+            }
+        }
+        viewModel.setEmptyResult()
+    }
+
+    private fun onFailedCallback(message: String, data: Any?) {
+        when(message) {
+            "toast" -> showToast(this, data as String)
+            "review" -> {
+                hideProgressDialog()
+                showToast(this, data as String)
             }
         }
     }

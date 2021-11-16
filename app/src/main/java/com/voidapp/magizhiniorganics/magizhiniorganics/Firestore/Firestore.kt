@@ -212,42 +212,64 @@ class Firestore(
 
 
     //live update of the limited items
-    fun getLimitedItems(viewModel: ViewModel) {
-        mFireStore.collection(Constants.PRODUCTS)
-            .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, fireSnapshotFailure ->
-                //error handling
-                fireSnapshotFailure?.let {
-                    Log.e(Constants.APP_NAME, it.message.toString())
-                }
-                snapshot?.let {
-                    val mutableLimitedItems: MutableList<ProductEntity> = mutableListOf()
-                    loop@ for (d in it.documents) {
-                        //we take each product object
-                        val product = d.toObject(Product::class.java)
-                        //if there is some content
-                        product?.let {
-                            product.id = d.id
-                            for (i in 0 until product.variants.size) {
-                                //we are checking all the variants of the product if the variant is limited or not.
-                                //if atleast any one of the variant is limited then we add the whole product to the list
-                                if (product.variants[i].status == Constants.LIMITED) {
-                                    val productEntity = product.toProductEntity()
-                                    mutableLimitedItems.add(productEntity)
-                                    break
+    fun getLimitedItems(viewModel: ShoppingMainViewModel) {
+        try {
+            mFireStore.collection(Constants.PRODUCTS)
+                .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
+                .addSnapshotListener { snapshot, fireSnapshotFailure ->
+                    //error handling
+                    fireSnapshotFailure?.let {
+                        Log.e(Constants.APP_NAME, it.message.toString())
+                    }
+                    snapshot?.let {
+                        val mutableLimitedItems: MutableList<ProductEntity> = mutableListOf()
+                        loop@ for (d in it.documents) {
+//                            val prod = it.documents.map { doc -> doc.toObject(ProductEntity::class.java) }
+                            //we take each product object
+                            val product = d.toObject(Product::class.java)
+                            //if there is some content
+                            product?.let {
+                                product.id = d.id
+                                for (i in 0 until product.variants.size) {
+                                    //we are checking all the variants of the product if the variant is limited or not.
+                                    //if atleast any one of the variant is limited then we add the whole product to the list
+                                    if (product.variants[i].status == Constants.LIMITED) {
+                                        val productEntity = product.toProductEntity()
+                                        mutableLimitedItems.add(productEntity)
+                                        break
+                                    }
                                 }
                             }
                         }
-                    }
-                    when (viewModel) {
-                        is ShoppingMainViewModel -> viewModel.limitedProducts(mutableLimitedItems)
-                        is ProductViewModel -> viewModel.limitedProducts(mutableLimitedItems)
+                        viewModel.limitedProducts(mutableLimitedItems)
                     }
                 }
-            }
+        } catch (e: Exception) {
+
+        }
     }
 
-
+    suspend fun productListener(id: String, viewModel: ProductViewModel) = withContext(Dispatchers.IO) {
+        try {
+            mFireStore.collection(Constants.PRODUCTS)
+                .document(id)
+                .addSnapshotListener { snapshot, fireSnapshotFailure ->
+                    //error handling
+                    fireSnapshotFailure?.let { error ->
+                        throw (error)
+                    }
+                    snapshot?.let {
+                        it.toObject(Product::class.java)?.variants?.let { variants ->
+                            viewModel.updateLimitedVariant(
+                                variants
+                            )
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            e.message?.let { logCrash("setting limited Item listener for the product", it) }
+        }
+    }
 
     //invoice - checking if all the products are available
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): NetworkResult =
@@ -531,15 +553,36 @@ class Firestore(
 
 
     //favorites
-    fun addFavorites(id: String, item: String) {
-        //This function will add a new data if it is not present in the array
-        mFireStore.collection(Constants.USERS)
-            .document(id).update(Constants.FAVORITES, FieldValue.arrayUnion(item))
+    suspend fun addFavorites(id: String, item: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            //This function will add a new data if it is not present in the array
+            mFireStore.collection(Constants.USERS)
+                .document(id).update(Constants.FAVORITES, FieldValue.arrayUnion(item)).await()
+            true
+        }catch (e: IOException) {
+            e.message?.let {
+                logCrash("firestore: adding fav to store",
+                    it
+                )
+            }
+            false
+        }
+
     }
 
-    fun removeFavorites(id: String, item: String) {
-        mFireStore.collection(Constants.USERS)
-            .document(id).update(Constants.FAVORITES, FieldValue.arrayRemove(item))
+    suspend fun removeFavorites(id: String, item: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            mFireStore.collection(Constants.USERS)
+                .document(id).update(Constants.FAVORITES, FieldValue.arrayRemove(item)).await()
+            true
+        }catch (e: IOException) {
+            e.message?.let {
+                logCrash("firestore: removing fav to store",
+                    it
+                )
+            }
+            false
+        }
     }
 
 
@@ -566,6 +609,7 @@ class Firestore(
                         }
                         when(viewModel) {
                             is SubscriptionProductViewModel -> viewModel.reviewListener(reviews)
+                            is ProductViewModel -> viewModel.reviewListener(reviews)
                         }
                     }
                 }

@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
@@ -91,7 +90,7 @@ class HomeViewModel (
             val product = dbRepository.getProductWithIdForUpdate(productEntity.id)
             product.variantInCart.remove(variantName)
             dbRepository.upsertProduct(product)
-            dbRepository.deleteCartItemFromShoppingMain(productEntity.id, variantName)
+            dbRepository.deleteProductFromCart(productEntity.id, variantName)
             updatingTheCartInProduct(productEntity.id , variantName, position, recycler)
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: delete item to cart", it) }

@@ -40,7 +40,7 @@ class DescriptionFragment : Fragment(), KodeinAware {
         productViewModel = ViewModelProvider(requireActivity(), factory).get(ProductViewModel::class.java)
         binding.viewmodel = productViewModel
 
-        mProductId = productViewModel.mProducts
+        mProductId = productViewModel.productID
 
         productViewModel.getProductById(mProductId).observe(viewLifecycleOwner, { product ->
             mProduct = product

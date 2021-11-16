@@ -11,13 +11,14 @@
 
 <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     tools:context=".ui.product.fragments.NewReviewFragment"
     android:orientation="vertical"
     android:background="@drawable/shape_round_rectangle_8"
     android:gravity="center_horizontal"
     android:layout_marginBottom="@dimen/material_size_32"
     android:paddingBottom="@dimen/material_size_32"
+
     >
 
     <com.hsalf.smileyrating.SmileyRating
@@ -39,37 +40,41 @@
         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
         />
 
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/etlDescription"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:nestedScrollingEnabled="true"
-        android:gravity="top"
-        android:hint="Review"
-        app:boxStrokeColor="@color/green_base"
-        android:textColorHint="@color/grey"
-        app:endIconMode="clear_text"
-        app:endIconTint="@color/grey"
-        app:flow_wrapMode="aligned"
-        app:hintTextColor="@color/green_base"
+        android:layout_height="200dp"
+        android:hint="Delivery Note"
         android:layout_margin="@dimen/material_size_16"
-        >
+        app:boxStrokeColor="@color/green_base"
+        app:flow_wrapMode="aligned"
+        app:endIconMode="clear_text"
+        android:textColorHint="@color/grey"
+        android:isScrollContainer="true"
+        app:hintTextColor="@color/green_base"
+        android:scrollbarStyle="insideInset"
+        android:scrollbars="vertical"
+        android:overScrollMode="always"
+        app:layout_constraintTop_toBottomOf="@id/spDeliveryPreference"
+        app:layout_constraintStart_toStartOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtDescription"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:cursorVisible="true"
-            android:textCursorDrawable="@null"
-            android:gravity="top|left"
             android:inputType="textMultiLine"
-            android:overScrollMode="ifContentScrolls"
-            android:nestedScrollingEnabled="true"
+            android:gravity="top"
+            android:isScrollContainer="true"
+            android:overScrollMode="always"
             android:scrollbars="vertical"
             android:textColorHint="@color/green_base"
-            />
+            android:textColor="@color/black"
+            android:textCursorDrawable="@null" />
     </com.google.android.material.textfield.TextInputLayout>
+
 <!--    <com.google.android.material.button.MaterialButton-->
 <!--        android:id="@+id/btnSaveReview"-->
 <!--        android:layout_width="wrap_content"-->

@@ -13,8 +13,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentReviewsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Animations
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
@@ -27,9 +25,6 @@ class ReviewsFragment : Fragment(), KodeinAware, ReviewAdapter.ReviewItemClickLi
     private lateinit var productViewModel: ProductViewModel
     private var _binding: FragmentReviewsBinding? = null
     private val binding get() = _binding!!
-
-    private var mProductId: String = ""
-    private var mReviews: ArrayList<Review> = arrayListOf()
 
     private lateinit var adapter: ReviewAdapter
 
@@ -51,16 +46,10 @@ class ReviewsFragment : Fragment(), KodeinAware, ReviewAdapter.ReviewItemClickLi
     }
 
     override fun previewImage(url: String) {
-//        productViewModel.reviewImage.value = url
-//        GlideLoader().loadUserPicture(binding.iv.context, url, binding.ivReviewImage)
-//        binding.ivPreviewImage.startAnimation(Animations.scaleBig)
-//        binding.ivPreviewImage.visible()
-//        isPreviewVisible = true
+        productViewModel.openPreview(url, "preview")
     }
 
     private fun initRecyclerView() {
-        val smileyActiveIndicator = SmileyActiveIndicator()
-//        binding.rvReviews.layoutManager = LinearLayoutManager(requireContext())
         binding.rvReviews.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = ReviewAdapter(
@@ -72,14 +61,8 @@ class ReviewsFragment : Fragment(), KodeinAware, ReviewAdapter.ReviewItemClickLi
     }
 
     private fun initLiveData() {
-        mProductId = productViewModel.mProducts
-        productViewModel.getProductById(mProductId).observe(viewLifecycleOwner, {
-            mReviews.clear()
-            mReviews.addAll(it.reviews)
-            mReviews.sortBy { review ->
-                review.timeStamp
-            }
-            adapter.reviews = mReviews
+        productViewModel.reviews.observe(viewLifecycleOwner, {
+            adapter.reviews = it
             adapter.notifyDataSetChanged()
         })
     }

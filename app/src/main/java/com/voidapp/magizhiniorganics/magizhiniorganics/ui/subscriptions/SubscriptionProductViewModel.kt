@@ -30,7 +30,7 @@ class SubscriptionProductViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
     var mProductID = ""
-    var subscriptionItem = ProductEntity()
+    private var subscriptionItem = ProductEntity()
     var userProfile = UserProfileEntity()
     var liveWallet = Wallet()
 

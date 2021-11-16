@@ -87,11 +87,8 @@ class ReviewAdapter(
 
             reviewImage.setOnClickListener {
                 onItemClickListener.previewImage(review.reviewImageUrl)
-//                when (viewModel) {
-//                    is ProductViewModel -> viewModel.previewImage(review.reviewImageUrl)
-//                    is SubscriptionProductViewModel -> viewModel.previewImage(review.reviewImageUrl)
-//                }
             }
+
             profilePic.setOnClickListener {
                 onItemClickListener.previewImage(review.userProfilePicUrl)
             }

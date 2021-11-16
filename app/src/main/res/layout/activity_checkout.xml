@@ -442,7 +442,7 @@
                         android:id="@+id/etlDeliveryNote"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
-                        android:layout_height="150dp"
+                        android:layout_height="200dp"
                         android:hint="Delivery Note"
                         android:layout_marginTop="@dimen/material_size_16"
                         android:layout_marginStart="@dimen/material_size_8"

@@ -384,7 +384,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         if (v != null) {
             when (v) {
                 binding.ivProfilePic -> {
-//                    PermissionsUtil().checkStoragePermission(this)
                     if (PermissionsUtil.hasStoragePermission(this)) {
                         getAction.launch(pickImageIntent)
                     } else {
