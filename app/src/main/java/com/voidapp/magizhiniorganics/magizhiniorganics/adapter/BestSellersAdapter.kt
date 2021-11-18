@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +43,7 @@ class BestSellersAdapter(
 
     override fun onBindViewHolder(holder: ProductHomeViewHolder, position: Int) {
         val product = products[position]
+        Log.e("TAG", "onBindViewHolder: $recycler", )
         val productID = product.id
         var variantInCartPosition: Int = 0
         for (i in product.variants.indices) {

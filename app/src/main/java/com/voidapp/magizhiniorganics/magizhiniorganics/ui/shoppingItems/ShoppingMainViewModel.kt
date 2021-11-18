@@ -1,15 +1,18 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Product
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.coroutines.*
@@ -19,7 +22,7 @@ class ShoppingMainViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
-    var shoppingMainListener: ShoppingMainListener? = null
+    var shoppingMainListener: ShoppingMainAdapter.ShoppingMainListener? = null
 
     var selectedChip: String = Constants.ALL
     var selectedCategory: String = ""
@@ -37,12 +40,8 @@ class ShoppingMainViewModel(
     val discountAvailableProducts: LiveData<List<ProductEntity>> = _discountAvailableProducts
     private var _subscriptions: MutableLiveData<List<ProductEntity>> = MutableLiveData()
     val subscriptions: LiveData<List<ProductEntity>> = _subscriptions
-    private var _subscriptionProduct: MutableLiveData<ProductEntity> = MutableLiveData()
-    val subscriptionProduct: LiveData<ProductEntity> = _subscriptionProduct
     private var _position: MutableLiveData<Int> = MutableLiveData()
     val position: LiveData<Int> = _position
-    private var _refreshProduct: MutableLiveData<ProductEntity> = MutableLiveData()
-    val refreshProduct: LiveData<ProductEntity> = _refreshProduct
 
     var productToRefresh = ProductEntity()
 
@@ -52,8 +51,25 @@ class ShoppingMainViewModel(
     fun getAllCartItems() = dbRepository.getAllCartItems()
     fun getCartItemsPrice() = dbRepository.getCartPrice()
 
-    fun getAllProductsStatic() = viewModelScope.launch(Dispatchers.IO) {
-        val products = dbRepository.getAllProductsStatic()
+    fun getAllProductsStatic() = viewModelScope.launch(Dispatchers.Default) {
+        val productsJob = async { dbRepository.getAllProductsStatic() }
+        val products = productsJob.await() as MutableList<ProductEntity>
+        val dummyFilter = mutableListOf<ProductEntity>()
+        dummyFilter.addAll(products)
+        dummyFilter.forEach { product ->
+            val dummyVariants = arrayListOf<ProductVariant>()
+            dummyVariants.addAll(product.variants)
+            product.variants.clear()
+            dummyVariants.forEach { variant ->
+                if (variant.status != Constants.LIMITED) {
+//                    products.remove(product)
+                    product.variants.add(variant)
+                }
+            }
+            if (product.variants.isEmpty()) {
+                products.remove(product)
+            }
+        }
         withContext(Dispatchers.Main) {
             _allProducts.value = products
         }
@@ -91,28 +107,42 @@ class ShoppingMainViewModel(
         }
     }
 
-    fun deleteCartItemFromShoppingMain(productId: String, variantName: String) = viewModelScope.launch (Dispatchers.IO) {
-        val product = dbRepository.getProductWithIdForUpdate(productId)
-        product.variantInCart.remove(variantName)
-        dbRepository.upsertProduct(product)
-        dbRepository.deleteProductFromCart(productId, variantName)
-        updatingTheCartInProduct(productId, variantName)
+    fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int) = viewModelScope.launch (Dispatchers.IO) {
+        dbRepository.deleteProductFromCart(product.id, variantName)
+        updatingTheCartInProduct(product,"", variantName, position)
     }
 
     fun deleteCartItem(id: Int, productId: String, variant: String) = viewModelScope.launch (Dispatchers.IO) {
         dbRepository.deleteCartItem(id)
-        updatingTheCartInProduct(productId, variant)
-        getAllCartItems()
+        updatingTheCartInProduct(null, productId, variant)
     }
 
-    private suspend fun updatingTheCartInProduct(productId: String, variant: String)  {
-        val productEntity = dbRepository.getProductWithIdForUpdate(productId)
-        productEntity.variantInCart.remove(variant)
+    private suspend fun updatingTheCartInProduct(product: ProductEntity?, productId: String = "", variant: String, position: Int = -1)  {
+        val productEntity = if (product == null) {
+            val entity = dbRepository.getProductWithIdForUpdate(productId)
+            entity.variantInCart.remove(variant)
+            entity
+        } else {
+            product.variantInCart.remove(variant)
+            product
+        }
+
         if (productEntity.variantInCart.isEmpty()) {
             productEntity.inCart = false
         }
         dbRepository.upsertProduct(productEntity)
-        updateShoppingMainPage()
+
+        if (position < 0) {
+            withContext(Dispatchers.Main) {
+                productToRefresh = productEntity
+                updateShoppingMainPage()
+            }
+        } else {
+            withContext(Dispatchers.Main) {
+                productToRefresh = productEntity
+                _position.value = position
+            }
+        }
     }
 
     private suspend fun updateShoppingMainPage() {
@@ -126,19 +156,16 @@ class ShoppingMainViewModel(
         }
     }
 
-    fun subscriptionItemToView(product: ProductEntity) = viewModelScope.launch {
-        delay(150)
-        _subscriptionProduct.value = product
-    }
-
     fun upsertCartItem(product: ProductEntity, position: Int , variant: String, count: Int, price:
-    Float, originalPrice: Float, maximumOrderQuantity: Int, variantIndex: Int) = viewModelScope.launch(Dispatchers.IO) {
-        val orderQuantity = if (maximumOrderQuantity == 0) {
-            10
-        } else {
-            maximumOrderQuantity
-        }
-        val cartEntity = CartEntity(
+    Float, originalPrice: Float, variantIndex: Int, maxOrderQuantity: Int) = viewModelScope.launch(Dispatchers.IO) {
+
+        val orderQuantity = if (maxOrderQuantity == 0) {
+                10
+            } else {
+                maxOrderQuantity
+            }
+
+        CartEntity(
             productId = product.id,
             productName = product.name,
             thumbnailUrl = product.thumbnailUrl,
@@ -148,22 +175,22 @@ class ShoppingMainViewModel(
             price = price,
             originalPrice = originalPrice,
             variantIndex = variantIndex
-        )
-        dbRepository.upsertCart(cartEntity)
-        val productEntity = dbRepository.getProductWithIdForUpdate(product.id)
-        productEntity.variantInCart.add(variant)
-        dbRepository.upsertProduct(productEntity)
-        getAllCartItems()
+        ).also { cartEntity ->
+            dbRepository.upsertCart(cartEntity)
+            product.variantInCart.add(variant)
+            dbRepository.upsertProduct(product)
+//            getAllCartItems()
 //        updateShoppingMainPage()
-        withContext(Dispatchers.Main) {
-            productToRefresh = productEntity
-            _position.value = position
+            withContext(Dispatchers.Main) {
+                productToRefresh = product
+                _position.value = position
+            }
         }
     }
 
     fun updateCartItem(id: Int, updatedCount: Int) = viewModelScope.launch (Dispatchers.IO) {
         dbRepository.updateCartItem(id, updatedCount)
-        getAllCartItems()
+//        getAllCartItems()
     }
 
     fun upsertProduct(product: ProductEntity) = viewModelScope.launch (Dispatchers.IO) {
@@ -183,7 +210,6 @@ class ShoppingMainViewModel(
             productToRefresh = product
             _position.value = position
         }
-//        updateShoppingMainPage()
     }
 
     private suspend fun localFavoritesUpdate(product: ProductEntity) = withContext(Dispatchers.IO) {
@@ -208,11 +234,11 @@ class ShoppingMainViewModel(
         dbRepository.updateProductFavoriteStatus(product.id, product.favorite)
     }
 
-    fun limitedItemsFilter() {
-        fbRepository.getLimitedItems(this)
+    fun limitedItemsFilter() = viewModelScope.launch {
+        fbRepository.getLimitedItems(this@ShoppingMainViewModel)
     }
 
-    fun limitedProducts(mutableLimitedItems: MutableList<ProductEntity>) {
+    fun limitedProducts(mutableLimitedItems: MutableList<ProductEntity>) = viewModelScope.launch(Dispatchers.Default){
         val products: List<ProductEntity> = mutableLimitedItems
         products.forEach { product ->
             val allVariants = mutableListOf<ProductVariant>()
@@ -226,11 +252,9 @@ class ShoppingMainViewModel(
                 }
             }
         }
-        shoppingMainListener?.limitedItemList(products)
-    }
-
-    fun moveToProductDetails(id: String, name: String) {
-        shoppingMainListener?.moveToProductDetails(id, name)
+        withContext(Dispatchers.Main) {
+            shoppingMainListener?.limitedItemList(products)
+        }
     }
 }
 

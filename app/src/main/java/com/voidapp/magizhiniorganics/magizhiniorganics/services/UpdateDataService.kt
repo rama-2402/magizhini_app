@@ -53,8 +53,6 @@ class UpdateDataService (
             val couponData = async { getAllData(Constants.COUPON) }
             val deliveryChargeData = async { getAllData(Constants.DELIVERY_CHARGE) }
 
-
-
             val categorySnapshot = categoryData.await()
             val bannerSnapshot = bannerData.await()
             val productSnapshot = productData.await()
@@ -91,6 +89,24 @@ class UpdateDataService (
         }
         return@withContext Result.success()
     }
+//
+//    private suspend fun setProductListener() = withContext(Dispatchers.IO) {
+//        try {
+//            mFireStore.collection(Constants.PRODUCTS)
+//                .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
+//                .addSnapshotListener { snapshot, fireSnapshotFailure ->
+//                    //error handling
+//                    fireSnapshotFailure?.let {
+//                        Log.e(Constants.APP_NAME, it.message.toString())
+//                    }
+//                    snapshot?.let { filterProducts(snapshot) }
+//
+//                }
+//        } catch (e: Exception) {
+//
+//        }
+//    }
+
 
     private suspend fun specialBanners() {
         try {

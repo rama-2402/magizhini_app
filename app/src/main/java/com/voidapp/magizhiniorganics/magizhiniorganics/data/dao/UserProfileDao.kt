@@ -73,9 +73,6 @@ interface UserProfileDao {
     @Query("SELECT * FROM CartEntity")
     fun getAllCartItems(): LiveData<List<CartEntity>>
 
-//    @Query("SELECT * FROM VariantEntity")
-//    fun getAllDefaultVariantsList(): LiveData<List<VariantEntity>>
-
     @Query("SELECT * FROM ProductEntity WHERE activated ORDER BY name")
     fun getAllProducts(): LiveData<List<ProductEntity>>
 

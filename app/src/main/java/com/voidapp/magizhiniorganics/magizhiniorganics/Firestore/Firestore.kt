@@ -212,7 +212,7 @@ class Firestore(
 
 
     //live update of the limited items
-    fun getLimitedItems(viewModel: ShoppingMainViewModel) {
+    suspend fun getLimitedItems(viewModel: ShoppingMainViewModel) = withContext(Dispatchers.IO) {
         try {
             mFireStore.collection(Constants.PRODUCTS)
                 .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
@@ -221,33 +221,99 @@ class Firestore(
                     fireSnapshotFailure?.let {
                         Log.e(Constants.APP_NAME, it.message.toString())
                     }
-                    snapshot?.let {
-                        val mutableLimitedItems: MutableList<ProductEntity> = mutableListOf()
-                        loop@ for (d in it.documents) {
-//                            val prod = it.documents.map { doc -> doc.toObject(ProductEntity::class.java) }
-                            //we take each product object
-                            val product = d.toObject(Product::class.java)
-                            //if there is some content
-                            product?.let {
-                                product.id = d.id
-                                for (i in 0 until product.variants.size) {
-                                    //we are checking all the variants of the product if the variant is limited or not.
-                                    //if atleast any one of the variant is limited then we add the whole product to the list
-                                    if (product.variants[i].status == Constants.LIMITED) {
-                                        val productEntity = product.toProductEntity()
-                                        mutableLimitedItems.add(productEntity)
-                                        break
-                                    }
-                                }
-                            }
-                        }
-                        viewModel.limitedProducts(mutableLimitedItems)
-                    }
+
+                    snapshot?.let { filterProducts(snapshot, viewModel) }
+
+//                    snapshot?.let {
+//                        val mutableLimitedItems: MutableList<ProductEntity> = mutableListOf()
+//                        for (d in it.documents) {
+////                            val prod = it.documents.map { doc -> doc.toObject(ProductEntity::class.java) }
+//                            //we take each product object
+//                            val product = d.toObject(Product::class.java)
+//                            //if there is some content
+//                            product?.let { it ->
+//                                it.id = d.id
+//                                for (i in 0 until it.variants.size) {
+//                                    //we are checking all the variants of the product if the variant is limited or not.
+//                                    //if atleast any one of the variant is limited then we add the whole product to the list
+//                                    if (it.variants[i].status == Constants.LIMITED) {
+//                                        val productEntity = it.toProductEntity()
+//                                        mutableLimitedItems.add(productEntity)
+//                                        break
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+
                 }
+
         } catch (e: Exception) {
 
         }
     }
+
+    private fun filterProducts(snapshot: QuerySnapshot, viewModel: ShoppingMainViewModel)
+    = CoroutineScope(Dispatchers.Default).launch {
+        val favorites = mutableListOf<String>()
+        val cartItems = repository.getAllCartItemsForEntityUpdate()
+
+        repository.getFavorites()?.let {
+            it.forEach { fav ->
+                favorites.add(fav.id)
+            }
+        }
+
+        val mutableLimitedItems: MutableList<ProductEntity> = mutableListOf()
+            for (d in snapshot.documents) {
+//                            val prod = it.documents.map { doc -> doc.toObject(ProductEntity::class.java) }
+                //we take each product object
+                val product = d.toObject(Product::class.java)
+                //if there is some content
+                product?.let { it ->
+                    it.id = d.id
+                    for (i in 0 until it.variants.size) {
+                        //we are checking all the variants of the product if the variant is limited or not.
+                        //if atleast any one of the variant is limited then we add the whole product to the list
+                        if (it.variants[i].status == Constants.LIMITED) {
+                            val productEntity = it.toProductEntity()
+                            if (favorites.contains(product.id)) {
+                                productEntity.favorite = true
+                            }
+                            cartItems.forEach { item ->
+                                if (item.productId == productEntity.id) {
+                                    productEntity.inCart = true
+                                    productEntity.variantInCart.add(item.variant)
+                                }
+                            }
+                            mutableLimitedItems.add(productEntity)
+                            break
+                        }
+                    }
+                }
+            }
+        viewModel.limitedProducts(mutableLimitedItems)
+    }
+
+//    //Function to update the products entity with user preferences like favorites, cart items and coupons added
+//    private suspend fun updateEntityData(viewModel: ShoppingMainViewModel, products: MutableList<ProductEntity>) = withContext(Dispatchers.IO) {
+//        try {
+//            val favorites: List<Favorites>? = repository.getFavorites()
+//            favorites?.forEach {
+//                repository.updateProductFavoriteStatus(it.id, status = true)
+//            }
+//            repository.getAllCartItemsForEntityUpdate().forEach {
+//                with(it) {
+//                    val product = repository.getProductWithIdForUpdate(productId)
+//                    product.variantInCart.add(it.variant)
+//                    repository.upsertProduct(product)
+//                    repository.updateCartItemsToEntity(productId, true, couponName)
+//                }
+//            }
+//        } catch (e: Exception) {
+//            Log.e("exception", e.message.toString())
+//        }
+//    }
 
     suspend fun productListener(id: String, viewModel: ProductViewModel) = withContext(Dispatchers.IO) {
         try {
@@ -301,6 +367,7 @@ class Firestore(
     suspend fun limitedItemsUpdater(cart: List<CartEntity>): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
+                Log.e("TAG", "limitedItemsUpdater: $cart", )
                 for (cartItem in cart) {
                     mFireStore.runTransaction { transaction ->
                         val productRef =

@@ -92,7 +92,7 @@ class CartAdapter(
 
         holder.productThumbNail.setOnClickListener {
             when(viewModel) {
-                is ShoppingMainViewModel -> viewModel.moveToProductDetails(cartItem.productId, cartItem.productName)
+//                is ShoppingMainViewModel -> viewModel.moveToProductDetails(cartItem.productId, cartItem.productName)
                 //can implement later for checkout and product page
             }
         }

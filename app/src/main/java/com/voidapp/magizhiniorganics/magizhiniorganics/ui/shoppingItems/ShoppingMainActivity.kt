@@ -25,7 +25,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +41,7 @@ import kotlin.collections.ArrayList
 class ShoppingMainActivity :
     BaseActivity(),
     KodeinAware,
-    ShoppingMainListener {
+    ShoppingMainAdapter.ShoppingMainListener {
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityShoppingMainBinding
@@ -61,9 +60,6 @@ class ShoppingMainActivity :
 
     private var mItems: MutableList<ProductEntity> = mutableListOf()
     private val mFilteredItems: MutableList<ProductEntity> = mutableListOf()
-    private val mCategoryFilteredItems: MutableList<ProductEntity> = mutableListOf()
-    private val mFavoriteItems: MutableList<ProductEntity> = mutableListOf()
-    private val mSubscriptionItems: MutableList<ProductEntity> = mutableListOf()
     private val mLimitedItems: MutableList<ProductEntity> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,49 +105,34 @@ class ShoppingMainActivity :
             viewModel.selectedChip = Constants.ALL
             mItems = it as MutableList<ProductEntity>
             adapter.limited = false
+            hideShimmer()
             adapter.setData(it)
             binding.cpAll.isChecked = true
-            lifecycleScope.launch(Dispatchers.Main) {
-                delay(1500)
-                hideShimmer()
-            }
         })
         viewModel.subscriptions.observe(this, {
             viewModel.selectedChip = Constants.SUBSCRIPTION
             adapter.limited = false
+            hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
-            lifecycleScope.launch(Dispatchers.Main) {
-                delay(1500)
-                hideShimmer()
-            }
         })
         viewModel.allProductsInCategory.observe(this, {
             viewModel.selectedChip = Constants.CATEGORY
             viewModel.selectedCategory = categoryFilter
             adapter.limited = false
+            hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
-            lifecycleScope.launch(Dispatchers.Main) {
-                delay(1500)
-                hideShimmer()
-            }
         })
         viewModel.allFavorites.observe(this, {
             viewModel.selectedChip = Constants.FAVORITES
             adapter.limited = false
+            hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
-            lifecycleScope.launch(Dispatchers.Main) {
-                delay(1500)
-                hideShimmer()
-            }
         })
         viewModel.discountAvailableProducts.observe(this, {
             viewModel.selectedChip = Constants.DISCOUNT
             adapter.limited = false
+            hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
-            lifecycleScope.launch(Dispatchers.Main) {
-                delay(1500)
-                hideShimmer()
-            }
         })
         viewModel.getAllCartItems().observe(this, {
             cartAdapter.setCartData(it)
@@ -170,15 +151,6 @@ class ShoppingMainActivity :
                 if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                     checkoutText.text = "Rs: $mCartPrice"
                 }
-            }
-        })
-        viewModel.subscriptionProduct.observe(this, { product ->
-            Intent(this, SubscriptionProductActivity::class.java).also {
-                it.putExtra(Constants.PRODUCTS, product.id)
-                it.putExtra(Constants.PRODUCT_NAME, product.name)
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
             }
         })
     }
@@ -271,14 +243,23 @@ class ShoppingMainActivity :
                     binding.cpLimitedItems.also {
                         it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                     }
-                    showShimmer()
-                    isFiltered = false
-                    binding.flShimmerPlaceholder.startShimmer()
                     binding.tvToolbarTitle.text = "Limited Items"
-                    viewModel.limitedItemsFilter()
+                    if(mLimitedItems.isEmpty()) {
+                        showShimmer()
+                        binding.flShimmerPlaceholder.startShimmer()
+                        viewModel.limitedItemsFilter()
+                    } else {
+                        displayLimitedItems(mLimitedItems)
+                    }
                 }
             }
         }
+    }
+
+    private fun displayLimitedItems(products: MutableList<ProductEntity>) {
+        isFiltered = false
+        adapter.limited = true
+        adapter.setData(products)
     }
 
     private fun openCategoryFilterDialog() {
@@ -348,7 +329,7 @@ class ShoppingMainActivity :
             this,
             mutableListOf(),
             false,
-            viewModel
+            this
         )
         binding.rvShoppingItems.layoutManager = LinearLayoutManager(this)
         binding.rvShoppingItems.adapter = adapter
@@ -422,14 +403,7 @@ class ShoppingMainActivity :
 //        return prodList
 //    }
 
-    //updating the limited items products list
-    override fun limitedItemList(products: List<ProductEntity>) {
-        adapter.limited = true
-        adapter.setData(products as MutableList<ProductEntity>)
-        hideShimmer()
-    }
-
-    override fun moveToProductDetails(id: String, name: String) {
+    private fun navigateToProductDetails(id: String, name: String) {
         if (NetworkHelper.isOnline(this)) {
             Intent(this, ProductActivity::class.java).also {
                 it.putExtra(Constants.PRODUCTS, id)
@@ -464,5 +438,40 @@ class ShoppingMainActivity :
                 finish()
             }
         }
+    }
+
+    override fun navigateToProduct(id: String, name: String) {
+        navigateToProductDetails(id, name)
+    }
+
+    override fun updateFavorites(id: String, product: ProductEntity, position: Int) {
+        viewModel.updateFavorites(id, product, position)
+    }
+
+    override fun navigateToSubscription(product: ProductEntity) {
+        navigateToProductDetails(product.id, product.name)
+    }
+
+    override fun upsertCartItem(
+        product: ProductEntity,
+        position: Int,
+        variant: String,
+        count: Int,
+        price: Float,
+        originalPrice: Float,
+        variantIndex: Int,
+        maxOrderQuantity: Int
+    ) {
+        viewModel.upsertCartItem(product, position, variant, count, price, originalPrice, variantIndex, maxOrderQuantity)
+    }
+
+    override fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int) {
+        viewModel.deleteCartItemFromShoppingMain(product, variantName, position)
+    }
+
+    //updating the limited items products list
+    override fun limitedItemList(products: List<ProductEntity>) {
+        hideShimmer()
+        displayLimitedItems(products = products as MutableList<ProductEntity>)
     }
 }

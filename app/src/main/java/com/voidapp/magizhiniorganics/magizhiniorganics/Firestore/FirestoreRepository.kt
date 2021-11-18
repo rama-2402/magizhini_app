@@ -49,7 +49,7 @@ class FirestoreRepository (
 
 
 
-    fun getLimitedItems(viewModel: ShoppingMainViewModel) = firestore.getLimitedItems(viewModel)
+    suspend fun getLimitedItems(viewModel: ShoppingMainViewModel) = firestore.getLimitedItems(viewModel)
 
     suspend fun productListener(id: String, viewModel: ProductViewModel) = firestore.productListener(id, viewModel)
 
