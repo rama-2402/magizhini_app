@@ -4,9 +4,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -18,6 +21,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
+import androidx.viewbinding.ViewBinding
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -36,6 +40,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.Su
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BROADCAST
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DESCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import kotlinx.coroutines.*
 import org.imaginativeworld.whynotimagecarousel.listener.CarouselListener
 import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
@@ -58,6 +66,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     private lateinit var specialsOneAdapter: BestSellersAdapter
     private lateinit var specialsTwoAdapter: BestSellersAdapter
     private lateinit var specialsThreeAdapter: BestSellersAdapter
+    private val banners = mutableListOf<BannerEntity>()
 
     //initializing the carousel item for the banners
     val mItems: MutableList<CarouselItem> = mutableListOf()
@@ -128,13 +137,36 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         binding.fabCart.setOnClickListener(this)
     }
 
+    private fun selectedBanner(position: Int) = lifecycleScope.launch {
+        val banner = banners[position]
+        when(banner.type) {
+            PRODUCTS -> {
+                try {
+                    val product = viewModel.getProductByID(banner.description)
+                    moveToProductDetails(product.id, product.name)
+                } catch (e: Exception) {}
+            }
+            CATEGORY -> {
+                try {
+                    val category = viewModel.getCategoryByID(banner.description)
+                    displaySelectedCategory(category)
+                } catch (e: Exception) {}
+            }
+            DESCRIPTION -> {
+                showDescriptionBs(banner.description)
+            }
+            else -> Unit
+        }
+    }
+
     private fun observers() {
 
         viewModel.getDataToPopulate()
 
         //observing the banners data and setting the banners
         viewModel.getAllBanners().observe(this, Observer {
-            val banners = it
+            banners.clear()
+            banners.addAll(it)
             val bannersCarousel: MutableList<CarouselItem> = mutableListOf()
             for (banner in banners) {
                 //creating a mutable list baaner carousel item
@@ -267,24 +299,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         binding.cvBanner.registerLifecycle(this)
         binding.cvBanner.carouselListener = object : CarouselListener {
             override fun onClick(position: Int, carouselItem: CarouselItem) {
-                try {
-                    //we are using try catch because there is a bug in the library where it sometimes returns larger index numbers causing app crash
-                    //checking the click response content type
-                    when (bannerItems[position].type) {
-                        Constants.OPEN_LINK -> bannerDescriptionClickAction(
-                            bannerItems[position].description,
-                            Constants.OPEN_LINK
-                        )
-                        Constants.SHOW_DETAILS -> bannerDescriptionClickAction(
-                            bannerItems[position].description,
-                            Constants.SHOW_DETAILS
-                        )
-                        else -> {
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e("void", e.message.toString())
-                }
+                selectedBanner(position)
             }
         }
     }
@@ -342,7 +357,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
 
     override fun displaySelectedCategory(category: String) {
         Intent(this, ShoppingMainActivity::class.java).also {
-            it.putExtra(Constants.CATEGORY, category)
+            it.putExtra(CATEGORY, category)
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
@@ -350,7 +365,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
 
     override fun moveToProductDetails(id: String, name: String) {
         Intent(this, ProductActivity::class.java).also {
-            it.putExtra(Constants.PRODUCTS, id)
+            it.putExtra(PRODUCTS, id)
             it.putExtra(Constants.PRODUCT_NAME, name)
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)

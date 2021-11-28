@@ -7,23 +7,23 @@ import androidx.room.PrimaryKey
 @Entity
 data class ProductCategoryEntity(
     @PrimaryKey(autoGenerate = false)
-    var id: String,
+    var id: String = "",
     @ColumnInfo
     var name: String = "",
     @ColumnInfo
-    val items: Int,
+    var items: Int = 0,
     @ColumnInfo
     var thumbnailUrl: String = "",
     @ColumnInfo
     var thumbnailName: String = "",
     @ColumnInfo
-    var isDiscounted: Boolean,
+    var isDiscounted: Boolean = false,
     @ColumnInfo
     var discountType: String = "percent",
     @ColumnInfo
     var discountAmount: Int = 0,
     @ColumnInfo
-    var products: ArrayList<String>,
+    var products: ArrayList<String> = arrayListOf(),
     @ColumnInfo
     var activated: Boolean = true
 )

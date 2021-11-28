@@ -129,6 +129,9 @@ interface UserProfileDao {
     @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated ORDER BY name")
     fun getAllProductByCategoryStatic(category: String): List<ProductEntity>
 
+    @Query("SELECT name FROM ProductEntity WHERE id = :id")
+    fun getCategoryByID(id: String): String?
+
     @Query("SELECT * FROM ProductEntity WHERE favorite ORDER BY name")
     fun getAllFavoritesStatic(): List<ProductEntity>
 

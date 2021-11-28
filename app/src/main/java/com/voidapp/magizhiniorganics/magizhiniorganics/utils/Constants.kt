@@ -77,6 +77,8 @@ object Constants {
     const val DO_NOTHING: String = "Do Nothing"
     const val SHOW_DETAILS: String = "Show details"
     const val OPEN_LINK: String = "url"
+    const val DESCRIPTION = "description"
+    const val NONE = "none"
 
     //image storage paths
     const val PROFILE_PIC_PATH: String = "users/profile-pic/"

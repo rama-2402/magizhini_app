@@ -5,6 +5,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductCategoryEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -273,5 +274,13 @@ class HomeViewModel (
 
     fun updateToken(token: String?)= viewModelScope.launch(Dispatchers.IO) {
         token?.let { fbRepository.updateToken(it) }
+    }
+
+    suspend fun getProductByID(id: String): ProductEntity = withContext(Dispatchers.IO) {
+        return@withContext dbRepository.getProductWithIdForUpdate(id)
+    }
+
+    suspend fun getCategoryByID(id: String): String = withContext(Dispatchers.IO) {
+        dbRepository.getCategoryByID(id)?.let { return@withContext it } ?: "Dairy Products"
     }
 }

@@ -33,6 +33,8 @@ class DatabaseRepository(
 
     fun upsertProductCategory(category: ProductCategoryEntity) = db.getUserProfileDao().upsertCategory(category)
 
+    fun getCategoryByID(id: String): String? = db.getUserProfileDao().getCategoryByID(id)
+
     fun upsertCoupon(coupon: CouponEntity) = db.getUserProfileDao().upsertCoupon(coupon)
 
     fun upsertBanner(bannerEntity: BannerEntity) = db.getUserProfileDao().upsertBanner(bannerEntity)
