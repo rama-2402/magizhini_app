@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -82,6 +83,7 @@ class SubscriptionProductActivity :
     private var reviewImageUri: Uri? = null
 
     private lateinit var adapter: ReviewAdapter
+    private lateinit var variantAdapter: ArrayAdapter<String>
     private lateinit var mAddressBottomSheet: BottomSheetDialog
 
     //sub class variables
@@ -221,8 +223,6 @@ class SubscriptionProductActivity :
                     }
                 }
             })
-
-
             spSubscriptionType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
@@ -236,14 +236,31 @@ class SubscriptionProductActivity :
                     generateEstimate(0)
                 }
             }
-
-            fabSubscribe.setOnClickListener {
-                lifecycleScope.launch(Dispatchers.IO) {
-                    oSubscription.id = viewModel.generateSubscriptionID("${TimeUtil().getMonth()}${TimeUtil().getYear()}")
+            spVariants.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long) {
+                    setDataToDisplay(position)
+                    generateEstimate(spSubscriptionType.selectedItemPosition)
                 }
-                showAddressBs(viewModel.userProfile.address[0])
-            }
 
+                override fun onNothingSelected(p0: AdapterView<*>?) {
+                    setDataToDisplay(0)
+                    generateEstimate(0)
+                }
+            }
+            fabSubscribe.setOnClickListener {
+                if (cpAddReview.text == "cancel") {
+                    return@setOnClickListener
+                } else {
+                     lifecycleScope.launch(Dispatchers.IO) {
+                        oSubscription.id = viewModel.generateSubscriptionID("${TimeUtil().getMonth()}${TimeUtil().getYear()}")
+                    }
+                    showAddressBs(viewModel.userProfile.address[0])
+                }
+            }
             tbAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
                 title = if (abs(verticalOffset) -appBarLayout.totalScrollRange == 0) {
                     mProductName
@@ -251,11 +268,9 @@ class SubscriptionProductActivity :
                     ""
                 }
             })
-
             ivPreviewImage.setOnClickListener {
                 onBackPressed()
             }
-
             btnAddImage.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                 if (PermissionsUtil.hasStoragePermission(this@SubscriptionProductActivity)) {
@@ -294,6 +309,9 @@ class SubscriptionProductActivity :
                         reviewImageUri?.let { GlideLoader().imageExtension(this@SubscriptionProductActivity,  reviewImageUri)!! } ?: ""
                     )
                 }
+            }
+            ivInfo.setOnClickListener {
+                showDescriptionBs(resources.getString(R.string.subscription_info))
             }
         }
     }
@@ -384,15 +402,15 @@ class SubscriptionProductActivity :
         when(position) {
             0 -> {
                 oSubscription.subType = Constants.SINGLE_PURCHASE
-                oSubscription.estimateAmount = mProduct.variants[0].variantPrice.toFloat()
                 binding.tvEstimate.text = "Estimate (single order)"
-                binding.tvEstimateAmount.text = "Rs: ${mProduct.variants[0].variantPrice}"
+                binding.tvEstimateAmount.text = "Rs: ${mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice}"
+                oSubscription.estimateAmount = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toString().toFloat()
                 setEndDate(position)
             }
             1 -> {
                 oSubscription.subType = Constants.MONTHLY
                 binding.tvEstimate.text = "Estimate (30 days cycle)"
-                val price = mProduct.variants[0].variantPrice.toFloat() * 30
+                val price = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toFloat() * 30
                 binding.tvEstimateAmount.text = "Rs: $price"
                 oSubscription.estimateAmount = price
                 setEndDate(position)
@@ -417,7 +435,17 @@ class SubscriptionProductActivity :
     private fun initLiveData() {
         viewModel.product.observe(this, {
             mProduct = it
-            setDataToDisplay()
+            val variantNames = arrayListOf<String>()
+            mProduct.variants.forEach { variant ->
+                variantNames.add("${variant.variantName} ${variant.variantType}")
+            }
+            variantAdapter = ArrayAdapter(
+                binding.spVariants.popupContext,
+                R.layout.support_simple_spinner_dropdown_item,
+                variantNames
+            )
+            binding.spVariants.adapter = variantAdapter
+            setDataToDisplay(0)
             clickListeners()
         })
 
@@ -470,15 +498,13 @@ class SubscriptionProductActivity :
         }
     }
 
-    private fun setDataToDisplay() {
+    private fun setDataToDisplay(variantPosition: Int) {
         val nextDate = System.currentTimeMillis() + (1000 * 60 * 60 * 24)
         with(binding) {
             GlideLoader().loadUserPicture(this@SubscriptionProductActivity, mProduct.thumbnailUrl, ivProductThumbnail)
-            adapter.reviews = mProduct.reviews
-            adapter.notifyDataSetChanged()
-            tvVariantName.text = "${mProduct.variants[0].variantName} ${mProduct.variants[0].variantType}"
-            tvDiscountedPrice.text = "Rs. ${mProduct.variants[0].variantPrice}"
+            tvDiscountedPrice.text = "Rs. ${mProduct.variants[variantPosition].variantPrice}"
             tvFromDate.text = TimeUtil().getCustomDate(dateLong = nextDate)
+            tvEstimateAmount.text = "Rs: ${mProduct.variants[variantPosition].variantPrice}"
         }
     }
 
@@ -515,11 +541,11 @@ class SubscriptionProductActivity :
             llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_in_right))
             llEmptyLayout.startAnimation(AnimationUtils.loadAnimation(llEmptyLayout.context, R.anim.slide_out_left))
             rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_out_left))
-            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
+//            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
+            fabSubscribe.remove()
             lifecycleScope.launch {
                 delay(400)
                 llNewReview.visible()
-                fabSubscribe.remove()
                 rvReviews.remove()
                 llEmptyLayout.remove()
             }

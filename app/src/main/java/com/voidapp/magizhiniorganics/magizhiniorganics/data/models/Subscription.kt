@@ -4,6 +4,8 @@ data class Subscription(
     var id: String = "",
     var productID: String = "",
     var productName: String = "",
+    var variantName: String = "",
+    var phoneNumber: String = "",
     var customerID: String = "",
     var address: Address = Address(),
     var monthYear: String = "",

@@ -16,6 +16,8 @@ class DatabaseRepository(
     fun deleteOrdersTable() = db.getUserProfileDao().deleteOrdersTable()
     fun deleteSubscriptionsTable() = db.getUserProfileDao().deleteSubscriptionsTable()
     fun deleteBanners() = db.getUserProfileDao().deleteBanners()
+    fun deleteCoupons() = db.getUserProfileDao().deleteCoupons()
+    fun deleteAllCategories() = db.getUserProfileDao().deleteAllCategories()
 
     fun deleteCartItem(id: Int) = db.getUserProfileDao().deleteCartItem(id)
 

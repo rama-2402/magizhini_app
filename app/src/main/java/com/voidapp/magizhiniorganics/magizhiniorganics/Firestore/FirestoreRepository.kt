@@ -98,4 +98,7 @@ class FirestoreRepository (
     suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult = firestore.updateTransaction(transaction)
 //    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
 
+
+    //updateToken
+    suspend fun updateToken(token: String) = firestore.updateToken(token)
 }

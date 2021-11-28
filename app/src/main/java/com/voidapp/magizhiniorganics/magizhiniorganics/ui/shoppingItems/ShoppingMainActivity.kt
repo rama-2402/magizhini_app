@@ -25,7 +25,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -390,7 +392,6 @@ class ShoppingMainActivity :
                 showErrorSnackBar("Please check network connection", true)
             }
         }
-
     }
 
 //    private fun getOnlyAvailableProducts(products: List<ProductEntity>?): List<ProductEntity> {
@@ -403,14 +404,24 @@ class ShoppingMainActivity :
 //        return prodList
 //    }
 
-    private fun navigateToProductDetails(id: String, name: String) {
+    private fun navigateToProductDetails(product: ProductEntity) {
         if (NetworkHelper.isOnline(this)) {
-            Intent(this, ProductActivity::class.java).also {
-                it.putExtra(Constants.PRODUCTS, id)
-                it.putExtra(Constants.PRODUCT_NAME, name)
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
+            if (product.productType == SUBSCRIPTION) {
+                Intent(this, SubscriptionProductActivity::class.java).also {
+                    it.putExtra(Constants.PRODUCTS, product.id)
+                    it.putExtra(Constants.PRODUCT_NAME, product.name)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                }
+            } else {
+                Intent(this, ProductActivity::class.java).also {
+                    it.putExtra(Constants.PRODUCTS, product.id)
+                    it.putExtra(Constants.PRODUCT_NAME, product.name)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                }
             }
         } else {
             showErrorSnackBar("Please check network connection", true)
@@ -440,16 +451,12 @@ class ShoppingMainActivity :
         }
     }
 
-    override fun navigateToProduct(id: String, name: String) {
-        navigateToProductDetails(id, name)
-    }
-
     override fun updateFavorites(id: String, product: ProductEntity, position: Int) {
         viewModel.updateFavorites(id, product, position)
     }
 
-    override fun navigateToSubscription(product: ProductEntity) {
-        navigateToProductDetails(product.id, product.name)
+    override fun navigateToProduct(product: ProductEntity) {
+        navigateToProductDetails(product)
     }
 
     override fun upsertCartItem(

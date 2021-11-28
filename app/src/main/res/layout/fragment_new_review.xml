@@ -46,7 +46,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:hint="Delivery Note"
+        android:hint="Enter your review here..."
         android:layout_margin="@dimen/material_size_16"
         app:boxStrokeColor="@color/green_base"
         app:flow_wrapMode="aligned"

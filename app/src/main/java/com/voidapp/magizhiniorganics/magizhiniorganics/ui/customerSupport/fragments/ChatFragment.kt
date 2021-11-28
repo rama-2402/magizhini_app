@@ -70,7 +70,6 @@ class ChatFragment : Fragment(), KodeinAware {
     }
 
     private fun setRecyclerView() {
-
         adapter = ChatAdapter(
             requireContext(),
             mRecentMessages,

@@ -14,6 +14,10 @@ data class SubscriptionEntity(
     @ColumnInfo
     var productName: String = "",
     @ColumnInfo
+    var variantName: String = "",
+    @ColumnInfo
+    var phoneNumber: String = "",
+    @ColumnInfo
     var customerID: String = "",
     @ColumnInfo
     var address: Address = Address(),

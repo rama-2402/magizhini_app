@@ -36,7 +36,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAd
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurchaseHistoryBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
@@ -160,87 +159,10 @@ class PurchaseHistoryActivity :
 
     private fun initLiveData() {
         viewModel.getProfileData("${mFilterMonth}${mFilterYear}")
-//        viewModel.getFavorites()
-
-//        viewModel.showCartBottomSheet.observe(this, {
-//            orderItemsAdapter.cartItems = it
-//            showCartBottomSheet()
-//        })
-
-        //observing the favorites livedata
-//        viewModel.favorites.observe(this, {
-//            orderItemsAdapter.favorites = it
-//        })
 
         viewModel.moveToProductReview.observe(this, {
             moveToProductDetails(viewModel.productId, viewModel.productName)
         })
-
-//        viewModel.cancelOrder.observe(this, {
-//            mCancelOrder = it
-//            showExitSheet(this, "Confirm Cancellation")
-//        })
-
-//        viewModel.invoiceOrder.observe(this, {
-//            mInvoiceOrder = it
-//            createPDF(mInvoiceOrder)
-//            if (PermissionsUtil.hasStoragePermission(this)) {
-//                createPDF(mInvoiceOrder)
-//            } else {
-//                showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
-//            }
-//        })
-//
-//        viewModel.cancellationStatus.observe(this, {
-//            if (it) {
-//                startWorkerThread(mCancelOrder)
-//                viewModel.orderCancelled(mCancelOrder)
-//                for (i in mOrderHistory.indices) {
-//                    if (mOrderHistory[i].orderId == mCancelOrder.orderId) {
-//                        mOrderHistory[i].orderStatus = Constants.CANCELLED
-//                        ordersAdapter.orders = mOrderHistory
-//                        ordersAdapter.notifyItemChanged(i)
-//                        hideProgressDialog()
-//                        showToast(this, "Order Cancelled", Constants.SHORT)
-//                        showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
-//                    }
-//                }
-//            } else {
-//                hideProgressDialog()
-//                showErrorSnackBar("Cancellation failed! Please try again later", true)
-//            }
-//        })
-
-//        viewModel.startWork.observe(this, {
-//            val workRequest: WorkRequest =
-//                OneTimeWorkRequestBuilder<GetOrderHistoryService>()
-//                    .setInputData(
-//                        workDataOf(
-//                            "filter" to "${mFilterMonth}${mFilterYear}",
-//                            "id" to SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
-//                        )
-//                    )
-//                    .build()
-//
-//            WorkManager.getInstance(this).enqueue(workRequest)
-//            WorkManager.getInstance(this)
-//                .getWorkInfoByIdLiveData(workRequest.id)
-//                .observe(this, {
-//                    when (it.state) {
-//                        WorkInfo.State.SUCCEEDED -> {
-//                            viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
-//                        }
-//                        WorkInfo.State.CANCELLED -> {
-//                            hideShimmer()
-//                            showErrorSnackBar("Failed to get data! Please try again later", true)
-//                        }
-//                        WorkInfo.State.FAILED -> {
-//                            hideShimmer()
-//                            showErrorSnackBar("Failed to get data! Please try again later", true)
-//                        }
-//                    }
-//                })
-//        })
 
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->
@@ -409,6 +331,7 @@ class PurchaseHistoryActivity :
                 }
             }
         }
+        viewModel.setEmptyStatus()
     }
 
     private fun onFailedCallback(message: String, data: Any?) {
@@ -418,6 +341,7 @@ class PurchaseHistoryActivity :
                 showErrorSnackBar("Server Error! Order cancellation failed. Try later", true)
             }
         }
+        viewModel.setEmptyStatus()
     }
 
     override fun showCart(cart: List<CartEntity>) {

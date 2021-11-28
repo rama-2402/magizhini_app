@@ -15,6 +15,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_ACTIVE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.UNSUB
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.tasks.await
@@ -44,11 +48,11 @@ class GetOrderHistoryService(
             withContext(Dispatchers.IO) {
                 val getOrders = async { getOrders(userID) }
                 val getSubscriptions = async { getSubscriptions(userID) }
-//                val getCancelledSubscriptions = async { getCancelledSubscriptions(userID) }
+                val getCancelledSubscriptions = async { getCancelledSubscriptions(userID) }
 
                 getOrders.await()
                 getSubscriptions.await()
-//                getCancelledSubscriptions.await()
+                getCancelledSubscriptions.await()
             }
         } catch (e: Exception) {
             return Result.retry()
@@ -56,27 +60,18 @@ class GetOrderHistoryService(
         return Result.success()
     }
 
+
     private suspend fun getSubscriptions(userID: String) {
         try {
             withContext(Dispatchers.IO) {
-                val subscriptionMonths = firestore
-                    .collection(Constants.USERS)
-                    .document(userID)
-                    .get()
-                    .await().toObject(UserProfile::class.java)?.subscribedMonths ?: arrayListOf()
-
-                for (month in subscriptionMonths) {
-                    val docs = firestore
-                        .collection("Subscription")
-                        .document("Active")
-                        .collection(month)
-                        .whereEqualTo("customerID", userID)
-                        .get().await()
-
-                    for (doc in docs.documents) {
-                        val subscription = doc.toObject(Subscription::class.java)?.toSubscriptionEntity()
-                        subscription?.let { repository.upsertSubscription(it) }
-                    }
+                val documents = FirebaseFirestore.getInstance()
+                    .collection(SUBSCRIPTION).document(SUB_ACTIVE)
+                    .collection(SUB)
+                    .whereEqualTo("customerID", userID)
+                    .get().await()
+                for (doc in documents.documents) {
+                    val sub = doc.toObject(Subscription::class.java)?.toSubscriptionEntity()
+                    sub?.let { repository.upsertSubscription(sub) }
                 }
             }
         } catch (e: Exception) {
@@ -88,29 +83,27 @@ class GetOrderHistoryService(
         }
     }
 
-//    private suspend fun getCancelledSubscriptions (userID: String) {
-//        try {
-//            withContext(Dispatchers.IO) {
-//                val docs = FirebaseFirestore.getInstance()
-//                    .collection("Subscription")
-//                    .document("Cancelled")
-//                    .collection("subs")
-//                    .whereEqualTo("customerID", userID)
-//                    .get().await()
-//
-//                for (doc in docs.documents) {
-//                    val subscription = doc.toObject(Subscription::class.java)?.toSubscriptionEntity()
-//                    subscription?.let { repository.upsertSubscription(it) }
-//                }
-//            }
-//        } catch (e: Exception) {
-//            e.message?.let {
-//                logCrash(userID, "GetOrderService: getting all the cancelled user subscriptions",
-//                    it
-//                )
-//            }
-//        }
-//    }
+    private suspend fun getCancelledSubscriptions (userID: String) {
+        try {
+            withContext(Dispatchers.IO) {
+                val documents = FirebaseFirestore.getInstance()
+                    .collection(SUBSCRIPTION).document(SUB_ACTIVE)
+                    .collection(UNSUB)
+                    .whereEqualTo("customerID", userID)
+                    .get().await()
+                for (doc in documents.documents) {
+                    val sub = doc.toObject(Subscription::class.java)?.toSubscriptionEntity()
+                    sub?.let { repository.upsertSubscription(sub) }
+                }
+            }
+        } catch (e: Exception) {
+            e.message?.let {
+                logCrash(userID, "GetOrderService: getting all the user cancelled subscriptions",
+                    it
+                )
+            }
+        }
+    }
 
     private suspend fun getOrders(userID: String) {
         try {

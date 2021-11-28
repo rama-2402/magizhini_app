@@ -3,8 +3,10 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.PhoneAuthCredential
+import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirebaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +15,7 @@ import kotlinx.coroutines.withContext
 
 class SignInViewModel(
     private val fbRepository: FirestoreRepository,
-    private val dbRepository: DatabaseRepository
+    private val firebaseRepository: FirebaseRepository
 ): ViewModel() {
 
     private val _loginStatus = MutableStateFlow("")
@@ -26,6 +28,7 @@ class SignInViewModel(
         if (
             fbRepository.signInWithPhoneAuthCredential(phoneAuthCredential)
         ) {
+            createNewCustomerProfile()
             withContext(Dispatchers.Main) {
                 _loginStatus.value = "complete"
             }
@@ -37,5 +40,7 @@ class SignInViewModel(
     }
 
     suspend fun checkUserProfileDetails(): String = fbRepository.checkUserProfileDetails()
+
+    suspend fun createNewCustomerProfile() = firebaseRepository.createNewCustomerProfile()
 
 }

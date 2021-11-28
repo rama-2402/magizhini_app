@@ -58,6 +58,13 @@ object Constants {
     const val INVENTORY: String = "inventory"
     const val ORDER_HISTORY: String = "orderHistory"
     const val ADDRESS: String = "address"
+    const val SPECIAL_BANNER = "specialBanner"
+    const val PRODUCT_SPECIALS = "ProductSpecials"
+    const val BEST_SELLERS = "BestSellers"
+    const val SPECIALS_ONE = "one"
+    const val SPECIALS_TWO = "two"
+    const val SPECIALS_THREE = "three"
+    const val TOKENS = "Tokens"
 
     //filters data
     const val ALL: String = "all"
@@ -120,6 +127,8 @@ object Constants {
     const val PENDING: String = "Pending"
     const val PURCHASE: String = "Purchase"
     const val SUBSCRIPTION: String = "Subscription"
+    const val SUB: String = "Sub"
+    const val UNSUB: String = "Unsub"
     const val ADD_MONEY: String = "Add Money"
 
     const val DELIVERY_CHARGE = "Delivery Charge"
@@ -131,4 +140,12 @@ object Constants {
     const val MONTHLY = "Monthly"
     const val SUB_ACTIVE = "Active"
     const val SUB_CANCELLED = "Cancelled"
+
+    //FCM
+    const val BASE_URL = "https://fcm.googleapis.com"
+    const val SERVER_KEY = "AAAAicvCZoA:APA91bGUQOWLoRac1IR6wlE3deLM-d4T8PBl9JRiJe9AesvbaN4WOQJjwgcLf8yQ6M5I-uDGKLF_PDA7E0R-qQfB14P1I97NHMCGOhHxB7p4HZpoYVtbqtnLl6ocUR6Y1gWX1iAMKvKl"
+    const val CONTENT_TYPE = "application/json"
+
+    //notification
+    const val BROADCAST: String = "/topics/magizhiniBroadcast"
 }

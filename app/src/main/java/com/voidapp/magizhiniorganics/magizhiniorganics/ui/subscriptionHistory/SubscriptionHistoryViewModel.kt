@@ -43,6 +43,10 @@ class SubscriptionHistoryViewModel(
         NetworkResult.Empty)
     val status: StateFlow<NetworkResult> = _status
 
+    fun setEmptyStatus() {
+        _status.value = NetworkResult.Empty
+    }
+
     fun getProfile() = viewModelScope.launch(Dispatchers.IO) {
         val profile = dbRepository.getProfileData()!!
         getWallet(profile.id)

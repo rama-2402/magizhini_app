@@ -43,25 +43,29 @@ class ProfileViewModel (
     fun getAllActiveSubscriptions() = dbRepository.getAllActiveSubscriptions()
 
     fun uploadProfile(profile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
-        if (fsRepository.uploadProfile(profile)) {
-            CustomerProfile(
-                profile.id,
-                profile.name,
-                profile.profilePicUrl
-            ).also {
-                if (fbRepository.uploadUserProfile(it)) {
-                    withContext(Dispatchers.Main) {
-                        _profileUploadStatus.value = true
-                    }
-                } else {
-                        _profileUploadStatus.value = false
-                }
-            }
-        } else {
-            withContext(Dispatchers.Main) {
-                _profileUploadStatus.value = false
-            }
+        val status = fsRepository.uploadProfile(profile)
+        withContext(Dispatchers.Main) {
+            _profileUploadStatus.value = status
         }
+//        if (fsRepository.uploadProfile(profile)) {
+//            CustomerProfile(
+//                profile.id,
+//                profile.name,
+//                profile.profilePicUrl
+//            ).also {
+//                if (fbRepository.uploadUserProfile(it)) {
+//                    withContext(Dispatchers.Main) {
+//                        _profileUploadStatus.value = true
+//                    }
+//                } else {
+//                        _profileUploadStatus.value = false
+//                }
+//            }
+//        } else {
+//            withContext(Dispatchers.Main) {
+//                _profileUploadStatus.value = false
+//            }
+//        }
     }
 
     fun uploadProfilePic(path: String, uri: Uri, extension: String) = viewModelScope.launch(Dispatchers.IO) {

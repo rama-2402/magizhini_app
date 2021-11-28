@@ -14,6 +14,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEnti
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BEST_SELLERS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_SPECIALS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_ONE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_THREE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_TWO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.tasks.await
@@ -31,7 +36,7 @@ class UpdateDataService (
 
     override val kodein: Kodein by kodein(context)
 
-    val repository: DatabaseRepository by instance()
+    private val repository: DatabaseRepository by instance()
 
     private val mFireStore by lazy {
         FirebaseFirestore.getInstance()
@@ -39,9 +44,6 @@ class UpdateDataService (
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-
-            repository.deleteBanners()
-
             val categoryData = async { getAllData(Constants.CATEGORY) }
             val bannerData = async { getAllData(Constants.BANNER) }
             val productData = async { getAllData(Constants.PRODUCTS) }
@@ -89,32 +91,15 @@ class UpdateDataService (
         }
         return@withContext Result.success()
     }
-//
-//    private suspend fun setProductListener() = withContext(Dispatchers.IO) {
-//        try {
-//            mFireStore.collection(Constants.PRODUCTS)
-//                .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-//                .addSnapshotListener { snapshot, fireSnapshotFailure ->
-//                    //error handling
-//                    fireSnapshotFailure?.let {
-//                        Log.e(Constants.APP_NAME, it.message.toString())
-//                    }
-//                    snapshot?.let { filterProducts(snapshot) }
-//
-//                }
-//        } catch (e: Exception) {
-//
-//        }
-//    }
-
 
     private suspend fun specialBanners() {
         try {
-            val snapshot = mFireStore.collection("specialBanner")
+            val snapshot = mFireStore.collection(Constants.SPECIAL_BANNER)
                 .get().await()
             for (doc in snapshot.documents) {
-//            repository.deleteSpecialsOne()
-                repository.upsertSpecialBanners(doc.toObject(SpecialBannersData::class.java)!!.toSpecialBanners())
+                repository.upsertSpecialBanners(
+                    doc.toObject(SpecialBannersData::class.java)!!.toSpecialBanners()
+                )
             }
         } catch (e: Exception) {
             Log.e("TAG", "one:${e.message} ", )
@@ -123,9 +108,10 @@ class UpdateDataService (
 
     private suspend fun specialsOne() {
         try {
-            val doc = mFireStore.collection("specialsOne")
-                .document("One").get().await().toObject(ProductSpecials::class.java)!!.toSpecialsOne()
-//            repository.deleteSpecialsOne()
+            val doc = mFireStore.collection(PRODUCT_SPECIALS)
+                .document(SPECIALS_ONE).get().await().toObject(ProductSpecials::class.java)!!
+                .toSpecialsOne()
+            repository.deleteSpecialsOne()
             repository.upsertSpecialsOne(doc)
         } catch (e: Exception) {
             Log.e("TAG", "one:${e.message} ", )
@@ -133,9 +119,10 @@ class UpdateDataService (
     }
     private suspend fun specialsTwo() {
         try {
-            val doc = mFireStore.collection("specialsOne")
-                .document("two").get().await().toObject(ProductSpecials::class.java)!!.toSpecialsTwo()
-//            repository.deleteSpecialsTwo()
+            val doc = mFireStore.collection(PRODUCT_SPECIALS)
+            .document(SPECIALS_TWO).get().await().toObject(ProductSpecials::class.java)!!
+            .toSpecialsTwo()
+            repository.deleteSpecialsTwo()
             repository.upsertSpecialsTwo(doc)
         } catch (e: Exception) {
             Log.e("TAG", "two:${e.message} ", )
@@ -143,10 +130,10 @@ class UpdateDataService (
     }
     private suspend fun specialsThree() {
         try {
-            val doc = mFireStore.collection("specialsOne")
-                .document("three").get().await().toObject(ProductSpecials::class.java)!!.toSpecialsThree()
-//            repository.deleteSpecialsThree()
-            Log.e("TAG", "three: $doc", )
+            val doc = mFireStore.collection(PRODUCT_SPECIALS)
+                .document(SPECIALS_THREE).get().await().toObject(ProductSpecials::class.java)!!
+                .toSpecialsThree()
+            repository.deleteSpecialsThree()
             repository.upsertSpecialsThree(doc)
         } catch (e: Exception) {
             Log.e("TAG", "three:${e.message} ", )
@@ -155,10 +142,10 @@ class UpdateDataService (
 
     private suspend fun getBestSellers() {
         try {
-            val doc = mFireStore.collection("bestSellers")
-                .document("2LVakx7dzw1zjKmPFy6m").get().await().toObject(ProductSpecials::class.java)!!.toBestSellers()
-            Log.e("TAG", "bs: $doc", )
-//            repository.deleteBestSellers()
+            val doc = mFireStore.collection(BEST_SELLERS)
+                .document(BEST_SELLERS).get().await()
+                .toObject(ProductSpecials::class.java)!!.toBestSellers()
+            repository.deleteBestSellers()
             repository.upsertBestSellers(doc)
         } catch (e: Exception) {
             Log.e("TAG", "bserror:${e.message} ", )
@@ -170,7 +157,7 @@ class UpdateDataService (
         withContext(Dispatchers.Default) {
             when (content) {
                 Constants.CATEGORY -> {
-                    Log.e("TAG", "getBestSellers: Cat", )
+                    repository.deleteAllCategories()
                     for (d in snapshot.documents) {
                         //getting the id of the category and converting to Category class
                         val category = d.toObject(ProductCategory::class.java)
@@ -182,6 +169,7 @@ class UpdateDataService (
                     }
                 }
                 Constants.BANNER -> {
+                    repository.deleteBanners()
                     for (d in snapshot.documents) {
                         val banner = d.toObject(Banner::class.java)
                         banner!!.id = d.id
@@ -199,6 +187,7 @@ class UpdateDataService (
                     }
                 }
                 Constants.COUPON -> {
+                    repository.deleteCoupons()
                     for (d in snapshot.documents) {
                         val coupon = d.toObject(Coupon::class.java)
                         coupon!!.id = d.id

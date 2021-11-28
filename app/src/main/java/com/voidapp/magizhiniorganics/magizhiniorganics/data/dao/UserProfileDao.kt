@@ -24,6 +24,10 @@ interface UserProfileDao {
     fun deleteSubscriptionsTable()
     @Query("DELETE FROM BannerEntity")
     fun deleteBanners()
+    @Query("DELETE FROM CouponEntity")
+    fun deleteCoupons()
+    @Query("DELETE FROM ProductCategoryEntity")
+    fun deleteAllCategories()
 
     @Query("DELETE FROM CartEntity WHERE id = :id")
     fun deleteCartItem(id: Int)

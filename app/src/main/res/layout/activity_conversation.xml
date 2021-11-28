@@ -110,49 +110,51 @@
             app:layout_constraintBottom_toTopOf="@id/llMessage"
             android:background="@color/white"
             />
+
         <LinearLayout
             android:id="@+id/llMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:elevation="@dimen/material_size_8"
             android:gravity="center_horizontal"
+            android:orientation="horizontal"
             android:padding="@dimen/material_size_8"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:elevation="@dimen/material_size_8">
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llHeader"
+            app:layout_constraintVertical_bias="1.0">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivAddAttachment"
+                style="@style/roundedImageViewRounded"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                style="@style/roundedImageViewRounded"
-                android:src="@drawable/ic_attach_picture"
-                />
+                android:src="@drawable/ic_attach_picture" />
+
             <EditText
                 android:id="@+id/edtMessageInputBox"
                 android:layout_width="0dp"
-                android:layout_weight=".1"
-                android:layout_height="match_parent"
-                android:elegantTextHeight="true"
-                android:maxHeight="@dimen/material_size_32"
-                android:backgroundTint="@color/gray200"
-                android:hint="Type Message..."
-                android:background="@drawable/shape_round_rectangle_6"
-                android:padding="6dp"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/material_size_8"
                 android:layout_marginEnd="@dimen/material_size_8"
-                android:textColorHint="@color/gray700"
-                />
+                android:layout_weight=".1"
+                android:background="@drawable/shape_round_rectangle_6"
+                android:backgroundTint="@color/gray200"
+                android:elegantTextHeight="true"
+                android:gravity="center_vertical"
+                android:hint="Type Message..."
+                android:padding="6dp"
+                android:textColorHint="@color/gray700" />
+
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivsendMessage"
+                style="@style/roundedImageViewRounded"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                style="@style/roundedImageViewRounded"
                 android:src="@drawable/ic_send"
-                app:tint="@color/matteGreen"
-                />
+                app:tint="@color/matteGreen" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

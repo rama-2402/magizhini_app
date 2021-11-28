@@ -34,10 +34,10 @@ class MagizhiniApplication: Application(), KodeinAware {
 
         bind() from singleton { UserDatabase(instance()) }
         bind() from singleton { DatabaseRepository(instance()) }
-        bind() from singleton { Firestore(instance()) }
-        bind() from singleton { FirestoreRepository(instance()) }
         bind() from singleton { Firebase(instance()) }
         bind() from singleton { FirebaseRepository(instance()) }
+        bind() from singleton { Firestore(instance(), instance()) }
+        bind() from singleton { FirestoreRepository(instance()) }
 
         //viewModels
         bind() from provider { SignInViewModelFactory(instance(), instance()) }

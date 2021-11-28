@@ -25,6 +25,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         membershipType = membershipType
     )
 
+    fun UserProfile.toCustomerProfile() = CustomerProfile (
+        id = id,
+        profileName = name,
+        phoneNumber = phNumber,
+        thumbnailName = id,
+        thumbnailUrl = profilePicUrl
+            )
+
     fun ProductCategory.toProductCategoryEntity() = ProductCategoryEntity (
         id = id,
         name = name,
@@ -107,6 +115,8 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
     id = id,
     productID = productID,
     productName = productName,
+    variantName = variantName,
+    phoneNumber = phoneNumber,
     customerID = customerID,
     address = address,
     monthYear = monthYear,
@@ -242,6 +252,8 @@ fun SubscriptionEntity.toSubscription() = Subscription (
     id = id,
     productID = productID,
     productName = productName,
+    variantName = variantName,
+    phoneNumber = phoneNumber,
     customerID = customerID,
     address = address,
     monthYear = monthYear,

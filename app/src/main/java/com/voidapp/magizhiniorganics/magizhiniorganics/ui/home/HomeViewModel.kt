@@ -270,4 +270,8 @@ class HomeViewModel (
     fun getUpdatedSpecialsThree() = viewModelScope.launch(Dispatchers.IO) {
         getSpecialsThree()
     }
+
+    fun updateToken(token: String?)= viewModelScope.launch(Dispatchers.IO) {
+        token?.let { fbRepository.updateToken(it) }
+    }
 }

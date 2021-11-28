@@ -42,6 +42,10 @@ class CheckoutViewModel(
     private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(NetworkResult.Empty)
     val status: StateFlow<NetworkResult> = _status
 
+    fun setEmptyStatus() {
+        _status.value = NetworkResult.Empty
+    }
+
     fun getUserProfileData() = viewModelScope.launch(Dispatchers.IO) {
         try {
             val profile = dbRepository.getProfileData()!!

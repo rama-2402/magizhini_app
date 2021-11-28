@@ -449,6 +449,7 @@ class SubscriptionHistoryActivity :
                 }
             }
         }
+        viewModel.setEmptyStatus()
     }
 
     private fun onFailedCallback(message: String, data: Any?) {
@@ -471,6 +472,7 @@ class SubscriptionHistoryActivity :
                 showExitSheet(this, "Server Error! Subscription cancellation failed. \n \n For further queries please click this message to contact Customer Support", "cs")
             }
         }
+        viewModel.setEmptyStatus()
     }
 
     override fun renewSub(position: Int) {

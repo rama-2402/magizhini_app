@@ -706,6 +706,7 @@ class InvoiceActivity :
                 showToast(this, data as String)
             }
         }
+        viewModel.setEmptyStatus()
     }
 
     private fun onFailedCallback(message: String, data: Any?) {
@@ -739,6 +740,7 @@ class InvoiceActivity :
                 showToast(this, data as String)
             }
         }
+        viewModel.setEmptyStatus()
     }
 
     fun moveToCustomerSupport() {

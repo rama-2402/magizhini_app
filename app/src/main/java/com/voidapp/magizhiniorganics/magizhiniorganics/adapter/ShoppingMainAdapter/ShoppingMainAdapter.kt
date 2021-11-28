@@ -157,7 +157,7 @@ open class ShoppingMainAdapter(
                 with(tvAddItem) {
                     when(text) {
                         "View" -> {
-                            onItemClickListener.navigateToSubscription(product)
+                            onItemClickListener.navigateToProduct(product)
                         }
                         "Add" -> {
                                 Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
@@ -182,11 +182,7 @@ open class ShoppingMainAdapter(
             }
 
             ivProductThumbnail.setOnClickListener {
-                if (product.productType == Constants.SUBSCRIPTION) {
-                    onItemClickListener.navigateToSubscription(product)
-                } else {
-                    onItemClickListener.navigateToProduct(productId, product.name)
-                }
+                onItemClickListener.navigateToProduct(product)
             }
         }
     }
@@ -298,9 +294,8 @@ open class ShoppingMainAdapter(
 
     interface ShoppingMainListener {
         fun limitedItemList(products: List<ProductEntity>)
-        fun navigateToProduct(id: String, name: String)
         fun updateFavorites(id: String, product: ProductEntity, position: Int)
-        fun navigateToSubscription(product: ProductEntity)
+        fun navigateToProduct(product: ProductEntity)
         fun upsertCartItem(product: ProductEntity, position: Int , variant: String, count: Int, price: Float, originalPrice: Float, variantIndex: Int, maxOrderQuantity: Int)
         fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int)
     }

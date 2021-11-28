@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.messaging.FirebaseMessaging
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
@@ -34,6 +35,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BROADCAST
 import kotlinx.coroutines.*
 import org.imaginativeworld.whynotimagecarousel.listener.CarouselListener
 import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
@@ -69,6 +71,15 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         viewModel = ViewModelProvider(this, factory).get(HomeViewModel::class.java)
         binding.viewmodel = viewModel
         viewModel.homeListener = this
+
+        FirebaseMessaging.getInstance().subscribeToTopic(BROADCAST)
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+//                viewModel.logCrash("FCM token failed", task.exception)
+            } else {
+                viewModel.updateToken(task.result)
+            }
+        }
 
         setSupportActionBar(binding.tbToolbar)
         binding.tbToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))

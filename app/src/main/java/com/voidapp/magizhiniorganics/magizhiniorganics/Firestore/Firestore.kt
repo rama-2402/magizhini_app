@@ -17,6 +17,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewMod
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_ACTIVE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.UNSUB
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -24,7 +28,8 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 
 class Firestore(
-    private val repository: DatabaseRepository
+    private val repository: DatabaseRepository,
+    private val fbRepository: FirebaseRepository
 ) {
 
     private val mFirebaseAuth = FirebaseAuth.getInstance()
@@ -180,19 +185,38 @@ class Firestore(
     suspend fun uploadProfile(profile: UserProfile): Boolean =
         withContext(Dispatchers.IO) {
             try {
-                mFireStore.collection(Constants.USERS)
-                    .document(profile.id)
-                    .set(profile, SetOptions.merge()).await()
-                val userProfileEntity = profile.toUserProfileEntity()
-                repository.upsertProfile(userProfileEntity)
-                return@withContext true
+                val uploadProfileToCloud = async { uploadProfileToCloud(profile) }
+                val uploadProfileToLocal = async { uploadProfileToLocal(profile) }
+                val upsertCustomerProfile = async { fbRepository.uploadUserProfile(profile.toCustomerProfile()) }
+                return@withContext uploadProfileToCloud.await() &&
+                        uploadProfileToLocal.await() &&
+                        upsertCustomerProfile.await()
             } catch (e: Exception) {
                 e.message?.let { logCrash("uploading profile", it) }
                 return@withContext false
             }
         }
 
+    private suspend fun uploadProfileToCloud(profile: UserProfile): Boolean {
+        return try {
+            mFireStore.collection(Constants.USERS)
+                .document(profile.id)
+                .set(profile, SetOptions.merge()).await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 
+    private suspend fun uploadProfileToLocal(profile: UserProfile): Boolean {
+        return try {
+            val userProfileEntity = profile.toUserProfileEntity()
+            repository.upsertProfile(userProfileEntity)
+            true
+        } catch (e: IOException) {
+            false
+        }
+    }
 
 
     //wallet
@@ -762,8 +786,8 @@ class Firestore(
     private suspend fun addSubCancelledDate(sub: SubscriptionEntity, date: Long): Boolean
         = withContext(Dispatchers.IO) {
             return@withContext try {
-                mFireStore.collection(Constants.SUBSCRIPTION)
-                    .document(Constants.SUB_ACTIVE).collection(sub.monthYear).document(sub.id)
+                mFireStore.collection(SUBSCRIPTION).document(SUB_ACTIVE)
+                    .collection(SUB).document(sub.id)
                     .update("cancelledDates", FieldValue.arrayUnion(date)).await()
                 true
             } catch (e: Exception) {
@@ -817,12 +841,16 @@ class Firestore(
     private suspend fun createCancellationSub(sub: SubscriptionEntity) =
         withContext(Dispatchers.IO) {
             try {
-                mFireStore.collection(Constants.SUBSCRIPTION)
-                    .document(Constants.SUB_ACTIVE)
-                    .collection(sub.monthYear)
+                mFireStore.collection(SUBSCRIPTION).document(SUB_ACTIVE)
+                    .collection(SUB)
                     .document(sub.id)
-                    .update("status", Constants.CANCELLED)
-                    .await()
+                    .delete().await()
+
+                mFireStore.collection(SUBSCRIPTION).document(SUB_ACTIVE)
+                    .collection(UNSUB)
+                    .document(sub.id)
+                    .set(sub, SetOptions.merge()).await()
+
                 true
             } catch (e: Exception) {
                 e.message?.let {
@@ -853,8 +881,6 @@ class Firestore(
                 false
             }
         }
-
-
 
     suspend fun generateSubscription(subscription: Subscription):NetworkResult = withContext(Dispatchers.IO) {
         val sub = subscription.toSubscriptionEntity()
@@ -905,11 +931,11 @@ class Firestore(
 
     private suspend fun updateStoreSubscription(sub: SubscriptionEntity): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
-            mFireStore.collection(Constants.SUBSCRIPTION)
-                .document(Constants.SUB_ACTIVE)
-                .collection(sub.monthYear)
+            mFireStore.collection(SUBSCRIPTION).document(SUB_ACTIVE)
+                .collection(SUB)
                 .document(sub.id)
-                .set(sub, SetOptions.merge()).await()
+                .set(sub, SetOptions.merge())
+                .await()
             true
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: uploading subscription to store", it) }
@@ -967,9 +993,8 @@ class Firestore(
     private suspend fun renewSubInFirestore(id: String, monthYear: String, newDate: Long): Boolean =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                mFireStore.collection(Constants.SUBSCRIPTION)
-                    .document(Constants.SUB_ACTIVE)
-                    .collection(monthYear)
+                mFireStore.collection(SUBSCRIPTION).document(SUB_ACTIVE)
+                    .collection(SUB)
                     .document(id)
                     .update("endDate", newDate).await()
                 true
@@ -1094,6 +1119,22 @@ class Firestore(
             .document(Constants.SUB_ACTIVE)
             .collection(id)
             .document().id
+
+
+    suspend fun updateToken(tokenString: String) = withContext(Dispatchers.IO) {
+        val profile = repository.getProfileData()!!
+        Token(
+            profile.id, tokenString, profile.name, profile.phNumber
+        ).let { token ->
+            try {
+                mFireStore.collection("Tokens")
+                    .document(token.id)
+                    .set(token, SetOptions.merge())
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: adding banner in DB", it) }
+            }
+        }
+    }
 
     suspend fun logCrash(location: String, message: String) {
         CrashLog(
