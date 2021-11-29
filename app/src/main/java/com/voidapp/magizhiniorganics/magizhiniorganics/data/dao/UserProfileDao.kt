@@ -28,6 +28,12 @@ interface UserProfileDao {
     fun deleteCoupons()
     @Query("DELETE FROM ProductCategoryEntity")
     fun deleteAllCategories()
+    @Query("DELETE FROM ProductEntity")
+    fun deleteAllProducts()
+    @Query("DELETE FROM ProductEntity WHERE id = :id")
+    fun deleteProductByID(id: String)
+    @Query("DELETE FROM ProductCategoryEntity WHERE id = :id")
+    fun deleteCategoryByID(id: String)
 
     @Query("DELETE FROM CartEntity WHERE id = :id")
     fun deleteCartItem(id: Int)
@@ -82,6 +88,12 @@ interface UserProfileDao {
 
     @Query("SELECT * FROM ProductEntity WHERE activated ORDER BY name")
     fun getAllProductsStatic(): List<ProductEntity>
+
+    @Query("SELECT * FROM ProductEntity")
+    fun getAllProductsForCleaning(): List<ProductEntity>
+
+    @Query("SELECT * FROM ProductCategoryEntity")
+    fun getAllCategoryForCleaning(): List<ProductCategoryEntity>
 
     @Query("SELECT * FROM productEntity WHERE id = :id")
     fun getProductWithId(id: String): LiveData<ProductEntity>

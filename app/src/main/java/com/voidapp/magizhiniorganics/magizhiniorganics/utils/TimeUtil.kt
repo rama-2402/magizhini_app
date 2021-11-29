@@ -38,6 +38,11 @@ class TimeUtil {
         return monthNameFromNumber(id)
     }
 
+    fun getMonthNumber(): Int {
+        val monthFormat = SimpleDateFormat("MM")
+        return monthFormat.format(System.currentTimeMillis()).toInt()
+    }
+
     fun getYear(): String {
         val year = SimpleDateFormat("yyyy")
         return year.format(System.currentTimeMillis())

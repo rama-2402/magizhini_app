@@ -157,10 +157,14 @@ class ProductActivity :
             showAddCouponDialog()
         }
         checkoutBtn.setOnClickListener {
-            Intent(this, InvoiceActivity::class.java).also {
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                finish()
+            if (NetworkHelper.isOnline(this)) {
+                Intent(this, InvoiceActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                }
+            } else {
+                showErrorSnackBar("Please check network connection", true)
             }
         }
     }

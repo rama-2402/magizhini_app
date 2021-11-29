@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.services
 import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.WorkerParameters
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -42,7 +43,17 @@ class UpdateDataService (
         FirebaseFirestore.getInstance()
     }
 
+    val wipe = inputData.getString("wipe")
+
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+
+        if (wipe == "wipe") {
+            repository.deleteAllProducts()
+            repository.deleteAllCategories()
+        }
+
+        Log.e("TAG", "onCreate: worker called --$wipe--", )
+
         try {
             val categoryData = async { getAllData(Constants.CATEGORY) }
             val bannerData = async { getAllData(Constants.BANNER) }
@@ -85,9 +96,8 @@ class UpdateDataService (
 
             updateEntityData()
 
-        }
-        catch (e: Exception) {
-            return@withContext Result.retry()
+        } catch (e: Exception) {
+            return@withContext Result.failure()
         }
         return@withContext Result.success()
     }
@@ -157,7 +167,7 @@ class UpdateDataService (
         withContext(Dispatchers.Default) {
             when (content) {
                 Constants.CATEGORY -> {
-                    repository.deleteAllCategories()
+//                    repository.deleteAllCategories()
                     for (d in snapshot.documents) {
                         //getting the id of the category and converting to Category class
                         val category = d.toObject(ProductCategory::class.java)

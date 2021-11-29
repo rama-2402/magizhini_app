@@ -18,6 +18,11 @@ class DatabaseRepository(
     fun deleteBanners() = db.getUserProfileDao().deleteBanners()
     fun deleteCoupons() = db.getUserProfileDao().deleteCoupons()
     fun deleteAllCategories() = db.getUserProfileDao().deleteAllCategories()
+    fun deleteAllProducts() = db.getUserProfileDao().deleteAllProducts()
+    fun deleteProductByID(id: String) = db.getUserProfileDao().deleteProductByID(id)
+    fun deleteCategoryByID(id: String) = db.getUserProfileDao().deleteCategoryByID(id)
+    fun getAllProductsForCleaning(): List<ProductEntity> = db.getUserProfileDao().getAllProductsForCleaning()
+    fun getAllCategoryForCleaning(): List<ProductCategoryEntity> = db.getUserProfileDao().getAllCategoryForCleaning()
 
     fun deleteCartItem(id: Int) = db.getUserProfileDao().deleteCartItem(id)
 

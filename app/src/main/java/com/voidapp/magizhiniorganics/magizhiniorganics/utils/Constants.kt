@@ -24,6 +24,7 @@ object Constants {
     //shared preference constants
     const val STRING: String = "string"
     const val BOOLEAN: String = "boolean"
+    const val INT: String = "int"
     const val DATE: String = "01/01/2020"
     const val CURRENT_COUPON: String = "currentCoupon"
 
@@ -64,6 +65,7 @@ object Constants {
     const val SPECIALS_ONE = "one"
     const val SPECIALS_TWO = "two"
     const val SPECIALS_THREE = "three"
+    const val TRASH = "Trash"
     const val TOKENS = "Tokens"
 
     //filters data

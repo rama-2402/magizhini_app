@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import android.content.Context
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
 
 class SharedPref(context: Context) {
 
@@ -22,6 +23,7 @@ class SharedPref(context: Context) {
         when(type) {
             Constants.STRING -> edit.putString(key, data.toString()).apply()
             Constants.BOOLEAN -> edit.putBoolean(key, data.toString().toBoolean()).apply()
+            INT -> edit.putInt(key, data.toString().toInt()).apply()
         }
     }
 
