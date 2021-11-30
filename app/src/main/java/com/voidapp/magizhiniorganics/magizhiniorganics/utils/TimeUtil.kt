@@ -48,6 +48,10 @@ class TimeUtil {
         return year.format(System.currentTimeMillis())
     }
 
+    fun getCurrentYearMonthDate(): Int {
+        return "${getYear()}${getMonthNumber()}${getCurrentDateNumber()}".toInt()
+    }
+
     fun getCustomDateFromDifference(
         startDate: Long,
         difference: Int

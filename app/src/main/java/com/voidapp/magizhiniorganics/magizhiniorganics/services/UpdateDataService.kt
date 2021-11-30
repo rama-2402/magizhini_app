@@ -43,7 +43,7 @@ class UpdateDataService (
         FirebaseFirestore.getInstance()
     }
 
-    val wipe = inputData.getString("wipe")
+    private val wipe = inputData.getString("wipe")
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
 
@@ -217,38 +217,45 @@ class UpdateDataService (
         }
 
     private suspend fun getAllData(content: String): QuerySnapshot = withContext(Dispatchers.IO) {
-        when (content) {
-            Constants.CATEGORY -> {
-                mFireStore.collection(Constants.CATEGORY)
-                    .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-                    .get().await()
+       return@withContext try {
+            when (content) {
+                Constants.CATEGORY -> {
+                    mFireStore.collection(Constants.CATEGORY)
+                        .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
+                        .get().await()
+                }
+                Constants.PRODUCTS -> {
+                    mFireStore.collection(Constants.PRODUCTS)
+                        .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
+                        .get().await()
+                }
+                Constants.BANNER -> {
+                    mFireStore.collection(Constants.BANNER)
+                        .orderBy(Constants.BANNER_ORDER, Query.Direction.ASCENDING)
+                        .get().await()
+                }
+                Constants.COUPON -> {
+                    mFireStore.collection(Constants.COUPON)
+                        .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
+                        .whereEqualTo(Constants.STATUS, Constants.ACTIVE)
+                        .get().await()
+                }
+                Constants.DELIVERY_CHARGE -> {
+                    mFireStore.collection("pincode")
+                        .get().await()
+                }
+                else -> {
+                    mFireStore.collection(Constants.CATEGORY)
+                        .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
+                        .get().await()
+                }
             }
-            Constants.PRODUCTS -> {
-                mFireStore.collection(Constants.PRODUCTS)
-                    .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-                    .get().await()
-            }
-            Constants.BANNER -> {
-                mFireStore.collection(Constants.BANNER)
-                    .orderBy(Constants.BANNER_ORDER, Query.Direction.ASCENDING)
-                    .get().await()
-            }
-            Constants.COUPON -> {
-                mFireStore.collection(Constants.COUPON)
-                    .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-                    .whereEqualTo(Constants.STATUS, Constants.ACTIVE)
-                    .get().await()
-            }
-            Constants.DELIVERY_CHARGE -> {
-                mFireStore.collection("pincode")
-                    .get().await()
-            }
-            else -> {
-                mFireStore.collection(Constants.CATEGORY)
-                    .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
-                    .get().await()
-            }
-        }
+        } catch (e: Exception) {
+           Log.e("tag", e.message.toString())
+           mFireStore.collection(Constants.CATEGORY)
+               .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
+               .get().await()
+       }
     }
 
     //Function to update the products entity with user preferences like favorites, cart items and coupons added
@@ -267,7 +274,7 @@ class UpdateDataService (
                 }
             }
         } catch (e: Exception) {
-            Log.e("exception", e.message.toString())
+            Log.e("tag", e.message.toString())
         }
     }
 

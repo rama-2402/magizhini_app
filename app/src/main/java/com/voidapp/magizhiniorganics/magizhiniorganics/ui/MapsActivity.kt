@@ -19,6 +19,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityMapsBinding
@@ -172,23 +173,35 @@ class MapsActivity : BaseActivity(), OnMapReadyCallback, android.location.Locati
             drawMarker(latlong)
 
         mMap.setOnMarkerDragListener(object : GoogleMap.OnMarkerDragListener {
-            override fun onMarkerDragStart(p0: com.google.android.gms.maps.model.Marker?) {
+//            override fun onMarkerDragStart(p0: com.google.android.gms.maps.model.Marker?) {
+//
+//            }
+//
+//            override fun onMarkerDrag(p0: com.google.android.gms.maps.model.Marker?) {
+//
+//            }
+//
+//            override fun onMarkerDragEnd(p0: com.google.android.gms.maps.model.Marker?) {
+//                if (currentMarker != null)
+//                    currentMarker?.remove()
+//
+//                gpsLatitude = p0?.position!!.latitude.toString()
+//                gpsLongitude = p0.position.longitude.toString()
+//
+//                val newlatlng = LatLng(p0.position.latitude, p0.position.longitude)
+//                drawMarker(newlatlng)
+//            }
+
+            override fun onMarkerDrag(p0: Marker) {
 
             }
 
-            override fun onMarkerDrag(p0: com.google.android.gms.maps.model.Marker?) {
+            override fun onMarkerDragEnd(p0: Marker) {
 
             }
 
-            override fun onMarkerDragEnd(p0: com.google.android.gms.maps.model.Marker?) {
-                if (currentMarker != null)
-                    currentMarker?.remove()
+            override fun onMarkerDragStart(p0: Marker) {
 
-                gpsLatitude = p0?.position!!.latitude.toString()
-                gpsLongitude = p0.position.longitude.toString()
-
-                val newlatlng = LatLng(p0.position.latitude, p0.position.longitude)
-                drawMarker(newlatlng)
             }
 
         })

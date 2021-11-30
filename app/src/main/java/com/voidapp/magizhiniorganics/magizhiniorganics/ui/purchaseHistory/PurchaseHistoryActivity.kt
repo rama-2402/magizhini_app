@@ -24,12 +24,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.*
 import com.google.gson.Gson
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
@@ -154,7 +148,6 @@ class PurchaseHistoryActivity :
     private fun fetchData() {
         showShimmer()
         viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
-        Log.e("TAG", "fetchData: ${mFilterMonth}${mFilterYear}", )
     }
 
     private fun initLiveData() {

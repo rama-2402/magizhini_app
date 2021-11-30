@@ -150,11 +150,14 @@ class SplashActivity : BaseActivity() {
                             LONG
                         )
                     }
-                    else -> {
+                    WorkInfo.State.BLOCKED -> {
                         showToast(
                             this,
                             "Server Error. Try restarting the app again"
                         )
+                        navigateToHomeScreen()
+                    }
+                    else -> {
                         navigateToHomeScreen()
                     }
                 }
@@ -166,7 +169,6 @@ class SplashActivity : BaseActivity() {
         binding.progressCircular.remove()
         Intent(this@SplashActivity, HomeActivity::class.java).also {
             startActivity(it)
-//                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
 

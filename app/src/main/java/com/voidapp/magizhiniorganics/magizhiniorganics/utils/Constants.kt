@@ -65,6 +65,7 @@ object Constants {
     const val SPECIALS_ONE = "one"
     const val SPECIALS_TWO = "two"
     const val SPECIALS_THREE = "three"
+    const val USER_NOTIFICATIONS = "UserNotifications"
     const val TRASH = "Trash"
     const val TOKENS = "Tokens"
 

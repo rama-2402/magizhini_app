@@ -371,26 +371,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
-
-    fun bannerDescriptionClickAction(content: String, type: String) {
-        when (type) {
-            //show a bottom sheet dialog with the description
-            Constants.SHOW_DETAILS -> showDescriptionBs(content)
-            //open a link in browser when pressed
-            Constants.OPEN_LINK -> {
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                    intent.data = Uri.parse(content)
-                    startActivity(Intent.createChooser(intent, "Open link with"))
-                } catch (e: Exception) {
-                    println("The current phone does not have a browser installed")
-                }
-            }
-
-        }
-
-
 /*
     //This will lock the vertical scrolling when horizontal child is scrolling and vice versa
             binding.rvHomeItems.setOnTouchListener { v, event ->
@@ -398,7 +378,6 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                 false
             }
 */
-    }
 
     override fun onDataTransactionFailure(message: String) {
         showErrorSnackBar(message, true)

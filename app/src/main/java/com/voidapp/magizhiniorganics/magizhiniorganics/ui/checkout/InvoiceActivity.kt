@@ -62,8 +62,6 @@ class InvoiceActivity :
     AddressAdapter.OnAddressClickListener
 {
 
-    //TODO WRONG COUPON WHEN APPLIED AFTER RIGHT COUPON MAKES COUPON INFO WONKY
-
     override val kodein: Kodein by kodein()
     private val factory: CheckoutViewModelFactory by instance()
     private lateinit var binding: ActivityCheckoutBinding

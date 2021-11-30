@@ -98,6 +98,11 @@ class FirestoreRepository (
     suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult = firestore.updateTransaction(transaction)
 //    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
 
+    //notifications
+    suspend fun getAllNotifications(): MutableList<UserNotification> = firestore.getAllNotifications()
+    suspend fun deleteNotification(notification: UserNotification): NetworkResult = firestore.deleteNotification(notification)
+    suspend fun clearAllNotifications(allNotifications:MutableList<UserNotification>): NetworkResult = firestore.clearAllNotifications(allNotifications)
+
 
     //updateToken
     suspend fun updateToken(token: String) = firestore.updateToken(token)

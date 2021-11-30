@@ -20,7 +20,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_ACTIVE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.TOKENS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.UNSUB
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_NOTIFICATIONS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -1121,13 +1123,66 @@ class Firestore(
             .document().id
 
 
+
+    //notifications
+    suspend fun getAllNotifications(): MutableList<UserNotification> = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val notifications = mutableListOf<UserNotification>()
+            val docs = mFireStore.collection(USER_NOTIFICATIONS)
+                .document(USER_NOTIFICATIONS)
+                .collection(getCurrentUserId()!!)
+                .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get().await()
+            for (doc in docs) {
+                val notification = doc.toObject(UserNotification::class.java)
+                notification.id = doc.id
+                notifications.add(notification)
+            }
+            notifications
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: Getting user Notifications", it) }
+            mutableListOf<UserNotification>()
+        }
+    }
+
+    suspend fun deleteNotification(notification: UserNotification): NetworkResult = withContext(Dispatchers.IO) {
+        return@withContext try {
+            mFireStore.collection(USER_NOTIFICATIONS)
+                .document(USER_NOTIFICATIONS)
+                .collection(notification.userID)
+                .document(notification.id)
+                .delete().await()
+            NetworkResult.Success("delete", "Notification removed")
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: deleteing user notification", it) }
+            NetworkResult.Failed("delete", "Server Error. Try again later")
+        }
+    }
+
+    suspend fun clearAllNotifications(allNotifications:MutableList<UserNotification>): NetworkResult = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val path =
+                mFireStore.collection(USER_NOTIFICATIONS)
+                    .document(USER_NOTIFICATIONS)
+                    .collection(allNotifications[0].userID)
+            for (notification in allNotifications) {
+                    path
+                    .document(notification.id)
+                    .delete()
+            }
+            NetworkResult.Success("deleteAll", "Notifications cleared")
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: deleteing all user notification", it) }
+            NetworkResult.Failed("deleteAll", "Server Error. Try again later")
+        }
+    }
+
     suspend fun updateToken(tokenString: String) = withContext(Dispatchers.IO) {
         val profile = repository.getProfileData()!!
         Token(
             profile.id, tokenString, profile.name, profile.phNumber
         ).let { token ->
             try {
-                mFireStore.collection("Tokens")
+                mFireStore.collection(TOKENS)
                     .document(token.id)
                     .set(token, SetOptions.merge())
             } catch (e: Exception) {

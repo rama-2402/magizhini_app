@@ -16,8 +16,7 @@ class WalletAdapter (
     var transactions: List<TransactionHistory>
         ) : RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
 
-    inner class WalletViewHolder(val binding: RvTransactionItemBinding): RecyclerView.ViewHolder(binding.root) {
-    }
+    inner class WalletViewHolder(val binding: RvTransactionItemBinding): RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(
         parent: ViewGroup,

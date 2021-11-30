@@ -86,8 +86,8 @@
     <!--    subscription-types-->
     <string-array name="subscription_types">
         <item>Single Purchase</item>
-<!--        <item>Week Days</item>-->
-<!--        <item>Weekends</item>-->
+        <!--        <item>Week Days</item>-->
+        <!--        <item>Weekends</item>-->
         <item>Monthly</item>
     </string-array>
 
