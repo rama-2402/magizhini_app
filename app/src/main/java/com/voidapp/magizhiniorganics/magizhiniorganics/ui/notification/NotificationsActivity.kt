@@ -13,6 +13,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.NotificationsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.SwipeGesture
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserNotificationEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserNotification
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
@@ -113,6 +114,7 @@ class NotificationsActivity :
 
     private fun initObservers() {
         viewModel.notifications.observe(this, {
+            hideProgressDialog()
             if (it.isEmpty()) {
                 showEmptyScreen()
             } else {
@@ -195,9 +197,10 @@ class NotificationsActivity :
         viewModel.setEmptyStatus()
     }
 
-    override fun clickedNotification(notification: UserNotification, position: Int) {
+    override fun clickedNotification(notification: UserNotificationEntity, position: Int) {
         lifecycleScope.launch {
             viewModel.clickedNotificationPosition = position
+            deleteNotification()
             when(notification.clickType) {
                 PRODUCTS -> {
                     val product = viewModel.getProductByID(notification.clickContent)

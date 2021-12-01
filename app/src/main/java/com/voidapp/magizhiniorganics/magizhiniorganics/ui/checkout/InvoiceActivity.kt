@@ -53,6 +53,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottom
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import ru.nikartm.support.ImageBadgeView
 
 
 class InvoiceActivity :
@@ -71,6 +72,7 @@ class InvoiceActivity :
     private lateinit var mAddressBottomSheet: BottomSheetDialog
     private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
     private lateinit var checkoutText: TextView
+    private lateinit var cartBtn: ImageBadgeView
     private lateinit var cartAdapter: CartAdapter
     private lateinit var orderItemsAdapter: OrderItemsAdapter
 
@@ -164,10 +166,10 @@ class InvoiceActivity :
 
     private fun setCartBottom() {
         val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
-        val cartBtn = findViewById<ImageView>(R.id.ivCart)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
         checkoutText = findViewById(R.id.tvCheckOut)
+        cartBtn = findViewById(R.id.ivCart)
 
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
@@ -235,6 +237,14 @@ class InvoiceActivity :
             mCartItems = it
             viewModel.itemsInCart = mCartItems
             cartAdapter.setCartData(mCartItems)
+
+            if (it.isEmpty()) {
+                cartBtn.badgeValue = it.size
+                cartBtn.visibleBadge(false)
+            } else {
+                cartBtn.visibleBadge(true)
+                cartBtn.badgeValue = it.size
+            }
 
             setDataToViews()
             setCheckoutText()

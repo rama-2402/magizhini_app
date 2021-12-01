@@ -35,20 +35,42 @@
                     android:orientation="horizontal"
                     >
 
-                    <com.google.android.material.imageview.ShapeableImageView
+                    <ru.nikartm.support.ImageBadgeView
                         android:id="@+id/ivCart"
                         android:layout_width="0dp"
                         android:layout_height="45dp"
                         android:layout_marginStart="@dimen/material_size_8"
                         android:layout_weight="1"
-                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
-                        android:backgroundTint="@color/white"
+                        android:layout_gravity="end"
+                        android:padding="4dp"
+                        android:scaleType="center"
                         android:background="@drawable/shape_round_rectangle_8"
+                        android:backgroundTint="@color/white"
                         android:elevation="@dimen/material_size_2"
-                        android:scaleType="centerInside"
+                        app:ibv_badgeValue="0"
+                        app:ibv_badgeTextSize="12sp"
+                        app:ibv_fixedBadgeRadius="8dp"
+                        app:ibv_badgeTextStyle="bold"
+                        app:ibv_badgeTextColor="#ffffff"
+                        app:ibv_badgeColor="@color/matteRed"
+                        app:ibv_badgeLimitValue="false"
                         android:src="@drawable/ic_cart"
-                        app:tint="@color/green_base"
-                        />
+                        app:tint="@color/green_base"/>
+
+<!--                    <com.google.android.material.imageview.ShapeableImageView-->
+<!--                        android:id="@+id/ivCart"-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="45dp"-->
+<!--                        android:layout_marginStart="@dimen/material_size_8"-->
+<!--                        android:layout_weight="1"-->
+<!--                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"-->
+<!--                        android:backgroundTint="@color/white"-->
+<!--                        android:background="@drawable/shape_round_rectangle_8"-->
+<!--                        android:elevation="@dimen/material_size_2"-->
+<!--                        android:scaleType="centerInside"-->
+<!--                        android:src="@drawable/ic_cart"-->
+<!--                        app:tint="@color/green_base"-->
+<!--                        />-->
 
                     <LinearLayout
                         android:id="@+id/rlCheckOutBtn"

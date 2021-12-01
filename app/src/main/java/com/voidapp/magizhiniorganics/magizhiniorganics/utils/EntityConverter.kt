@@ -63,6 +63,17 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         activated = activated
     )
 
+    fun UserNotification.toUserNotificationEntity() = UserNotificationEntity (
+        id = id,
+        userID = userID,
+        timestamp = timestamp,
+        title = title,
+        message = message,
+        imageUrl = imageUrl,
+        clickType = clickType,
+        clickContent = clickContent
+            )
+
     fun Coupon.toCouponEntity() = CouponEntity (
         id = id,
         name = name,

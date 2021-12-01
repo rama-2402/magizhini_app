@@ -157,4 +157,12 @@ class DatabaseRepository(
     fun getSpecialsTwo(): SpecialsTwo = db.getUserProfileDao().getSpecialsTwo()
     fun getSpecialsThree(): SpecialsThree = db.getUserProfileDao().getSpecialsThree()
     fun getSpecialBanners(): List<SpecialBanners> = db.getUserProfileDao().getSpecialBanners()
+
+
+    //notifications
+    fun upsertNotification(userNotificationEntity: UserNotificationEntity) = db.getUserProfileDao().upsertNotification(userNotificationEntity)
+    fun deleteAllNotifications() = db.getUserProfileDao().deleteAllNotifications()
+    fun deleteNotificationsByID(id: String) = db.getUserProfileDao().deleteNotificationsByID(id)
+    fun getAllNotifications(): List<UserNotificationEntity>?  = db.getUserProfileDao().getAllNotifications()
+    fun getAllNotificationsBeforeDate(date: Int): List<UserNotificationEntity>? = db.getUserProfileDao().getAllNotificationsBeforeDate(date)
 }

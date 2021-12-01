@@ -52,6 +52,16 @@ class TimeUtil {
         return "${getYear()}${getMonthNumber()}${getCurrentDateNumber()}".toInt()
     }
 
+    fun getCurrentYearMonthDateFromLong(dateLong: Long): Int {
+        val date = getCustomDate(dateLong = dateLong)
+        val dateSplitList = date.split("/").map { it.trim() }
+        return if (dateLong == 0L) {
+            "${getYear()}${getMonthNumber()}${getCurrentDateNumber()}".toInt()
+        } else {
+            "${dateSplitList[2]}${dateSplitList[1]}${dateSplitList[0]}".toInt()
+        }
+    }
+
     fun getCustomDateFromDifference(
         startDate: Long,
         difference: Int

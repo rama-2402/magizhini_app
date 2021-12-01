@@ -43,6 +43,7 @@ import kotlin.math.abs
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.flow.collect
+import ru.nikartm.support.ImageBadgeView
 
 
 //TODO CHECK LIMITED ITEMS COUNT BEFORE ORDERING MULTIPLE
@@ -70,6 +71,7 @@ class ProductActivity :
     private var mCartPrice: Float? = 0f
 
     private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
+    private lateinit var cartBtn: ImageBadgeView
     private lateinit var cartAdapter: CartAdapter
     private lateinit var checkoutText: TextView
 
@@ -109,7 +111,7 @@ class ProductActivity :
     private fun cartBottomSheet() {
         val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
-        val cartBtn = findViewById<ImageView>(R.id.ivCart)
+        cartBtn = findViewById(R.id.ivCart)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
         val filterBtn: ImageView = findViewById(R.id.ivFilter)
         checkoutText = findViewById(R.id.tvCheckOut)
@@ -257,6 +259,13 @@ class ProductActivity :
         viewModel.getAllCartItems().observe(this, { it ->
             mCartItems = it
             cartAdapter.setCartData(mCartItems)
+            if (it.isEmpty()) {
+                cartBtn.badgeValue = it.size
+                cartBtn.visibleBadge(false)
+            } else {
+                cartBtn.visibleBadge(true)
+                cartBtn.badgeValue = it.size
+            }
             setCheckoutText()
         })
 

@@ -44,7 +44,27 @@
                     android:gravity="center"
                     app:iconTint="@color/white"
                     app:navigationIcon="@color/white"
-                    app:titleTextColor="@color/white" />
+                    app:titleTextColor="@color/white" >
+
+                    <ru.nikartm.support.ImageBadgeView
+                        android:id="@+id/ivNotification"
+                        android:layout_width="@dimen/material_size_32"
+                        android:layout_height="@dimen/material_size_32"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:layout_gravity="end"
+                        android:padding="2dp"
+                        app:ibv_badgeValue="0"
+                        app:ibv_badgeTextSize="12sp"
+                        app:ibv_fixedBadgeRadius="8dp"
+                        app:ibv_badgeTextStyle="bold"
+                        app:ibv_badgeTextColor="#ffffff"
+                        app:ibv_badgeColor="@color/matteRed"
+                        app:ibv_badgeLimitValue="false"
+                        android:src="@drawable/ic_notify_off"
+                        app:tint="@color/white"/>
+
+                </androidx.appcompat.widget.Toolbar>
+
             </com.google.android.material.appbar.AppBarLayout>
 
             <me.didik.component.StickyNestedScrollView

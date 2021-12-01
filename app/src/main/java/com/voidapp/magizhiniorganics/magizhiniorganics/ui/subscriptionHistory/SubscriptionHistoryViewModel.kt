@@ -138,9 +138,10 @@ class SubscriptionHistoryViewModel(
 
     suspend fun renewSubscription(
         id: String,
+        productName: String,
         monthYear: String,
         newDate: Long
     ) {
-        _status.value = fbRepository.renewSubscription(id, monthYear, newDate)
+        _status.value = fbRepository.renewSubscription(id, productName, monthYear, newDate)
     }
 }

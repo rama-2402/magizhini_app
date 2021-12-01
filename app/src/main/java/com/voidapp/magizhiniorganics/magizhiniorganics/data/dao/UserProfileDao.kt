@@ -243,4 +243,15 @@ interface UserProfileDao {
     fun getSpecialsThree(): SpecialsThree
     @Query("SELECT * FROM SpecialBanners")
     fun getSpecialBanners(): List<SpecialBanners>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertNotification(userNotificationEntity: UserNotificationEntity)
+    @Query("DELETE FROM UserNotificationEntity")
+    fun deleteAllNotifications()
+    @Query("DELETE FROM UserNotificationEntity WHERE id = :id")
+    fun deleteNotificationsByID(id: String)
+    @Query("SELECT * FROM UserNotificationEntity")
+    fun getAllNotifications(): List<UserNotificationEntity>?
+    @Query("SELECT * FROM UserNotificationEntity where timestamp <= :date")
+    fun getAllNotificationsBeforeDate(date: Int): List<UserNotificationEntity>?
 }

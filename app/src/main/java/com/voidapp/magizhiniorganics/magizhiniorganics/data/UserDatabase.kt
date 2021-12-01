@@ -30,7 +30,8 @@ import org.kodein.di.Volatile
                SpecialsOne::class,
                SpecialsTwo::class,
                SpecialsThree::class,
-               SpecialBanners::class],
+               SpecialBanners::class,
+               UserNotificationEntity::class],
 
     version = 2,
     exportSchema = false

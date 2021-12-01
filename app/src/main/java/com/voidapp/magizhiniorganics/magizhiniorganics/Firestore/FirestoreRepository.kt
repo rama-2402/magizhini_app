@@ -3,10 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.PhoneAuthCredential
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
@@ -70,7 +67,7 @@ class FirestoreRepository (
 
     suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
 
-    suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): NetworkResult = firestore.renewSubscription(id, monthYear, newDate)
+    suspend fun renewSubscription(id: String,productName: String, monthYear: String, newDate: Long): NetworkResult = firestore.renewSubscription(id, productName, monthYear, newDate)
 
     //subscription history
     suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean = firestore.addCancellationDates(sub, date)
@@ -99,9 +96,8 @@ class FirestoreRepository (
 //    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
 
     //notifications
-    suspend fun getAllNotifications(): MutableList<UserNotification> = firestore.getAllNotifications()
-    suspend fun deleteNotification(notification: UserNotification): NetworkResult = firestore.deleteNotification(notification)
-    suspend fun clearAllNotifications(allNotifications:MutableList<UserNotification>): NetworkResult = firestore.clearAllNotifications(allNotifications)
+    suspend fun deleteNotification(notification: UserNotificationEntity): NetworkResult = firestore.deleteNotification(notification)
+    suspend fun clearAllNotifications(allNotifications:MutableList<UserNotificationEntity>): NetworkResult = firestore.clearAllNotifications(allNotifications)
 
 
     //updateToken

@@ -33,6 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
@@ -135,6 +136,11 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         binding.cpSpecialTwo.setOnClickListener(this)
         binding.cpSpecialThree.setOnClickListener(this)
         binding.fabCart.setOnClickListener(this)
+        binding.ivNotification.setOnClickListener {
+            Intent(this, NotificationsActivity::class.java).also {
+                startActivity(it)
+            }
+        }
     }
 
     private fun selectedBanner(position: Int) = lifecycleScope.launch {
@@ -162,7 +168,18 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     private fun observers() {
 
         viewModel.getDataToPopulate()
+        viewModel.getAllNotifications()
 
+        viewModel.notifications.observe(this, {
+            if (it.isEmpty()) {
+                binding.ivNotification.visibleBadge(false)
+            } else {
+                binding.ivNotification.apply{
+                    visibleBadge(true)
+                    badgeValue = it.size
+                }
+            }
+        })
         //observing the banners data and setting the banners
         viewModel.getAllBanners().observe(this, Observer {
             banners.clear()

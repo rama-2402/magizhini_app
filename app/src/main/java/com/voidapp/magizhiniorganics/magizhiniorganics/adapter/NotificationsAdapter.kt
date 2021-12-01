@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserNotificationEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserNotification
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvNotificationItemBinding
@@ -14,7 +15,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 
 class NotificationsAdapter(
     private val context: Context,
-    var notifications: MutableList<UserNotification>,
+    var notifications: MutableList<UserNotificationEntity>,
     private val onItemClickListener: NotificationItemClickListener
 ) : RecyclerView.Adapter<NotificationsAdapter.NotificationViewHolder>() {
 
@@ -54,6 +55,6 @@ class NotificationsAdapter(
 //    }
 
     interface NotificationItemClickListener {
-        fun clickedNotification(notification: UserNotification, position: Int)
+        fun clickedNotification(notification: UserNotificationEntity, position: Int)
     }
 }

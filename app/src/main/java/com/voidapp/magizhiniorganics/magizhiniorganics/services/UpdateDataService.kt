@@ -5,14 +5,12 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.PinCodesEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BEST_SELLERS
@@ -20,6 +18,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_S
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_ONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_THREE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_TWO
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_NOTIFICATIONS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.tasks.await
@@ -44,6 +45,7 @@ class UpdateDataService (
     }
 
     private val wipe = inputData.getString("wipe")
+    private val userID = SharedPref(context).getData(USER_ID, STRING, "").toString()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
 
@@ -63,6 +65,7 @@ class UpdateDataService (
             val getSpecialsTwo = async { specialsTwo() }
             val getSpecialsThree = async { specialsThree() }
             val getSpecialsBanners = async { specialBanners() }
+            val getAllNotifications = async { getAllData(USER_NOTIFICATIONS) }
             val couponData = async { getAllData(Constants.COUPON) }
             val deliveryChargeData = async { getAllData(Constants.DELIVERY_CHARGE) }
 
@@ -74,6 +77,7 @@ class UpdateDataService (
             getSpecialsTwo.await()
             getSpecialsThree.await()
             getSpecialsBanners.await()
+            val notificationSnapshot = getAllNotifications.await()
             val couponSnapshot = couponData.await()
             val deliveryChargeSnapshot = deliveryChargeData.await()
 
@@ -83,16 +87,20 @@ class UpdateDataService (
                 async { filterDataAndUpdateRoom(Constants.BANNER, bannerSnapshot) }
             val updateProduct =
                 async { filterDataAndUpdateRoom(Constants.PRODUCTS, productSnapshot) }
+            val updateNotifications =
+                async { filterDataAndUpdateRoom(Constants.USER_NOTIFICATIONS, notificationSnapshot) }
             val updateCoupon =
                 async { filterDataAndUpdateRoom(Constants.COUPON, couponSnapshot) }
             val updateDeliveryCharge =
                 async { filterDataAndUpdateRoom(Constants.DELIVERY_CHARGE, deliveryChargeSnapshot) }
 
+
             updateCategory.await()
             updateProduct.await()
+            updateBanner.await()
+            updateNotifications.await()
             updateCoupon.await()
             updateDeliveryCharge.await()
-            updateBanner.await()
 
             updateEntityData()
 
@@ -196,6 +204,15 @@ class UpdateDataService (
                         repository.upsertProduct(productEntity)
                     }
                 }
+                Constants.USER_NOTIFICATIONS -> {
+                    repository.deleteAllNotifications()
+                    for (d in snapshot.documents) {
+                        val notification = d.toObject(UserNotification::class.java)
+                        notification!!.id = d.id
+                        val notificationEntity: UserNotificationEntity = notification.toUserNotificationEntity()
+                        repository.upsertNotification(notificationEntity)
+                    }
+                }
                 Constants.COUPON -> {
                     repository.deleteCoupons()
                     for (d in snapshot.documents) {
@@ -233,6 +250,12 @@ class UpdateDataService (
                     mFireStore.collection(Constants.BANNER)
                         .orderBy(Constants.BANNER_ORDER, Query.Direction.ASCENDING)
                         .get().await()
+                }
+                USER_NOTIFICATIONS -> {
+                    mFireStore.collection(USER_NOTIFICATIONS)
+                        .document(USER_NOTIFICATIONS)
+                        .collection(userID)
+                        .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get().await()
                 }
                 Constants.COUPON -> {
                     mFireStore.collection(Constants.COUPON)

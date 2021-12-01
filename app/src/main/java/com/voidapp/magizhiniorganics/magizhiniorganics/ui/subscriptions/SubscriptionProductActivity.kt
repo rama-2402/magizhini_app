@@ -652,10 +652,10 @@ class SubscriptionProductActivity :
     }
 
     override fun previewImage(url: String) {
-        GlideLoader().loadUserPicture(binding.ivReviewImage.context, url, binding.ivReviewImage)
-        binding.ivPreviewImage.startAnimation(Animations.scaleBig)
-        binding.ivPreviewImage.visible()
         isPreviewVisible = true
+        GlideLoader().loadUserPicture(this, url, binding.ivPreviewImage)
+        binding.ivPreviewImage.visible()
+        binding.ivPreviewImage.startAnimation(Animations.scaleBig)
     }
 
     override fun onBackPressed() {

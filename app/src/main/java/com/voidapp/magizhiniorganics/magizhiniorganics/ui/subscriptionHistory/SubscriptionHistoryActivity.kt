@@ -391,7 +391,7 @@ class SubscriptionHistoryActivity :
 
     private fun startTransaction() = lifecycleScope.launch(Dispatchers.IO) {
         val renewedDate = TimeUtil().getCustomDateFromDifference(mSubscription.endDate, 30)
-        viewModel.renewSubscription(mSubscription.id, mSubscription.monthYear, renewedDate)
+        viewModel.renewSubscription(mSubscription.id, mSubscription.productName, mSubscription.monthYear, renewedDate)
     }
 
     private fun onSuccessCallback(message: String, data: Any?) {

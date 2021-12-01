@@ -6,10 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserNotification
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -24,11 +21,11 @@ class NotificationsViewModel(
 ): ViewModel() {
 
     var userId: String = ""
-    var allNotifications: MutableList<UserNotification> = mutableListOf()
+    var allNotifications: MutableList<UserNotificationEntity> = mutableListOf()
     var clickedNotificationPosition = 0
 
-    private var _notifications: MutableLiveData<List<UserNotification>> = MutableLiveData()
-    val notifications: LiveData<List<UserNotification>> = _notifications
+    private var _notifications: MutableLiveData<List<UserNotificationEntity>> = MutableLiveData()
+    val notifications: LiveData<List<UserNotificationEntity>> = _notifications
     private var _couponIndex: MutableLiveData<Int> = MutableLiveData()
     val couponIndex: LiveData<Int> = _couponIndex
     private var _profile: MutableLiveData<UserProfileEntity> = MutableLiveData()
@@ -42,8 +39,12 @@ class NotificationsViewModel(
         _status.value = NetworkResult.Empty
     }
 
-    fun getAllNotifications() = viewModelScope.launch {
-        _notifications.value = fbRepository.getAllNotifications()
+    fun getAllNotifications() = viewModelScope.launch(Dispatchers.IO) {
+        _status.value = NetworkResult.Loading("")
+        val notifications = dbRepository.getAllNotifications()
+        withContext(Dispatchers.Main) {
+            notifications?.let { _notifications.value = it } ?: listOf<UserNotificationEntity>()
+        }
     }
 
     suspend fun getProductByID(id: String): ProductEntity = withContext(Dispatchers.IO) {

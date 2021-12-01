@@ -40,6 +40,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import ru.nikartm.support.ImageBadgeView
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -54,6 +55,7 @@ class ShoppingMainActivity :
     private lateinit var viewModel: ShoppingMainViewModel
 
     private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
+    private lateinit var cartBtn: ImageBadgeView
     private lateinit var checkoutText: TextView
     private var item: MenuItem? = null
 
@@ -140,6 +142,13 @@ class ShoppingMainActivity :
             adapter.setData(it as MutableList<ProductEntity>)
         })
         viewModel.getAllCartItems().observe(this, {
+            if (it.isEmpty()) {
+                cartBtn.badgeValue = it.size
+                cartBtn.visibleBadge(false)
+            } else {
+                cartBtn.visibleBadge(true)
+                cartBtn.badgeValue = it.size
+            }
             cartAdapter.setCartData(it)
         })
         viewModel.availableCategoryNames.observe(this, {
@@ -345,9 +354,9 @@ class ShoppingMainActivity :
     private fun setCartBottom() {
         val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
         val filterBtn = findViewById<ImageView>(R.id.ivFilter)
-        val cartBtn = findViewById<ImageView>(R.id.ivCart)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
+        cartBtn = findViewById(R.id.ivCart)
 
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 

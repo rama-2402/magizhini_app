@@ -820,7 +820,7 @@ class Firestore(
                     false
                 }
             }
-
+            //TODO NEED SOME LOGIC TO REMOVE THE NOTIFICATION REMINDER
             if (
                 createCancellationSub.await() &&
                 removeActiveSubFromProfile.await() &&
@@ -897,12 +897,31 @@ class Firestore(
                 e.message?.let { logCrash("firestore: uploading the generated sub to local Db", it) }
                 false
             } }
+            val createNewNotification = async {
+                UserNotification(
+                    id = "",
+                    userID = getCurrentUserId()!!,
+                    timestamp = TimeUtil().getCurrentYearMonthDateFromLong(subscription.endDate - 86400000).toString().toLong(),
+                    title = "Subscription Ending Reminder",
+                    message = "Your subscription for product ${subscription.productName} is ending Tomorrow. Kindly Resubscribe to continue our service. If you have already renewed your subscription kindly ignore this reminder.",
+                    imageUrl = "",
+                    clickType = SUBSCRIPTION,
+                    clickContent = ""
+                ).let {
+                    createNewNotification(it)
+                    it.timestamp = it.timestamp+1
+                    it.message = "Your subscription for product ${subscription.productName} is ending Today. Kindly Resubscribe to continue our service. If you have already renewed your subscription kindly ignore this reminder."
+                    createNewNotification(it)
+                    true
+                }
+            }
 
             if (
                 updateStore.await() &&
                 updateLocal.await() &&
                 updateCloud.await() &&
-                createSubInDB.await()
+                createSubInDB.await() &&
+                createNewNotification.await()
             ) {
                 NetworkResult.Success("sub", "Subscription Created Successfully")
             } else {
@@ -960,7 +979,7 @@ class Firestore(
         }
     }
     //Renew subscription
-    suspend fun renewSubscription(id: String, monthYear: String, newDate: Long): NetworkResult =
+    suspend fun renewSubscription(id: String, productName: String, monthYear: String, newDate: Long): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val renewSubInFirestore = async { renewSubInFirestore(id, monthYear, newDate) }
@@ -978,9 +997,28 @@ class Firestore(
                         false
                     }
                 }
+                val createNewNotification = async {
+                        UserNotification(
+                            id = "",
+                            userID = getCurrentUserId()!!,
+                            timestamp = TimeUtil().getCurrentYearMonthDateFromLong(newDate - 86400000).toString().toLong(),
+                            title = "Subscription Ending Reminder",
+                            message = "Your subscription for product $productName is ending Tomorrow. Kindly Resubscribe to continue our service. If you have already renewed your subscription kindly ignore this reminder.",
+                            imageUrl = "",
+                            clickType = SUBSCRIPTION,
+                            clickContent = ""
+                        ).let {
+                            createNewNotification(it)
+                            it.timestamp = it.timestamp+1
+                            it.message = "Your subscription for product $productName is ending Today. Kindly Resubscribe to continue our service. If you have already renewed your subscription kindly ignore this reminder."
+                            createNewNotification(it)
+                            true
+                        }
+                    }
                 if (
                     renewSubInFirestore.await() &&
-                    renewSubInLocalDB.await()
+                    renewSubInLocalDB.await() &&
+                    createNewNotification.await()
                 ) {
                     NetworkResult.Success("renew", null)
                 } else {
@@ -1125,26 +1163,22 @@ class Firestore(
 
 
     //notifications
-    suspend fun getAllNotifications(): MutableList<UserNotification> = withContext(Dispatchers.IO) {
+    private suspend fun createNewNotification(notification: UserNotification): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
-            val notifications = mutableListOf<UserNotification>()
-            val docs = mFireStore.collection(USER_NOTIFICATIONS)
+            mFireStore.collection(USER_NOTIFICATIONS)
                 .document(USER_NOTIFICATIONS)
-                .collection(getCurrentUserId()!!)
-                .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get().await()
-            for (doc in docs) {
-                val notification = doc.toObject(UserNotification::class.java)
-                notification.id = doc.id
-                notifications.add(notification)
-            }
-            notifications
+                .collection(notification.userID)
+                .document()
+                .set(notification, SetOptions.merge())
+                .await()
+            true
         } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: Getting user Notifications", it) }
-            mutableListOf<UserNotification>()
+            e.message?.let { logCrash("firestore: deleteing user notification", it) }
+                false
         }
     }
 
-    suspend fun deleteNotification(notification: UserNotification): NetworkResult = withContext(Dispatchers.IO) {
+    suspend fun deleteNotification(notification: UserNotificationEntity): NetworkResult = withContext(Dispatchers.IO) {
         return@withContext try {
             mFireStore.collection(USER_NOTIFICATIONS)
                 .document(USER_NOTIFICATIONS)
@@ -1158,7 +1192,7 @@ class Firestore(
         }
     }
 
-    suspend fun clearAllNotifications(allNotifications:MutableList<UserNotification>): NetworkResult = withContext(Dispatchers.IO) {
+    suspend fun clearAllNotifications(allNotifications:MutableList<UserNotificationEntity>): NetworkResult = withContext(Dispatchers.IO) {
         return@withContext try {
             val path =
                 mFireStore.collection(USER_NOTIFICATIONS)

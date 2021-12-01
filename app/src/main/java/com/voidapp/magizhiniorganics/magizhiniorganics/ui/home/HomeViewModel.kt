@@ -3,10 +3,8 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 import androidx.lifecycle.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductCategoryEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -31,6 +29,10 @@ class HomeViewModel (
     val recyclerPosition: LiveData<Int> = _recyclerPosition
     private var _specialBanners: MutableLiveData<List<String>> = MutableLiveData()
     val specialBanners: LiveData<List<String>> = _specialBanners
+    private var _notifications: MutableLiveData<List<UserNotificationEntity>> = MutableLiveData()
+    val notifications: LiveData<List<UserNotificationEntity>> = _notifications
+
+
 
     var recyclerToRefresh = ""
 
@@ -282,5 +284,12 @@ class HomeViewModel (
 
     suspend fun getCategoryByID(id: String): String = withContext(Dispatchers.IO) {
         dbRepository.getCategoryByID(id)?.let { return@withContext it } ?: "Dairy Products"
+    }
+
+    fun getAllNotifications() = viewModelScope.launch(Dispatchers.IO) {
+        val notifications = dbRepository.getAllNotifications()
+        withContext(Dispatchers.Main) {
+            notifications?.let { _notifications.value = it } ?: listOf<UserNotificationEntity>()
+        }
     }
 }

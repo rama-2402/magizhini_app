@@ -1,7 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.models
 
-import java.sql.Timestamp
-
 data class UserNotification (
     var id: String = "",
     var userID: String = "",
