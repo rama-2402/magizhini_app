@@ -27,7 +27,7 @@
         android:layout_marginEnd="@dimen/material_size_16"
         android:layout_marginBottom="@dimen/material_size_16"
         android:layout_weight="1"
-        android:hint="Referrer Phone"
+        android:hint="Referrer Phone Number"
         app:boxStrokeColor="@color/green_base"
         app:flow_wrapMode="aligned"
         app:endIconMode="clear_text"

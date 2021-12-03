@@ -204,7 +204,7 @@ class UpdateDataService (
                         repository.upsertProduct(productEntity)
                     }
                 }
-                Constants.USER_NOTIFICATIONS -> {
+                USER_NOTIFICATIONS -> {
                     repository.deleteAllNotifications()
                     for (d in snapshot.documents) {
                         val notification = d.toObject(UserNotification::class.java)

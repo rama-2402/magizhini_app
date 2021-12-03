@@ -44,7 +44,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         //viewModels
         bind() from provider { SignInViewModelFactory(instance(), instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
-        bind() from provider { ProfileViewModelFactory(instance(), instance(), instance()) }
+        bind() from provider { ProfileViewModelFactory(instance(), instance()) }
         bind() from provider { ShoppingMainViewModelFactory(instance(), instance()) }
         bind() from provider { ProductViewModelFactory(instance(), instance()) }
         bind() from provider { CheckoutViewModelFactory(instance(), instance()) }

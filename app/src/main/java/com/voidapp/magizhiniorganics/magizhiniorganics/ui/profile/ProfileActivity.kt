@@ -108,6 +108,17 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             })
             setUserDetailsFromDao(userData)
         })
+        viewModel.referralStatus.observe(this, {
+            hideProgressDialog()
+            if (it) {
+                dialogBsAddReferral.dismiss()
+                showToast(this@ProfileActivity, "Referral added", Constants.SHORT)
+                sendReferralNotification()
+            } else {
+                mProfile.referrerNumber = ""
+                showToast(this, "No account with the given number. Please check again")
+            }
+        })
         viewModel.profileUploadStatus.observe(this, { status ->
             if (status) {
                 hideProgressDialog()
@@ -128,11 +139,17 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         })
     }
 
+    private fun sendReferralNotification() = lifecycleScope.launch {
+
+    }
+
     private fun activityInit() {
         binding.ivProfilePic.clipToOutline = true
         binding.tvPhoneNumber.text = mPhoneNumber
         if (!isNewUser) {
             viewModel.getUserProfile()
+        } else {
+            viewModel.createNewUserWallet(mCurrentUserId!!)
         }
     }
 
@@ -149,9 +166,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     //generating the profile model for uploading to firestore
     //and assigning it to mProfile variable for later use
     private fun generateProfileModel(): UserProfile {
-        if (isNewUser) {
-            viewModel.createNewUserWallet(mCurrentUserId!!)
-        }
         generateAddressObject()
         with(mProfile) {
             id = mCurrentUserId!!
@@ -323,17 +337,17 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         dialogBsAddReferral.dismissWithAnimation = true
 
         //verifying if the referral number is empty and assigning it to the userProfile object
-            view.btnApply.setOnClickListener {
-                val code = view.etReferralNumber.text.toString().trim()
-                if (code.isEmpty()) {
-                    view.etlReferralNumber.error = "* Enter a valid code"
-                return@setOnClickListener
-                } else {
-                    mProfile.referrerNumber = code
-                    dialogBsAddReferral.dismiss()
-                    showToast(this@ProfileActivity, "Referral added", Constants.SHORT)
-                }
+        view.btnApply.setOnClickListener {
+            val code = view.etReferralNumber.text.toString().trim()
+            if (code.isEmpty()) {
+                view.etlReferralNumber.error = "* Enter a valid code"
+            return@setOnClickListener
+            } else {
+                showProgressDialog()
+                mProfile.referrerNumber = code
+                viewModel.applyReferralNumber(mCurrentUserId!!, code)
             }
+        }
 
         dialogBsAddReferral.show()
     }

@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.services
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -14,7 +15,13 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SplashActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ONLINE_STATUS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import kotlin.random.Random
 
 
@@ -29,14 +36,28 @@ class FirebaseService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        val intent = Intent(this, SplashActivity::class.java)
+        val onlineStatus: Boolean = SharedPref(this).getData(ONLINE_STATUS, BOOLEAN, false).toString().toBoolean()
+        val intent = when(message.data["activity"]) {
+            CUSTOMER_SUPPORT -> Intent(this, ChatActivity::class.java)
+            else -> Intent(this, SplashActivity::class.java)
+        }
+        if (message.data["activity"] == CUSTOMER_SUPPORT) {
+            if (!onlineStatus) {
+                createNotification(intent, message)
+            }
+        } else {
+            createNotification(intent, message)
+        }
+    }
+
+    @SuppressLint("UnspecifiedImmutableFlag")
+    private fun createNotification(intent: Intent, message: RemoteMessage) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationID = Random.nextInt()
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(notificationManager)
         }
-
 
         val icon: Bitmap = Glide
             .with(this)
@@ -47,7 +68,6 @@ class FirebaseService : FirebaseMessagingService() {
 
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
-
 
         val notification = if (message.data["image"] == "") {
 

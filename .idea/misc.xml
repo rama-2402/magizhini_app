@@ -55,7 +55,7 @@
         <entry key="app/src/main/res/layout/cv_example_layout.xml" value="0.5312820512820513" />
         <entry key="app/src/main/res/layout/dialog_bottom_add_referral.xml" value="0.3907407407407407" />
         <entry key="app/src/main/res/layout/dialog_bottom_address.xml" value="0.375" />
-        <entry key="app/src/main/res/layout/dialog_bottom_cart.xml" value="0.67" />
+        <entry key="app/src/main/res/layout/dialog_bottom_cart.xml" value="0.5" />
         <entry key="app/src/main/res/layout/dialog_bottom_description.xml" value="0.2828125" />
         <entry key="app/src/main/res/layout/dialog_bottom_exit_confirmation.xml" value="0.375" />
         <entry key="app/src/main/res/layout/dialog_bottom_item_list.xml" value="0.25" />

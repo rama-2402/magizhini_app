@@ -3,20 +3,15 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
-import com.aminography.primedatepicker.utils.gone
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySplashBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.CleanDatabaseService
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataService
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.updateDeliveryService
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDeliveryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
@@ -24,14 +19,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import androidx.work.WorkManager
-
-
-
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity() {
@@ -77,7 +67,7 @@ class SplashActivity : BaseActivity() {
             }
         } else {
             val updateDeliveryWorkRequest: WorkRequest =
-                OneTimeWorkRequestBuilder<updateDeliveryService>()
+                OneTimeWorkRequestBuilder<UpdateDeliveryService>()
                     .build()
 
             WorkManager.getInstance(this).enqueue(updateDeliveryWorkRequest)
@@ -105,15 +95,15 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun updateDatabaseWorkRequest(wipe: Boolean, isNewDay: String) {
-        if (isNewDay == TimeUtil().getCurrentDate()) {
-            if (wipe) {
-                startWork("wipe")
-            }else {
+//        if (isNewDay == TimeUtil().getCurrentDate()) {
+//            if (wipe) {
+//                startWork("wipe")
+//            }else {
                 startWork("")
-            }
-        } else {
-            navigateToHomeScreen()
-        }
+//            }
+//        } else {
+//            navigateToHomeScreen()
+//        }
     }
 
     private fun startWork(wipe: String) {

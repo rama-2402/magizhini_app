@@ -9,10 +9,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel
 
 class ProfileViewModelFactory (
     private val dbRepository: DatabaseRepository,
-    private val fsRepository: FirestoreRepository,
-    private val fbRepository: FirebaseRepository
+    private val fbRepository: FirestoreRepository
 ) : ViewModelProvider.NewInstanceFactory() {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return ProfileViewModel(dbRepository, fsRepository, fbRepository) as T
+        return ProfileViewModel(dbRepository, fbRepository) as T
     }
 }

@@ -224,6 +224,8 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 mCurrentUserID = viewModel.getCurrentUserId()!!
                 SharedPref(this).putData(USER_ID, STRING, mCurrentUserID)
                 SharedPref(this).putData(PHONE_NUMBER, STRING, mPhoneNumber)
+                startGetProfileDataService()
+                startGetAllDataService()
                 delay(2000)
                 hideProgressDialog()
                 navigateToProfilePage()
@@ -280,6 +282,11 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun startGetAllDataService() {
         val workRequest: WorkRequest =
             OneTimeWorkRequestBuilder<UpdateDataService>()
+                .setInputData(
+                    workDataOf(
+                        "wipe" to ""
+                    )
+                )
                 .build()
 
         WorkManager.getInstance(this).enqueue(workRequest)

@@ -5,11 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirebaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CustomerProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import kotlinx.coroutines.Dispatchers
@@ -18,8 +16,7 @@ import kotlinx.coroutines.withContext
 
 class ProfileViewModel (
     val dbRepository: DatabaseRepository,
-    val fsRepository: FirestoreRepository,
-    val fbRepository: FirebaseRepository
+    val fbRepository: FirestoreRepository
         ) : ViewModel() {
 
     private var _isNewUser: MutableLiveData<Boolean> = MutableLiveData()
@@ -28,6 +25,8 @@ class ProfileViewModel (
     val userProfile: LiveData<UserProfileEntity> = _userProfile
     private var _profileUploadStatus: MutableLiveData<Boolean> = MutableLiveData()
     val profileUploadStatus: LiveData<Boolean> = _profileUploadStatus
+    private var _referralStatus: MutableLiveData<Boolean> = MutableLiveData()
+    val referralStatus: LiveData<Boolean> = _referralStatus
     private var _profileImageUploadStatus: MutableLiveData<String> = MutableLiveData()
     val profileImageUploadStatus: LiveData<String> = _profileImageUploadStatus
 
@@ -43,7 +42,7 @@ class ProfileViewModel (
     fun getAllActiveSubscriptions() = dbRepository.getAllActiveSubscriptions()
 
     fun uploadProfile(profile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
-        val status = fsRepository.uploadProfile(profile)
+        val status = fbRepository.uploadProfile(profile)
         withContext(Dispatchers.Main) {
             _profileUploadStatus.value = status
         }
@@ -69,7 +68,7 @@ class ProfileViewModel (
     }
 
     fun uploadProfilePic(path: String, uri: Uri, extension: String) = viewModelScope.launch(Dispatchers.IO) {
-        val status = fsRepository.uploadImage(path, uri, extension)
+        val status = fbRepository.uploadImage(path, uri, extension)
         if (
             status == "failed"
         ) {
@@ -91,8 +90,11 @@ class ProfileViewModel (
             0L,
             listOf()
         ).also {
-            fsRepository.createWallet(it)
+            fbRepository.createWallet(it)
         }
     }
 
+    fun applyReferralNumber(currentUserID: String, code: String) = viewModelScope.launch {
+        _referralStatus.value = fbRepository.applyReferralNumber(currentUserID, code)
+    }
 }

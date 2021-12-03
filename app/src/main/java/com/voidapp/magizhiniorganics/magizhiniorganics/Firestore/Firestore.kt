@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.work.ListenableWorker
+import androidx.work.Operation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.firestore.*
@@ -17,12 +18,18 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewMod
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADD_MONEY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_ACTIVE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUCCESS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.TOKENS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.UNSUB
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_NOTIFICATIONS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
@@ -220,8 +227,117 @@ class Firestore(
         }
     }
 
+    suspend fun applyReferralNumber(currentUserID: String, code: String): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val profileDoc = mFireStore.collection(USERS).whereEqualTo("phNumber", "+91$code").get().await()
+            if (profileDoc.documents.isNullOrEmpty()) {
+                false
+            } else {
+                val profile = profileDoc.documents[0].toObject(UserProfile::class.java)
+                val addReferralBonusToReferrer = async { addReferralBonusToReferrer(profile!!) }
+                val addReferralBonusToCurrentUser = async { addReferralBonusToCurrentUser(currentUserID) }
 
-    //wallet
+                addReferralBonusToReferrer.await() &&
+                addReferralBonusToCurrentUser.await()
+            }
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: applying referral", it) }
+            false
+        }
+    }
+    data class Referral (
+        var referralAmount: Float = 0f,
+        var referrerAmount: Float = 0f
+    )
+
+    private suspend fun addReferralBonusToCurrentUser(currentUserID: String): Boolean = withContext(Dispatchers.IO){
+        return@withContext try {
+            val amount = mFireStore.collection(REFERRAL).document(REFERRAL).get().await().toObject(Referral::class.java)!!.referralAmount
+            val addReferralMoneyToWallet = async { makeTransactionFromWallet(amount, currentUserID, "Add") }
+            val createTransactionEntry = async { TransactionHistory(
+                id = "",
+                timestamp = System.currentTimeMillis(),
+                month = TimeUtil().getMonth(),
+                year = TimeUtil().getYear().toLong(),
+                amount = amount,
+                fromID = currentUserID,
+                fromUPI = "Magizhini Referral Program",
+                status = SUCCESS,
+                purpose = ADD_MONEY
+            ).let {
+                when(updateTransaction(it)) {
+                    is NetworkResult.Failed -> false
+                    else -> true
+                }
+            } }
+            val createNotification = async { UserNotification(
+                id = "",
+                userID = currentUserID,
+                timestamp =  TimeUtil().getCurrentYearMonthDate().toString().toLong(),
+                title = "Referral Bonus",
+                message = "You have received a referral Bonus of Rs: $amount to your Wallet as a part of Magizhini Referral Program.",
+                imageUrl = "",
+                clickType = WALLET,
+                clickContent = ""
+            ).let {
+                createNewNotification(it)
+            } }
+
+            addReferralMoneyToWallet.await() &&
+            createTransactionEntry.await() &&
+            createNotification.await()
+
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: adding referral money to the new member", it) }
+            false
+        }
+    }
+
+    private suspend fun addReferralBonusToReferrer(profile: UserProfile): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val amount = mFireStore.collection(REFERRAL).document(REFERRAL).get().await().toObject(Referral::class.java)!!.referrerAmount
+            val addReferralMoneyToWallet = async { makeTransactionFromWallet(amount, profile.id, "Add") }
+            val createTransactionEntry = async { TransactionHistory(
+                id = "",
+                timestamp = System.currentTimeMillis(),
+                month = TimeUtil().getMonth(),
+                year = TimeUtil().getYear().toLong(),
+                amount = amount,
+                fromID = profile.id,
+                fromUPI = "Magizhini Referral Program",
+                status = SUCCESS,
+                purpose = ADD_MONEY
+            ).let {
+                when(updateTransaction(it)) {
+                    is NetworkResult.Success -> true
+                    else -> false
+                }
+            } }
+            val createNotification = async { UserNotification(
+                id = "",
+                userID = profile.id,
+                timestamp =  TimeUtil().getCurrentYearMonthDate().toString().toLong(),
+                title = "Referral Bonus",
+                message = "You have received a referral Bonus of Rs: $amount to your Wallet as a part of Magizhini Referral Program.",
+                imageUrl = "",
+                clickType = WALLET,
+                clickContent = ""
+            ).let {
+                createNewNotification(it)
+            } }
+
+            addReferralMoneyToWallet.await() &&
+            createTransactionEntry.await() &&
+            createNotification.await()
+
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: applying referral", it) }
+            false
+        }
+    }
+
+
+        //wallet
     suspend fun createWallet(wallet: Wallet) = withContext(Dispatchers.IO) {
         try {
             mFireStore.collection("Wallet")
@@ -1180,11 +1296,16 @@ class Firestore(
 
     suspend fun deleteNotification(notification: UserNotificationEntity): NetworkResult = withContext(Dispatchers.IO) {
         return@withContext try {
-            mFireStore.collection(USER_NOTIFICATIONS)
-                .document(USER_NOTIFICATIONS)
-                .collection(notification.userID)
-                .document(notification.id)
-                .delete().await()
+            val deleteNotificationByIDInStore = async {
+                mFireStore.collection(USER_NOTIFICATIONS)
+                    .document(USER_NOTIFICATIONS)
+                    .collection(notification.userID)
+                    .document(notification.id)
+                    .delete().await()
+            }
+            val deleteNotificationByIDInDB = async { repository.deleteNotificationsByID(notification.id) }
+            deleteNotificationByIDInStore.await()
+            deleteNotificationByIDInDB.await()
             NetworkResult.Success("delete", "Notification removed")
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: deleteing user notification", it) }
@@ -1194,15 +1315,21 @@ class Firestore(
 
     suspend fun clearAllNotifications(allNotifications:MutableList<UserNotificationEntity>): NetworkResult = withContext(Dispatchers.IO) {
         return@withContext try {
-            val path =
+            val deleteAllNotificationInStore = async { val path =
                 mFireStore.collection(USER_NOTIFICATIONS)
                     .document(USER_NOTIFICATIONS)
                     .collection(allNotifications[0].userID)
-            for (notification in allNotifications) {
+                for (notification in allNotifications) {
                     path
-                    .document(notification.id)
-                    .delete()
+                        .document(notification.id)
+                        .delete()
+                }
             }
+            val deleteAllNotificationInDB = async { repository.deleteAllNotifications() }
+
+            deleteAllNotificationInStore.await()
+            deleteAllNotificationInDB.await()
+
             NetworkResult.Success("deleteAll", "Notifications cleared")
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: deleteing all user notification", it) }

@@ -404,8 +404,8 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         if (binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
         } else {
-            finishAffinity()
             finish()
+            finishAffinity()
             super.onBackPressed()
         }
     }
@@ -477,6 +477,16 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             delay(150)
             displaySelectedCategory(Constants.ALL_PRODUCTS)
         }
+    }
+
+    override fun onResume() {
+        viewModel.getAllNotifications()
+        super.onResume()
+    }
+
+    override fun onRestart() {
+        viewModel.getAllNotifications()
+        super.onRestart()
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

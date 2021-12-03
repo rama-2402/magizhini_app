@@ -44,6 +44,8 @@ class FirestoreRepository (
 
     suspend fun updateAddress(id: String, address: ArrayList<Address>)  = firestore.updateAddress(id, address)
 
+    suspend fun applyReferralNumber(currentUserID: String, code: String): Boolean = firestore.applyReferralNumber(currentUserID, code)
+
 
 
     suspend fun getLimitedItems(viewModel: ShoppingMainViewModel) = firestore.getLimitedItems(viewModel)

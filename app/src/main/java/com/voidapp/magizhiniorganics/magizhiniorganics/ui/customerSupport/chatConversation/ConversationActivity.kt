@@ -19,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityConve
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ONLINE_STATUS
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -49,6 +50,7 @@ class ConversationActivity : BaseActivity(), KodeinAware {
         mSelectedProfile = intent.getParcelableExtra(Constants.CUSTOMER_SUPPORT)!!
         viewModel.currentUserName = intent.getStringExtra(Constants.PROFILE_NAME)!!
         mCurrentUserId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
+        SharedPref(this).putData(ONLINE_STATUS, Constants.BOOLEAN, true)
 
         setRecyclerView()
         initLiveData()
@@ -193,6 +195,7 @@ class ConversationActivity : BaseActivity(), KodeinAware {
             }
             else -> {
                 viewModel.updateTypingStatus(mCurrentUserId, false)
+                SharedPref(this).putData(ONLINE_STATUS, Constants.BOOLEAN, false)
                 Intent(this, ChatActivity::class.java).also {
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)

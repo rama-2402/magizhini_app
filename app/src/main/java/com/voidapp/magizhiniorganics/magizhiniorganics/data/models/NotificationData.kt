@@ -1,1 +1,1 @@
-package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class NotificationData(    var title: String = "",    var message: String = "",    val image: String = "")
+package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class NotificationData(    var title: String = "",    var message: String = "",    var image: String = "",    var activity: String = "")

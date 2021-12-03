@@ -68,6 +68,8 @@ object Constants {
     const val USER_NOTIFICATIONS = "UserNotifications"
     const val TRASH = "Trash"
     const val TOKENS = "Tokens"
+    const val WALLET = "Wallet"
+    const val REFERRAL = "Referral"
 
     //filters data
     const val ALL: String = "all"
@@ -153,4 +155,5 @@ object Constants {
 
     //notification
     const val BROADCAST: String = "/topics/magizhiniBroadcast"
+    const val ONLINE_STATUS: String = "online"
 }
