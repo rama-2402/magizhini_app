@@ -97,4 +97,8 @@ class ProfileViewModel (
     fun applyReferralNumber(currentUserID: String, code: String) = viewModelScope.launch {
         _referralStatus.value = fbRepository.applyReferralNumber(currentUserID, code)
     }
+
+    suspend fun checkForReferral(userID: String): Boolean {
+        return fbRepository.checkForReferral(userID)
+    }
 }

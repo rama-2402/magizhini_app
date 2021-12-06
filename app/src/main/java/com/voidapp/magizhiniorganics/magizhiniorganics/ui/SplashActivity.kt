@@ -121,9 +121,6 @@ class SplashActivity : BaseActivity() {
             .getWorkInfoByIdLiveData(workRequest.id)
             .observe(this, {
                 when (it.state) {
-                    WorkInfo.State.SUCCEEDED -> {
-                        navigateToHomeScreen()
-                    }
                     WorkInfo.State.CANCELLED -> {
                         showRetry()
                         showToast(
@@ -139,13 +136,6 @@ class SplashActivity : BaseActivity() {
                             "Failed to update product catalog. Try restarting the app again",
                             LONG
                         )
-                    }
-                    WorkInfo.State.BLOCKED -> {
-                        showToast(
-                            this,
-                            "Server Error. Try restarting the app again"
-                        )
-                        navigateToHomeScreen()
                     }
                     else -> {
                         navigateToHomeScreen()

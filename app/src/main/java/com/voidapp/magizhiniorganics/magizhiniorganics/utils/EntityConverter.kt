@@ -94,8 +94,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
         url = url,
         order = order,
         type = type,
-        description = description,
-        imageId = imageId
+        description = description
     )
 
     fun Order.toOrderEntity() = OrderEntity(
@@ -159,11 +158,21 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
         name = name,
         id = id
     )
-    fun SpecialBannersData.toSpecialBanners() = SpecialBanners(
+    fun Banner.toSpecialBanners() = SpecialBanners(
         id = id,
-        url = url
+        url = url,
+        order = order,
+        type = type,
+        description = description
     )
 
+    fun SpecialBanners.toBannerEntity() = BannerEntity (
+        id = id,
+        url = url,
+        order = order,
+        type = type,
+        description = description
+            )
     // Entity class to model data class converters
 
     fun UserProfileEntity.toUserProfile() = UserProfile (
@@ -236,8 +245,7 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity (
         url = url,
         order = order,
         type = type,
-        description = description,
-        imageId = imageId
+        description = description
     )
 
     fun OrderEntity.toOrder() = Order(

@@ -35,7 +35,13 @@ data class SpecialsThree(
 @Entity
 data class SpecialBanners(
     @PrimaryKey(autoGenerate = false)
-    var id: Int = 0,
+    var id: String = "",
     @ColumnInfo
-    var url: String = ""
+    var url: String = "",
+    @ColumnInfo
+    var order: Int = 1,
+    @ColumnInfo
+    var type: String = "",
+    @ColumnInfo
+    var description: String = ""
 )

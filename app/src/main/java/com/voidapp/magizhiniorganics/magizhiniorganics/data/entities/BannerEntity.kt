@@ -7,15 +7,13 @@ import androidx.room.PrimaryKey
 @Entity
 data class BannerEntity(
     @PrimaryKey(autoGenerate = false)
-    var id: String,
+    var id: String = "",
     @ColumnInfo
-    val url: String,
+    var url: String = "",
     @ColumnInfo
     var order: Int = 1,
     @ColumnInfo
-    val type: String = "",
+    var type: String = "",
     @ColumnInfo
-    val description: String = "",
-    @ColumnInfo
-    var imageId: String = ""
+    var description: String = ""
 )

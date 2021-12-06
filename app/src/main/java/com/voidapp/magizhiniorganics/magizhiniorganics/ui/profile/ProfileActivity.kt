@@ -26,6 +26,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import kotlinx.coroutines.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -34,8 +36,6 @@ import java.io.IOException
 import java.util.*
 
 class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
-
-    //TODO UPLOAD FIRESTORE AND DAO FAVORITES, DEFAULT VARIANTS DETAILS IN PROFILE
 
     lateinit var binding: ActivityProfileBinding
     override val kodein by kodein()
@@ -112,8 +112,8 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             hideProgressDialog()
             if (it) {
                 dialogBsAddReferral.dismiss()
-                showToast(this@ProfileActivity, "Referral added", Constants.SHORT)
-                sendReferralNotification()
+                binding.tvReferral.remove()
+                showErrorSnackBar("Referral added Successfully. Your referral bonus will be added to your Wallet.", false, LONG)
             } else {
                 mProfile.referrerNumber = ""
                 showToast(this, "No account with the given number. Please check again")
@@ -139,10 +139,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         })
     }
 
-    private fun sendReferralNotification() = lifecycleScope.launch {
-
-    }
-
     private fun activityInit() {
         binding.ivProfilePic.clipToOutline = true
         binding.tvPhoneNumber.text = mPhoneNumber
@@ -150,6 +146,11 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             viewModel.getUserProfile()
         } else {
             viewModel.createNewUserWallet(mCurrentUserId!!)
+            lifecycleScope.launch {
+                if (viewModel.checkForReferral(mCurrentUserId!!)) {
+                    binding.tvReferral.remove()
+                }
+            }
         }
     }
 

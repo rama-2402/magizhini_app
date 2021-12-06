@@ -336,6 +336,20 @@ class Firestore(
         }
     }
 
+    suspend fun checkForReferral(userID: String): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+            mFireStore.collection(WALLET)
+                .document(WALLET)
+                .collection(USERS)
+                .document(userID)
+                .get()
+                .await().toObject(Wallet::class.java)!!
+            true
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: checking for existing referral", it) }
+            false
+        }
+    }
 
         //wallet
     suspend fun createWallet(wallet: Wallet) = withContext(Dispatchers.IO) {
@@ -350,8 +364,6 @@ class Firestore(
             e.message?.let { logCrash("creating wallet", it) }
         }
     }
-
-
 
     //live update of the limited items
     suspend fun getLimitedItems(viewModel: ShoppingMainViewModel) = withContext(Dispatchers.IO) {

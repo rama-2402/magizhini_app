@@ -28,6 +28,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SpecialBanners
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Banner
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
@@ -67,6 +69,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     private lateinit var specialsOneAdapter: BestSellersAdapter
     private lateinit var specialsTwoAdapter: BestSellersAdapter
     private lateinit var specialsThreeAdapter: BestSellersAdapter
+    private var mSelectedBanner: SpecialBanners = SpecialBanners()
     private val banners = mutableListOf<BannerEntity>()
 
     //initializing the carousel item for the banners
@@ -141,10 +144,59 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                 startActivity(it)
             }
         }
+        binding.apply {
+            ivBannerOne.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[0]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerTwo.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[1]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerThree.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[2]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerFour.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[3]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerFive.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[4]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerSix.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[5]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerSeven.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[6]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerEight.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[7]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerNine.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[8]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerTen.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[9]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerEleven.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[10]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+            ivBannerTwelve.setOnClickListener {
+                mSelectedBanner = viewModel.bannersList[11]
+                selectedBanner(mSelectedBanner.toBannerEntity())
+            }
+        }
     }
 
-    private fun selectedBanner(position: Int) = lifecycleScope.launch {
-        val banner = banners[position]
+    private fun selectedBanner(banner: BannerEntity) = lifecycleScope.launch {
         when(banner.type) {
             PRODUCTS -> {
                 try {
@@ -264,18 +316,18 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         })
         viewModel.specialBanners.observe(this, {
             with(binding) {
-                GlideLoader().loadUserPicture(this@HomeActivity, it[0], ivBannerOne)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[1], ivBannerTwo)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[2], ivBannerThree)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[3], ivBannerFour)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[4], ivBannerFive)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[5], ivBannerSix)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[6], ivBannerSeven)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[7], ivBannerEight)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[8], ivBannerNine)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[9], ivBannerTen)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[10], ivBannerEleven)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[11], ivBannerTwelve)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[0].url, ivBannerOne)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[1].url, ivBannerTwo)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[2].url, ivBannerThree)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[3].url, ivBannerFour)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[4].url, ivBannerFive)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[5].url, ivBannerSix)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[6].url, ivBannerSeven)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[7].url, ivBannerEight)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[8].url, ivBannerNine)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[9].url, ivBannerTen)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[10].url, ivBannerEleven)
+                GlideLoader().loadUserPicture(this@HomeActivity, it[11].url, ivBannerTwelve)
             }
         })
 
@@ -316,7 +368,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         binding.cvBanner.registerLifecycle(this)
         binding.cvBanner.carouselListener = object : CarouselListener {
             override fun onClick(position: Int, carouselItem: CarouselItem) {
-                selectedBanner(position)
+                selectedBanner(banners[position])
             }
         }
     }

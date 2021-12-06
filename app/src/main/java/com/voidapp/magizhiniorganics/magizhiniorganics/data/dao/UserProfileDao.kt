@@ -141,7 +141,7 @@ interface UserProfileDao {
     @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated ORDER BY name")
     fun getAllProductByCategoryStatic(category: String): List<ProductEntity>
 
-    @Query("SELECT name FROM ProductEntity WHERE id = :id")
+    @Query("SELECT name FROM ProductCategoryEntity WHERE id = :id")
     fun getCategoryByID(id: String): String?
 
     @Query("SELECT * FROM ProductEntity WHERE favorite ORDER BY name")
@@ -241,7 +241,7 @@ interface UserProfileDao {
     fun getSpecialsTwo(): SpecialsTwo
     @Query("SELECT * FROM SpecialsThree")
     fun getSpecialsThree(): SpecialsThree
-    @Query("SELECT * FROM SpecialBanners")
+    @Query("SELECT * FROM SpecialBanners ORDER BY `order`")
     fun getSpecialBanners(): List<SpecialBanners>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

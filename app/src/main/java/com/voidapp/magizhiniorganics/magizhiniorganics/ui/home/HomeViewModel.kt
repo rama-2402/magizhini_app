@@ -27,12 +27,12 @@ class HomeViewModel (
     val bestSellers: LiveData<MutableList<ProductEntity>> = _bestSellers
     private var _recyclerPosition: MutableLiveData<Int> = MutableLiveData()
     val recyclerPosition: LiveData<Int> = _recyclerPosition
-    private var _specialBanners: MutableLiveData<List<String>> = MutableLiveData()
-    val specialBanners: LiveData<List<String>> = _specialBanners
+    private var _specialBanners: MutableLiveData<List<SpecialBanners>> = MutableLiveData()
+    val specialBanners: LiveData<List<SpecialBanners>> = _specialBanners
     private var _notifications: MutableLiveData<List<UserNotificationEntity>> = MutableLiveData()
     val notifications: LiveData<List<UserNotificationEntity>> = _notifications
 
-
+    val bannersList: MutableList<SpecialBanners> = mutableListOf()
 
     var recyclerToRefresh = ""
 
@@ -180,12 +180,14 @@ class HomeViewModel (
     private suspend fun getSpecialBanners() {
         try {
             val banners = dbRepository.getSpecialBanners()
-            val bannerUrls = arrayListOf<String>()
-            for (item in banners.indices) {
-                bannerUrls.add(banners[item].url)
-            }
+//            val bannerUrls = arrayListOf<String>()
+//            for (item in banners.indices) {
+//                bannerUrls.add(banners[item].url)
+//            }
+            bannersList.clear()
             withContext(Dispatchers.Main) {
-                _specialBanners.value = bannerUrls
+                bannersList.addAll(banners)
+                _specialBanners.value = banners
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl banners from db", it) }

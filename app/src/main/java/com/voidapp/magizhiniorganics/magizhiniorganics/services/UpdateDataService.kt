@@ -116,7 +116,7 @@ class UpdateDataService (
                 .get().await()
             for (doc in snapshot.documents) {
                 repository.upsertSpecialBanners(
-                    doc.toObject(SpecialBannersData::class.java)!!.toSpecialBanners()
+                    doc.toObject(Banner::class.java)!!.toSpecialBanners()
                 )
             }
         } catch (e: Exception) {

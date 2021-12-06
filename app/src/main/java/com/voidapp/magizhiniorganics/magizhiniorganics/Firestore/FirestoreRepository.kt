@@ -46,7 +46,7 @@ class FirestoreRepository (
 
     suspend fun applyReferralNumber(currentUserID: String, code: String): Boolean = firestore.applyReferralNumber(currentUserID, code)
 
-
+    suspend fun checkForReferral(userID: String): Boolean = firestore.checkForReferral(userID)
 
     suspend fun getLimitedItems(viewModel: ShoppingMainViewModel) = firestore.getLimitedItems(viewModel)
 
