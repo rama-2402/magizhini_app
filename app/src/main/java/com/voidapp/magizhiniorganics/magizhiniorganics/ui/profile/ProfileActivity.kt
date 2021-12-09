@@ -61,10 +61,9 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mCurrentUserId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "") as String
-
-        mPhoneNumber = intent.getStringExtra(Constants.PHONE_NUMBER).toString()
         isNewUser = intent.getBooleanExtra(Constants.STATUS, false)
+        mCurrentUserId = intent.getStringExtra(Constants.USER_ID).toString()
+        mPhoneNumber = intent.getStringExtra(Constants.PHONE_NUMBER).toString()
 
         //setting the theme and view binding
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
@@ -142,13 +141,15 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun activityInit() {
         binding.ivProfilePic.clipToOutline = true
         binding.tvPhoneNumber.text = mPhoneNumber
-        if (!isNewUser) {
-            viewModel.getUserProfile()
-        } else {
-            viewModel.createNewUserWallet(mCurrentUserId!!)
-            lifecycleScope.launch {
+        lifecycleScope.launch {
+            if (!isNewUser) {
+                viewModel.getUserProfile()
+            } else {
                 if (viewModel.checkForReferral(mCurrentUserId!!)) {
+                    Log.e("TAG", "activityInit: $mCurrentUserId", )
                     binding.tvReferral.remove()
+                } else {
+                    viewModel.createNewUserWallet(mCurrentUserId!!)
                 }
             }
         }
@@ -320,6 +321,8 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private fun newUserTransitionFromProfile() {
+        SharedPref(this).putData(Constants.USER_ID, Constants.STRING, mCurrentUserId!!)
+        SharedPref(this).putData(Constants.PHONE_NUMBER, Constants.STRING, mPhoneNumber)
         SharedPref(this).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
         Intent(this, HomeActivity::class.java).also {
             startActivity(it)

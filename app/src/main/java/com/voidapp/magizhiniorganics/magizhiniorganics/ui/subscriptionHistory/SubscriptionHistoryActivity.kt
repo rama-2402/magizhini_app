@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 import android.content.Intent
 import android.os.Bundle
 import android.os.Message
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -202,6 +203,7 @@ class SubscriptionHistoryActivity :
         view.tvDueDate.text = TimeUtil().getCustomDate(dateLong = sub.endDate)
 
         view.calendarView.setUseThreeLetterAbbreviation(true)
+        view.calendarView.shouldDrawIndicatorsBelowSelectedDays(true)
 
         val month = SimpleDateFormat("MMMM - yyyy")
         view.tvMonth.text = month.format(System.currentTimeMillis())

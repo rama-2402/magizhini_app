@@ -12,6 +12,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvNotificatio
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvTransactionItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils.addCharAtIndex
 
 class NotificationsAdapter(
     private val context: Context,
@@ -29,7 +30,10 @@ class NotificationsAdapter(
     override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
         val notification = notifications[position]
         holder.binding.apply {
-            tvDate.text = TimeUtil().getCustomDate(dateLong = notification.timestamp)
+            val date = notification.timestamp.toString()
+            val firstChange = date.addCharAtIndex('/', 4)
+            val secondChange = firstChange.addCharAtIndex('/', 7)
+            tvDate.text = secondChange
             tvTitle.text = notification.title
             if (notification.message != "") {
                 tvMessage.text = notification.message
@@ -39,7 +43,6 @@ class NotificationsAdapter(
             } else {
                 ivMessage.visibility = View.GONE
             }
-
             llNotificationBody.setOnClickListener {
                 onItemClickListener.clickedNotification(notification, position)
             }

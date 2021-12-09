@@ -242,11 +242,13 @@ class SubscriptionProductActivity :
                     view: View?,
                     position: Int,
                     id: Long) {
+                    oSubscription.variantName = "${mProduct.variants[position].variantName} ${mProduct.variants[position].variantType}"
                     setDataToDisplay(position)
                     generateEstimate(spSubscriptionType.selectedItemPosition)
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
+                    oSubscription.variantName = "${mProduct.variants[0].variantName} ${mProduct.variants[0].variantType}"
                     setDataToDisplay(0)
                     generateEstimate(0)
                 }

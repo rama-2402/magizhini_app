@@ -149,6 +149,8 @@ class SplashActivity : BaseActivity() {
         binding.progressCircular.remove()
         Intent(this@SplashActivity, HomeActivity::class.java).also {
             startActivity(it)
+            finish()
+            finishAffinity()
         }
     }
 

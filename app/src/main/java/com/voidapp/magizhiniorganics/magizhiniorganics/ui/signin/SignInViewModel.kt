@@ -28,7 +28,6 @@ class SignInViewModel(
         if (
             fbRepository.signInWithPhoneAuthCredential(phoneAuthCredential)
         ) {
-            createNewCustomerProfile()
             withContext(Dispatchers.Main) {
                 _loginStatus.value = "complete"
             }

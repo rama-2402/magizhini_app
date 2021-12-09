@@ -29,4 +29,6 @@ object Utils {
         val date = SimpleDateFormat("MM")
         return date.format(this).toInt()
     }
+    fun String.addCharAtIndex(char: Char, index: Int) =
+        StringBuilder(this).apply { insert(index, char) }.toString()
 }

@@ -222,8 +222,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         when (val status = viewModel.checkUserProfileDetails()) {
             "" -> {
                 mCurrentUserID = viewModel.getCurrentUserId()!!
-                SharedPref(this).putData(USER_ID, STRING, mCurrentUserID)
-                SharedPref(this).putData(PHONE_NUMBER, STRING, mPhoneNumber)
+                viewModel.createNewCustomerProfile()
                 startGetProfileDataService()
                 startGetAllDataService()
                 delay(2000)
@@ -260,7 +259,6 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun navigateToHomePage() {
         Intent(this, HomeActivity::class.java).also {
             startActivity(it)
-            finish()
         }
     }
 

@@ -337,25 +337,28 @@ class Firestore(
     }
 
     suspend fun checkForReferral(userID: String): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
-            mFireStore.collection(WALLET)
-                .document(WALLET)
-                .collection(USERS)
-                .document(userID)
-                .get()
-                .await().toObject(Wallet::class.java)!!
-            true
+        try {
+            val doc = mFireStore.collection(WALLET)
+                        .document(WALLET)
+                        .collection("Users")
+                        .document(userID)
+                .get().await().toObject(Wallet::class.java)
+            if (doc != null) {
+                return@withContext doc.amount != 0f
+            }else {
+                return@withContext false
+            }
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: checking for existing referral", it) }
-            false
+            return@withContext false
         }
     }
 
         //wallet
     suspend fun createWallet(wallet: Wallet) = withContext(Dispatchers.IO) {
         try {
-            mFireStore.collection("Wallet")
-                .document("Wallet")
+            mFireStore.collection(WALLET)
+                .document(WALLET)
                 .collection("Users")
                 .document(wallet.id)
                 .set(wallet, SetOptions.merge())
@@ -897,11 +900,11 @@ class Firestore(
             val dateDocID = SimpleDateFormat("dd")
             val docID = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
 
-            val path = mFireStore.collection(Constants.SUBSCRIPTION)
-                .document(Constants.CANCELLED).collection(docID).document(dateDocID.format(System.currentTimeMillis()))
+            val path = mFireStore.collection(SUBSCRIPTION)
+                .document(Constants.CANCELLED).collection(docID).document(dateDocID.format(date))
 
             if (!path.get().await().exists()) {
-                val cancelledIDs: MutableMap<String, ArrayList<String>> = mutableMapOf<String, ArrayList<String>>()
+                val cancelledIDs: MutableMap<String, ArrayList<String>> = mutableMapOf()
                 cancelledIDs["cancelledIDs"] = arrayListOf()
                 path.set(cancelledIDs, SetOptions.merge()).await()
             }

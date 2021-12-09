@@ -83,7 +83,11 @@ class NewReviewFragment : Fragment(), KodeinAware {
 
     private fun clickListeners() {
         with(binding) {
-
+            srSmileyRating.setTitle(SmileyRating.Type.TERRIBLE, "Bad")
+            srSmileyRating.setTitle(SmileyRating.Type.BAD, "Not Satisfied")
+            srSmileyRating.setTitle(SmileyRating.Type.OKAY, "Satisfied")
+            srSmileyRating.setTitle(SmileyRating.Type.GOOD, "Great")
+            srSmileyRating.setTitle(SmileyRating.Type.GREAT, "Awesome")
             srSmileyRating.setSmileySelectedListener { type ->
                 mRating = when (type) {
                     SmileyRating.Type.TERRIBLE -> 1

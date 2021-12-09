@@ -98,7 +98,7 @@ class ProfileViewModel (
         _referralStatus.value = fbRepository.applyReferralNumber(currentUserID, code)
     }
 
-    suspend fun checkForReferral(userID: String): Boolean {
-        return fbRepository.checkForReferral(userID)
+    suspend fun checkForReferral(userID: String): Boolean = withContext(Dispatchers.IO){
+        return@withContext fbRepository.checkForReferral(userID)
     }
 }
