@@ -28,7 +28,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -44,10 +46,9 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private lateinit var transactionAdapter: WalletAdapter
     private var mWallet: Wallet = Wallet()
     private val mTransactions = mutableListOf<TransactionHistory>()
+    private var mCurrentTransaction = TransactionHistory()
     private var mProfile = UserProfile()
     private var mMoneyToAddInWallet: Float = 0f
-
-    private val TAG: String = "qqqq"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,10 +75,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     private fun liveDataObservers() {
-        viewModel.wallet.observe(this, {
-            mWallet = it
-            displayWalletDataToScreen()
-        })
         viewModel.transactions.observe(this, {
             mTransactions.clear()
             mTransactions.addAll(it)
@@ -97,10 +94,22 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         viewModel.profile.observe(this, {
             mProfile = it
         })
-        viewModel.toast.observe(this, {
-            showErrorSnackBar(it, true)
-        })
-
+        lifecycleScope.launchWhenStarted {
+            viewModel.status.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
+                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
+                    is NetworkResult.Loading -> {
+                        if (result.message == "") {
+                            showProgressDialog()
+                        } else {
+                            showSuccessDialog("", result.message, result.data)
+                        }
+                    }
+                    else -> Unit
+                }
+            }
+        }
     }
 
     private fun displayWalletDataToScreen() {
@@ -109,7 +118,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             if (mWallet.lastRecharge == 0L) {
                 tvLastRechargeDate.text = "-"
             } else {
-                tvLastRechargeDate.text = TimeUtil().getCustomDate(dateLong = mWallet.lastTransaction)
+                tvLastRechargeDate.text = TimeUtil().getCustomDate(dateLong = mWallet.lastRecharge)
             }
             if (mWallet.lastTransaction == 0L) {
                 tvTransactionDate.text = "-"
@@ -235,42 +244,48 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     override fun onPaymentSuccess(orderID: String?) {
         showSuccessDialog("","Adding Money to the Wallet...", "wallet")
         showShimmer()
-        lifecycleScope.launch(Dispatchers.Main) {
-            val id = viewModel.createTransaction(mMoneyToAddInWallet.toFloat(), mProfile.id, orderID!!)
-            if (id == "failed") {
-                delay(1000)
-                hideSuccessDialog()
-                showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
-                return@launch
-            } else {
-                delay(1500)
-                hideSuccessDialog()
-                showSuccessDialog("", "Wallet Updated successfully!", "complete")
-                TransactionHistory (
-                    id,
-                    System.currentTimeMillis(),
-                    TimeUtil().getMonth(),
-                    TimeUtil().getYear().toLong(),
-                    mMoneyToAddInWallet.toFloat(),
-                    id,
-                    orderID,
-                    Constants.SUCCESS,
-                    Constants.ADD_MONEY,
-                    orderID
-                ).also {
-                    mTransactions.add(it)
-                    mTransactions.sortByDescending { transaction ->
-                        transaction.timestamp
-                    }
-                    transactionAdapter.transactions = mTransactions
-                    transactionAdapter.notifyDataSetChanged()
-                    binding.tvWalletTotal.text = (mWallet.amount + mMoneyToAddInWallet).toString()
-                    delay(1500)
-                    hideSuccessDialog()
-                    hideShimmer()
-                }
-            }
-        }
+        viewModel.makeTransactionFromWallet(
+            mMoneyToAddInWallet,
+            mProfile.id,
+            orderID!!,
+            "Add"
+        )
+//        lifecycleScope.launch(Dispatchers.Main) {
+//            val id = viewModel.createTransaction(mMoneyToAddInWallet.toFloat(), mProfile.id, orderID!!)
+//            if (id == "failed") {
+//                delay(1000)
+//                hideSuccessDialog()
+//                showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
+//                return@launch
+//            } else {
+//                delay(1500)
+//                hideSuccessDialog()
+//                showSuccessDialog("", "Wallet Updated successfully!", "complete")
+//                TransactionHistory (
+//                    id,
+//                    System.currentTimeMillis(),
+//                    TimeUtil().getMonth(),
+//                    TimeUtil().getYear().toLong(),
+//                    mMoneyToAddInWallet.toFloat(),
+//                    id,
+//                    orderID,
+//                    Constants.SUCCESS,
+//                    Constants.ADD_MONEY,
+//                    orderID
+//                ).also {
+//                    mTransactions.add(it)
+//                    mTransactions.sortByDescending { transaction ->
+//                        transaction.timestamp
+//                    }
+//                    transactionAdapter.transactions = mTransactions
+//                    transactionAdapter.notifyDataSetChanged()
+//                    binding.tvWalletTotal.text = (mWallet.amount + mMoneyToAddInWallet).toString()
+//                    delay(1500)
+//                    hideSuccessDialog()
+//                    hideShimmer()
+//                }
+//            }
+//        }
 
     }
 
@@ -303,8 +318,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     fun setMonthFilter(month: String) = lifecycleScope.launch(Dispatchers.Default) {
         withContext(Dispatchers.Main) {
             showShimmer()
+            binding.tvMonthFilter.text = month
         }
-        binding.tvMonthFilter.text = month
         val filteredTransactions = mutableListOf<TransactionHistory>()
         for (transaction in mTransactions) {
             if (transaction.month == month) {
@@ -319,6 +334,52 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             transactionAdapter.notifyDataSetChanged()
             hideShimmer()
         }
+    }
+
+    private suspend fun onSuccessCallback(message: String, data: Any?) {
+        when(message) {
+            "wallet" -> {
+                mWallet = data as Wallet
+                displayWalletDataToScreen()
+            }
+            "transaction" -> {
+                delay(1500)
+                hideSuccessDialog()
+                showSuccessDialog("", "Wallet Updated successfully!", "complete")
+                mCurrentTransaction = data as TransactionHistory
+                viewModel.updateTransaction(data)
+            }
+            "transactionID" -> {
+                mCurrentTransaction.id = data as String
+                mTransactions.add(mCurrentTransaction)
+                hideShimmer()
+                setMonthFilter(binding.tvMonthFilter.text.toString())
+                viewModel.getWallet(mProfile.id)
+                delay(1500)
+                hideSuccessDialog()
+            }
+        }
+
+        viewModel.emptyResult()
+    }
+
+    private suspend fun onFailedCallback(message: String, data: Any?) {
+        when(message) {
+            "wallet" -> {
+                showErrorSnackBar(data as String, true)
+            }
+            "transaction" -> {
+                delay(1000)
+                hideSuccessDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+            "transactionID" -> {
+                delay(1000)
+                hideSuccessDialog()
+                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
+            }
+        }
+        viewModel.emptyResult()
     }
 
     private fun showShimmer() {

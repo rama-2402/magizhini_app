@@ -1216,11 +1216,11 @@ class Firestore(
             }
         }
 
-    suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean {
-        return try {
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
             withContext(Dispatchers.IO) {
-                val path = mFireStore.collection("Wallet")
-                    .document("Wallet")
+                val path = mFireStore.collection(WALLET)
+                    .document(WALLET)
                     .collection("Users")
                 mFireStore.runTransaction { transaction ->
                     val wallet = transaction.get(path.document(id)).toObject(Wallet::class.java)
@@ -1252,20 +1252,20 @@ class Firestore(
             }
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: Making transaction for purchase", it) }
-            return false
+            return@withContext false
         }
     }
 
     suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                val path = mFireStore.collection("Wallet")
+                val path = mFireStore.collection(WALLET)
                     .document("Transaction")
                     .collection(transaction.fromID)
                 transaction.id = path.document().id
 
                 path.document(transaction.id).set(transaction, SetOptions.merge()).await()
-                NetworkResult.Success("transactionID", path.id)
+                NetworkResult.Success("transactionID", transaction.id)
             } catch (e: Exception) {
                 e.message?.let { logCrash("firestore: updating the wallet transaction", it) }
                 NetworkResult.Failed("transactionID", null)
