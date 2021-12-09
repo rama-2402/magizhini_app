@@ -3,13 +3,18 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
@@ -72,7 +77,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         viewModel.wallet.observe(this, {
             mWallet = it
             displayWalletDataToScreen()
-
         })
         viewModel.transactions.observe(this, {
             mTransactions.clear()
@@ -93,6 +97,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         viewModel.profile.observe(this, {
             mProfile = it
         })
+        viewModel.toast.observe(this, {
+            showErrorSnackBar(it, true)
+        })
+
     }
 
     private fun displayWalletDataToScreen() {
@@ -163,6 +171,19 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             //TODO: Show some info about wallet and it's functions
         }
+
+        binding.rvTransactionHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
+                super.onScrolled(recyclerView, up, down)
+                if (down < 0 && binding.fabAddMoney.isGone) {
+                    binding.fabAddMoney.startAnimation(Animations.scaleBig)
+                    binding.fabAddMoney.visibility = View.VISIBLE
+                } else if (down > 0 && binding.fabAddMoney.isVisible) {
+                    binding.fabAddMoney.startAnimation(Animations.scaleSmall)
+                    binding.fabAddMoney.visibility = View.GONE
+                }
+            }
+        })
 
         binding.fabAddMoney.setOnClickListener {
             //BS to add Amount number

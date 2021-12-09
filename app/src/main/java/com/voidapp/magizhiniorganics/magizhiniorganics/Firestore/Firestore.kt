@@ -263,7 +263,8 @@ class Firestore(
                 fromID = currentUserID,
                 fromUPI = "Magizhini Referral Program",
                 status = SUCCESS,
-                purpose = ADD_MONEY
+                purpose = ADD_MONEY,
+                transactionFor = "Magizhini Referral Bonus"
             ).let {
                 when(updateTransaction(it)) {
                     is NetworkResult.Failed -> false
@@ -1185,8 +1186,8 @@ class Firestore(
 
     suspend fun getWallet(id: String): NetworkResult = withContext(Dispatchers.IO) {
         return@withContext try {
-            val wallet = mFireStore.collection("Wallet")
-                .document("Wallet")
+            val wallet = mFireStore.collection(WALLET)
+                .document(WALLET)
                 .collection("Users")
                 .document(id).get().await().toObject(Wallet::class.java)!!
             NetworkResult.Success("wallet", wallet)
