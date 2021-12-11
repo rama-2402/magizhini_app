@@ -5,6 +5,7 @@ import androidx.room.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 
 @Dao
 interface UserProfileDao {
@@ -254,4 +255,12 @@ interface UserProfileDao {
     fun getAllNotifications(): List<UserNotificationEntity>?
     @Query("SELECT * FROM UserNotificationEntity where timestamp <= :date")
     fun getAllNotificationsBeforeDate(date: Int): List<UserNotificationEntity>?
+
+    //Testimonials
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun upsertTestimonial(testimonial: TestimonialsEntity)
+    @Query("SELECT * FROM TestimonialsEntity ORDER BY `order`")
+    fun getAllTestimonials(): List<TestimonialsEntity>
+    @Query("DELETE FROM TestimonialsEntity")
+    fun deleteAllTestimonials()
 }

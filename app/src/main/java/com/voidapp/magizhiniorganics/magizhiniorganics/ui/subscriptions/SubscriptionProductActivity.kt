@@ -543,6 +543,11 @@ class SubscriptionProductActivity :
             llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_in_right))
             llEmptyLayout.startAnimation(AnimationUtils.loadAnimation(llEmptyLayout.context, R.anim.slide_out_left))
             rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_out_left))
+            srSmileyRating.setTitle(SmileyRating.Type.TERRIBLE, "Bad")
+            srSmileyRating.setTitle(SmileyRating.Type.BAD, "Not Satisfied")
+            srSmileyRating.setTitle(SmileyRating.Type.OKAY, "Satisfied")
+            srSmileyRating.setTitle(SmileyRating.Type.GOOD, "Great")
+            srSmileyRating.setTitle(SmileyRating.Type.GREAT, "Awesome")
 //            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
             fabSubscribe.remove()
             lifecycleScope.launch {

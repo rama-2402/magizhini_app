@@ -4,6 +4,7 @@ import androidx.lifecycle.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -25,6 +26,8 @@ class HomeViewModel (
     val specialsThree: LiveData<MutableList<ProductEntity>> = _specialsThree
     private var _bestSellers: MutableLiveData<MutableList<ProductEntity>> = MutableLiveData()
     val bestSellers: LiveData<MutableList<ProductEntity>> = _bestSellers
+    private var _testimonials: MutableLiveData<MutableList<TestimonialsEntity>> = MutableLiveData()
+    val testimonials: LiveData<MutableList<TestimonialsEntity>> = _testimonials
     private var _recyclerPosition: MutableLiveData<Int> = MutableLiveData()
     val recyclerPosition: LiveData<Int> = _recyclerPosition
     private var _specialBanners: MutableLiveData<List<SpecialBanners>> = MutableLiveData()
@@ -169,21 +172,19 @@ class HomeViewModel (
         val getSpecialsTwo = async { getSpecialsTwo() }
         val getSpecialsThree = async { getSpecialsThree() }
         val getSpecialBanners = async { getSpecialBanners() }
+        val getAllTestimonials = async { getAllTestimonials() }
 
         getBestSellers.await()
         getSpecialsOne.await()
         getSpecialsTwo.await()
         getSpecialsThree.await()
         getSpecialBanners.await()
+        getAllTestimonials.await()
     }
 
     private suspend fun getSpecialBanners() {
         try {
             val banners = dbRepository.getSpecialBanners()
-//            val bannerUrls = arrayListOf<String>()
-//            for (item in banners.indices) {
-//                bannerUrls.add(banners[item].url)
-//            }
             bannersList.clear()
             withContext(Dispatchers.Main) {
                 bannersList.addAll(banners)
@@ -260,6 +261,17 @@ class HomeViewModel (
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl three from db", it) }
+        }
+    }
+
+    private suspend fun getAllTestimonials() {
+        try {
+            val testimonials = dbRepository.getAllTestimonials()
+            withContext(Dispatchers.Main) {
+                _testimonials.value = testimonials as MutableList<TestimonialsEntity>
+            }
+        } catch (e: IOException) {
+            e.message?.let { fbRepository.logCrash("Home: populating testimonials from db", it) }
         }
     }
 

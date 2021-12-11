@@ -172,4 +172,8 @@ dependencies {
 
     //notification badge for imageview      https://github.com/nikartm/Image-Support
     implementation 'io.github.nikartm:image-support:2.0.0'
+    
+    //exo player
+    implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
+
 }

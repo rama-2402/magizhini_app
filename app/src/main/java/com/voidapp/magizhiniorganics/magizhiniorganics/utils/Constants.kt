@@ -70,6 +70,7 @@ object Constants {
     const val TOKENS = "Tokens"
     const val WALLET = "Wallet"
     const val REFERRAL = "Referral"
+    const val TESTIMONIALS = "Testimonials"
 
     //filters data
     const val ALL: String = "all"

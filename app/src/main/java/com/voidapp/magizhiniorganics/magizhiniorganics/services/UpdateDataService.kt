@@ -19,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_THREE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_TWO
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.TESTIMONIALS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_NOTIFICATIONS
 import kotlinx.coroutines.Dispatchers
@@ -68,10 +69,12 @@ class UpdateDataService (
             val getAllNotifications = async { getAllData(USER_NOTIFICATIONS) }
             val couponData = async { getAllData(Constants.COUPON) }
             val deliveryChargeData = async { getAllData(Constants.DELIVERY_CHARGE) }
+            val testimonialsData = async { getAllData(TESTIMONIALS) }
 
             val categorySnapshot = categoryData.await()
             val bannerSnapshot = bannerData.await()
             val productSnapshot = productData.await()
+            val testimonialsSnapshot = testimonialsData.await()
             getBestSellers.await()
             getSpecialsOne.await()
             getSpecialsTwo.await()
@@ -93,12 +96,14 @@ class UpdateDataService (
                 async { filterDataAndUpdateRoom(Constants.COUPON, couponSnapshot) }
             val updateDeliveryCharge =
                 async { filterDataAndUpdateRoom(Constants.DELIVERY_CHARGE, deliveryChargeSnapshot) }
-
+            val updateTestimonials =
+                async { filterDataAndUpdateRoom(Constants.TESTIMONIALS, testimonialsSnapshot) }
 
             updateCategory.await()
             updateProduct.await()
             updateBanner.await()
             updateNotifications.await()
+            updateTestimonials.await()
             updateCoupon.await()
             updateDeliveryCharge.await()
 
@@ -230,6 +235,16 @@ class UpdateDataService (
                         repository.upsertPinCodes(deliveryCodeEntity)
                     }
                 }
+                Constants.TESTIMONIALS -> {
+                    repository.deleteAllTestimonials()
+                for (d in snapshot.documents) {
+                    val testimonial = d.toObject(Testimonials::class.java)
+                        testimonial?.let {
+                            val testimonialsEntity: TestimonialsEntity = testimonial.toTestimonialEntity()
+                            repository.upsertTestimonial(testimonialsEntity)
+                        }
+                    }
+                }
             }
         }
 
@@ -265,6 +280,10 @@ class UpdateDataService (
                 }
                 Constants.DELIVERY_CHARGE -> {
                     mFireStore.collection("pincode")
+                        .get().await()
+                }
+                TESTIMONIALS -> {
+                    mFireStore.collection(TESTIMONIALS)
                         .get().await()
                 }
                 else -> {

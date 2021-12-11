@@ -250,43 +250,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             orderID!!,
             "Add"
         )
-//        lifecycleScope.launch(Dispatchers.Main) {
-//            val id = viewModel.createTransaction(mMoneyToAddInWallet.toFloat(), mProfile.id, orderID!!)
-//            if (id == "failed") {
-//                delay(1000)
-//                hideSuccessDialog()
-//                showErrorSnackBar("Server Error! If money is debited please contact customer support", false)
-//                return@launch
-//            } else {
-//                delay(1500)
-//                hideSuccessDialog()
-//                showSuccessDialog("", "Wallet Updated successfully!", "complete")
-//                TransactionHistory (
-//                    id,
-//                    System.currentTimeMillis(),
-//                    TimeUtil().getMonth(),
-//                    TimeUtil().getYear().toLong(),
-//                    mMoneyToAddInWallet.toFloat(),
-//                    id,
-//                    orderID,
-//                    Constants.SUCCESS,
-//                    Constants.ADD_MONEY,
-//                    orderID
-//                ).also {
-//                    mTransactions.add(it)
-//                    mTransactions.sortByDescending { transaction ->
-//                        transaction.timestamp
-//                    }
-//                    transactionAdapter.transactions = mTransactions
-//                    transactionAdapter.notifyDataSetChanged()
-//                    binding.tvWalletTotal.text = (mWallet.amount + mMoneyToAddInWallet).toString()
-//                    delay(1500)
-//                    hideSuccessDialog()
-//                    hideShimmer()
-//                }
-//            }
-//        }
-
     }
 
     override fun onPaymentError(p0: Int, p1: String?) {

@@ -9,6 +9,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.UserProfileDao
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Converters
 import org.kodein.di.Volatile
@@ -31,7 +32,8 @@ import org.kodein.di.Volatile
                SpecialsTwo::class,
                SpecialsThree::class,
                SpecialBanners::class,
-               UserNotificationEntity::class],
+               UserNotificationEntity::class,
+               TestimonialsEntity::class],
 
     version = 2,
     exportSchema = false

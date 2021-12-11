@@ -245,6 +245,7 @@ class Firestore(
             false
         }
     }
+
     data class Referral (
         var referralAmount: Float = 0f,
         var referrerAmount: Float = 0f
@@ -252,6 +253,9 @@ class Firestore(
 
     private suspend fun addReferralBonusToCurrentUser(currentUserID: String): Boolean = withContext(Dispatchers.IO){
         return@withContext try {
+            if (currentUserID.isNullOrEmpty()) {
+                return@withContext false
+            }
             val amount = mFireStore.collection(REFERRAL).document(REFERRAL).get().await().toObject(Referral::class.java)!!.referralAmount
             val addReferralMoneyToWallet = async { makeTransactionFromWallet(amount, currentUserID, "Add") }
             val createTransactionEntry = async { TransactionHistory(
@@ -339,10 +343,15 @@ class Firestore(
 
     suspend fun checkForReferral(userID: String): Boolean = withContext(Dispatchers.IO) {
         try {
+            val currentUserID = if (userID.isNullOrEmpty()) {
+                getCurrentUserId()!!
+            } else {
+                userID
+            }
             val doc = mFireStore.collection(WALLET)
                         .document(WALLET)
                         .collection("Users")
-                        .document(userID)
+                        .document(currentUserID)
                 .get().await().toObject(Wallet::class.java)
             if (doc != null) {
                 return@withContext doc.amount != 0f
@@ -525,7 +534,6 @@ class Firestore(
     suspend fun limitedItemsUpdater(cart: List<CartEntity>): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                Log.e("TAG", "limitedItemsUpdater: $cart", )
                 for (cartItem in cart) {
                     mFireStore.runTransaction { transaction ->
                         val productRef =
@@ -780,9 +788,14 @@ class Firestore(
     //favorites
     suspend fun addFavorites(id: String, item: String): Boolean = withContext(Dispatchers.IO) {
         try {
+            val currentUserID = if (id.isNullOrEmpty()) {
+                getCurrentUserId()!!
+            } else {
+                id
+            }
             //This function will add a new data if it is not present in the array
             mFireStore.collection(Constants.USERS)
-                .document(id).update(Constants.FAVORITES, FieldValue.arrayUnion(item)).await()
+                .document(currentUserID).update(Constants.FAVORITES, FieldValue.arrayUnion(item)).await()
             true
         }catch (e: IOException) {
             e.message?.let {
@@ -797,8 +810,13 @@ class Firestore(
 
     suspend fun removeFavorites(id: String, item: String): Boolean = withContext(Dispatchers.IO) {
         try {
+            val currentUserID = if (id.isNullOrEmpty()) {
+                getCurrentUserId()!!
+            } else {
+                id
+            }
             mFireStore.collection(Constants.USERS)
-                .document(id).update(Constants.FAVORITES, FieldValue.arrayRemove(item)).await()
+                .document(currentUserID).update(Constants.FAVORITES, FieldValue.arrayRemove(item)).await()
             true
         }catch (e: IOException) {
             e.message?.let {
@@ -862,8 +880,13 @@ class Firestore(
     //address
     suspend fun addAddress(id: String, address: Address) = CoroutineScope(Dispatchers.IO).launch {
         try {
+            val currentUserID = if (id.isNullOrEmpty()) {
+                getCurrentUserId()!!
+            } else {
+                id
+            }
             mFireStore.collection(Constants.USERS)
-                .document(id).update(Constants.ADDRESS, FieldValue.arrayUnion(address))
+                .document(currentUserID).update(Constants.ADDRESS, FieldValue.arrayUnion(address))
         } catch (e: Exception) {
             e.message?.let { logCrash("Firestore: adding address", it) }
         }
@@ -871,8 +894,13 @@ class Firestore(
 
     suspend fun updateAddress(id: String, address: ArrayList<Address>) {
         try {
+            val currentUserID = if (id.isNullOrEmpty()) {
+                getCurrentUserId()!!
+            } else {
+                id
+            }
             mFireStore.collection(Constants.USERS)
-                .document(id).update("address", address)
+                .document(currentUserID).update("address", address)
         } catch (e: Exception) {
             e.message?.let { logCrash("Firestore: updating address", it) }
         }
@@ -1178,18 +1206,28 @@ class Firestore(
 
     //wallet
     suspend fun getWalletAmount(id: String): Float {
-        return mFireStore.collection("Wallet")
-            .document("Wallet")
+        val currentUserID = if (id.isNullOrEmpty()) {
+            getCurrentUserId()!!
+        } else {
+            id
+        }
+        return mFireStore.collection(WALLET)
+            .document(WALLET)
             .collection("Users")
-            .document(id).get().await().toObject(Wallet::class.java)!!.amount
+            .document(currentUserID).get().await().toObject(Wallet::class.java)!!.amount
     }
 
     suspend fun getWallet(id: String): NetworkResult = withContext(Dispatchers.IO) {
         return@withContext try {
+            val currentUserID = if (id.isNullOrEmpty()) {
+                getCurrentUserId()!!
+            } else {
+                id
+            }
             val wallet = mFireStore.collection(WALLET)
                 .document(WALLET)
                 .collection("Users")
-                .document(id).get().await().toObject(Wallet::class.java)!!
+                .document(currentUserID).get().await().toObject(Wallet::class.java)!!
             NetworkResult.Success("wallet", wallet)
         } catch (e: Exception) {
             e.message?.let { logCrash("checkout: getting wallet", it) }
@@ -1201,10 +1239,15 @@ class Firestore(
     suspend fun getTransactions(id: String): List<TransactionHistory> =
         withContext(Dispatchers.IO) {
             try {
+                val currentUserID = if (id.isNullOrEmpty()) {
+                    getCurrentUserId()!!
+                } else {
+                    id
+                }
                 val transactions = mutableListOf<TransactionHistory>()
-                val docs = mFireStore.collection("Wallet")
+                val docs = mFireStore.collection(WALLET)
                     .document("Transaction")
-                    .collection(id)
+                    .collection(currentUserID)
                     .get().await()
                 for (doc in docs) {
                     val transaction = doc.toObject(TransactionHistory::class.java)
@@ -1218,17 +1261,22 @@ class Firestore(
 
     suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
+            val currentUserID = if (id.isNullOrEmpty()) {
+                getCurrentUserId()!!
+            } else {
+                id
+            }
             withContext(Dispatchers.IO) {
                 val path = mFireStore.collection(WALLET)
                     .document(WALLET)
                     .collection("Users")
                 mFireStore.runTransaction { transaction ->
-                    val wallet = transaction.get(path.document(id)).toObject(Wallet::class.java)
+                    val wallet = transaction.get(path.document(currentUserID)).toObject(Wallet::class.java)
                     if (status == "Add") {
                         wallet!!.amount = wallet.amount + amount
                         wallet.lastRecharge = System.currentTimeMillis()
                         transaction.update(
-                            path.document(id),
+                            path.document(currentUserID),
                             "amount",
                             wallet.amount,
                             "lastRecharge",
@@ -1239,7 +1287,7 @@ class Firestore(
                         wallet!!.amount = wallet.amount - amount
                         wallet.lastTransaction = System.currentTimeMillis()
                         transaction.update(
-                            path.document(id),
+                            path.document(currentUserID),
                             "amount",
                             wallet.amount,
                             "lastTransaction",
@@ -1271,20 +1319,6 @@ class Firestore(
                 NetworkResult.Failed("transactionID", null)
             }
         }
-//    suspend fun updateTransaction(transaction: TransactionHistory): String =
-//        withContext(Dispatchers.IO) {
-//            try {
-//                val path = mFireStore.collection("Wallet")
-//                    .document("Transaction")
-//                    .collection(transaction.fromID)
-//                transaction.id = path.document().id
-//
-//                path.document(transaction.id).set(transaction, SetOptions.merge()).await()
-//                return@withContext path.id
-//            } catch (e: Exception) {
-//                return@withContext "failed"
-//            }
-//        }
 
     suspend fun generateSubscriptionID(id: String): String =
         mFireStore.collection(Constants.SUBSCRIPTION)

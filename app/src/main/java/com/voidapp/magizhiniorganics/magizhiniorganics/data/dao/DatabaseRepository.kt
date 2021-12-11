@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.data.dao
 import androidx.lifecycle.LiveData
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.UserDatabase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 
 class DatabaseRepository(
     private val db: UserDatabase
@@ -165,4 +166,11 @@ class DatabaseRepository(
     fun deleteNotificationsByID(id: String) = db.getUserProfileDao().deleteNotificationsByID(id)
     fun getAllNotifications(): List<UserNotificationEntity>?  = db.getUserProfileDao().getAllNotifications()
     fun getAllNotificationsBeforeDate(date: Int): List<UserNotificationEntity>? = db.getUserProfileDao().getAllNotificationsBeforeDate(date)
+
+    //testimonials
+    fun upsertTestimonial(testimonial: TestimonialsEntity) = db.getUserProfileDao().upsertTestimonial(testimonial)
+    fun getAllTestimonials(): List<TestimonialsEntity> = db.getUserProfileDao().getAllTestimonials()
+    fun deleteAllTestimonials() = db.getUserProfileDao().deleteAllTestimonials()
+
+
 }

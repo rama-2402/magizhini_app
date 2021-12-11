@@ -27,11 +27,13 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.TestimonialsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SpecialBanners
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Banner
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.VideoPlayerActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
@@ -55,7 +57,13 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
 
-class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeListener, NavigationView.OnNavigationItemSelectedListener {
+class HomeActivity :
+    BaseActivity(),
+    View.OnClickListener,
+    KodeinAware,
+    HomeListener,
+    TestimonialsAdapter.TestimonialItemClickListener,
+    NavigationView.OnNavigationItemSelectedListener {
 
     //DI Injection with kodein
     override val kodein by kodein()
@@ -69,6 +77,7 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
     private lateinit var specialsOneAdapter: BestSellersAdapter
     private lateinit var specialsTwoAdapter: BestSellersAdapter
     private lateinit var specialsThreeAdapter: BestSellersAdapter
+    private lateinit var testimonialsAdapter: TestimonialsAdapter
     private var mSelectedBanner: SpecialBanners = SpecialBanners()
     private val banners = mutableListOf<BannerEntity>()
 
@@ -138,10 +147,12 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         binding.cpSpecialOne.setOnClickListener(this)
         binding.cpSpecialTwo.setOnClickListener(this)
         binding.cpSpecialThree.setOnClickListener(this)
+        binding.cpTestimonials.setOnClickListener(this)
         binding.fabCart.setOnClickListener(this)
         binding.ivNotification.setOnClickListener {
             Intent(this, NotificationsActivity::class.java).also {
                 startActivity(it)
+                onPause()
             }
         }
         binding.apply {
@@ -330,6 +341,10 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                 GlideLoader().loadUserPicture(this@HomeActivity, it[11].url, ivBannerTwelve)
             }
         })
+        viewModel.testimonials.observe(this, {
+            testimonialsAdapter.testimonials = it
+            testimonialsAdapter.notifyDataSetChanged()
+        })
 
         binding.svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
             if (scrollY < oldScrollY && binding.fabCart.isGone) {
@@ -405,6 +420,11 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
             viewModel,
             "three"
         )
+        testimonialsAdapter = TestimonialsAdapter(
+            this,
+            mutableListOf(),
+            this
+        )
 
         binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
         binding.rvHomeItems.adapter = adapter
@@ -420,6 +440,9 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         binding.rvSpecialsThree.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvSpecialsThree.adapter = specialsThreeAdapter
+        binding.rvTestimonials.layoutManager =
+            LinearLayoutManager(this)
+        binding.rvTestimonials.adapter = testimonialsAdapter
 //        val snapHelper: SnapHelper = GravitySnapHelper(Gravity.TOP)
 //        snapHelper.attachToRecyclerView(binding.rvHomeItems)
     }
@@ -503,6 +526,15 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
                 }
                 binding.cpSpecialThree -> {
                     binding.cpSpecialThree.startAnimation(
+                        AnimationUtils.loadAnimation(
+                            binding.cpShowAll.context,
+                            R.anim.bounce
+                        )
+                    )
+                    moveToAllProducts()
+                }
+                binding.cpTestimonials -> {
+                    binding.cpTestimonials.startAnimation(
                         AnimationUtils.loadAnimation(
                             binding.cpShowAll.context,
                             R.anim.bounce
@@ -647,6 +679,13 @@ class HomeActivity : BaseActivity(), View.OnClickListener, KodeinAware, HomeList
         } else {
             showErrorSnackBar("Please check network connection", true)
             return false
+        }
+    }
+
+    override fun openVideo(url: String) {
+        Intent(this, VideoPlayerActivity::class.java).also {
+            it.putExtra("url", url)
+            startActivity(it)
         }
     }
 }

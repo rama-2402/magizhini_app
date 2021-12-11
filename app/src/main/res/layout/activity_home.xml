@@ -132,7 +132,7 @@
                             android:id="@+id/cpShowAll"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/material_size_4"
+                            android:layout_marginEnd="@dimen/material_size_8"
                             android:backgroundTint="@color/green_base"
                             android:text="Show All"
                             android:textColor="@color/white"
@@ -173,7 +173,7 @@
                             android:id="@+id/cpBestSellers"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/material_size_4"
+                            android:layout_marginEnd="@dimen/material_size_8"
                             app:rippleColor="@color/green_base"
                             android:backgroundTint="@color/green_base"
                             android:text="Show All"
@@ -266,7 +266,7 @@
                             android:id="@+id/cpSpecialOne"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/material_size_4"
+                            android:layout_marginEnd="@dimen/material_size_8"
                             app:rippleColor="@color/green_base"
                             android:backgroundTint="@color/green_base"
                             android:text="Show All"
@@ -357,7 +357,7 @@
                             android:id="@+id/cpSpecialTwo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/material_size_4"
+                            android:layout_marginEnd="@dimen/material_size_8"
                             app:rippleColor="@color/green_base"
                             android:backgroundTint="@color/green_base"
                             android:text="Show All"
@@ -448,7 +448,7 @@
                             android:id="@+id/cpSpecialThree"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/material_size_4"
+                            android:layout_marginEnd="@dimen/material_size_8"
                             app:rippleColor="@color/green_base"
                             android:backgroundTint="@color/green_base"
                             android:text="Show All"
@@ -512,8 +512,48 @@
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_app_placeholder"
                         />
+                    <LinearLayout
+                        android:id="@+id/stickyTestimonials"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:background="@color/white"
+                        android:orientation="horizontal"
+                        android:tag="sticky"
+                        android:weightSum="4">
 
+                        <TextView
+                            android:id="@+id/tvTestimonials"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="@dimen/material_size_8"
+                            android:layout_weight="4"
+                            android:fontFamily="@font/roboto"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:text="Testimonials"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="italic" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/cpTestimonials"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/material_size_8"
+                            app:rippleColor="@color/green_base"
+                            android:backgroundTint="@color/green_base"
+                            android:text="Go Shopping"
+                            android:textColor="@color/white"
+                            app:chipCornerRadius="@dimen/material_size_8"
+                            />
+                    </LinearLayout>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvTestimonials"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/material_size_16"/>
                 </LinearLayout>
+
             </me.didik.component.StickyNestedScrollView>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
