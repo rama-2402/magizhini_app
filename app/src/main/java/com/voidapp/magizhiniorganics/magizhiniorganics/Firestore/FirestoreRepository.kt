@@ -104,4 +104,6 @@ class FirestoreRepository (
 
     //updateToken
     suspend fun updateToken(token: String) = firestore.updateToken(token)
+    suspend fun getSupportToken(id: String): String = firestore.getSupportToken(id)
+
 }

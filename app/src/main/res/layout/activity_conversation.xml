@@ -99,9 +99,23 @@
                 android:layout_marginStart="@dimen/material_size_8"
                 />
 
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivCall"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleType="center"
+                android:layout_marginEnd="@dimen/material_size_4"
+                android:src="@drawable/ic_phone_msg"
+                app:tint="@color/green_base"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="@dimen/material_size_12"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded" />
         </androidx.constraintlayout.widget.ConstraintLayout>
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvCustomerId"
+            android:id="@+id/rvConversation"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/llHeader"

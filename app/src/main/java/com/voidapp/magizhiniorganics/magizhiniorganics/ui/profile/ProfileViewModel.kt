@@ -101,4 +101,8 @@ class ProfileViewModel (
     suspend fun checkForReferral(userID: String): Boolean = withContext(Dispatchers.IO){
         return@withContext fbRepository.checkForReferral(userID)
     }
+
+    fun deleteprof() = viewModelScope.launch(Dispatchers.IO) {
+        dbRepository.deleteprof()
+    }
 }

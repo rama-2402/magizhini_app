@@ -16,6 +16,7 @@ import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.room.Query
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
@@ -140,17 +141,17 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     private fun activityInit() {
         binding.ivProfilePic.clipToOutline = true
-        binding.tvPhoneNumber.text = mPhoneNumber
         lifecycleScope.launch {
-            if (!isNewUser) {
-                viewModel.getUserProfile()
-            } else {
+            if (isNewUser) {
+                mProfile.id = mCurrentUserId.toString()
+                binding.tvPhoneNumber.text = mPhoneNumber
                 if (viewModel.checkForReferral(mCurrentUserId!!)) {
-                    Log.e("TAG", "activityInit: $mCurrentUserId", )
                     binding.tvReferral.remove()
                 } else {
                     viewModel.createNewUserWallet(mCurrentUserId!!)
                 }
+            } else {
+                viewModel.getUserProfile()
             }
         }
     }
@@ -170,7 +171,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun generateProfileModel(): UserProfile {
         generateAddressObject()
         with(mProfile) {
-            id = mCurrentUserId!!
             name = binding.etProfileName.text.toString().trim()
             phNumber = binding.tvPhoneNumber.text.toString().trim()
             alternatePhNumber = binding.etAlternateNumber.text.toString().trim()
@@ -234,7 +234,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     //validating the data entered before uploading
     private fun profileDataValidation() {
-
         if (binding.etAddressOne.text.isNullOrEmpty()) {
                 binding.etlAddressOne.error = "* required"
                 return
@@ -266,7 +265,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                     //uploading only the changed data. since uri is empty profile pic is not changed
                     viewModel.uploadProfile(mProfile)
                 }
-                mProfilePicUri !== null -> {
+                mProfilePicUri != null -> {
                     showProgressDialog()
                     //uploading the profile pic first and thereby then chaining to upload the rest of the data
                     viewModel.uploadProfilePic (
@@ -297,6 +296,9 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private fun successDialogAndTransition() {
         //on save profile btn press if new user the success dialog will be shown else profile updated text will be shown with sucess dialog
         if (isNewUser) {
+            SharedPref(this).putData(Constants.USER_ID, Constants.STRING, mCurrentUserId!!)
+            SharedPref(this).putData(Constants.PHONE_NUMBER, Constants.STRING, mPhoneNumber)
+            SharedPref(this).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
             showSuccessDialog()
         } else {
             showSuccessDialog("Profile Updated", "" )
@@ -321,9 +323,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private fun newUserTransitionFromProfile() {
-        SharedPref(this).putData(Constants.USER_ID, Constants.STRING, mCurrentUserId!!)
-        SharedPref(this).putData(Constants.PHONE_NUMBER, Constants.STRING, mPhoneNumber)
-        SharedPref(this).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
         Intent(this, HomeActivity::class.java).also {
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
@@ -410,6 +409,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 }
                 binding.btnSaveProfile -> {
                     profileDataValidation()
+//                    viewModel.deleteprof()
                 }
                 binding.llDob -> {
                     DatePickerLib().pickDob(this)

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ChatAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Messages
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.SupportProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentChatBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModelFactory
@@ -24,7 +25,11 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
 
-class ChatFragment : Fragment(), KodeinAware {
+class ChatFragment :
+    Fragment(),
+    KodeinAware,
+    ChatAdapter.ChatItemListener
+{
     override val kodein: Kodein by kodein()
     private var _binding: FragmentChatBinding? = null
     private val binding get() = _binding!!
@@ -34,8 +39,6 @@ class ChatFragment : Fragment(), KodeinAware {
 
     private lateinit var mProgressDialog: Dialog
     private lateinit var adapter: ChatAdapter
-    private var mRecentMessages: ArrayList<Messages> = arrayListOf()
-    private var mCurrentUserId: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,25 +49,25 @@ class ChatFragment : Fragment(), KodeinAware {
         chatViewModel = ViewModelProvider(requireActivity(), factory).get(ChatViewModel::class.java)
         binding.viewmodel = chatViewModel
 
-        mCurrentUserId = SharedPref(requireContext()).getData(Constants.USER_ID, Constants.STRING, "").toString()
-        chatViewModel.listenForRecentMessages(mCurrentUserId)
-
-        binding.rvCustomerId.visibility = View.VISIBLE
+        binding.rvConversation.visibility = View.VISIBLE
         binding.tvNoMessages.visibility = View.GONE
 
         showProgressDialog()
         setRecyclerView()
-        liveDataObservers()
+        initObservers()
+
         return binding.root
     }
 
-    private fun liveDataObservers() {
+    private fun initObservers() {
         chatViewModel.recentMessage.observe(viewLifecycleOwner, {
-            if (it.isNotEmpty()) {
-                adapter.setData(it)
-            } else {
-                binding.rvCustomerId.visibility = View.GONE
+            if (it.isNullOrEmpty()) {
+                binding.rvConversation.visibility = View.GONE
                 binding.tvNoMessages.visibility = View.VISIBLE
+                if(mProgressDialog.isShowing) hideProgressDialog()
+            } else {
+                adapter.setData(it)
+                if(mProgressDialog.isShowing) hideProgressDialog()
             }
         })
     }
@@ -72,14 +75,13 @@ class ChatFragment : Fragment(), KodeinAware {
     private fun setRecyclerView() {
         adapter = ChatAdapter(
             requireContext(),
-            mRecentMessages,
-            chatViewModel
+            arrayListOf(),
+            this
         )
-        binding.rvCustomerId.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvCustomerId.adapter = adapter
-        val divider = DividerItemDecoration(binding.rvCustomerId.context, LinearLayoutManager.VERTICAL)
-        binding.rvCustomerId.addItemDecoration(divider)
-        hideProgressDialog()
+        binding.rvConversation.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvConversation.adapter = adapter
+        val divider = DividerItemDecoration(binding.rvConversation.context, LinearLayoutManager.VERTICAL)
+        binding.rvConversation.addItemDecoration(divider)
     }
 
     private fun showProgressDialog() {
@@ -115,4 +117,7 @@ class ChatFragment : Fragment(), KodeinAware {
         _binding = null
     }
 
+    override fun navigateToConversation(supportProfile: SupportProfile) {
+        chatViewModel.navigateToConversation(supportProfile)
+    }
 }

@@ -160,7 +160,6 @@ open class ShoppingMainAdapter(
                             onItemClickListener.navigateToProduct(product)
                         }
                         "Add" -> {
-                                Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
                                 onItemClickListener.upsertCartItem(
                                     product,
                                     position,
@@ -174,7 +173,6 @@ open class ShoppingMainAdapter(
 //                            }
                         }
                         else -> {
-                            Toast.makeText(context, "Removed from Cart", Toast.LENGTH_SHORT).show()
                             onItemClickListener.deleteCartItemFromShoppingMain(product, variantName, position)
                         }
                     }

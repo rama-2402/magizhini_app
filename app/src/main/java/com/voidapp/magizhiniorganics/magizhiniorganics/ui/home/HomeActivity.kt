@@ -234,7 +234,7 @@ class HomeActivity :
         viewModel.getAllNotifications()
 
         viewModel.notifications.observe(this, {
-            if (it.isEmpty()) {
+            if (it.isNullOrEmpty()) {
                 binding.ivNotification.visibleBadge(false)
             } else {
                 binding.ivNotification.apply{

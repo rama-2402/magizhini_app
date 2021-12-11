@@ -171,6 +171,7 @@ class DatabaseRepository(
     fun upsertTestimonial(testimonial: TestimonialsEntity) = db.getUserProfileDao().upsertTestimonial(testimonial)
     fun getAllTestimonials(): List<TestimonialsEntity> = db.getUserProfileDao().getAllTestimonials()
     fun deleteAllTestimonials() = db.getUserProfileDao().deleteAllTestimonials()
+    fun deleteprof() = db.getUserProfileDao().deleteUserProfilenULL()
 
 
 }

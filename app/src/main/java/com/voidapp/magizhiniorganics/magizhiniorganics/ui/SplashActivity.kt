@@ -22,6 +22,9 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.math.abs
 import androidx.work.WorkManager
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity() {
@@ -107,11 +110,13 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun startWork(wipe: String) {
+        val userID = SharedPref(this).getData(USER_ID, STRING, "")
         val workRequest: WorkRequest =
             OneTimeWorkRequestBuilder<UpdateDataService>()
                 .setInputData(
                     workDataOf(
-                        "wipe" to wipe
+                        "wipe" to wipe,
+                        "id" to userID
                     )
                 )
                 .build()
@@ -137,8 +142,11 @@ class SplashActivity : BaseActivity() {
                             LONG
                         )
                     }
-                    else -> {
+                    WorkInfo.State.SUCCEEDED -> {
                         navigateToHomeScreen()
+                    }
+                    else -> {
+//                        navigateToHomeScreen()
                     }
                 }
             })

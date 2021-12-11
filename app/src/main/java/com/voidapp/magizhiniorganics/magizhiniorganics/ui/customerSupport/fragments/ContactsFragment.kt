@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.provider.ContactsContract
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,7 +25,11 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
 
-class ContactsFragment : Fragment(), KodeinAware {
+class ContactsFragment :
+    Fragment(),
+    KodeinAware,
+    ContactsAdapter.ContactItemClickListener
+{
 
     override val kodein: Kodein by kodein()
     private var _binding: FragmentContactsBinding? = null
@@ -35,10 +40,7 @@ class ContactsFragment : Fragment(), KodeinAware {
 
     private lateinit var mProgressDialog: Dialog
     private lateinit var adapter: ContactsAdapter
-    private var mCurrentUserId: String = ""
     private var mSupportProfiles: ArrayList<SupportProfile> = arrayListOf()
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,9 +51,8 @@ class ContactsFragment : Fragment(), KodeinAware {
         chatViewModel = ViewModelProvider(requireActivity(), factory).get(ChatViewModel::class.java)
         binding.viewmodel = chatViewModel
 
-        mCurrentUserId = SharedPref(requireContext()).getData(Constants.USER_ID, Constants.STRING, "").toString()
-        chatViewModel.getAllSupportProfiles()
         showProgressDialog()
+        chatViewModel.getAllSupportProfiles()
 
         setRecyclerView()
         liveDataObservers()
@@ -62,6 +63,7 @@ class ContactsFragment : Fragment(), KodeinAware {
         chatViewModel.supportProfiles.observe(viewLifecycleOwner, {
             adapter.supportProfiles = it
             adapter.notifyDataSetChanged()
+            hideProgressDialog()
         })
     }
 
@@ -69,13 +71,12 @@ class ContactsFragment : Fragment(), KodeinAware {
         adapter = ContactsAdapter(
             requireContext(),
             mSupportProfiles,
-            chatViewModel
+            this
         )
-        binding.rvCustomerId.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvCustomerId.adapter = adapter
-        val divider = DividerItemDecoration(binding.rvCustomerId.context, LinearLayoutManager.VERTICAL)
-        binding.rvCustomerId.addItemDecoration(divider)
-        hideProgressDialog()
+        binding.rvConversation.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvConversation.adapter = adapter
+        val divider = DividerItemDecoration(binding.rvConversation.context, LinearLayoutManager.VERTICAL)
+        binding.rvConversation.addItemDecoration(divider)
     }
 
     fun showProgressDialog() {
@@ -111,4 +112,7 @@ class ContactsFragment : Fragment(), KodeinAware {
         _binding = null
     }
 
+    override fun moveToConversations(supportProfile: SupportProfile) {
+        chatViewModel.navigateToConversation(supportProfile)
+    }
 }

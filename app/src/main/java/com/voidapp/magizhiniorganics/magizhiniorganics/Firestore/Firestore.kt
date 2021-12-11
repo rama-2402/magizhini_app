@@ -57,6 +57,7 @@ class Firestore(
         repository.deleteActiveSubTable()
         repository.deleteOrdersTable()
         repository.deleteSubscriptionsTable()
+        repository.deleteAllNotifications()
     }
 
     suspend fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential): Boolean {
@@ -1387,6 +1388,7 @@ class Firestore(
         }
     }
 
+    //Tokens
     suspend fun updateToken(tokenString: String) = withContext(Dispatchers.IO) {
         val profile = repository.getProfileData()!!
         Token(
@@ -1399,6 +1401,17 @@ class Firestore(
             } catch (e: Exception) {
                 e.message?.let { logCrash("firestore: adding banner in DB", it) }
             }
+        }
+    }
+
+    suspend fun getSupportToken(id: String): String = withContext(Dispatchers.IO) {
+        return@withContext try {
+            mFireStore.collection(TOKENS)
+                .document(id)
+                .get().await().toObject(Token::class.java)?.token ?: ""
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: getting customer Token", it) }
+            ""
         }
     }
 

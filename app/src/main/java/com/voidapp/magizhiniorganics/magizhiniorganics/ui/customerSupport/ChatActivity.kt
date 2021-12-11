@@ -7,8 +7,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ContactsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ChatViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.SupportProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityChatBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
@@ -20,15 +22,16 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-class ChatActivity : BaseActivity(), KodeinAware {
+class ChatActivity :
+    BaseActivity(),
+    KodeinAware,
+    ContactsAdapter.ContactItemClickListener
+{
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityChatBinding
     private val factory: ChatViewModelFactory by instance()
     private lateinit var viewModel: ChatViewModel
-
-    private var mCurrentUserProfile = UserProfileEntity()
-    private var mCurrentUserId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,11 +40,21 @@ class ChatActivity : BaseActivity(), KodeinAware {
         viewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
         binding.viewmodel = viewModel
 
-        mCurrentUserId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
-
-        initViewPager()
         initData()
+        initViewPager()
+        initObservers()
         clickListeners()
+    }
+
+    private fun initObservers() {
+        viewModel.navigateToConversation.observe(this, {
+            moveToConversationPage(it)
+        })
+        viewModel.currentUserProfile.observe(this, {
+            //setting the toolbar data - profile pic and user name
+            GlideLoader().loadUserPicture(this@ChatActivity, it.profilePicUrl, binding.ivProfileImage)
+            binding.tvProfileName.text = it.name
+        })
     }
 
     private fun initViewPager() {
@@ -76,46 +89,38 @@ class ChatActivity : BaseActivity(), KodeinAware {
 
     private fun initData() {
         viewModel.getProfileData()
-        viewModel.updateProfileStatus(mCurrentUserId, true)
-        viewModel.currentUserProfile.observe(this, {
-            //setting the toolbar data - profile pic and user name
-            mCurrentUserProfile = it
-            GlideLoader().loadUserPicture(this@ChatActivity, mCurrentUserProfile.profilePicUrl, binding.ivProfileImage)
-            binding.tvProfileName.text = mCurrentUserProfile.name
-        })
-        viewModel.moveToConversation.observe(this, {
-            //move to the conversation page based on the selected id for support in the viewModel
-            moveToConversationPage()
-        })
-
     }
 
-    private fun moveToConversationPage() {
+    private fun moveToConversationPage(supportProfile: SupportProfile) {
         Intent(this, ConversationActivity::class.java).also {
-            it.putExtra(Constants.CUSTOMER_SUPPORT, viewModel.selectedIdForSupport)
-            it.putExtra(Constants.PROFILE_NAME, viewModel.profileName)
+            it.putExtra(Constants.CUSTOMER_SUPPORT, supportProfile.id)
+            it.putExtra(Constants.PROFILE_NAME, viewModel.profile.id)
             startActivity(it)
             finish()
         }
     }
 
     override fun onPause() {
-        viewModel.updateProfileStatus(mCurrentUserId, false, System.currentTimeMillis())
+        viewModel.updateProfileStatus( false, System.currentTimeMillis())
         super.onPause()
     }
 
     override fun onDestroy() {
-        viewModel.updateProfileStatus(mCurrentUserId, false, System.currentTimeMillis())
+        viewModel.updateProfileStatus( false, System.currentTimeMillis())
         super.onDestroy()
     }
 
     override fun onResume() {
-        viewModel.updateProfileStatus(mCurrentUserId, true)
+        viewModel.updateProfileStatus( true)
         super.onResume()
     }
 
     override fun onRestart() {
-        viewModel.updateProfileStatus(mCurrentUserId, true)
+        viewModel.updateProfileStatus( true)
         super.onRestart()
+    }
+
+    override fun moveToConversations(supportProfile: SupportProfile) {
+        moveToConversationPage(supportProfile)
     }
 }

@@ -46,7 +46,8 @@ class UpdateDataService (
     }
 
     private val wipe = inputData.getString("wipe")
-    private val userID = SharedPref(context).getData(USER_ID, STRING, "").toString()
+    private val userID = inputData.getString("id")!!
+//    private val userID = SharedPref(context).getData(USER_ID, STRING, "").toString()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
 
@@ -54,8 +55,6 @@ class UpdateDataService (
             repository.deleteAllProducts()
             repository.deleteAllCategories()
         }
-
-        Log.e("TAG", "onCreate: worker called --$wipe--", )
 
         try {
             val categoryData = async { getAllData(Constants.CATEGORY) }
@@ -211,7 +210,9 @@ class UpdateDataService (
                 }
                 USER_NOTIFICATIONS -> {
                     repository.deleteAllNotifications()
+                    Log.e("TAG", "filterDataAndUpdateRoom: $userID", )
                     for (d in snapshot.documents) {
+                        Log.e("TAG", "filterDataAndUpdateRoom: $d", )
                         val notification = d.toObject(UserNotification::class.java)
                         notification!!.id = d.id
                         val notificationEntity: UserNotificationEntity = notification.toUserNotificationEntity()

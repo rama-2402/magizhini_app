@@ -7,19 +7,32 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ConversationAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Messages
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.NotificationData
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.PushNotification
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.SupportProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityConversationBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.RetrofitInstance
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.IMAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ONLINE_STATUS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.TEXT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -27,7 +40,11 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.io.IOException
 
-class ConversationActivity : BaseActivity(), KodeinAware {
+class ConversationActivity :
+    BaseActivity(),
+    KodeinAware,
+    ConversationAdapter.ConversationItemClickListener
+{
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityConversationBinding
@@ -35,10 +52,7 @@ class ConversationActivity : BaseActivity(), KodeinAware {
     private lateinit var viewModel: ConversationViewModel
     private lateinit var adapter: ConversationAdapter
 
-    private var mSelectedProfile: SupportProfile = SupportProfile()
-    private var mCurrentUserId: String = ""
-    private val mMessages: ArrayList<Messages> = arrayListOf()
-    private var isZoomed: Boolean = false
+    private var isPreviewOpened: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,56 +61,42 @@ class ConversationActivity : BaseActivity(), KodeinAware {
         viewModel = ViewModelProvider(this, factory).get(ConversationViewModel::class.java)
         binding.viewmodel = viewModel
 
-        mSelectedProfile = intent.getParcelableExtra(Constants.CUSTOMER_SUPPORT)!!
-        viewModel.currentUserName = intent.getStringExtra(Constants.PROFILE_NAME)!!
-        mCurrentUserId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
-        SharedPref(this).putData(ONLINE_STATUS, Constants.BOOLEAN, true)
+        viewModel.supportID = intent?.getStringExtra(CUSTOMER_SUPPORT).toString()
 
-        setRecyclerView()
-        initLiveData()
-        setDataToViews()
+        initData()
+        initRecyclerView()
+        initObservers()
         clickListeners()
     }
 
-    private fun initLiveData() {
-        viewModel.getConversation(mCurrentUserId, mSelectedProfile.id)
-        viewModel.updateProfileStatus(mCurrentUserId, true)
-        viewModel.getSupportProfileUpdates(mSelectedProfile.id)
-        viewModel.conversation.observe(this, {
-            mMessages.add(it)
-            adapter.messages = mMessages
-            adapter.notifyItemChanged(mMessages.size)
-            binding.rvCustomerId.scrollToPosition(mMessages.size-1)
-        })
-        viewModel.supportProfileStatus.observe(this, {
-            checkTypingStatus(it)
-        })
-        viewModel.keyboardVisibile.observe(this, {
-            UIUtil.hideKeyboard(this@ConversationActivity)
-        })
-        viewModel.imageUploadStatus.observe(this, {
-            if (it == "failed") {
-                hideProgressDialog()
-                showErrorSnackBar("Server Error! Image Update failed. Try later", true)
-            } else {
-                hideProgressDialog()
-                generateMessageObjectAndSend(Constants.IMAGE, it)
-            }
-        })
-        viewModel.imageUrl.observe(this, {
-            GlideLoader().loadUserPictureWithoutCrop(binding.ivReviewImageChat.context, it, binding.ivReviewImageChat)
-            binding.ivReviewImageChat.startAnimation(Animations.scaleBig)
-            binding.ivReviewImageChat.visible()
-            isZoomed = true
-        })
+    private fun initData() {
+        showProgressDialog()
+        viewModel.getToken()
+        viewModel.getProfileData()
+        viewModel.supportStatusListener()
     }
 
-    private fun checkTypingStatus(profile: SupportProfile) {
-        if (profile.typing) {
-            binding.tvStatus.text = "typing..."
-            binding.tvStatus.setTextColor(ContextCompat.getColor(this, R.color.matteGreen))
-        } else {
-           checkOnlineStatus(profile)
+    private fun initObservers() {
+        viewModel.conversation.observe(this, {
+            adapter.messages = it
+            adapter.currentUserID = viewModel.profile.id
+            adapter.notifyItemChanged(it.size)
+            binding.rvConversation.scrollToPosition(it.size-1)
+            hideProgressDialog()
+        })
+        viewModel.liveSupportProfile.observe(this, {
+            viewModel.supportProfile = it
+            setTypingStatus(it)
+        })
+        lifecycleScope.launchWhenStarted {
+            viewModel.status.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
+                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
+                    is NetworkResult.Loading -> showProgressDialog()
+                    else -> Unit
+                }
+            }
         }
     }
 
@@ -110,40 +110,53 @@ class ConversationActivity : BaseActivity(), KodeinAware {
         }
     }
 
-    private fun setRecyclerView() {
-        val messages: ArrayList<Messages> = arrayListOf()
+    private fun initRecyclerView() {
         adapter = ConversationAdapter(
             this,
-            messages,
-            viewModel
+            arrayListOf(),
+            "",
+            this
         )
-        binding.rvCustomerId.layoutManager = LinearLayoutManager(this)
-        binding.rvCustomerId.adapter = adapter
-        binding.rvCustomerId.scrollToPosition(mMessages.size-1)
+        binding.rvConversation.layoutManager = LinearLayoutManager(this)
+        binding.rvConversation.adapter = adapter
     }
 
     private fun clickListeners() {
         with(binding) {
             ivBackBtn.setOnClickListener {
-                onBackPressed()
+                Intent(this@ConversationActivity, ChatActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                }
             }
             ivAddAttachment.setOnClickListener {
                 ivAddAttachment.startAnimation(AnimationUtils.loadAnimation(ivAddAttachment.context, R.anim.bounce))
-//                PermissionsUtil.checkStoragePermission(this@ConversationActivity)
+                if (PermissionsUtil.hasStoragePermission(this@ConversationActivity)) {
+                    getAction.launch(pickImageIntent)
+                } else {
+                    showExitSheet(this@ConversationActivity, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "accessPermission")
+                }
+            }
+            ivCall.setOnClickListener {
+                this@ConversationActivity.callNumberIntent(viewModel.supportProfile.phoneNumber)
             }
             ivsendMessage.setOnClickListener {
                 ivsendMessage.startAnimation(AnimationUtils.loadAnimation(ivsendMessage.context, R.anim.bounce))
-                validateText()
+                if (edtMessageInputBox.text.isNullOrEmpty()) {
+                    return@setOnClickListener
+                } else {
+                    generateMessageObjectAndSend(TEXT, edtMessageInputBox.text.toString().trim())
+                }
             }
             edtMessageInputBox.onFocusChangeListener =
                 View.OnFocusChangeListener { v, hasFocus ->
                     if (hasFocus) {
-                        UIUtil.hideKeyboard(this@ConversationActivity)
-                        binding.rvCustomerId.scrollToPosition(mMessages.size-1)
-                        viewModel.updateTypingStatus(mCurrentUserId, true)
+                        binding.rvConversation.scrollToPosition(viewModel.messages.size-1)
+                        viewModel.updateTypingStatus(true)
                     } else {
-                        UIUtil.hideKeyboard(this@ConversationActivity)
-                        viewModel.updateTypingStatus(mCurrentUserId, false)
+                        this@ConversationActivity.hideKeyboard()
+                        viewModel.updateTypingStatus(false)
                     }
                 }
             ivReviewImageChat.setOnClickListener {
@@ -152,50 +165,58 @@ class ConversationActivity : BaseActivity(), KodeinAware {
         }
     }
 
-    private fun validateText() {
-        with(binding) {
-            if (edtMessageInputBox.text.isNotEmpty()) {
-                generateMessageObjectAndSend(messageContent = binding.edtMessageInputBox.text.toString().trim())
-            } else {
-                UIUtil.hideKeyboard(this@ConversationActivity)
-            }
-        }
-    }
-
     private fun generateMessageObjectAndSend(
-        type: String = Constants.TEXT,
+        type: String,
         messageContent: String
         ) {
         val message = Messages(
             id = "",
-            fromId = mCurrentUserId,
-            toId = mSelectedProfile.id,
+            fromId = viewModel.profile.id,
+            toId = viewModel.supportID,
             message = messageContent,
             type = type,
             timeStamp = System.currentTimeMillis(),
             seen = false
         )
         viewModel.sendMessage(message)
+        if (type == TEXT) {
+            sendNotification(messageContent)
+        } else {
+            sendNotification("Sent an image")
+        }
         binding.edtMessageInputBox.setText("")
     }
 
-    private fun setDataToViews() {
-        with(binding) {
-            GlideLoader().loadUserPicture(this@ConversationActivity, mSelectedProfile.thumbnailUrl, ivProfileImage)
-            tvProfileName.text = mSelectedProfile.profileName
+    private fun setTypingStatus(supportProfile: SupportProfile) {
+        binding.apply {
+            GlideLoader().loadUserPicture(this@ConversationActivity, supportProfile.thumbnailUrl, ivProfileImage)
+            tvProfileName.text = supportProfile.profileName
+            if (supportProfile.typing) {
+                tvStatus.text = "typing..."
+                tvStatus.setTextColor(ContextCompat.getColor(this@ConversationActivity, R.color.green_base))
+            } else {
+                checkOnlineStatus(supportProfile)
+            }
+        }
+    }
+    override fun openImage(url: String) {
+        binding.apply {
+            isPreviewOpened = true
+            GlideLoader().loadUserPictureWithoutCrop(this@ConversationActivity, url, ivReviewImageChat)
+            binding.ivReviewImageChat.startAnimation(Animations.scaleBig)
+            binding.ivReviewImageChat.visible()
         }
     }
 
     override fun onBackPressed() {
         when {
-            isZoomed -> {
+            isPreviewOpened -> {
                 binding.ivReviewImageChat.startAnimation(Animations.scaleSmall)
                 binding.ivReviewImageChat.remove()
-                isZoomed = false
+                isPreviewOpened = false
             }
             else -> {
-                viewModel.updateTypingStatus(mCurrentUserId, false)
-                SharedPref(this).putData(ONLINE_STATUS, Constants.BOOLEAN, false)
+                viewModel.updateTypingStatus(false)
                 Intent(this, ChatActivity::class.java).also {
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
@@ -203,48 +224,104 @@ class ConversationActivity : BaseActivity(), KodeinAware {
                 }
             }
         }
+    }
 
+    private fun sendNotification(message: String) {
+        val title = viewModel.profile.name
+        PushNotification(
+            NotificationData(title, message, "", CUSTOMER_SUPPORT),
+            viewModel.token
+        ).also {
+            sendNotification(it)
+        }
+    }
+
+    private fun sendNotification(notification: PushNotification) = lifecycleScope.launch(Dispatchers.IO) {
+        try {
+            val response = RetrofitInstance.api.postNotification(notification)
+            if(response.isSuccessful) {
+                hideProgressDialog()
+                showToast(this@ConversationActivity, "Message Broadcast complete")
+            } else {
+                Log.e("TAG", response.errorBody().toString())
+            }
+        } catch(e: Exception) {
+            Log.e("TAG", e.toString())
+        }
+    }
+    private suspend fun onSuccessCallback(message: String, data: Any?) {
+        when(message) {
+            "image" -> {
+                generateMessageObjectAndSend(IMAGE, data as String)
+                showToast(this, "Image sent")
+                hideProgressDialog()
+            }
+        }
+        viewModel.setEmptyStatus()
+    }
+
+    private suspend fun onFailedCallback(message: String, data: Any?) {
+        when(message) {
+            "image" -> {
+                hideProgressDialog()
+                showToast(this, "Server Error! Failed to upload Image")
+            }
+            "token" -> showErrorSnackBar(data as String, true, LONG)
+            "hide" -> hideProgressDialog()
+        }
+        viewModel.setEmptyStatus()
+    }
+
+    fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
+
+    fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
+
+    private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val imageMessage = result.data?.data
+        imageMessage?.let {
+            viewModel.updateProfileWithPic(
+                it,
+                GlideLoader().imageExtension(this,  it)!!,
+            )}
     }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == Constants.READ_STORAGE_PERMISSION_CODE) {
-            //If permission is granted
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                GlideLoader().showImageChooser(this)
+
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
+            if(
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                showToast(this, "Storage Permission Granted")
+                getAction.launch(pickImageIntent)
             } else {
-                //Displaying another toast if permission is not granted
-                showErrorSnackBar("Storage Permission Denied!", true)
+                showToast(this, "Storage Permission Denied")
+                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
             }
         }
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == Constants.PICK_IMAGE_REQUEST_CODE) {
-                if (data != null) {
-                    try {
-                        // The uri of selected image from phone storage.
-                        showProgressDialog()
-                        viewModel.uploadImageToStorage(
-                            mCurrentUserId ,
-                            data.data!!,
-                            GlideLoader().imageExtension(this,  data.data!!)!!
-                        )
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                        showErrorSnackBar("Image selection failed!", true)
-                    }
-                }
-            }
-        } else if (resultCode == Activity.RESULT_CANCELED) {
-            // A log is printed when user close or cancel the image selection.
-            Log.e("Request Cancelled", "Image selection cancelled")
-        }
+    override fun onPause() {
+        viewModel.updateProfileStatus(false, System.currentTimeMillis())
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        viewModel.updateProfileStatus( false, System.currentTimeMillis())
+        super.onDestroy()
+    }
+
+    override fun onResume() {
+        viewModel.updateProfileStatus( true)
+        super.onResume()
+    }
+
+    override fun onRestart() {
+        viewModel.updateProfileStatus( true)
+        super.onRestart()
     }
 }

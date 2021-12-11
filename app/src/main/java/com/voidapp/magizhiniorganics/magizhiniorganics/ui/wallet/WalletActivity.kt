@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.aminography.primedatepicker.utils.gone
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
@@ -76,19 +77,25 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
     private fun liveDataObservers() {
         viewModel.transactions.observe(this, {
-            mTransactions.clear()
-            mTransactions.addAll(it)
-            val history = it.filter { transactions ->
-                transactions.month == TimeUtil().getMonth()
-            }
-            transactionAdapter.transactions = history.sortedByDescending { trans ->
-                trans.timestamp
-            }
-            transactionAdapter.notifyDataSetChanged()
-            lifecycleScope.launch(Dispatchers.Main) {
-                delay(1500)
-                binding.tvMonthFilter.text = TimeUtil().getMonth()
+            if (it.isNullOrEmpty()) {
                 hideShimmer()
+                binding.llEmptyLayout.visible()
+            } else {
+                binding.llEmptyLayout.remove()
+                mTransactions.clear()
+                mTransactions.addAll(it)
+                val history = it.filter { transactions ->
+                    transactions.month == TimeUtil().getMonth()
+                }
+                transactionAdapter.transactions = history.sortedByDescending { trans ->
+                    trans.timestamp
+                }
+                transactionAdapter.notifyDataSetChanged()
+                lifecycleScope.launch(Dispatchers.Main) {
+                    delay(1500)
+                    binding.tvMonthFilter.text = TimeUtil().getMonth()
+                    hideShimmer()
+                }
             }
         })
         viewModel.profile.observe(this, {
@@ -269,8 +276,13 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             }
         }
         withContext(Dispatchers.Main) {
-            filteredTransactions.sortBy {
-                it.timestamp
+            if (filteredTransactions.isNullOrEmpty()) {
+                binding.llEmptyLayout.visible()
+            } else {
+                binding.llEmptyLayout.remove()
+                filteredTransactions.sortBy {
+                    it.timestamp
+                }
             }
             transactionAdapter.transactions = filteredTransactions
             transactionAdapter.notifyDataSetChanged()
@@ -290,8 +302,13 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             }
         }
         withContext(Dispatchers.Main) {
-            filteredTransactions.sortBy {
-                it.timestamp
+            if (filteredTransactions.isNullOrEmpty()) {
+                binding.llEmptyLayout.visible()
+            } else {
+                binding.llEmptyLayout.remove()
+                filteredTransactions.sortBy {
+                    it.timestamp
+                }
             }
             transactionAdapter.transactions = filteredTransactions
             transactionAdapter.notifyDataSetChanged()

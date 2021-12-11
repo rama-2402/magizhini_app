@@ -15,6 +15,8 @@ interface UserProfileDao {
 
     @Query("DELETE FROM UserProfileEntity")
     fun deleteUserProfile()
+    @Query("DELETE FROM UserProfileEntity WHERE alternatePhNumber = :num")
+    fun deleteUserProfilenULL(num: String = "99")
     @Query("DELETE FROM ActiveOrders")
     fun deleteActiveOrdersTable()
     @Query("DELETE FROM ActiveSubscriptions")

@@ -15,7 +15,7 @@
     tools:context=".ui.customerSupport.fragments.ChatFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCustomerId"
+        android:id="@+id/rvConversation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />

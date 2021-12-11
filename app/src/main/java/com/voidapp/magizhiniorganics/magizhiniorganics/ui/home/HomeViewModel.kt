@@ -302,8 +302,10 @@ class HomeViewModel (
 
     fun getAllNotifications() = viewModelScope.launch(Dispatchers.IO) {
         val notifications = dbRepository.getAllNotifications()
-        withContext(Dispatchers.Main) {
-            notifications?.let { _notifications.value = it } ?: listOf<UserNotificationEntity>()
+        if (!notifications.isNullOrEmpty()) {
+            withContext(Dispatchers.Main) {
+                _notifications.value = notifications
+            }
         }
     }
 }

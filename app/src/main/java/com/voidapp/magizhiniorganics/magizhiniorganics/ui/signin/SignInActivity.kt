@@ -59,7 +59,6 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         viewModel = ViewModelProvider(this, factory)[SignInViewModel::class.java]
         binding.viewmodel = viewModel
 
-
         layoutVisibility("pre")
 
         // Verifying the mobile number and sending the OTP
@@ -282,7 +281,8 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             OneTimeWorkRequestBuilder<UpdateDataService>()
                 .setInputData(
                     workDataOf(
-                        "wipe" to ""
+                        "wipe" to "",
+                        "id" to mCurrentUserID
                     )
                 )
                 .build()

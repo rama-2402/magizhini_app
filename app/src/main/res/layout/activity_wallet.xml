@@ -87,7 +87,7 @@
                 android:layout_margin="@dimen/material_size_8">
 
                 <com.airbnb.lottie.LottieAnimationView
-                    android:id="@+id/ltAnimImg"
+                    android:id="@+id/ltPiggyImg"
                     android:layout_width="150dp"
                     android:layout_height="match_parent"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -104,7 +104,7 @@
                     android:layout_margin="@dimen/material_size_16"
                     android:src="@drawable/ic_rupee"
                     app:layout_constraintBottom_toBottomOf="@id/tvWalletTotal"
-                    app:layout_constraintStart_toEndOf="@id/ltAnimImg"
+                    app:layout_constraintStart_toEndOf="@id/ltPiggyImg"
                     app:layout_constraintTop_toTopOf="@id/tvWalletTotal" />
 
                 <TextView
@@ -119,7 +119,7 @@
                     android:textSize="24dp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toEndOf="@id/ivRupee"
-                    app:layout_constraintTop_toTopOf="@id/ltAnimImg" />
+                    app:layout_constraintTop_toTopOf="@id/ltPiggyImg" />
 
                 <TextView
                     android:id="@+id/tvTransactionText"
@@ -245,6 +245,37 @@
                 app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
                 app:tint="@color/green_base" />
 
+            <LinearLayout
+                android:id="@+id/llEmptyLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:gravity="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivWalletFilter" >
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/ltAnimImg"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/empty" />
+                <TextView
+                    android:id="@+id/tvEmptyMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    android:text="You don't have any Transactions in the Month !"
+                    android:textColor="@color/gray500"
+                    android:textSize="16sp"
+                    />
+            </LinearLayout>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvTransactionHistory"
                 android:layout_width="match_parent"
