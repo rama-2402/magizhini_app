@@ -7,8 +7,10 @@ import androidx.work.Data
 import androidx.work.WorkerParameters
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirestoreRegistrar
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
@@ -40,6 +42,7 @@ class UpdateDataService (
     override val kodein: Kodein by kodein(context)
 
     private val repository: DatabaseRepository by instance()
+    private val fbRepository: FirestoreRepository by instance()
 
     private val mFireStore by lazy {
         FirebaseFirestore.getInstance()
@@ -47,7 +50,6 @@ class UpdateDataService (
 
     private val wipe = inputData.getString("wipe")
     private val userID = inputData.getString("id")!!
-//    private val userID = SharedPref(context).getData(USER_ID, STRING, "").toString()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
 
@@ -109,6 +111,7 @@ class UpdateDataService (
             updateEntityData()
 
         } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("update data service parent job", it) }
             return@withContext Result.failure()
         }
         return@withContext Result.success()
@@ -124,7 +127,7 @@ class UpdateDataService (
                 )
             }
         } catch (e: Exception) {
-            Log.e("TAG", "one:${e.message} ", )
+            e.message?.let { fbRepository.logCrash("update data service: get specials banners", it) }
         }
     }
 
@@ -136,7 +139,7 @@ class UpdateDataService (
             repository.deleteSpecialsOne()
             repository.upsertSpecialsOne(doc)
         } catch (e: Exception) {
-            Log.e("TAG", "one:${e.message} ", )
+            e.message?.let { fbRepository.logCrash("update data service: get specials One", it) }
         }
     }
     private suspend fun specialsTwo() {
@@ -147,7 +150,7 @@ class UpdateDataService (
             repository.deleteSpecialsTwo()
             repository.upsertSpecialsTwo(doc)
         } catch (e: Exception) {
-            Log.e("TAG", "two:${e.message} ", )
+            e.message?.let { fbRepository.logCrash("update data service: get specials two", it) }
         }
     }
     private suspend fun specialsThree() {
@@ -158,7 +161,7 @@ class UpdateDataService (
             repository.deleteSpecialsThree()
             repository.upsertSpecialsThree(doc)
         } catch (e: Exception) {
-            Log.e("TAG", "three:${e.message} ", )
+            e.message?.let { fbRepository.logCrash("update data service: get specials three", it) }
         }
     }
 
@@ -170,82 +173,85 @@ class UpdateDataService (
             repository.deleteBestSellers()
             repository.upsertBestSellers(doc)
         } catch (e: Exception) {
-            Log.e("TAG", "bserror:${e.message} ", )
+            e.message?.let { fbRepository.logCrash("update data service: get best sellers", it) }
         }
     }
 
 
     private suspend fun filterDataAndUpdateRoom(content: String, snapshot: QuerySnapshot) =
         withContext(Dispatchers.Default) {
-            when (content) {
-                Constants.CATEGORY -> {
+            try {
+                when (content) {
+                    Constants.CATEGORY -> {
 //                    repository.deleteAllCategories()
-                    for (d in snapshot.documents) {
-                        //getting the id of the category and converting to Category class
-                        val category = d.toObject(ProductCategory::class.java)
-                        category!!.id = d.id
-                        //converting the category onject to CategoryEntity for updating the field in the room database
-                        val categoryEntity = category.toProductCategoryEntity()
-                        //updating the room - this add the new category and updates the existing ones
-                        repository.upsertProductCategory(categoryEntity)
-                    }
-                }
-                Constants.BANNER -> {
-                    repository.deleteBanners()
-                    for (d in snapshot.documents) {
-                        val banner = d.toObject(Banner::class.java)
-                        banner!!.id = d.id
-                        //creating a generic banner items array
-                        val bannerEntity = banner.toBannerEntity()
-                        repository.upsertBanner(bannerEntity)
-                    }
-                }
-                Constants.PRODUCTS -> {
-                    for (d in snapshot.documents) {
-                        val product = d.toObject(Product::class.java)
-                        product!!.id = d.id
-                        val productEntity: ProductEntity = product.toProductEntity()
-                        repository.upsertProduct(productEntity)
-                    }
-                }
-                USER_NOTIFICATIONS -> {
-                    repository.deleteAllNotifications()
-                    Log.e("TAG", "filterDataAndUpdateRoom: $userID", )
-                    for (d in snapshot.documents) {
-                        Log.e("TAG", "filterDataAndUpdateRoom: $d", )
-                        val notification = d.toObject(UserNotification::class.java)
-                        notification!!.id = d.id
-                        val notificationEntity: UserNotificationEntity = notification.toUserNotificationEntity()
-                        repository.upsertNotification(notificationEntity)
-                    }
-                }
-                Constants.COUPON -> {
-                    repository.deleteCoupons()
-                    for (d in snapshot.documents) {
-                        val coupon = d.toObject(Coupon::class.java)
-                        coupon!!.id = d.id
-                        val couponEntity = coupon.toCouponEntity()
-                        repository.upsertCoupon(couponEntity)
-                    }
-                }
-                Constants.DELIVERY_CHARGE -> {
-                    for (d in snapshot.documents) {
-                        val deliveryCode = d.toObject(PinCodes::class.java)
-                        deliveryCode!!.id = d.id
-                        val deliveryCodeEntity: PinCodesEntity = deliveryCode.toPinCodesEntity()
-                        repository.upsertPinCodes(deliveryCodeEntity)
-                    }
-                }
-                Constants.TESTIMONIALS -> {
-                    repository.deleteAllTestimonials()
-                for (d in snapshot.documents) {
-                    val testimonial = d.toObject(Testimonials::class.java)
-                        testimonial?.let {
-                            val testimonialsEntity: TestimonialsEntity = testimonial.toTestimonialEntity()
-                            repository.upsertTestimonial(testimonialsEntity)
+                        for (d in snapshot.documents) {
+                            //getting the id of the category and converting to Category class
+                            val category = d.toObject(ProductCategory::class.java)
+                            category!!.id = d.id
+                            //converting the category onject to CategoryEntity for updating the field in the room database
+                            val categoryEntity = category.toProductCategoryEntity()
+                            //updating the room - this add the new category and updates the existing ones
+                            repository.upsertProductCategory(categoryEntity)
                         }
                     }
+                    Constants.BANNER -> {
+                        repository.deleteBanners()
+                        for (d in snapshot.documents) {
+                            val banner = d.toObject(Banner::class.java)
+                            banner!!.id = d.id
+                            //creating a generic banner items array
+                            val bannerEntity = banner.toBannerEntity()
+                            repository.upsertBanner(bannerEntity)
+                        }
+                    }
+                    Constants.PRODUCTS -> {
+                        for (d in snapshot.documents) {
+                            val product = d.toObject(Product::class.java)
+                            product!!.id = d.id
+                            val productEntity: ProductEntity = product.toProductEntity()
+                            repository.upsertProduct(productEntity)
+                        }
+                    }
+                    USER_NOTIFICATIONS -> {
+                        repository.deleteAllNotifications()
+                        for (d in snapshot.documents) {
+                            val notification = d.toObject(UserNotification::class.java)
+                            notification!!.id = d.id
+                            val notificationEntity: UserNotificationEntity = notification.toUserNotificationEntity()
+                            repository.upsertNotification(notificationEntity)
+                        }
+                    }
+                    Constants.COUPON -> {
+                        repository.deleteCoupons()
+                        for (d in snapshot.documents) {
+                            val coupon = d.toObject(Coupon::class.java)
+                            coupon!!.id = d.id
+                            val couponEntity = coupon.toCouponEntity()
+                            repository.upsertCoupon(couponEntity)
+                        }
+                    }
+                    Constants.DELIVERY_CHARGE -> {
+                        for (d in snapshot.documents) {
+                            val deliveryCode = d.toObject(PinCodes::class.java)
+                            deliveryCode!!.id = d.id
+                            val deliveryCodeEntity: PinCodesEntity = deliveryCode.toPinCodesEntity()
+                            repository.upsertPinCodes(deliveryCodeEntity)
+                        }
+                    }
+                    Constants.TESTIMONIALS -> {
+                        repository.deleteAllTestimonials()
+                        for (d in snapshot.documents) {
+                            val testimonial = d.toObject(Testimonials::class.java)
+                            testimonial?.let {
+                                val testimonialsEntity: TestimonialsEntity = testimonial.toTestimonialEntity()
+                                repository.upsertTestimonial(testimonialsEntity)
+                            }
+                        }
+                    }
+                    else -> Unit
                 }
+            } catch (e: Exception) {
+                e.message?.let { fbRepository.logCrash("update data service: updating the DB with data", it) }
             }
         }
 
@@ -294,7 +300,7 @@ class UpdateDataService (
                 }
             }
         } catch (e: Exception) {
-           Log.e("tag", e.message.toString())
+           e.message?.let { fbRepository.logCrash("update data service: getting query snapshot from store", it) }
            mFireStore.collection(Constants.CATEGORY)
                .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
                .get().await()
@@ -302,7 +308,7 @@ class UpdateDataService (
     }
 
     //Function to update the products entity with user preferences like favorites, cart items and coupons added
-    private fun updateEntityData() {
+    private suspend fun updateEntityData() = withContext(Dispatchers.IO) {
         try {
             val favorites: List<Favorites>? = repository.getFavorites()
             favorites?.forEach {
@@ -317,7 +323,7 @@ class UpdateDataService (
                 }
             }
         } catch (e: Exception) {
-            Log.e("tag", e.message.toString())
+            e.message?.let { fbRepository.logCrash("update data service: updating the product favorites and in cart", it) }
         }
     }
 

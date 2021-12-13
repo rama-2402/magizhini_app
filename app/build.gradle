@@ -5,6 +5,7 @@ plugins {
     id "androidx.navigation.safeargs.kotlin"
     id 'com.google.gms.google-services'
     id 'kotlin-parcelize'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -49,6 +50,8 @@ android {
 
 dependencies {
 
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.4'
+    implementation 'com.google.firebase:firebase-analytics-ktx:20.0.0'
     def room_version = "2.2.1"
     def kodein_version = "6.4.0"
     def lifecycle_version = "2.0.0"

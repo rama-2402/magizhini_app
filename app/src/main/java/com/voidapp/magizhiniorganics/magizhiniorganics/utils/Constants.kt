@@ -72,6 +72,24 @@ object Constants {
     const val REFERRAL = "Referral"
     const val TESTIMONIALS = "Testimonials"
 
+    //Navigation
+    const val NAVIGATION: String = "navigate"
+    const val HOME_PAGE: String = "home"
+    const val SHOPPING_MAIN_PAGE: String = "shopping"
+    const val DISCOUNT_FILTER_PAGE: String = "discountFilter"
+    const val SUB_FILTER_PAGE: String = "subFilter"
+    const val FAVORITES_FILTER_PAGE: String = "favoritesFilter"
+    const val LIMITED_FILTER_PAGE: String = "LimitedFilter"
+    const val PRODUCT_PAGE: String = "productPage"
+    const val SUBSCRIPTION_PAGE: String = "subPage"
+    const val CHECKOUT_PAGE: String = "checkoutPage"
+    const val SUB_PRODUCT_PAGE: String = "subProductPage"
+    const val PROFILE_PAGE: String = "profilePage"
+    const val SUB_HISTORY_PAGE: String = "subHistoryPage"
+    const val ORDER_HISTORY_PAGE: String = "orderHistoryPage"
+    const val WALLET_PAGE: String = "walletPage"
+    const val CUSTOMER_SUPPORT_PAGE: String = "customerSupport"
+
     //filters data
     const val ALL: String = "all"
     const val ALL_PRODUCTS: String = "All Products"

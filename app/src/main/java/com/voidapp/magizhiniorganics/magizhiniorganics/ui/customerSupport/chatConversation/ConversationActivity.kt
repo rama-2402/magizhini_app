@@ -24,6 +24,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.services.RetrofitInstance
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.IMAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
@@ -306,21 +307,25 @@ class ConversationActivity :
     }
 
     override fun onPause() {
+        SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, false)
         viewModel.updateProfileStatus(false, System.currentTimeMillis())
         super.onPause()
     }
 
     override fun onDestroy() {
+        SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, false)
         viewModel.updateProfileStatus( false, System.currentTimeMillis())
         super.onDestroy()
     }
 
     override fun onResume() {
+        SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, true)
         viewModel.updateProfileStatus( true)
         super.onResume()
     }
 
     override fun onRestart() {
+        SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, true)
         viewModel.updateProfileStatus( true)
         super.onRestart()
     }

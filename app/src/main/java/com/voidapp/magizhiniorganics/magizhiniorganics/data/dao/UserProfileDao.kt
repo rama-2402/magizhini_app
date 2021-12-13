@@ -113,7 +113,7 @@ interface UserProfileDao {
     @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated")
     fun getAllProductsInCategory(category: String): LiveData<List<ProductEntity>>
 
-    @Query("SELECT * FROM ProductEntity WHERE discountAvailable ORDER BY name")
+    @Query("SELECT * FROM ProductEntity WHERE discountAvailable AND activated ORDER BY name")
     fun getAllDiscountProducts(): List<ProductEntity>
 
     @Query("SELECT * FROM CouponEntity WHERE status = :status")
@@ -135,7 +135,7 @@ interface UserProfileDao {
     @Query("SELECT * FROM productEntity WHERE id = :id")
     fun getProductWithIdForUpdate(id: String) : ProductEntity
 
-    @Query("SELECT * FROM ProductEntity WHERE productType = :filter")
+    @Query("SELECT * FROM ProductEntity WHERE productType = :filter AND activated")
     fun getAllSubscriptions(filter: String): List<ProductEntity>
 
     @Query("UPDATE ProductEntity SET favorite = :status WHERE id = :id")
@@ -147,7 +147,7 @@ interface UserProfileDao {
     @Query("SELECT name FROM ProductCategoryEntity WHERE id = :id")
     fun getCategoryByID(id: String): String?
 
-    @Query("SELECT * FROM ProductEntity WHERE favorite ORDER BY name")
+    @Query("SELECT * FROM ProductEntity WHERE favorite AND activated ORDER BY name")
     fun getAllFavoritesStatic(): List<ProductEntity>
 
     @Query("SELECT name FROM ProductCategoryEntity WHERE activated ORDER BY name")

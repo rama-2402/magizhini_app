@@ -25,6 +25,7 @@ import androidx.work.WorkManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import kotlin.RuntimeException
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity() {
@@ -41,6 +42,7 @@ class SplashActivity : BaseActivity() {
         val isNewUser = sRef.getString(Constants.USER_ID, "")
         val isNewDay = sRef.getString(Constants.DATE, Constants.DATE)
         val month = sRef.getInt("month", TimeUtil().getMonthNumber())
+
 
         binding.tvStatus.setOnClickListener {
             checkNetwork(isNewDay!!, isNewUser!!, month)

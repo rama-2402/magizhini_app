@@ -37,11 +37,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionProductBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddressBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -99,6 +102,7 @@ class SubscriptionProductActivity :
         mProductId = intent.getStringExtra(Constants.PRODUCTS).toString()
         mProductName = intent.getStringExtra(Constants.PRODUCT_NAME).toString()
         viewModel.mProductID = mProductId
+        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -184,8 +188,10 @@ class SubscriptionProductActivity :
 
             ivWallet.setOnClickListener {
                 Intent(this@SubscriptionProductActivity, WalletActivity::class.java).also {
+                    it.putExtra(NAVIGATION, PRODUCTS)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    onPause()
                 }
             }
 
@@ -658,6 +664,29 @@ class SubscriptionProductActivity :
         }
     }
 
+    private fun navigateToPreviousPage() {
+        when(viewModel.navigateToPage) {
+            Constants.HOME_PAGE -> {
+                Intent(this, HomeActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                    finishAffinity()
+                }
+            }
+            Constants.SUB_HISTORY_PAGE -> finish()
+            else -> {
+                Intent(this, ShoppingMainActivity::class.java).also {
+                    it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                    finishAffinity()
+                }
+            }
+        }
+    }
+
     override fun previewImage(url: String) {
         isPreviewVisible = true
         GlideLoader().loadUserPicture(this, url, binding.ivPreviewImage)
@@ -673,13 +702,7 @@ class SubscriptionProductActivity :
                 isPreviewVisible = false
             }
             else -> {
-                Intent(this, ShoppingMainActivity::class.java).also {
-                    it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-
-                }
+                navigateToPreviousPage()
             }
         }
     }
@@ -688,7 +711,9 @@ class SubscriptionProductActivity :
         when(content) {
             "purchaseHistory" -> {
                 Intent(this, SubscriptionHistoryActivity::class.java).also {
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                     startActivity(it)
+                    finish()
                 }
             }
         }
@@ -726,4 +751,8 @@ class SubscriptionProductActivity :
         }
     }
 
+    override fun onResume() {
+        viewModel.getProfileData()
+        super.onResume()
+    }
 }

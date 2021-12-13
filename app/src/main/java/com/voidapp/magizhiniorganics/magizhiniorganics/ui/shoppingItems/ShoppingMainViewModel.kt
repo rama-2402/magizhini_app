@@ -22,6 +22,7 @@ class ShoppingMainViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
+    var navigateToPage: String = ""
     var shoppingMainListener: ShoppingMainAdapter.ShoppingMainListener? = null
 
     var selectedChip: String = Constants.ALL
@@ -62,7 +63,6 @@ class ShoppingMainViewModel(
             product.variants.clear()
             dummyVariants.forEach { variant ->
                 if (variant.status != Constants.LIMITED) {
-//                    products.remove(product)
                     product.variants.add(variant)
                 }
             }

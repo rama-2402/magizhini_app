@@ -15,6 +15,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
@@ -27,6 +28,7 @@ class CheckoutViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
+    var navigateToPage: String = ALL_PRODUCTS
     var userId: String = ""
     var itemsInCart: List<CartEntity> = listOf()
     var addressPosition = 0

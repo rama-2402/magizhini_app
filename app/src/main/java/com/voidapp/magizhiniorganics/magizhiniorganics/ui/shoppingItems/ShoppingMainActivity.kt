@@ -2,7 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -14,26 +13,29 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.SwipeGesture
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityShoppingMainBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHOPPING_MAIN_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
@@ -61,7 +63,7 @@ class ShoppingMainActivity :
 
     private lateinit var cartAdapter: CartAdapter
     private lateinit var adapter: ShoppingMainAdapter
-    var categoryFilter: String = Constants.ALL_PRODUCTS
+    var categoryFilter: String = ALL_PRODUCTS
     private var mCartPrice: Float? = 0f
     private var isFiltered: Boolean = false
 
@@ -79,6 +81,7 @@ class ShoppingMainActivity :
 
         //getting the intent to check the type of chip we want to see
         categoryFilter = intent.getStringExtra(Constants.CATEGORY).toString()
+        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
 
         setSupportActionBar(binding.tbToolbar)
         title = ""
@@ -110,6 +113,7 @@ class ShoppingMainActivity :
         }
         viewModel.allProduct.observe(this, {
             viewModel.selectedChip = Constants.ALL
+            viewModel.selectedCategory = ALL_PRODUCTS
             mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
@@ -118,6 +122,7 @@ class ShoppingMainActivity :
         })
         viewModel.subscriptions.observe(this, {
             viewModel.selectedChip = Constants.SUBSCRIPTION
+            viewModel.selectedCategory = ALL_PRODUCTS
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
@@ -131,12 +136,14 @@ class ShoppingMainActivity :
         })
         viewModel.allFavorites.observe(this, {
             viewModel.selectedChip = Constants.FAVORITES
+            viewModel.selectedCategory = ALL_PRODUCTS
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
         })
         viewModel.discountAvailableProducts.observe(this, {
             viewModel.selectedChip = Constants.DISCOUNT
+            viewModel.selectedCategory = ALL_PRODUCTS
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
@@ -273,6 +280,7 @@ class ShoppingMainActivity :
     private fun displayLimitedItems(products: MutableList<ProductEntity>) {
         isFiltered = false
         adapter.limited = true
+        viewModel.selectedChip = LIMITED
         adapter.setData(products)
     }
 
@@ -396,9 +404,10 @@ class ShoppingMainActivity :
         checkoutBtn.setOnClickListener {
             if (NetworkHelper.isOnline(this)) {
                 Intent(this, InvoiceActivity::class.java).also {
+                    it.putExtra(NAVIGATION, viewModel.selectedCategory)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
+                    onPause()
                 }
             } else {
                 showErrorSnackBar("Please check network connection", true)
@@ -416,23 +425,45 @@ class ShoppingMainActivity :
 //        return prodList
 //    }
 
+    private fun navigateToPreviousPage() {
+        when(viewModel.navigateToPage) {
+            ORDER_HISTORY_PAGE -> {
+                Intent(this, PurchaseHistoryActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                }
+            }
+            else -> {
+                Intent(this, HomeActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                    finishAffinity()
+                }
+            }
+        }
+    }
+
     private fun navigateToProductDetails(product: ProductEntity) {
         if (NetworkHelper.isOnline(this)) {
             if (product.productType == SUBSCRIPTION) {
                 Intent(this, SubscriptionProductActivity::class.java).also {
                     it.putExtra(Constants.PRODUCTS, product.id)
                     it.putExtra(Constants.PRODUCT_NAME, product.name)
+                    it.putExtra(NAVIGATION, viewModel.selectedCategory)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
+                    onPause()
                 }
             } else {
                 Intent(this, ProductActivity::class.java).also {
                     it.putExtra(Constants.PRODUCTS, product.id)
                     it.putExtra(Constants.PRODUCT_NAME, product.name)
+                    it.putExtra(NAVIGATION, viewModel.selectedCategory)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
+                    onPause()
                 }
             }
         } else {
@@ -455,11 +486,7 @@ class ShoppingMainActivity :
         if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
             cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
-            Intent(this, HomeActivity::class.java).also {
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                finish()
-            }
+            navigateToPreviousPage()
         }
     }
 

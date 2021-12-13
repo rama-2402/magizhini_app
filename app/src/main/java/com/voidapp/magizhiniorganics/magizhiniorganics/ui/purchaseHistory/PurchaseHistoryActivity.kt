@@ -33,6 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurch
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
@@ -256,8 +257,12 @@ class PurchaseHistoryActivity :
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
+        Intent(this, HomeActivity::class.java).also {
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            finish()
+            finishAffinity()
+        }
     }
 
     private fun createPDF(order: OrderEntity) {

@@ -383,6 +383,7 @@ class Firestore(
     suspend fun getLimitedItems(viewModel: ShoppingMainViewModel) = withContext(Dispatchers.IO) {
         try {
             mFireStore.collection(Constants.PRODUCTS)
+                .whereEqualTo("activated", true)
                 .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
                 .addSnapshotListener { snapshot, fireSnapshotFailure ->
                     //error handling

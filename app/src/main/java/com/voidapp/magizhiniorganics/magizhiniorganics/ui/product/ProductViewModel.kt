@@ -24,6 +24,7 @@ class ProductViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
+    var navigateToPage: String = ""
     var productID = ""
     var product = ProductEntity()
     var userProfile: UserProfileEntity = UserProfileEntity()

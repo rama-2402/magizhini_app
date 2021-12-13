@@ -47,6 +47,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BROADCAST
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DESCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.HOME_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import kotlinx.coroutines.*
@@ -450,7 +452,9 @@ class HomeActivity :
     override fun displaySelectedCategory(category: String) {
         Intent(this, ShoppingMainActivity::class.java).also {
             it.putExtra(CATEGORY, category)
+            it.putExtra(NAVIGATION, HOME_PAGE)
             startActivity(it)
+            onPause()
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
@@ -459,7 +463,9 @@ class HomeActivity :
         Intent(this, ProductActivity::class.java).also {
             it.putExtra(PRODUCTS, id)
             it.putExtra(Constants.PRODUCT_NAME, name)
+            it.putExtra(NAVIGATION, HOME_PAGE)
             startActivity(it)
+            onPause()
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }

@@ -47,6 +47,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatAc
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
@@ -111,6 +114,8 @@ class InvoiceActivity :
             mCurrentUserID = getData(Constants.USER_ID, Constants.STRING, "").toString()
             mPhoneNumber = getData(Constants.PHONE_NUMBER, Constants.STRING, "").toString()
         }
+
+        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
 
         binding.apply {
             rvAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
@@ -467,6 +472,7 @@ class InvoiceActivity :
 
         binding.ivWallet.setOnClickListener {
             Intent(this, WalletActivity::class.java).also {
+                it.putExtra(NAVIGATION, CHECKOUT_PAGE)
                 startActivity(it)
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                 finish()
@@ -661,11 +667,15 @@ class InvoiceActivity :
         if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
             cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
-            Intent(this, ShoppingMainActivity::class.java).also {
-                it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            if (viewModel.navigateToPage == PRODUCTS) {
                 finish()
+            } else {
+                Intent(this, ShoppingMainActivity::class.java).also {
+                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                }
             }
         }
     }

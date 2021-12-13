@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -9,13 +10,11 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.aminography.primedatepicker.utils.gone
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
@@ -29,6 +28,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -69,6 +71,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         Checkout.preload(applicationContext)
 
         showShimmer()
+        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
+        Log.e("TAG", "onCreate: ${viewModel.navigateToPage}", )
         clickListeners()
         initLiveData()
         liveDataObservers()
@@ -373,6 +377,21 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         with(binding) {
             flShimmerPlaceholder.remove()
             rvTransactionHistory.visible()
+        }
+    }
+
+    override fun onBackPressed() {
+        Log.e("TAG", "onBackPressed: ${viewModel.navigateToPage}", )
+        when(viewModel.navigateToPage) {
+            CHECKOUT_PAGE -> {
+                Intent(this, InvoiceActivity::class.java).also {
+                    it.putExtra(NAVIGATION, ALL_PRODUCTS)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                }
+            }
+            else -> finish()
         }
     }
 }

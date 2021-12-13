@@ -36,17 +36,14 @@ class FirebaseService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        val onlineStatus: Boolean = SharedPref(this).getData(ONLINE_STATUS, BOOLEAN, false).toString().toBoolean()
+        val isOnline = SharedPref(this).getData(ONLINE_STATUS, BOOLEAN, false).toString().toBoolean()
         val intent = when(message.data["activity"]) {
             CUSTOMER_SUPPORT -> Intent(this, ChatActivity::class.java)
             else -> Intent(this, SplashActivity::class.java)
         }
-        if (message.data["activity"] == CUSTOMER_SUPPORT) {
-            if (!onlineStatus) {
-                createNotification(intent, message)
-            }
-        } else {
-            createNotification(intent, message)
+        when {
+            isOnline && message.data["activity"] == CUSTOMER_SUPPORT -> Unit
+            else -> createNotification(intent, message)
         }
     }
 

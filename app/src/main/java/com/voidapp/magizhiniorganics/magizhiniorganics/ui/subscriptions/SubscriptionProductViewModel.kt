@@ -29,6 +29,7 @@ class SubscriptionProductViewModel(
     private val dbRepository: DatabaseRepository,
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
+    var navigateToPage: String = ""
     var mProductID = ""
     private var subscriptionItem = ProductEntity()
     var userProfile = UserProfileEntity()

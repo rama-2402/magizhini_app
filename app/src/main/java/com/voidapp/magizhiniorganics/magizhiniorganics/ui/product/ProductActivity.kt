@@ -32,6 +32,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProdu
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
@@ -41,12 +42,14 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import kotlin.math.abs
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.HOME_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.flow.collect
 import ru.nikartm.support.ImageBadgeView
-
-
-//TODO CHECK LIMITED ITEMS COUNT BEFORE ORDERING MULTIPLE
 
 class ProductActivity :
     BaseActivity(),
@@ -90,6 +93,7 @@ class ProductActivity :
 
         mProductId = intent.getStringExtra(Constants.PRODUCTS).toString()
         mProductName = intent.getStringExtra(Constants.PRODUCT_NAME).toString()
+        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
         viewModel.productID = mProductId
 
         setSupportActionBar(binding.tbCollapsedToolbar)
@@ -115,8 +119,6 @@ class ProductActivity :
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
         val filterBtn: ImageView = findViewById(R.id.ivFilter)
         checkoutText = findViewById(R.id.tvCheckOut)
-
-        //TODO NEED TO CHANGE THE ICON OF THE FILTERBTN TO COUPON
 
         checkoutText.text = "Rs: $mCartPrice"
         filterBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_coupon))
@@ -161,6 +163,7 @@ class ProductActivity :
         checkoutBtn.setOnClickListener {
             if (NetworkHelper.isOnline(this)) {
                 Intent(this, InvoiceActivity::class.java).also {
+                    it.putExtra(NAVIGATION, PRODUCTS)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                     finish()
@@ -340,6 +343,7 @@ class ProductActivity :
 
         binding.ivWallet.setOnClickListener {
             Intent(this, WalletActivity::class.java).also {
+                it.putExtra(NAVIGATION, PRODUCTS)
                 startActivity(it)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
@@ -552,6 +556,29 @@ class ProductActivity :
         }.attach()
     }
 
+    private fun navigateToPreviousPage() {
+        when(viewModel.navigateToPage) {
+            HOME_PAGE -> {
+                Intent(this, HomeActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                    finishAffinity()
+                }
+            }
+            ORDER_HISTORY_PAGE -> finish()
+            else -> {
+                Intent(this, ShoppingMainActivity::class.java).also {
+                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                    finishAffinity()
+                }
+            }
+        }
+    }
+
     //Title bar back button press function
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -573,12 +600,7 @@ class ProductActivity :
             cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED -> cartBottomSheet.state =
                 BottomSheetBehavior.STATE_COLLAPSED
             else -> {
-                Intent(this, ShoppingMainActivity::class.java).also {
-                    it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                }
+                navigateToPreviousPage()
             }
         }
     }
