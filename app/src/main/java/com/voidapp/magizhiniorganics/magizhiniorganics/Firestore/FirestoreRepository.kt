@@ -44,7 +44,7 @@ class FirestoreRepository (
 
     suspend fun updateAddress(id: String, address: ArrayList<Address>)  = firestore.updateAddress(id, address)
 
-    suspend fun applyReferralNumber(currentUserID: String, code: String): Boolean = firestore.applyReferralNumber(currentUserID, code)
+    suspend fun applyReferralNumber(currentUserID: String, code: String, fromHomeMenu: Boolean = false): Boolean = firestore.applyReferralNumber(currentUserID, code, fromHomeMenu)
 
     suspend fun checkForReferral(userID: String): Boolean = firestore.checkForReferral(userID)
 

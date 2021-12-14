@@ -17,7 +17,10 @@ class HomeViewModel (
     private val dbRepository: DatabaseRepository
 ): ViewModel() {
 
-
+    private var _referralStatus: MutableLiveData<Boolean> = MutableLiveData()
+    val referralStatus: LiveData<Boolean> = _referralStatus
+    private var _allowReferral: MutableLiveData<String> = MutableLiveData()
+    val allowReferral: LiveData<String> = _allowReferral
     private var _specialsOne: MutableLiveData<MutableList<ProductEntity>> = MutableLiveData()
     val specialsOne: LiveData<MutableList<ProductEntity>> = _specialsOne
     private var _specialsTwo: MutableLiveData<MutableList<ProductEntity>> = MutableLiveData()
@@ -306,6 +309,21 @@ class HomeViewModel (
             withContext(Dispatchers.Main) {
                 _notifications.value = notifications
             }
+        }
+    }
+
+    fun applyReferralNumber(currentUserID: String, code: String) = viewModelScope.launch {
+        _referralStatus.value = fbRepository.applyReferralNumber(currentUserID, code, true)
+    }
+
+    fun checkForReferral() = viewModelScope.launch(Dispatchers.IO) {
+        val profile = dbRepository.getProfileData()!!
+        withContext(Dispatchers.Main) {
+           if( profile.referralId.isNullOrEmpty() ) {
+               _allowReferral.value = profile.id
+           } else {
+               _allowReferral.value = "no"
+           }
         }
     }
 }

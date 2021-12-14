@@ -228,22 +228,63 @@ class Firestore(
         }
     }
 
-    suspend fun applyReferralNumber(currentUserID: String, code: String): Boolean = withContext(Dispatchers.IO) {
+    suspend fun applyReferralNumber(currentUserID: String, code: String, fromHomeMenu: Boolean = false): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
             val profileDoc = mFireStore.collection(USERS).whereEqualTo("phNumber", "+91$code").get().await()
             if (profileDoc.documents.isNullOrEmpty()) {
                 false
             } else {
                 val profile = profileDoc.documents[0].toObject(UserProfile::class.java)
+                if (fromHomeMenu) {
+                    mFireStore.collection(USERS).document(currentUserID).update("referrerNumber", code).await()
+                    val currentUserProfile = repository.getProfileData()!!
+                    currentUserProfile.referralId = code
+                    repository.upsertProfile(currentUserProfile)
+                }
+
+                val checkReferralLimit = async { checkReferralLimit(profile!!.id)  }
                 val addReferralBonusToReferrer = async { addReferralBonusToReferrer(profile!!) }
                 val addReferralBonusToCurrentUser = async { addReferralBonusToCurrentUser(currentUserID) }
 
-                addReferralBonusToReferrer.await() &&
-                addReferralBonusToCurrentUser.await()
+                if (checkReferralLimit.await()) {
+                    addReferralBonusToReferrer.await() &&
+                    addReferralBonusToCurrentUser.await()
+                } else {
+                    addReferralBonusToCurrentUser.await()
+                }
             }
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: applying referral", it) }
             false
+        }
+    }
+
+    private suspend fun checkReferralLimit(referrerID: String): Boolean = withContext(Dispatchers.IO) {
+        data class Referral(
+            var totalReferrals: Int = 0
+        )
+        return@withContext try {
+            val referralLimit = mFireStore.collection(REFERRAL).document(referrerID).get().await()
+            if (referralLimit.exists()) {
+                val referral = referralLimit.toObject(Referral::class.java)!!
+                if (referral.totalReferrals != 10) {
+                    referral.totalReferrals = referral.totalReferrals + 1
+                    mFireStore.collection(REFERRAL).document(referrerID).update("totalReferrals", referral.totalReferrals).await()
+                    true
+                } else {
+                    false
+                }
+            } else {
+                Referral(
+                    1
+                ).let {
+                    mFireStore.collection(REFERRAL).document(referrerID).set(it, SetOptions.merge()).await()
+                    true
+                }
+            }
+        } catch (e: Exception) {
+          e.message?.let { logCrash("firestore: verifying referral limit", it) }
+          false
         }
     }
 

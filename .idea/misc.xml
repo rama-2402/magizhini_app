@@ -63,6 +63,7 @@
         <entry key="app/src/main/res/layout/dialog_bottom_list.xml" value="0.5307692307692308" />
         <entry key="app/src/main/res/layout/dialog_calendar.xml" value="0.5" />
         <entry key="app/src/main/res/layout/dialog_loading.xml" value="0.46648550724637683" />
+        <entry key="app/src/main/res/layout/dialog_referral.xml" value="0.5421875" />
         <entry key="app/src/main/res/layout/dialog_subscription_details.xml" value="0.5421875" />
         <entry key="app/src/main/res/layout/dialog_success.xml" value="0.48703703703703705" />
         <entry key="app/src/main/res/layout/dialog_swipe_confirmation.xml" value="0.5394021739130435" />

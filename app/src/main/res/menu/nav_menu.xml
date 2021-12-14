@@ -25,11 +25,19 @@
     </group>
     <group
         android:id="@+id/agreement" >
-
         <item
             android:id="@+id/menuContact"
             android:title="CUSTOMER SUPPORT"
             android:icon="@drawable/ic_upport_agent"/>
+        <item
+            android:id="@+id/menuReferral"
+            android:title="REFER AND EARN"
+            android:icon="@drawable/ic_money"/>
+        <item
+            android:id="@+id/menuSubDetails"
+            android:title="ABOUT SUBSCRIPTION"
+            android:icon="@drawable/ic_subscriptions"
+            android:iconTint="@color/green_base"/>
         <item
             android:id="@+id/menuReturn"
             android:title="RETURN POLICY"

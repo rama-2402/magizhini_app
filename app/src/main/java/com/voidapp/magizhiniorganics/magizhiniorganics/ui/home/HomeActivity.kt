@@ -1,15 +1,15 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -21,17 +21,16 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
-import androidx.viewbinding.ViewBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.messaging.FirebaseMessaging
-import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.TestimonialsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SpecialBanners
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Banner
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.VideoPlayerActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
@@ -49,7 +48,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DESCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.HOME_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import kotlinx.coroutines.*
 import org.imaginativeworld.whynotimagecarousel.listener.CarouselListener
@@ -57,6 +55,11 @@ import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import android.content.pm.ResolveInfo
+import com.voidapp.magizhiniorganics.magizhiniorganics.BuildConfig
+import com.voidapp.magizhiniorganics.magizhiniorganics.R
+
+import java.net.URLEncoder
 
 
 class HomeActivity :
@@ -82,6 +85,8 @@ class HomeActivity :
     private lateinit var testimonialsAdapter: TestimonialsAdapter
     private var mSelectedBanner: SpecialBanners = SpecialBanners()
     private val banners = mutableListOf<BannerEntity>()
+
+    private lateinit var dialogBsAddReferral: BottomSheetDialog
 
     //initializing the carousel item for the banners
     val mItems: MutableList<CarouselItem> = mutableListOf()
@@ -357,7 +362,24 @@ class HomeActivity :
                 binding.fabCart.visibility = View.GONE
             }
         })
-
+        viewModel.referralStatus.observe(this, {
+            hideProgressDialog()
+            if (it) {
+                dialogBsAddReferral.dismiss()
+                showErrorSnackBar("Referral added Successfully. Your referral bonus will be added to your Wallet.", false,
+                    Constants.LONG
+                )
+            } else {
+                showToast(this, "No account with the given number. Please check again")
+            }
+        })
+        viewModel.allowReferral.observe(this, {
+            if (it == "no") {
+                showErrorSnackBar("Referral Already Applied", true)
+            } else {
+                showReferralBs(it)
+            }
+        })
 //        //scroll change listener to hide the fab when scrolling down
 //        binding.rvHomeItems.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 //            override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
@@ -447,6 +469,30 @@ class HomeActivity :
         binding.rvTestimonials.adapter = testimonialsAdapter
 //        val snapHelper: SnapHelper = GravitySnapHelper(Gravity.TOP)
 //        snapHelper.attachToRecyclerView(binding.rvHomeItems)
+    }
+
+    private fun showReferralBs(currentUserID: String) {
+        //BS to add referral number
+        dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
+
+        val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(LayoutInflater.from(applicationContext),R.layout.dialog_bottom_add_referral,null,false)
+        dialogBsAddReferral.setCancelable(true)
+        dialogBsAddReferral.setContentView(view.root)
+        dialogBsAddReferral.dismissWithAnimation = true
+
+        //verifying if the referral number is empty and assigning it to the userProfile object
+        view.btnApply.setOnClickListener {
+            val code = view.etReferralNumber.text.toString().trim()
+            if (code.isEmpty()) {
+                view.etlReferralNumber.error = "* Enter a valid code"
+                return@setOnClickListener
+            } else {
+                showProgressDialog()
+                viewModel.applyReferralNumber(currentUserID ,code)
+            }
+        }
+
+        dialogBsAddReferral.show()
     }
 
     override fun displaySelectedCategory(category: String) {
@@ -628,6 +674,14 @@ class HomeActivity :
                         }
                     }
                 }
+                R.id.menuReferral -> {
+                    binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
+                    showExitSheet(this, "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus! Click Proceed to Continue")
+                }
+                R.id.menuSubDetails -> {
+                    binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
+                    showDescriptionBs(resources.getString(R.string.subscription_info))
+                }
                 R.id.menuPrivacyPolicy -> {
                     lifecycleScope.launch {
                         delay(200)
@@ -680,6 +734,9 @@ class HomeActivity :
                         }
                     }
                 }
+                R.id.menuContactUs -> {
+                    showListBottomSheet(this, arrayListOf("Call", "WhatsApp", "E-Mail"))
+                }
             }
             return true
         } else {
@@ -693,5 +750,76 @@ class HomeActivity :
             it.putExtra("url", url)
             startActivity(it)
         }
+    }
+
+    fun selectedContactMethod(selectedItem: String) {
+        when(selectedItem) {
+            "Call" -> {
+                this.callNumberIntent("7299827393")
+            }
+            "WhatsApp" -> {
+                val message = ""
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(
+                            "https://api.whatsapp.com/send?phone=+917299827393&text=$message"
+                        )
+                    )
+                )
+            }
+            "E-Mail" -> {
+                shareToGMail(arrayOf("magizhiniOrganics2018@gmail.com"), "", "")
+            }
+        }
+    }
+
+    private fun shareToGMail(email: Array<String?>?, subject: String?, content: String?) {
+        val emailIntent = Intent(Intent.ACTION_SEND)
+        try {
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, email)
+            emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
+            emailIntent.type = "text/plain"
+            emailIntent.putExtra(Intent.EXTRA_TEXT, content)
+            val pm: PackageManager = this.packageManager
+            val matches = pm.queryIntentActivities(emailIntent, 0)
+            var best: ResolveInfo? = null
+            for (info in matches) if (info.activityInfo.packageName.endsWith(".gm") || info.activityInfo.name.toLowerCase()
+                    .contains("gmail")
+            ) best = info
+            if (best != null) emailIntent.setClassName(
+                best.activityInfo.packageName,
+                best.activityInfo.name
+            )
+            this.startActivity(emailIntent)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Toast.makeText(this, "Email App is not installed in your phone.", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+
+    fun referralAction(selectedItem: String) {
+        if(selectedItem == "Share My Referral Code") {
+            try {
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                shareIntent.type = "text/plain"
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "My application name")
+                var shareMessage = "\nLet me recommend you this application\n\n"
+                shareMessage =
+                    """
+                    ${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
+                    """.trimIndent()
+                shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
+                startActivity(Intent.createChooser(shareIntent, "choose one"))
+            } catch (e: java.lang.Exception) {
+                showToast(this, "Something went wrong! Please try again later")
+            }
+        } else {
+            viewModel.checkForReferral()
+        }
+    }
+
+    fun showReferralOptions() {
+        showListBottomSheet(this, arrayListOf("Share My Referral Code", "Add Referral Number"), "referral")
     }
 }

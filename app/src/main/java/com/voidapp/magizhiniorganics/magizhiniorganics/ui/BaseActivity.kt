@@ -26,6 +26,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
@@ -35,7 +36,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.Subscrip
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 
 open class BaseActivity : AppCompatActivity() {
@@ -280,6 +280,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                 }
                 is InvoiceActivity -> activity.moveToCustomerSupport()
+                is HomeActivity -> activity.showReferralOptions()
             }
         }
         ExitBottomSheetdialog.show()
@@ -404,6 +405,14 @@ open class BaseActivity : AppCompatActivity() {
                     is WalletActivity -> {
                         hideListBottomSheet()
                         activity.setMonthFilter(selectedItem)
+                    }
+                    is HomeActivity -> {
+                        hideListBottomSheet()
+                        when(data) {
+                            "referral" -> activity.referralAction(selectedItem)
+                            else -> activity.selectedContactMethod(selectedItem)
+
+                        }
                     }
                     is PurchaseHistoryActivity -> {
                         hideListBottomSheet()
