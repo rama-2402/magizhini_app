@@ -133,6 +133,7 @@ class SubscriptionProductActivity :
         oSubscription.productID = mProductId
         oSubscription.productName = mProductName
         oSubscription.monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
+        oSubscription.phoneNumber = viewModel.userProfile.phNumber
         oSubscription.status = Constants.SUB_ACTIVE
         if (mStartDate == 0L) {
             filterDate(System.currentTimeMillis() + (1000 * 60 * 60 * 24))

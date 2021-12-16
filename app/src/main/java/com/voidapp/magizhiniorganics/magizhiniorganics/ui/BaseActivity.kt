@@ -41,11 +41,11 @@ import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 open class BaseActivity : AppCompatActivity() {
 
     private lateinit var mProgressDialog: Dialog
-    private lateinit var ExitBottomSheetdialog: BottomSheetDialog
+    private lateinit var exitBottomSheetDialog: BottomSheetDialog
     private lateinit var mSuccessDialog: Dialog
     private lateinit var mDescriptionBottomSheet: BottomSheetDialog
     private lateinit var mSwipeConfirmationBottomSheet: BottomSheetDialog
-    private lateinit var listBottomSheetdialog: BottomSheetDialog
+    private lateinit var listBottomSheetDialog: BottomSheetDialog
 
     fun View.visible() {
         this.visibility = View.VISIBLE
@@ -171,7 +171,7 @@ open class BaseActivity : AppCompatActivity() {
 
     fun showExitSheet(activity: Activity, confirmation: String, data: Any = "") {
 
-        ExitBottomSheetdialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
+        exitBottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
 
         val view: DialogBottomExitConfirmationBinding =
             DataBindingUtil.inflate(
@@ -180,8 +180,8 @@ open class BaseActivity : AppCompatActivity() {
                 null,
                 false)
 
-        ExitBottomSheetdialog.setCancelable(true)
-        ExitBottomSheetdialog.setContentView(view.root)
+        exitBottomSheetDialog.setCancelable(true)
+        exitBottomSheetDialog.setContentView(view.root)
 
         when (data) {
             "Cancel for some days" -> view.tvCancelText.text = data as String
@@ -283,11 +283,11 @@ open class BaseActivity : AppCompatActivity() {
                 is HomeActivity -> activity.showReferralOptions()
             }
         }
-        ExitBottomSheetdialog.show()
+        exitBottomSheetDialog.show()
     }
 
     private fun hideExitSheet() {
-        ExitBottomSheetdialog.dismiss()
+        exitBottomSheetDialog.dismiss()
     }
 
     fun showSuccessDialog(title: String = getString(R.string.msg_profile_activated),
@@ -368,7 +368,7 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     fun showListBottomSheet(activity: Activity, listItems: ArrayList<String>, data: String = "") {
-        listBottomSheetdialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
+        listBottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
         val view: DialogBottomListBinding =
             DataBindingUtil.inflate(
                 LayoutInflater.from(baseContext),
@@ -437,14 +437,14 @@ open class BaseActivity : AppCompatActivity() {
 
             }
 
-        listBottomSheetdialog.setContentView(view.root)
-        listBottomSheetdialog.setCanceledOnTouchOutside(true)
-        listBottomSheetdialog.show()
+        listBottomSheetDialog.setContentView(view.root)
+        listBottomSheetDialog.setCanceledOnTouchOutside(true)
+        listBottomSheetDialog.show()
     }
 
 
     private fun hideListBottomSheet() {
-        listBottomSheetdialog.dismiss()
+        listBottomSheetDialog.dismiss()
     }
 
     fun showSwipeConfirmationDialog(activity: Activity, content: String) {
