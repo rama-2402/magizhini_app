@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.aminography.primecalendar.PrimeCalendar
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.hsalf.smileyrating.SmileyRating
@@ -46,12 +47,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.CustomSubDaysDialog
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -79,7 +78,7 @@ class SubscriptionProductActivity :
     private var mProductId: String = ""
     private var mProductName: String = ""
     private var mRating: Int = 5
-    private var mStartDate: Long = 0L
+    private var mStartDate: Long = System.currentTimeMillis() + 86400000
 
     private var newReview: Boolean = false
     private var isPreviewVisible: Boolean = false
@@ -158,20 +157,16 @@ class SubscriptionProductActivity :
             binding.tvFromDate.text = TimeUtil().getCustomDate(dateLong = date)
             mStartDate = date
             oSubscription.startDate = date
-            setEndDate(binding.spSubscriptionType.selectedItemPosition)
+            setEndDate()
+            generateEstimate(binding.spSubscriptionType.selectedItemPosition, "dateFilter")
         }
     }
 
-    private fun setEndDate(position: Int) {
-        when(position) {
-            0 -> oSubscription.endDate = oSubscription.startDate
-            1 -> {
-                val cal = Calendar.getInstance()
-                cal.timeInMillis = oSubscription.startDate
-                cal.add(Calendar.DATE, 29)  //since we add the start date as well, we add remaining 29 days to get a total of 30 days
-                oSubscription.endDate = cal.timeInMillis
-            }
-        }
+    private fun setEndDate() {
+        val cal = Calendar.getInstance()
+        cal.timeInMillis = oSubscription.startDate
+        cal.add(Calendar.DATE, 29)  //since we add the start date as well, we add remaining 29 days to get a total of 30 days
+        oSubscription.endDate = cal.timeInMillis
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -181,7 +176,13 @@ class SubscriptionProductActivity :
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                 DatePickerLib().startSubscriptionDate(this@SubscriptionProductActivity)
             }
-
+            ivShowCustomDaysDialog.setOnClickListener {
+                CustomSubDaysDialog(
+                    this@SubscriptionProductActivity,
+                    oSubscription.customDates,
+                    this@SubscriptionProductActivity
+                ).show()
+            }
             edtDescription.setOnTouchListener { _, _ ->
                 binding.svBody.requestDisallowInterceptTouchEvent(true)
                 false
@@ -236,7 +237,17 @@ class SubscriptionProductActivity :
                     view: View?,
                     position: Int,
                     id: Long) {
-                    generateEstimate(position)
+                    if (position == 2) {
+                        CustomSubDaysDialog(
+                            this@SubscriptionProductActivity,
+                            oSubscription.customDates,
+                            this@SubscriptionProductActivity
+                        ).show()
+                        ivShowCustomDaysDialog.visible()
+                    } else {
+                        ivShowCustomDaysDialog.remove()
+                        generateEstimate(position)
+                    }
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -250,6 +261,7 @@ class SubscriptionProductActivity :
                     position: Int,
                     id: Long) {
                     oSubscription.variantName = "${mProduct.variants[position].variantName} ${mProduct.variants[position].variantType}"
+                    oSubscription.basePay = mProduct.variants[position].variantPrice.toFloat()
                     setDataToDisplay(position)
                     generateEstimate(spSubscriptionType.selectedItemPosition)
                 }
@@ -407,22 +419,46 @@ class SubscriptionProductActivity :
         return text.isNullOrBlank()
     }
 
-    private fun generateEstimate(position: Int = 0) {
+    private fun generateEstimate(position: Int = 0, filter: String = "") = lifecycleScope.launch {
+        if (filter != "dateFilter") {
+            filterDate(mStartDate)
+            return@launch
+        }
         when(position) {
             0 -> {
-                oSubscription.subType = Constants.SINGLE_PURCHASE
-                binding.tvEstimate.text = "Estimate (single order)"
-                binding.tvEstimateAmount.text = "Rs: ${mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice}"
-                oSubscription.estimateAmount = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toString().toFloat()
-                setEndDate(position)
-            }
-            1 -> {
                 oSubscription.subType = Constants.MONTHLY
                 binding.tvEstimate.text = "Estimate (30 days cycle)"
                 val price = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toFloat() * 30
                 binding.tvEstimateAmount.text = "Rs: $price"
                 oSubscription.estimateAmount = price
-                setEndDate(position)
+                oSubscription.cancelledDates.clear()
+                setEndDate()
+            }
+            1 -> {
+                showProgressDialog()
+                val cancelledDatesJob = async { viewModel.setCancelDates(oSubscription.startDate) }
+                val cancelledDatesList = cancelledDatesJob.await()
+                oSubscription.cancelledDates.clear()
+                oSubscription.cancelledDates.addAll(cancelledDatesList)
+                oSubscription.subType = Constants.ALTERNATE_DAYS
+                binding.tvEstimate.text = "Estimate (15/30 days cycle)"
+                val price = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toFloat() * 15
+                binding.tvEstimateAmount.text = "Rs: $price"
+                oSubscription.estimateAmount = price
+                hideProgressDialog()
+            }
+            2 -> {
+                showProgressDialog()
+                val cancelledDatesJob = async { viewModel.setCancelDates(oSubscription.startDate, oSubscription.customDates) }
+                val cancelledDatesList = cancelledDatesJob.await()
+                oSubscription.cancelledDates.clear()
+                oSubscription.cancelledDates.addAll(cancelledDatesList)
+                oSubscription.subType = Constants.CUSTOM_DAYS
+                binding.tvEstimate.text = "Estimate (${30 - oSubscription.cancelledDates.size}/30 days cycle)"
+                val price = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toFloat() * (30 - oSubscription.cancelledDates.size)
+                binding.tvEstimateAmount.text = "Rs: $price"
+                oSubscription.estimateAmount = price
+                hideProgressDialog()
             }
         }
     }
@@ -755,5 +791,15 @@ class SubscriptionProductActivity :
     override fun onResume() {
         viewModel.getProfileData()
         super.onResume()
+    }
+
+    fun selectedCustomSubDates(dates: ArrayList<String>) {
+        if (dates.isNullOrEmpty()) {
+            binding.spSubscriptionType.setSelection(0)
+        } else {
+            oSubscription.customDates.clear()
+            oSubscription.customDates.addAll(dates)
+            generateEstimate(2)
+        }
     }
 }

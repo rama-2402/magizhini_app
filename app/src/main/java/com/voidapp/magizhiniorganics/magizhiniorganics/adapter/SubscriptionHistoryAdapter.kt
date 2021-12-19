@@ -36,7 +36,6 @@ class SubscriptionHistoryAdapter(
 
     override fun onBindViewHolder(holder: SubscriptionHistoryViewHolder, position: Int) {
         val subscription = subscriptions[position]
-        var renewal = false
         with(holder.binding) {
             tvTransactionIDText.text = subscription.productName
             tvSubID.text = subscription.id
@@ -46,17 +45,14 @@ class SubscriptionHistoryAdapter(
             ivSubStatus.visibility = View.INVISIBLE
             when (subscription.status) {
                 Constants.SUB_ACTIVE ->  {
-//                    ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivered))
-                        renewal = if (
-                            subscription.subType != Constants.SINGLE_PURCHASE &&
-                            System.currentTimeMillis() > TimeUtil().getCustomDateFromDifference(subscription.endDate, -7)
-                        ) {
-                            tvRenew.text = "Renew \n Subscription"
-                            true
-                        } else {
-                            tvRenew.text = "Unsubscribe"
-                            false
-                        }
+    //                    ivSubStatus.setImageDrawable(ContextCompat.getDrawable(ivSubStatus.context, R.drawable.ic_delivered))
+                    if (
+                        System.currentTimeMillis() > TimeUtil().getCustomDateFromDifference(subscription.endDate, -7)
+                    ) {
+                        tvRenew.text = "Renew \n Subscription"
+                    } else {
+                        tvRenew.text = "Unsubscribe"
+                    }
                     tvRenew.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(tvRenew.context, R.color.matteRed))
                     tvRenew.elevation = 4f
                     tvRenew.setTextColor(ContextCompat.getColor(tvRenew.context, R.color.white))

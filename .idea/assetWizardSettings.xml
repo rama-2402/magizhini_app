@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:$USER_HOME$/Android/Sdk/icons/material/materialicons/attach_money/baseline_attach_money_24.xml" />
+                                      <entry key="url" value="jar:file:/app/extra/android-studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/visibility/baseline_visibility_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -29,7 +29,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="585858" />
-                            <entry key="outputName" value="ic_money" />
+                            <entry key="outputName" value="ic_visible" />
                           </map>
                         </option>
                       </PersistentState>

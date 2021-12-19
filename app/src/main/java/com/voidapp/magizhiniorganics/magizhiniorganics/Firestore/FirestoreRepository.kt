@@ -69,7 +69,7 @@ class FirestoreRepository (
 
     suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
 
-    suspend fun renewSubscription(id: String,productName: String, monthYear: String, newDate: Long): NetworkResult = firestore.renewSubscription(id, productName, monthYear, newDate)
+    suspend fun renewSubscription(sub: SubscriptionEntity, updatedCancelledDates: ArrayList<Long>): NetworkResult = firestore.renewSubscription(sub, updatedCancelledDates)
 
     //subscription history
     suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean = firestore.addCancellationDates(sub, date)

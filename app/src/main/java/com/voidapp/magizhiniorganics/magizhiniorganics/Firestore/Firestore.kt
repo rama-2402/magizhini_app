@@ -19,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADD_MONEY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB
@@ -956,7 +957,7 @@ class Firestore(
     = withContext(Dispatchers.IO) {
         return@withContext try {
             val addSubCancelledDate = async { addSubCancelledDate(sub, date) }
-            val addSubIDToCancelledDate = async { addSubIDToCancelledDate(sub, date) }
+            val addSubIDToCancelledDate = async { addSubIDToCancelledDate(sub.id, date) }
 
             addSubCancelledDate.await() &&
             addSubIDToCancelledDate.await()
@@ -966,7 +967,7 @@ class Firestore(
         }
     }
 
-    private suspend fun addSubIDToCancelledDate(sub: SubscriptionEntity, date: Long): Boolean
+    private suspend fun addSubIDToCancelledDate(id: String, date: Long): Boolean
             = withContext(Dispatchers.IO) {
         return@withContext try {
             val dateDocID = SimpleDateFormat("dd")
@@ -980,7 +981,7 @@ class Firestore(
                 cancelledIDs["cancelledIDs"] = arrayListOf()
                 path.set(cancelledIDs, SetOptions.merge()).await()
             }
-            path.update("cancelledIDs", FieldValue.arrayUnion(sub.id)).await()
+            path.update("cancelledIDs", FieldValue.arrayUnion(id)).await()
             true
         }catch (e: Exception) {
             e.message?.let { logCrash("Firestore: adding sub ID to date list in firestore", it) }
@@ -1100,32 +1101,18 @@ class Firestore(
                 e.message?.let { logCrash("firestore: uploading the generated sub to local Db", it) }
                 false
             } }
-            val createNewNotification = async {
-                UserNotification(
-                    id = "",
-                    userID = getCurrentUserId()!!,
-                    timestamp = TimeUtil().getCurrentYearMonthDateFromLong(subscription.endDate - 86400000).toString().toLong(),
-                    title = "Subscription Ending Reminder",
-                    message = "Your subscription for product ${subscription.productName} is ending Tomorrow. Kindly Resubscribe to continue our service. If you have already renewed your subscription kindly ignore this reminder.",
-                    imageUrl = "",
-                    clickType = SUBSCRIPTION,
-                    clickContent = ""
-                ).let {
-                    createNewNotification(it)
-                    it.timestamp = it.timestamp+1
-                    it.message = "Your subscription for product ${subscription.productName} is ending Today. Kindly Resubscribe to continue our service. If you have already renewed your subscription kindly ignore this reminder."
-                    createNewNotification(it)
-                    true
-                }
-            }
 
             if (
                 updateStore.await() &&
                 updateLocal.await() &&
                 updateCloud.await() &&
-                createSubInDB.await() &&
-                createNewNotification.await()
+                createSubInDB.await()
             ) {
+                if (subscription.subType != MONTHLY) {
+                    for (date in subscription.cancelledDates) {
+                        addSubIDToCancelledDate(sub.id, date)
+                    }
+                }
                 NetworkResult.Success("sub", "Subscription Created Successfully")
             } else {
                 NetworkResult.Failed("sub", "Server Error! Failed to create Subscription. Try Later")
@@ -1182,13 +1169,13 @@ class Firestore(
         }
     }
     //Renew subscription
-    suspend fun renewSubscription(id: String, productName: String, monthYear: String, newDate: Long): NetworkResult =
+    suspend fun renewSubscription(sub: SubscriptionEntity, updatedCancelledDates: ArrayList<Long>): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                val renewSubInFirestore = async { renewSubInFirestore(id, monthYear, newDate) }
+                val renewSubInFirestore = async { renewSubInFirestore(sub.id, sub.monthYear, sub.endDate) }
                 val renewSubInLocalDB = async {
                     try {
-                        repository.updateSubscription(id, newDate)
+                        repository.upsertSubscription(sub)
                         true
                     } catch (e: IOException) {
                         e.message?.let {
@@ -1200,28 +1187,25 @@ class Firestore(
                         false
                     }
                 }
-                val createNewNotification = async {
-                        UserNotification(
-                            id = "",
-                            userID = getCurrentUserId()!!,
-                            timestamp = TimeUtil().getCurrentYearMonthDateFromLong(newDate - 86400000).toString().toLong(),
-                            title = "Subscription Ending Reminder",
-                            message = "Your subscription for product $productName is ending Tomorrow. Kindly Resubscribe to continue our service. If you have already renewed your subscription kindly ignore this reminder.",
-                            imageUrl = "",
-                            clickType = SUBSCRIPTION,
-                            clickContent = ""
-                        ).let {
-                            createNewNotification(it)
-                            it.timestamp = it.timestamp+1
-                            it.message = "Your subscription for product $productName is ending Today. Kindly Resubscribe to continue our service. If you have already renewed your subscription kindly ignore this reminder."
-                            createNewNotification(it)
+                val updateCancellationDates = async {
+                    try {
+                        if (updatedCancelledDates.isNullOrEmpty()) {
+                            true
+                        } else {
+                            for (date in updatedCancelledDates) {
+                                addCancellationDates(sub, date)
+                            }
                             true
                         }
+                    } catch (e: Exception) {
+                        false
                     }
+                }
+
                 if (
                     renewSubInFirestore.await() &&
                     renewSubInLocalDB.await() &&
-                    createNewNotification.await()
+                    updateCancellationDates.await()
                 ) {
                     NetworkResult.Success("renew", null)
                 } else {

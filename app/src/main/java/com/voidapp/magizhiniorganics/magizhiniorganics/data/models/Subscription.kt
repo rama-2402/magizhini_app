@@ -11,11 +11,12 @@ data class Subscription(
     var monthYear: String = "",
     var startDate: Long = 0L,
     var endDate: Long = 0L,
-    var autoPay: Boolean = false,
+    var basePay: Float = 0f,
     var paymentMode: String = "Wallet",
     var estimateAmount: Float = 0f,
     var subType: String = "Single Purchase",
     var status: String = "",
+    var customDates: ArrayList<String> = arrayListOf(),
     var deliveredDates: ArrayList<Long> = arrayListOf(),
     var cancelledDates: ArrayList<Long> = arrayListOf(),
     var notDeliveredDates: ArrayList<Long> = arrayListOf()

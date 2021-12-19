@@ -30,6 +30,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCalenda
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOM_DAYS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
@@ -68,8 +71,6 @@ class SubscriptionHistoryActivity :
 
     private val paymentList = mutableListOf<String>()
     private var id: String = ""
-
-    private val TAG: String = "qqqq"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -365,7 +366,6 @@ class SubscriptionHistoryActivity :
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
-
     fun approved(status: Boolean) {
         showSuccessDialog("", "Processing payment from Wallet...", "wallet")
         lifecycleScope.launch {
@@ -393,10 +393,16 @@ class SubscriptionHistoryActivity :
 
     private fun startTransaction() = lifecycleScope.launch(Dispatchers.IO) {
         val renewedDate = TimeUtil().getCustomDateFromDifference(mSubscription.endDate, 30)
-        viewModel.renewSubscription(mSubscription.id, mSubscription.productName, mSubscription.monthYear, renewedDate)
+        mSubscription.endDate = renewedDate
+        viewModel.renewSubscription(mSubscription)
+//        if (mSubscription.subType == MONTHLY) {
+//            viewModel.renewSubscription(mSubscription.id, mSubscription.productName, mSubscription.monthYear, renewedDate, false)
+//        } else {
+//            viewModel.renewSubscription(mSubscription.id, mSubscription.productName, mSubscription.monthYear, renewedDate, true)
+//        }
     }
 
-    private fun onSuccessCallback(message: String, data: Any?) {
+    private suspend fun onSuccessCallback(message: String, data: Any?) {
         when(message) {
             "wallet" -> {
                 viewModel.liveWallet = data as Wallet
@@ -407,6 +413,7 @@ class SubscriptionHistoryActivity :
             "transaction" -> viewModel.updateTransaction(data as TransactionHistory)
             "transactionID" -> lifecycleScope.launch {
                 if (mSubscription.status == Constants.CANCELLED) {
+                    viewModel.getProfile()
                     delay(1500)
                     hideSuccessDialog()
                     showExitSheet(
@@ -420,11 +427,13 @@ class SubscriptionHistoryActivity :
                     startTransaction()
                 }
             }
+//            "basePay" -> sub.basePay = data as Float
             "renew" -> lifecycleScope.launch {
                 delay(1500)
                 hideSuccessDialog()
                 viewModel.getSubscriptions(Constants.SUB_ACTIVE)
                 showSuccessDialog("", "Subscription renewed Successfully...")
+                viewModel.getProfile()
                 delay(1500)
                 hideSuccessDialog()
             }
@@ -445,7 +454,8 @@ class SubscriptionHistoryActivity :
                     body = "Adding balance to the Wallet... Please wait",
                     content = "wallet"
                 )
-                val refundAmount = viewModel.calculateBalance(mSubscription)
+                val refundAmountJob = async { viewModel.calculateBalance(mSubscription) }
+                val refundAmount = refundAmountJob.await()
                 with(mSubscription) {
                     viewModel.makeTransactionFromWallet(refundAmount, customerID, id, "Add")
                 }
@@ -478,21 +488,42 @@ class SubscriptionHistoryActivity :
     }
 
     override fun renewSub(position: Int) {
-        mSubscription = mAllSubscriptions[position]
-        Toast.makeText(this, "Choose Payment Method", Toast.LENGTH_SHORT).show()
-        showListBottomSheet(this, paymentList as ArrayList<String>, "payment")
+        lifecycleScope.launch {
+            showProgressDialog()
+            mSubscription = mAllSubscriptions[position]
+            if (mSubscription.subType != MONTHLY) {
+                val updatedCancelledDatesJob = async { viewModel.getCancellationDays(mSubscription) }
+                val updatedCancelledDates = updatedCancelledDatesJob.await()
+            }
+            val getUpdatedEstimateForNewSubJob = async { viewModel.getUpdatedEstimateForNewSubJob(mSubscription) }
+            val updatedEstimateForNewSub = getUpdatedEstimateForNewSubJob.await()
+            if (updatedEstimateForNewSub == 0f) {
+                hideProgressDialog()
+                showToast(this@SubscriptionHistoryActivity, "Product is not available for purchase anymore. Please contact customer support for further assistance.", LONG)
+            } else {
+                mSubscription.estimateAmount = updatedEstimateForNewSub
+                hideProgressDialog()
+//                showPaymentMethod()
+                //THIS CAN BE USED IF WE WANT THE RENEWED SUB TO HAVE CURRENT PRODUCT PRICE
+                showExitSheet(this@SubscriptionHistoryActivity, "Renewing the Existing Subscription plan with revised Product MRP is Rs: ${mSubscription.estimateAmount}. There is no additional cost added for renewal. To Continue with renewal click PROCEED below.", "price")
+            }
+        }
     }
 
     override fun cancelSub(position: Int) {
         mSubscriptionPosition = position
         mSubscription = mAllSubscriptions[position]
-        mSubscription.status = Constants.CANCELLED
         showExitSheet(this, "Cancel Subscription")
     }
 
     override fun showCalendar(position: Int) {
         showProgressDialog()
         showCalendarDialog(mAllSubscriptions[position])
+    }
+
+    fun showPaymentMethod() {
+        Toast.makeText(this@SubscriptionHistoryActivity, "Choose Payment Method", Toast.LENGTH_SHORT).show()
+        showListBottomSheet(this@SubscriptionHistoryActivity, paymentList as ArrayList<String>, "payment")
     }
 
 }

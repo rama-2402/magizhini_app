@@ -28,7 +28,7 @@ data class SubscriptionEntity(
     @ColumnInfo
     var endDate: Long = 0L,
     @ColumnInfo
-    var autoPay: Boolean = false,
+    var basePay: Float = 0f,
     @ColumnInfo
     var paymentMode: String = "Wallet",
     @ColumnInfo
@@ -37,6 +37,8 @@ data class SubscriptionEntity(
     var subType: String = "Single Purchase",
     @ColumnInfo
     var status: String = "Active",
+    @ColumnInfo
+    var customDates: ArrayList<String> = arrayListOf(),
     @ColumnInfo
     var deliveredDates: ArrayList<Long> = arrayListOf(),
     @ColumnInfo

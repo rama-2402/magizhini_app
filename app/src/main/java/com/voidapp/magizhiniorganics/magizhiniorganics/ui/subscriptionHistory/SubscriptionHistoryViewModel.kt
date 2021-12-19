@@ -16,6 +16,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ACTIVE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADD_MONEY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALTERNATE_DAYS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOM_DAYS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -24,9 +29,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.Period
 import java.time.temporal.ChronoUnit
+import java.util.*
+import kotlin.collections.ArrayList
 
 class SubscriptionHistoryViewModel(
     val fbRepository: FirestoreRepository,
@@ -35,6 +43,8 @@ class SubscriptionHistoryViewModel(
 
     var liveWallet: Wallet = Wallet()
     var currentUserProfile: UserProfileEntity = UserProfileEntity()
+    private var updatedCustomDaysForSubRenewal: Int = 0
+    private val updatedCancelledDaysForSubRenewal = arrayListOf<Long>()
 
     private var _activeSubs: MutableLiveData<MutableList<SubscriptionEntity>> = MutableLiveData()
     val activeSub: LiveData<MutableList<SubscriptionEntity>> = _activeSubs
@@ -57,7 +67,6 @@ class SubscriptionHistoryViewModel(
 
     private suspend fun getWallet(id: String) {
         val suspendProfile = dbRepository.getProfileData()!!
-        Log.e("TAG", "getWallet: $suspendProfile", )
         _status.value = fbRepository.getWallet(id)
     }
 
@@ -94,20 +103,22 @@ class SubscriptionHistoryViewModel(
     }
 
     suspend fun calculateBalance(sub: SubscriptionEntity): Float = withContext(Dispatchers.Default) {
-        val singleDayPrice = sub.estimateAmount/30f
-        if (System.currentTimeMillis() > sub.startDate) {
-            // we add plus one because the day will counted if exactly at 00:00. any timestamp past that point day will not be calculated. So to include that we add one to the total
-            val remainingDays = (sub.endDate - System.currentTimeMillis()) / (1000*60*60*24)
-            val cancelledDates = mutableListOf<Long>()
-            for (date in sub.cancelledDates.indices) {
-                if (sub.cancelledDates[date] < System.currentTimeMillis()) {
-                    cancelledDates.add(sub.cancelledDates[date])
+        return@withContext if(sub.subType == CUSTOM_DAYS) {
+            var totalSubDays = 0
+            val dayFormat = SimpleDateFormat("EEEE", Locale.ENGLISH)
+            for (dateLong in sub.startDate..sub.endDate step 86400000) {
+                if (sub.customDates.contains(dayFormat.format(dateLong))) {
+                    totalSubDays += 1
                 }
             }
-            val refundDays = cancelledDates.size + sub.notDeliveredDates.size + remainingDays + 1
-            return@withContext (refundDays * singleDayPrice)
+            val totalAmountPaid = totalSubDays * sub.basePay
+            val amountForDelivery = sub.deliveredDates.size * sub.basePay
+            totalAmountPaid - amountForDelivery
         } else {
-            return@withContext (30f * singleDayPrice)
+            val totalSubPeriod = (sub.endDate - sub.startDate + 86400000)/86400000
+            val totalSubscriptionRenewals = totalSubPeriod / 30
+            val amountForDelivery = sub.deliveredDates.size * sub.basePay
+            (sub.estimateAmount * totalSubscriptionRenewals) - amountForDelivery
         }
     }
 
@@ -122,9 +133,12 @@ class SubscriptionHistoryViewModel(
                 id,
                 id,
                 Constants.SUCCESS,
-                Constants.PURCHASE,
+                Constants.SUBSCRIPTION,
                 orderID
             ).let {
+                if (transactionType == "Add") {
+                    it.purpose = ADD_MONEY
+                }
                 _status.value = NetworkResult.Success("transaction", it)
             }
         } else {
@@ -136,12 +150,66 @@ class SubscriptionHistoryViewModel(
         _status.value = fbRepository.updateTransaction(transaction)
     }
 
-    suspend fun renewSubscription(
-        id: String,
-        productName: String,
-        monthYear: String,
-        newDate: Long
-    ) {
-        _status.value = fbRepository.renewSubscription(id, productName, monthYear, newDate)
+    suspend fun renewSubscription(sub: SubscriptionEntity) {
+        sub.cancelledDates.addAll(updatedCancelledDaysForSubRenewal)
+        if (sub.subType == MONTHLY) {
+            _status.value = fbRepository.renewSubscription(sub, arrayListOf())
+        } else {
+            _status.value = fbRepository.renewSubscription(sub, updatedCancelledDaysForSubRenewal)
+        }
+    }
+
+    suspend fun getCancellationDays(sub: SubscriptionEntity) : ArrayList<Long> = withContext (Dispatchers.Default) {
+        val singeDateDifference = 86400000
+        val cancelledDates = arrayListOf<Long>()
+        var startDate = sub.endDate
+        updatedCancelledDaysForSubRenewal.clear()
+        if (sub.subType == ALTERNATE_DAYS) {
+            for (i in 1..15) {
+                startDate += (2 * singeDateDifference)
+                cancelledDates.add(startDate)
+            }
+            updatedCancelledDaysForSubRenewal.addAll(cancelledDates)
+            return@withContext cancelledDates
+        } else {
+            for (i in 1..30) {
+                startDate += singeDateDifference
+                val day = SimpleDateFormat("EEEE", Locale.ENGLISH).format(startDate)
+                if (!sub.customDates.contains(day)) {
+                    cancelledDates.add(startDate)
+                }
+            }
+            updatedCancelledDaysForSubRenewal.addAll(cancelledDates)
+            updatedCustomDaysForSubRenewal = 30 - cancelledDates.size
+            return@withContext cancelledDates
+        }
+    }
+
+    suspend fun getUpdatedEstimateForNewSubJob(sub: SubscriptionEntity): Float = withContext(Dispatchers.Default) {
+        val updatedProduct = dbRepository.getProductWithIdForUpdate(sub.productID)
+        if (updatedProduct.status != ACTIVE) {
+            //THIS CODE CAN BE USED IF WE WANT THE RENEWED SUB TO HAVE NEW UPDATED PRICES
+//            var variantPosition = 0
+//            for (i in updatedProduct.variants.indices) {
+//                val variantName = "${updatedProduct.variants[i].variantName} ${updatedProduct.variants[i].variantType}"
+//                if (variantName == sub.variantName) {
+//                    variantPosition = i
+//                }
+//            }
+//            _status.value = NetworkResult.Success("basePay", updatedProduct.variants[variantPosition].variantPrice)
+
+            val estimateAmount = when(sub.subType) {
+//                CUSTOM_DAYS -> (updatedProduct.variants[variantPosition].variantPrice * updatedCustomDaysForSubRenewal).toFloat()
+//                ALTERNATE_DAYS -> (updatedProduct.variants[variantPosition].variantPrice * 15).toFloat()
+//                else -> (updatedProduct.variants[variantPosition].variantPrice * 30).toFloat()
+                CUSTOM_DAYS -> (sub.basePay * updatedCustomDaysForSubRenewal)
+                ALTERNATE_DAYS -> (sub.basePay * 15)
+                else -> (sub.basePay * 30)
+            }
+//            _status.value = NetworkResult.Success("basePay", estimateAmount)
+            return@withContext estimateAmount
+        } else {
+            return@withContext 0f
+        }
     }
 }

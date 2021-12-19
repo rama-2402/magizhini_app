@@ -1,11 +1,15 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import com.aminography.primecalendar.civil.CivilCalendar
+import com.aminography.primecalendar.common.CalendarFactory
+import com.aminography.primecalendar.common.CalendarType
 import com.aminography.primedatepicker.picker.PrimeDatePicker
+import com.aminography.primedatepicker.picker.callback.MultipleDaysPickCallback
 import com.aminography.primedatepicker.picker.callback.SingleDayPickCallback
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
+import java.util.*
 
 
 class DatePickerLib {
@@ -24,12 +28,14 @@ class DatePickerLib {
                     .build()
                 datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
         }
+
     fun pickSingleDate(activity: WalletActivity) {
         //val themeFactory = object: DarkThemeFactory() {}
 
             val callback = SingleDayPickCallback { date ->
                 activity.filterDate(date.timeInMillis)
             }
+
                 val today = CivilCalendar()
                 val datePicker = PrimeDatePicker.dialogWith(today)
                     .pickSingleDay(callback)
@@ -37,19 +43,24 @@ class DatePickerLib {
                     .build()
                 datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
         }
+
     fun startSubscriptionDate(activity: SubscriptionProductActivity) {
         //val themeFactory = object: DarkThemeFactory() {}
 
             val callback = SingleDayPickCallback { date ->
                 activity.filterDate(date.timeInMillis)
             }
+            val min = CalendarFactory.newInstance(CalendarType.CIVIL)
+            min.add(Calendar.DAY_OF_MONTH, +1)
                 val today = CivilCalendar()
                 val datePicker = PrimeDatePicker.dialogWith(today)
                     .pickSingleDay(callback)
+                    .minPossibleDate(min)
                     //.applyTheme(themeFactory)
                     .build()
                 datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
         }
+
 //    fun pickMultipleDates(activity: SubscriptionHistoryActivity, minDate: Int, maxDate: Int) {
 //        val callback = MultipleDaysPickCallback { dates ->
 //            activity.cancellationDates(dates)

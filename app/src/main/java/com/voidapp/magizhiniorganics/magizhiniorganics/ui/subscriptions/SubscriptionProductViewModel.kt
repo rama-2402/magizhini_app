@@ -24,6 +24,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class SubscriptionProductViewModel(
     private val dbRepository: DatabaseRepository,
@@ -134,7 +137,7 @@ class SubscriptionProductViewModel(
                 id,
                 id,
                 Constants.SUCCESS,
-                Constants.PURCHASE,
+                Constants.SUBSCRIPTION,
                 orderID
             ).let {
                 _status.value = NetworkResult.Success("transaction", it)
@@ -150,6 +153,28 @@ class SubscriptionProductViewModel(
 
     suspend fun generateSubscriptionID(id: String): String = withContext(Dispatchers.IO) {
         return@withContext fbRepository.generateSubscriptionID(id)
+    }
+
+    suspend fun setCancelDates(date: Long , days: ArrayList<String> = arrayListOf()) : ArrayList<Long> = withContext (Dispatchers.Default) {
+        val singeDateDifference = 86400000
+        val cancelledDates = arrayListOf<Long>()
+        var startDate = date - singeDateDifference
+        if (days.isNullOrEmpty()) {
+            for (i in 1..15) {
+                startDate += (2 * singeDateDifference)
+                cancelledDates.add(startDate)
+            }
+            return@withContext cancelledDates
+        } else {
+            for (i in 1..30) {
+                startDate += singeDateDifference
+                val day = SimpleDateFormat("EEEE", Locale.ENGLISH).format(startDate)
+                if (!days.contains(day)) {
+                    cancelledDates.add(startDate)
+                }
+            }
+            return@withContext cancelledDates
+        }
     }
 }
 

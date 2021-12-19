@@ -163,11 +163,20 @@ object Constants {
 
     //subscriptions
     const val SINGLE_PURCHASE = "Single Purchase"
-    const val WEEKDAYS = "Weekdays"
-    const val WEEKENDS = "Weekends"
     const val MONTHLY = "Monthly"
+    const val ALTERNATE_DAYS = "Alternate Days"
+    const val CUSTOM_DAYS = "Custom Days"
     const val SUB_ACTIVE = "Active"
     const val SUB_CANCELLED = "Cancelled"
+
+    //weekdays
+    const val MONDAY: String = "Monday"
+    const val TUESDAY: String = "Tuesday"
+    const val WEDNESDAY: String = "Wednesday"
+    const val THURSDAY: String = "Thursday"
+    const val FRIDAY: String = "Friday"
+    const val SATURDAY: String = "Saturday"
+    const val SUNDAY: String = "Sunday"
 
     //FCM
     const val BASE_URL = "https://fcm.googleapis.com"

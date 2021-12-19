@@ -190,26 +190,6 @@ open class BaseActivity : AppCompatActivity() {
                 view.tvCancelText.text = "Contact Support"
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
             }
-//            "permission" -> {
-//                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
-//                view.tvCancelText.text = "Proceed"
-//                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
-//            }
-//            "setting" -> {
-//                view.tvConfirmationText.setTextColor(
-//                    ContextCompat.getColor(
-//                        view.tvConfirmationText.context,
-//                        R.color.gray700
-//                    )
-//                )
-//                view.tvCancelText.text = "Proceed"
-//                view.tvCancelText.setTextColor(
-//                    ContextCompat.getColor(
-//                        view.tvConfirmationText.context,
-//                        R.color.matteRed
-//                    )
-//                )
-//            }
             else -> {
                 view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
                 view.tvCancelText.text = "Proceed"
@@ -277,6 +257,7 @@ open class BaseActivity : AppCompatActivity() {
                 is SubscriptionHistoryActivity -> {
                     when(data) {
                         "cs" -> activity.moveToCustomerSupport()
+                        "price" -> activity.showPaymentMethod()
                     }
                 }
                 is InvoiceActivity -> activity.moveToCustomerSupport()

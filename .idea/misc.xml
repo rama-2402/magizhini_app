@@ -48,7 +48,7 @@
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.48703703703703705" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_subscription_history.xml" value="0.44880546075085326" />
-        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.5053658536585366" />
         <entry key="app/src/main/res/layout/activity_video_player.xml" value="0.5421875" />
         <entry key="app/src/main/res/layout/activity_wallet.xml" value="0.5" />
         <entry key="app/src/main/res/layout/content_subscription_product.xml" value="0.5432291666666667" />
@@ -62,6 +62,7 @@
         <entry key="app/src/main/res/layout/dialog_bottom_item_list.xml" value="0.25" />
         <entry key="app/src/main/res/layout/dialog_bottom_list.xml" value="0.5307692307692308" />
         <entry key="app/src/main/res/layout/dialog_calendar.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/dialog_custom_sub_days.xml" value="0.5395833333333333" />
         <entry key="app/src/main/res/layout/dialog_loading.xml" value="0.46648550724637683" />
         <entry key="app/src/main/res/layout/dialog_referral.xml" value="0.5421875" />
         <entry key="app/src/main/res/layout/dialog_subscription_details.xml" value="0.5421875" />

@@ -99,7 +99,7 @@
     <string-array name="subscription_types">
         <item>Monthly</item>
         <item>Alternate Days</item>
-        <item>Custom Delivery</item>
+        <item>Custom Days</item>
     </string-array>
 
     <!--    dates filter-->

@@ -1,355 +1,372 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
     <data>
+
         <variable
             name="viewmodel"
             type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel" />
     </data>
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.subscriptions.SubscriptionProductActivity">
-
-    <ImageView
-        android:id="@+id/ivPreviewImage"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
-        android:elevation="32dp"
-        android:visibility="gone"
-        />
+        tools:context=".ui.subscriptions.SubscriptionProductActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/tbAppBar"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
->
-
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/tbCollapsingToolbar"
+        <ImageView
+            android:id="@+id/ivPreviewImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            app:contentScrim="@color/green_base"
-            app:expandedTitleMargin="@dimen/material_size_16"
-            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
-            app:titleCollapseMode="scale"
-            app:titleEnabled="false"
-            >
+            android:background="@color/black"
+            android:elevation="32dp"
+            android:visibility="gone" />
 
-            <ImageView
-                android:id="@+id/ivProductThumbnail"
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/tbAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:fitsSystemWindows="true"
+            android:theme="@style/ThemeOverlay.MaterialComponents.Dark">
+
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/tbCollapsingToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_app_placeholder"
-                android:background="@color/white"
-                app:layout_collapseMode="parallax" />
+                android:fitsSystemWindows="true"
+                app:contentScrim="@color/green_base"
+                app:expandedTitleMargin="@dimen/material_size_16"
+                app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+                app:titleCollapseMode="scale"
+                app:titleEnabled="false">
 
-            <View
+                <ImageView
+                    android:id="@+id/ivProductThumbnail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_app_placeholder"
+                    app:layout_collapseMode="parallax" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_gravity="bottom"
+                    android:background="@drawable/bg_gradient_transparent" />
+
+                <TextView
+                    android:id="@+id/tvProductName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_margin="@dimen/material_size_8"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="@font/roboto"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:textColor="@color/white"
+                    android:textSize="24sp" />
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/tbCollapsedToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    app:contentInsetStart="16dp"
+                    app:contentInsetStartWithNavigation="0dp"
+                    app:layout_collapseMode="pin"
+                    app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+                    app:title="">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivWallet"
+                        android:layout_width="@dimen/material_size_24"
+                        android:layout_height="@dimen/material_size_24"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="@dimen/material_size_16"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/favorites_icon"
+                        android:src="@drawable/ic_wallet"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/white" />
+                </androidx.appcompat.widget.Toolbar>
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!--    MAIN BODY LAYOUT-->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/svBody"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_gravity="bottom"
-                android:background="@drawable/bg_gradient_transparent" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvProductName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:fontFamily="@font/roboto"
-                android:textSize="24sp"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:layout_margin="@dimen/material_size_8"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:scrollHorizontally="true"
-                android:marqueeRepeatLimit ="marquee_forever"
-                android:layout_gravity="bottom"
-                />
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/tbCollapsedToolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:contentInsetStart="16dp"
-                app:title=""
-                app:contentInsetStartWithNavigation="0dp"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" >
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivWallet"
-                    android:layout_width="@dimen/material_size_24"
-                    android:layout_height="@dimen/material_size_24"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_wallet"
-                    android:layout_marginEnd="@dimen/material_size_16"
-                    android:contentDescription="@string/favorites_icon"
-                    app:tint="@color/white"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
-            </androidx.appcompat.widget.Toolbar>
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!--    MAIN BODY LAYOUT-->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/svBody"
-        android:background="@color/white"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        >
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/material_size_8"
-        android:elevation="@dimen/material_size_4"
-        android:background="@drawable/shape_round_rectangle_8"
-        android:layout_marginStart="@dimen/material_size_8"
-        android:layout_marginEnd="@dimen/material_size_8"
-        android:layout_marginTop="@dimen/material_size_8"
-        android:layout_marginBottom="@dimen/material_size_4"
-        >
-        <TextView
-            android:id="@+id/tvVariantName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:singleLine="true"
-            android:text="Variant: "
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/spVariants"
-            app:layout_constraintTop_toTopOf="@id/spVariants"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <Spinner
-            android:id="@+id/spVariants"
-            android:gravity="left"
-            android:paddingStart="@dimen/material_size_8"
-            android:background="@drawable/bg_material_box"
-            android:theme="@style/mySpinnerItemStyle"
-            android:popupBackground="@drawable/shape_round_rectangle_8"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="@dimen/material_size_8"
-            android:layout_marginEnd="@dimen/material_size_8"
-            app:layout_constraintBottom_toBottomOf="@id/tvVariantName"
-            app:layout_constraintStart_toEndOf="@id/tvVariantName"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ivInfo"
-            />
-        <TextView
-            android:id="@+id/tvPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_size_8"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:singleLine="true"
-            android:text="MRP : "
-            android:textColor="@color/gray700"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/spVariants"
-            app:layout_constraintStart_toStartOf="@id/tvVariantName"/>
-        <TextView
-            android:id="@+id/tvOriginalPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/material_size_8"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:singleLine="true"
-            android:text="(incl GST)"
-            android:textStyle="italic"
-            android:textColor="@color/grey"
-            android:textSize="14sp"
-            app:layout_constraintTop_toTopOf="@id/tvDiscountedPrice"
-            app:layout_constraintStart_toEndOf="@id/tvDiscountedPrice"
-            app:layout_constraintBottom_toBottomOf="@id/tvDiscountedPrice"/>
-        <TextView
-            android:id="@+id/tvDiscountedPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/material_size_8"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:singleLine="true"
-            android:text="Rs.5000"
-            android:textColor="@color/gray700"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="@id/tvPrice"
-            app:layout_constraintStart_toEndOf="@id/tvPrice"
-            app:layout_constraintBottom_toBottomOf="@id/tvPrice"/>
-
-
-        <TextView
-            android:id="@+id/tvStart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_size_8"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:singleLine="true"
-            android:text="Subscribe From: "
-            android:textColor="@color/gray700"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/tvPrice"
-            app:layout_constraintStart_toStartOf="@id/tvPrice"/>
-        <TextView
-            android:id="@+id/tvFromDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/material_size_8"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:singleLine="true"
-            android:text="DD/MM/YYYY"
-            android:textColor="@color/gray700"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="@id/tvStart"
-            app:layout_constraintStart_toEndOf="@id/tvStart"
-            app:layout_constraintBottom_toBottomOf="@id/tvStart"/>
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ivCalendar"
-            android:layout_width="@dimen/material_size_32"
-            android:layout_height="@dimen/material_size_32"
-            android:layout_marginStart="@dimen/material_size_8"
-            app:layout_constraintBottom_toBottomOf="@+id/tvFromDate"
-            app:layout_constraintStart_toEndOf="@id/tvFromDate"
-            app:layout_constraintTop_toTopOf="@+id/tvFromDate"
-            android:src="@drawable/ic_calendar"
-            android:padding="@dimen/material_size_4"
-            android:contentDescription="@string/favorites_icon"
-            app:tint="@color/green_base"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
-
-<!--        <com.google.android.material.button.MaterialButton-->
-<!--            android:id="@+id/btnCheckEstimate"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="check estimate"-->
-<!--            android:backgroundTint="@color/green_base"-->
-<!--            android:textColor="@color/white"-->
-<!--            app:cornerRadius="@dimen/material_size_8"-->
-<!--            android:layout_marginStart="@dimen/material_size_8"-->
-<!--            app:layout_constraintStart_toEndOf="@id/spSubscriptionType"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="@id/spSubscriptionType"-->
-<!--            app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType" />-->
-
-        <Spinner
-            android:id="@+id/spSubscriptionType"
-            android:gravity="left"
-            android:paddingStart="@dimen/material_size_8"
-            android:background="@drawable/bg_material_box"
-            android:theme="@style/mySpinnerItemStyle"
-            android:popupBackground="@drawable/shape_round_rectangle_8"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:entries="@array/subscription_types"
-            android:layout_marginTop="@dimen/material_size_16"
-            android:layout_marginEnd="@dimen/material_size_8"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/tvStart"
-            app:layout_constraintTop_toBottomOf="@id/tvStart"
-            app:layout_constraintEnd_toStartOf="@id/tvEstimate"
-            />
-
-        <TextView
-            android:id="@+id/tvEstimate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:singleLine="true"
-            android:text="Estimate (single order)"
-            android:textColor="@color/gray700"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/spSubscriptionType"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/spSubscriptionType"
-            app:layout_constraintBottom_toTopOf="@id/tvEstimateAmount"/>
-
-        <TextView
-            android:id="@+id/tvEstimateAmount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:singleLine="true"
-            android:text="Rs: 0.00"
-            android:textColor="@color/gray700"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/tvEstimate"
-            app:layout_constraintEnd_toEndOf="@id/tvEstimate"
-            app:layout_constraintTop_toBottomOf="@id/tvEstimate"
-            app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType"/>
-
-<!--        <TextView-->
-<!--            android:id="@+id/tvShowEstimateDates"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:ellipsize="end"-->
-<!--            android:fontFamily="@font/roboto"-->
-<!--            android:singleLine="true"-->
-<!--            android:text="show more"-->
-<!--            android:textColor="@color/blue900"-->
-<!--            android:textSize="10sp"-->
-<!--            android:textStyle="italic"-->
-<!--            app:layout_constraintStart_toEndOf="@id/tvEstimateAmount"-->
-<!--            app:layout_constraintEnd_toEndOf="@id/tvEstimate"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/tvEstimate"-->
-<!--            app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType"/>-->
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivInfo"
-                    android:layout_width="@dimen/material_size_32"
-                    android:layout_height="@dimen/material_size_32"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/material_size_8"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/spVariants"
-                    app:layout_constraintBottom_toBottomOf="@id/spVariants"
-                    android:src="@drawable/ic_info"
-                    android:padding="@dimen/material_size_4"
-                    android:contentDescription="@string/favorites_icon"
-                    app:tint="@color/green_base"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_4"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4"
+                    android:padding="@dimen/material_size_8">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:id="@+id/tvVariantName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="Variant: "
+                        android:textColor="@color/black"
+                        android:textSize="@dimen/text_size_large"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/spVariants"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/spVariants" />
+
+                    <Spinner
+                        android:id="@+id/spVariants"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:background="@drawable/bg_material_box"
+                        android:gravity="left"
+                        android:paddingStart="@dimen/material_size_8"
+                        android:popupBackground="@drawable/shape_round_rectangle_8"
+                        android:theme="@style/mySpinnerItemStyle"
+                        app:layout_constraintBottom_toBottomOf="@id/tvVariantName"
+                        app:layout_constraintEnd_toStartOf="@id/ivInfo"
+                        app:layout_constraintStart_toEndOf="@id/tvVariantName"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="MRP : "
+                        android:textColor="@color/gray700"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="@id/tvVariantName"
+                        app:layout_constraintTop_toBottomOf="@id/spVariants" />
+
+                    <TextView
+                        android:id="@+id/tvOriginalPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="(incl GST)"
+                        android:textColor="@color/grey"
+                        android:textSize="14sp"
+                        android:textStyle="italic"
+                        app:layout_constraintBottom_toBottomOf="@id/tvDiscountedPrice"
+                        app:layout_constraintStart_toEndOf="@id/tvDiscountedPrice"
+                        app:layout_constraintTop_toTopOf="@id/tvDiscountedPrice" />
+
+                    <TextView
+                        android:id="@+id/tvDiscountedPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="Rs.5000"
+                        android:textColor="@color/gray700"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/tvPrice"
+                        app:layout_constraintStart_toEndOf="@id/tvPrice"
+                        app:layout_constraintTop_toTopOf="@id/tvPrice" />
+
+
+                    <TextView
+                        android:id="@+id/tvStart"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="Subscribe From: "
+                        android:textColor="@color/gray700"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="@id/tvPrice"
+                        app:layout_constraintTop_toBottomOf="@id/tvPrice" />
+
+                    <TextView
+                        android:id="@+id/tvFromDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="DD/MM/YYYY"
+                        android:textColor="@color/gray700"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/tvStart"
+                        app:layout_constraintStart_toEndOf="@id/tvStart"
+                        app:layout_constraintTop_toTopOf="@id/tvStart" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivCalendar"
+                        android:layout_width="@dimen/material_size_32"
+                        android:layout_height="@dimen/material_size_32"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/favorites_icon"
+                        android:padding="@dimen/material_size_4"
+                        android:src="@drawable/ic_calendar"
+                        app:layout_constraintBottom_toBottomOf="@+id/tvFromDate"
+                        app:layout_constraintStart_toEndOf="@id/tvFromDate"
+                        app:layout_constraintTop_toTopOf="@+id/tvFromDate"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/green_base" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivShowCustomDaysDialog"
+                        android:layout_width="@dimen/material_size_32"
+                        android:layout_height="@dimen/material_size_32"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/favorites_icon"
+                        android:padding="@dimen/material_size_4"
+                        android:visibility="gone"
+                        android:src="@drawable/ic_visible"
+                        app:layout_constraintBottom_toBottomOf="@+id/ivCalendar"
+                        app:layout_constraintStart_toEndOf="@id/ivCalendar"
+                        app:layout_constraintTop_toTopOf="@+id/ivCalendar"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/green_base" />
+
+                    <!--        <com.google.android.material.button.MaterialButton-->
+                    <!--            android:id="@+id/btnCheckEstimate"-->
+                    <!--            android:layout_width="wrap_content"-->
+                    <!--            android:layout_height="wrap_content"-->
+                    <!--            android:text="check estimate"-->
+                    <!--            android:backgroundTint="@color/green_base"-->
+                    <!--            android:textColor="@color/white"-->
+                    <!--            app:cornerRadius="@dimen/material_size_8"-->
+                    <!--            android:layout_marginStart="@dimen/material_size_8"-->
+                    <!--            app:layout_constraintStart_toEndOf="@id/spSubscriptionType"-->
+                    <!--            app:layout_constraintEnd_toEndOf="parent"-->
+                    <!--            app:layout_constraintTop_toTopOf="@id/spSubscriptionType"-->
+                    <!--            app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType" />-->
+
+                    <Spinner
+                        android:id="@+id/spSubscriptionType"
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="@dimen/material_size_16"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:background="@drawable/bg_material_box"
+                        android:entries="@array/subscription_types"
+                        android:gravity="left"
+                        android:paddingStart="@dimen/material_size_8"
+                        android:popupBackground="@drawable/shape_round_rectangle_8"
+                        android:theme="@style/mySpinnerItemStyle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/tvEstimate"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvStart" />
+
+                    <TextView
+                        android:id="@+id/tvEstimate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="Estimate (single order)"
+                        android:textColor="@color/gray700"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@id/tvEstimateAmount"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/spSubscriptionType"
+                        app:layout_constraintTop_toTopOf="@id/spSubscriptionType" />
+
+                    <TextView
+                        android:id="@+id/tvEstimateAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="Rs: 0.00"
+                        android:textColor="@color/gray700"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType"
+                        app:layout_constraintEnd_toEndOf="@id/tvEstimate"
+                        app:layout_constraintStart_toStartOf="@id/tvEstimate"
+                        app:layout_constraintTop_toBottomOf="@id/tvEstimate" />
+
+                    <!--        <TextView-->
+                    <!--            android:id="@+id/tvShowEstimateDates"-->
+                    <!--            android:layout_width="wrap_content"-->
+                    <!--            android:layout_height="wrap_content"-->
+                    <!--            android:ellipsize="end"-->
+                    <!--            android:fontFamily="@font/roboto"-->
+                    <!--            android:singleLine="true"-->
+                    <!--            android:text="show more"-->
+                    <!--            android:textColor="@color/blue900"-->
+                    <!--            android:textSize="10sp"-->
+                    <!--            android:textStyle="italic"-->
+                    <!--            app:layout_constraintStart_toEndOf="@id/tvEstimateAmount"-->
+                    <!--            app:layout_constraintEnd_toEndOf="@id/tvEstimate"-->
+                    <!--            app:layout_constraintTop_toBottomOf="@id/tvEstimate"-->
+                    <!--            app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType"/>-->
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivInfo"
+                        android:layout_width="@dimen/material_size_32"
+                        android:layout_height="@dimen/material_size_32"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/favorites_icon"
+                        android:padding="@dimen/material_size_4"
+                        android:src="@drawable/ic_info"
+                        app:layout_constraintBottom_toBottomOf="@id/spVariants"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/spVariants"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/green_base" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/llViewPager"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/shape_round_rectangle_8"
-                    android:layout_marginTop="@dimen/material_size_4"
                     android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginTop="@dimen/material_size_4"
                     android:layout_marginEnd="@dimen/material_size_8"
                     android:layout_marginBottom="@dimen/material_size_16"
+                    android:background="@drawable/shape_round_rectangle_8"
                     android:elevation="@dimen/material_size_4">
 
                     <TextView
@@ -363,38 +380,37 @@
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         android:textStyle="italic"
+                        app:layout_constraintBottom_toBottomOf="@id/cpAddReview"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/cpAddReview"
-                        app:layout_constraintBottom_toBottomOf="@id/cpAddReview"/>
+                        app:layout_constraintTop_toTopOf="@id/cpAddReview" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/cpAddReview"
+                        style="@style/Widget.MaterialComponents.Chip.Action"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/material_size_4"
-                        app:chipBackgroundColor="@color/green_base"
                         android:text="Add Review"
-                        app:chipIcon="@drawable/ic_add"
                         android:textColor="@color/white"
+                        app:chipBackgroundColor="@color/green_base"
+                        app:chipIcon="@drawable/ic_add"
                         app:chipIconTint="@color/white"
-                        style="@style/Widget.MaterialComponents.Chip.Action"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <LinearLayout
                         android:id="@+id/llNewReview"
-                        android:visibility="gone"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        tools:context=".ui.product.fragments.NewReviewFragment"
-                        android:orientation="vertical"
                         android:background="@drawable/shape_round_rectangle_8"
                         android:gravity="center_horizontal"
+                        android:orientation="vertical"
                         android:paddingBottom="@dimen/material_size_32"
-                        app:layout_constraintTop_toBottomOf="@id/cpAddReview"
-                        app:layout_constraintStart_toStartOf="parent"
+                        android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
-                        >
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/cpAddReview"
+                        tools:context=".ui.product.fragments.NewReviewFragment">
 
                         <com.hsalf.smileyrating.SmileyRating
                             android:id="@+id/srSmileyRating"
@@ -405,48 +421,45 @@
                         <com.google.android.material.imageview.ShapeableImageView
                             android:id="@+id/ivReviewImage"
                             android:layout_width="match_parent"
+                            android:layout_height="200dp"
                             android:layout_marginStart="@dimen/material_size_16"
+                            android:layout_marginTop="@dimen/material_size_8"
                             android:layout_marginEnd="@dimen/material_size_16"
                             android:elevation="@dimen/material_size_8"
-                            android:layout_marginTop="@dimen/material_size_8"
-                            android:layout_height="200dp"
-                            android:visibility="gone"
                             android:scaleType="fitCenter"
-                            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
-                            />
+                            android:visibility="gone"
+                            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/etlDescription"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="200dp"
-                            android:nestedScrollingEnabled="true"
+                            android:layout_margin="@dimen/material_size_16"
+                            android:enabled="true"
                             android:gravity="top"
                             android:hint="Review"
-                            android:enabled="true"
-                            app:boxStrokeColor="@color/green_base"
+                            android:nestedScrollingEnabled="true"
                             android:textColorHint="@color/grey"
+                            app:boxStrokeColor="@color/green_base"
                             app:endIconMode="clear_text"
                             app:endIconTint="@color/grey"
                             app:flow_wrapMode="aligned"
-                            app:hintTextColor="@color/green_base"
-                            android:layout_margin="@dimen/material_size_16"
-                            >
+                            app:hintTextColor="@color/green_base">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/edtDescription"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:cursorVisible="true"
-                                android:textCursorDrawable="@null"
+                                android:enabled="true"
                                 android:gravity="top|left"
                                 android:inputType="textMultiLine"
-                                android:enabled="true"
-                                android:overScrollMode="ifContentScrolls"
                                 android:nestedScrollingEnabled="true"
+                                android:overScrollMode="ifContentScrolls"
                                 android:scrollbars="vertical"
                                 android:textColorHint="@color/green_base"
-                                />
+                                android:textCursorDrawable="@null" />
                         </com.google.android.material.textfield.TextInputLayout>
                         <!--    <com.google.android.material.button.MaterialButton-->
                         <!--        android:id="@+id/btnSaveReview"-->
@@ -465,48 +478,52 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_horizontal">
+                            android:gravity="center_horizontal"
+                            android:orientation="horizontal">
+
                             <TextView
                                 android:id="@+id/btnAddImage"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Add Image"
-                                android:textColor="@color/white"
-                                android:textStyle="bold"
+                                android:layout_margin="@dimen/material_size_8"
                                 android:background="@drawable/shape_round_rectangle_8"
                                 android:backgroundTint="@color/green_base"
-                                android:layout_margin="@dimen/material_size_8"
                                 android:elevation="6dp"
-                                android:padding="@dimen/material_size_8"/>
+                                android:padding="@dimen/material_size_8"
+                                android:text="Add Image"
+                                android:textColor="@color/white"
+                                android:textStyle="bold" />
+
                             <TextView
                                 android:id="@+id/btnSaveReview"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Add Review"
-                                android:textColor="@color/white"
-                                android:textStyle="bold"
-                                android:background="@drawable/shape_round_rectangle_8"
                                 android:layout_margin="@dimen/material_size_8"
+                                android:background="@drawable/shape_round_rectangle_8"
                                 android:backgroundTint="@color/green_base"
                                 android:elevation="6dp"
-                                android:padding="@dimen/material_size_8"/>
+                                android:padding="@dimen/material_size_8"
+                                android:text="Add Review"
+                                android:textColor="@color/white"
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                     </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/llEmptyLayout"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical"
                         android:layout_marginTop="@dimen/material_size_32"
                         android:layout_marginBottom="@dimen/material_size_32"
-                        android:visibility="gone"
                         android:gravity="center"
-                        app:layout_constraintTop_toBottomOf="@id/cpAddReview"
-                        app:layout_constraintStart_toStartOf="parent"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent">
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/cpAddReview">
+
                         <com.airbnb.lottie.LottieAnimationView
                             android:id="@+id/ltAnimImg"
                             android:layout_width="200dp"
@@ -517,6 +534,7 @@
                             app:lottie_autoPlay="true"
                             app:lottie_loop="true"
                             app:lottie_rawRes="@raw/empty" />
+
                         <TextView
                             android:id="@+id/tvEmptyMessage"
                             android:layout_width="wrap_content"
@@ -524,46 +542,45 @@
                             android:layout_marginTop="@dimen/material_size_16"
                             android:text="Product has no reviews yet! Be the first to review :)"
                             android:textColor="@color/gray500"
-                            android:textSize="16sp"
-                            />
+                            android:textSize="16sp" />
                     </LinearLayout>
 
                     <com.facebook.shimmer.ShimmerFrameLayout
                         android:id="@+id/flShimmerPlaceholder"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        app:shimmer_auto_start="true"
-                        app:layout_constraintTop_toBottomOf="@id/cpAddReview"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        >
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/cpAddReview"
+                        app:shimmer_auto_start="true">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical">
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
-                            <include
-                                layout="@layout/shimmer_transaction_history"/>
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
+
+                            <include layout="@layout/shimmer_transaction_history" />
                         </LinearLayout>
                     </com.facebook.shimmer.ShimmerFrameLayout>
 
@@ -582,19 +599,20 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
-            </androidx.core.widget.NestedScrollView>
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fabSubscribe"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-android:layout_marginBottom="@dimen/material_size_24"
-        android:text="  SUBSCRIBE"
-        android:gravity="center"
-        android:foregroundGravity="center"
-        android:textColor="@color/white"
-        app:backgroundTint="@color/matteRed"
-        app:fabSize="normal"
-        android:layout_gravity="bottom|center"
-        app:tint="@color/white" />
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
-        </layout>
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabSubscribe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="@dimen/material_size_24"
+            android:foregroundGravity="center"
+            android:gravity="center"
+            android:text="  SUBSCRIBE"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/matteRed"
+            app:fabSize="normal"
+            app:tint="@color/white" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

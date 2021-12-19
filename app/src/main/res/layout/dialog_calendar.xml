@@ -104,7 +104,7 @@
         <com.github.sundeepk.compactcalendarview.CompactCalendarView
             android:id="@+id/calendarView"
             android:layout_width="wrap_content"
-            android:layout_height="210dp"
+            android:layout_height="250dp"
             app:compactCalendarTargetHeight="250dp"
             app:compactCalendarTextSize="12sp"
             app:compactCalendarShouldSelectFirstDayOfMonthOnScroll="false"
