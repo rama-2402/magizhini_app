@@ -971,7 +971,7 @@ class Firestore(
             = withContext(Dispatchers.IO) {
         return@withContext try {
             val dateDocID = SimpleDateFormat("dd")
-            val docID = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
+            val docID = "${TimeUtil().getMonth(date)}${TimeUtil().getYear(date)}"
 
             val path = mFireStore.collection(SUBSCRIPTION)
                 .document(Constants.CANCELLED).collection(docID).document(dateDocID.format(date))

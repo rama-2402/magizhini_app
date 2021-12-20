@@ -189,7 +189,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
         binding.ivInfo.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            //TODO: Show some info about wallet and it's functions
+            showDescriptionBs("ABOUT MAGIZHINI WALLET \n \n \n Magizhini Wallet provides you a safe way of transaction for Purchases and Subscriptions. All your promotional cashback and refunds will be transferred to wallet and can be used for purchasing any item in Magizhini Store.")
         }
 
         binding.rvTransactionHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -381,7 +381,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     override fun onBackPressed() {
-        Log.e("TAG", "onBackPressed: ${viewModel.navigateToPage}", )
         when(viewModel.navigateToPage) {
             CHECKOUT_PAGE -> {
                 Intent(this, InvoiceActivity::class.java).also {

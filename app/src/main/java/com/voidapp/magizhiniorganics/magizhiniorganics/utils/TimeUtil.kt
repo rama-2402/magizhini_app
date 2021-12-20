@@ -32,9 +32,14 @@ class TimeUtil {
         return dateFormat.format(System.currentTimeMillis())
     }
 
-    fun getMonth(): String {
+    fun getMonth(dateLong: Long = 0L): String {
         val monthFormat = SimpleDateFormat("MM")
-        val id = monthFormat.format(System.currentTimeMillis())
+        val date = if (dateLong == 0L) {
+            System.currentTimeMillis()
+        } else {
+            dateLong
+        }
+        val id = monthFormat.format(date)
         return monthNameFromNumber(id)
     }
 
@@ -43,9 +48,14 @@ class TimeUtil {
         return monthFormat.format(System.currentTimeMillis()).toInt()
     }
 
-    fun getYear(): String {
+    fun getYear(dateLong: Long = 0L): String {
         val year = SimpleDateFormat("yyyy")
-        return year.format(System.currentTimeMillis())
+        val date = if (dateLong == 0L) {
+            System.currentTimeMillis()
+        } else {
+            dateLong
+        }
+        return year.format(date)
     }
 
     fun getCurrentYearMonthDate(): Int {
