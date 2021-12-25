@@ -11,16 +11,17 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.tasks.await
 import java.io.IOException
 
 class CheckoutViewModel(
@@ -243,6 +244,22 @@ class CheckoutViewModel(
     }
 
     fun placeOrder(order: Order) = viewModelScope.launch(Dispatchers.IO) {
+        if (order.paymentMethod == "Online") {
+            GlobalTransaction(
+                id = "",
+                userID = localProfile.id,
+                userName = localProfile.name,
+                userMobileNumber = localProfile.phNumber,
+                transactionID = order.transactionID,
+                transactionType = "Online Payment",
+                transactionAmount = order.price,
+                transactionDirection = PURCHASE,
+                timestamp = System.currentTimeMillis(),
+                transactionReason = "Product Purchase Online Transaction"
+            ).let {
+                fbRepository.createGlobalTransactionEntry(it)
+            }
+        }
         _status.value = fbRepository.placeOrder(order)
     }
 

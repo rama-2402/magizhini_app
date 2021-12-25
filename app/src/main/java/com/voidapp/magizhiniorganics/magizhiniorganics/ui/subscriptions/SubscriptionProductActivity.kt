@@ -121,14 +121,14 @@ class SubscriptionProductActivity :
 
     override fun onPaymentSuccess(response: String?) {
         showSuccessDialog("", "Processing payment ...", "wallet")
-        startTransaction()
+        startTransaction(response!!)
     }
 
     override fun onPaymentError(p0: Int, p1: String?) {
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
-    private fun startTransaction() {
+    private fun startTransaction(transactionID: String = "") {
         oSubscription.productID = mProductId
         oSubscription.productName = mProductName
         oSubscription.monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
@@ -137,7 +137,7 @@ class SubscriptionProductActivity :
         if (mStartDate == 0L) {
             filterDate(System.currentTimeMillis() + (1000 * 60 * 60 * 24))
         }
-        viewModel.generateSubscription(oSubscription)
+        viewModel.generateSubscription(oSubscription, transactionID)
     }
 
     private fun initRecyclerView() {

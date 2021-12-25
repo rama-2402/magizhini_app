@@ -226,6 +226,7 @@
                         android:layout_height="wrap_content"
                         android:text="-"
                         android:textStyle="normal"
+                        android:visibility="gone"
                         style="@style/TextAppearance.MaterialComponents.Body1"
                         android:layout_marginEnd="@dimen/material_size_4"
                         android:textColor="@color/gray700"

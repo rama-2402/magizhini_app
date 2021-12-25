@@ -33,6 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOM_DAYS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
@@ -358,7 +359,8 @@ class SubscriptionHistoryActivity :
     override fun onPaymentSuccess(response: String?) {
         showSuccessDialog("", "Processing payment ...", "wallet")
         lifecycleScope.launch {
-            startTransaction()
+            mSubscription.paymentMode = "Online"
+            startTransaction(response!!)
         }
     }
 
@@ -372,6 +374,7 @@ class SubscriptionHistoryActivity :
             if (viewModel.checkWalletForBalance(mSubscription.estimateAmount)) {
                 withContext(Dispatchers.IO) {
                     with(mSubscription) {
+                        paymentMode = WALLET
                         viewModel.makeTransactionFromWallet(
                             estimateAmount,
                             customerID,
@@ -391,10 +394,10 @@ class SubscriptionHistoryActivity :
         }
     }
 
-    private fun startTransaction() = lifecycleScope.launch(Dispatchers.IO) {
+    private fun startTransaction(transactionID: String = "") = lifecycleScope.launch(Dispatchers.IO) {
         val renewedDate = TimeUtil().getCustomDateFromDifference(mSubscription.endDate, 30)
         mSubscription.endDate = renewedDate
-        viewModel.renewSubscription(mSubscription)
+        viewModel.renewSubscription(mSubscription, transactionID)
 //        if (mSubscription.subType == MONTHLY) {
 //            viewModel.renewSubscription(mSubscription.id, mSubscription.productName, mSubscription.monthYear, renewedDate, false)
 //        } else {

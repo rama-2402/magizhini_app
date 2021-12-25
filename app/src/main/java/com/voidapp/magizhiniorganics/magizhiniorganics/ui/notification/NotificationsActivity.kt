@@ -27,11 +27,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_NOTIFICATIONS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -126,6 +129,12 @@ class NotificationsActivity :
                 notificationsAdapter.notifications = viewModel.allNotifications
                 binding.tvToolbarTitle.text = "Notifications (${viewModel.allNotifications.size})"
                 notificationsAdapter.notifyDataSetChanged()
+
+                if (!SharedPref(this).getData(USER_NOTIFICATIONS, BOOLEAN, false).toString().toBoolean()) {
+                    showToast(this, "Swipe Left or Right to clear Notification")
+                    SharedPref(this).putData(USER_NOTIFICATIONS, BOOLEAN, true)
+                }
+
             }
         })
         lifecycleScope.launchWhenStarted {

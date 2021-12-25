@@ -75,6 +75,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
+                android:id="@+id/tvTerms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/by_signing_in_you_indicate_that_you_have_read_and_agreed_to_our_terms_of_service_and_privacy_policy"

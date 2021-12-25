@@ -95,6 +95,7 @@ class FirestoreRepository (
     suspend fun generateOrderID(): String = firestore.generateOrderID()
 
     suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult = firestore.updateTransaction(transaction)
+    suspend fun createGlobalTransactionEntry(globalTransaction: GlobalTransaction): Boolean = firestore.createGlobalTransactionEntry(globalTransaction)
 //    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
 
     //notifications

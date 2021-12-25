@@ -1003,7 +1003,6 @@ class Firestore(
     }
 
 
-
     //cancel Subscription
     suspend fun cancelSubscription(sub: SubscriptionEntity): NetworkResult = withContext(Dispatchers.IO) {
         try {
@@ -1024,7 +1023,6 @@ class Firestore(
                     false
                 }
             }
-            //TODO NEED SOME LOGIC TO REMOVE THE NOTIFICATION REMINDER
             if (
                 createCancellationSub.await() &&
                 removeActiveSubFromProfile.await() &&
@@ -1110,7 +1108,9 @@ class Firestore(
             ) {
                 if (subscription.subType != MONTHLY) {
                     for (date in subscription.cancelledDates) {
-                        addSubIDToCancelledDate(sub.id, date)
+                        if (addSubIDToCancelledDate(sub.id, date)) {
+                            continue
+                        }
                     }
                 }
                 NetworkResult.Success("sub", "Subscription Created Successfully")
@@ -1287,44 +1287,44 @@ class Firestore(
         }
 
     suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
+        try {
             val currentUserID = if (id.isNullOrEmpty()) {
                 getCurrentUserId()!!
             } else {
                 id
             }
-            withContext(Dispatchers.IO) {
                 val path = mFireStore.collection(WALLET)
                     .document(WALLET)
                     .collection("Users")
-                mFireStore.runTransaction { transaction ->
-                    val wallet = transaction.get(path.document(currentUserID)).toObject(Wallet::class.java)
-                    if (status == "Add") {
-                        wallet!!.amount = wallet.amount + amount
-                        wallet.lastRecharge = System.currentTimeMillis()
-                        transaction.update(
-                            path.document(currentUserID),
-                            "amount",
-                            wallet.amount,
-                            "lastRecharge",
-                            wallet.lastRecharge
-                        )
-                        null
-                    } else {
-                        wallet!!.amount = wallet.amount - amount
-                        wallet.lastTransaction = System.currentTimeMillis()
-                        transaction.update(
-                            path.document(currentUserID),
-                            "amount",
-                            wallet.amount,
-                            "lastTransaction",
-                            wallet.lastTransaction
-                        )
-                        null
+
+                    mFireStore.runTransaction { transaction ->
+                        val wallet = transaction.get(path.document(currentUserID)).toObject(Wallet::class.java)
+                        if (status == "Add") {
+                            wallet!!.amount = wallet.amount + amount
+                            wallet.lastRecharge = System.currentTimeMillis()
+                            transaction.update(
+                                path.document(currentUserID),
+                                "amount",
+                                wallet.amount,
+                                "lastRecharge",
+                                wallet.lastRecharge
+                            )
+                            null
+                        } else {
+                            wallet!!.amount = wallet.amount - amount
+                            wallet.lastTransaction = System.currentTimeMillis()
+                            transaction.update(
+                                path.document(currentUserID),
+                                "amount",
+                                wallet.amount,
+                                "lastTransaction",
+                                wallet.lastTransaction
+                            )
+                            null
+                        }
                     }
-                }
+
                 return@withContext true
-            }
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: Making transaction for purchase", it) }
             return@withContext false
@@ -1339,8 +1339,32 @@ class Firestore(
                     .collection(transaction.fromID)
                 transaction.id = path.document().id
 
-                path.document(transaction.id).set(transaction, SetOptions.merge()).await()
-                NetworkResult.Success("transactionID", transaction.id)
+                val makeTransactionEntry = async {
+                    path.document(transaction.id).set(transaction, SetOptions.merge()).await()
+                    true
+                }
+                val makeGlobalTransactionEntry = async {
+                        val profile = mFireStore.collection(USERS).document(transaction.fromID).get().await().toObject(UserProfile::class.java)!!
+                        GlobalTransaction(
+                            id = "",
+                            userID = transaction.fromID,
+                            userName = profile.name,
+                            userMobileNumber = profile.phNumber,
+                            transactionID = transaction.id,
+                            transactionType = WALLET,
+                            transactionAmount = transaction.amount,
+                            transactionDirection = "Added Money to User Wallet",
+                            timestamp = transaction.timestamp,
+                            transactionReason = "This transaction may be Adding extra Money to Wallet or REFUND"
+                        ).let {
+                            createGlobalTransactionEntry(it)
+                        }
+                     }
+                if (makeTransactionEntry.await() && makeGlobalTransactionEntry.await()) {
+                    NetworkResult.Success("transactionID", transaction.id)
+                } else {
+                    NetworkResult.Failed("transactionID", null)
+                }
             } catch (e: Exception) {
                 e.message?.let { logCrash("firestore: updating the wallet transaction", it) }
                 NetworkResult.Failed("transactionID", null)
@@ -1459,6 +1483,20 @@ class Firestore(
             } catch (e: Exception) {
                 Log.e("Magizhini", "logCrash: $it ")
             }
+        }
+    }
+
+    suspend fun createGlobalTransactionEntry(globalTransaction: GlobalTransaction): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+             val path = mFireStore.collection(WALLET)
+                .document("GlobalTransaction")
+                .collection("GlobalTransaction")
+
+            path.document(globalTransaction.id).set(globalTransaction, SetOptions.merge()).await()
+            true
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: adding a global transaction entry", it) }
+            false
         }
     }
 

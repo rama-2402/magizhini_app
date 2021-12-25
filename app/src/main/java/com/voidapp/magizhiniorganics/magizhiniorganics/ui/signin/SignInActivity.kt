@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin
 
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.databinding.DataBindingUtil
@@ -125,6 +126,19 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         }
         binding.llPostOTP.setOnClickListener{
             this.hideKeyboard()
+        }
+        binding.tvTerms.setOnClickListener {
+            lifecycleScope.launch {
+                delay(200)
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                    intent.data = Uri.parse("https://rama-2402.github.io/privacy-policy/")
+                    startActivity(Intent.createChooser(intent, "Open link with"))
+                } catch (e: Exception) {
+                    println("The current phone does not have a browser installed")
+                }
+            }
         }
     }
 

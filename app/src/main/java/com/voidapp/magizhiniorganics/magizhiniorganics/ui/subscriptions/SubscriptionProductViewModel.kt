@@ -11,11 +11,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -118,7 +117,23 @@ class SubscriptionProductViewModel(
         _wallet.value = fbRepository.getWallet(id)
     }
 
-    fun generateSubscription(subscription: Subscription) = viewModelScope.launch(Dispatchers.IO) {
+    fun generateSubscription(subscription: Subscription, transactionID: String) = viewModelScope.launch(Dispatchers.IO) {
+        if (subscription.paymentMode != WALLET) {
+            GlobalTransaction(
+                id = "",
+                userID = userProfile.id,
+                userName = userProfile.name,
+                userMobileNumber = userProfile.phNumber,
+                transactionID = transactionID,
+                transactionType = "Online Payment",
+                transactionAmount = subscription.estimateAmount,
+                transactionDirection = SUBSCRIPTION,
+                timestamp = System.currentTimeMillis(),
+                transactionReason = "${subscription.productName} ${subscription.variantName} Subscription Online Transaction"
+            ).let {
+                fbRepository.createGlobalTransactionEntry(it)
+            }
+        }
         _status.value = fbRepository.generateSubscription(subscription)
     }
 

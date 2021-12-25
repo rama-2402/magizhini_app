@@ -72,11 +72,13 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
         showShimmer()
         viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
-        Log.e("TAG", "onCreate: ${viewModel.navigateToPage}", )
-        clickListeners()
-        initLiveData()
-        liveDataObservers()
-        initRecyclerView()
+        lifecycleScope.launch {
+            delay(800)
+            clickListeners()
+            initLiveData()
+            liveDataObservers()
+            initRecyclerView()
+        }
     }
 
     private fun liveDataObservers() {

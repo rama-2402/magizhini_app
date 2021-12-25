@@ -58,8 +58,13 @@ import org.kodein.di.generic.instance
 import android.content.pm.ResolveInfo
 import com.voidapp.magizhiniorganics.magizhiniorganics.BuildConfig
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 
 import java.net.URLEncoder
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class HomeActivity :
@@ -597,6 +602,7 @@ class HomeActivity :
                 binding.fabCart -> {
                     if (NetworkHelper.isOnline(this)) {
                         Intent(this, InvoiceActivity::class.java).also {
+                            it.putExtra(NAVIGATION, ALL_PRODUCTS)
                             startActivity(it)
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                         }
@@ -737,6 +743,17 @@ class HomeActivity :
                 R.id.menuContactUs -> {
                     showListBottomSheet(this, arrayListOf("Call", "WhatsApp", "E-Mail"))
                 }
+                R.id.menuAboutUs -> {
+                    showDescriptionBs("ABOUT US \n\n\n  Magizhini Organics is a retail-focused Store offering food and related consumables produced from organics farming and Certified Organic food producers according to organic farming standards. \n\n\n\n\nABOUT ORGANIC FOOD:\n" +
+                            "\n" +
+                            "Any food product cultivated relying entirely on natural methods without compromising on the consumer's health can be called 'Organic' food. In other words, no chemicals, no unnatural fertilizers or pesticides and no farming methods that are not humane.\n" +
+                            "\n" +
+                            "Cultivating food the organic way is not as expensive or not viable as some make it out to be. Though it does cost the farmer more than the usual chemical dependent methods, at the same time it should not also be priced out of the reach of the ordinary consumer. Assuming that the ruling market prices for conventionally-grown food (read chemically-grown food) are fair, it is important that organic food also be prized more or less similar for pushing the customers towards more healthy organic intake, especially when consumers are aware that organic food is better than chemically-grown food in all respects, including taste, flavour and for their own health, besides that of the earth.\n" +
+                            "\n" +
+                            "Another aspect of the organic food 'issue' at least in India is a common problem faced by organic farmers: the lack of a ready market and often unremunerative prices for their produce. In many cases, the grower does not receive timely payments from middlemen including organic food traders. Interested buyers of organic food on the other hand, cannot find what they need, at least not at reasonable prices. Supplies are often erratic or unreliable and in some cases buyers are not even sure if the food they are buying is indeed organic.\n" +
+                            "\n" +
+                            "Taking all the above into account, we, Magizhini Organics, have started this initiative to supply organic food and food products in Chennai with a single click of button from your mobile in the comfort of your home. This is an attempt to link growers and processors with buyers to ensure a fair price for growers and easier availability of a wide variety of organic food at reasonable prices for buyers.")
+                }
             }
             return true
         } else {
@@ -784,7 +801,9 @@ class HomeActivity :
             val pm: PackageManager = this.packageManager
             val matches = pm.queryIntentActivities(emailIntent, 0)
             var best: ResolveInfo? = null
-            for (info in matches) if (info.activityInfo.packageName.endsWith(".gm") || info.activityInfo.name.toLowerCase()
+            for (info in matches) if (info.activityInfo.packageName.endsWith(".gm") || info.activityInfo.name.lowercase(
+                    Locale.getDefault()
+                )
                     .contains("gmail")
             ) best = info
             if (best != null) emailIntent.setClassName(
@@ -799,12 +818,13 @@ class HomeActivity :
     }
 
     fun referralAction(selectedItem: String) {
+        val phoneNumber = SharedPref(this).getData(PHONE_NUMBER, STRING, "").toString()
         if(selectedItem == "Share My Referral Code") {
             try {
                 val shareIntent = Intent(Intent.ACTION_SEND)
                 shareIntent.type = "text/plain"
                 shareIntent.putExtra(Intent.EXTRA_SUBJECT, "My application name")
-                var shareMessage = "\nLet me recommend you this application\n\n"
+                var shareMessage = "\nHey I'm using Magizhini Organics for my Organic Food Purchases. Check it out! You can use my number $phoneNumber as Referral Number to get Exciting Referral Bonus!\n\n"
                 shareMessage =
                     """
                     ${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
@@ -822,4 +842,6 @@ class HomeActivity :
     fun showReferralOptions() {
         showListBottomSheet(this, arrayListOf("Share My Referral Code", "Add Referral Number"), "referral")
     }
+
+
 }

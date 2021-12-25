@@ -12,6 +12,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.GlobalTransaction
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
@@ -21,6 +22,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADD_MONEY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALTERNATE_DAYS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOM_DAYS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -150,8 +152,24 @@ class SubscriptionHistoryViewModel(
         _status.value = fbRepository.updateTransaction(transaction)
     }
 
-    suspend fun renewSubscription(sub: SubscriptionEntity) {
+    suspend fun renewSubscription(sub: SubscriptionEntity, transactionID: String) {
         sub.cancelledDates.addAll(updatedCancelledDaysForSubRenewal)
+        if (sub.paymentMode == "Online") {
+            GlobalTransaction(
+                id = "",
+                userID = currentUserProfile.id,
+                userName = currentUserProfile.name,
+                userMobileNumber = currentUserProfile.phNumber,
+                transactionID = transactionID,
+                transactionType = "Online Payment",
+                transactionAmount = sub.estimateAmount,
+                transactionDirection = SUBSCRIPTION,
+                timestamp = System.currentTimeMillis(),
+                transactionReason = "${sub.productName} ${sub.variantName} Subscription Renewal Transaction"
+            ).let {
+                fbRepository.createGlobalTransactionEntry(it)
+            }
+        }
         if (sub.subType == MONTHLY) {
             _status.value = fbRepository.renewSubscription(sub, arrayListOf())
         } else {

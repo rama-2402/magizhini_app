@@ -29,6 +29,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurchaseHistoryBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
@@ -36,6 +37,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatAc
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
@@ -319,24 +321,50 @@ class PurchaseHistoryActivity :
             }
             "cancel" -> {
                 startWorkerThread(mCancelOrder)
-                for (i in mOrderHistory.indices) {
                     mOrderHistory[mCancelOrderPosition].orderStatus = Constants.CANCELLED
                     ordersAdapter.orders[mCancelOrderPosition] = mOrderHistory[mCancelOrderPosition]
-                    ordersAdapter.notifyItemChanged(i)
-                    hideProgressDialog()
-                    showToast(this, "Order Cancelled", Constants.SHORT)
-                    showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
-                }
+                    ordersAdapter.notifyDataSetChanged()
+                    if (mOrderHistory[mCancelOrderPosition].paymentMethod == WALLET) {
+                        viewModel.makeTransactionFromWallet(
+                            mOrderHistory[mCancelOrderPosition].price,
+                            mOrderHistory[mCancelOrderPosition].customerId,
+                            "Refund",
+                            "Add"
+                        )
+                    } else {
+                        hideProgressDialog()
+                        showToast(this, "Order Cancelled", Constants.SHORT)
+                        showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
+                    }
+            }
+            "transaction" -> {
+                data as TransactionHistory
+                viewModel.updateTransaction(data)
+            }
+            "transactionID" -> {
+                hideProgressDialog()
+                showToast(this, "Order Cancelled", Constants.SHORT)
+                showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
             }
         }
         viewModel.setEmptyStatus()
     }
 
-    private fun onFailedCallback(message: String, data: Any?) {
+    private suspend fun onFailedCallback(message: String, data: Any?) {
         when(message) {
             "cancel" -> {
                 hideProgressDialog()
                 showErrorSnackBar("Server Error! Order cancellation failed. Try later", true)
+            }
+            "transaction" -> {
+                delay(1000)
+                hideProgressDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+            "transactionID" -> {
+                delay(1000)
+                hideProgressDialog()
+                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
             }
         }
         viewModel.setEmptyStatus()
