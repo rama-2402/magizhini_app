@@ -205,8 +205,9 @@ class SubscriptionHistoryViewModel(
 
     suspend fun getUpdatedEstimateForNewSubJob(sub: SubscriptionEntity): Float = withContext(Dispatchers.Default) {
         val updatedProduct = dbRepository.getProductWithIdForUpdate(sub.productID)
-        if (updatedProduct.status != ACTIVE) {
-            //THIS CODE CAN BE USED IF WE WANT THE RENEWED SUB TO HAVE NEW UPDATED PRICES
+        updatedProduct?.let {
+            if (updatedProduct.status != ACTIVE) {
+                //THIS CODE CAN BE USED IF WE WANT THE RENEWED SUB TO HAVE NEW UPDATED PRICES
 //            var variantPosition = 0
 //            for (i in updatedProduct.variants.indices) {
 //                val variantName = "${updatedProduct.variants[i].variantName} ${updatedProduct.variants[i].variantType}"
@@ -216,18 +217,20 @@ class SubscriptionHistoryViewModel(
 //            }
 //            _status.value = NetworkResult.Success("basePay", updatedProduct.variants[variantPosition].variantPrice)
 
-            val estimateAmount = when(sub.subType) {
+                val estimateAmount = when(sub.subType) {
 //                CUSTOM_DAYS -> (updatedProduct.variants[variantPosition].variantPrice * updatedCustomDaysForSubRenewal).toFloat()
 //                ALTERNATE_DAYS -> (updatedProduct.variants[variantPosition].variantPrice * 15).toFloat()
 //                else -> (updatedProduct.variants[variantPosition].variantPrice * 30).toFloat()
-                CUSTOM_DAYS -> (sub.basePay * updatedCustomDaysForSubRenewal)
-                ALTERNATE_DAYS -> (sub.basePay * 15)
-                else -> (sub.basePay * 30)
-            }
+                    CUSTOM_DAYS -> (sub.basePay * updatedCustomDaysForSubRenewal)
+                    ALTERNATE_DAYS -> (sub.basePay * 15)
+                    else -> (sub.basePay * 30)
+                }
 //            _status.value = NetworkResult.Success("basePay", estimateAmount)
-            return@withContext estimateAmount
-        } else {
-            return@withContext 0f
-        }
+                return@withContext estimateAmount
+            } else {
+                return@withContext 0f
+            }
+        } ?: return@withContext 0f
+
     }
 }

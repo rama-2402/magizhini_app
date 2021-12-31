@@ -88,7 +88,7 @@ class DatabaseRepository(
 
     fun getAllCartItemsForEntityUpdate() = db.getUserProfileDao().getAllCartItemsForEntityUpdate()
 
-    fun getProductWithIdForUpdate(id: String) = db.getUserProfileDao().getProductWithIdForUpdate(id)
+    fun getProductWithIdForUpdate(id: String): ProductEntity? = db.getUserProfileDao().getProductWithIdForUpdate(id)
 
     fun getAllProductsStatic() = db.getUserProfileDao().getAllProductsStatic()
 
@@ -171,7 +171,6 @@ class DatabaseRepository(
     fun upsertTestimonial(testimonial: TestimonialsEntity) = db.getUserProfileDao().upsertTestimonial(testimonial)
     fun getAllTestimonials(): List<TestimonialsEntity> = db.getUserProfileDao().getAllTestimonials()
     fun deleteAllTestimonials() = db.getUserProfileDao().deleteAllTestimonials()
-    fun deleteprof() = db.getUserProfileDao().deleteUserProfilenULL()
 
 
 }

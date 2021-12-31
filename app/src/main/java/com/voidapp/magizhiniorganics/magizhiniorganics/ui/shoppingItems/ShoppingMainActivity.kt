@@ -310,9 +310,16 @@ class ShoppingMainActivity :
                 mFilteredItems.clear()
                 val searchText = newText!!.lowercase(Locale.getDefault())
                 if (searchText.isNotEmpty()) {
-                    mItems.forEach {
-                        if (it.name.lowercase(Locale.getDefault()).contains(searchText)) {
+                    mItems.forEach loop@ { it ->
+                        if (it.name.lowercase().contains(searchText)) {
                             mFilteredItems.add(it)
+                        } else {
+                            for (label in it.labels) {
+                                if (label.lowercase().contains(searchText)) {
+                                    mFilteredItems.add(it)
+                                    return@loop
+                                }
+                            }
                         }
                     }
                     adapter.products = mFilteredItems

@@ -82,12 +82,14 @@ class HomeViewModel (
                 variantIndex = variantIndex
             )
             dbRepository.upsertCart(cartEntity)
-            val productEntity = dbRepository.getProductWithIdForUpdate(product.id)
-            productEntity.variantInCart.add(variant)
-            dbRepository.upsertProduct(productEntity)
-            withContext(Dispatchers.Main) {
-                recyclerToRefresh = recycler
-                _recyclerPosition.value = position
+            val entity = dbRepository.getProductWithIdForUpdate(product.id)
+            entity?.let { productEntity ->
+                productEntity.variantInCart.add(variant)
+                dbRepository.upsertProduct(productEntity)
+                withContext(Dispatchers.Main) {
+                    recyclerToRefresh = recycler
+                    _recyclerPosition.value = position
+                }
             }
         } catch (e: Exception) {
             e.message?.let { fbRepository.logCrash("Home: add item to cart", it) }
@@ -96,11 +98,13 @@ class HomeViewModel (
 
     fun deleteCartItemFromShoppingMain(productEntity: ProductEntity, variantName: String, position: Int, recycler: String) = viewModelScope.launch (Dispatchers.IO) {
         try {
-            val product = dbRepository.getProductWithIdForUpdate(productEntity.id)
-            product.variantInCart.remove(variantName)
-            dbRepository.upsertProduct(product)
-            dbRepository.deleteProductFromCart(productEntity.id, variantName)
-            updatingTheCartInProduct(productEntity.id , variantName, position, recycler)
+            val entity = dbRepository.getProductWithIdForUpdate(productEntity.id)
+            entity?.let { product ->
+                product.variantInCart.remove(variantName)
+                dbRepository.upsertProduct(product)
+                dbRepository.deleteProductFromCart(productEntity.id, variantName)
+                updatingTheCartInProduct(productEntity.id , variantName, position, recycler)
+            }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: delete item to cart", it) }
         }
@@ -109,15 +113,17 @@ class HomeViewModel (
     private suspend fun updatingTheCartInProduct(productId: String, variant: String, position: Int, recycler: String) =
         withContext(Dispatchers.IO){
         try {
-            val productEntity = dbRepository.getProductWithIdForUpdate(productId)
-            productEntity.variantInCart.remove(variant)
-            if (productEntity.variantInCart.isEmpty()) {
-                productEntity.inCart = false
-            }
-            dbRepository.upsertProduct(productEntity)
-            withContext(Dispatchers.Main) {
-                recyclerToRefresh = recycler
-                _recyclerPosition.value = position
+            val entity = dbRepository.getProductWithIdForUpdate(productId)
+            entity?.let { productEntity ->
+                productEntity.variantInCart.remove(variant)
+                if (productEntity.variantInCart.isEmpty()) {
+                    productEntity.inCart = false
+                }
+                dbRepository.upsertProduct(productEntity)
+                withContext(Dispatchers.Main) {
+                    recyclerToRefresh = recycler
+                    _recyclerPosition.value = position
+                }
             }
         } catch (e: Exception) {
             e.message?.let { fbRepository.logCrash("Home: updating product after delete from cart", it) }
@@ -206,7 +212,7 @@ class HomeViewModel (
             val products = arrayListOf<ProductEntity>()
             items.addAll(bestSeller.id)
             for (item in items.indices) {
-                products.add(dbRepository.getProductWithIdForUpdate(items[item]))
+                dbRepository.getProductWithIdForUpdate(items[item])?.let { products.add(it) }
             }
             withContext(Dispatchers.Main) {
                 _bestSellers.value = products
@@ -223,7 +229,7 @@ class HomeViewModel (
             val products = arrayListOf<ProductEntity>()
             items.addAll(one.id)
             for (item in items.indices) {
-                products.add(dbRepository.getProductWithIdForUpdate(items[item]))
+                dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
             withContext(Dispatchers.Main) {
                 _specialsOne.value = products
@@ -240,7 +246,7 @@ class HomeViewModel (
             val products = arrayListOf<ProductEntity>()
             items.addAll(two.id)
             for (item in items.indices) {
-                products.add(dbRepository.getProductWithIdForUpdate(items[item]))
+                dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
             withContext(Dispatchers.Main) {
                 _specialsTwo.value = products
@@ -257,7 +263,7 @@ class HomeViewModel (
             val products = arrayListOf<ProductEntity>()
             items.addAll(three.id)
             for (item in items.indices) {
-                products.add(dbRepository.getProductWithIdForUpdate(items[item]))
+                dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
             withContext(Dispatchers.Main) {
                 _specialsThree.value = products
@@ -295,7 +301,7 @@ class HomeViewModel (
         token?.let { fbRepository.updateToken(it) }
     }
 
-    suspend fun getProductByID(id: String): ProductEntity = withContext(Dispatchers.IO) {
+    suspend fun getProductByID(id: String): ProductEntity? = withContext(Dispatchers.IO) {
         return@withContext dbRepository.getProductWithIdForUpdate(id)
     }
 

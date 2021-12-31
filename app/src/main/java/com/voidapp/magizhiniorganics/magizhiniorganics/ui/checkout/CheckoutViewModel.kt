@@ -163,12 +163,14 @@ class CheckoutViewModel(
 
     private fun updatingTheCartInProduct(productId: String, variant: String) = viewModelScope.launch (Dispatchers.IO) {
         try {
-            val productEntity = dbRepository.getProductWithIdForUpdate(productId)
-            productEntity.variantInCart.remove(variant)
-            if (productEntity.variantInCart.isEmpty()) {
-                productEntity.inCart = false
+            val entity = dbRepository.getProductWithIdForUpdate(productId)
+            entity?.let { productEntity ->
+                productEntity.variantInCart.remove(variant)
+                if (productEntity.variantInCart.isEmpty()) {
+                    productEntity.inCart = false
+                }
+                dbRepository.upsertProduct(productEntity)
             }
-            dbRepository.upsertProduct(productEntity)
         } catch (e: Exception) {
             e.message?.let { fbRepository.logCrash("checkout: updating the product in cart in db", it) }
         }
@@ -202,10 +204,13 @@ class CheckoutViewModel(
     fun clearCart(cartItems: List<CartEntity>) = viewModelScope.launch (Dispatchers.IO) {
         try {
             for (cartItem in cartItems) {
-                val product = dbRepository.getProductWithIdForUpdate(cartItem.productId)
-                product.inCart = false
-                product.variantInCart.clear()
-                dbRepository.upsertProduct(product)
+
+                val entity = dbRepository.getProductWithIdForUpdate(cartItem.productId)
+                entity?.let { product ->
+                    product.inCart = false
+                    product.variantInCart.clear()
+                    dbRepository.upsertProduct(product)
+                }
             }
             dbRepository.clearCart()
             _status.value = NetworkResult.Success("orderPlaced", null)
@@ -268,9 +273,11 @@ class CheckoutViewModel(
             val limitedCartItems = mutableListOf<CartEntity>()
             for (cartItem in cartEntity) {
                 withContext(Dispatchers.IO) {
-                    val product = dbRepository.getProductWithIdForUpdate(cartItem.productId)
-                    if (product.variants[cartItem.variantIndex].status == Constants.LIMITED) {
-                        limitedCartItems.add(cartItem)
+                    val entity = dbRepository.getProductWithIdForUpdate(cartItem.productId)
+                    entity?.let { product ->
+                        if (product.variants[cartItem.variantIndex].status == Constants.LIMITED) {
+                            limitedCartItems.add(cartItem)
+                        }
                     }
                 }
             }

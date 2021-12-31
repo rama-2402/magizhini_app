@@ -60,6 +60,7 @@ fun Product.toProductEntity() = ProductEntity(
     defaultVariant = defaultVariant,
     productType = productType,
     variants = variants,
+    labels = labels,
     activated = activated
 )
 
@@ -236,6 +237,7 @@ fun ProductEntity.toProduct() = Product(
     defaultVariant = defaultVariant,
     productType = productType,
     variants = variants,
+    labels = labels,
     activated = activated
 )
 

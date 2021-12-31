@@ -56,11 +56,13 @@ class SubscriptionProductViewModel(
 
     fun getProductByID(id: String) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val product = dbRepository.getProductWithIdForUpdate(id)
-            withContext(Dispatchers.Main) {
-                subscriptionItem = product
-                getProductReviews(product.id)
-                _product.value = product
+            val entity = dbRepository.getProductWithIdForUpdate(id)
+            entity?.let { product ->
+                withContext(Dispatchers.Main) {
+                    subscriptionItem = product
+                    getProductReviews(product.id)
+                    _product.value = product
+                }
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("sub product: getting the sub product from DB", it) }

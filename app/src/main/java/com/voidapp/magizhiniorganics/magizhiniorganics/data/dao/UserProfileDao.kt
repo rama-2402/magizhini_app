@@ -15,8 +15,6 @@ interface UserProfileDao {
 
     @Query("DELETE FROM UserProfileEntity")
     fun deleteUserProfile()
-    @Query("DELETE FROM UserProfileEntity WHERE alternatePhNumber = :num")
-    fun deleteUserProfilenULL(num: String = "99")
     @Query("DELETE FROM ActiveOrders")
     fun deleteActiveOrdersTable()
     @Query("DELETE FROM ActiveSubscriptions")
@@ -133,7 +131,7 @@ interface UserProfileDao {
     fun getAllCartItemsForEntityUpdate() : List<CartEntity>
 
     @Query("SELECT * FROM productEntity WHERE id = :id")
-    fun getProductWithIdForUpdate(id: String) : ProductEntity
+    fun getProductWithIdForUpdate(id: String) : ProductEntity?
 
     @Query("SELECT * FROM ProductEntity WHERE productType = :filter AND activated")
     fun getAllSubscriptions(filter: String): List<ProductEntity>

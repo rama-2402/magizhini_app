@@ -588,12 +588,14 @@ class Firestore(
                             variants[cartItem.variantIndex].inventory - cartItem.quantity
                         if (variants[cartItem.variantIndex].inventory <= 0) {
                             variants[cartItem.variantIndex].status = Constants.OUT_OF_STOCK
-                            val productEntity =
+                            val entity =
                                 repository.getProductWithIdForUpdate(cartItem.productId)
-                            productEntity.variants[cartItem.variantIndex].status =
-                                Constants.OUT_OF_STOCK
-                            productEntity.variants[cartItem.variantIndex].inventory = 0
-                            repository.upsertProduct(productEntity)
+                            entity?.let { productEntity ->
+                                productEntity.variants[cartItem.variantIndex].status =
+                                    Constants.OUT_OF_STOCK
+                                productEntity.variants[cartItem.variantIndex].inventory = 0
+                                repository.upsertProduct(productEntity)
+                            }
                         }
                         transaction.update(productRef, "variants", variants)
                         null
@@ -1355,8 +1357,11 @@ class Firestore(
                             transactionAmount = transaction.amount,
                             transactionDirection = "Added Money to User Wallet",
                             timestamp = transaction.timestamp,
-                            transactionReason = "This transaction may be Adding extra Money to Wallet or REFUND"
+                            transactionReason = ""
                         ).let {
+                            if (transaction.purpose == ADD_MONEY) {
+                                it.transactionReason = "This transaction may be Adding extra Money to Wallet or REFUND"
+                            }
                             createGlobalTransactionEntry(it)
                         }
                      }
@@ -1488,11 +1493,15 @@ class Firestore(
 
     suspend fun createGlobalTransactionEntry(globalTransaction: GlobalTransaction): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
-             val path = mFireStore.collection(WALLET)
-                .document("GlobalTransaction")
-                .collection("GlobalTransaction")
-
-            path.document(globalTransaction.id).set(globalTransaction, SetOptions.merge()).await()
+            val docID = "${TimeUtil().getMonth(globalTransaction.timestamp)}${TimeUtil().getYear(globalTransaction.timestamp)}"
+            val dateFormat = SimpleDateFormat("dd")
+            val collectionID = "${dateFormat.format(globalTransaction.timestamp)}"
+            mFireStore.collection("GlobalTransaction")
+                .document(docID)
+                .collection(collectionID)
+                .document()
+                .set(globalTransaction, SetOptions.merge())
+                .await()
             true
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: adding a global transaction entry", it) }

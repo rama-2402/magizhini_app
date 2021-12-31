@@ -58,6 +58,7 @@ import org.kodein.di.generic.instance
 import android.content.pm.ResolveInfo
 import com.voidapp.magizhiniorganics.magizhiniorganics.BuildConfig
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
@@ -223,8 +224,10 @@ class HomeActivity :
         when(banner.type) {
             PRODUCTS -> {
                 try {
-                    val product = viewModel.getProductByID(banner.description)
-                    moveToProductDetails(product.id, product.name)
+                    val product: ProductEntity? = viewModel.getProductByID(banner.description)
+                    product?.let {
+                        moveToProductDetails(product.id, product.name)
+                    } ?: showErrorSnackBar("Product is no longer Available", true)
                 } catch (e: Exception) {}
             }
             CATEGORY -> {
@@ -744,7 +747,7 @@ class HomeActivity :
                     showListBottomSheet(this, arrayListOf("Call", "WhatsApp", "E-Mail"))
                 }
                 R.id.menuAboutUs -> {
-                    showDescriptionBs("ABOUT US \n\n\n  Magizhini Organics is a retail-focused Store offering food and related consumables produced from organics farming and Certified Organic food producers according to organic farming standards. \n\n\n\n\nABOUT ORGANIC FOOD:\n" +
+                    showDescriptionBs("ABOUT US \n\n  Magizhini Organics is a retail-focused Store offering food and related consumables produced from organics farming and Certified Organic food producers according to organic farming standards. \n\n\nABOUT ORGANIC FOOD:\n" +
                             "\n" +
                             "Any food product cultivated relying entirely on natural methods without compromising on the consumer's health can be called 'Organic' food. In other words, no chemicals, no unnatural fertilizers or pesticides and no farming methods that are not humane.\n" +
                             "\n" +

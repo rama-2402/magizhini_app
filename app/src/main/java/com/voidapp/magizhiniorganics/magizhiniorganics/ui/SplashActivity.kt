@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.math.abs
 import androidx.work.WorkManager
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
@@ -102,6 +103,7 @@ class SplashActivity : BaseActivity() {
     private fun updateDatabaseWorkRequest(wipe: Boolean, isNewDay: String) {
 //        if (isNewDay == TimeUtil().getCurrentDate()) {
 //            if (wipe) {
+//                SharedPref(this).putData("month", INT, TimeUtil().getMonthNumber())
 //                startWork("wipe")
 //            }else {
                 startWork("")

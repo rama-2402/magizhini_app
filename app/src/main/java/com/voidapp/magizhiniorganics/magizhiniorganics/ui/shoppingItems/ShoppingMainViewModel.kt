@@ -120,14 +120,16 @@ class ShoppingMainViewModel(
     private suspend fun updatingTheCartInProduct(product: ProductEntity?, productId: String = "", variant: String, position: Int = -1)  {
         val productEntity = if (product == null) {
             val entity = dbRepository.getProductWithIdForUpdate(productId)
-            entity.variantInCart.remove(variant)
-            entity
+            entity?.let { it ->
+                it.variantInCart.remove(variant)
+                it
+            }
         } else {
             product.variantInCart.remove(variant)
             product
         }
 
-        if (productEntity.variantInCart.isEmpty()) {
+        if (productEntity?.variantInCart!!.isEmpty()) {
             productEntity.inCart = false
         }
         dbRepository.upsertProduct(productEntity)

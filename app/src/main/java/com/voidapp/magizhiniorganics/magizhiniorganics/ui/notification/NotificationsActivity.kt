@@ -214,13 +214,15 @@ class NotificationsActivity :
             deleteNotification()
             when(notification.clickType) {
                 PRODUCTS -> {
-                    val product = viewModel.getProductByID(notification.clickContent)
-                    Intent(this@NotificationsActivity, ProductActivity::class.java).also {
-                        it.putExtra(PRODUCTS, product.id)
-                        it.putExtra(Constants.PRODUCT_NAME, product.name)
-                        startActivity(it)
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    }
+                    val entity = viewModel.getProductByID(notification.clickContent)
+                    entity?.let { product ->
+                        Intent(this@NotificationsActivity, ProductActivity::class.java).also {
+                            it.putExtra(PRODUCTS, product.id)
+                            it.putExtra(Constants.PRODUCT_NAME, product.name)
+                            startActivity(it)
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        }
+                    } ?: showErrorSnackBar("Product does not Exist", true)
                 }
                 CATEGORY -> {
                     val category = viewModel.getCategoryName(notification.clickContent)

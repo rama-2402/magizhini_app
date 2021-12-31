@@ -47,7 +47,7 @@ class NotificationsViewModel(
         }
     }
 
-    suspend fun getProductByID(id: String): ProductEntity = withContext(Dispatchers.IO) {
+    suspend fun getProductByID(id: String): ProductEntity? = withContext(Dispatchers.IO) {
         return@withContext dbRepository.getProductWithIdForUpdate(id)
     }
 

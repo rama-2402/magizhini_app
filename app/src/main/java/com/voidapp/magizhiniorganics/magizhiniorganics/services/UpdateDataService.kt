@@ -207,9 +207,12 @@ class UpdateDataService (
                     Constants.PRODUCTS -> {
                         for (d in snapshot.documents) {
                             val product = d.toObject(Product::class.java)
-                            product!!.id = d.id
-                            val productEntity: ProductEntity = product.toProductEntity()
-                            repository.upsertProduct(productEntity)
+                            product?.let {
+//                                product.id = d.id
+                                val productEntity: ProductEntity = it.toProductEntity()
+//                                Log.e("tag", "filterDataAndUpdateRoom: ${productEntity.id}--${productEntity.name}")
+                                repository.upsertProduct(productEntity)
+                            }
                         }
                     }
                     USER_NOTIFICATIONS -> {
@@ -300,6 +303,7 @@ class UpdateDataService (
                 }
             }
         } catch (e: Exception) {
+           Log.e("TAG", "getAllDataError: ${e.message}", )
            e.message?.let { fbRepository.logCrash("update data service: getting query snapshot from store", it) }
            mFireStore.collection(Constants.CATEGORY)
                .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)
@@ -316,10 +320,12 @@ class UpdateDataService (
             }
             repository.getAllCartItemsForEntityUpdate().forEach {
                 with(it) {
-                    val product = repository.getProductWithIdForUpdate(productId)
-                    product.variantInCart.add(it.variant)
-                    repository.upsertProduct(product)
-                    repository.updateCartItemsToEntity(productId, true, couponName)
+                    val entity = repository.getProductWithIdForUpdate(productId)
+                    entity?.let { product ->
+                        product.variantInCart.add(it.variant)
+                        repository.upsertProduct(product)
+                        repository.updateCartItemsToEntity(productId, true, couponName)
+                    }
                 }
             }
         } catch (e: Exception) {
