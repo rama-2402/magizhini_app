@@ -60,18 +60,17 @@
                         android:textColor="@color/white"
                         android:textSize="@dimen/text_size_large" />
 
-                    <TextView
-                        android:id="@+id/tvYearFilter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivFilter"
+                        android:layout_width="@dimen/material_size_24"
+                        android:layout_height="@dimen/material_size_24"
                         android:layout_gravity="end"
-                        android:layout_marginStart="@dimen/material_size_8"
+                        android:src="@drawable/ic_filter"
                         android:layout_marginEnd="@dimen/material_size_16"
+                        android:contentDescription="@string/favorites_icon"
+                        app:tint="@color/white"
                         android:background="?android:attr/selectableItemBackgroundBorderless"
-                        android:fontFamily="@font/roboto"
-                        android:text="2021"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/text_size_large" />
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
                 </androidx.appcompat.widget.Toolbar>
             </com.google.android.material.appbar.AppBarLayout>
 
@@ -143,21 +142,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </LinearLayout>
-
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fabMonthFilter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="24dp"
-            android:text="Month"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:foregroundGravity="center"
-            app:backgroundTint="@color/green_base"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

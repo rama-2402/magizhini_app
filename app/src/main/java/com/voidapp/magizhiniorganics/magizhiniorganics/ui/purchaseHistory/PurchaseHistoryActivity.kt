@@ -42,6 +42,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.CalendarFilterDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -87,7 +88,7 @@ class PurchaseHistoryActivity :
         setSupportActionBar(binding.tbToolbar)
         mFilterMonth = TimeUtil().getMonth()
         mFilterYear = TimeUtil().getYear()
-        binding.fabMonthFilter.text = " $mFilterMonth"
+        binding.tvToolbarTitle.text = "$mFilterMonth $mFilterYear"
 
         showShimmer()
 
@@ -101,51 +102,9 @@ class PurchaseHistoryActivity :
             onBackPressed()
         }
 
-        binding.tvYearFilter.setOnClickListener {
-            val years = resources.getStringArray(R.array.years).toList() as ArrayList<String>
-            showListBottomSheet(this, years, data = "years")
+        binding.ivFilter.setOnClickListener {
+            CalendarFilterDialog(this, this, mFilterMonth, mFilterYear).show()
         }
-
-        //scroll change listener to hide the fab when scrolling down
-        binding.rvPurchaseHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
-                super.onScrolled(recyclerView, up, down)
-                if (down > 0 && binding.fabMonthFilter.isVisible) {
-                    binding.fabMonthFilter.startAnimation(
-                        AnimationUtils.loadAnimation(
-                            binding.fabMonthFilter.context,
-                            R.anim.slide_out_right
-                        )
-                    )
-                    binding.fabMonthFilter.hide()
-                } else if (down < 0 && binding.fabMonthFilter.isGone) {
-                    binding.fabMonthFilter.show()
-                    binding.fabMonthFilter.startAnimation(
-                        AnimationUtils.loadAnimation(
-                            this@PurchaseHistoryActivity,
-                            R.anim.slide_in_right
-                        )
-                    )
-                }
-            }
-        })
-
-        binding.fabMonthFilter.setOnClickListener {
-            val months = resources.getStringArray(R.array.months_name).toList() as ArrayList<String>
-            showListBottomSheet(this, months, data = "months")
-        }
-    }
-
-    fun setYearFilter(year: String) {
-        mFilterYear = year
-        binding.tvYearFilter.text = year
-        fetchData()
-    }
-
-    fun setMonthFilter(month: String) {
-        mFilterMonth = month
-        binding.fabMonthFilter.text = " $month"
-        fetchData()
     }
 
     private fun fetchData() {
@@ -301,6 +260,7 @@ class PurchaseHistoryActivity :
         when(message) {
             "orders" -> {
                 lifecycleScope.launch {
+                    binding.tvToolbarTitle.text = "$mFilterMonth $mFilterYear"
                     if (data == null) {
                         hideShimmer()
                         binding.llEmptyLayout.visible()
@@ -926,5 +886,11 @@ class PurchaseHistoryActivity :
         } catch (e: IOException) {
             Log.e("TAG", "openFolder: ${e.message}", )
         }
+    }
+
+    fun filterOrders(month: String, year: String) {
+        mFilterMonth = month
+        mFilterYear = year
+        fetchData()
     }
 }

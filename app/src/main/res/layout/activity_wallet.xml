@@ -214,22 +214,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/tvMonthFilter"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_marginEnd="@dimen/material_size_8"
-                android:background="@drawable/bg_material_box"
-                android:gravity="center_vertical"
-                android:paddingStart="@dimen/material_size_16"
-                android:paddingEnd="@dimen/material_size_16"
-                android:text="September"
-                android:textColor="@color/gray700"
-                android:textSize="@dimen/material_size_16"
-                app:layout_constraintBottom_toBottomOf="@id/ivWalletFilter"
-                app:layout_constraintEnd_toStartOf="@id/ivWalletFilter"
-                app:layout_constraintTop_toTopOf="@id/ivWalletFilter" />
-
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivWalletFilter"
                 android:layout_width="@dimen/material_size_32"

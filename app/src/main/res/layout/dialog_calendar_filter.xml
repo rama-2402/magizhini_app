@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+    </data>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:elevation="@dimen/material_size_32"
+        android:background="@drawable/shape_round_rectangle_16"
+        android:padding="@dimen/material_size_8"
+        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            >
+
+            <Spinner
+                android:id="@+id/spMonth"
+                android:layout_width="0dp"
+                android:layout_weight="1.25"
+                android:layout_height="50dp"
+                android:layout_marginEnd="@dimen/material_size_8"
+                android:theme="@style/mySpinnerItemStyle"
+                android:entries="@array/months_name"
+                android:popupBackground="@drawable/shape_round_rectangle_8"
+                android:background="@drawable/bg_material_box"/>
+            <Spinner
+                android:id="@+id/spYear"
+                android:layout_width="0dp"
+                android:layout_weight=".75"
+                android:layout_height="50dp"
+                android:entries="@array/years"
+                android:theme="@style/mySpinnerItemStyle"
+                android:popupBackground="@drawable/shape_round_rectangle_8"
+                android:background="@drawable/bg_material_box"/>
+        </LinearLayout>
+        <Button
+            android:id="@+id/btnFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Apply Filter"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/green_base"
+            android:layout_marginTop="@dimen/material_size_8"/>
+    </LinearLayout>
+</layout>

@@ -32,6 +32,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODU
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.CalendarFilterDialog
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.kodein.di.Kodein
@@ -52,6 +53,9 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     private var mCurrentTransaction = TransactionHistory()
     private var mProfile = UserProfile()
     private var mMoneyToAddInWallet: Float = 0f
+
+    private var mFilterMonth: String =  TimeUtil().getMonth(dateLong = System.currentTimeMillis())
+    private var mFilterYear: String = TimeUtil().getYear(dateLong = System.currentTimeMillis())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,11 +101,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                     trans.timestamp
                 }
                 transactionAdapter.notifyDataSetChanged()
-                lifecycleScope.launch(Dispatchers.Main) {
-                    delay(1500)
-                    binding.tvMonthFilter.text = TimeUtil().getMonth()
-                    hideShimmer()
-                }
+                hideShimmer()
             }
         })
         viewModel.profile.observe(this, {
@@ -178,15 +178,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
         binding.ivWalletFilter.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            DatePickerLib().pickSingleDate(this)
-        }
-
-        binding.tvMonthFilter.setOnClickListener {
-            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            showListBottomSheet(
-                this,
-                resources.getStringArray(R.array.months_name).toList() as ArrayList<String>
-            )
+            CalendarFilterDialog(this, this, mFilterMonth, mFilterYear).show()
         }
 
         binding.ivInfo.setOnClickListener {
@@ -269,15 +261,39 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
-    fun filterDate(date: Long) = lifecycleScope.launch(Dispatchers.Default) {
+    fun filterTransactions(month: String, year: String) = lifecycleScope.launch(Dispatchers.Default) {
+//        withContext(Dispatchers.Main) {
+//            showShimmer()
+//        }
+//        val filteredTransactions = mutableListOf<TransactionHistory>()
+//        for (transaction in mTransactions) {
+//            val transactionDate = TimeUtil().getCustomDate(dateLong = transaction.timestamp)
+//            val filteredDate = TimeUtil().getCustomDate(dateLong = date)
+//            if (transactionDate == filteredDate) {
+//                filteredTransactions.add(transaction)
+//            }
+//        }
+//        withContext(Dispatchers.Main) {
+//            if (filteredTransactions.isNullOrEmpty()) {
+//                binding.llEmptyLayout.visible()
+//            } else {
+//                binding.llEmptyLayout.remove()
+//                filteredTransactions.sortBy {
+//                    it.timestamp
+//                }
+//            }
+//            transactionAdapter.transactions = filteredTransactions
+//            transactionAdapter.notifyDataSetChanged()
+//            hideShimmer()
+//        }
         withContext(Dispatchers.Main) {
             showShimmer()
+            mFilterMonth = month
+            mFilterYear = year
         }
         val filteredTransactions = mutableListOf<TransactionHistory>()
         for (transaction in mTransactions) {
-            val transactionDate = TimeUtil().getCustomDate(dateLong = transaction.timestamp)
-            val filteredDate = TimeUtil().getCustomDate(dateLong = date)
-            if (transactionDate == filteredDate) {
+            if (transaction.month == mFilterMonth && transaction.year == mFilterYear.toLong()) {
                 filteredTransactions.add(transaction)
             }
         }
@@ -297,29 +313,29 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     fun setMonthFilter(month: String) = lifecycleScope.launch(Dispatchers.Default) {
-        withContext(Dispatchers.Main) {
-            showShimmer()
-            binding.tvMonthFilter.text = month
-        }
-        val filteredTransactions = mutableListOf<TransactionHistory>()
-        for (transaction in mTransactions) {
-            if (transaction.month == month) {
-                filteredTransactions.add(transaction)
-            }
-        }
-        withContext(Dispatchers.Main) {
-            if (filteredTransactions.isNullOrEmpty()) {
-                binding.llEmptyLayout.visible()
-            } else {
-                binding.llEmptyLayout.remove()
-                filteredTransactions.sortBy {
-                    it.timestamp
-                }
-            }
-            transactionAdapter.transactions = filteredTransactions
-            transactionAdapter.notifyDataSetChanged()
-            hideShimmer()
-        }
+//        withContext(Dispatchers.Main) {
+//            showShimmer()
+//            binding.tvMonthFilter.text = month
+//        }
+//        val filteredTransactions = mutableListOf<TransactionHistory>()
+//        for (transaction in mTransactions) {
+//            if (transaction.month == month) {
+//                filteredTransactions.add(transaction)
+//            }
+//        }
+//        withContext(Dispatchers.Main) {
+//            if (filteredTransactions.isNullOrEmpty()) {
+//                binding.llEmptyLayout.visible()
+//            } else {
+//                binding.llEmptyLayout.remove()
+//                filteredTransactions.sortBy {
+//                    it.timestamp
+//                }
+//            }
+//            transactionAdapter.transactions = filteredTransactions
+//            transactionAdapter.notifyDataSetChanged()
+//            hideShimmer()
+//        }
     }
 
     private suspend fun onSuccessCallback(message: String, data: Any?) {
@@ -339,7 +355,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 mCurrentTransaction.id = data as String
                 mTransactions.add(mCurrentTransaction)
                 hideShimmer()
-                setMonthFilter(binding.tvMonthFilter.text.toString())
                 viewModel.getWallet(mProfile.id)
                 delay(1500)
                 hideSuccessDialog()

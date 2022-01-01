@@ -395,14 +395,6 @@ open class BaseActivity : AppCompatActivity() {
 
                         }
                     }
-                    is PurchaseHistoryActivity -> {
-                        hideListBottomSheet()
-                        if (data == "years") {
-                            activity.setYearFilter(selectedItem)
-                        } else if (data == "months") {
-                            activity.setMonthFilter(selectedItem)
-                        }
-                    }
                     is SubscriptionProductActivity -> {
                         hideListBottomSheet()
                         activity.selectedPaymentMode(selectedItem)

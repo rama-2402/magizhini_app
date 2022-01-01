@@ -29,21 +29,6 @@ class DatePickerLib {
                 datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
         }
 
-    fun pickSingleDate(activity: WalletActivity) {
-        //val themeFactory = object: DarkThemeFactory() {}
-
-            val callback = SingleDayPickCallback { date ->
-                activity.filterDate(date.timeInMillis)
-            }
-
-                val today = CivilCalendar()
-                val datePicker = PrimeDatePicker.dialogWith(today)
-                    .pickSingleDay(callback)
-                    //.applyTheme(themeFactory)
-                    .build()
-                datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
-        }
-
     fun startSubscriptionDate(activity: SubscriptionProductActivity) {
         //val themeFactory = object: DarkThemeFactory() {}
 
