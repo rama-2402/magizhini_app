@@ -151,7 +151,7 @@ dependencies {
 //    implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
 
     //rating animation  https://github.com/sujithkanna/SmileyRating?utm_source=android-arsenal.com&utm_medium=referral&utm_campaign=5424
-    implementation 'com.github.sujithkanna:smileyrating:2.0.0'
+//    implementation 'com.github.sujithkanna:smileyrating:2.0.0'
 
     //shimmer loader for recycler view
     //github    https://github.com/facebook/shimmer-android
@@ -178,5 +178,8 @@ dependencies {
     
     //exo player
     implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
+
+    //start rating      https://github.com/whinc/RatingBar
+    implementation 'com.github.whinc:ratingbar:1.1.1'
 
 }

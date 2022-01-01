@@ -412,11 +412,18 @@
                         app:layout_constraintTop_toBottomOf="@id/cpAddReview"
                         tools:context=".ui.product.fragments.NewReviewFragment">
 
-                        <com.hsalf.smileyrating.SmileyRating
+                        <com.whinc.widget.ratingbar.RatingBar
                             android:id="@+id/srSmileyRating"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="@dimen/material_size_16" />
+                            app:rb_max_count="5"
+                            app:rb_count="5"
+                            app:rb_empty="@drawable/empty"
+                            app:rb_fill="@drawable/fill"
+                            app:rb_space="10dp"
+                            app:rb_touch_rating="true"
+                            android:layout_margin="@dimen/material_size_16"
+                            />
 
                         <com.google.android.material.imageview.ShapeableImageView
                             android:id="@+id/ivReviewImage"

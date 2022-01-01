@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.hsalf.smileyrating.SmileyRating
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentNewReviewBinding
@@ -83,21 +82,21 @@ class NewReviewFragment : Fragment(), KodeinAware {
 
     private fun clickListeners() {
         with(binding) {
-            srSmileyRating.setTitle(SmileyRating.Type.TERRIBLE, "Bad")
-            srSmileyRating.setTitle(SmileyRating.Type.BAD, "Not Satisfied")
-            srSmileyRating.setTitle(SmileyRating.Type.OKAY, "Satisfied")
-            srSmileyRating.setTitle(SmileyRating.Type.GOOD, "Great")
-            srSmileyRating.setTitle(SmileyRating.Type.GREAT, "Awesome")
-            srSmileyRating.setSmileySelectedListener { type ->
-                mRating = when (type) {
-                    SmileyRating.Type.TERRIBLE -> 1
-                    SmileyRating.Type.BAD -> 2
-                    SmileyRating.Type.OKAY -> 3
-                    SmileyRating.Type.GOOD -> 4
-                    SmileyRating.Type.GREAT -> 5
-                    else -> 5
-                }
-            }
+//            srSmileyRating.setTitle(SmileyRating.Type.TERRIBLE, "Bad")
+//            srSmileyRating.setTitle(SmileyRating.Type.BAD, "Not Satisfied")
+//            srSmileyRating.setTitle(SmileyRating.Type.OKAY, "Satisfied")
+//            srSmileyRating.setTitle(SmileyRating.Type.GOOD, "Great")
+//            srSmileyRating.setTitle(SmileyRating.Type.GREAT, "Awesome")
+//            srSmileyRating.setSmileySelectedListener { type ->
+//                mRating = when (type) {
+//                    SmileyRating.Type.TERRIBLE -> 1
+//                    SmileyRating.Type.BAD -> 2
+//                    SmileyRating.Type.OKAY -> 3
+//                    SmileyRating.Type.GOOD -> 4
+//                    SmileyRating.Type.GREAT -> 5
+//                    else -> 5
+//                }
+//            }
 
             btnAddImage.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
@@ -118,7 +117,8 @@ class NewReviewFragment : Fragment(), KodeinAware {
                     productViewModel.userProfile.name,
                     productViewModel.userProfile.profilePicUrl,
                     System.currentTimeMillis(),
-                    mRating,
+//                    mRating,
+                    srSmileyRating.count,
                     getReviewContent()
                 ).also { review ->
                     productViewModel.upsertProductReview(

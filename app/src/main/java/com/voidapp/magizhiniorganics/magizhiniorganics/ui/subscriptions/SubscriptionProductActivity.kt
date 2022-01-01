@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.aminography.primecalendar.PrimeCalendar
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.hsalf.smileyrating.SmileyRating
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -301,16 +300,16 @@ class SubscriptionProductActivity :
                 }
             }
 
-            srSmileyRating.setSmileySelectedListener { type ->
-                mRating = when (type) {
-                    SmileyRating.Type.TERRIBLE -> 1
-                    SmileyRating.Type.BAD -> 2
-                    SmileyRating.Type.OKAY -> 3
-                    SmileyRating.Type.GOOD -> 4
-                    SmileyRating.Type.GREAT -> 5
-                    else -> 5
-                }
-            }
+//            srSmileyRating.setSmileySelectedListener { type ->
+//                mRating = when (type) {
+//                    SmileyRating.Type.TERRIBLE -> 1
+//                    SmileyRating.Type.BAD -> 2
+//                    SmileyRating.Type.OKAY -> 3
+//                    SmileyRating.Type.GOOD -> 4
+//                    SmileyRating.Type.GREAT -> 5
+//                    else -> 5
+//                }
+//            }
 
             btnSaveReview.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
@@ -319,7 +318,8 @@ class SubscriptionProductActivity :
                     viewModel.userProfile.name,
                     viewModel.userProfile.profilePicUrl,
                     System.currentTimeMillis(),
-                    mRating,
+//                    mRating,
+                    srSmileyRating.count,
                     getReviewContent()
                 ).also { review ->
                     showProgressDialog()
@@ -586,11 +586,11 @@ class SubscriptionProductActivity :
             llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_in_right))
             llEmptyLayout.startAnimation(AnimationUtils.loadAnimation(llEmptyLayout.context, R.anim.slide_out_left))
             rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_out_left))
-            srSmileyRating.setTitle(SmileyRating.Type.TERRIBLE, "Bad")
-            srSmileyRating.setTitle(SmileyRating.Type.BAD, "Not Satisfied")
-            srSmileyRating.setTitle(SmileyRating.Type.OKAY, "Satisfied")
-            srSmileyRating.setTitle(SmileyRating.Type.GOOD, "Great")
-            srSmileyRating.setTitle(SmileyRating.Type.GREAT, "Awesome")
+//            srSmileyRating.setTitle(SmileyRating.Type.TERRIBLE, "Bad")
+//            srSmileyRating.setTitle(SmileyRating.Type.BAD, "Not Satisfied")
+//            srSmileyRating.setTitle(SmileyRating.Type.OKAY, "Satisfied")
+//            srSmileyRating.setTitle(SmileyRating.Type.GOOD, "Great")
+//            srSmileyRating.setTitle(SmileyRating.Type.GREAT, "Awesome")
 //            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
             fabSubscribe.remove()
             lifecycleScope.launch {
