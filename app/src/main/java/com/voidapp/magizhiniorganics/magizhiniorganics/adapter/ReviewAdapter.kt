@@ -62,26 +62,11 @@ class ReviewAdapter(
             timeStamp.text = TimeUtil().getCustomDate(dateLong = review.timeStamp)
 
             when (review.rating) {
-                1 -> {
-                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_bad))
-                    reviewText.text = "Bad"
-                }
-                2 -> {
-                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_ok))
-                    reviewText.text = "Not Satisfied"
-                }
-                3 -> {
-                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_satisfied))
-                    reviewText.text = "Satisfied"
-                }
-                4 -> {
-                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_great))
-                    reviewText.text = "Great"
-                }
-                5 -> {
-                    ratings.setImageDrawable(ContextCompat.getDrawable(ratings.context, R.drawable.sm_awesome))
-                    reviewText.text = "Awesome"
-                }
+                1 -> reviewText.text = "1"
+                2 -> reviewText.text = "2"
+                3 -> reviewText.text = "3"
+                4 -> reviewText.text = "4"
+                5 -> reviewText.text = "5"
             }
 
             reviewContent.text = getReviewContent(review.review)

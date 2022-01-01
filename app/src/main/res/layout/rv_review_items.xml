@@ -62,7 +62,7 @@
         android:id="@+id/ivReview"
         android:layout_width="@dimen/material_size_32"
         android:layout_height="@dimen/material_size_32"
-        android:src="@drawable/sm_awesome"
+        android:src="@drawable/fill"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/ivProfilePic"
         app:layout_constraintBottom_toBottomOf="@id/ivProfilePic"

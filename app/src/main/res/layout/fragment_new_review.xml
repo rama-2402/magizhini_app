@@ -11,13 +11,12 @@
 
 <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".ui.product.fragments.NewReviewFragment"
     android:orientation="vertical"
     android:background="@drawable/shape_round_rectangle_8"
     android:gravity="center_horizontal"
     android:layout_marginBottom="@dimen/material_size_32"
-    android:paddingBottom="@dimen/material_size_32"
     >
 
     <com.whinc.widget.ratingbar.RatingBar
@@ -99,7 +98,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:layout_marginBottom="@dimen/material_size_16">
     <TextView
         android:id="@+id/btnAddImage"
         android:layout_width="wrap_content"
@@ -110,7 +110,6 @@
         android:background="@drawable/shape_round_rectangle_8"
         android:backgroundTint="@color/green_base"
         android:layout_margin="@dimen/material_size_8"
-        android:elevation="6dp"
         android:padding="@dimen/material_size_8"/>
     <TextView
         android:id="@+id/btnSaveReview"
@@ -122,7 +121,6 @@
         android:background="@drawable/shape_round_rectangle_8"
         android:layout_margin="@dimen/material_size_8"
         android:backgroundTint="@color/green_base"
-        android:elevation="6dp"
         android:padding="@dimen/material_size_8"/>
 </LinearLayout>
 
