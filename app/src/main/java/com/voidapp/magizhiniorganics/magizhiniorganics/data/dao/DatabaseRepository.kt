@@ -102,6 +102,8 @@ class DatabaseRepository(
 
     fun getFavorites(): List<Favorites>? = db.getUserProfileDao().getFavorites()
 
+    fun deleteAllFavorites() = db.getUserProfileDao().deleteAllFavorites()
+
     fun getAllCategoryNames() = db.getUserProfileDao().getAllCategoryNames()
 
     fun getCartPrice() = db.getUserProfileDao().getCartPrice()

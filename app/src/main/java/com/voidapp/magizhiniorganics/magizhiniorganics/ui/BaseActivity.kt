@@ -391,6 +391,7 @@ open class BaseActivity : AppCompatActivity() {
                         hideListBottomSheet()
                         when(data) {
                             "referral" -> activity.referralAction(selectedItem)
+                            "developer" -> activity.selectedContactMethodForDeveloper(selectedItem)
                             else -> activity.selectedContactMethod(selectedItem)
 
                         }

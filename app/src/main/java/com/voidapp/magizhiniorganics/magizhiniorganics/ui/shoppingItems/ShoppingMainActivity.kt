@@ -311,7 +311,7 @@ class ShoppingMainActivity :
                 val searchText = newText!!.lowercase(Locale.getDefault())
                 if (searchText.isNotEmpty()) {
                     mItems.forEach loop@ { it ->
-                        if (it.name.lowercase().contains(searchText)) {
+                        if (it.name.lowercase().contains(searchText) || it.description.lowercase().contains(searchText)) {
                             mFilteredItems.add(it)
                         } else {
                             for (label in it.labels) {

@@ -101,16 +101,16 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun updateDatabaseWorkRequest(wipe: Boolean, isNewDay: String) {
-//        if (isNewDay == TimeUtil().getCurrentDate()) {
-//            if (wipe) {
-//                SharedPref(this).putData("month", INT, TimeUtil().getMonthNumber())
-//                startWork("wipe")
-//            }else {
+        if (isNewDay == TimeUtil().getCurrentDate()) {
+            if (wipe) {
+                SharedPref(this).putData("month", INT, TimeUtil().getMonthNumber())
+                startWork("wipe")
+            }else {
                 startWork("")
-//            }
-//        } else {
-//            navigateToHomeScreen()
-//        }
+            }
+        } else {
+            navigateToHomeScreen()
+        }
     }
 
     private fun startWork(wipe: String) {

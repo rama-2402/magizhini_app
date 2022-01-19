@@ -37,6 +37,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatAc
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
@@ -174,6 +176,7 @@ class PurchaseHistoryActivity :
         Intent(this, ProductActivity::class.java).also {
             it.putExtra(Constants.PRODUCTS, productId)
             it.putExtra(Constants.PRODUCT_NAME, productName)
+            it.putExtra(NAVIGATION, ORDER_HISTORY_PAGE)
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }

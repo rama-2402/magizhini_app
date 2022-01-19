@@ -769,9 +769,9 @@ class InvoiceActivity :
     }
 
     override fun selectedAddress(position: Int) {
-        setUpDeliveryChargeForTheLocation(mSelectedAddress)
         mSelectedAddress = mProfile.address[position]
         mCheckedAddressPosition = position
+        setUpDeliveryChargeForTheLocation(mSelectedAddress)
         adapter.checkedAddressPosition = position
         adapter.notifyDataSetChanged()
     }

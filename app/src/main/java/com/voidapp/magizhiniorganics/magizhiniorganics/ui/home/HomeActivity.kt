@@ -56,12 +56,13 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import android.content.pm.ResolveInfo
-import com.voidapp.magizhiniorganics.magizhiniorganics.BuildConfig
+import com.google.firebase.BuildConfig
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+
 
 import java.net.URLEncoder
 import java.util.*
@@ -746,6 +747,9 @@ class HomeActivity :
                 R.id.menuContactUs -> {
                     showListBottomSheet(this, arrayListOf("Call", "WhatsApp", "E-Mail"))
                 }
+                R.id.menuContactDeveloper -> {
+                    showListBottomSheet(this, arrayListOf("WhatsApp", "E-Mail"), "developer")
+                }
                 R.id.menuAboutUs -> {
                     showDescriptionBs("ABOUT US \n\n  Magizhini Organics is a retail-focused Store offering food and related consumables produced from organics farming and Certified Organic food producers according to organic farming standards. \n\n\nABOUT ORGANIC FOOD:\n" +
                             "\n" +
@@ -769,6 +773,25 @@ class HomeActivity :
         Intent(this, VideoPlayerActivity::class.java).also {
             it.putExtra("url", url)
             startActivity(it)
+        }
+    }
+
+    fun selectedContactMethodForDeveloper(selectedItem: String) {
+        when(selectedItem) {
+            "WhatsApp" -> {
+                val message = ""
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(
+                            "https://api.whatsapp.com/send?phone=+919486598819&text=$message"
+                        )
+                    )
+                )
+            }
+            "E-Mail" -> {
+                shareToGMail(arrayOf("rama_void@zohomail.in"), "", "")
+            }
         }
     }
 
@@ -843,7 +866,7 @@ class HomeActivity :
     }
 
     fun showReferralOptions() {
-        showListBottomSheet(this, arrayListOf("Share My Referral Code", "Add Referral Number"), "referral")
+        showListBottomSheet(this, arrayListOf("Share My Referral Code", "Have a Referral Code? Enter here..."), "referral")
     }
 
 

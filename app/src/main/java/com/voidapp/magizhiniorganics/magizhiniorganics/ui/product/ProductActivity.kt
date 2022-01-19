@@ -33,6 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil

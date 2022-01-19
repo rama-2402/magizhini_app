@@ -59,6 +59,7 @@ class Firestore(
         repository.deleteOrdersTable()
         repository.deleteSubscriptionsTable()
         repository.deleteAllNotifications()
+        repository.deleteAllFavorites()
     }
 
     suspend fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential): Boolean {

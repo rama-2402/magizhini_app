@@ -173,6 +173,9 @@ interface UserProfileDao {
     @Query("SELECT * FROM Favorites")
     fun getFavorites(): List<Favorites>?
 
+    @Query("DELETE FROM Favorites")
+    fun deleteAllFavorites()
+
     //subscription
     @Insert(onConflict =  OnConflictStrategy.REPLACE)
     fun upsertSubscription(subscriptionEntity: SubscriptionEntity)
