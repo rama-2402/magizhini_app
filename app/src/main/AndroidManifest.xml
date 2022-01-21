@@ -24,6 +24,12 @@
         android:supportsRtl="true"
         android:theme="@style/splashScreenTheme">
         <activity
+            android:name=".ui.cwm.dish.DishActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.cwm.allCWM.AllCWMActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.VideoPlayerActivity"
             android:exported="false" />
         <activity
@@ -91,44 +97,44 @@
             android:name=".ui.shoppingItems.ShoppingMainActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"
-            android:theme="@style/Theme.MagizhiniOrganics.NoActionBar" />
+            android:theme="@style/Theme.MagizhiniOrganics.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"
             android:theme="@style/Theme.MagizhiniOrganics.NoActionBar"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.profile.ProfileActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.MapsActivity"
             android:exported="false"
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.signin.SignInActivity"
             android:exported="false"
-            tools:ignore="LockedOrientationActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.product.ProductActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.OnBoardingActivity"
             android:exported="false"
-            tools:ignore="LockedOrientationActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
 
         <meta-data
             android:name="com.razorpay.ApiKey"

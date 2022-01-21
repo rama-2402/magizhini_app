@@ -22,6 +22,11 @@
         android:icon="@drawable/ic_subscriptions"
         android:title="SUBSCRIPTIONS" />
 
+    <item
+        android:id="@+id/menuCWM"
+        android:icon="@drawable/ic_dish"
+        android:title="COOK WITH MAGIZHINI" />
+
     </group>
     <group
         android:id="@+id/agreement" >

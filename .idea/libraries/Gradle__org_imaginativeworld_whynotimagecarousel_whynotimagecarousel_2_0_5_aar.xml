@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: org.imaginativeworld.whynotimagecarousel:whynotimagecarousel:2.0.5@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/f6c1f68ae5b40668fe1cfdc10f58c0f7/transformed/jetified-whynotimagecarousel-2.0.5/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/f6c1f68ae5b40668fe1cfdc10f58c0f7/transformed/jetified-whynotimagecarousel-2.0.5/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/f6c1f68ae5b40668fe1cfdc10f58c0f7/transformed/jetified-whynotimagecarousel-2.0.5/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/e9f60a771ca08295028a6ca83d26d700/transformed/jetified-whynotimagecarousel-2.0.5/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/e9f60a771ca08295028a6ca83d26d700/transformed/jetified-whynotimagecarousel-2.0.5/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/e9f60a771ca08295028a6ca83d26d700/transformed/jetified-whynotimagecarousel-2.0.5/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.imaginativeworld.whynotimagecarousel/whynotimagecarousel/2.0.5/36ec1b156aadd42c929b38661d7ecc676348195a/whynotimagecarousel-2.0.5-javadoc.jar!/" />

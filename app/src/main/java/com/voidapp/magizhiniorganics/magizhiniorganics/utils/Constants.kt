@@ -71,6 +71,9 @@ object Constants {
     const val WALLET = "Wallet"
     const val REFERRAL = "Referral"
     const val TESTIMONIALS = "Testimonials"
+    const val CWM = "CWM"
+    const val ALL_DISHES = "AllDishes"
+
 
     //Navigation
     const val NAVIGATION: String = "navigate"

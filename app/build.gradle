@@ -183,4 +183,7 @@ dependencies {
     //start rating      https://github.com/whinc/RatingBar
     implementation 'com.github.whinc:ratingbar:1.1.1'
 
+    //youtube player integration         https://github.com/PierfrancescoSoffritti/android-youtube-player
+    implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:11.0.1'
+
 }

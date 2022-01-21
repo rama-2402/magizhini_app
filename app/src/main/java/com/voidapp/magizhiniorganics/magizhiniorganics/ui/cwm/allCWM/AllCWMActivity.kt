@@ -1,0 +1,196 @@
+package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM
+
+import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AllCWMAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityAllCwmBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import org.kodein.di.Kodein
+import org.kodein.di.KodeinAware
+import org.kodein.di.android.kodein
+import org.kodein.di.generic.instance
+import java.util.*
+
+class AllCWMActivity :
+    BaseActivity(),
+    KodeinAware,
+    AllCWMAdapter.CWMClickListener
+{
+
+    override val kodein: Kodein by kodein()
+
+    private lateinit var binding: ActivityAllCwmBinding
+    private lateinit var viewModel: CWMViewModel
+    private val factory: CWMViewModelFactory by instance()
+
+    private lateinit var allCWMAdapter: AllCWMAdapter
+
+    private var item: MenuItem? = null
+    private val mFilteredItems: MutableList<CWMFood> = mutableListOf()
+    private val mItems: MutableList<CWMFood> = mutableListOf()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_all_cwm)
+        viewModel = ViewModelProvider(this, factory)[CWMViewModel::class.java]
+
+        title = ""
+        setSupportActionBar(binding.tbToolbar)
+
+        initData()
+        initRecyclerView()
+        initObservers()
+        initListeners()
+    }
+
+    private fun initObservers() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.status.collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
+                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
+                    is NetworkResult.Loading -> {
+                        if (result.message == "") {
+                            showProgressDialog()
+                        } else {
+                            showSuccessDialog("", result.message, result.data)
+                        }
+                    }
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    private fun initListeners() {
+        binding.apply {
+            ivBackBtn.setOnClickListener {
+                collapseSearchBar()
+                onBackPressed()
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search, menu)
+        item = menu?.findItem(R.id.btnSearch)
+        item?.icon?.setTint(ContextCompat.getColor(this, R.color.white))
+        val searchView = item?.actionView as androidx.appcompat.widget.SearchView
+
+        searchView.setOnQueryTextListener(object :
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                mFilteredItems.clear()
+                val searchText = newText!!.lowercase(Locale.getDefault())
+                if (searchText.isNotEmpty()) {
+                    mItems.forEach loop@ { it ->
+                        if (it.dishName.lowercase().contains(searchText)) {
+                            mFilteredItems.add(it)
+                        }
+                    }
+                    allCWMAdapter.dishes = mFilteredItems
+                    allCWMAdapter.notifyDataSetChanged()
+                } else {
+                    mFilteredItems.clear()
+                    allCWMAdapter.dishes = mItems
+                    allCWMAdapter.notifyDataSetChanged()
+                }
+                return false
+            }
+        })
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    private fun collapseSearchBar() {
+        if (item?.isActionViewExpanded == true) {
+            item!!.collapseActionView()
+        }
+    }
+
+    private fun navigateToDish(dish: CWMFood) {
+        Intent(this@AllCWMActivity, DishActivity::class.java).also {
+            it.putExtra("dish", dish)
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            finish()
+        }
+    }
+
+    private fun initData() {
+        viewModel.getAllCWMDishes()
+    }
+
+    private fun initRecyclerView() {
+        allCWMAdapter = AllCWMAdapter(
+            this,
+            mutableListOf(),
+            this
+        )
+
+        binding.apply {
+            rvCWM.layoutManager = LinearLayoutManager(this@AllCWMActivity)
+            rvCWM.adapter = allCWMAdapter
+        }
+    }
+
+    private fun populateRecyclerView(dishes: MutableList<CWMFood>) {
+        mItems.clear()
+        mItems.addAll(dishes)
+        allCWMAdapter.dishes = dishes
+        allCWMAdapter.notifyDataSetChanged()
+    }
+
+    private suspend fun onSuccessCallback(message: String, data: Any?) {
+        when(message) {
+            "status" -> {
+                hideProgressDialog()
+                data as MutableList<CWMFood>
+                if (data.isNullOrEmpty()) {
+                    showToast(this, "No Dishes available to display")
+                } else {
+                    populateRecyclerView(data)
+                }
+            }
+        }
+
+        viewModel.setEmptyStatus()
+    }
+
+    private suspend fun onFailedCallback(message: String, data: Any?) {
+        when(message) {
+            "status" -> {
+                delay(1000)
+                hideSuccessDialog()
+                showErrorSnackBar(data!! as String, true)
+            }
+        }
+        viewModel.setEmptyStatus()
+    }
+
+    override fun selectedItem(dish: CWMFood) {
+        collapseSearchBar()
+        navigateToDish(dish)
+    }
+}

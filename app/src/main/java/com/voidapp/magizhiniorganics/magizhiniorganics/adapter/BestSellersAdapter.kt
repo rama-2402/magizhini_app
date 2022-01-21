@@ -53,10 +53,10 @@ class BestSellersAdapter(
         }
         val variantName = "${product.variants[variantInCartPosition].variantName} ${product.variants[variantInCartPosition].variantType}"
         variantDisplayName = when (product.variants[variantInCartPosition].variantType) {
-            "Kilogram" -> "${product.variants[variantInCartPosition].variantName} Kg"
-            "Gram" -> "${product.variants[variantInCartPosition].variantName} G"
-            "Liter" -> "${product.variants[variantInCartPosition].variantName} L"
-            else -> "${product.variants[variantInCartPosition].variantName} mL"
+            "Kilogram" -> "${product.variants[variantInCartPosition].variantName}Kg"
+            "Gram" -> "${product.variants[variantInCartPosition].variantName}g"
+            "Liter" -> "${product.variants[variantInCartPosition].variantName}l"
+            else -> "${product.variants[variantInCartPosition].variantName}ml"
         }
 
 //        var variantPrice: Float = product.variants[0].variantPrice.toFloat()

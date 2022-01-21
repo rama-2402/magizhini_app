@@ -19,6 +19,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityShoppingMainBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
@@ -83,7 +84,6 @@ class ShoppingMainActivity :
         categoryFilter = intent.getStringExtra(Constants.CATEGORY).toString()
         viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
 
-        setSupportActionBar(binding.tbToolbar)
         title = ""
         setSupportActionBar(binding.tbToolbar)
         binding.tvToolbarTitle.text = categoryFilter
@@ -156,7 +156,7 @@ class ShoppingMainActivity :
                 cartBtn.visibleBadge(true)
                 cartBtn.badgeValue = it.size
             }
-            cartAdapter.setCartData(it)
+            cartAdapter.setCartData(it as MutableList<CartEntity>)
         })
         viewModel.availableCategoryNames.observe(this, {
             showListBottomSheet(this, it as ArrayList<String>)

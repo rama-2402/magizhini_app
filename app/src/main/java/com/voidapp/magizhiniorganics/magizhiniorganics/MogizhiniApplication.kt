@@ -10,6 +10,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.CWMViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsViewModelFactory
@@ -55,5 +57,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { SubscriptionProductViewModelFactory(instance(), instance()) }
         bind() from provider { SubscriptionViewModelFactory(instance(), instance()) }
         bind() from provider { NotificationsViewModelFactory(instance(), instance()) }
+        bind() from provider { CWMViewModelFactory(instance(), instance()) }
+        bind() from provider { DishViewModelFactory(instance(), instance()) }
     }
 }

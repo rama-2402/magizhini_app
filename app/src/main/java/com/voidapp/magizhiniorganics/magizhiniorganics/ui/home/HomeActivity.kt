@@ -59,6 +59,7 @@ import android.content.pm.ResolveInfo
 import com.google.firebase.BuildConfig
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
@@ -680,6 +681,14 @@ class HomeActivity :
                     lifecycleScope.launch {
                         delay(200)
                         Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
+                            startActivity(it)
+                        }
+                    }
+                }
+                R.id.menuCWM -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        Intent(this@HomeActivity, AllCWMActivity::class.java).also {
                             startActivity(it)
                         }
                     }

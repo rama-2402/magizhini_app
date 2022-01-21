@@ -65,7 +65,7 @@ class ProductActivity :
 
     private var userId: String = ""
 
-    private var mCartItems: List<CartEntity> = listOf()
+    private var mCartItems: MutableList<CartEntity> = mutableListOf()
     private var mProduct: ProductEntity = ProductEntity()
     private var mProductId: String = ""
     private var mProductName: String = ""
@@ -261,7 +261,7 @@ class ProductActivity :
         })
 
         viewModel.getAllCartItems().observe(this, { it ->
-            mCartItems = it
+            mCartItems = it as MutableList<CartEntity>
             cartAdapter.setCartData(mCartItems)
             if (it.isEmpty()) {
                 cartBtn.badgeValue = it.size

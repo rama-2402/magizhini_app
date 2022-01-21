@@ -107,4 +107,9 @@ class FirestoreRepository (
     suspend fun updateToken(token: String) = firestore.updateToken(token)
     suspend fun getSupportToken(id: String): String = firestore.getSupportToken(id)
 
+
+    //cwm
+    suspend fun getAllCWMDishes(): NetworkResult = firestore.getAllCWMDishes()
+    suspend fun getDishDetails(dishID: String): NetworkResult = firestore.getDishDetails(dishID)
+
 }

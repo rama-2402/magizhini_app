@@ -19,6 +19,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADD_MONEY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_DISHES
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
@@ -1510,4 +1512,48 @@ class Firestore(
         }
     }
 
+
+    suspend fun getAllCWMDishes(): NetworkResult = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val dishes = mutableListOf<CWMFood>()
+            val allDishesDoc = mFireStore.collection(CWM)
+                .document(ALL_DISHES)
+                .collection(CWM)
+                .get().await()
+
+            for (doc in allDishesDoc.documents) {
+                val dish = doc.toObject(CWMFood::class.java)
+                dish?.let {
+                    it.id = doc.id
+                    dishes.add(dish)
+                }
+            }
+
+            NetworkResult.Success("status", dishes)
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: getting all CWM Dishes", it) }
+            NetworkResult.Failed("status", "Server Error! Try later")
+        }
+    }
+
+    suspend fun getDishDetails(dishID: String): NetworkResult = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val dishDoc = mFireStore.collection(CWM)
+                .document(ALL_DISHES)
+                .collection(CWM)
+                .document(dishID).get().await()
+
+            if (dishDoc.exists()) {
+                val dish = dishDoc.toObject(CWMFood::class.java)
+                dish!!.id = dishDoc.id
+                NetworkResult.Success("dish", dish)
+            } else {
+                NetworkResult.Failed("dish", "Dish Details not available")
+            }
+
+        } catch (e: Exception){
+            e.message?.let { logCrash("firestore: getting the dish details from store", it) }
+            NetworkResult.Failed("dish", "Server Error! Failed to get Details")
+        }
+    }
 }

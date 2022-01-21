@@ -17,6 +17,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
@@ -24,7 +25,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 
 class CartAdapter(
     val context: Context,
-    var cartItems: List<CartEntity>,
+    var cartItems: MutableList<CartEntity>,
     val viewModel: ViewModel
 ): RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
 
@@ -110,7 +111,8 @@ class CartAdapter(
                 when(viewModel) {
                     is ShoppingMainViewModel -> viewModel.updateCartItem(id, count+1)
                     is ProductViewModel -> viewModel.updateCartItem(id, count+1)
-                    is CheckoutViewModel -> viewModel.updateCartItem(id, count+1)
+                    is CheckoutViewModel -> viewModel.updateCartItem(id, count+1, position)
+                    is DishViewModel -> viewModel.updateCartItem(position, count+1)
                 }
             }
         }
@@ -121,16 +123,18 @@ class CartAdapter(
                 when(viewModel) {
                     is ShoppingMainViewModel -> viewModel.updateCartItem(id, count-1)
                     is ProductViewModel -> viewModel.updateCartItem(id, count-1)
-                    is CheckoutViewModel -> viewModel.updateCartItem(id, count-1)
+                    is CheckoutViewModel -> viewModel.updateCartItem(id, count-1, position)
+                    is DishViewModel -> viewModel.updateCartItem(position, count-1)
                 }
             }
         }
         holder.delete.setOnClickListener {
-            holder.remove.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
+            holder.delete.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             when(viewModel) {
                 is ShoppingMainViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)
                 is ProductViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)
-                is CheckoutViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)
+                is CheckoutViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant, position)
+                is DishViewModel -> viewModel.deleteItemFromCart(position)
             }
         }
 
@@ -141,7 +145,7 @@ class CartAdapter(
     }
 
 
-    fun setCartData(newList: List<CartEntity>) {
+    fun setCartData(newList: MutableList<CartEntity>) {
         val diffUtil = CartDiffUtil(cartItems, newList)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
         cartItems = newList

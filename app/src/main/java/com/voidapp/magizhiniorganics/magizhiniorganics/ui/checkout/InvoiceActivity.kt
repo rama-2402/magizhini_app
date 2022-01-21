@@ -17,7 +17,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddressBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -38,9 +37,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ChatAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
@@ -66,6 +63,12 @@ class InvoiceActivity :
     AddressAdapter.OnAddressClickListener
 {
 
+    /*
+    *todo bugs
+    * checkout page update the total purchase item count and price with cart item change
+     *
+     */
+
     override val kodein: Kodein by kodein()
     private val factory: CheckoutViewModelFactory by instance()
     private lateinit var binding: ActivityCheckoutBinding
@@ -79,7 +82,7 @@ class InvoiceActivity :
     private lateinit var cartAdapter: CartAdapter
     private lateinit var orderItemsAdapter: OrderItemsAdapter
 
-    private var mCartItems: List<CartEntity> = listOf()
+    private var mCartItems: MutableList<CartEntity> = mutableListOf()
     private var mCoupons: List<CouponEntity> = listOf()
     private var mCoupon: CouponEntity = CouponEntity()
     private var mCouponIndex: Int = 0
@@ -116,6 +119,9 @@ class InvoiceActivity :
         }
 
         viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
+        viewModel.cwmDish = intent.getParcelableArrayListExtra<CartEntity>("dish") ?: mutableListOf()
+        viewModel.cartPrice = intent.getFloatExtra("price", 0f)
+        viewModel.isCWMCart = intent.getBooleanExtra("cwm", false)
 
         binding.apply {
             rvAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
@@ -194,7 +200,11 @@ class InvoiceActivity :
 
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        checkoutText.text = "Rs: ${viewModel.getCartPrice(mCartItems)}"
+                        checkoutText.text = if(viewModel.isCWMCart) {
+                            "Rs: ${viewModel.cartPrice}"
+                        } else {
+                            "Rs: ${viewModel.getCartPrice(mCartItems)}"
+                        }
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         checkoutText.text = "PLACE ORDER"
@@ -235,25 +245,31 @@ class InvoiceActivity :
         viewModel.getUserProfileData()
         viewModel.getWallet(mCurrentUserID)
 
-        //we are getting all the items in cart and creating an array of id's that contains the variant names
-        //so in setting the recycler view, if the variant name is in that array then it will be considered as part of cart
-        //and remaining variant names will be removed when displaying the item
-        viewModel.getAllCartItems().observe(this, {
-            mCartItems = it
+        if (viewModel.cwmDish.isNullOrEmpty()) {
+            //we are getting all the items in cart and creating an array of id's that contains the variant names
+            //so in setting the recycler view, if the variant name is in that array then it will be considered as part of cart
+            //and remaining variant names will be removed when displaying the item
+            viewModel.getAllCartItems().observe(this, {
+                mCartItems = it as MutableList<CartEntity>
+                viewModel.itemsInCart = mCartItems
+                cartAdapter.setCartData(mCartItems)
+
+                if (it.isEmpty()) {
+                    cartBtn.badgeValue = it.size
+                    cartBtn.visibleBadge(false)
+                } else {
+                    cartBtn.visibleBadge(true)
+                    cartBtn.badgeValue = it.size
+                }
+
+                setDataToViews()
+                setCheckoutText()
+            })
+        } else {
+            mCartItems = viewModel.cwmDish
             viewModel.itemsInCart = mCartItems
             cartAdapter.setCartData(mCartItems)
-
-            if (it.isEmpty()) {
-                cartBtn.badgeValue = it.size
-                cartBtn.visibleBadge(false)
-            } else {
-                cartBtn.visibleBadge(true)
-                cartBtn.badgeValue = it.size
-            }
-
-            setDataToViews()
-            setCheckoutText()
-        })
+        }
 
         //getting all the coupons
         viewModel.coupons.observe(this, {
@@ -406,7 +422,11 @@ class InvoiceActivity :
     }
 
     private fun setDataToViews() {
-        val cartPrice = viewModel.getCartPrice(mCartItems)
+        val cartPrice = if (viewModel.isCWMCart) {
+            viewModel.cartPrice
+        } else {
+            viewModel.getCartPrice(mCartItems)
+        }
        with(binding) {
             tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(mCartItems).toString()
             tvMrpAmount.text = viewModel.getCartOriginalPrice(mCartItems).toString()
@@ -722,6 +742,12 @@ class InvoiceActivity :
             "transactionID" -> validatingTransactionBeforeOrder(data as String)
             "toast" -> {
                 showToast(this, data as String)
+            }
+            "cwm" -> {
+                cartAdapter.cartItems = data as MutableList<CartEntity>
+                cartAdapter.notifyDataSetChanged()
+                checkoutText.text = "Rs: ${viewModel.cartPrice}"
+                setDataToViews()
             }
         }
         viewModel.setEmptyStatus()

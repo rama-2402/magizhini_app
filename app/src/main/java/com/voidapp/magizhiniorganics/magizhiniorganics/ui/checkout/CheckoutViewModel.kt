@@ -35,6 +35,10 @@ class CheckoutViewModel(
     var addressPosition = 0
     private var localProfile = UserProfileEntity()
 
+    var cwmDish: MutableList<CartEntity> = mutableListOf()
+    var isCWMCart: Boolean = false
+    var cartPrice = 0f
+
     private var _coupons: MutableLiveData<List<CouponEntity>> = MutableLiveData()
     val coupons: LiveData<List<CouponEntity>> = _coupons
     private var _couponIndex: MutableLiveData<Int> = MutableLiveData()
@@ -143,22 +147,39 @@ class CheckoutViewModel(
     //cart functions
     fun getAllCartItems() = dbRepository.getAllCartItems()
 
-    fun deleteCartItem(id: Int, productId: String, variant: String) = viewModelScope.launch (Dispatchers.IO) {
+    fun deleteCartItem(id: Int, productId: String, variant: String, position: Int = 0) = viewModelScope.launch (Dispatchers.IO) {
         try {
-            dbRepository.deleteCartItem(id)
-            updatingTheCartInProduct(productId, variant)
-            getAllCartItems()
+            if (isCWMCart) {
+                cartPrice -= (cwmDish[position].price * cwmDish[position].quantity)
+                cwmDish.removeAt(position)
+                _status.value = NetworkResult.Success("cwm", cwmDish)
+            } else {
+                dbRepository.deleteCartItem(id)
+                updatingTheCartInProduct(productId, variant)
+                getAllCartItems()
+            }
         } catch (e: Exception) {
             e.message?.let { fbRepository.logCrash("checkout: deleting cart item in db", it) }
         }
     }
 
-    fun updateCartItem(id: Int, updatedCount: Int) = viewModelScope.launch (Dispatchers.IO) {
+    fun updateCartItem(id: Int, updatedCount: Int, position: Int = 0) = viewModelScope.launch (Dispatchers.IO) {
         try {
-            dbRepository.updateCartItem(id, updatedCount)
+            if (isCWMCart) {
+                updateDishPrice(position, updatedCount)
+                _status.value = NetworkResult.Success("cwm", cwmDish)
+            } else {
+                dbRepository.updateCartItem(id, updatedCount)
+            }
         } catch (e: Exception) {
             e.message?.let { fbRepository.logCrash("checkout: updating cart item in db", it) }
         }
+    }
+
+    private fun updateDishPrice(position: Int, count: Int) {
+        cartPrice -= (cwmDish[position].price * cwmDish[position].quantity)
+        cwmDish[position].quantity = count
+        cartPrice += (cwmDish[position].price * cwmDish[position].quantity)
     }
 
     private fun updatingTheCartInProduct(productId: String, variant: String) = viewModelScope.launch (Dispatchers.IO) {
@@ -204,7 +225,6 @@ class CheckoutViewModel(
     fun clearCart(cartItems: List<CartEntity>) = viewModelScope.launch (Dispatchers.IO) {
         try {
             for (cartItem in cartItems) {
-
                 val entity = dbRepository.getProductWithIdForUpdate(cartItem.productId)
                 entity?.let { product ->
                     product.inCart = false
