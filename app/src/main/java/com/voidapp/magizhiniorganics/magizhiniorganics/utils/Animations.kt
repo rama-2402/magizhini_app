@@ -28,8 +28,8 @@ object Animations {
         0.5f
     ).also {
         it.duration = 250 // animation duration in milliseconds
-        //            it.fillAfter =
-//                true // If fillAfter is true, the transformation that this animation performed will persist when it is finished.
+        //            it.fillAfter = true
+        // If fillAfter is true, the transformation that this animation performed will persist when it is finished.
     }
 
 }

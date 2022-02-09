@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory
 
-import android.Manifest
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,19 +8,13 @@ import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Message
 import android.provider.MediaStore
 import android.util.Log
-import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.work.*
 import com.google.gson.Gson
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -44,8 +37,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.CalendarFilterDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -350,7 +343,7 @@ class PurchaseHistoryActivity :
         if (PermissionsUtil.hasStoragePermission(this)) {
             createPDF(mInvoiceOrder)
         } else {
-            showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+            showExitSheet(this, "The App Needs Storage Permission to save PDF invoice. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
         }
     }
 
@@ -655,7 +648,6 @@ class PurchaseHistoryActivity :
         pgNum: Int,
         serial: Int
     ) {
-        Log.e("TAG", "createPDF: triggered")
 
         val pgWidth = 2480
         val pgHeight = 3508

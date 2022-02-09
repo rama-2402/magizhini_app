@@ -92,34 +92,37 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             mProfilePicUri = savedInstanceState.getString(Constants.PROFILE_PIC_URI)?.toUri()
             mProfilePicUri?.let { GlideLoader().loadUserPicture(this, it, binding.ivProfilePic) }
         }
-
     }
 
     private fun observers() {
-        viewModel.userProfile.observe(this, { userData ->
+        viewModel.userProfile.observe(this) { userData ->
             mProfile = userData.toUserProfile()
-            viewModel.getAllActiveOrders().observe(this, {
+            viewModel.getAllActiveOrders().observe(this) {
                 mProfile.purchaseHistory.clear()
                 mProfile.purchaseHistory.addAll(it)
-            })
-            viewModel.getAllActiveSubscriptions().observe(this, {
+            }
+            viewModel.getAllActiveSubscriptions().observe(this) {
                 mProfile.subscriptions.clear()
                 mProfile.subscriptions.addAll(it)
-            })
+            }
             setUserDetailsFromDao(userData)
-        })
-        viewModel.referralStatus.observe(this, {
+        }
+        viewModel.referralStatus.observe(this) {
             hideProgressDialog()
             if (it) {
                 dialogBsAddReferral.dismiss()
                 binding.tvReferral.remove()
-                showErrorSnackBar("Referral added Successfully. Your referral bonus will be added to your Wallet.", false, LONG)
+                showErrorSnackBar(
+                    "Referral added Successfully. Your referral bonus will be added to your Wallet.",
+                    false,
+                    LONG
+                )
             } else {
                 mProfile.referrerNumber = ""
                 showToast(this, "No account with the given number. Please check again")
             }
-        })
-        viewModel.profileUploadStatus.observe(this, { status ->
+        }
+        viewModel.profileUploadStatus.observe(this) { status ->
             if (status) {
                 hideProgressDialog()
                 successDialogAndTransition()
@@ -127,8 +130,8 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 hideProgressDialog()
                 showErrorSnackBar("Server Error! Profile Creation failed. Try later", true)
             }
-        })
-        viewModel.profileImageUploadStatus.observe(this, { status ->
+        }
+        viewModel.profileImageUploadStatus.observe(this) { status ->
             if (status == "failed") {
                 hideProgressDialog()
                 showErrorSnackBar("Server Error! Image Update failed. Try later", true)
@@ -136,7 +139,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 mProfile.profilePicUrl = status
                 viewModel.uploadProfile(mProfile)
             }
-        })
+        }
     }
 
     private fun activityInit() {
@@ -418,7 +421,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                     showReferralBs()
                 }
                 binding.llGps -> {
-
 //                    if(!PermissionsUtil().isGpsEnabled(this)) {
 //                        startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 //                    } else {

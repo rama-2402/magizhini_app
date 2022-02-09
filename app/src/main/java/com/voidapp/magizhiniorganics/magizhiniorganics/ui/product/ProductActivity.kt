@@ -638,7 +638,7 @@ class ProductActivity :
                     showToast(this, "Storage Permission Granted")
                     viewModel.previewImage("granted")
                 } else {
-                    showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                    showExitSheet(this, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
                 }
             }
             "review" -> {

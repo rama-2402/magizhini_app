@@ -7,6 +7,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.Firestore
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.UserDatabase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.use_cases.ProfileUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationViewModelFactory
@@ -18,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.Notificat
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionViewModelFactory
@@ -43,6 +45,10 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from singleton { Firestore(instance(), instance()) }
         bind() from singleton { FirestoreRepository(instance()) }
 
+        //use cases
+        bind() from provider { ProfileUseCase(instance(), instance()) }
+
+
         //viewModels
         bind() from provider { SignInViewModelFactory(instance(), instance()) }
         bind() from provider { HomeViewModelFactory(instance(), instance()) }
@@ -59,5 +65,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { NotificationsViewModelFactory(instance(), instance()) }
         bind() from provider { CWMViewModelFactory(instance(), instance()) }
         bind() from provider { DishViewModelFactory(instance(), instance()) }
+        bind() from provider { QuickOrderViewModelFactory(instance(), instance()) }
+
     }
 }

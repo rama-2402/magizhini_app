@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -60,12 +59,15 @@ import com.google.firebase.BuildConfig
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_BANNER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_BANNER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_BANNER
 
 
-import java.net.URLEncoder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -241,6 +243,9 @@ class HomeActivity :
             DESCRIPTION -> {
                 showDescriptionBs(banner.description)
             }
+            CWM_BANNER -> navigateToCWM()
+            WALLET_BANNER -> navigateToWallet()
+            QUICK_ORDER_BANNER -> navigateToQuickOrder()
             else -> Unit
         }
     }
@@ -250,16 +255,16 @@ class HomeActivity :
         viewModel.getDataToPopulate()
         viewModel.getAllNotifications()
 
-        viewModel.notifications.observe(this, {
+        viewModel.notifications.observe(this) {
             if (it.isNullOrEmpty()) {
                 binding.ivNotification.visibleBadge(false)
             } else {
-                binding.ivNotification.apply{
+                binding.ivNotification.apply {
                     visibleBadge(true)
                     badgeValue = it.size
                 }
             }
-        })
+        }
         //observing the banners data and setting the banners
         viewModel.getAllBanners().observe(this, Observer {
             banners.clear()
@@ -282,31 +287,31 @@ class HomeActivity :
             adapter.categories = it
             adapter.notifyDataSetChanged()
         })
-        viewModel.bestSellers.observe(this, {
+        viewModel.bestSellers.observe(this) {
             binding.tvBestSellers.text = viewModel.bestSellerHeader
             bestSellersAdapter.recycler = "bestSeller"
             bestSellersAdapter.products = it
             bestSellersAdapter.notifyDataSetChanged()
-        })
-        viewModel.specialsOne.observe(this, {
+        }
+        viewModel.specialsOne.observe(this) {
             binding.tvSpecialsOne.text = viewModel.specialsOneHeader
             specialsOneAdapter.recycler = "one"
             specialsOneAdapter.products = it
             specialsOneAdapter.notifyDataSetChanged()
-        })
-        viewModel.specialsTwo.observe(this, {
+        }
+        viewModel.specialsTwo.observe(this) {
             binding.tvSpecialsTwo.text = viewModel.specialsTwoHeader
             specialsTwoAdapter.recycler = "two"
             specialsTwoAdapter.products = it
             specialsTwoAdapter.notifyDataSetChanged()
-        })
-        viewModel.specialsThree.observe(this, {
+        }
+        viewModel.specialsThree.observe(this) {
             binding.tvSpecialsThree.text = viewModel.specialsThreeHeader
             specialsThreeAdapter.recycler = "three"
             specialsThreeAdapter.products = it
             specialsThreeAdapter.notifyDataSetChanged()
-        })
-        viewModel.recyclerPosition.observe(this, {
+        }
+        viewModel.recyclerPosition.observe(this) {
             when (viewModel.recyclerToRefresh) {
                 "bestSeller" -> {
                     bestSellersAdapter.notifyItemChanged(it)
@@ -341,8 +346,8 @@ class HomeActivity :
                     }
                 }
             }
-        })
-        viewModel.specialBanners.observe(this, {
+        }
+        viewModel.specialBanners.observe(this) {
             with(binding) {
                 GlideLoader().loadUserPicture(this@HomeActivity, it[0].url, ivBannerOne)
                 GlideLoader().loadUserPicture(this@HomeActivity, it[1].url, ivBannerTwo)
@@ -357,11 +362,11 @@ class HomeActivity :
                 GlideLoader().loadUserPicture(this@HomeActivity, it[10].url, ivBannerEleven)
                 GlideLoader().loadUserPicture(this@HomeActivity, it[11].url, ivBannerTwelve)
             }
-        })
-        viewModel.testimonials.observe(this, {
+        }
+        viewModel.testimonials.observe(this) {
             testimonialsAdapter.testimonials = it
             testimonialsAdapter.notifyDataSetChanged()
-        })
+        }
 
         binding.svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
             if (scrollY < oldScrollY && binding.fabCart.isGone) {
@@ -372,24 +377,26 @@ class HomeActivity :
                 binding.fabCart.visibility = View.GONE
             }
         })
-        viewModel.referralStatus.observe(this, {
+        viewModel.referralStatus.observe(this) {
             hideProgressDialog()
             if (it) {
                 dialogBsAddReferral.dismiss()
-                showErrorSnackBar("Referral added Successfully. Your referral bonus will be added to your Wallet.", false,
+                showErrorSnackBar(
+                    "Referral added Successfully. Your referral bonus will be added to your Wallet.",
+                    false,
                     Constants.LONG
                 )
             } else {
                 showToast(this, "No account with the given number. Please check again")
             }
-        })
-        viewModel.allowReferral.observe(this, {
+        }
+        viewModel.allowReferral.observe(this) {
             if (it == "no") {
                 showErrorSnackBar("Referral Already Applied", true)
             } else {
                 showReferralBs(it)
             }
-        })
+        }
 //        //scroll change listener to hide the fab when scrolling down
 //        binding.rvHomeItems.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 //            override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
@@ -525,6 +532,7 @@ class HomeActivity :
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
+
 /*
     //This will lock the vertical scrolling when horizontal child is scrolling and vice versa
             binding.rvHomeItems.setOnTouchListener { v, event ->
@@ -546,6 +554,8 @@ class HomeActivity :
             super.onBackPressed()
         }
     }
+
+
 
     override fun onClick(v: View?) {
         if (v != null) {
@@ -626,15 +636,42 @@ class HomeActivity :
         }
     }
 
+    private fun navigateToCWM() {
+        lifecycleScope.launch {
+            delay(200)
+            Intent(this@HomeActivity, AllCWMActivity::class.java).also {
+                startActivity(it)
+            }
+        }
+    }
+
+    private fun navigateToWallet() {
+        lifecycleScope.launch {
+            delay(200)
+            Intent(this@HomeActivity, WalletActivity::class.java).also {
+                startActivity(it)
+            }
+        }
+    }
+
+    private fun navigateToQuickOrder() {
+        lifecycleScope.launch {
+            delay(200)
+            Intent(this@HomeActivity, QuickOrderActivity::class.java).also {
+                startActivity(it)
+            }
+        }
+    }
+
     override fun onResume() {
         viewModel.getAllNotifications()
         super.onResume()
     }
 
-    override fun onRestart() {
-        viewModel.getAllNotifications()
-        super.onRestart()
-    }
+//    override fun onRestart() {
+//        viewModel.getAllNotifications()
+//        super.onRestart()
+//    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (NetworkHelper.isOnline(this)) {
@@ -669,14 +706,7 @@ class HomeActivity :
                         }
                     }
                 }
-                R.id.menuWallet -> {
-                    lifecycleScope.launch {
-                        delay(200)
-                        Intent(this@HomeActivity, WalletActivity::class.java).also {
-                            startActivity(it)
-                        }
-                    }
-                }
+                R.id.menuWallet -> navigateToWallet()
                 R.id.menuSubscriptions -> {
                     lifecycleScope.launch {
                         delay(200)
@@ -685,14 +715,8 @@ class HomeActivity :
                         }
                     }
                 }
-                R.id.menuCWM -> {
-                    lifecycleScope.launch {
-                        delay(200)
-                        Intent(this@HomeActivity, AllCWMActivity::class.java).also {
-                            startActivity(it)
-                        }
-                    }
-                }
+                R.id.menuCWM -> navigateToCWM()
+                R.id.menuQuickOrder -> navigateToQuickOrder()
                 R.id.menuReferral -> {
                     binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
                     showExitSheet(this, "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus! Click Proceed to Continue")

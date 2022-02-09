@@ -105,6 +105,12 @@ object Constants {
     const val SHOW_DETAILS: String = "Show details"
     const val OPEN_LINK: String = "url"
     const val DESCRIPTION = "description"
+    const val CWM_BANNER: String = "cwm"
+    const val SUBSCRIPTION_BANNER: String = "subscription"
+    const val QUICK_ORDER_BANNER: String = "quick order"
+    const val WALLET_BANNER: String = "wallet"
+    const val OPEN: String = "open"
+
     const val NONE = "none"
 
     //image storage paths

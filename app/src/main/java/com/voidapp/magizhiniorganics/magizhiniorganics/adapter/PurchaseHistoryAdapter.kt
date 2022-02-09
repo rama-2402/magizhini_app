@@ -42,6 +42,7 @@ class PurchaseHistoryAdapter(
     }
 
     override fun onBindViewHolder(holder: PurchaseHistoryViewHolder, position: Int) {
+
         val order = orders[position]
 
         with(holder) {
@@ -56,8 +57,8 @@ class PurchaseHistoryAdapter(
                     holder.paymentStatus.setTextColor(ContextCompat.getColor(context, R.color.matteGreen))
                 }
                 false -> {
-                    paymentStatus.text = "(pending - ${order.paymentMethod})"
-                    holder.paymentStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
+                    paymentStatus.text = "(${order.paymentMethod})"
+                    holder.paymentStatus.setTextColor(ContextCompat.getColor(context, R.color.matteGreen))
                 }
             }
 
@@ -118,7 +119,7 @@ class PurchaseHistoryAdapter(
         }
     }
 
-    override fun getItemCount(): Int {
+     override fun getItemCount(): Int {
         return orders.size
     }
 

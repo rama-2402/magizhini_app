@@ -23,6 +23,11 @@
         android:title="SUBSCRIPTIONS" />
 
     <item
+        android:id="@+id/menuQuickOrder"
+        android:icon="@drawable/ic_add_cart"
+        android:title="QUICK ORDER" />
+
+    <item
         android:id="@+id/menuCWM"
         android:icon="@drawable/ic_dish"
         android:title="COOK WITH MAGIZHINI" />

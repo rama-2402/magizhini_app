@@ -33,9 +33,7 @@ import androidx.work.*
 import com.google.gson.Gson
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ChatAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
@@ -49,7 +47,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATIO
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.ItemsBottomSheet
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -62,12 +60,6 @@ class InvoiceActivity :
     PaymentResultListener,
     AddressAdapter.OnAddressClickListener
 {
-
-    /*
-    *todo bugs
-    * checkout page update the total purchase item count and price with cart item change
-     *
-     */
 
     override val kodein: Kodein by kodein()
     private val factory: CheckoutViewModelFactory by instance()
@@ -249,7 +241,7 @@ class InvoiceActivity :
             //we are getting all the items in cart and creating an array of id's that contains the variant names
             //so in setting the recycler view, if the variant name is in that array then it will be considered as part of cart
             //and remaining variant names will be removed when displaying the item
-            viewModel.getAllCartItems().observe(this, {
+            viewModel.getAllCartItems().observe(this) {
                 mCartItems = it as MutableList<CartEntity>
                 viewModel.itemsInCart = mCartItems
                 cartAdapter.setCartData(mCartItems)
@@ -264,7 +256,7 @@ class InvoiceActivity :
 
                 setDataToViews()
                 setCheckoutText()
-            })
+            }
         } else {
             mCartItems = viewModel.cwmDish
             viewModel.itemsInCart = mCartItems
@@ -272,27 +264,27 @@ class InvoiceActivity :
         }
 
         //getting all the coupons
-        viewModel.coupons.observe(this, {
+        viewModel.coupons.observe(this){
             mCoupons = it
             checkExistingCoupon()
-        })
+        }
 
-        viewModel.couponIndex.observe(this, {
+        viewModel.couponIndex.observe(this) {
             //everytime a new coupon is applied the index changes and we observe it and
             //save it to the preference and apply the changes to the invoice accordingly
             mCouponIndex = it
             mCoupon = mCoupons[mCouponIndex]
             SharedPref(this).putData(Constants.CURRENT_COUPON, Constants.STRING, mCoupon.id)
             setDataToViews()
-        })
+        }
 
-        viewModel.profile.observe(this, {
+        viewModel.profile.observe(this) {
             mProfile = it
             adapter.addressList = it.address
             mSelectedAddress = it.address[0]
             adapter.notifyDataSetChanged()
             setUpDeliveryChargeForTheLocation(mSelectedAddress)
-        })
+        }
 
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->
@@ -429,6 +421,7 @@ class InvoiceActivity :
         }
        with(binding) {
             tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(mCartItems).toString()
+            cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
             tvMrpAmount.text = viewModel.getCartOriginalPrice(mCartItems).toString()
             mDiscountedPrice =
                 viewModel.getCartOriginalPrice(mCartItems) - cartPrice

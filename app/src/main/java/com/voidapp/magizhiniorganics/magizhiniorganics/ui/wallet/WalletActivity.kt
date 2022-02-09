@@ -2,7 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -32,7 +31,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODU
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.dialogs.CalendarFilterDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.kodein.di.Kodein

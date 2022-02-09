@@ -144,7 +144,6 @@ class CartAdapter(
         return cartItems.size
     }
 
-
     fun setCartData(newList: MutableList<CartEntity>) {
         val diffUtil = CartDiffUtil(cartItems, newList)
         val diffResult = DiffUtil.calculateDiff(diffUtil)

@@ -46,7 +46,6 @@ class CategoryHomeAdapter(
 
         holder.itemView.setOnClickListener {
             viewModel.selectedCategory(categoryEntity.name)
-            Log.e("cat",categoryEntity.name)
         }
 
     }

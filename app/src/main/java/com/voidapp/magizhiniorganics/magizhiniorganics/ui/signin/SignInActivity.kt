@@ -8,10 +8,7 @@ import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import androidx.work.workDataOf
+import androidx.work.*
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -237,10 +234,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 mCurrentUserID = viewModel.getCurrentUserId()!!
                 viewModel.createNewCustomerProfile()
                 startGetProfileDataService()
-                startGetAllDataService()
-                delay(2000)
-                hideProgressDialog()
-                navigateToProfilePage()
+                startGetAllDataService("profile")
             }
             "failed" -> {
                 hideProgressDialog()
@@ -251,10 +245,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 SharedPref(this).putData(USER_ID, STRING, mCurrentUserID)
                 SharedPref(this).putData(PHONE_NUMBER, STRING, mPhoneNumber)
                 startGetProfileDataService()
-                startGetAllDataService()
-                delay(2000)
-                hideProgressDialog()
-                navigateToHomePage()
+                startGetAllDataService("home")
             }
         }
     }
@@ -290,7 +281,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         WorkManager.getInstance(this).enqueue(workRequest)
     }
 
-    private fun startGetAllDataService() {
+    private fun startGetAllDataService(navigateTo: String) {
         val workRequest: WorkRequest =
             OneTimeWorkRequestBuilder<UpdateDataService>()
                 .setInputData(
@@ -302,6 +293,37 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 .build()
 
         WorkManager.getInstance(this).enqueue(workRequest)
+        WorkManager.getInstance(this)
+            .getWorkInfoByIdLiveData(workRequest.id)
+            .observe(this) {
+                when (it.state) {
+                    WorkInfo.State.CANCELLED -> {
+                        hideProgressDialog()
+                        showToast(
+                            this,
+                            "Failed to update product catalog. Clear app data and try again",
+                            LONG
+                        )
+                    }
+                    WorkInfo.State.FAILED -> {
+                        hideProgressDialog()
+                        showToast(
+                            this,
+                            "Failed to update product catalog. Clear app data and try again",
+                            LONG
+                        )
+                    }
+                    WorkInfo.State.SUCCEEDED -> {
+                        hideProgressDialog()
+                        if (navigateTo == "home") {
+                            navigateToHomePage()
+                        } else {
+                            navigateToProfilePage()
+                        }
+                    }
+                    else -> Unit
+                }
+            }
     }
 
 

@@ -52,16 +52,16 @@
                     android:textColor="@color/white"
                     android:fontFamily="@font/roboto"/>
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivSave"
-                    android:layout_width="@dimen/material_size_24"
-                    android:layout_height="@dimen/material_size_24"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_save"
-                    android:layout_marginEnd="@dimen/material_size_16"
-                    app:tint="@color/white"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+<!--                <com.google.android.material.imageview.ShapeableImageView-->
+<!--                    android:id="@+id/ivSave"-->
+<!--                    android:layout_width="@dimen/material_size_24"-->
+<!--                    android:layout_height="@dimen/material_size_24"-->
+<!--                    android:layout_gravity="end"-->
+<!--                    android:src="@drawable/ic_save"-->
+<!--                    android:layout_marginEnd="@dimen/material_size_16"-->
+<!--                    app:tint="@color/white"-->
+<!--                    android:background="?android:attr/selectableItemBackgroundBorderless"-->
+<!--                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>-->
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
         <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView

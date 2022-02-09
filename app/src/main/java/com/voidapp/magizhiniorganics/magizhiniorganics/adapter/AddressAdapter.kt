@@ -10,11 +10,15 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
 
 class AddressAdapter(
     val context: Context,
@@ -42,7 +46,6 @@ class AddressAdapter(
     override fun onBindViewHolder(holder: AddressViewHolder, position: Int) {
 
             val address = addressList[position]
-            val userID: String = SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
             if (position == checkedAddressPosition) {
                 holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
             } else {
@@ -92,5 +95,33 @@ class AddressAdapter(
         fun addAddress(position: Int)
         fun deleteAddress(position: Int)
         fun updateAddress(position: Int)
+    }
+
+    fun setAddressData(newList: ArrayList<Address>) {
+        val diffUtil = AddressDiffUtil(addressList as List<Address>, newList as List<Address>)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
+        addressList = newList
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    class AddressDiffUtil(
+        private val oldList: List<Address>,
+        private val newList: List<Address>
+    ): DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].addressLineOne == newList[newItemPosition].addressLineOne
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].equals(newList[newItemPosition])
+        }
     }
 }

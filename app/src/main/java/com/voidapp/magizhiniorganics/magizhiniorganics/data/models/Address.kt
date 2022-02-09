@@ -14,4 +14,27 @@ data class Address(
     var gpsLatitude: String = "",
     var gpsLongitude: String = "",
     var gpsAddress: String = ""
-): Parcelable
+): Parcelable {
+    override fun equals(other: Any?): Boolean {
+        if (javaClass != other?.javaClass) {
+            return false
+        }
+
+        other as Address
+
+        return when {
+            userId != other.userId -> false
+            addressLineOne != other.addressLineOne -> false
+            addressLineTwo != other.addressLineTwo -> false
+            LocationCode != other.LocationCode -> false
+            LocationCodePosition != other.LocationCodePosition -> false
+            city != other.city -> false
+            gpsLatitude != other.gpsLatitude -> false
+            gpsLongitude != other.gpsLongitude -> false
+            gpsAddress != other.gpsAddress -> false
+            else -> true
+        }
+    }
+}
+
+

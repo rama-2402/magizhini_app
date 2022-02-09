@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/green100"
+        tools:context=".ui.quickOrder.QuickOrderActivity">
+
+        <ImageView
+            android:id="@+id/ivPreviewImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:elevation="@dimen/material_size_24"
+            android:background="@color/black"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/apbAppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green_base"
+            android:gravity="center"
+            android:layout_gravity="center"
+            app:iconTint="@color/white"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/rvAddress">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/tbToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivBackBtn"
+                    android:padding="@dimen/material_size_4"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_back"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/white"
+                    android:layout_marginEnd="@dimen/material_size_16"/>
+                <TextView
+                    android:id="@+id/tvToolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quick Order"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:textSize="@dimen/text_size_large"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/roboto"/>
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivHelp"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
+                    android:layout_gravity="end"
+                    android:src="@drawable/ic_help"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:contentDescription="@string/favorites_icon"
+                    app:tint="@color/white"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:elevation="8dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/shape_round_rectangle_16"
+            >
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvOrderList"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/material_size_8"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/btnPlaceOrder"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGetEstimate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/material_size_8"
+                android:paddingBottom="@dimen/material_size_8"
+                android:layout_marginEnd="@dimen/material_size_4"
+                android:text="GET ESTIMATE"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/green_base"
+                android:background="@drawable/shape_round_rectangle_8"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginBottom="@dimen/material_size_4"
+                app:layout_constraintEnd_toStartOf="@+id/btnPlaceOrder"/>
+
+            <Button
+                android:id="@+id/btnPlaceOrder"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/material_size_8"
+                android:paddingBottom="@dimen/material_size_8"
+                android:layout_marginStart="@dimen/material_size_4"
+                android:text="PLACE ORDER"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/matteRed"
+                android:background="@drawable/shape_round_rectangle_8"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginBottom="@dimen/material_size_4"
+                app:layout_constraintStart_toEndOf="@id/btnGetEstimate"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</layout>
