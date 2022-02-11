@@ -69,15 +69,15 @@ class NewReviewFragment : Fragment(), KodeinAware {
     }
 
     private fun initLiveData() {
-        productViewModel.previewImage.observe(viewLifecycleOwner, {
-            when(it) {
+        productViewModel.previewImage.observe(viewLifecycleOwner) {
+            when (it) {
                 "granted" -> picker.launch("image/*")
                 "added" -> {
                     binding.ivReviewImage.visibility = View.GONE
                     binding.edtDescription.setText("")
                 }
             }
-        })
+        }
     }
 
     private fun clickListeners() {

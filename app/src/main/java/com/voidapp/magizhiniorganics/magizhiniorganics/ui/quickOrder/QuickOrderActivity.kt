@@ -16,12 +16,14 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderListAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityQuickOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Animations
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -29,6 +31,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -38,7 +41,8 @@ class QuickOrderActivity :
     BaseActivity(),
     KodeinAware,
     AddressAdapter.OnAddressClickListener,
-    QuickOrderListAdapter.QuickOrderClickListener
+    QuickOrderListAdapter.QuickOrderClickListener,
+    AddressDialogClickListener
 {
     override val kodein: Kodein by kodein()
 
@@ -64,6 +68,10 @@ class QuickOrderActivity :
     }
 
     private fun initData() {
+        lifecycleScope.launchWhenCreated {
+            viewModel.userProfile = UserProfileEntity()
+            viewModel.addressContainer = Address()
+        }
         viewModel.getAddress()
     }
 
@@ -82,6 +90,13 @@ class QuickOrderActivity :
             ivPreviewImage.setOnClickListener {
                 onBackPressed()
             }
+            btnGetEstimate.setOnClickListener {
+                viewModel.sendGetEstimateRequest()
+            }
+            btnPlaceOrder.setOnClickListener {
+                viewModel.sendOrderPlaceRequest()
+            }
+
         }
     }
 
@@ -125,10 +140,8 @@ class QuickOrderActivity :
         binding.rvOrderList.adapter = quickOrderListAdapter
     }
 
-    private fun populateAddressDetails(addresses: ArrayList<Address>) {
-//        addressAdapter.setAddressData(addresses)
-        addressAdapter.addressList = addresses
-        addressAdapter.notifyDataSetChanged()
+    private fun populateAddressDetails(addresses: List<Address>) {
+        addressAdapter.setAddressData(addresses)
     }
 
     private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -142,14 +155,6 @@ class QuickOrderActivity :
     private fun loadNewImage() {
         quickOrderListAdapter.quickOrderList = viewModel.orderListUri
         quickOrderListAdapter.notifyDataSetChanged()
-    }
-
-    fun newUpdatedAddress(address: Address, isNew: Boolean) {
-        if (isNew) {
-            viewModel.addAddress(address)
-        } else {
-            viewModel.updateAddress(address)
-        }
     }
 
     fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
@@ -172,7 +177,6 @@ class QuickOrderActivity :
             }
         }
     }
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -197,7 +201,7 @@ class QuickOrderActivity :
     private fun onSuccessCallback(message: String, data: Any?) {
         when (message) {
             "address" -> {
-                populateAddressDetails(data as ArrayList<Address>)
+                populateAddressDetails(data as List<Address>)
             }
             "addressUpdate" -> {
                 viewModel.userProfile?.let {
@@ -206,6 +210,7 @@ class QuickOrderActivity :
                 showToast(this, data as String)
             }
         }
+        viewModel.setEmptyStatus()
     }
 
     private fun onFailedCallback(message: String, data: Any?) {
@@ -217,21 +222,18 @@ class QuickOrderActivity :
                 showToast(this, data as String)
             }
         }
+        viewModel.setEmptyStatus()
     }
 
+    //from address adapter
     override fun selectedAddress(position: Int) {
-//        viewModel.mSelectedAddress = viewModel.userProfile!!.address[position]
         viewModel.mCheckedAddressPosition = position
         addressAdapter.checkedAddressPosition = position
         addressAdapter.notifyDataSetChanged()
     }
 
     override fun addAddress(position: Int) {
-        AddressDialog(
-            this,
-            this,
-            null
-        ).show()
+        AddressDialog().show(supportFragmentManager, "addressDialog")
     }
 
     override fun deleteAddress(position: Int) {
@@ -243,14 +245,16 @@ class QuickOrderActivity :
     override fun updateAddress(position: Int) {
         viewModel.addressPosition = position
         viewModel.userProfile?.let {
-            AddressDialog(
-                this,
-                this,
-                it.address[position]
-            ).show()
+            val dialog = AddressDialog()
+            val bundle = Bundle()
+            bundle.putParcelable("address", it.address[position])
+            dialog.arguments = bundle
+            dialog.show(supportFragmentManager, "addressDialog")
         }
+
     }
 
+    //from order list adapter
     override fun selectedListImage(position: Int, imageUri: Uri) {
         binding.apply {
             isPreviewOpened = true
@@ -270,6 +274,23 @@ class QuickOrderActivity :
             getAction.launch(pickImageIntent)
         } else {
             showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+        }
+    }
+
+    //from address dialog
+    override fun savedAddress(addressMap: HashMap<String, Any>, isNew: Boolean) {
+        viewModel.addressContainer?.let { address ->
+            address.userId = addressMap["userId"].toString()
+            address.addressLineOne = addressMap["addressLineOne"].toString()
+            address.addressLineTwo = addressMap["addressLineTwo"].toString()
+            address.LocationCode = addressMap["LocationCode"].toString()
+            address.LocationCodePosition = addressMap["LocationCodePosition"].toString().toInt()
+            address.city = addressMap["city"].toString()
+            if (isNew) {
+                viewModel.addAddress(address)
+            } else {
+                viewModel.updateAddress(address)
+            }
         }
     }
 }

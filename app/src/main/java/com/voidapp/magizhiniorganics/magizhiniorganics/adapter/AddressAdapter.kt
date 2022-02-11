@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -97,10 +98,11 @@ class AddressAdapter(
         fun updateAddress(position: Int)
     }
 
-    fun setAddressData(newList: ArrayList<Address>) {
-        val diffUtil = AddressDiffUtil(addressList as List<Address>, newList as List<Address>)
+    fun setAddressData(newList: List<Address>) {
+        val diffUtil = AddressDiffUtil(addressList, newList)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
-        addressList = newList
+        addressList.clear()
+        addressList.addAll(newList)
         diffResult.dispatchUpdatesTo(this)
     }
 
@@ -117,7 +119,7 @@ class AddressAdapter(
         }
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return oldList[oldItemPosition].addressLineOne == newList[newItemPosition].addressLineOne
+            return false
         }
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

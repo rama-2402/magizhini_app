@@ -26,9 +26,9 @@ class QuickOrderViewModel(
 
     val orderListUri: MutableList<Uri> = mutableListOf()
     var userProfile: UserProfileEntity? = null
+    var addressContainer: Address? = null
 
     var mCheckedAddressPosition: Int = 0
-//    var mSelectedAddress: Address? = null
     var addressPosition: Int = 0
 
     private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(
@@ -48,15 +48,14 @@ class QuickOrderViewModel(
             val profile = dbRepository.getProfileData()
             profile?.let {
                 userProfile = it
-                _status.value = NetworkResult.Success("address", profile.address)
+                _status.value = NetworkResult.Success("address", it.address)
             }
         } catch (e: IOException) {
             _status.value = NetworkResult.Failed("address", "Failed to fetch address. Please try again later")
         }
-
     }
 
-    fun deleteAddress(position: Int) = viewModelScope.launch (Dispatchers.IO){
+    fun deleteAddress(position: Int) = viewModelScope.launch (Dispatchers.IO) {
         try {
             val localUpdate = async {
                 userProfile?.let {
@@ -139,5 +138,15 @@ class QuickOrderViewModel(
             _status.value = NetworkResult.Success("addressUpdate", "Failed to update address. Try later")
             e.message?.let { fbRepository.logCrash("checkout: update address to profile from db", it) }
         }
+    }
+
+    fun sendGetEstimateRequest() = viewModelScope.launch {
+        _status.value = NetworkResult.Loading("")
+
+    }
+
+    fun sendOrderPlaceRequest() = viewModelScope.launch {
+        _status.value = NetworkResult.Loading("")
+
     }
 }

@@ -35,6 +35,19 @@ data class Address(
             else -> true
         }
     }
+
+    override fun hashCode(): Int {
+        var result = userId.hashCode()
+        result = 31 * result + addressLineOne.hashCode()
+        result = 31 * result + addressLineTwo.hashCode()
+        result = 31 * result + LocationCode.hashCode()
+        result = 31 * result + LocationCodePosition
+        result = 31 * result + city.hashCode()
+        result = 31 * result + gpsLatitude.hashCode()
+        result = 31 * result + gpsLongitude.hashCode()
+        result = 31 * result + gpsAddress.hashCode()
+        return result
+    }
 }
 
 
