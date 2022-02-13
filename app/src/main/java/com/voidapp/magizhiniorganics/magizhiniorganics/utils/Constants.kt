@@ -73,6 +73,7 @@ object Constants {
     const val TESTIMONIALS = "Testimonials"
     const val CWM = "CWM"
     const val ALL_DISHES = "AllDishes"
+    const val QUICK_ORDER: String = "QuickOrder"
 
 
     //Navigation
@@ -117,6 +118,7 @@ object Constants {
     const val PROFILE_PIC_PATH: String = "users/profile-pic/"
     const val REVIEW_IMAGE_PATH: String = "reviews/"
     const val CHAT_CONVERSATION: String = "customerSupport/support/"
+    const val ORDER_ESTIMATE_PATH: String = "orders/"
 
 
     //profile activity

@@ -7,35 +7,48 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.aminography.primedatepicker.utils.enableHardwareAcceleration
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderListAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityQuickOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Animations
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+
+/*
+* check if there is any order list already available
+* disable the add button if order list is already in place
+* enable place order only after adding atleast one image
+*
+* */
 
 class QuickOrderActivity :
     BaseActivity(),
@@ -91,10 +104,16 @@ class QuickOrderActivity :
                 onBackPressed()
             }
             btnGetEstimate.setOnClickListener {
-                viewModel.sendGetEstimateRequest()
+                showExitSheet(this@QuickOrderActivity, "To get Estimate price, Your List will be sent for validation and we will contact you with the price breakdown for each product and Total Order. Please click PROCEED below to start uploading order list.", "estimate")
             }
             btnPlaceOrder.setOnClickListener {
-                viewModel.sendOrderPlaceRequest()
+                if (viewModel.quickOrder == null && viewModel.orderListUri.isNullOrEmpty()) {
+                    showErrorSnackBar("Please add your purchase list image to place order", true)
+                    return@setOnClickListener
+                }
+                viewModel.quickOrder?.let {
+                    showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet", "Cash On Delivery"))
+                } ?: viewModel.sendOrderPlaceRequest()
             }
 
         }
@@ -132,7 +151,8 @@ class QuickOrderActivity :
 
         quickOrderListAdapter = QuickOrderListAdapter(
             this,
-            mutableListOf(),
+            listOf(),
+            listOf(),
             this
         )
         binding.rvOrderList.layoutManager =
@@ -142,6 +162,63 @@ class QuickOrderActivity :
 
     private fun populateAddressDetails(addresses: List<Address>) {
         addressAdapter.setAddressData(addresses)
+//        addressAdapter.addressList = addresses as ArrayList<Address>
+//        addressAdapter.notifyDataSetChanged()
+    }
+
+    private fun populateEstimateDetails(quickOrder: QuickOrder) {
+        viewModel.quickOrder = quickOrder
+        binding.apply {
+            quickOrderListAdapter.quickOrderListUrl = quickOrder.imageUrl
+            quickOrderListAdapter.notifyDataSetChanged()
+            if (quickOrder.note.isNotEmpty()) {
+                ivNotification.badgeValue = 1
+            }
+            btnGetEstimate.text =
+                "Rs:${viewModel.getTotalCartPrice()} (${quickOrder.cart.size} Items)"
+            updatePlaceOrderButton()
+            showToast(this@QuickOrderActivity, "click Total Price to get Individual Item Price", LONG)
+        }
+
+    }
+
+    fun selectedPaymentMode(paymentMethod: String) {
+        when(paymentMethod) {
+            "Online" -> {
+
+            }
+            "Wallet" -> {
+
+            }
+            else -> viewModel.sendOrderPlaceRequest()
+        }
+    }
+
+    fun sendEstimateRequest() {
+        val imageExtensionList = mutableListOf<String>()
+        for (uri in viewModel.orderListUri) {
+            imageExtensionList.add(GlideLoader().imageExtension(this@QuickOrderActivity, uri)!!)
+        }
+        viewModel.sendGetEstimateRequest (
+            imageExtensionList
+        )
+    }
+
+    private fun updatePlaceOrderButton() {
+        if(
+            viewModel.quickOrder == null &&
+            viewModel.orderListUri.isNullOrEmpty()
+        ) {
+            binding.btnPlaceOrder.text = "Add List"
+        } else {
+            binding.btnPlaceOrder.text = "Place Order"
+        }
+    }
+
+    private fun loadNewImage() {
+        quickOrderListAdapter.quickOrderList = viewModel.orderListUri
+        quickOrderListAdapter.notifyDataSetChanged()
+        updatePlaceOrderButton()
     }
 
     private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -152,11 +229,6 @@ class QuickOrderActivity :
         }
     }
 
-    private fun loadNewImage() {
-        quickOrderListAdapter.quickOrderList = viewModel.orderListUri
-        quickOrderListAdapter.notifyDataSetChanged()
-    }
-
     fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
 
     fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
@@ -164,7 +236,7 @@ class QuickOrderActivity :
     override fun onBackPressed() {
         when {
             isPreviewOpened -> {
-                binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
+//                binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
                 binding.ivPreviewImage.remove()
                 isPreviewOpened = false
             }
@@ -176,6 +248,13 @@ class QuickOrderActivity :
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        viewModel.userProfile = null
+        viewModel.quickOrder = null
+        viewModel.addressContainer = null
+        super.onDestroy()
     }
 
     override fun onRequestPermissionsResult(
@@ -198,16 +277,44 @@ class QuickOrderActivity :
         }
     }
 
-    private fun onSuccessCallback(message: String, data: Any?) {
+    private suspend fun onSuccessCallback(message: String, data: Any?) {
         when (message) {
             "address" -> {
                 populateAddressDetails(data as List<Address>)
             }
+            "estimate" -> {
+                updatePlaceOrderButton()
+                populateEstimateDetails(data as QuickOrder)
+                hideProgressDialog()
+//                orderDetailsVisibility(true)
+            }
+            "empty" -> {
+                updatePlaceOrderButton()
+                hideProgressDialog()
+//                orderDetailsVisibility(false)
+            }
             "addressUpdate" -> {
-                viewModel.userProfile?.let {
-                    populateAddressDetails(it.address)
-                }
-                showToast(this, data as String)
+                populateAddressDetails(data as List<Address>)
+                showToast(this, "Address Updated")
+            }
+            "starting" -> {
+                val dialog = LoadStatusDialog()
+                val bundle = Bundle()
+                bundle.putString("title", "")
+                bundle.putString("body", "Starting to Upload your order List... Please wait")
+                bundle.putString("content", "upload")
+                dialog.arguments = bundle
+                dialog.show(supportFragmentManager, "loadDialog")
+            }
+            "uploading" -> {
+                LoadStatusDialog.statusText.value = "Uploading Page $data..."
+            }
+            "complete" -> {
+                LoadStatusDialog.statusText.value = "Files Upload Complete!"
+                LoadStatusDialog.statusText.value = "success"
+                delay(2000)
+                LoadStatusDialog.statusText.value = "dismiss"
+                showExitSheet(this, "We have received your order estimate request. This might take some time. After verification we will contact you with price breakdown.", "close")
             }
         }
         viewModel.setEmptyStatus()
@@ -221,6 +328,15 @@ class QuickOrderActivity :
             "addressUpdate" -> {
                 showToast(this, data as String)
             }
+            "complete" -> {
+                LoadStatusDialog.statusText.value = "dismiss"
+                showErrorSnackBar("Failed to upload List to generate Estimate. Try later", true)
+            }
+            "estimate" -> {
+                hideProgressDialog()
+                showErrorSnackBar(data as String, true)
+            }
+
         }
         viewModel.setEmptyStatus()
     }
@@ -255,16 +371,16 @@ class QuickOrderActivity :
     }
 
     //from order list adapter
-    override fun selectedListImage(position: Int, imageUri: Uri) {
+    override fun selectedListImage(position: Int, imageUri: Any) {
         binding.apply {
             isPreviewOpened = true
             GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
-            ivPreviewImage.startAnimation(Animations.scaleBig)
+//            ivPreviewImage.startAnimation(Animations.scaleBig)
             ivPreviewImage.visible()
         }
     }
 
-    override fun deleteListItem(position: Int, imageUri: Uri) {
+    override fun deleteListItem(position: Int, imageUri: Any) {
         viewModel.orderListUri.removeAt(position)
         loadNewImage()
     }

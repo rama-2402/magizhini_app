@@ -17,7 +17,7 @@ object Animations {
         it.duration = 250 // animation duration in milliseconds
     }
 
-    val scaleBig = ScaleAnimation(
+    val scaleBig: ScaleAnimation = ScaleAnimation(
         0f,
         1f,
         0f,

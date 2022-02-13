@@ -51,8 +51,8 @@ android {
 
 dependencies {
 
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.7'
-    implementation 'com.google.firebase:firebase-analytics-ktx:20.0.2'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.8'
+    implementation 'com.google.firebase:firebase-analytics-ktx:20.1.0'
     def room_version = "2.2.1"
     def kodein_version = "6.4.0"
     def lifecycle_version = "2.0.0"
@@ -188,5 +188,8 @@ dependencies {
 
     // debugImplementation because LeakCanary should only run in debug builds.
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
+
+    //zoom image    https://github.com/MikeOrtiz/TouchImageView
+    implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
 
 }

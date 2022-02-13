@@ -191,6 +191,11 @@ open class BaseActivity : AppCompatActivity() {
                 view.tvCancelText.text = "Contact Support"
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
             }
+            "close"-> {
+                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvCancelText.text = "Close"
+                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+            }
             else -> {
                 view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
                 view.tvCancelText.text = "Proceed"
@@ -259,7 +264,9 @@ open class BaseActivity : AppCompatActivity() {
                     when(data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
+                        "estimate" -> activity.sendEstimateRequest()
                     }
+                    hideExitSheet()
                 }
                 is SubscriptionHistoryActivity -> {
                     when(data) {
@@ -318,6 +325,10 @@ open class BaseActivity : AppCompatActivity() {
                 view.tvTitle.remove()
             }
             "wallet" -> {
+                view.ltAnimImg.setAnimation(R.raw.piggy_bank)
+                view.tvTitle.remove()
+            }
+            "upload" -> {
                 view.ltAnimImg.setAnimation(R.raw.piggy_bank)
                 view.tvTitle.remove()
             }
@@ -413,6 +424,10 @@ open class BaseActivity : AppCompatActivity() {
                             "filter" -> activity.setSubscriptionFilter(selectedItem)
                             "payment" -> activity.selectedPaymentMode(selectedItem)
                         }
+                    }
+                    is QuickOrderActivity -> {
+                        hideListBottomSheet()
+                        activity.selectedPaymentMode(selectedItem)
                     }
                 }
 

@@ -38,7 +38,7 @@
         <entry key="app/src/main/res/drawable/unselected_indicator.xml" value="0.559375" />
         <entry key="app/src/main/res/layout/activity_all_cwm.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_chat.xml" value="0.42592592592592593" />
-        <entry key="app/src/main/res/layout/activity_checkout.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_checkout.xml" value="0.2" />
         <entry key="app/src/main/res/layout/activity_conversation.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_dish.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_home.xml" value="0.28956884561891516" />
@@ -47,7 +47,7 @@
         <entry key="app/src/main/res/layout/activity_product.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_profile.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_purchase_history.xml" value="0.48703703703703705" />
-        <entry key="app/src/main/res/layout/activity_quick_order.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_quick_order.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_shopping_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.48703703703703705" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.5" />

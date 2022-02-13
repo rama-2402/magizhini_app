@@ -24,7 +24,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffU
 
 class QuickOrderListAdapter(
     private val context: Context,
-    var quickOrderList: MutableList<Uri>,
+    var quickOrderList: List<Uri>,
+    var quickOrderListUrl: List<String>,
     private val onItemClickListener: QuickOrderClickListener
 ): RecyclerView.Adapter<QuickOrderListAdapter.QuickOrderViewHolder>() {
 
@@ -55,48 +56,72 @@ class QuickOrderListAdapter(
 
     override fun onBindViewHolder(holder: QuickOrderViewHolder, position: Int) {
         holder.binding.apply {
-            if (position == 0) {
-                ivDelete.visibility = View.GONE
-                view.visibility = View.GONE
-                tvListPageNumber.visibility = View.GONE
-                ivListPage.setImageDrawable(ContextCompat.getDrawable(ivListPage.context, R.drawable.ic_add))
-                ivListPage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray500))
-                ivListPage.clipToOutline = true
+            if (quickOrderList.isNotEmpty()) {
+                if (position == 0) {
+                    ivDelete.visibility = View.GONE
+                    view.visibility = View.GONE
+                    tvListPageNumber.visibility = View.GONE
+                    ivListPage.setImageDrawable(ContextCompat.getDrawable(ivListPage.context, R.drawable.ic_add))
+                    ivListPage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray500))
+                    ivListPage.clipToOutline = true
 
-                ivListPage.setOnClickListener {
-                    onItemClickListener.addImage()
+                    ivListPage.setOnClickListener {
+                        onItemClickListener.addImage()
+                    }
+                } else {
+                    val uri = quickOrderList[position - 1]
+
+                    tvListPageNumber.text = "Page: ${position}"
+
+                    //loading the product images
+                    GlideLoader().loadUserPicture(
+                        context,
+                        uri,
+                        ivListPage
+                    )
+                    ivListPage.clipToOutline = true
+
+                    ivListPage.setOnClickListener {
+                        onItemClickListener.selectedListImage(position-1, uri)
+                    }
+                    ivDelete.setOnClickListener {
+                        onItemClickListener.deleteListItem(position-1, uri)
+                    }
                 }
             } else {
-                val uri = quickOrderList[position - 1]
+                val url = quickOrderListUrl[position]
 
-                tvListPageNumber.text = "Page: ${position}"
+                tvListPageNumber.text = "Page: ${position + 1}"
 
                 //loading the product images
                 GlideLoader().loadUserPicture(
                     context,
-                    uri,
+                    url,
                     ivListPage
                 )
                 ivListPage.clipToOutline = true
 
                 ivListPage.setOnClickListener {
-                    onItemClickListener.selectedListImage(position-1, uri)
+                    onItemClickListener.selectedListImage(position, url)
                 }
                 ivDelete.setOnClickListener {
-                    onItemClickListener.deleteListItem(position-1, uri)
+                    onItemClickListener.deleteListItem(position, url)
                 }
             }
-
         }
     }
 
     override fun getItemCount(): Int {
-        return quickOrderList.size + 1
+        return if (quickOrderList.isNotEmpty()) {
+            quickOrderList.size + 1
+        } else {
+            quickOrderListUrl.size
+        }
     }
 
     interface QuickOrderClickListener {
-        fun selectedListImage(position: Int, imageUri: Uri)
-        fun deleteListItem(position: Int, imageUri: Uri)
+        fun selectedListImage(position: Int, imageUri: Any)
+        fun deleteListItem(position: Int, imageUri: Any)
         fun addImage()
     }
 }

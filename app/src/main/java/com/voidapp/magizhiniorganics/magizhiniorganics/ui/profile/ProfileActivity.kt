@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -254,6 +255,14 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             when {
                 name.isEmpty() -> {
                     binding.etlProfileName.error = "* required"
+                    return@with
+                }
+                mailId.isEmpty() -> {
+                    binding.etlEmailId.error = "* required"
+                    return@with
+                }
+                !Patterns.EMAIL_ADDRESS.matcher(mailId).matches() -> {
+                    binding.etlEmailId.error = "* Enter a valid Email ID"
                     return@with
                 }
                 dob == " DD / MM / YYYY " -> {

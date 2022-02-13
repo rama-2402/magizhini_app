@@ -1,12 +1,12 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.whinc:ratingbar:1.1.1@aar">
     <ANNOTATIONS>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/e456ac0b8434a3b961b5ecd7ef04087d/transformed/jetified-ratingbar-1.1.1/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9edfbe34e6b86f4a808c90d5d50f1349/transformed/jetified-ratingbar-1.1.1/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/e456ac0b8434a3b961b5ecd7ef04087d/transformed/jetified-ratingbar-1.1.1/AndroidManifest.xml" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/e456ac0b8434a3b961b5ecd7ef04087d/transformed/jetified-ratingbar-1.1.1/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/e456ac0b8434a3b961b5ecd7ef04087d/transformed/jetified-ratingbar-1.1.1/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9edfbe34e6b86f4a808c90d5d50f1349/transformed/jetified-ratingbar-1.1.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9edfbe34e6b86f4a808c90d5d50f1349/transformed/jetified-ratingbar-1.1.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9edfbe34e6b86f4a808c90d5d50f1349/transformed/jetified-ratingbar-1.1.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -5,9 +5,10 @@
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/807c92087b66f77be2c0eb21d84776ea/transformed/jetified-kodein-di-framework-android-core-6.4.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/aec270651ad4c4c74d6aa51782d43175/transformed/jetified-kodein-di-framework-android-core-6.4.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/25a4aa06e6434f39cf4d442f10f6c8ab/transformed/jetified-kodein-di-framework-android-core-6.4.0/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/e89b22f5a9edd5002e8528e295131f9f/transformed/jetified-kodein-di-framework-android-core-6.4.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/e89b22f5a9edd5002e8528e295131f9f/transformed/jetified-kodein-di-framework-android-core-6.4.0/AndroidManifest.xml" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/e89b22f5a9edd5002e8528e295131f9f/transformed/jetified-kodein-di-framework-android-core-6.4.0/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/deea6b47bb814dca0008327ca648bb52/transformed/jetified-kodein-di-framework-android-core-6.4.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/deea6b47bb814dca0008327ca648bb52/transformed/jetified-kodein-di-framework-android-core-6.4.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/deea6b47bb814dca0008327ca648bb52/transformed/jetified-kodein-di-framework-android-core-6.4.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

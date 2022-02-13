@@ -1,6 +1,5 @@
-package com.voidapp.magizhiniorganics.magizhiniorganics.data.use_cases
+package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase
 
-import com.google.firebase.crashlytics.internal.breadcrumbs.DisabledBreadcrumbSource
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
