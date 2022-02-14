@@ -1,5 +1,8 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,22 +21,34 @@ class LoadStatusDialog: DialogFragment() {
     private val binding get() = _binding!!
 
     companion object {
+
+        fun newInstance(title: String, body: String, content: String): LoadStatusDialog {
+            val args = Bundle()
+            args.putString("title", title)
+            args.putString("body", body)
+            args.putString("content", content)
+            val fragment = LoadStatusDialog()
+            fragment.arguments = args
+            return fragment
+        }
+
         var statusText: MutableLiveData<String> = MutableLiveData()
         private val _statusText: LiveData<String> = statusText
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setStyle(STYLE_NORMAL, R.style.CustomAlertDialog)
-        isCancelable = false
         super.onCreate(savedInstanceState)
     }
 
+    @SuppressLint("UseGetLayoutInflater")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = DialogSuccessBinding.inflate(inflater, container, false)
+        _binding = DialogSuccessBinding.inflate(LayoutInflater.from(context))
+        isCancelable = false
 
         val title = arguments?.getString("title") ?: ""
         val body = arguments?.getString("body") ?: ""
@@ -42,6 +57,13 @@ class LoadStatusDialog: DialogFragment() {
         populateData(title, body, content)
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _statusText.observe(this) {
+            updateBody(it)
+        }
     }
 
     private fun populateData(title: String, body: String, content: String) {
@@ -63,15 +85,21 @@ class LoadStatusDialog: DialogFragment() {
             "upload" -> {
                 binding.ltAnimImg.apply {
                     setAnimation(R.raw.upload)
+                    playAnimation()
                 }
             }
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        _statusText.observe(this) {
-            updateBody(it)
+            "transaction" -> {
+                binding.ltAnimImg.apply {
+                    setAnimation(R.raw.piggy_bank)
+                    playAnimation()
+                }
+            }
+            "placingOrder" -> {
+                binding.ltAnimImg.apply {
+                    setAnimation(R.raw.placing_order)
+                    playAnimation()
+                }
+            }
         }
     }
 
@@ -79,6 +107,14 @@ class LoadStatusDialog: DialogFragment() {
         when(content) {
             "success" -> loadLottie("success")
             "dismiss" -> dismissLoadStatusDialog()
+            "placingOrder" -> {
+                binding.tvBody.text = "Placing your Order..."
+                loadLottie("placingOrder")
+            }
+            "orderPlaced" -> {
+                binding.tvBody.text = "Order Placed Successfully...!"
+                loadLottie("success")
+            }
             else -> binding.tvBody.text = content
         }
     }

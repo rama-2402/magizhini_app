@@ -75,6 +75,8 @@ object Constants {
     const val ALL_DISHES = "AllDishes"
     const val QUICK_ORDER: String = "QuickOrder"
 
+    //Dialogs
+    const val LOAD_DIALOG = "loadDialog"
 
     //Navigation
     const val NAVIGATION: String = "navigate"

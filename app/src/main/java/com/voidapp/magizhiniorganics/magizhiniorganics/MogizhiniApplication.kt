@@ -8,6 +8,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.UserDatabase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.ProfileUseCase
+import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationViewModelFactory
@@ -46,7 +47,7 @@ class MagizhiniApplication: Application(), KodeinAware {
 
         //use cases
         bind() from provider { ProfileUseCase(instance(), instance()) }
-
+        bind() from provider { QuickOrderUseCase(instance()) }
 
         //viewModels
         bind() from provider { SignInViewModelFactory(instance(), instance()) }
@@ -64,7 +65,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { NotificationsViewModelFactory(instance(), instance()) }
         bind() from provider { CWMViewModelFactory(instance(), instance()) }
         bind() from provider { DishViewModelFactory(instance(), instance()) }
-        bind() from provider { QuickOrderViewModelFactory(instance(), instance()) }
+        bind() from provider { QuickOrderViewModelFactory(instance(), instance(), instance()) }
 
     }
 }

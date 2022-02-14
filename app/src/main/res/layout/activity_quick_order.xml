@@ -286,49 +286,6 @@
                                 android:textColor="@color/black"
                                 android:textCursorDrawable="@null" />
                         </com.google.android.material.textfield.TextInputLayout>
-                        <RadioGroup
-                            android:id="@+id/rgPaymentType"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:orientation="horizontal"
-                            android:gravity="center"
-                            android:layout_gravity="center"
-                            app:layout_constraintEnd_toStartOf="@id/etlDeliveryNote"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/etlDeliveryNote">
-
-                            <com.google.android.material.radiobutton.MaterialRadioButton
-                                android:id="@+id/rbCod"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:buttonTint="@color/green_base"
-                                android:text=" COD"
-                                android:textSize="16sp"
-                                android:checked="true"
-                                android:textColor="@color/gray700"/>
-
-                            <com.google.android.material.radiobutton.MaterialRadioButton
-                                android:id="@+id/rbUpi"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:buttonTint="@color/green_base"
-                                android:text=" Online"
-                                android:textSize="16sp"
-                                android:textColor="@color/gray700"/>
-
-                            <com.google.android.material.radiobutton.MaterialRadioButton
-                                android:id="@+id/rbWallet"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:buttonTint="@color/green_base"
-                                android:text=" Wallet (0.00)"
-                                android:textSize="16sp"
-                                android:textColor="@color/gray700"/>
-                        </RadioGroup>
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
@@ -357,7 +314,7 @@
                 android:paddingTop="@dimen/material_size_8"
                 android:paddingBottom="@dimen/material_size_8"
                 android:layout_marginStart="@dimen/material_size_4"
-                android:text="PLACE ORDER"
+                android:text="Add List"
                 android:textColor="@color/white"
                 app:backgroundTint="@color/matteRed"
                 android:background="@drawable/shape_round_rectangle_8"

@@ -1368,7 +1368,10 @@ class Firestore(
                             createGlobalTransactionEntry(it)
                         }
                      }
-                if (makeTransactionEntry.await() && makeGlobalTransactionEntry.await()) {
+                if (
+                    makeTransactionEntry.await() &&
+                    makeGlobalTransactionEntry.await()
+                ) {
                     NetworkResult.Success("transactionID", transaction.id)
                 } else {
                     NetworkResult.Failed("transactionID", null)

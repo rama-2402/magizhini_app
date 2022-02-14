@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import kotlin.math.max
 
 //data class to entity class converter
 
@@ -123,6 +124,18 @@ fun Order.toOrderEntity() = OrderEntity(
     orderStatus = orderStatus,
     monthYear = monthYear,
     phoneNumber = phoneNumber
+)
+
+fun Cart.toCartEntity() = CartEntity(
+    id = id,
+    variant = variant,
+    productId = productId,
+    productName = productName,
+    thumbnailUrl = thumbnailUrl,
+    quantity = quantity,
+    maxOrderQuantity = maxOrderQuantity,
+    price = price,
+    originalPrice = originalPrice
 )
 
 fun PinCodes.toPinCodesEntity() = PinCodesEntity(
