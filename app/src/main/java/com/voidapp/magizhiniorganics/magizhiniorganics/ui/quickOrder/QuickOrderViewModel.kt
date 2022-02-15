@@ -33,6 +33,7 @@ class QuickOrderViewModel(
     var wallet: Wallet? = null
 
     var orderID: String? = null
+    var placeOrderByCOD: Boolean = false
 
     var mCheckedAddressPosition: Int = 0
     var addressPosition: Int = 0
@@ -64,7 +65,7 @@ class QuickOrderViewModel(
                     _uiUpdate.value = UiUpdate.AddressUpdate("address", it.address, true)
                 }
             }
-            checkForPreviousEstimate()
+//            checkForPreviousEstimate()
             getWallet(userProfile!!.id)
         } catch (e: IOException) {
             _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
@@ -176,17 +177,6 @@ class QuickOrderViewModel(
                 )
             }
         }
-    }
-
-    fun sendOrderPlaceRequest() = viewModelScope.launch(Dispatchers.IO) {
-        val orderMap: HashMap<String, Any> = hashMapOf()
-        orderMap["customerId"] = userProfile!!.id
-        orderMap["deliveryPreference"] = ""
-        orderMap["customerId"] = userProfile!!.id
-        orderMap["customerId"] = userProfile!!.id
-        orderMap["customerId"] = userProfile!!.id
-        orderMap["customerId"] = userProfile!!.id
-        orderMap["customerId"] = userProfile!!.id
     }
 
     private fun checkForPreviousEstimate() = viewModelScope.launch {
@@ -327,14 +317,26 @@ class QuickOrderViewModel(
     ) {
         viewModelScope.launch {
             val mrp = getTotalCartPrice()
-            val cartEntity = quickOrder!!.cart.map { it.toCartEntity() }
+            val cartEntity = quickOrder?.cart?.map { it.toCartEntity() } ?: arrayListOf()
             quickOrderUseCase
                 .placeCashOnDeliveryOrder(
                     orderDetailsMap,
                     cartEntity as ArrayList<CartEntity>,
                     mrp
-                ).collect {
-
+                ).collect { result ->
+                    when(result) {
+                        is NetworkResult.Success -> {
+                            if (result.message == "placing") {
+                                _uiUpdate.value = UiUpdate.PlacingOrder("")
+                            } else {
+                                _uiUpdate.value = UiUpdate.OrderPlaced("")
+                            }
+                        }
+                        is NetworkResult.Failed -> {
+                            _uiUpdate.value = UiUpdate.OrderPlacementFailed("Server Error! failed to place order. Try again")
+                        }
+                        else -> Unit
+                    }
                 }
         }
     }

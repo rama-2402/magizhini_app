@@ -267,6 +267,7 @@ open class BaseActivity : AppCompatActivity() {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                         "estimate" -> activity.sendEstimateRequest()
+                        "cs" -> activity.moveToCustomerSupport()
                     }
                     hideExitSheet()
                 }

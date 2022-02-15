@@ -184,8 +184,29 @@ class QuickOrderUseCase(
         orderDetailsMap: HashMap<String, Any>,
         cart: ArrayList<CartEntity>,
         amount: Float
-        ): Flow<NetworkResult> = flow<NetworkResult> {
+    ): Flow<NetworkResult> = flow<NetworkResult> {
 
+        emit(NetworkResult.Success("placing", null))
+
+        val transactionMap: HashMap<String, Any> = hashMapOf()
+        transactionMap["transactionID"] = "COD"
+        transactionMap["paymentMode"] = "COD"
+        transactionMap["paymentDone"] = false
+        transactionMap["amount"] = amount
+
+        if (
+            placeOrder(
+                transactionMap,
+                orderDetailsMap,
+                cart
+            )
+        ) {
+            delay(1000)
+            emit(NetworkResult.Success("placed", null))
+        } else {
+            delay(1000)
+            emit(NetworkResult.Failed("", null))
+        }
     }.flowOn(Dispatchers.IO)
 
     private suspend fun placeOrder(

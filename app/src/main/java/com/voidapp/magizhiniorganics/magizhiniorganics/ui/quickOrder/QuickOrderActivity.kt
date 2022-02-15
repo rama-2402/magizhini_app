@@ -23,6 +23,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityQuickOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
@@ -130,13 +131,12 @@ class QuickOrderActivity :
                     return@setOnClickListener
                 }
                 viewModel.quickOrder?.let {
-                    if (it.cart.isEmpty()) {
-                        showErrorSnackBar("Estimate not yet available. Please wait", true)
-                        return@setOnClickListener
-                    } else {
-                        showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
-                    }
-                } ?: viewModel.sendOrderPlaceRequest()
+//                    if (it.cart.isEmpty()) {
+//                        showErrorSnackBar("Estimate not yet available. Please wait", true)
+//                        return@setOnClickListener
+//                    }
+                }
+                showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
             }
         }
     }
@@ -174,21 +174,33 @@ class QuickOrderActivity :
                     lifecycleScope.launch {
                         delay(1800)
                         dismissLoadStatusDialog()
+                        if (viewModel.placeOrderByCOD) {
+                            showExitSheet(
+                                this@QuickOrderActivity,
+                                "We have received your order. Once we verify all the product in the list, We will add all the products to your cart. You can track the progress from Purchase History",
+                            "close"
+                            )
+                        }
                     }
                 }
                 is QuickOrderViewModel.UiUpdate.WalletTransactionFailed -> {
                     lifecycleScope.launch {
                         delay(1800)
                         dismissLoadStatusDialog()
-                        showErrorSnackBar(
-                            "Server Error! Wallet Transaction Failed. Try later",
-                            true
+                        showExitSheet(
+                            this@QuickOrderActivity,
+                            "Server Error! Transaction Failed. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. Click CUSTOMER SUPPORT to open customer support",
+                            "cs"
                         )
                     }
                 }
                 is QuickOrderViewModel.UiUpdate.OrderPlacementFailed -> {
                     updateLoadStatusDialogText("dismiss")
-                    showErrorSnackBar("Server Error! Order Placement Failed. Try later", true)
+                    showExitSheet(
+                        this,
+                        "Server Error! Failed to place order. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. Click CUSTOMER SUPPORT to open customer support",
+                        "cs"
+                        )
                 }
                 is QuickOrderViewModel.UiUpdate.BeginningUpload -> {
                     showLoadStatusDialog(
@@ -201,7 +213,7 @@ class QuickOrderActivity :
                     updateLoadStatusDialogText("Uploading Page ${event.pageNumber}...")
                 }
                 is QuickOrderViewModel.UiUpdate.UploadComplete -> {
-                    if (viewModel.orderID != null) {
+                    if (viewModel.placeOrderByCOD) {
                         viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
                     } else {
                         updateLoadStatusDialogText("Files Upload Complete!")
@@ -315,16 +327,31 @@ class QuickOrderActivity :
     }
 
     fun selectedPaymentMode(paymentMethod: String) {
-        val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
-
         when(paymentMethod) {
             "Online" -> {
-
+                if (viewModel.quickOrder == null) {
+                    showExitSheet(
+                        this,
+                        "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
+                        "close"
+                    )
+                    return
+                }
             }
             "Cash On Delivery" -> {
+                viewModel.placeOrderByCOD = true
                 sendEstimateRequest()
             }
             else -> {
+                if (viewModel.quickOrder == null) {
+                    showExitSheet(
+                        this,
+                    "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
+                    "close"
+                    )
+                    return
+                }
+                val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
                 viewModel.proceedForWalletPayment(
                     orderDetailsMap
                 )
@@ -378,6 +405,14 @@ class QuickOrderActivity :
         quickOrderListAdapter.quickOrderList = viewModel.orderListUri
         quickOrderListAdapter.notifyDataSetChanged()
         updatePlaceOrderButton()
+    }
+
+    fun moveToCustomerSupport() {
+        Intent(this, QuickOrderActivity::class.java).also {
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            finish()
+        }
     }
 
     private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
