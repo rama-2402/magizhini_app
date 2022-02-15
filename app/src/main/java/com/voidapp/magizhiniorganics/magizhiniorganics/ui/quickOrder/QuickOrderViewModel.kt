@@ -6,21 +6,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.Operation
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.UserProfileDao
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BEST_SELLERS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_ESTIMATE_PATH
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toCartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toOrderEntity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.IOException
@@ -40,23 +35,17 @@ class QuickOrderViewModel(
     var mCheckedAddressPosition: Int = 0
     var addressPosition: Int = 0
 
-//    private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(
-//        NetworkResult.Empty
-//    )
-//    val status: StateFlow<NetworkResult> = _status.asStateFlow()
+    private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
+    val uiUpdate: LiveData<UiUpdate> = _uiUpdate
+    private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
+    val uiEvent: LiveData<UIEvent> = _uiEvent
 
-    private val _uiEvent: MutableLiveData<UiEvent> = MutableLiveData()
-    val uiEvent: LiveData<UiEvent> = _uiEvent
-
-//    private val _uiEvent: MutableStateFlow<UiEvent> = MutableStateFlow<UiEvent>(UiEvent.Empty)
-//    val uiEvent: StateFlow<UiEvent> = _uiEvent.asStateFlow()
-
-    private val _displayMessage: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    val displayMessage = _displayMessage.asSharedFlow()
+    fun setEmptyUiEvent() {
+        _uiEvent.value = UIEvent.EmptyUIEvent
+    }
 
     fun setEmptyStatus() {
-//        _status.value = NetworkResult.Empty
-        _uiEvent.value = UiEvent.Empty
+        _uiUpdate.value = UiUpdate.Empty
     }
 
     fun addNewImageUri(data: Uri) {
@@ -68,16 +57,15 @@ class QuickOrderViewModel(
             val profile = dbRepository.getProfileData()
             profile?.let {
                 userProfile = it
-//                _status.value = NetworkResult.Success("address", it.address)
                 withContext(Dispatchers.Main) {
-                    _uiEvent.value = UiEvent.AddressUpdate("address", it.address, true)
+                    _uiEvent.value = UIEvent.ProgressBar(true)
+                    _uiUpdate.value = UiUpdate.AddressUpdate("address", it.address, true)
                 }
             }
             checkForPreviousEstimate()
-            getWallet()
+            getWallet(userProfile!!.id)
         } catch (e: IOException) {
-//            _status.value = NetworkResult.Failed("address", "Failed to fetch address. Please try again later")
-            _uiEvent.value = UiEvent.AddressUpdate(e.message.toString(), null, false)
+            _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
         }
     }
 
@@ -97,11 +85,13 @@ class QuickOrderViewModel(
 
             localUpdate.await()
             cloudUpdate.await()
-            _uiEvent.value = UiEvent.AddressUpdate("update", userProfile!!.address, true)
-//            _status.value = NetworkResult.Success("addressUpdate", "Address Deleted")
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address, true)
+            }
         } catch (e: IOException) {
-            _uiEvent.value = UiEvent.AddressUpdate(e.message.toString(), null, false)
-//            _status.value = NetworkResult.Success("addressUpdate", "Failed to delete address. Try later")
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
+            }
             e.message?.let {
                 fbRepository.logCrash(
                     "checkout: update address to profile from db",
@@ -138,11 +128,13 @@ class QuickOrderViewModel(
 
             localUpdate.await()
             cloudUpdate.await()
-            _uiEvent.value = UiEvent.AddressUpdate("update", userProfile!!.address, true)
-//            _status.value = NetworkResult.Success("addressUpdate", userProfile!!.address)
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address, true)
+            }
         } catch (e: IOException) {
-            _uiEvent.value = UiEvent.AddressUpdate(e.message.toString(), null, false)
-//            _status.value = NetworkResult.Success("addressUpdate", "Failed to add address. Try later")
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
+            }
             e.message?.let { fbRepository.logCrash("checkout: add address to profile from db", it) }
         }
     }
@@ -166,13 +158,15 @@ class QuickOrderViewModel(
 
                     localUpdate.await()
                     cloudUpdate.await()
-                    _uiEvent.value = UiEvent.AddressUpdate("update", userProfile!!.address, true)
-//                    _status.value = NetworkResult.Success("addressUpdate", userProfile!!.address)
+                    withContext(Dispatchers.Main) {
+                        _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address, true)
+                    }
                 }
             }
         } catch (e: IOException) {
-            _uiEvent.value = UiEvent.AddressUpdate(e.message.toString(), null, false)
-//            _status.value = NetworkResult.Success("addressUpdate", "Failed to update address. Try later")
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
+            }
             e.message?.let {
                 fbRepository.logCrash(
                     "checkout: update address to profile from db",
@@ -196,30 +190,24 @@ class QuickOrderViewModel(
                     withContext(Dispatchers.Main) {
                         when (result) {
                             is NetworkResult.Loading -> {
-//                        _uiEvent.value = UiEvent.BeginningUpload("BeginningUpload")
                             }
                             is NetworkResult.Success -> {
                                 when (result.message) {
                                     "starting" -> {
-                                        Log.e("qw", "startvm",)
-                                        _uiEvent.value = UiEvent.BeginningUpload("")
-//                                  _uiEvent.value = UiEvent.BeginningUpload("")
+                                        _uiUpdate.value = UiUpdate.BeginningUpload("")
                                     }
                                     "uploading" -> {
-                                        Log.e("qw", "${result.data}")
-                                        _uiEvent.value =
-                                            UiEvent.UploadingImage(result.data.toString())
+                                        _uiUpdate.value =
+                                            UiUpdate.UploadingImage(result.data.toString())
                                     }
                                     "complete" -> {
-                                        Log.e("qw", "completevm",)
-                                        _uiEvent.value =
-                                            UiEvent.UploadComplete(result.data.toString())
+                                        _uiUpdate.value =
+                                            UiUpdate.UploadComplete(result.data.toString())
                                     }
                                 }
                             }
                             is NetworkResult.Failed -> {
-//                            _status.value = NetworkResult.Failed("complete", result.data)
-                                _displayMessage.emit(UiEvent.SnackBar(result.data.toString(), true))
+                                _uiUpdate.value = UiUpdate.UploadFailed(result.data.toString())
                             }
                             else -> Unit
                         }
@@ -243,13 +231,24 @@ class QuickOrderViewModel(
         val result = QuickOrderUseCase(fbRepository)
             .checkForPreviousEstimate(userID = userProfile!!.id)
         when(result) {
-            is NetworkResult.Success -> _uiEvent.value = UiEvent.EstimateData("", result.data as QuickOrder, true)
-            is NetworkResult.Failed -> _uiEvent.value = UiEvent.EstimateData(result.message, null, false)
+            is NetworkResult.Success -> _uiUpdate.value = UiUpdate.EstimateData("", result.data as QuickOrder, true)
+            is NetworkResult.Failed -> _uiUpdate.value = UiUpdate.EstimateData(result.message, null, false)
+            else -> Unit
         }
     }
 
-    private fun getWallet() = viewModelScope.launch {
-        //todo
+    private fun getWallet(userID: String) = viewModelScope.launch {
+        when(val result = fbRepository.getWallet(userID)) {
+            is NetworkResult.Success -> {
+                _uiEvent.value = UIEvent.ProgressBar(false)
+                wallet = result.data as Wallet
+            }
+            is NetworkResult.Failed -> {
+                _uiEvent.value = UIEvent.ProgressBar(false)
+                _uiEvent.value = UIEvent.SnackBar(result.data.toString(), true)
+            }
+            else -> Unit
+        }
     }
 
     fun getTotalCartPrice(): Float {
@@ -267,17 +266,16 @@ class QuickOrderViewModel(
     ) {
         viewModelScope.launch {
             val mrp = getTotalCartPrice()
-            userProfile?.let {
-                orderDetailsMap["userID"] = it.id
-                orderDetailsMap["phoneNumber"] = it.phNumber
-                orderDetailsMap["address"] = addressContainer ?: it.address[0]
+            userProfile?.let { profile ->
+                orderDetailsMap["userID"] = profile.id
+                orderDetailsMap["phoneNumber"] = profile.phNumber
+                orderDetailsMap["address"] = profile.address[mCheckedAddressPosition]
             }
             val cartEntity = quickOrder!!.cart.map { it.toCartEntity() }
             wallet?.let {
                 if (mrp > it.amount) {
-                    _displayMessage.emit(
-                        UiEvent.SnackBar("Insufficient Wallet Balance. Please choose any other payment method", true)
-                    )
+                    _uiEvent.value =
+                        UIEvent.SnackBar("Insufficient Wallet Balance. Please choose any other payment method", true)
                     return@launch
                 } else {
                     quickOrderUseCase
@@ -287,7 +285,7 @@ class QuickOrderViewModel(
                             PURCHASE,
                             cart = cartEntity as ArrayList<CartEntity>
                             )
-                        .onEach { result ->
+                        .collect { result ->
                             withContext(Dispatchers.Main) {
                                 when (result) {
                                     is NetworkResult.Loading -> {
@@ -295,62 +293,55 @@ class QuickOrderViewModel(
                                     }
                                     is NetworkResult.Success -> {
                                         when (result.message) {
-//                                            "transaction" -> _uiEvent.emit(
-//                                                UiEvent.StartingTransaction(
-//                                                    result.data.toString()
-//                                                )
-//                                            )
-//                                            "order" -> _uiEvent.emit(UiEvent.PlacingOrder(result.data.toString()))
-//                                            "success" -> _uiEvent.emit(UiEvent.OrderPlaced(result.data.toString()))
+                                            "transaction" -> _uiUpdate.value =
+                                                UiUpdate.StartingTransaction(
+                                                    result.data.toString()
+                                                )
+                                            "order" -> _uiUpdate.value = UiUpdate.PlacingOrder(result.data.toString())
+                                            "success" -> _uiUpdate.value = UiUpdate.OrderPlaced(result.data.toString())
                                         }
                                     }
                                     is NetworkResult.Failed -> {
                                         when (result.message) {
-//                                            "wallet" -> _uiEvent.emit(
-//                                                UiEvent.WalletTransactionFailed(
-//                                                    result.data.toString()
-//                                                )
-//                                            )
-//                                            "order" -> _uiEvent.emit(
-//                                                UiEvent.OrderPlacementFailed(
-//                                                    result.data.toString()
-//                                                )
-//                                            )
+                                            "wallet" -> _uiUpdate.value = UiUpdate.WalletTransactionFailed(
+                                                    result.data.toString()
+                                                )
+                                            "order" -> _uiUpdate.value = UiUpdate.OrderPlacementFailed(
+                                                    result.data.toString()
+                                                )
                                         }
                                     }
                                     else -> Unit
                                 }
                             }
-                        }.launchIn(this)
+                        }
                 }
             }
         }
 
     }
 
-    sealed class UiEvent {
-        data class WalletData(val wallet: Wallet): UiEvent()
-        data class Toast(val data: String, val duration: String = SHORT): UiEvent()
-        data class SnackBar(val data: String, val isError: Boolean) : UiEvent()
-        data class ProgressBar(val visibility: Boolean): UiEvent()
+    sealed class UiUpdate {
+        data class WalletData(val wallet: Wallet): UiUpdate()
 
         //uploading List
-        data class BeginningUpload(val message: String): UiEvent()
-        data class UploadingImage(val pageNumber: String): UiEvent()
-        data class UploadComplete(val message: String): UiEvent()
+        data class BeginningUpload(val message: String): UiUpdate()
+        data class UploadingImage(val pageNumber: String): UiUpdate()
+        data class UploadComplete(val message: String): UiUpdate()
+        data class UploadFailed(val message: String): UiUpdate()
 
         //address
-        data class AddressUpdate(val message: String, val data: ArrayList<Address>?, val isSuccess: Boolean): UiEvent()
+        data class AddressUpdate(val message: String, val data: ArrayList<Address>?, val isSuccess: Boolean): UiUpdate()
 
         //estimateData
-        data class EstimateData(val message: String, val data: QuickOrder?, val isSuccess: Boolean): UiEvent()
+        data class EstimateData(val message: String, val data: QuickOrder?, val isSuccess: Boolean): UiUpdate()
 
         //order
-        data class WalletTransactionFailed(val message: String): UiEvent()
-        data class OrderPlacementFailed(val message: String): UiEvent()
-        data class StartingTransaction(val message: String): UiEvent()
-        data class PlacingOrder(val message: String): UiEvent()
-        data class OrderPlaced(val message: String): UiEvent()
-        object Empty: UiEvent()
+        data class WalletTransactionFailed(val message: String): UiUpdate()
+        data class OrderPlacementFailed(val message: String): UiUpdate()
+        data class StartingTransaction(val message: String): UiUpdate()
+        data class PlacingOrder(val message: String): UiUpdate()
+        data class OrderPlaced(val message: String): UiUpdate()
+        object Empty: UiUpdate()
     }
 }

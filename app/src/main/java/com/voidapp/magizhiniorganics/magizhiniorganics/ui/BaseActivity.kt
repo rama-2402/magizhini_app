@@ -167,7 +167,9 @@ open class BaseActivity : AppCompatActivity() {
     fun hideProgressDialog() {
 //        val lottie = mProgressDialog.findViewById<LottieAnimationView>(R.id.lottie_progress)
 //        lottie.cancelAnimation()
-        mProgressDialog.dismiss()
+        if (mProgressDialog.isShowing) {
+            mProgressDialog.dismiss()
+        }
     }
 
     fun showExitSheet(activity: Activity, confirmation: String, data: Any = "") {

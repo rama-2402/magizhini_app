@@ -12,8 +12,10 @@ import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogSuccessBinding
+import kotlinx.coroutines.launch
 
 class LoadStatusDialog: DialogFragment() {
 
@@ -32,8 +34,8 @@ class LoadStatusDialog: DialogFragment() {
             return fragment
         }
 
-        var statusText: MutableLiveData<String> = MutableLiveData()
-        private val _statusText: LiveData<String> = statusText
+        var statusText: MutableLiveData<String?> = MutableLiveData()
+        private val _statusText: LiveData<String?> = statusText
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,8 +63,8 @@ class LoadStatusDialog: DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _statusText.observe(this) {
-            updateBody(it)
+        _statusText.observe(this) { content ->
+            content?.let { it -> updateBody(it) }
         }
     }
 
@@ -81,6 +83,7 @@ class LoadStatusDialog: DialogFragment() {
                     setAnimation(R.raw.success)
                     playAnimation()
                 }
+                statusText.value = null
             }
             "upload" -> {
                 binding.ltAnimImg.apply {
@@ -106,7 +109,6 @@ class LoadStatusDialog: DialogFragment() {
     private fun updateBody(content: String) {
         when(content) {
             "success" -> loadLottie("success")
-            "dismiss" -> dismissLoadStatusDialog()
             "placingOrder" -> {
                 binding.tvBody.text = "Placing your Order..."
                 loadLottie("placingOrder")
@@ -115,6 +117,7 @@ class LoadStatusDialog: DialogFragment() {
                 binding.tvBody.text = "Order Placed Successfully...!"
                 loadLottie("success")
             }
+            "dismiss" -> dialog?.dismiss()
             else -> binding.tvBody.text = content
         }
     }
@@ -129,9 +132,5 @@ class LoadStatusDialog: DialogFragment() {
         binding.ltAnimImg.cancelAnimation()
         _statusText.removeObservers(this)
         _binding = null
-    }
-
-    private fun dismissLoadStatusDialog() {
-        dismiss()
     }
 }

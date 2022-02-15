@@ -2,9 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.icu.text.CaseMap
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
@@ -13,12 +11,11 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListUpdateCallback
+import com.google.gson.annotations.Until
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderListAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
@@ -35,8 +32,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOAD_DIAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toCartEntity
-import kotlinx.coroutines.flow.collect
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -84,12 +84,21 @@ class QuickOrderActivity :
             viewModel.userProfile = UserProfileEntity()
             viewModel.addressContainer = Address()
         }
-        showProgressDialog()
         viewModel.getAddress()
     }
 
     private fun initListeners() {
         binding.apply {
+            KeyboardVisibilityEvent.setEventListener(this@QuickOrderActivity
+            ) { isOpen ->
+                if (!isOpen) {
+                    binding.btnGetEstimate.visible()
+                    binding.btnPlaceOrder.visible()
+                } else {
+                    binding.btnPlaceOrder.hide()
+                    binding.btnGetEstimate.hide()
+                }
+            }
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
@@ -106,7 +115,8 @@ class QuickOrderActivity :
                 }
                 viewModel.quickOrder?.let {
                     if (it.cart.isEmpty()) {
-                        showErrorSnackBar("Estimate not yet available. Please wait", true)
+                        showErrorSnackBar("Estimate is not available yet. Please wait", true)
+                        return@setOnClickListener
                     } else {
                         cartItemsDialog(it.cart)
                     }
@@ -122,93 +132,118 @@ class QuickOrderActivity :
                     return@setOnClickListener
                 }
                 viewModel.quickOrder?.let {
-                    showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
+                    if (it.cart.isEmpty()) {
+                        showErrorSnackBar("Estimate not yet available. Please wait", true)
+                        return@setOnClickListener
+                    } else {
+                        showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
+                    }
                 } ?: viewModel.sendOrderPlaceRequest()
             }
         }
     }
 
     private fun initObservers() {
-            viewModel.uiEvent.observe(this@QuickOrderActivity) { event ->
-                when (event) {
-                    is QuickOrderViewModel.UiEvent.WalletData -> {
-                        viewModel.wallet = event.wallet
-                    }
-                    is QuickOrderViewModel.UiEvent.StartingTransaction -> {
-                        showLoadStatusDialog("", "Processing payment from Wallet...", "transaction")
-                    }
-                    is QuickOrderViewModel.UiEvent.PlacingOrder -> {
-                        updateLoadStatusDialogText("placingOrder")
-                    }
-                    is QuickOrderViewModel.UiEvent.OrderPlaced -> {
-                        updateLoadStatusDialogText("orderPlaced")
-                        lifecycleScope.launch {
-                            delay(1800)
-                            dismissLoadStatusDialog()
-                        }
-                    }
-                    is QuickOrderViewModel.UiEvent.WalletTransactionFailed -> {
-                        lifecycleScope.launch {
-                            delay(1800)
-                            dismissLoadStatusDialog()
-                            showErrorSnackBar(
-                                "Server Error! Wallet Transaction Failed. Try later",
-                                true
-                            )
-                        }
-                    }
-                    is QuickOrderViewModel.UiEvent.OrderPlacementFailed -> {
-                        updateLoadStatusDialogText("dismiss")
-                        showErrorSnackBar("Server Error! Order Placement Failed. Try later", true)
-                    }
-                    is QuickOrderViewModel.UiEvent.BeginningUpload -> {
-                        showLoadStatusDialog(
-                            "",
-                            "Starting to Upload your order List... Please wait",
-                            "upload"
-                        )
-                    }
-                    is QuickOrderViewModel.UiEvent.UploadingImage -> {
-                        updateLoadStatusDialogText("Uploading Page ${event.pageNumber}...")
-                    }
-                    is QuickOrderViewModel.UiEvent.UploadComplete -> {
-                        updateLoadStatusDialogText("Files Upload Complete!")
-                        updateLoadStatusDialogText("success")
-                        lifecycleScope.launch {
-                            delay(1800)
-                            dismissLoadStatusDialog()
-                            showExitSheet(
-                                this@QuickOrderActivity,
-                                "We have received your order estimate request. This might take some time. After verification we will contact you with price breakdown.",
-                                "close"
-                            )
-                        }
-                    }
-                    is QuickOrderViewModel.UiEvent.AddressUpdate -> {
-                        if (event.isSuccess) {
-                            if (event.message == "update") {
-                                showToast(this@QuickOrderActivity, "Address Updated")
-                            }
-                            populateAddressDetails(event.data as List<Address>)
-                        } else {
-                            showErrorSnackBar(event.message, true)
-                        }
-                    }
-                    is QuickOrderViewModel.UiEvent.EstimateData -> {
-                        if (event.isSuccess) {
-                            event.data?.let {
-                                populateEstimateDetails(it)
-                            }
-                        } else {
-                            showErrorSnackBar(event.message, true)
-                        }
+        viewModel.uiEvent.observe(this) { event ->
+            when(event) {
+                is UIEvent.Toast -> showToast(this, event.message, event.duration)
+                is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
+                is UIEvent.ProgressBar -> {
+                    if (event.visibility) {
+                        showProgressDialog()
+                    } else {
                         hideProgressDialog()
                     }
-                    is QuickOrderViewModel.UiEvent.Empty -> return@observe
-                    else -> Unit
                 }
-                viewModel.setEmptyStatus()
+                is UIEvent.EmptyUIEvent -> return@observe
+                else -> Unit
             }
+            viewModel.setEmptyUiEvent()
+        }
+        viewModel.uiUpdate.observe(this@QuickOrderActivity) { event ->
+            when (event) {
+                is QuickOrderViewModel.UiUpdate.WalletData -> {
+                    viewModel.wallet = event.wallet
+                }
+                is QuickOrderViewModel.UiUpdate.StartingTransaction -> {
+                    showLoadStatusDialog("", "Processing payment from Wallet...", "transaction")
+                }
+                is QuickOrderViewModel.UiUpdate.PlacingOrder -> {
+                    updateLoadStatusDialogText("placingOrder")
+                }
+                is QuickOrderViewModel.UiUpdate.OrderPlaced -> {
+                    updateLoadStatusDialogText("orderPlaced")
+                    lifecycleScope.launch {
+                        delay(1800)
+                        dismissLoadStatusDialog()
+                    }
+                }
+                is QuickOrderViewModel.UiUpdate.WalletTransactionFailed -> {
+                    lifecycleScope.launch {
+                        delay(1800)
+                        dismissLoadStatusDialog()
+                        showErrorSnackBar(
+                            "Server Error! Wallet Transaction Failed. Try later",
+                            true
+                        )
+                    }
+                }
+                is QuickOrderViewModel.UiUpdate.OrderPlacementFailed -> {
+                    updateLoadStatusDialogText("dismiss")
+                    showErrorSnackBar("Server Error! Order Placement Failed. Try later", true)
+                }
+                is QuickOrderViewModel.UiUpdate.BeginningUpload -> {
+                    showLoadStatusDialog(
+                        "",
+                        "Starting to Upload your order List... Please wait",
+                        "upload"
+                    )
+                }
+                is QuickOrderViewModel.UiUpdate.UploadingImage -> {
+                    updateLoadStatusDialogText("Uploading Page ${event.pageNumber}...")
+                }
+                is QuickOrderViewModel.UiUpdate.UploadComplete -> {
+                    updateLoadStatusDialogText("Files Upload Complete!")
+                    updateLoadStatusDialogText("success")
+                    lifecycleScope.launch {
+                        delay(1800)
+                        dismissLoadStatusDialog()
+                        showExitSheet(
+                            this@QuickOrderActivity,
+                            "We have received your order estimate request. This might take some time. After verification we will contact you with price breakdown.",
+                            "close"
+                        )
+                    }
+                }
+                is QuickOrderViewModel.UiUpdate.UploadFailed -> {
+                    dismissLoadStatusDialog()
+                    showErrorSnackBar(event.message, true)
+                }
+                is QuickOrderViewModel.UiUpdate.AddressUpdate -> {
+                    if (event.isSuccess) {
+                        if (event.message == "update") {
+                            showToast(this@QuickOrderActivity, "Address Updated")
+                        }
+                        populateAddressDetails(event.data as List<Address>)
+                    } else {
+                        showErrorSnackBar(event.message, true)
+                    }
+                }
+                is QuickOrderViewModel.UiUpdate.EstimateData -> {
+                    if (event.isSuccess) {
+                        event.data?.let {
+                            populateEstimateDetails(it)
+                        }
+                    } else {
+                        showErrorSnackBar(event.message, true)
+                    }
+                    hideProgressDialog()
+                }
+                is QuickOrderViewModel.UiUpdate.Empty -> return@observe
+                else -> Unit
+            }
+            viewModel.setEmptyStatus()
+        }
     }
 
     private fun initRecyclerView() {
@@ -282,7 +317,10 @@ class QuickOrderActivity :
             "Online" -> {
 
             }
-            "Wallet" -> {
+            "Cash On Delivery" -> {
+
+            }
+            else -> {
                 val orderDetailsMap: HashMap<String, Any> = hashMapOf()
                 orderDetailsMap["deliveryPreference"] = binding.spDeliveryPreference.selectedItem
                 orderDetailsMap["deliveryNote"] = binding.etDeliveryNote.text.toString().trim()
@@ -296,7 +334,6 @@ class QuickOrderActivity :
                     orderDetailsMap
                 )
             }
-            else -> viewModel.sendOrderPlaceRequest()
         }
     }
 

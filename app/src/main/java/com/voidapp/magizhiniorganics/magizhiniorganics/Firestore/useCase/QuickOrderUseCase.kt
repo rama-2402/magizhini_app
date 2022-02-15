@@ -53,7 +53,7 @@ class QuickOrderUseCase(
             val imageUrl = arrayListOf<String>()
 
             try {
-                delay(500)
+                delay(1000)
                 for (i in orderListExtension.indices) {
                     emit(NetworkResult.Success("uploading", i + 1))
                     val reference: StorageReference = firebaseStorage.child(
@@ -115,7 +115,7 @@ class QuickOrderUseCase(
         amount: Float,
         purpose: String,
         cart: ArrayList<CartEntity>
-        ): Flow<NetworkResult> = withContext(Dispatchers.IO) {
+        ): Flow<NetworkResult> =
             flow<NetworkResult> {
                 try {
 
@@ -142,30 +142,35 @@ class QuickOrderUseCase(
                                 emit(NetworkResult.Failed("wallet", "Server Error! Failed to make transaction"))
                                 return@flow
                             } else {
-                                delay(1500)
+                                delay(1000)
                                 emit(NetworkResult.Success("order", "Placing order..."))
                                 val transactionMap: HashMap<String, Any> = hashMapOf()
                                 transactionMap["orderID"] = orderID
                                 transactionMap["transactionID"] = transactionID
                                 transactionMap["amount"] = amount
                                 transactionMap["paymentMode"] = "Wallet"
+                                transactionMap["paymentDone"] = true
                                 if (placeOrder(transactionMap, orderDetailsMap, cart)) {
+                                    delay(1000)
                                     emit(NetworkResult.Success("success", "Order Placed Successfully..."))
                                 } else {
+                                    delay(1000)
                                     emit(NetworkResult.Failed("order", "Server Error! Failed to place order"))
                                     return@flow
                                 }
                             }
                         }
                     } else {
+                        delay(1000)
                         emit(NetworkResult.Failed("wallet", "Server Error! Failed to make transaction"))
                         return@flow
                     }
                 } catch (e: Exception) {
+                    delay(1000)
                     emit(NetworkResult.Failed("wallet", e.message.toString()))
                 }
-            }
-    }
+            }.flowOn(Dispatchers.IO)
+
 
     private suspend fun makeTransactionEntry(transactionHistory: TransactionHistory): String {
         return try {
@@ -192,6 +197,7 @@ class QuickOrderUseCase(
                 cart = cart,
                 purchaseDate = TimeUtil().getCurrentDate(),
                 paymentMethod = transactionMap["paymentMode"].toString(),
+                isPaymentDone = transactionMap["paymentDone"].toString().toBoolean(),
                 deliveryPreference = orderDetailsMap["deliveryPreference"].toString(),
                 deliveryNote = orderDetailsMap["deliveryNote"].toString(),
                 appliedCoupon = orderDetailsMap["appliedCoupon"].toString(),
