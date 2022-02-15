@@ -28,6 +28,7 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_app_placeholder"
             />
+
         <View
             android:id="@+id/ivCountBg"
             android:layout_width="match_parent"

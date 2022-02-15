@@ -32,6 +32,8 @@ class QuickOrderViewModel(
     var quickOrder: QuickOrder? = null
     var wallet: Wallet? = null
 
+    var orderID: String? = null
+
     var mCheckedAddressPosition: Int = 0
     var addressPosition: Int = 0
 
@@ -176,46 +178,6 @@ class QuickOrderViewModel(
         }
     }
 
-    fun sendGetEstimateRequest(imageExtensions: MutableList<String>) {
-        viewModelScope.launch {
-            quickOrderUseCase
-                .sendGetEstimateRequest(
-                    orderListUri,
-                    imageExtensions,
-                    userProfile!!.id,
-                    userProfile!!.name,
-                    userProfile!!.phNumber
-                )
-                .collect { result ->
-                    withContext(Dispatchers.Main) {
-                        when (result) {
-                            is NetworkResult.Loading -> {
-                            }
-                            is NetworkResult.Success -> {
-                                when (result.message) {
-                                    "starting" -> {
-                                        _uiUpdate.value = UiUpdate.BeginningUpload("")
-                                    }
-                                    "uploading" -> {
-                                        _uiUpdate.value =
-                                            UiUpdate.UploadingImage(result.data.toString())
-                                    }
-                                    "complete" -> {
-                                        _uiUpdate.value =
-                                            UiUpdate.UploadComplete(result.data.toString())
-                                    }
-                                }
-                            }
-                            is NetworkResult.Failed -> {
-                                _uiUpdate.value = UiUpdate.UploadFailed(result.data.toString())
-                            }
-                            else -> Unit
-                        }
-                    }
-                }
-        }
-    }
-
     fun sendOrderPlaceRequest() = viewModelScope.launch(Dispatchers.IO) {
         val orderMap: HashMap<String, Any> = hashMapOf()
         orderMap["customerId"] = userProfile!!.id
@@ -261,16 +223,57 @@ class QuickOrderViewModel(
         return cartPrice
     }
 
+    fun sendGetEstimateRequest(imageExtensions: MutableList<String>) {
+        viewModelScope.launch {
+            orderID = fbRepository.generateOrderID()
+            val detailsMap: HashMap<String, String> = hashMapOf()
+            userProfile?.let {
+                detailsMap["id"] = it.id
+                detailsMap["name"] = it.name
+                detailsMap["phNumber"] = it.phNumber
+                detailsMap["orderID"] = orderID!!
+            }
+            quickOrderUseCase
+                .sendGetEstimateRequest(
+                    orderListUri,
+                    imageExtensions,
+                    detailsMap
+                )
+                .collect { result ->
+                    withContext(Dispatchers.Main) {
+                        when (result) {
+                            is NetworkResult.Loading -> {
+                            }
+                            is NetworkResult.Success -> {
+                                when (result.message) {
+                                    "starting" -> {
+                                        _uiUpdate.value = UiUpdate.BeginningUpload("")
+                                    }
+                                    "uploading" -> {
+                                        _uiUpdate.value =
+                                            UiUpdate.UploadingImage(result.data.toString())
+                                    }
+                                    "complete" -> {
+                                        _uiUpdate.value =
+                                            UiUpdate.UploadComplete(result.data.toString())
+                                    }
+                                }
+                            }
+                            is NetworkResult.Failed -> {
+                                _uiUpdate.value = UiUpdate.UploadFailed(result.data.toString())
+                            }
+                            else -> Unit
+                        }
+                    }
+                }
+        }
+    }
+
     fun proceedForWalletPayment(
         orderDetailsMap: HashMap<String, Any>
     ) {
         viewModelScope.launch {
             val mrp = getTotalCartPrice()
-            userProfile?.let { profile ->
-                orderDetailsMap["userID"] = profile.id
-                orderDetailsMap["phoneNumber"] = profile.phNumber
-                orderDetailsMap["address"] = profile.address[mCheckedAddressPosition]
-            }
             val cartEntity = quickOrder!!.cart.map { it.toCartEntity() }
             wallet?.let {
                 if (mrp > it.amount) {
@@ -288,9 +291,7 @@ class QuickOrderViewModel(
                         .collect { result ->
                             withContext(Dispatchers.Main) {
                                 when (result) {
-                                    is NetworkResult.Loading -> {
-
-                                    }
+                                    is NetworkResult.Loading -> {}
                                     is NetworkResult.Success -> {
                                         when (result.message) {
                                             "transaction" -> _uiUpdate.value =
@@ -319,6 +320,23 @@ class QuickOrderViewModel(
             }
         }
 
+    }
+
+    fun placeCashOnDeliveryOrder(
+        orderDetailsMap: HashMap<String, Any>
+    ) {
+        viewModelScope.launch {
+            val mrp = getTotalCartPrice()
+            val cartEntity = quickOrder!!.cart.map { it.toCartEntity() }
+            quickOrderUseCase
+                .placeCashOnDeliveryOrder(
+                    orderDetailsMap,
+                    cartEntity as ArrayList<CartEntity>,
+                    mrp
+                ).collect {
+
+                }
+        }
     }
 
     sealed class UiUpdate {

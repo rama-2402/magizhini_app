@@ -8,6 +8,7 @@ data class QuickOrder(
     var customerID: String = "",
     var customerName: String = "",
     var phoneNumber: String = "",
+    var orderID: String = "",
     var mailID: String = "",
     var timeStamp: Long = 0,
     var imageUrl: ArrayList<String> = arrayListOf(),

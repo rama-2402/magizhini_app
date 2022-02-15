@@ -189,10 +189,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
                 super.onScrolled(recyclerView, up, down)
                 if (down < 0 && binding.fabAddMoney.isGone) {
-                    binding.fabAddMoney.startAnimation(Animations.scaleBig)
+                    binding.fabAddMoney.startAnimation(scaleBig)
                     binding.fabAddMoney.visibility = View.VISIBLE
                 } else if (down > 0 && binding.fabAddMoney.isVisible) {
-                    binding.fabAddMoney.startAnimation(Animations.scaleSmall)
+                    binding.fabAddMoney.startAnimation(scaleSmall)
                     binding.fabAddMoney.visibility = View.GONE
                 }
             }

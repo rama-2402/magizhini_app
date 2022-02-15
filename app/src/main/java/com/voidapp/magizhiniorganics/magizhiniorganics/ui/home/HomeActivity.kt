@@ -370,10 +370,10 @@ class HomeActivity :
 
         binding.svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
             if (scrollY < oldScrollY && binding.fabCart.isGone) {
-                binding.fabCart.startAnimation(Animations.scaleBig)
+                binding.fabCart.startAnimation(scaleBig)
                 binding.fabCart.visibility = View.VISIBLE
             } else if (scrollY > oldScrollY && binding.fabCart.isVisible) {
-                binding.fabCart.startAnimation(Animations.scaleSmall)
+                binding.fabCart.startAnimation(scaleSmall)
                 binding.fabCart.visibility = View.GONE
             }
         })

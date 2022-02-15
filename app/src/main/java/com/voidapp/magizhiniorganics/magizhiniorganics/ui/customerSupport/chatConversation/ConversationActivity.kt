@@ -204,7 +204,7 @@ class ConversationActivity :
         binding.apply {
             isPreviewOpened = true
             GlideLoader().loadUserPictureWithoutCrop(this@ConversationActivity, url, ivReviewImageChat)
-            binding.ivReviewImageChat.startAnimation(Animations.scaleBig)
+            binding.ivReviewImageChat.startAnimation(scaleBig)
             binding.ivReviewImageChat.visible()
         }
     }
@@ -212,7 +212,7 @@ class ConversationActivity :
     override fun onBackPressed() {
         when {
             isPreviewOpened -> {
-                binding.ivReviewImageChat.startAnimation(Animations.scaleSmall)
+                binding.ivReviewImageChat.startAnimation(scaleSmall)
                 binding.ivReviewImageChat.remove()
                 isPreviewOpened = false
             }

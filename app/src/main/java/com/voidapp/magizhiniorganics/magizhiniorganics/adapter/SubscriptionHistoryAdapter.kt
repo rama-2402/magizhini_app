@@ -15,7 +15,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Subscriptio
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvSubscriptionHistoryItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Animations
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 

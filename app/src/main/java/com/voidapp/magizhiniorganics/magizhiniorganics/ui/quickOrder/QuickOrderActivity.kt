@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.animation.AnimationUtils
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
@@ -27,13 +28,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomShe
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOAD_DIALOG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toCartEntity
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
@@ -203,16 +201,20 @@ class QuickOrderActivity :
                     updateLoadStatusDialogText("Uploading Page ${event.pageNumber}...")
                 }
                 is QuickOrderViewModel.UiUpdate.UploadComplete -> {
-                    updateLoadStatusDialogText("Files Upload Complete!")
-                    updateLoadStatusDialogText("success")
-                    lifecycleScope.launch {
-                        delay(1800)
-                        dismissLoadStatusDialog()
-                        showExitSheet(
-                            this@QuickOrderActivity,
-                            "We have received your order estimate request. This might take some time. After verification we will contact you with price breakdown.",
-                            "close"
-                        )
+                    if (viewModel.orderID != null) {
+                        viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
+                    } else {
+                        updateLoadStatusDialogText("Files Upload Complete!")
+                        updateLoadStatusDialogText("success")
+                        lifecycleScope.launch {
+                            delay(1800)
+                            dismissLoadStatusDialog()
+                            showExitSheet(
+                                this@QuickOrderActivity,
+                                "We have received your order estimate request. This might take some time. After verification we will contact you with price breakdown.",
+                                "close"
+                            )
+                        }
                     }
                 }
                 is QuickOrderViewModel.UiUpdate.UploadFailed -> {
@@ -313,28 +315,41 @@ class QuickOrderActivity :
     }
 
     fun selectedPaymentMode(paymentMethod: String) {
+        val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
+
         when(paymentMethod) {
             "Online" -> {
 
             }
             "Cash On Delivery" -> {
-
+                sendEstimateRequest()
             }
             else -> {
-                val orderDetailsMap: HashMap<String, Any> = hashMapOf()
-                orderDetailsMap["deliveryPreference"] = binding.spDeliveryPreference.selectedItem
-                orderDetailsMap["deliveryNote"] = binding.etDeliveryNote.text.toString().trim()
-                orderDetailsMap["appliedCoupon"] = if (binding.etCoupon.text.toString().isEmpty()) {
-                    ""
-                } else {
-                    binding.etCoupon.text.toString().trim()
-                }
-
                 viewModel.proceedForWalletPayment(
                     orderDetailsMap
                 )
             }
         }
+    }
+
+    private fun generateOrderDetailsMap(): HashMap<String, Any> {
+        val orderDetailsMap = hashMapOf<String, Any>()
+        orderDetailsMap["deliveryPreference"] = binding.spDeliveryPreference.selectedItem
+        orderDetailsMap["deliveryNote"] = binding.etDeliveryNote.text.toString().trim()
+        orderDetailsMap["appliedCoupon"] = if (binding.etCoupon.text.toString().isEmpty()) {
+            ""
+        } else {
+            binding.etCoupon.text.toString().trim()
+        }
+        viewModel.userProfile?.let { profile ->
+            orderDetailsMap["userID"] = profile.id
+            orderDetailsMap["phoneNumber"] = profile.phNumber
+            orderDetailsMap["address"] = profile.address[viewModel.mCheckedAddressPosition]
+        }
+
+        orderDetailsMap["orderID"] = viewModel.orderID ?: viewModel.quickOrder!!.orderID
+
+        return orderDetailsMap
     }
 
     fun sendEstimateRequest() {
@@ -380,7 +395,7 @@ class QuickOrderActivity :
     override fun onBackPressed() {
         when {
             isPreviewOpened -> {
-//                binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
+                binding.ivPreviewImage.startAnimation(scaleSmall)
                 binding.ivPreviewImage.remove()
                 isPreviewOpened = false
             }
@@ -422,65 +437,6 @@ class QuickOrderActivity :
         }
     }
 
-//    private suspend fun onSuccessCallback(message: String, data: Any?) {
-//        when (message) {
-//            "address" -> {
-//                populateAddressDetails(data as List<Address>)
-//            }
-//            "estimate" -> {
-//                populateEstimateDetails(data as QuickOrder)
-//                updatePlaceOrderButton()
-//                hideProgressDialog()
-////                orderDetailsVisibility(true)
-//            }
-//            "empty" -> {
-//                updatePlaceOrderButton()
-//                hideProgressDialog()
-////                orderDetailsVisibility(false)
-//            }
-//            "addressUpdate" -> {
-//                populateAddressDetails(data as List<Address>)
-//                showToast(this, "Address Updated")
-//            }
-////            "starting" -> {
-////                showLoadStatusDialog("", "Starting to Upload your order List... Please wait", "upload")
-////            }
-////            "uploading" -> {
-////                updateLoadStatusDialogText("Uploading Page $data...")
-////            }
-////            "complete" -> {
-////                updateLoadStatusDialogText("Files Upload Complete!")
-////                updateLoadStatusDialogText("success")
-////                delay(2000)
-////                updateLoadStatusDialogText("dismiss")
-////                showExitSheet(this, "We have received your order estimate request. This might take some time. After verification we will contact you with price breakdown.", "close")
-////            }
-//        }
-//        viewModel.setEmptyStatus()
-//    }
-//
-//    private fun onFailedCallback(message: String, data: Any?) {
-//        when (message) {
-//            "address" -> {
-//                showErrorSnackBar(data as String, true)
-//            }
-//            "addressUpdate" -> {
-//                showToast(this, data as String)
-//            }
-//            "complete" -> {
-//                LoadStatusDialog.statusText.value = "dismiss"
-////                showErrorSnackBar("Failed to upload List to generate Estimate. Try later", true)
-//                showExitSheet(this, data.toString())
-//            }
-//            "estimate" -> {
-//                hideProgressDialog()
-//                showErrorSnackBar(data as String, true)
-//            }
-//
-//        }
-//        viewModel.setEmptyStatus()
-//    }
-
     //from address adapter
     override fun selectedAddress(position: Int) {
         viewModel.mCheckedAddressPosition = position
@@ -512,12 +468,18 @@ class QuickOrderActivity :
 
     //from order list adapter
     override fun selectedListImage(position: Int, imageUri: Any) {
-        binding.apply {
-            isPreviewOpened = true
-            GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
-//            ivPreviewImage.startAnimation(Animations.scaleBig)
-            ivPreviewImage.visible()
+        lifecycleScope.launch {
+            binding.apply {
+                isPreviewOpened = true
+                GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
+                ivPreviewImage.startAnimation(
+//                    AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.scale_big)
+                    scaleBig
+                )
+                ivPreviewImage.visible()
+            }
         }
+
     }
 
     override fun deleteListItem(position: Int, imageUri: Any) {

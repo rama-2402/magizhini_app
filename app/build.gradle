@@ -193,5 +193,4 @@ dependencies {
 
     //zoom image    https://github.com/MikeOrtiz/TouchImageView
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
-
 }

@@ -90,7 +90,7 @@ class QuickOrderListAdapter(
                 }
             } else {
                 val url = quickOrderListUrl[position]
-
+                ivDelete.visibility = View.GONE
                 tvListPageNumber.text = "Page: ${position + 1}"
 
                 //loading the product images

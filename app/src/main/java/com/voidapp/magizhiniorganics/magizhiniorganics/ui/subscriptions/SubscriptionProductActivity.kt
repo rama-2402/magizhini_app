@@ -721,13 +721,13 @@ class SubscriptionProductActivity :
         isPreviewVisible = true
         GlideLoader().loadUserPicture(this, url, binding.ivPreviewImage)
         binding.ivPreviewImage.visible()
-        binding.ivPreviewImage.startAnimation(Animations.scaleBig)
+        binding.ivPreviewImage.startAnimation(scaleBig)
     }
 
     override fun onBackPressed() {
         when {
             isPreviewVisible -> {
-                binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
+                binding.ivPreviewImage.startAnimation(scaleSmall)
                 binding.ivPreviewImage.remove()
                 isPreviewVisible = false
             }

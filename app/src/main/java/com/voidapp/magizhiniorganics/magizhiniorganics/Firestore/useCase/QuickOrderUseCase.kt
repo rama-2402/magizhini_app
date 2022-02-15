@@ -43,9 +43,7 @@ class QuickOrderUseCase(
     fun sendGetEstimateRequest (
         orderListUri: List<Uri>,
         orderListExtension: List<String>,
-        userID: String,
-        name: String,
-        phoneNumber: String
+        detailsMap: HashMap<String, String>
         ): Flow<NetworkResult> =
         flow {
             emit(NetworkResult.Success("starting", null))
@@ -57,7 +55,7 @@ class QuickOrderUseCase(
                 for (i in orderListExtension.indices) {
                     emit(NetworkResult.Success("uploading", i + 1))
                     val reference: StorageReference = firebaseStorage.child(
-                        "${ORDER_ESTIMATE_PATH}${userID}/Page${i + 1}.${orderListExtension[i]}"
+                        "${ORDER_ESTIMATE_PATH}${detailsMap["id"]}/Page${i + 1}.${orderListExtension[i]}"
                     )
 
                     val url = reference.putFile(orderListUri[i])
@@ -67,9 +65,10 @@ class QuickOrderUseCase(
                 }
 
                 quickOrder = QuickOrder(
-                    customerID = userID,
-                    customerName = name,
-                    phoneNumber = phoneNumber,
+                    customerID = detailsMap["id"].toString(),
+                    customerName = detailsMap["name"].toString(),
+                    phoneNumber = detailsMap["phNumber"].toString(),
+                    orderID = detailsMap["orderID"].toString(),
                     mailID = "",
                     timeStamp = System.currentTimeMillis(),
                     cart = arrayListOf(),
@@ -86,9 +85,8 @@ class QuickOrderUseCase(
 
                     emit(NetworkResult.Success("complete", imageUrl))
                 }
-                emit(NetworkResult.Loading(""))
             } catch (e: Exception) {
-                emit(NetworkResult.Failed("complete", "${ e.message.toString()} - $userID"))
+                emit(NetworkResult.Failed("complete", "${ e.message.toString()}"))
             }
         }.flowOn(Dispatchers.IO)
 
@@ -124,9 +122,8 @@ class QuickOrderUseCase(
                     if (
                         fbRepository.makeTransactionFromWallet(amount, orderDetailsMap["userID"].toString(), "Remove")
                     ) {
-                        val orderID = fbRepository.generateOrderID()
                         TransactionHistory(
-                            id = orderID,
+                            id = orderDetailsMap["orderID"].toString(),
                             timestamp = System.currentTimeMillis(),
                             month = TimeUtil().getMonth(),
                             year = TimeUtil().getYear().toLong(),
@@ -135,7 +132,7 @@ class QuickOrderUseCase(
                             fromUPI = orderDetailsMap["userID"].toString(),
                             status = SUCCESS,
                             purpose = purpose,
-                            transactionFor = orderID,
+                            transactionFor = orderDetailsMap["orderID"].toString(),
                         ).let {
                             val transactionID = makeTransactionEntry(it)
                             if (transactionID == "failed") {
@@ -145,7 +142,6 @@ class QuickOrderUseCase(
                                 delay(1000)
                                 emit(NetworkResult.Success("order", "Placing order..."))
                                 val transactionMap: HashMap<String, Any> = hashMapOf()
-                                transactionMap["orderID"] = orderID
                                 transactionMap["transactionID"] = transactionID
                                 transactionMap["amount"] = amount
                                 transactionMap["paymentMode"] = "Wallet"
@@ -184,6 +180,14 @@ class QuickOrderUseCase(
         }
     }
 
+    suspend fun placeCashOnDeliveryOrder(
+        orderDetailsMap: HashMap<String, Any>,
+        cart: ArrayList<CartEntity>,
+        amount: Float
+        ): Flow<NetworkResult> = flow<NetworkResult> {
+
+    }.flowOn(Dispatchers.IO)
+
     private suspend fun placeOrder(
         transactionMap: HashMap<String, Any>,
         orderDetailsMap: HashMap<String, Any>,
@@ -191,7 +195,7 @@ class QuickOrderUseCase(
     ): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
             Order(
-                orderId = transactionMap["orderID"].toString(),
+                orderId = orderDetailsMap["orderID"].toString(),
                 customerId = orderDetailsMap["userID"].toString(),
                 transactionID = transactionMap["transactionID"].toString(),
                 cart = cart,

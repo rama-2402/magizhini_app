@@ -594,7 +594,7 @@ class ProductActivity :
     override fun onBackPressed() {
         when {
             isPreviewVisible -> {
-                binding.ivPreviewImage.startAnimation(Animations.scaleSmall)
+                binding.ivPreviewImage.startAnimation(scaleSmall)
                 binding.ivPreviewImage.visibility = View.GONE
                 isPreviewVisible = false
             }
@@ -651,7 +651,7 @@ class ProductActivity :
                 with(binding) {
                     GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, data as String, ivPreviewImage)
                     ivPreviewImage.visible()
-                    ivPreviewImage.startAnimation(Animations.scaleBig)
+                    ivPreviewImage.startAnimation(scaleBig)
                 }
             }
         }
