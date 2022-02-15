@@ -155,6 +155,7 @@ interface UserProfileDao {
     fun getCartPrice(): LiveData<Float>
 
     @Query("SELECT * FROM CouponEntity WHERE code = :code")
+//    @Query("SELECT * FROM CouponEntity WHERE code LIKE '%' || :code || '%'")
     fun getCouponByCode(code: String): CouponEntity?
 
     //pincodes

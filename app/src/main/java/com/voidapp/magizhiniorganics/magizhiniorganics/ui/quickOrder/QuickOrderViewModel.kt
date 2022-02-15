@@ -10,8 +10,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
@@ -34,6 +36,7 @@ class QuickOrderViewModel(
 
     var orderID: String? = null
     var placeOrderByCOD: Boolean = false
+    var couponAppliedPrice: Float? = 0f
 
     var mCheckedAddressPosition: Int = 0
     var addressPosition: Int = 0
@@ -65,7 +68,7 @@ class QuickOrderViewModel(
                     _uiUpdate.value = UiUpdate.AddressUpdate("address", it.address, true)
                 }
             }
-//            checkForPreviousEstimate()
+            checkForPreviousEstimate()
             getWallet(userProfile!!.id)
         } catch (e: IOException) {
             _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
@@ -263,7 +266,7 @@ class QuickOrderViewModel(
         orderDetailsMap: HashMap<String, Any>
     ) {
         viewModelScope.launch {
-            val mrp = getTotalCartPrice()
+            val mrp = couponAppliedPrice?: getTotalCartPrice()
             val cartEntity = quickOrder!!.cart.map { it.toCartEntity() }
             wallet?.let {
                 if (mrp > it.amount) {
@@ -316,7 +319,7 @@ class QuickOrderViewModel(
         orderDetailsMap: HashMap<String, Any>
     ) {
         viewModelScope.launch {
-            val mrp = getTotalCartPrice()
+            val mrp = couponAppliedPrice ?: getTotalCartPrice()
             val cartEntity = quickOrder?.cart?.map { it.toCartEntity() } ?: arrayListOf()
             quickOrderUseCase
                 .placeCashOnDeliveryOrder(
@@ -341,6 +344,47 @@ class QuickOrderViewModel(
         }
     }
 
+    fun verifyCoupon(couponCode: String) = viewModelScope.launch(Dispatchers.IO) {
+        dbRepository.getCouponByCode(couponCode)?.let { coupon ->
+            val cartPrice = getTotalCartPrice()
+            if (!coupon.categories.contains(ALL)) {
+                withContext(Dispatchers.Main) {
+                    _uiEvent.value = UIEvent.Toast("Coupon Applies only for few product categories")
+                }
+                return@launch
+            }
+            if (cartPrice > coupon.purchaseLimit) {
+                couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
+                withContext(Dispatchers.Main) {
+                    _uiUpdate.value = UiUpdate.CouponApplied(
+                        "Coupon Applied Successfully! Your updated cart price is Rs: $couponAppliedPrice"
+                    )
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    _uiEvent.value = UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
+                }
+                return@launch
+            }
+        } ?: withContext(Dispatchers.Main) {
+            _uiEvent.value = UIEvent.Toast("Coupon Code does not exist.")
+        }
+    }
+
+    private fun couponDiscount(coupon: CouponEntity, cartPrice: Float): Float {
+        var discountPrice = when (coupon.type) {
+            "percent" -> (cartPrice * coupon.amount / 100)
+            "rupees" -> coupon.amount
+            else -> 0f
+        }
+
+        if (discountPrice > coupon.maxDiscount) {
+            discountPrice = coupon.maxDiscount
+        }
+
+        return discountPrice
+    }
+
     sealed class UiUpdate {
         data class WalletData(val wallet: Wallet): UiUpdate()
 
@@ -355,6 +399,9 @@ class QuickOrderViewModel(
 
         //estimateData
         data class EstimateData(val message: String, val data: QuickOrder?, val isSuccess: Boolean): UiUpdate()
+
+        //coupon
+        data class CouponApplied(val message: String): UiUpdate()
 
         //order
         data class WalletTransactionFailed(val message: String): UiUpdate()

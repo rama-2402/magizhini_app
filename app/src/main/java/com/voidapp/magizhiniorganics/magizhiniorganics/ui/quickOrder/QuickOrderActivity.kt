@@ -4,7 +4,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -101,8 +103,33 @@ class QuickOrderActivity :
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
+            btnApplyCoupon.setOnClickListener {
+                if (etCoupon.text.isNullOrEmpty()) {
+                    showToast(this@QuickOrderActivity, "Enter a coupon code")
+                    return@setOnClickListener
+                }
+                viewModel.quickOrder?.let {
+                    if (it.cart.isEmpty()) {
+                        showErrorSnackBar("Coupon can be applied only after receiving Estimate Data", true)
+                    } else {
+                        viewModel.couponAppliedPrice?.let {
+                            applyUiChangesWithCoupon(false)
+                        } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim())
+                    }
+                }
+            }
             ivHelp.setOnClickListener {
 
+            }
+            ivNotification.setOnClickListener {
+                viewModel.quickOrder?.let {
+                    if (it.note.isNotEmpty()) {
+                        showDescriptionBs(it.note)
+                        binding.ivNotification.badgeValue = 0
+                    } else {
+                        showToast(this@QuickOrderActivity, "No New Notification")
+                    }
+                }
             }
             ivPreviewImage.setOnClickListener {
                 onBackPressed()
@@ -253,10 +280,42 @@ class QuickOrderActivity :
                     }
                     hideProgressDialog()
                 }
+                is QuickOrderViewModel.UiUpdate.CouponApplied -> {
+                    this.hideKeyboard()
+                    showErrorSnackBar(event.message, false)
+                    applyUiChangesWithCoupon(true)
+                }
                 is QuickOrderViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
             }
             viewModel.setEmptyStatus()
+        }
+    }
+
+    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
+        binding.apply {
+            if (isCouponApplied) {
+                btnGetEstimate.text = "Rs:${viewModel.couponAppliedPrice} (${viewModel.quickOrder!!.cart.size} Items)"
+                etCoupon.disable()
+                btnApplyCoupon.text = "Remove"
+                btnApplyCoupon.setBackgroundColor(
+                    ContextCompat.getColor(
+                        baseContext,
+                        R.color.matteRed
+                    )
+                )
+            } else {
+                btnGetEstimate.text = "Rs:${viewModel.getTotalCartPrice()} (${viewModel.quickOrder!!.cart.size} Items)"
+                viewModel.couponAppliedPrice = null
+                etCoupon.enable()
+                btnApplyCoupon.text = "Apply"
+                btnApplyCoupon.setBackgroundColor(
+                    ContextCompat.getColor(
+                        baseContext,
+                        R.color.green_base
+                    )
+                )
+            }
         }
     }
 
@@ -363,10 +422,10 @@ class QuickOrderActivity :
         val orderDetailsMap = hashMapOf<String, Any>()
         orderDetailsMap["deliveryPreference"] = binding.spDeliveryPreference.selectedItem
         orderDetailsMap["deliveryNote"] = binding.etDeliveryNote.text.toString().trim()
-        orderDetailsMap["appliedCoupon"] = if (binding.etCoupon.text.toString().isEmpty()) {
-            ""
-        } else {
+        orderDetailsMap["appliedCoupon"] = if (viewModel.couponAppliedPrice != null) {
             binding.etCoupon.text.toString().trim()
+        } else {
+            ""
         }
         viewModel.userProfile?.let { profile ->
             orderDetailsMap["userID"] = profile.id
