@@ -46,13 +46,6 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-/*
-* check if there is any order list already available
-* disable the add button if order list is already in place
-* enable place order only after adding atleast one image
-*
-* */
-
 class QuickOrderActivity :
     BaseActivity(),
     KodeinAware,
@@ -164,10 +157,10 @@ class QuickOrderActivity :
                     return@setOnClickListener
                 }
                 viewModel.quickOrder?.let {
-//                    if (it.cart.isEmpty()) {
-//                        showErrorSnackBar("Estimate not yet available. Please wait", true)
-//                        return@setOnClickListener
-//                    }
+                    if (it.cart.isEmpty()) {
+                        showErrorSnackBar("Estimate not yet available. Please wait", true)
+                        return@setOnClickListener
+                    }
                 }
                 showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
             }
