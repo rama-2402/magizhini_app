@@ -37,6 +37,7 @@ class QuickOrderViewModel(
     var orderID: String? = null
     var placeOrderByCOD: Boolean = false
     var couponAppliedPrice: Float? = 0f
+    var deliveryCharge: Float = 0f
 
     var mCheckedAddressPosition: Int = 0
     var addressPosition: Int = 0
@@ -207,13 +208,19 @@ class QuickOrderViewModel(
     }
 
     fun getTotalCartPrice(): Float {
-        var cartPrice: Float = 0f
-        quickOrder?.let {
-            for (item in it.cart) {
-                cartPrice += item.price
+            var cartPrice: Float = 0f
+            quickOrder?.let {
+                for (item in it.cart) {
+                    cartPrice += item.price
+                }
             }
+            return cartPrice
         }
-        return cartPrice
+
+    suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
+        return@withContext userProfile?.let {
+            dbRepository.getDeliveryCharge(it.address[mCheckedAddressPosition].LocationCode).deliveryCharge.toFloat()
+        } ?: 30f
     }
 
     fun sendGetEstimateRequest(imageExtensions: MutableList<String>) {
@@ -266,7 +273,7 @@ class QuickOrderViewModel(
         orderDetailsMap: HashMap<String, Any>
     ) {
         viewModelScope.launch {
-            val mrp = couponAppliedPrice?: getTotalCartPrice()
+            val mrp = (couponAppliedPrice ?: getTotalCartPrice()) + getDeliveryCharge()
             val cartEntity = quickOrder!!.cart.map { it.toCartEntity() }
             wallet?.let {
                 if (mrp > it.amount) {
@@ -319,14 +326,14 @@ class QuickOrderViewModel(
         orderDetailsMap: HashMap<String, Any>
     ) {
         viewModelScope.launch {
-            val mrp = couponAppliedPrice ?: getTotalCartPrice()
+            val mrp = (couponAppliedPrice ?: getTotalCartPrice()) + getDeliveryCharge()
             val cartEntity = quickOrder?.cart?.map { it.toCartEntity() } ?: arrayListOf()
             quickOrderUseCase
                 .placeCashOnDeliveryOrder(
                     orderDetailsMap,
                     cartEntity as ArrayList<CartEntity>,
                     mrp
-                ).collect { result ->
+                ).onEach { result ->
                     when(result) {
                         is NetworkResult.Success -> {
                             if (result.message == "placing") {
@@ -340,12 +347,12 @@ class QuickOrderViewModel(
                         }
                         else -> Unit
                     }
-                }
+                }.launchIn(this)
         }
     }
 
     fun placeOrderWithOnlinePayment(orderDetailsMap: HashMap<String, Any>) = viewModelScope.launch {
-        val mrp = couponAppliedPrice?: getTotalCartPrice()
+        val mrp = (couponAppliedPrice ?: getTotalCartPrice()) + getDeliveryCharge()
         val cartEntity = quickOrder!!.cart.map { it.toCartEntity() }
         quickOrderUseCase
             .placeOnlinePaymentOrder(

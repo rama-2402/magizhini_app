@@ -118,7 +118,7 @@ class QuickOrderActivity :
                 }
             }
             ivHelp.setOnClickListener {
-
+                showDescriptionBs(getString(R.string.quick_order_description))
             }
             ivNotification.setOnClickListener {
                 viewModel.quickOrder?.let {
@@ -345,6 +345,7 @@ class QuickOrderActivity :
     }
 
     private fun populateAddressDetails(addresses: List<Address>) {
+        updatePriceButton()
         addressAdapter.setAddressData(addresses)
     }
 
@@ -356,17 +357,23 @@ class QuickOrderActivity :
             if (quickOrder.note.isNotEmpty()) {
                 ivNotification.badgeValue = 1
             }
-            btnGetEstimate.text =
-                "Rs:${viewModel.getTotalCartPrice()} (${quickOrder.cart.size} Items)"
+            updatePriceButton()
             updatePlaceOrderButton()
-            showToast(this@QuickOrderActivity, "click Total Price to get Individual Item Price", LONG)
+            showToast(this@QuickOrderActivity, "Click Total Price to get Individual Item Price", LONG)
+        }
+    }
+
+    private fun updatePriceButton() {
+        lifecycleScope.launch {
+            binding.btnGetEstimate.text =
+                "Rs:${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()} \n (${viewModel.quickOrder?.cart?.size} Items)"
         }
     }
 
     private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
         binding.apply {
             if (isCouponApplied) {
-                btnGetEstimate.text = "Rs:${viewModel.couponAppliedPrice} (${viewModel.quickOrder!!.cart.size} Items)"
+                updatePriceButton()
                 etCoupon.disable()
                 btnApplyCoupon.text = "Remove"
                 btnApplyCoupon.setBackgroundColor(
@@ -376,7 +383,7 @@ class QuickOrderActivity :
                     )
                 )
             } else {
-                btnGetEstimate.text = "Rs:${viewModel.getTotalCartPrice()} (${viewModel.quickOrder!!.cart.size} Items)"
+                updatePriceButton()
                 viewModel.couponAppliedPrice = null
                 etCoupon.enable()
                 btnApplyCoupon.text = "Apply"
@@ -408,49 +415,51 @@ class QuickOrderActivity :
     }
 
     fun selectedPaymentMode(paymentMethod: String) {
-        when(paymentMethod) {
-            "Online" -> {
-                if (viewModel.quickOrder == null) {
-                    showExitSheet(
-                        this,
-                        "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                        "close"
-                    )
-                    return
-                }
-                val mrp = viewModel.couponAppliedPrice ?: viewModel.getTotalCartPrice()
-                viewModel.userProfile?.let {
-                    startPayment(
-                        this,
-                        mailID = it.mailId,
-                        mrp  * 100f,
-                        name = it.name,
-                        userID = it.id,
-                        phoneNumber = it.phNumber
-                    ).also { status ->
-                        if (!status) {
-                            showToast(this, "Error in processing payment")
+        lifecycleScope.launch {
+            when(paymentMethod) {
+                "Online" -> {
+                    if (viewModel.quickOrder == null) {
+                        showExitSheet(
+                            this@QuickOrderActivity,
+                            "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
+                            "close"
+                        )
+                        return@launch
+                    }
+                    val mrp = (viewModel.couponAppliedPrice ?: viewModel.getTotalCartPrice()) + viewModel.getDeliveryCharge()
+                    viewModel.userProfile?.let {
+                        startPayment(
+                            this@QuickOrderActivity,
+                            mailID = it.mailId,
+                            mrp  * 100f,
+                            name = it.name,
+                            userID = it.id,
+                            phoneNumber = it.phNumber
+                        ).also { status ->
+                            if (!status) {
+                                showToast(this@QuickOrderActivity, "Error in processing payment")
+                            }
                         }
                     }
                 }
-            }
-            "Cash On Delivery" -> {
-                viewModel.placeOrderByCOD = true
-                sendEstimateRequest()
-            }
-            else -> {
-                if (viewModel.quickOrder == null) {
-                    showExitSheet(
-                        this,
-                        "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                        "close"
-                    )
-                    return
+                "Cash On Delivery" -> {
+                    viewModel.placeOrderByCOD = true
+                    sendEstimateRequest()
                 }
-                val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
-                viewModel.proceedForWalletPayment(
-                    orderDetailsMap
-                )
+                else -> {
+                    if (viewModel.quickOrder == null) {
+                        showExitSheet(
+                            this@QuickOrderActivity,
+                            "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
+                            "close"
+                        )
+                        return@launch
+                    }
+                    val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
+                    viewModel.proceedForWalletPayment(
+                        orderDetailsMap
+                    )
+                }
             }
         }
     }
@@ -520,7 +529,9 @@ class QuickOrderActivity :
     override fun onBackPressed() {
         when {
             isPreviewOpened -> {
-                binding.ivPreviewImage.startAnimation(scaleSmall)
+                binding.ivPreviewImage.startAnimation(
+                    AnimationUtils.loadAnimation(this, R.anim.scale_small)
+                )
                 binding.ivPreviewImage.remove()
                 isPreviewOpened = false
             }
@@ -567,6 +578,7 @@ class QuickOrderActivity :
         viewModel.mCheckedAddressPosition = position
         addressAdapter.checkedAddressPosition = position
         addressAdapter.notifyDataSetChanged()
+        updatePriceButton()
     }
 
     override fun addAddress(position: Int) {
@@ -575,6 +587,7 @@ class QuickOrderActivity :
 
     override fun deleteAddress(position: Int) {
         viewModel.deleteAddress(position)
+        viewModel.mCheckedAddressPosition = 0
         addressAdapter.checkedAddressPosition = 0
         addressAdapter.notifyDataSetChanged()
     }
@@ -588,7 +601,6 @@ class QuickOrderActivity :
             dialog.arguments = bundle
             dialog.show(supportFragmentManager, "addressDialog")
         }
-
     }
 
     //from order list adapter
@@ -598,8 +610,7 @@ class QuickOrderActivity :
                 isPreviewOpened = true
                 GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
                 ivPreviewImage.startAnimation(
-//                    AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.scale_big)
-                    scaleBig
+                    AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.scale_big)
                 )
                 ivPreviewImage.visible()
             }
