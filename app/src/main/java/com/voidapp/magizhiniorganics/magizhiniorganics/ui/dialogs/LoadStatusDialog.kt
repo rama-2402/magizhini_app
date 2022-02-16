@@ -33,7 +33,7 @@ class LoadStatusDialog: DialogFragment() {
             fragment.arguments = args
             return fragment
         }
-
+        var statusContent: String? = null
         var statusText: MutableLiveData<String?> = MutableLiveData()
         private val _statusText: LiveData<String?> = statusText
     }
@@ -64,7 +64,7 @@ class LoadStatusDialog: DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _statusText.observe(this) { content ->
-            content?.let { it -> updateBody(it) }
+            content?.let { it -> loadLottie(it) }
         }
     }
 
@@ -77,12 +77,14 @@ class LoadStatusDialog: DialogFragment() {
     }
 
     private fun loadLottie(content: String) {
+        binding.tvBody.text = statusContent
         when(content) {
             "success" -> {
                 binding.ltAnimImg.apply {
                     setAnimation(R.raw.success)
                     playAnimation()
                 }
+                statusContent = null
                 statusText.value = null
             }
             "upload" -> {
@@ -103,21 +105,30 @@ class LoadStatusDialog: DialogFragment() {
                     playAnimation()
                 }
             }
+            "purchaseValidation" -> {
+                binding.ltAnimImg.apply {
+                    setAnimation(R.raw.validating_purchase)
+                    playAnimation()
+                }
+            }
         }
     }
 
     private fun updateBody(content: String) {
         when(content) {
-            "success" -> loadLottie("success")
+            "success" -> {
+                binding.tvBody.text = statusContent
+                loadLottie("success")
+            }
             "placingOrder" -> {
-                binding.tvBody.text = "Placing your Order..."
+                binding.tvBody.text = statusContent
                 loadLottie("placingOrder")
             }
             "orderPlaced" -> {
-                binding.tvBody.text = "Order Placed Successfully...!"
+                binding.tvBody.text = statusContent
                 loadLottie("success")
             }
-            "dismiss" -> dialog?.dismiss()
+
             else -> binding.tvBody.text = content
         }
     }

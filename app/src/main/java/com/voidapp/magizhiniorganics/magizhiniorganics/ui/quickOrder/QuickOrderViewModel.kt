@@ -244,11 +244,11 @@ class QuickOrderViewModel(
                                     }
                                     "uploading" -> {
                                         _uiUpdate.value =
-                                            UiUpdate.UploadingImage(result.data.toString())
+                                            UiUpdate.UploadingImage("Uploading Page ${result.data}...")
                                     }
                                     "complete" -> {
                                         _uiUpdate.value =
-                                            UiUpdate.UploadComplete(result.data.toString())
+                                            UiUpdate.UploadComplete("Files Upload Complete!")
                                     }
                                 }
                             }
@@ -291,8 +291,8 @@ class QuickOrderViewModel(
                                                 UiUpdate.StartingTransaction(
                                                     result.data.toString()
                                                 )
-                                            "order" -> _uiUpdate.value = UiUpdate.PlacingOrder(result.data.toString())
-                                            "success" -> _uiUpdate.value = UiUpdate.OrderPlaced(result.data.toString())
+                                            "order" -> _uiUpdate.value = UiUpdate.PlacingOrder("Placing your Order...")
+                                            "success" -> _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
                                         }
                                     }
                                     is NetworkResult.Failed -> {
@@ -330,9 +330,9 @@ class QuickOrderViewModel(
                     when(result) {
                         is NetworkResult.Success -> {
                             if (result.message == "placing") {
-                                _uiUpdate.value = UiUpdate.PlacingOrder("")
+                                _uiUpdate.value = UiUpdate.PlacingOrder("Placing your Order...")
                             } else {
-                                _uiUpdate.value = UiUpdate.OrderPlaced("")
+                                _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
                             }
                         }
                         is NetworkResult.Failed -> {
@@ -342,6 +342,33 @@ class QuickOrderViewModel(
                     }
                 }
         }
+    }
+
+    fun placeOrderWithOnlinePayment(orderDetailsMap: HashMap<String, Any>) = viewModelScope.launch {
+        val mrp = couponAppliedPrice?: getTotalCartPrice()
+        val cartEntity = quickOrder!!.cart.map { it.toCartEntity() }
+        quickOrderUseCase
+            .placeOnlinePaymentOrder(
+                orderDetailsMap,
+                mrp,
+                PURCHASE,
+                "Product Purchase Online Transaction",
+                cartEntity as ArrayList<CartEntity>
+            ).collect { result ->
+                when(result) {
+                    is NetworkResult.Success -> {
+                        when (result.message) {
+                            "validation" -> _uiUpdate.value = UiUpdate.ValidatingPurchase("")
+                            "placing" -> _uiUpdate.value = UiUpdate.PlacingOrder("Placing Order...")
+                            "placed" -> _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
+                        }
+                    }
+                    is NetworkResult.Failed -> {
+                        _uiUpdate.value = UiUpdate.OrderPlacementFailed("")
+                    }
+                    else -> Unit
+                }
+            }
     }
 
     fun verifyCoupon(couponCode: String) = viewModelScope.launch(Dispatchers.IO) {
@@ -390,7 +417,7 @@ class QuickOrderViewModel(
 
         //uploading List
         data class BeginningUpload(val message: String): UiUpdate()
-        data class UploadingImage(val pageNumber: String): UiUpdate()
+        data class UploadingImage(val message: String): UiUpdate()
         data class UploadComplete(val message: String): UiUpdate()
         data class UploadFailed(val message: String): UiUpdate()
 
@@ -404,11 +431,12 @@ class QuickOrderViewModel(
         data class CouponApplied(val message: String): UiUpdate()
 
         //order
-        data class WalletTransactionFailed(val message: String): UiUpdate()
-        data class OrderPlacementFailed(val message: String): UiUpdate()
+        data class ValidatingPurchase(val message: String): UiUpdate()
         data class StartingTransaction(val message: String): UiUpdate()
         data class PlacingOrder(val message: String): UiUpdate()
         data class OrderPlaced(val message: String): UiUpdate()
+        data class WalletTransactionFailed(val message: String): UiUpdate()
+        data class OrderPlacementFailed(val message: String): UiUpdate()
         object Empty: UiUpdate()
     }
 }

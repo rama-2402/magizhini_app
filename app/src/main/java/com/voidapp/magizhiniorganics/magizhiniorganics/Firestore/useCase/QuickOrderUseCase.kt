@@ -8,10 +8,8 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_ESTIMATE_PATH
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PENDING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
@@ -179,6 +177,59 @@ class QuickOrderUseCase(
             "failed"
         }
     }
+
+    suspend fun placeOnlinePaymentOrder(
+        orderDetailsMap: HashMap<String, Any>,
+        amount: Float,
+        purpose: String,
+        reason: String,
+        cart: ArrayList<CartEntity>
+    ): Flow<NetworkResult> =
+        flow<NetworkResult> {
+            try {
+                emit(NetworkResult.Success("validation", null))
+                GlobalTransaction(
+                    id = "",
+                    userID = orderDetailsMap["userID"].toString(),
+                    userName = orderDetailsMap["name"].toString(),
+                    userMobileNumber = orderDetailsMap["phoneNumber"].toString(),
+                    transactionID = orderDetailsMap["transactionID"].toString(),
+                    transactionType = "Online Payment",
+                    transactionAmount = amount,
+                    transactionDirection = purpose,
+                    timestamp = System.currentTimeMillis(),
+                    transactionReason = reason
+                ).let {
+                    if(fbRepository.createGlobalTransactionEntry(it)) {
+                        emit(NetworkResult.Success("placing", null))
+
+                        val transactionMap: HashMap<String, Any> = hashMapOf()
+                        transactionMap["transactionID"] = orderDetailsMap["transactionID"].toString()
+                        transactionMap["paymentMode"] = "Online"
+                        transactionMap["paymentDone"] = true
+                        transactionMap["amount"] = amount
+
+                        if (placeOrder(
+                                transactionMap,
+                                orderDetailsMap,
+                                cart
+                        )) {
+                            delay(1000)
+                            emit(NetworkResult.Success("placed", null))
+                        } else {
+                            delay(1000)
+                            emit(NetworkResult.Failed("placed", null))
+                        }
+                    } else {
+                        delay(1000)
+                        emit(NetworkResult.Failed("transaction", null))
+                    }
+                }
+            } catch (e: Exception) {
+                emit(NetworkResult.Failed("transaction", null))
+            }
+        }.flowOn(Dispatchers.IO)
+
 
     suspend fun placeCashOnDeliveryOrder(
         orderDetailsMap: HashMap<String, Any>,

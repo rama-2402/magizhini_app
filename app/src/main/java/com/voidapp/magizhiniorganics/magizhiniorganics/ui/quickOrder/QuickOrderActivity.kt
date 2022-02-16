@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +16,8 @@ import kotlinx.coroutines.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.annotations.Until
+import com.razorpay.Checkout
+import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
@@ -53,6 +56,7 @@ import org.kodein.di.generic.instance
 class QuickOrderActivity :
     BaseActivity(),
     KodeinAware,
+    PaymentResultListener,
     AddressAdapter.OnAddressClickListener,
     QuickOrderListAdapter.QuickOrderClickListener,
     AddressDialogClickListener
@@ -73,6 +77,8 @@ class QuickOrderActivity :
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_quick_order)
         viewModel = ViewModelProvider(this, factory).get(QuickOrderViewModel::class.java)
+
+        Checkout.preload(applicationContext)
 
         initRecyclerView()
         initData()
@@ -194,10 +200,10 @@ class QuickOrderActivity :
                     showLoadStatusDialog("", "Processing payment from Wallet...", "transaction")
                 }
                 is QuickOrderViewModel.UiUpdate.PlacingOrder -> {
-                    updateLoadStatusDialogText("placingOrder")
+                    updateLoadStatusDialogText("placingOrder", event.message)
                 }
                 is QuickOrderViewModel.UiUpdate.OrderPlaced -> {
-                    updateLoadStatusDialogText("orderPlaced")
+                    updateLoadStatusDialogText("success", event.message)
                     lifecycleScope.launch {
                         delay(1800)
                         dismissLoadStatusDialog()
@@ -222,7 +228,7 @@ class QuickOrderActivity :
                     }
                 }
                 is QuickOrderViewModel.UiUpdate.OrderPlacementFailed -> {
-                    updateLoadStatusDialogText("dismiss")
+                    dismissLoadStatusDialog()
                     showExitSheet(
                         this,
                         "Server Error! Failed to place order. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. Click CUSTOMER SUPPORT to open customer support",
@@ -237,14 +243,13 @@ class QuickOrderActivity :
                     )
                 }
                 is QuickOrderViewModel.UiUpdate.UploadingImage -> {
-                    updateLoadStatusDialogText("Uploading Page ${event.pageNumber}...")
+                    updateLoadStatusDialogText("upload", event.message)
                 }
                 is QuickOrderViewModel.UiUpdate.UploadComplete -> {
                     if (viewModel.placeOrderByCOD) {
                         viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
                     } else {
-                        updateLoadStatusDialogText("Files Upload Complete!")
-                        updateLoadStatusDialogText("success")
+                        updateLoadStatusDialogText("success", event.message)
                         lifecycleScope.launch {
                             delay(1800)
                             dismissLoadStatusDialog()
@@ -259,6 +264,13 @@ class QuickOrderActivity :
                 is QuickOrderViewModel.UiUpdate.UploadFailed -> {
                     dismissLoadStatusDialog()
                     showErrorSnackBar(event.message, true)
+                }
+                is QuickOrderViewModel.UiUpdate.ValidatingPurchase -> {
+                    showLoadStatusDialog(
+                        "",
+                        "Validating Transaction...",
+                    "purchaseValidation"
+                    )
                 }
                 is QuickOrderViewModel.UiUpdate.AddressUpdate -> {
                     if (event.isSuccess) {
@@ -289,33 +301,6 @@ class QuickOrderActivity :
                 else -> Unit
             }
             viewModel.setEmptyStatus()
-        }
-    }
-
-    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
-        binding.apply {
-            if (isCouponApplied) {
-                btnGetEstimate.text = "Rs:${viewModel.couponAppliedPrice} (${viewModel.quickOrder!!.cart.size} Items)"
-                etCoupon.disable()
-                btnApplyCoupon.text = "Remove"
-                btnApplyCoupon.setBackgroundColor(
-                    ContextCompat.getColor(
-                        baseContext,
-                        R.color.matteRed
-                    )
-                )
-            } else {
-                btnGetEstimate.text = "Rs:${viewModel.getTotalCartPrice()} (${viewModel.quickOrder!!.cart.size} Items)"
-                viewModel.couponAppliedPrice = null
-                etCoupon.enable()
-                btnApplyCoupon.text = "Apply"
-                btnApplyCoupon.setBackgroundColor(
-                    ContextCompat.getColor(
-                        baseContext,
-                        R.color.green_base
-                    )
-                )
-            }
         }
     }
 
@@ -361,8 +346,9 @@ class QuickOrderActivity :
         (supportFragmentManager.findFragmentByTag(LOAD_DIALOG) as? DialogFragment)?.dismiss()
     }
 
-    private fun updateLoadStatusDialogText(content: String) {
-        LoadStatusDialog.statusText.value = content
+    private fun updateLoadStatusDialogText(filter: String, content: String) {
+        LoadStatusDialog.statusContent = content
+        LoadStatusDialog.statusText.value = filter
     }
 
     private fun populateAddressDetails(addresses: List<Address>) {
@@ -382,7 +368,50 @@ class QuickOrderActivity :
             updatePlaceOrderButton()
             showToast(this@QuickOrderActivity, "click Total Price to get Individual Item Price", LONG)
         }
+    }
 
+    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
+        binding.apply {
+            if (isCouponApplied) {
+                btnGetEstimate.text = "Rs:${viewModel.couponAppliedPrice} (${viewModel.quickOrder!!.cart.size} Items)"
+                etCoupon.disable()
+                btnApplyCoupon.text = "Remove"
+                btnApplyCoupon.setBackgroundColor(
+                    ContextCompat.getColor(
+                        baseContext,
+                        R.color.matteRed
+                    )
+                )
+            } else {
+                btnGetEstimate.text = "Rs:${viewModel.getTotalCartPrice()} (${viewModel.quickOrder!!.cart.size} Items)"
+                viewModel.couponAppliedPrice = null
+                etCoupon.enable()
+                btnApplyCoupon.text = "Apply"
+                btnApplyCoupon.setBackgroundColor(
+                    ContextCompat.getColor(
+                        baseContext,
+                        R.color.green_base
+                    )
+                )
+            }
+        }
+    }
+
+    private fun updatePlaceOrderButton() {
+        if(
+            viewModel.quickOrder == null &&
+            viewModel.orderListUri.isNullOrEmpty()
+        ) {
+            binding.btnPlaceOrder.text = "Add List"
+        } else {
+            binding.btnPlaceOrder.text = "Place Order"
+        }
+    }
+
+    private fun loadNewImage() {
+        quickOrderListAdapter.quickOrderList = viewModel.orderListUri
+        quickOrderListAdapter.notifyDataSetChanged()
+        updatePlaceOrderButton()
     }
 
     fun selectedPaymentMode(paymentMethod: String) {
@@ -396,6 +425,21 @@ class QuickOrderActivity :
                     )
                     return
                 }
+                val mrp = viewModel.couponAppliedPrice ?: viewModel.getTotalCartPrice()
+                viewModel.userProfile?.let {
+                    startPayment(
+                        this,
+                        mailID = it.mailId,
+                        mrp  * 100f,
+                        name = it.name,
+                        userID = it.id,
+                        phoneNumber = it.phNumber
+                    ).also { status ->
+                        if (!status) {
+                            showToast(this, "Error in processing payment")
+                        }
+                    }
+                }
             }
             "Cash On Delivery" -> {
                 viewModel.placeOrderByCOD = true
@@ -405,8 +449,8 @@ class QuickOrderActivity :
                 if (viewModel.quickOrder == null) {
                     showExitSheet(
                         this,
-                    "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                    "close"
+                        "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
+                        "close"
                     )
                     return
                 }
@@ -416,6 +460,16 @@ class QuickOrderActivity :
                 )
             }
         }
+    }
+
+    override fun onPaymentSuccess(response: String?) {
+        val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
+        orderDetailsMap["transactionID"] = response!!
+        viewModel.placeOrderWithOnlinePayment(orderDetailsMap)
+    }
+
+    override fun onPaymentError(p0: Int, p1: String?) {
+        showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
     private fun generateOrderDetailsMap(): HashMap<String, Any> {
@@ -429,6 +483,7 @@ class QuickOrderActivity :
         }
         viewModel.userProfile?.let { profile ->
             orderDetailsMap["userID"] = profile.id
+            orderDetailsMap["name"] = profile.name
             orderDetailsMap["phoneNumber"] = profile.phNumber
             orderDetailsMap["address"] = profile.address[viewModel.mCheckedAddressPosition]
         }
@@ -447,23 +502,6 @@ class QuickOrderActivity :
         viewModel.sendGetEstimateRequest (
             imageExtensionList
         )
-    }
-
-    private fun updatePlaceOrderButton() {
-        if(
-            viewModel.quickOrder == null &&
-            viewModel.orderListUri.isNullOrEmpty()
-        ) {
-            binding.btnPlaceOrder.text = "Add List"
-        } else {
-            binding.btnPlaceOrder.text = "Place Order"
-        }
-    }
-
-    private fun loadNewImage() {
-        quickOrderListAdapter.quickOrderList = viewModel.orderListUri
-        quickOrderListAdapter.notifyDataSetChanged()
-        updatePlaceOrderButton()
     }
 
     fun moveToCustomerSupport() {
