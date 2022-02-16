@@ -71,7 +71,8 @@ class QuickOrderUseCase(
                     timeStamp = System.currentTimeMillis(),
                     cart = arrayListOf(),
                     imageUrl = imageUrl,
-                    note = ""
+                    note = "",
+                    orderPlaced = false
                 )
 
                 quickOrder?.let {
@@ -84,7 +85,7 @@ class QuickOrderUseCase(
                     emit(NetworkResult.Success("complete", imageUrl))
                 }
             } catch (e: Exception) {
-                emit(NetworkResult.Failed("complete", "${ e.message.toString()}"))
+                emit(NetworkResult.Failed("complete", "${e.message}"))
             }
         }.flowOn(Dispatchers.IO)
 
@@ -145,6 +146,7 @@ class QuickOrderUseCase(
                                 transactionMap["paymentMode"] = "Wallet"
                                 transactionMap["paymentDone"] = true
                                 if (placeOrder(transactionMap, orderDetailsMap, cart)) {
+                                    updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
                                     delay(1000)
                                     emit(NetworkResult.Success("success", "Order Placed Successfully..."))
                                 } else {
@@ -214,6 +216,7 @@ class QuickOrderUseCase(
                                 orderDetailsMap,
                                 cart
                         )) {
+                            updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
                             delay(1000)
                             emit(NetworkResult.Success("placed", null))
                         } else {
@@ -252,6 +255,7 @@ class QuickOrderUseCase(
                 cart
             )
         ) {
+            updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
             delay(1000)
             emit(NetworkResult.Success("placed", null))
         } else {
@@ -291,6 +295,17 @@ class QuickOrderUseCase(
             }
         } catch (e: Exception) {
             false
+        }
+    }
+
+    private suspend fun updateOrderPlacedInQuickOrder(userID: String) {
+        try {
+            fireStore
+                .collection(QUICK_ORDER)
+                .document(userID)
+                .update("orderPlaced", true).await()
+        } catch (e: Exception) {
+
         }
     }
 }

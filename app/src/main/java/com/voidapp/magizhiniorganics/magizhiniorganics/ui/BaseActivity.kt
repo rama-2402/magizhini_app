@@ -194,6 +194,7 @@ open class BaseActivity : AppCompatActivity() {
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
             }
             "close"-> {
+                exitBottomSheetDialog.setCancelable(false)
                 view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
                 view.tvCancelText.text = "Close"
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
@@ -224,6 +225,7 @@ open class BaseActivity : AppCompatActivity() {
                         "" -> activity.confirmCancellation()
                     }
                 }
+                is QuickOrderActivity -> activity.onBackPressed()
             }
         }
 
@@ -268,8 +270,8 @@ open class BaseActivity : AppCompatActivity() {
                         "setting" -> activity.proceedToRequestManualPermission()
                         "estimate" -> activity.sendEstimateRequest()
                         "cs" -> activity.moveToCustomerSupport()
+                        "close" -> activity.onBackPressed()
                     }
-                    hideExitSheet()
                 }
                 is SubscriptionHistoryActivity -> {
                     when(data) {

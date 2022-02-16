@@ -157,6 +157,10 @@ class QuickOrderActivity :
                     return@setOnClickListener
                 }
                 viewModel.quickOrder?.let {
+                    if (it.orderPlaced) {
+                        showToast(this@QuickOrderActivity,"Order already placed. Please check your Purchase History for know the progress")
+                        return@setOnClickListener
+                    }
                     if (it.cart.isEmpty()) {
                         showErrorSnackBar("Estimate not yet available. Please wait", true)
                         return@setOnClickListener
@@ -194,6 +198,7 @@ class QuickOrderActivity :
                 }
                 is QuickOrderViewModel.UiUpdate.PlacingOrder -> {
                     updateLoadStatusDialogText("placingOrder", event.message)
+
                 }
                 is QuickOrderViewModel.UiUpdate.OrderPlaced -> {
                     updateLoadStatusDialogText("success", event.message)
@@ -444,7 +449,14 @@ class QuickOrderActivity :
                 }
                 "Cash On Delivery" -> {
                     viewModel.placeOrderByCOD = true
-                    sendEstimateRequest()
+                    viewModel.quickOrder?.let {
+                        showLoadStatusDialog(
+                            "",
+                            "Validating your purchase...",
+                            "purchaseValidation"
+                        )
+                        viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
+                    } ?: sendEstimateRequest()
                 }
                 else -> {
                     if (viewModel.quickOrder == null) {

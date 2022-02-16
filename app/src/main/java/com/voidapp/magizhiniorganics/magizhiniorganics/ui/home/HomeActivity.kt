@@ -251,7 +251,6 @@ class HomeActivity :
     }
 
     private fun observers() {
-
         viewModel.getDataToPopulate()
         viewModel.getAllNotifications()
 
