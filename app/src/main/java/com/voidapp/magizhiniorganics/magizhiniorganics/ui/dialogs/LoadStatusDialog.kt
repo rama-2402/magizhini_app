@@ -15,6 +15,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogSuccessBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
 import kotlinx.coroutines.launch
 
 class LoadStatusDialog: DialogFragment() {
@@ -69,15 +70,16 @@ class LoadStatusDialog: DialogFragment() {
     }
 
     private fun populateData(title: String, body: String, content: String) {
+        loadLottie(content)
         binding.apply {
             tvTitle.text = title
             tvBody.text = body
         }
-        loadLottie(content)
     }
 
     private fun loadLottie(content: String) {
-        binding.tvBody.text = statusContent
+//        binding.tvBody.text = statusContent
+        statusContent?.let { binding.tvBody.setTextAnimation(it) }
         when(content) {
             "success" -> {
                 binding.ltAnimImg.apply {

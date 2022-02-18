@@ -4,6 +4,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Paint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewMod
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
+import kotlin.io.path.createTempDirectory
 
 class CartAdapter(
     val context: Context,
@@ -105,7 +107,7 @@ class CartAdapter(
         }
 
         holder.add.setOnClickListener {
-            holder.add.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
+//            holder.add.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             val count = holder.orderCount.text.toString().toInt()
             if (count < limit) {
                 when(viewModel) {
@@ -117,7 +119,7 @@ class CartAdapter(
             }
         }
         holder.remove.setOnClickListener {
-            holder.remove.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
+//            holder.remove.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             val count = holder.orderCount.text.toString().toInt()
             if (count > 1) {
                 when(viewModel) {
@@ -129,7 +131,7 @@ class CartAdapter(
             }
         }
         holder.delete.setOnClickListener {
-            holder.delete.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
+//            holder.delete.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             when(viewModel) {
                 is ShoppingMainViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)
                 is ProductViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)
@@ -137,11 +139,23 @@ class CartAdapter(
                 is DishViewModel -> viewModel.deleteItemFromCart(position)
             }
         }
-
     }
 
     override fun getItemCount(): Int {
         return cartItems.size
+    }
+
+    fun deleteCartItem(position: Int) {
+        val items = cartItems.map { it.copy() } as MutableList
+        items.removeAt(position)
+        setCartData(items)
+        this.notifyDataSetChanged()
+    }
+
+    fun updateItemsCount(position: Int, count: Int) {
+        val items = cartItems.map { it.copy() }  as MutableList
+        items[position].quantity = count
+        setCartData(items)
     }
 
     fun setCartData(newList: MutableList<CartEntity>) {

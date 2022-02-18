@@ -37,6 +37,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.Subscrip
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadOutAnimation
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 
 open class BaseActivity : AppCompatActivity() {
@@ -49,7 +52,9 @@ open class BaseActivity : AppCompatActivity() {
     private lateinit var listBottomSheetDialog: BottomSheetDialog
 
     fun View.visible() {
-        this.visibility = View.VISIBLE
+        fadInAnimation(300) {
+            this.visibility = View.VISIBLE
+        }
     }
 
     fun View.hide() {
@@ -57,7 +62,9 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     fun View.remove() {
-        this.visibility = View.GONE
+        fadOutAnimation(300) {
+            this.visibility = View.GONE
+        }
     }
 
     fun View.enable() {
@@ -434,6 +441,10 @@ open class BaseActivity : AppCompatActivity() {
                         hideListBottomSheet()
                         activity.selectedPaymentMode(selectedItem)
                     }
+                    is InvoiceActivity -> {
+                        hideListBottomSheet()
+                        activity.selectedPaymentMode(selectedItem)
+                    }
                 }
 
             }
@@ -468,7 +479,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     is InvoiceActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()
-                        activity.approved(true)
+                        activity.approved()
                     }
                     is SubscriptionHistoryActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()

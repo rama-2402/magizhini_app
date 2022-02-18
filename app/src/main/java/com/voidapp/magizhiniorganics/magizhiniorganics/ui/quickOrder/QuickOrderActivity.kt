@@ -75,6 +75,12 @@ class QuickOrderActivity :
 
         initRecyclerView()
         initData()
+
+        binding.apply {
+            rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
+            nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
+        }
+
         initObservers()
         initListeners()
     }

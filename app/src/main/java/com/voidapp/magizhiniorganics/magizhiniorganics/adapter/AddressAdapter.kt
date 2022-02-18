@@ -98,11 +98,37 @@ class AddressAdapter(
         fun updateAddress(position: Int)
     }
 
+    fun deleteAddress(position: Int) {
+        var items: MutableList<Address>? = addressList.map { it.copy() } as MutableList<Address>
+        items?.let{
+            it.removeAt(position)
+            setAddressData(it)
+        }
+        items = null
+    }
+
+    fun updateAddress(position: Int, newAddress: Address) {
+        var items: MutableList<Address>? = addressList.map { it.copy() } as MutableList
+        items?.let {
+            it[position] = newAddress
+            setAddressData(it)
+        }
+        items = null
+    }
+
+    fun addAddress(position: Int, newAddress: Address) {
+        var items: MutableList<Address>? = addressList.map { it.copy() } as MutableList
+        items?.let {
+            it.add(newAddress)
+            setAddressData(it)
+        }
+        items = null
+    }
+
     fun setAddressData(newList: List<Address>) {
         val diffUtil = AddressDiffUtil(addressList, newList)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
-        addressList.clear()
-        addressList.addAll(newList)
+        addressList = newList as ArrayList<Address>
         diffResult.dispatchUpdatesTo(this)
     }
 
@@ -119,11 +145,22 @@ class AddressAdapter(
         }
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return false
+            return oldList[oldItemPosition].gpsAddress == newList[newItemPosition].gpsAddress
         }
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return oldList[oldItemPosition].equals(newList[newItemPosition])
+            return when {
+                oldList[oldItemPosition].userId != newList[newItemPosition].userId -> false
+                oldList[oldItemPosition].addressLineOne != newList[newItemPosition].addressLineOne -> false
+                oldList[oldItemPosition].addressLineTwo != newList[newItemPosition].addressLineTwo -> false
+                oldList[oldItemPosition].LocationCode != newList[newItemPosition].LocationCode -> false
+                oldList[oldItemPosition].LocationCodePosition != newList[newItemPosition].LocationCodePosition -> false
+                oldList[oldItemPosition].city != newList[newItemPosition].city -> false
+                oldList[oldItemPosition].gpsLatitude != newList[newItemPosition].gpsLatitude -> false
+                oldList[oldItemPosition].gpsLongitude != newList[newItemPosition].gpsLongitude -> false
+                oldList[oldItemPosition].gpsAddress != newList[newItemPosition].gpsAddress -> false
+                else -> true
+            }
         }
     }
 }

@@ -3,54 +3,56 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.util.Log
+import android.view.MenuItem
 import android.view.View
+import android.view.animation.AnimationUtils
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.*
+import com.aminography.primedatepicker.utils.gone
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.gson.Gson
+import com.razorpay.Checkout
+import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddressBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CartDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
+import kotlinx.coroutines.*
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import android.view.MenuItem
-import android.view.animation.AnimationUtils
-import android.widget.*
-import androidx.lifecycle.lifecycleScope
-import androidx.work.*
-import com.google.gson.Gson
-import com.razorpay.Checkout
-import com.razorpay.PaymentResultListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import ru.nikartm.support.ImageBadgeView
 
 
@@ -58,7 +60,8 @@ class InvoiceActivity :
     BaseActivity(),
     KodeinAware,
     PaymentResultListener,
-    AddressAdapter.OnAddressClickListener
+    AddressAdapter.OnAddressClickListener,
+    AddressDialogClickListener
 {
 
     override val kodein: Kodein by kodein()
@@ -66,30 +69,12 @@ class InvoiceActivity :
     private lateinit var binding: ActivityCheckoutBinding
     private lateinit var viewModel: CheckoutViewModel
 
-    private lateinit var adapter: AddressAdapter
-    private lateinit var mAddressBottomSheet: BottomSheetDialog
     private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
     private lateinit var checkoutText: TextView
     private lateinit var cartBtn: ImageBadgeView
+
+    private lateinit var addressAdapter: AddressAdapter
     private lateinit var cartAdapter: CartAdapter
-    private lateinit var orderItemsAdapter: OrderItemsAdapter
-
-    private var mCartItems: MutableList<CartEntity> = mutableListOf()
-    private var mCoupons: List<CouponEntity> = listOf()
-    private var mCoupon: CouponEntity = CouponEntity()
-    private var mCouponIndex: Int = 0
-    private var mCurrentCoupon: String = ""
-    private var mCheckedAddressPosition: Int = 0
-    private var mSelectedAddress: Address = Address()
-    private var mOrder: Order = Order()
-    private var mProfile: UserProfileEntity = UserProfileEntity()
-    private var mWallet: Wallet = Wallet()
-
-    private var mDiscountedPrice: Float = 0F
-    private var mPaymentPreference: String = "COD"
-    private var mCurrentUserID: String = ""
-    private var mTransactionID: String = "COD"
-    private var mPhoneNumber: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,15 +89,8 @@ class InvoiceActivity :
             onBackPressed()
         }
 
-        SharedPref(this).apply {
-            mCurrentCoupon = getData(Constants.CURRENT_COUPON, Constants.STRING, "").toString()
-            mCurrentUserID = getData(Constants.USER_ID, Constants.STRING, "").toString()
-            mPhoneNumber = getData(Constants.PHONE_NUMBER, Constants.STRING, "").toString()
-        }
-
         viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
-        viewModel.cwmDish = intent.getParcelableArrayListExtra<CartEntity>("dish") ?: mutableListOf()
-        viewModel.cartPrice = intent.getFloatExtra("price", 0f)
+        val cartItems = intent.getParcelableArrayListExtra<CartEntity>("dish") ?: mutableListOf()
         viewModel.isCWMCart = intent.getBooleanExtra("cwm", false)
 
         binding.apply {
@@ -122,68 +100,77 @@ class InvoiceActivity :
 
         Checkout.preload(applicationContext)
 
-        initRecyclerView()
+        initRecyclerView(cartItems)
+        initData(cartItems)
         setCartBottom()
-        iniLiveData()
+        initLiveData()
         listeners()
     }
 
+    private fun initData(cartItems: MutableList<CartEntity>) {
+        viewModel.getUserProfileData()  //getting profile to update address
+        viewModel.getAllCartItem(cartItems) //updating the cart items based on cart from db or cwm
+    }
+
     override fun onPaymentSuccess(response: String?) {
-        mTransactionID = response!!
-        mOrder.isPaymentDone = true
-        showSuccessDialog("","Placing Order... ","order")
-        placeOrder()
+        val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
+        orderDetailsMap["transactionID"] = response!!
+        viewModel.placeOrderWithOnlinePayment(orderDetailsMap)
     }
 
     override fun onPaymentError(p0: Int, p1: String?) {
-        mOrder.isPaymentDone = false
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
-    private fun checkExistingCoupon() {
-        if (mCurrentCoupon.isNotEmpty()) {
-            mCoupons.forEach {
-                if (it.id == mCurrentCoupon) {
-                    mCoupon = it
-                    binding.etCoupon.setText(mCoupon.code)
-                    setDataToViews()
-                    setRemoveButton()
-                }
-            }
+    private fun generateOrderDetailsMap(): HashMap<String, Any> {
+        val orderDetailsMap = hashMapOf<String, Any>()
+        orderDetailsMap["deliveryPreference"] = binding.spDeliveryPreference.selectedItem
+        orderDetailsMap["deliveryNote"] = binding.etDeliveryNote.text.toString().trim()
+        orderDetailsMap["appliedCoupon"] = if (viewModel.couponAppliedPrice != null) {
+            binding.etCoupon.text.toString().trim()
         } else {
-            setDataToViews()
+            ""
         }
+        viewModel.userProfile?.let { profile ->
+            orderDetailsMap["userID"] = profile.id
+            orderDetailsMap["name"] = profile.name
+            orderDetailsMap["phoneNumber"] = profile.phNumber
+            orderDetailsMap["address"] = profile.address[viewModel.checkedAddressPosition]
+        }
+        return orderDetailsMap
     }
 
-    private fun initRecyclerView() {
-        adapter = AddressAdapter(
+    private fun initRecyclerView(cartItems: MutableList<CartEntity>) {
+        val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
+
+        addressAdapter = AddressAdapter(
             this,
-            mCheckedAddressPosition,
+            viewModel.checkedAddressPosition,
             arrayListOf(),
             this
         )
         binding.rvAddress.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvAddress.adapter = adapter
-    }
-
-    private fun setCartBottom() {
-        val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
-        val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
-        val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
-        checkoutText = findViewById(R.id.tvCheckOut)
-        cartBtn = findViewById(R.id.ivCart)
-
-        cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
+        binding.rvAddress.adapter = addressAdapter
 
         cartAdapter = CartAdapter(
             this,
-            arrayListOf(),
+            cartItems,
             viewModel
         )
 
         cartRecycler.layoutManager = LinearLayoutManager(this)
         cartRecycler.adapter = cartAdapter
+    }
+
+    private fun setCartBottom() {
+        val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
+        val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
+        checkoutText = findViewById(R.id.tvCheckOut)
+        cartBtn = findViewById(R.id.ivCart)
+
+        cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
+
 
         cartBottomSheet.isDraggable = true
 
@@ -192,14 +179,15 @@ class InvoiceActivity :
 
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        checkoutText.text = if(viewModel.isCWMCart) {
-                            "Rs: ${viewModel.cartPrice}"
+                        val content = if(viewModel.isCWMCart) {
+                            "Rs: ${viewModel.getCartPrice(viewModel.cwmDish)}"
                         } else {
-                            "Rs: ${viewModel.getCartPrice(mCartItems)}"
+                            "Rs: ${viewModel.getCartPrice(viewModel.totalCartItems)}"
                         }
+                        checkoutText.setTextAnimation(content)
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
-                        checkoutText.text = "PLACE ORDER"
+                        checkoutText.setTextAnimation("PLACE ORDER")
                     }
                 }
             }
@@ -214,267 +202,295 @@ class InvoiceActivity :
         }
 
         checkoutBtn.setOnClickListener {
-            if (mCartItems.isEmpty()) {
-                showErrorSnackBar("Add some Items to Cart to proceed", true)
+            if (viewModel.isCWMCart) {
+                if (viewModel.cwmDish.isNullOrEmpty()) {
+                    showErrorSnackBar("Add some Items to Cart to proceed", true)
+                    return@setOnClickListener
+                }
             } else {
-                if (mPaymentPreference == "COD") {
-                    showSwipeConfirmationDialog(this, "swipe right to place order")
-                } else {
-                    showSwipeConfirmationDialog(this, "swipe right to make payment")
+                if (viewModel.totalCartItems.isNullOrEmpty()) {
+                    showErrorSnackBar("Add some Items to Cart to proceed", true)
+                    return@setOnClickListener
                 }
             }
+            showListBottomSheet(this, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
         }
-
-    }
-
-    private fun hideAddressBs() {
-        mAddressBottomSheet.dismiss()
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun iniLiveData() {
-        viewModel.getAllCoupons(Constants.ACTIVE)
-        viewModel.getUserProfileData()
-        viewModel.getWallet(mCurrentUserID)
-
-        if (viewModel.cwmDish.isNullOrEmpty()) {
-            //we are getting all the items in cart and creating an array of id's that contains the variant names
-            //so in setting the recycler view, if the variant name is in that array then it will be considered as part of cart
-            //and remaining variant names will be removed when displaying the item
-            viewModel.getAllCartItems().observe(this) {
-                mCartItems = it as MutableList<CartEntity>
-                viewModel.itemsInCart = mCartItems
-                cartAdapter.setCartData(mCartItems)
-
-                if (it.isEmpty()) {
-                    cartBtn.badgeValue = it.size
-                    cartBtn.visibleBadge(false)
-                } else {
-                    cartBtn.visibleBadge(true)
-                    cartBtn.badgeValue = it.size
-                }
-
-                setDataToViews()
-                setCheckoutText()
-            }
-        } else {
-            mCartItems = viewModel.cwmDish
-            viewModel.itemsInCart = mCartItems
-            cartAdapter.setCartData(mCartItems)
-        }
-
-        //getting all the coupons
-        viewModel.coupons.observe(this){
-            mCoupons = it
-            checkExistingCoupon()
-        }
-
-        viewModel.couponIndex.observe(this) {
-            //everytime a new coupon is applied the index changes and we observe it and
-            //save it to the preference and apply the changes to the invoice accordingly
-            mCouponIndex = it
-            mCoupon = mCoupons[mCouponIndex]
-            SharedPref(this).putData(Constants.CURRENT_COUPON, Constants.STRING, mCoupon.id)
-            setDataToViews()
-        }
-
-        viewModel.profile.observe(this) {
-            mProfile = it
-            adapter.addressList = it.address
-            mSelectedAddress = it.address[0]
-            adapter.notifyDataSetChanged()
-            setUpDeliveryChargeForTheLocation(mSelectedAddress)
-        }
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.status.collect { result ->
-                when(result) {
-                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
-                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
-                    is NetworkResult.Loading -> {
-                        if (result.message == "") {
-                            showProgressDialog()
-                        } else {
-                            showSuccessDialog("", result.message, result.data)
-                        }
-                    }
-                    else -> Unit
-                }
-            }
-        }
-    }
-
-    private fun checkPaymentMode() {
-        when (mPaymentPreference) {
-            "Online" -> {
-                with(mProfile) {
-                    startPayment(
-                        this@InvoiceActivity,
-                        mailId,
-                        binding.tvTotalAmt.text.toString().toFloat() * 100,
-                        name,
-                        id,
-                        phNumber
-                    ).also { status ->
-                        if (!status) {
-                            Toast.makeText(
-                                this@InvoiceActivity,
-                                "Error in processing payment. Try Later ",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+    private fun initLiveData() {
+        viewModel.uiEvent.observe(this) { event ->
+            when(event) {
+                is UIEvent.Toast -> showToast(this, event.message, event.duration)
+                is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
+                is UIEvent.ProgressBar -> {
+                    if (event.visibility) {
+                        showProgressDialog()
+                    } else {
+                        hideProgressDialog()
                     }
                 }
+                is UIEvent.EmptyUIEvent -> return@observe
+                else -> Unit
             }
-            "COD" -> {
-                mOrder.isPaymentDone = false
-                showSuccessDialog("","Placing Order... ","order")
-                placeOrder()
-            }
-            else -> {
-                val amount = binding.tvTotalAmt.text.toString().toFloat()
-                showSuccessDialog("", "Processing payment from Wallet...", "wallet")
-                lifecycleScope.launch {
-                    if (mWallet.amount > amount) {
-                        withContext(Dispatchers.IO) {
-                            viewModel.makeTransactionFromWallet(amount, mCurrentUserID, mOrder.orderId)
+            viewModel.setEmptyUiEvent()
+        }
+
+        viewModel.uiUpdate.observe(this) { event ->
+            when (event) {
+                is CheckoutViewModel.UiUpdate.WalletData -> {
+                    //can get updated wallet data if needed
+                }
+                is CheckoutViewModel.UiUpdate.PopulateCartData -> {
+                    event.cartItems?.let {
+                        cartAdapter.setCartData(it as MutableList<CartEntity>)
+                    } ?: showToast(this, "Looks like your cart is Empty")
+                }
+                is CheckoutViewModel.UiUpdate.UpdateCartData -> {
+                    setDataToViews()
+                    event.count?.let {
+                        Log.e("qq", "vm: ${event.count} ${event.position}", )
+                        cartAdapter.updateItemsCount(event.position, event.count)
+                    } ?: cartAdapter.deleteCartItem(event.position)
+                }
+                is CheckoutViewModel.UiUpdate.StartingTransaction -> {
+                    showLoadStatusDialog("", "Processing payment from Wallet...", "transaction")
+                }
+                is CheckoutViewModel.UiUpdate.PlacingOrder -> {
+                    updateLoadStatusDialogText("placingOrder", event.message)
+                }
+                is CheckoutViewModel.UiUpdate.OrderPlaced -> {
+                    updateLoadStatusDialogText("success", event.message)
+                    val cartItems = if (viewModel.isCWMCart) {
+                        viewModel.cwmDish
+                    } else {
+                        viewModel.totalCartItems
+                    }
+                    lifecycleScope.launch {
+                        viewModel.clearCart(cartItems)
+                        delay(1800)
+                        dismissLoadStatusDialog()
+                        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                        }
+                        onBackPressed()
+                    }
+                }
+                is CheckoutViewModel.UiUpdate.WalletTransactionFailed -> {
+                    lifecycleScope.launch {
+                        delay(1800)
+                        dismissLoadStatusDialog()
+                        showExitSheet(
+                            this@InvoiceActivity,
+                            "Server Error! Transaction Failed. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. Click CUSTOMER SUPPORT to open customer support",
+                            "cs"
+                        )
+                    }
+                }
+                is CheckoutViewModel.UiUpdate.OrderPlacementFailed -> {
+                    dismissLoadStatusDialog()
+                    showExitSheet(
+                        this,
+                        "Server Error! Failed to place order. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. Click CUSTOMER SUPPORT to open customer support",
+                        "cs"
+                    )
+                }
+                is CheckoutViewModel.UiUpdate.ValidatingPurchase -> {
+                    showLoadStatusDialog(
+                        "",
+                        "Validating Transaction...",
+                        "purchaseValidation"
+                    )
+                }
+                is CheckoutViewModel.UiUpdate.PopulateAddressData -> {
+                    addressAdapter.setAddressData(event.addressList)
+                    setDataToViews()
+                }
+                is CheckoutViewModel.UiUpdate.AddressUpdate -> {
+                    if (event.isSuccess) {
+                        when (event.message) {
+                            "update" -> {
+                                showToast(this@InvoiceActivity, "Address Updated")
+                                addressAdapter.updateAddress(event.position, event.address!!)
+                            }
+                            "add" -> {
+                                showToast(this@InvoiceActivity, "Address added")
+                                addressAdapter.addAddress(event.position, event.address!!)
+                            }
+                            "delete" -> {
+                                showToast(this@InvoiceActivity, "Address Updated")
+                                addressAdapter.deleteAddress(event.position)
+                            }
                         }
                     } else {
-                        delay(1000)
-                        hideSuccessDialog()
-                        showErrorSnackBar("Insufficient balance in Wallet. Pick another payment method", true)
+                        showErrorSnackBar(event.message, true)
                     }
+                }
+                is CheckoutViewModel.UiUpdate.CouponApplied -> {
+                    this.hideKeyboard()
+                    showErrorSnackBar(event.message, false)
+                    setDataToViews()
+                    applyUiChangesWithCoupon(true)
+                }
+                is CheckoutViewModel.UiUpdate.Empty -> return@observe
+                else -> Unit
+            }
+            viewModel.setEmptyStatus()
+        }
+    }
+
+    private fun showLoadStatusDialog(title: String, body: String, content: String) {
+        LoadStatusDialog.newInstance(title, body, content).show(supportFragmentManager,
+            Constants.LOAD_DIALOG
+        )
+    }
+
+    private fun dismissLoadStatusDialog() {
+        (supportFragmentManager.findFragmentByTag(Constants.LOAD_DIALOG) as? DialogFragment)?.dismiss()
+    }
+
+    private fun updateLoadStatusDialogText(filter: String, content: String) {
+        LoadStatusDialog.statusContent = content
+        LoadStatusDialog.statusText.value = filter
+    }
+
+    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
+        binding.apply {
+            if (isCouponApplied) {
+                etCoupon.disable()
+                ivCouponInfo.visible()
+                btnApplyCoupon.text = "Remove"
+                btnApplyCoupon.setBackgroundColor(
+                    ContextCompat.getColor(
+                        baseContext,
+                        R.color.matteRed
+                    )
+                )
+            } else {
+                viewModel.couponAppliedPrice = null
+                viewModel.currentCoupon = null
+                setDataToViews()
+                etCoupon.setText("")
+                etCoupon.enable()
+                ivCouponInfo.remove()
+                btnApplyCoupon.text = "Apply"
+                btnApplyCoupon.setBackgroundColor(
+                    ContextCompat.getColor(
+                        baseContext,
+                        R.color.green_base
+                    )
+                )
+            }
+        }
+    }
+
+    fun selectedPaymentMode(paymentMethod: String) {
+        lifecycleScope.launch {
+            val cartItems = if (viewModel.isCWMCart) {
+                viewModel.cwmDish
+            } else {
+                viewModel.totalCartItems
+            }
+            when(paymentMethod) {
+                "Online" -> {
+                    val mrp = (viewModel.couponAppliedPrice ?: viewModel.getCartPrice(cartItems)) + viewModel.getDeliveryCharge()
+                    viewModel.userProfile?.let {
+                        startPayment(
+                            this@InvoiceActivity,
+                            mailID = it.mailId,
+                            mrp  * 100f,
+                            name = it.name,
+                            userID = it.id,
+                            phoneNumber = it.phNumber
+                        ).also { status ->
+                            if (!status) {
+                                showToast(this@InvoiceActivity, "Error in processing payment")
+                            }
+                        }
+                    }
+                }
+                "Cash On Delivery" -> {
+                    showSwipeConfirmationDialog(this@InvoiceActivity, "")
+                }
+                else -> {
+                    val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
+                    viewModel.proceedForWalletPayment(
+                        orderDetailsMap
+                    )
                 }
             }
         }
     }
 
-    private fun validatingTransactionBeforeOrder(id: String) = lifecycleScope.launch {
-        mTransactionID = id
-        mOrder.isPaymentDone = true
-        delay(1500)
-        hideSuccessDialog()
-        showSuccessDialog("","Placing Order... ","order")
-        placeOrder()
-    }
-
-    private fun placeOrder() {
-        mOrder.apply {
-            customerId = mCurrentUserID
-            transactionID = mTransactionID
-            cart = mCartItems
-            purchaseDate = TimeUtil().getCurrentDate()
-            paymentMethod = mPaymentPreference
-            deliveryPreference =
-                binding.spDeliveryPreference.selectedItem.toString()
-            deliveryNote = binding.etDeliveryNote.text.toString().trim()
-            appliedCoupon = mCurrentCoupon
-            address = mSelectedAddress
-            price = binding.tvTotalAmt.text.toString().toFloat()
-            orderStatus = Constants.PENDING
-            monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
-            phoneNumber = mPhoneNumber
-        }
-        startWorkerThread(mOrder)
-        viewModel.placeOrder(mOrder)
-    }
-
-    fun approved(status: Boolean) = lifecycleScope.launch {
-        val orderID = async { viewModel.generateOrderID() }
-        mOrder.orderId = orderID.await()
-        delay(250)
-        withContext(Dispatchers.IO) {
-            viewModel.validateItemAvailability(mCartItems)
-        }
-    }
-
-    private fun startWorkerThread(order: Order) {
-        val stringConvertedOrder = order.toStringConverter(order)
-        val workRequest: WorkRequest =
-            OneTimeWorkRequestBuilder<UpdateTotalOrderItemService>()
-                .setInputData(workDataOf(
-                    "order" to stringConvertedOrder
-                ))
-                .build()
-
-        WorkManager.getInstance(this).enqueue(workRequest)
-    }
-
-    private fun Order.toStringConverter(order: Order): String {
-        return Gson().toJson(order)
-    }
-
-    private fun setUpDeliveryChargeForTheLocation(address: Address) = lifecycleScope.launch (Dispatchers.IO) {
-        val getAreaCodeJob = async { viewModel.getDeliveryChargeForTheLocation(address.LocationCode) }
-        val areaCode = getAreaCodeJob.await()
-        withContext(Dispatchers.Main) {
-            binding.tvDeliveryChargeAmt.text = areaCode.deliveryCharge.toString()
-            setDataToViews()
-        }
+    fun approved() {
+        showLoadStatusDialog(
+            "",
+            "Validating your purchase...",
+            "purchaseValidation"
+        )
+        viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
     }
 
     private fun setDataToViews() {
-        val cartPrice = if (viewModel.isCWMCart) {
-            viewModel.cartPrice
+        val cartItems = if (viewModel.isCWMCart) {
+            viewModel.cwmDish
         } else {
-            viewModel.getCartPrice(mCartItems)
+            viewModel.totalCartItems
         }
-       with(binding) {
-            tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(mCartItems).toString()
-            cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
-            tvMrpAmount.text = viewModel.getCartOriginalPrice(mCartItems).toString()
-            mDiscountedPrice =
-                viewModel.getCartOriginalPrice(mCartItems) - cartPrice
-            tvSavingsInDiscountAmt.text = mDiscountedPrice.toString()
-           tvTotalAmt.text = "${cartPrice - applyCouponDiscountToInvoice(cartPrice, mCoupon) + binding.tvDeliveryChargeAmt.text.toString().toFloat()}"
-            if (etCoupon.text.toString().isEmpty()) {
-                ivCouponInfo.remove()
+        var detailsJob: Job? = null
+        detailsJob?.cancel()
+        detailsJob = lifecycleScope.launch {
+            delay(600)
+            viewModel.currentCoupon?.let {
+                viewModel.verifyCoupon(it.code, cartItems)
+            }
+            val cartPrice = if (viewModel.isCWMCart) {
+                viewModel.getCartPrice(cartItems)
+            } else {
+                viewModel.getCartPrice(cartItems)
+            }
+            val cartOriginalPrice = viewModel.getCartOriginalPrice(cartItems)
+            with(binding) {
+                tvSavingsInCouponAmt.text = "${viewModel.couponAppliedPrice ?: 0f}"
+                tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(cartItems).toString()
+                cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
+                tvMrpAmount.text = cartOriginalPrice.toString()
+                tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
+                tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
+                val totalPrice = cartPrice + binding.tvDeliveryChargeAmt.text.toString().toFloat() - (viewModel.couponAppliedPrice ?: 0f)
+                tvTotalAmt.setTextAnimation(totalPrice.toString())
+                if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    checkoutText.setTextAnimation("Rs: $cartPrice")
+                }
             }
         }
+        detailsJob = null
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun listeners() {
         binding.apply {
-            etDeliveryNote.setOnTouchListener { _, _ ->
-                binding.nsvScrollBody.requestDisallowInterceptTouchEvent(true)
-                false
-            }
+//            etDeliveryNote.setOnTouchListener { _, _ ->
+//                binding.nsvScrollBody.requestDisallowInterceptTouchEvent(true)
+//                false
+//            }
             btnApplyCoupon.setOnClickListener {
                 val couponCode: String = binding.etCoupon.text.toString().trim()
-                if (couponCode.isEmpty()) {
-                    binding.etlCoupon.isErrorEnabled = false
-                    showToast(this@InvoiceActivity, "Enter a valid coupon code")
+                if (couponCode.isNullOrEmpty()) {
+                    showToast(this@InvoiceActivity, "Enter a coupon code")
                     return@setOnClickListener
                 }
-                if (binding.btnApplyCoupon.text == "Apply") {
-                    if (viewModel.isCouponAvailable(mCoupons, couponCode)) {
-                        binding.etlCoupon.isErrorEnabled = false
-                        setRemoveButton()
-                    } else {
-                        binding.ivCouponInfo.remove()
-                        binding.etlCoupon.error = "Coupon expired or does not exists. Check Again"
-                        return@setOnClickListener
-                    }
-                } else if (binding.btnApplyCoupon.text == "Remove") {
-                    removeCouponDiscountFromInvoice()
-                    setDataToViews()
-                    setAddButton()
-                }
+                viewModel.couponAppliedPrice?.let {
+                    applyUiChangesWithCoupon(false)
+                } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim(), viewModel.totalCartItems)
             }
             ivCouponInfo.setOnClickListener {
                 ivCouponInfo.startAnimation(AnimationUtils.loadAnimation(ivCouponInfo.context, R.anim.bounce))
-                val content = "\nThe Coupon code ${mCoupon.code} only applies for the following criteria \n \n Minimum Purchase Amount: ${mCoupon.purchaseLimit} \n " +
-                        "Maximum Discount Amount: ${mCoupon.maxDiscount}\n" +
-                        "${mCoupon.description}"
-                showDescriptionBs(content)
-            }
-            rgPaymentType.setOnCheckedChangeListener { _, checkedId ->
-                val selectedId = findViewById<RadioButton>(checkedId)
-                mPaymentPreference = when(selectedId.text) {
-                    " Online" -> "Online"
-                    " COD" -> "COD"
-                    else -> "Wallet"
+                viewModel.currentCoupon?.let { coupon ->
+                    val content = "Using ${coupon.name} Coupon with coupon code ${coupon.code} you can avail ${coupon.amount} ${coupon.type} discount on your total purchase. \n \n \n The Coupon can be used only for the following criteria: \n \n Minimum Purchase Amount: ${coupon.purchaseLimit} \n " +
+                            "Maximum Discount Amount: ${coupon.maxDiscount}\n" +
+                            "${coupon.description}"
+                    showDescriptionBs(content)
                 }
             }
         }
@@ -493,156 +509,6 @@ class InvoiceActivity :
         }
     }
 
-    //this will populate the add/edit address bottom sheet
-    private fun showAddressBs(address: Address = Address()) {
-        mAddressBottomSheet = BottomSheetDialog(this, R.style.BottomSheetDialog)
-        val view: DialogBottomAddressBinding =
-            DataBindingUtil.inflate(
-                LayoutInflater.from(this),
-                R.layout.dialog_bottom_address,
-                null,
-                false
-            )
-
-        if (address.userId.isNotEmpty()) {
-            with(view) {
-                etProfileName.setText(address.userId)
-                etAddressOne.setText(address.addressLineTwo)
-                etAddressTwo.setText(address.addressLineTwo)
-                spArea.setSelection(address.LocationCodePosition)
-            }
-        }
-
-        view.btnSaveAddress.setOnClickListener {
-            when {
-                validateAddress(view.etProfileName.text.toString()) -> view.etProfileName.error =
-                    "*required"
-                validateAddress(view.etAddressOne.text.toString()) -> view.etAddressOne.error =
-                    "*required"
-                validateAddress(view.etAddressTwo.text.toString()) -> view.etAddressTwo.error =
-                    "*required"
-                else -> {
-                    val newAddress = Address(
-                        view.etProfileName.text.toString().trim(),
-                        view.etAddressOne.text.toString().trim(),
-                        view.etAddressTwo.text.toString().trim(),
-                        view.spArea.selectedItem.toString(),
-                        view.spArea.selectedItemPosition,
-                        "Chennai"
-                    )
-                    if (address.userId.isEmpty()) {
-                        viewModel.addAddress(mCurrentUserID, newAddress)
-                    } else {
-                        viewModel.updateAddress(newAddress)
-                    }
-                    hideAddressBs()
-                }
-            }
-        }
-
-        mAddressBottomSheet.setCancelable(true)
-        mAddressBottomSheet.setCanceledOnTouchOutside(true)
-        mAddressBottomSheet.setContentView(view.root)
-
-        mAddressBottomSheet.show()
-
-    }
-
-    //this is setting the checkout btn text for the bottomsheet
-    private fun setCheckoutText() {
-        if (cartBottomSheet.state == BottomSheetBehavior.STATE_COLLAPSED) {
-            checkoutText.text = "PLACE ORDER"
-        } else {
-            checkoutText.text = "Rs: ${viewModel.getCartPrice(mCartItems)}"
-        }
-    }
-
-    //this will return a value after applying the coupon discount to the price of the cart items including the coupon and discounts
-    private fun applyCouponDiscountToInvoice(cartPrice: Float, coupon: CouponEntity): Float {
-        var couponDiscount: Float = 0f
-        if(cartPrice > coupon.purchaseLimit.toFloat()) {
-            with(binding) {
-                //setting up the product discount info based on the discount type
-                when (coupon.type) {
-                    "percent" -> couponDiscount = (cartPrice * coupon.amount / 100)
-                    "rupees" -> couponDiscount = coupon.amount
-                }
-
-                if (couponDiscount > coupon.maxDiscount) {
-                    couponDiscount = coupon.maxDiscount
-                }
-                tvSavingsInCoupon.setTextColor(
-                    ContextCompat.getColor(
-                        this@InvoiceActivity,
-                        R.color.green_base
-                    )
-                )
-                tvSavingsInCouponAmt.text = couponDiscount.toString()
-            }
-            binding.ivCouponInfo.visible()
-            return couponDiscount
-        } else {
-            if(!binding.etCoupon.text.isNullOrEmpty()) {
-                binding.ivCouponInfo.visible()
-                this.hideKeyboard()
-                showErrorSnackBar("Coupon Not Applicable! Check Info", true)
-            }
-            return couponDiscount
-        }
-    }
-
-    private fun removeCouponDiscountFromInvoice() {
-        with(binding) {
-            etCoupon.setText("")
-            etlCoupon.isErrorEnabled = false
-            tvSavingsInCoupon.setTextColor(
-                ContextCompat.getColor(
-                    this@InvoiceActivity,
-                    R.color.black
-                )
-            )
-            tvSavingsInCouponAmt.text = "0.00"
-            mCoupon = CouponEntity()
-            SharedPref(this@InvoiceActivity).putData(
-                Constants.CURRENT_COUPON,
-                Constants.STRING,
-                ""
-            )
-            ivCouponInfo.remove()
-        }
-    }
-
-    //this is to get the applied coupon details on app restart or activity restart
-    private fun validateAddress(text: String?): Boolean {
-        return text.isNullOrBlank()
-    }
-
-    private fun setAddButton() {
-        with(binding) {
-            btnApplyCoupon.text = "Apply"
-            btnApplyCoupon.setBackgroundColor(
-                ContextCompat.getColor(
-                    baseContext,
-                    R.color.green_base
-                )
-            )
-            etCoupon.isEnabled = true
-        }
-    }
-
-    private fun setRemoveButton() {
-        with(binding) {
-            btnApplyCoupon.text = "Remove"
-            btnApplyCoupon.setBackgroundColor(
-                ContextCompat.getColor(
-                    baseContext,
-                    R.color.matteRed
-                )
-            )
-            etCoupon.isEnabled = false
-        }
-    }
-
     //Title bar back button press function
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -654,27 +520,17 @@ class InvoiceActivity :
         }
     }
 
-    private fun validateItemAvailability(items: List<CartEntity>) {
-        if (items.isNotEmpty()) {
-            hideSuccessDialog()
-            Toast.makeText(this@InvoiceActivity, "Items Out of Stock", Toast.LENGTH_LONG).show()
-            ootItemsDialog(items)
-        } else {
-            viewModel.limitedItemsUpdater(mCartItems)
-        }
-    }
-
-    private fun ootItemsDialog(outOfStockItems: List<CartEntity>) {
-        orderItemsAdapter = OrderItemsAdapter(
-            this,
-            outOfStockItems,
-            viewModel,
-            arrayListOf(),
-            "checkout"
-        )
-        hideSuccessDialog()
-        ItemsBottomSheet(this, orderItemsAdapter).show()
-    }
+//    private fun ootItemsDialog(outOfStockItems: List<CartEntity>) {
+//        orderItemsAdapter = OrderItemsAdapter(
+//            this,
+//            outOfStockItems,
+//            viewModel,
+//            arrayListOf(),
+//            "checkout"
+//        )
+//        hideSuccessDialog()
+//        ItemsBottomSheet(this, orderItemsAdapter).show()
+//    }
 
     override fun onBackPressed() {
         if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -693,91 +549,13 @@ class InvoiceActivity :
         }
     }
 
-    private fun onSuccessCallback(message: String, data: Any?) {
-        when(message) {
-            "wallet" -> {
-                data as Wallet
-                mWallet = data
-                binding.rbWallet.text = "Wallet (${data.amount})"
-            }
-            "ootItems" -> {
-                data as List<CartEntity>
-                validateItemAvailability(data)
-            }
-            "limitedItems" -> {
-                lifecycleScope.launch {
-                    delay(1500)
-                    hideSuccessDialog()
-                    checkPaymentMode()
-                }
-            }
-            "orderPlacing" -> {
-                lifecycleScope.launch {
-                    delay(1500)
-                        hideSuccessDialog()
-                        showSuccessDialog("", "Order Placed Successfully!", "complete")
-                        viewModel.clearCart(mCartItems)
-                }
-            }
-            "orderPlaced" -> {
-                lifecycleScope.launch {
-                    removeCouponDiscountFromInvoice()
-                    setAddButton()
-                    delay(2000)
-                    hideSuccessDialog()
-                    Intent(this@InvoiceActivity, PurchaseHistoryActivity::class.java).also {
-                        startActivity(it)
-                        finish()
-                    }
-                }
-            }
-            "transaction" -> viewModel.updateTransaction(data as TransactionHistory)
-            "transactionID" -> validatingTransactionBeforeOrder(data as String)
-            "toast" -> {
-                showToast(this, data as String)
-            }
-            "cwm" -> {
-                cartAdapter.cartItems = data as MutableList<CartEntity>
-                cartAdapter.notifyDataSetChanged()
-                checkoutText.text = "Rs: ${viewModel.cartPrice}"
-                setDataToViews()
-            }
+    override fun onDestroy() {
+        viewModel.apply {
+            userProfile = null
+            wallet = null
+            currentCoupon = null
         }
-        viewModel.setEmptyStatus()
-    }
-
-    private fun onFailedCallback(message: String, data: Any?) {
-        when(message) {
-            "wallet" -> showErrorSnackBar(data!! as String, true)
-            "ootItems" -> {
-                hideSuccessDialog()
-                showErrorSnackBar(data!! as String, true)
-            }
-            "limitedItems" -> {
-                hideSuccessDialog()
-                showErrorSnackBar(data!! as String, true)
-            }
-            "orderPlacing" -> {
-                hideSuccessDialog()
-                showErrorSnackBar(data!! as String, true)
-            }
-            "orderPlaced" -> {
-                hideSuccessDialog()
-                showExitSheet(this, "Order Placed Successfully! \n \n There are some internal errors recorded while placing order. Please report this to customer support for further updates", "cs")
-            }
-            "transaction" -> {
-                hideSuccessDialog()
-                showErrorSnackBar(data!! as String, true)
-            }
-            "transactionID" -> {
-                hideSuccessDialog()
-                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
-            }
-            "toast" -> {
-                showToast(this, data as String)
-            }
-        }
-        viewModel.setEmptyStatus()
+        super.onDestroy()
     }
 
     fun moveToCustomerSupport() {
@@ -786,26 +564,50 @@ class InvoiceActivity :
             finish()
         }
     }
-
+    //from address adapter
     override fun selectedAddress(position: Int) {
-        mSelectedAddress = mProfile.address[position]
-        mCheckedAddressPosition = position
-        setUpDeliveryChargeForTheLocation(mSelectedAddress)
-        adapter.checkedAddressPosition = position
-        adapter.notifyDataSetChanged()
+        viewModel.checkedAddressPosition = position
+        addressAdapter.checkedAddressPosition = position
+        addressAdapter.notifyDataSetChanged()
+        setDataToViews()
     }
 
-    override fun addAddress(position: Int) = showAddressBs()
+    override fun addAddress(position: Int) {
+        AddressDialog().show(supportFragmentManager, "addressDialog")
+    }
 
     override fun deleteAddress(position: Int) {
         viewModel.deleteAddress(position)
-        adapter.checkedAddressPosition = 0
-        adapter.notifyDataSetChanged()
+        viewModel.checkedAddressPosition = 0
+        addressAdapter.checkedAddressPosition = 0
     }
 
     override fun updateAddress(position: Int) {
         viewModel.addressPosition = position
-        showAddressBs(mProfile.address[position])
+        viewModel.userProfile?.let {
+            val dialog = AddressDialog()
+            val bundle = Bundle()
+            bundle.putParcelable("address", it.address[position])
+            dialog.arguments = bundle
+            dialog.show(supportFragmentManager, "addressDialog")
+        }
     }
 
+    //from address dialog
+    override fun savedAddress(addressMap: HashMap<String, Any>, isNew: Boolean) {
+        Address(
+            userId = addressMap["userId"].toString(),
+            addressLineOne = addressMap["addressLineOne"].toString(),
+            addressLineTwo = addressMap["addressLineTwo"].toString(),
+            LocationCode = addressMap["LocationCode"].toString(),
+            LocationCodePosition = addressMap["LocationCodePosition"].toString().toInt(),
+            city = addressMap["city"].toString()
+        ).let { address ->
+            if (isNew) {
+                viewModel.addAddress(address)
+            } else {
+                viewModel.updateAddress(address)
+            }
+        }
+    }
 }

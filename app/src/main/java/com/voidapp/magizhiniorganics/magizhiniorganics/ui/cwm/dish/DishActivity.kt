@@ -178,7 +178,6 @@ class DishActivity :
                     it.putExtra(Constants.NAVIGATION, PRODUCTS)
                     it.putParcelableArrayListExtra("dish", viewModel.cartItems as ArrayList<CartEntity>)
                     it.putExtra("cwm", true)
-                    it.putExtra("price", viewModel.dish.totalPrice)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                     onPause()

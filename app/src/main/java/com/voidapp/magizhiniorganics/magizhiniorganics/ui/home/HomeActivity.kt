@@ -56,16 +56,21 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import android.content.pm.ResolveInfo
 import com.google.firebase.BuildConfig
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_BANNER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OPEN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_BANNER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_BANNER
+import kotlinx.coroutines.tasks.await
 
 
 import java.util.*
@@ -78,7 +83,8 @@ class HomeActivity :
     KodeinAware,
     HomeListener,
     TestimonialsAdapter.TestimonialItemClickListener,
-    NavigationView.OnNavigationItemSelectedListener {
+    NavigationView.OnNavigationItemSelectedListener
+{
 
     //DI Injection with kodein
     override val kodein by kodein()
@@ -97,6 +103,8 @@ class HomeActivity :
     private val banners = mutableListOf<BannerEntity>()
 
     private lateinit var dialogBsAddReferral: BottomSheetDialog
+
+    private var isPreviewOpened: Boolean = false
 
     //initializing the carousel item for the banners
     val mItems: MutableList<CarouselItem> = mutableListOf()
@@ -151,7 +159,7 @@ class HomeActivity :
             delay(1000)
             SharedPref(this@HomeActivity).putData(
                 Constants.DATE,
-                Constants.STRING,
+                STRING,
                 TimeUtil().getCurrentDate()
             )
             hideProgressDialog()
@@ -246,6 +254,14 @@ class HomeActivity :
             CWM_BANNER -> navigateToCWM()
             WALLET_BANNER -> navigateToWallet()
             QUICK_ORDER_BANNER -> navigateToQuickOrder()
+            OPEN -> {
+                isPreviewOpened = true
+                GlideLoader().loadUserPictureWithoutCrop(this@HomeActivity, banner.url, binding.ivPreviewImage)
+                binding.ivPreviewImage.startAnimation(
+                    AnimationUtils.loadAnimation(this@HomeActivity, R.anim.scale_big)
+                )
+                binding.ivPreviewImage.visible()
+            }
             else -> Unit
         }
     }
@@ -545,13 +561,29 @@ class HomeActivity :
     }
 
     override fun onBackPressed() {
-        if (binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            finish()
-            finishAffinity()
-            super.onBackPressed()
+        when {
+            binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START) ->
+                binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
+            isPreviewOpened -> {
+                binding.ivPreviewImage.startAnimation(
+                    AnimationUtils.loadAnimation(this, R.anim.scale_small)
+                )
+                binding.ivPreviewImage.remove()
+                isPreviewOpened = false
+            }
+            else -> {
+                finish()
+                finishAffinity()
+                super.onBackPressed()
+            }
         }
+//        if (binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+//            binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
+//        } else {
+//            finish()
+//            finishAffinity()
+//            super.onBackPressed()
+//        }
     }
 
 

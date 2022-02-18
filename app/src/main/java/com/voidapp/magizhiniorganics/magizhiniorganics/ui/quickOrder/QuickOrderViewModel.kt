@@ -211,7 +211,7 @@ class QuickOrderViewModel(
             var cartPrice: Float = 0f
             quickOrder?.let {
                 for (item in it.cart) {
-                    cartPrice += item.price
+                    cartPrice += (item.price * item.quantity)
                 }
             }
             return cartPrice

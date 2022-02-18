@@ -55,7 +55,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { ProfileViewModelFactory(instance(), instance()) }
         bind() from provider { ShoppingMainViewModelFactory(instance(), instance()) }
         bind() from provider { ProductViewModelFactory(instance(), instance()) }
-        bind() from provider { CheckoutViewModelFactory(instance(), instance()) }
+        bind() from provider { CheckoutViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { PurchaseHistoryViewModelFactory(instance(), instance()) }
         bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ConversationViewModelFactory(instance(), instance(), instance()) }
