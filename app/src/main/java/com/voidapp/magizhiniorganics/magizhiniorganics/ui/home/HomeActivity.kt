@@ -55,15 +55,19 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import android.content.pm.ResolveInfo
+import android.util.Log
 import com.google.firebase.BuildConfig
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_BANNER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OPEN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
@@ -119,15 +123,6 @@ class HomeActivity :
         binding.viewmodel = viewModel
         viewModel.homeListener = this
 
-        FirebaseMessaging.getInstance().subscribeToTopic(BROADCAST)
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-//                viewModel.logCrash("FCM token failed", task.exception)
-            } else {
-                viewModel.updateToken(task.result)
-            }
-        }
-
         setSupportActionBar(binding.tbToolbar)
         binding.tbToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))
 
@@ -150,6 +145,18 @@ class HomeActivity :
 
         showProgressDialog()
 
+        FirebaseMessaging.getInstance().subscribeToTopic(Constants.BROADCAST)
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+//                viewModel.logCrash("FCM token failed", task.exception)
+            } else {
+                if (
+                    intent?.getBooleanExtra("day", false) == true
+                ) {
+                    viewModel.updateToken(task.result)
+                }
+            }
+        }
         generateRecyclerView()
         //getting all the data from room database
         observers()
@@ -302,6 +309,11 @@ class HomeActivity :
             adapter.categories = it
             adapter.notifyDataSetChanged()
         })
+        viewModel.showBirthday.observe(this) {
+            it?.let { card ->
+                showBirthDayCard(card)
+            }
+        }
         viewModel.bestSellers.observe(this) {
             binding.tvBestSellers.text = viewModel.bestSellerHeader
             bestSellersAdapter.recycler = "bestSeller"
@@ -425,6 +437,13 @@ class HomeActivity :
 //        })
     }
 
+    private fun showBirthDayCard(card: BirthdayCard?) {
+        card?.let {
+            BirthdayCardDialog.newInstance(card).show(supportFragmentManager, "cardDialog")
+            viewModel.updateBirthdayCard(card.customerID)
+        }
+    }
+
     //after generating the banners from the viewModel we are assigning the classes to carousel items and settnig click listeners for it
     private fun generateBanners(
         bannerCarouselItems: MutableList<CarouselItem>,
@@ -532,7 +551,7 @@ class HomeActivity :
             it.putExtra(CATEGORY, category)
             it.putExtra(NAVIGATION, HOME_PAGE)
             startActivity(it)
-            onPause()
+//            onPause()
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
@@ -543,7 +562,7 @@ class HomeActivity :
             it.putExtra(Constants.PRODUCT_NAME, name)
             it.putExtra(NAVIGATION, HOME_PAGE)
             startActivity(it)
-            onPause()
+//            onPause()
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }

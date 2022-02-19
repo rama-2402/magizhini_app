@@ -19,7 +19,7 @@ class DatePickerLib {
         //val themeFactory = object: DarkThemeFactory() {}
 
             val callback = SingleDayPickCallback { date ->
-                activity.onDobSelected(date.longDateString)
+                activity.onDobSelected(date.timeInMillis)
             }
                 val today = CivilCalendar()
                 val datePicker = PrimeDatePicker.dialogWith(today)

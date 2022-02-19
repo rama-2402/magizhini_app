@@ -291,9 +291,9 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     //assigning the data of birth date
-    fun onDobSelected(date: String) {
-        binding.tvDob.text = date
-        mProfile.dob = date
+    fun onDobSelected(date: Long) {
+        binding.tvDob.text = TimeUtil().getCustomDate(dateLong = date)
+        mProfile.dob = date.toString()
     }
 
     fun exitProfileWithoutChange() {

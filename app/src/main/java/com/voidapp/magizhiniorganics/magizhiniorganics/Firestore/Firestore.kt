@@ -1452,17 +1452,35 @@ class Firestore(
     }
 
     //Tokens
-    suspend fun updateToken(tokenString: String) = withContext(Dispatchers.IO) {
-        val profile = repository.getProfileData()!!
-        Token(
-            profile.id, tokenString, profile.name, profile.phNumber
-        ).let { token ->
-            try {
-                mFireStore.collection(TOKENS)
-                    .document(token.id)
-                    .set(token, SetOptions.merge())
-            } catch (e: Exception) {
-                e.message?.let { logCrash("firestore: adding banner in DB", it) }
+    suspend fun updateToken(tokenString: String): BirthdayCard? = withContext(Dispatchers.IO) {
+        val profileDB = repository.getProfileData()
+        profileDB?.let { profile ->
+            Token(
+                profile.id, tokenString, profile.name, profile.phNumber
+            ).let { token ->
+                try {
+                    mFireStore.collection(TOKENS)
+                        .document(token.id)
+                        .set(token, SetOptions.merge()).await()
+
+                    Log.e("qw", "${profile.id}", )
+
+                    val doc = mFireStore.collection(USERS)
+                        .document(profile.id)
+                        .collection("birthdayCard")
+                        .document("user").get().await()
+
+                    Log.e("fs", "$doc", )
+
+                    if (doc.exists()) {
+                        return@withContext doc.toObject(BirthdayCard::class.java)
+                    } else {
+                        return@withContext null
+                    }
+                } catch (e: Exception) {
+                    e.message?.let { logCrash("firestore: adding banner in DB", it) }
+                    return@withContext null
+                }
             }
         }
     }
@@ -1559,6 +1577,18 @@ class Firestore(
         } catch (e: Exception){
             e.message?.let { logCrash("firestore: getting the dish details from store", it) }
             NetworkResult.Failed("dish", "Server Error! Failed to get Details")
+        }
+    }
+
+    suspend fun updateBirthdayCard(customerID: String) = withContext(Dispatchers.IO){
+        try {
+            mFireStore
+                .collection(USERS)
+                .document(customerID)
+                .collection("birthdayCard")
+                .document("user").delete()
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: deleting birthday card greeting", it) }
         }
     }
 }

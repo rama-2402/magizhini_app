@@ -9,6 +9,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
@@ -33,7 +34,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODU
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHOPPING_MAIN_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +45,7 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 class ShoppingMainActivity :
     BaseActivity(),

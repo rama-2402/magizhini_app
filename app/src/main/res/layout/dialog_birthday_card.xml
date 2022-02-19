@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_round_rectangle_8"
+    android:layout_margin="@dimen/material_size_32"
+    android:padding="@dimen/material_size_16">
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/ltAnimImg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/bday"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:lottie_autoPlay="true" />
+
+    <TextView
+        android:id="@+id/tvHbd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HAPPY BIRTHDAY !"
+        android:fontFamily="@font/baloo"
+        android:textSize="24sp"
+        android:textColor="@color/matteRed"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Customer name"
+        android:fontFamily="@font/baloo"
+        android:textSize="20sp"
+        android:textColor="@color/matteRed"
+        app:layout_constraintTop_toBottomOf="@id/tvHbd"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title Text"
+        android:textStyle="bold"
+        android:textColor="@color/gray700"
+        android:textSize="18sp"
+        android:layout_marginTop="@dimen/material_size_8"
+        app:layout_constraintTop_toBottomOf="@id/tvName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+    <TextView
+        android:id="@+id/tvContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lorem ipsum lorem ipsum content content content something test afsddfsdcvzdas sdf s asewe asdf sd qweadf"
+        android:textStyle="normal"
+        android:textColor="@color/gray700"
+        android:textSize="14sp"
+        android:layout_marginTop="@dimen/material_size_8"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tvAccept"/>
+    <TextView
+        android:id="@+id/tvAccept"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CLOSE"
+        android:textStyle="normal"
+        android:textColor="@color/green_base"
+        android:textSize="14sp"
+        android:fontFamily="@font/baloo"
+        android:padding="@dimen/material_size_8"
+        android:paddingStart="@dimen/material_size_16"
+        android:paddingEnd="@dimen/material_size_16"
+        android:layout_marginTop="@dimen/material_size_16"
+        android:layout_marginBottom="@dimen/material_size_8"
+        app:layout_constraintTop_toBottomOf="@id/tvContent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -45,7 +45,6 @@
         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
         />
 
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/etlDescription"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"

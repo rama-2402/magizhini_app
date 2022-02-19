@@ -1,6 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport
 
+import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil

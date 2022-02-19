@@ -1,9 +1,11 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +23,8 @@ class HomeViewModel (
     val referralStatus: LiveData<Boolean> = _referralStatus
     private var _allowReferral: MutableLiveData<String> = MutableLiveData()
     val allowReferral: LiveData<String> = _allowReferral
+    private var _showBirthday: MutableLiveData<BirthdayCard?> = MutableLiveData()
+    val showBirthday: LiveData<BirthdayCard?> = _showBirthday
     private var _specialsOne: MutableLiveData<MutableList<ProductEntity>> = MutableLiveData()
     val specialsOne: LiveData<MutableList<ProductEntity>> = _specialsOne
     private var _specialsTwo: MutableLiveData<MutableList<ProductEntity>> = MutableLiveData()
@@ -298,7 +302,12 @@ class HomeViewModel (
     }
 
     fun updateToken(token: String?)= viewModelScope.launch(Dispatchers.IO) {
-        token?.let { fbRepository.updateToken(it) }
+        token?.let {
+            val birthdayCard: BirthdayCard? = fbRepository.updateToken(it)
+            withContext(Dispatchers.Main) {
+                _showBirthday.value = birthdayCard
+            }
+        }
     }
 
     suspend fun getProductByID(id: String): ProductEntity? = withContext(Dispatchers.IO) {
@@ -331,5 +340,9 @@ class HomeViewModel (
                _allowReferral.value = "no"
            }
         }
+    }
+
+    fun updateBirthdayCard(customerID: String) = viewModelScope.launch(Dispatchers.IO) {
+        fbRepository.updateBirthdayCard(customerID)
     }
 }

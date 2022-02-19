@@ -1,8 +1,11 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -55,6 +58,7 @@ class ConversationActivity :
     private lateinit var adapter: ConversationAdapter
 
     private var isPreviewOpened: Boolean = false
+    private lateinit var mProgressDialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -319,5 +323,35 @@ class ConversationActivity :
         SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, true)
         viewModel.updateProfileStatus( true)
         super.onResume()
+    }
+
+    override fun showProgressDialog() {
+
+        mProgressDialog = Dialog(this)
+
+        /*Set the screen content from a layout resource.
+        The resource will be inflated, adding all top-level views to the screen.*/
+        mProgressDialog.setContentView(R.layout.dialog_loading)
+
+//        val lottie = mProgressDialog.findViewById<LottieAnimationView>(R.id.lottie_progress)
+//        lottie.animate()
+
+        mProgressDialog.setCancelable(false)
+        mProgressDialog.setCanceledOnTouchOutside(false)
+        mProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        mProgressDialog.window?.setDimAmount(0f)
+        //Start the dialog and display it on screen.
+        mProgressDialog.show()
+    }
+
+    /**
+     * This function is used to dismiss the progress dialog if it is visible to user.
+     */
+    override fun hideProgressDialog() {
+//        val lottie = mProgressDialog.findViewById<LottieAnimationView>(R.id.lottie_progress)
+//        lottie.cancelAnimation()
+        if (mProgressDialog.isShowing) {
+            mProgressDialog.dismiss()
+        }
     }
 }

@@ -104,12 +104,13 @@ class FirestoreRepository (
 
 
     //updateToken
-    suspend fun updateToken(token: String) = firestore.updateToken(token)
+    suspend fun updateToken(token: String): BirthdayCard? = firestore.updateToken(token)
     suspend fun getSupportToken(id: String): String = firestore.getSupportToken(id)
 
 
     //cwm
     suspend fun getAllCWMDishes(): NetworkResult = firestore.getAllCWMDishes()
     suspend fun getDishDetails(dishID: String): NetworkResult = firestore.getDishDetails(dishID)
+    suspend fun updateBirthdayCard(customerID: String) = firestore.updateBirthdayCard(customerID)
 
 }

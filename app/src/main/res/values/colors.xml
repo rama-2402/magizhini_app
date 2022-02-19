@@ -16,7 +16,8 @@
     <color name="matteRed">#FF5B5B</color>
     <color name="matteGreen">#AED48B</color>
 
-    <color name="transparent">#00FFFFFF</color>
+<!--    <color name="transparent">#00FFFFFF</color>-->
+    <color name="transparent">#00000000</color>
     <color name="semiTransparent">#c6000000</color>
     <color name="transparent_bg">#80131313</color>
     <color name="flatGray">#7f8c8d</color>

@@ -16,6 +16,7 @@
         <item name="android:listDivider">@color/grey</item>
 <!--        <item name="android:textColorPrimary">@color/white</item>-->
         <!-- Customize your theme here. -->
+        <item name="android:windowContentTransitions">true</item>
 
     </style>
 
@@ -37,6 +38,7 @@
         <item name="android:colorEdgeEffect">@color/green_base</item>
         <!--        <item name="android:colorControlHighlight">@color/green_base</item>-->
         <item name="android:textColorPrimary">@color/gray700</item>
+        <item name="android:windowContentTransitions">true</item>
     </style>
 
     <!--    Rounded corner bottomsheet dialog-->

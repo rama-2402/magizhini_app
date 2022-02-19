@@ -15,13 +15,17 @@
         android:layout_height="match_parent"
         tools:context=".ui.subscriptions.SubscriptionProductActivity">
 
-        <ImageView
+        <com.ortiz.touchview.TouchImageView
             android:id="@+id/ivPreviewImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="gone"
+            android:elevation="@dimen/material_size_32"
             android:background="@color/black"
-            android:elevation="32dp"
-            android:visibility="gone" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/tbAppBar"

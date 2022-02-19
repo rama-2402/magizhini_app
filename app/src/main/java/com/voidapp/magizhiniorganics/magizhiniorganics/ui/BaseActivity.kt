@@ -149,7 +149,7 @@ open class BaseActivity : AppCompatActivity() {
     /**
      * This function is used to show the progress dialog with the title and message to user.
      */
-    fun showProgressDialog() {
+    open fun showProgressDialog() {
 
         mProgressDialog = Dialog(this)
 
@@ -163,7 +163,6 @@ open class BaseActivity : AppCompatActivity() {
         mProgressDialog.setCancelable(false)
         mProgressDialog.setCanceledOnTouchOutside(false)
         mProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
         //Start the dialog and display it on screen.
         mProgressDialog.show()
     }
@@ -171,7 +170,7 @@ open class BaseActivity : AppCompatActivity() {
     /**
      * This function is used to dismiss the progress dialog if it is visible to user.
      */
-    fun hideProgressDialog() {
+    open fun hideProgressDialog() {
 //        val lottie = mProgressDialog.findViewById<LottieAnimationView>(R.id.lottie_progress)
 //        lottie.cancelAnimation()
         if (mProgressDialog.isShowing) {

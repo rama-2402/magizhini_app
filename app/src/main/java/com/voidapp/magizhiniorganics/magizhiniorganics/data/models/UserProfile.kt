@@ -24,3 +24,15 @@ data class UserProfile(
     var member: Boolean = false,
     var membershipType: String = ""
 ): Parcelable
+
+@Parcelize
+data class BirthdayCard(
+    var id: String = "",
+    var customerID: String = "",
+    var customerName: String = "",
+    var date: Long = 0,
+    var title: String = "",
+    var message: String = "",
+    var clickAction: String = "",
+    var seen: Boolean = false
+): Parcelable

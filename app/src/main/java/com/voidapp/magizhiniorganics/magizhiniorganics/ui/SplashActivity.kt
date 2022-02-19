@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.contextaware.withContextAvailable
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
@@ -22,10 +24,23 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.math.abs
 import androidx.work.WorkManager
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.messaging.FirebaseMessaging
+import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.Firestore
+import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Token
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.kodein.di.Kodein
+import org.kodein.di.KodeinAware
+import org.kodein.di.android.kodein
+import org.kodein.di.generic.instance
 import kotlin.RuntimeException
 
 @SuppressLint("CustomSplashScreen")
@@ -43,7 +58,6 @@ class SplashActivity : BaseActivity() {
         val isNewUser = sRef.getString(Constants.USER_ID, "")
         val isNewDay = sRef.getString(Constants.DATE, Constants.DATE)
         val month = sRef.getInt("month", TimeUtil().getMonthNumber())
-
 
         binding.tvStatus.setOnClickListener {
             checkNetwork(isNewDay!!, isNewUser!!, month)
@@ -101,7 +115,7 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun updateDatabaseWorkRequest(wipe: Boolean, isNewDay: String) {
-        if (isNewDay == TimeUtil().getCurrentDate()) {
+        if (isNewDay != TimeUtil().getCurrentDate()) {
             if (wipe) {
                 SharedPref(this).putData("month", INT, TimeUtil().getMonthNumber())
                 startWork("wipe")
@@ -109,7 +123,7 @@ class SplashActivity : BaseActivity() {
                 startWork("")
             }
         } else {
-            navigateToHomeScreen()
+            navigateToHomeScreen(false)
         }
     }
 
@@ -128,7 +142,7 @@ class SplashActivity : BaseActivity() {
         WorkManager.getInstance(this).enqueue(workRequest)
         WorkManager.getInstance(this)
             .getWorkInfoByIdLiveData(workRequest.id)
-            .observe(this, {
+            .observe(this) {
                 when (it.state) {
                     WorkInfo.State.CANCELLED -> {
                         showRetry()
@@ -147,19 +161,20 @@ class SplashActivity : BaseActivity() {
                         )
                     }
                     WorkInfo.State.SUCCEEDED -> {
-                        navigateToHomeScreen()
+                        navigateToHomeScreen(true)
                     }
                     else -> {
 //                        navigateToHomeScreen()
                     }
                 }
-            })
+            }
     }
 
-    private fun navigateToHomeScreen() = lifecycleScope.launch {
+    private fun navigateToHomeScreen(newDayCheck: Boolean) = lifecycleScope.launch {
         delay(1000)
         binding.progressCircular.remove()
         Intent(this@SplashActivity, HomeActivity::class.java).also {
+            it.putExtra("day", newDayCheck)
             startActivity(it)
             finish()
             finishAffinity()
