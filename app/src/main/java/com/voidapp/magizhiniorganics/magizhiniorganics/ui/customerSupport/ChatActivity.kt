@@ -47,14 +47,18 @@ class ChatActivity :
     }
 
     private fun initObservers() {
-        viewModel.navigateToConversation.observe(this, {
+        viewModel.navigateToConversation.observe(this) {
             moveToConversationPage(it)
-        })
-        viewModel.currentUserProfile.observe(this, {
+        }
+        viewModel.currentUserProfile.observe(this) {
             //setting the toolbar data - profile pic and user name
-            GlideLoader().loadUserPicture(this@ChatActivity, it.profilePicUrl, binding.ivProfileImage)
+            GlideLoader().loadUserPicture(
+                this@ChatActivity,
+                it.profilePicUrl,
+                binding.ivProfileImage
+            )
             binding.tvProfileName.text = it.name
-        })
+        }
     }
 
     private fun initViewPager() {
@@ -92,11 +96,13 @@ class ChatActivity :
     }
 
     private fun moveToConversationPage(supportProfile: SupportProfile) {
-        Intent(this, ConversationActivity::class.java).also {
-            it.putExtra(Constants.CUSTOMER_SUPPORT, supportProfile.id)
-            it.putExtra(Constants.PROFILE_NAME, viewModel.profile.id)
-            startActivity(it)
-            finish()
+        viewModel.profile?.let { profile ->
+            Intent(this, ConversationActivity::class.java).also {
+                it.putExtra(Constants.CUSTOMER_SUPPORT, supportProfile.id)
+                it.putExtra(Constants.PROFILE_NAME, profile.id)
+                startActivity(it)
+                finish()
+            }
         }
     }
 

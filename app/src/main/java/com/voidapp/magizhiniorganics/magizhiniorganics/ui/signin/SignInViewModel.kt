@@ -28,13 +28,13 @@ class SignInViewModel(
         if (
             fbRepository.signInWithPhoneAuthCredential(phoneAuthCredential)
         ) {
-            withContext(Dispatchers.Main) {
+//            withContext(Dispatchers.Main) {
                 _loginStatus.value = "complete"
-            }
+//            }
         } else {
-            withContext(Dispatchers.Main) {
+//            withContext(Dispatchers.Main) {
                 _loginStatus.value = "failed"
-            }
+//            }
         }
     }
 

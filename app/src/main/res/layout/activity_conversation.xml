@@ -17,8 +17,8 @@
         tools:context=".ui.customerSupport.ChatActivity"
         android:background="@color/white">
 
-        <ImageView
-            android:id="@+id/ivReviewImageChat"
+        <com.ortiz.touchview.TouchImageView
+            android:id="@+id/ivPreviewImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"

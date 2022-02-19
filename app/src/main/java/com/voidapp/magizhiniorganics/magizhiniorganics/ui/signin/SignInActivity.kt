@@ -60,26 +60,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         layoutVisibility("pre")
 
         // Verifying the mobile number and sending the OTP
-        mCallBacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-            override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
-                showProgressDialog()
-                viewModel.signIn(phoneAuthCredential)
-            }
-
-            override fun onVerificationFailed(error: FirebaseException) {
-                showErrorSnackBar("Server error! Please Try Later", true)
-            }
-
-            override fun onCodeSent(
-                verificationId: String,
-                token: PhoneAuthProvider.ForceResendingToken
-            ) {
-                mVerificationId = verificationId
-                forceResendingToken = token
-                layoutVisibility("post")
-                showToast(this@SignInActivity, "OTP Sent", LONG)
-            }
-        }
+//        mCallBacks =
 
         initFlow()
         clickListeners()
@@ -105,10 +86,14 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                     }
                     "success" -> {
                         hideProgressDialog()
+                        stopTimer()
                         showErrorSnackBar("Profile Created Successfully", false)
                         navigateToHomePage()
                     }
-                    else -> newUserVerification()
+                    else -> {
+                        stopTimer()
+                        newUserVerification()
+                    }
                 }
             }
         }
@@ -188,7 +173,30 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 .setPhoneNumber(phone)
                 .setTimeout(120L, TimeUnit.NANOSECONDS)
                 .setActivity(this@SignInActivity)
-                .setCallbacks(mCallBacks!!)
+                .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
+                        try {
+                            showProgressDialog()
+                            viewModel.signIn(phoneAuthCredential)
+                        } catch (e: Exception) {
+                            showErrorSnackBar("Server error! Please Try Later", true)
+                        }
+                    }
+
+                    override fun onVerificationFailed(error: FirebaseException) {
+//                        showErrorSnackBar("Server error! Please Try Later", true)
+                    }
+
+                    override fun onCodeSent(
+                        verificationId: String,
+                        token: PhoneAuthProvider.ForceResendingToken
+                    ) {
+                        mVerificationId = verificationId
+                        forceResendingToken = token
+                        layoutVisibility("post")
+                        showToast(this@SignInActivity, "OTP Sent", LONG)
+                    }
+                })
                 .build()
 
             withContext(Dispatchers.Main) {
@@ -224,7 +232,6 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     private fun verifyPhoneNumberWithCode(verificationId: String?, code: String) {
         val credential = PhoneAuthProvider.getCredential(verificationId.toString(), code)
-        stopTimer()
         viewModel.signIn(credential)
     }
 

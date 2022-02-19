@@ -32,6 +32,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ONLINE_ST
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.TEXT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
@@ -78,17 +79,16 @@ class ConversationActivity :
     }
 
     private fun initObservers() {
-        viewModel.conversation.observe(this, {
-            adapter.messages = it
+        viewModel.conversation.observe(this) {
+            adapter.updateMessage(it)
             adapter.currentUserID = viewModel.profile.id
-            adapter.notifyItemChanged(it.size)
-            binding.rvConversation.scrollToPosition(it.size-1)
+            binding.rvConversation.scrollToPosition(it.size - 1)
             hideProgressDialog()
-        })
-        viewModel.liveSupportProfile.observe(this, {
+        }
+        viewModel.liveSupportProfile.observe(this) {
             viewModel.supportProfile = it
             setTypingStatus(it)
-        })
+        }
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->
                 when(result) {
@@ -113,7 +113,6 @@ class ConversationActivity :
 
     private fun initRecyclerView() {
         adapter = ConversationAdapter(
-            this,
             arrayListOf(),
             "",
             this
@@ -136,7 +135,7 @@ class ConversationActivity :
                 if (PermissionsUtil.hasStoragePermission(this@ConversationActivity)) {
                     getAction.launch(pickImageIntent)
                 } else {
-                    showExitSheet(this@ConversationActivity, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "accessPermission")
+                    showExitSheet(this@ConversationActivity, "The App Needs Storage Permission to access picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
                 }
             }
             ivCall.setOnClickListener {
@@ -160,7 +159,7 @@ class ConversationActivity :
                         viewModel.updateTypingStatus(false)
                     }
                 }
-            ivReviewImageChat.setOnClickListener {
+            ivPreviewImage.setOnClickListener {
                 onBackPressed()
             }
         }
@@ -203,17 +202,17 @@ class ConversationActivity :
     override fun openImage(url: String) {
         binding.apply {
             isPreviewOpened = true
-            GlideLoader().loadUserPictureWithoutCrop(this@ConversationActivity, url, ivReviewImageChat)
-            binding.ivReviewImageChat.startAnimation(scaleBig)
-            binding.ivReviewImageChat.visible()
+            GlideLoader().loadUserPictureWithoutCrop(this@ConversationActivity, url, ivPreviewImage)
+            binding.ivPreviewImage.startAnimation(scaleBig)
+            binding.ivPreviewImage.visible()
         }
     }
 
     override fun onBackPressed() {
         when {
             isPreviewOpened -> {
-                binding.ivReviewImageChat.startAnimation(scaleSmall)
-                binding.ivReviewImageChat.remove()
+                binding.ivPreviewImage.startAnimation(scaleSmall)
+                binding.ivPreviewImage.remove()
                 isPreviewOpened = false
             }
             else -> {
@@ -268,7 +267,11 @@ class ConversationActivity :
                 showToast(this, "Server Error! Failed to upload Image")
             }
             "token" -> showErrorSnackBar(data as String, true, LONG)
-            "hide" -> hideProgressDialog()
+            "hide" -> {
+                hideProgressDialog()
+                delay(200)
+                showErrorSnackBar("Sorry there is a problem with server. Please contact later", true)
+            }
         }
         viewModel.setEmptyStatus()
     }
@@ -312,21 +315,9 @@ class ConversationActivity :
         super.onPause()
     }
 
-    override fun onDestroy() {
-        SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, false)
-        viewModel.updateProfileStatus( false, System.currentTimeMillis())
-        super.onDestroy()
-    }
-
     override fun onResume() {
         SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, true)
         viewModel.updateProfileStatus( true)
         super.onResume()
-    }
-
-    override fun onRestart() {
-        SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, true)
-        viewModel.updateProfileStatus( true)
-        super.onRestart()
     }
 }

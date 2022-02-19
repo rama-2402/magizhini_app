@@ -68,11 +68,13 @@ class Firestore(
         return try {
             var status: Boolean = false
             mFirebaseAuth.signInWithCredential(credential)
-                .addOnSuccessListener { status = true }
-                .addOnCanceledListener { status = false }.await()
+                .addOnCompleteListener { task ->
+                     status = task.isSuccessful
+                }.await()
+//                .addOnSuccessListener { status = true }
+//                .addOnCanceledListener { status = false }.await()
             status
         } catch (e: Exception) {
-            e.message?.let { logCrash("signIn - phone Auth", it) }
             false
         }
     }

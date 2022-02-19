@@ -60,16 +60,16 @@ class ChatFragment :
     }
 
     private fun initObservers() {
-        chatViewModel.recentMessage.observe(viewLifecycleOwner, {
+        chatViewModel.recentMessage.observe(viewLifecycleOwner) {
             if (it.isNullOrEmpty()) {
                 binding.rvConversation.visibility = View.GONE
                 binding.tvNoMessages.visibility = View.VISIBLE
-                if(mProgressDialog.isShowing) hideProgressDialog()
+                if (mProgressDialog.isShowing) hideProgressDialog()
             } else {
                 adapter.setData(it)
-                if(mProgressDialog.isShowing) hideProgressDialog()
+                if (mProgressDialog.isShowing) hideProgressDialog()
             }
-        })
+        }
     }
 
     private fun setRecyclerView() {
