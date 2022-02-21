@@ -27,8 +27,6 @@ class DescriptionFragment : Fragment(), KodeinAware {
 
     private val factory: ProductViewModelFactory by instance()
     private lateinit var productViewModel: ProductViewModel
-    private var mProductId = ""
-    private var mProduct = ProductEntity()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,32 +38,11 @@ class DescriptionFragment : Fragment(), KodeinAware {
         productViewModel = ViewModelProvider(requireActivity(), factory).get(ProductViewModel::class.java)
         binding.viewmodel = productViewModel
 
-        mProductId = productViewModel.productID
-
-        productViewModel.getProductById(mProductId).observe(viewLifecycleOwner, { product ->
-            mProduct = product
-              if (mProduct.description.isEmpty()) {
-                  binding.tvDescription.text = "No Description provided"
-              } else {
-                  binding.tvDescription.text = mProduct.description
-              }
-        })
-
-        binding.tvDescription.setOnClickListener {
-            when(mProduct.descType) {
-                Constants.DO_NOTHING -> {}
-                Constants.OPEN_LINK -> {
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                        intent.data = Uri.parse(mProduct.description)
-                        startActivity(Intent.createChooser(intent, "Open link with"))
-                    } catch (e: Exception) {
-                        println("The current phone does not have a browser installed")
-                    }
-                }
-                Constants.SHOW_DETAILS -> {
-                }
+        productViewModel.description.observe(viewLifecycleOwner) {
+            if (it.isEmpty()) {
+                binding.tvDescription.text = "No Description provided"
+            } else {
+                binding.tvDescription.text = it
             }
         }
 

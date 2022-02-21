@@ -1,12 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.ListenableWorker
-import com.google.firebase.firestore.ktx.firestoreSettings
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
@@ -14,18 +11,13 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toCartEntity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.tasks.await
 import java.io.IOException
 
 class CheckoutViewModel(
@@ -36,14 +28,13 @@ class CheckoutViewModel(
 
     var userProfile: UserProfileEntity? = null
     var wallet: Wallet? = null
+
     var currentCoupon: CouponEntity? = null
-
-    var couponAppliedPrice: Float? = null
-
+    var couponPrice: Float? = null
     var deliveryCharge: Float = 0f
     var checkedAddressPosition: Int = 0
-
     var addressPosition: Int = 0
+
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
 
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
@@ -321,18 +312,6 @@ class CheckoutViewModel(
     }
 
     //Coupons
-//    fun getAllCoupons(status: String) = viewModelScope.launch (Dispatchers.IO) {
-//        try {
-//            val coupons = dbRepository.getAllActiveCoupons(status)
-//            withContext(Dispatchers.Main) {
-//                _coupons.value = coupons
-//            }
-//        } catch (e: Exception) {
-//            e.message?.let { fbRepository.logCrash("checkout: getting all active coupons from db", it) }
-//            _status.value = NetworkResult.Failed("toast", "Failed to fetch coupon details")
-//        }
-//    }
-
     fun verifyCoupon(couponCode: String, cartItems: List<CartEntity>) = viewModelScope.launch(Dispatchers.IO) {
         if (couponCode == "") {
             return@launch
@@ -349,7 +328,7 @@ class CheckoutViewModel(
                     return@launch
                 }
                 if (cartPrice > coupon.purchaseLimit) {
-                    if (couponAppliedPrice == null) {
+                    if (couponPrice == null) {
                         withContext(Dispatchers.Main) {
                             _uiUpdate.value = UiUpdate.CouponApplied(
                                 "Coupon Applied Successfully!"
@@ -357,7 +336,7 @@ class CheckoutViewModel(
                         }
                     }
                     currentCoupon = coupon
-                    couponAppliedPrice = couponDiscount(coupon, cartPrice)
+                    couponPrice = couponDiscount(coupon, cartPrice)
 //                    couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
                 } else {
                     withContext(Dispatchers.Main) {
@@ -445,7 +424,7 @@ class CheckoutViewModel(
             } else {
                 totalCartItems
             }
-            val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponAppliedPrice ?: 0f)
+            val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
             orderDetailsMap["orderID"] = generateOrderID()
             wallet?.let {
                 if (mrp > it.amount) {
@@ -503,7 +482,7 @@ class CheckoutViewModel(
             } else {
                 totalCartItems
             }
-            val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponAppliedPrice ?: 0f)
+            val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
             orderDetailsMap["orderID"] = generateOrderID()
             quickOrderUseCase
                 .placeCashOnDeliveryOrder(
@@ -534,7 +513,7 @@ class CheckoutViewModel(
         } else {
             totalCartItems
         }
-        val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponAppliedPrice ?: 0f)
+        val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
         quickOrderUseCase
             .placeOnlinePaymentOrder(
                 orderDetailsMap,
@@ -564,7 +543,7 @@ class CheckoutViewModel(
         _status.value = fbRepository.updateTransaction(transaction)
     }
 
-    suspend fun generateOrderID(): String = withContext(Dispatchers.IO) {
+    private suspend fun generateOrderID(): String = withContext(Dispatchers.IO) {
         return@withContext fbRepository.generateOrderID()
     }
 

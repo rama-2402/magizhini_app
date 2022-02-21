@@ -69,7 +69,6 @@ class SubscriptionProductActivity :
     private var mProduct = ProductEntity()
     private var mProductId: String = ""
     private var mProductName: String = ""
-    private var mRating: Int = 5
     private var mStartDate: Long = System.currentTimeMillis() + 86400000
 
     private var newReview: Boolean = false
@@ -471,7 +470,7 @@ class SubscriptionProductActivity :
     }
 
     private fun initLiveData() {
-        viewModel.product.observe(this, {
+        viewModel.product.observe(this) {
             mProduct = it
             val variantNames = arrayListOf<String>()
             mProduct.variants.forEach { variant ->
@@ -485,9 +484,9 @@ class SubscriptionProductActivity :
             binding.spVariants.adapter = variantAdapter
             setDataToDisplay(0)
             clickListeners()
-        })
+        }
 
-        viewModel.reviews.observe(this, {
+        viewModel.reviews.observe(this) {
             if (it.isEmpty()) {
                 hideShimmer()
                 binding.llEmptyLayout.visible()
@@ -499,7 +498,7 @@ class SubscriptionProductActivity :
                 binding.llEmptyLayout.remove()
                 adapter.setData(it)
             }
-        })
+        }
 
         lifecycleScope.launchWhenStarted {
             viewModel.wallet.collect { result ->

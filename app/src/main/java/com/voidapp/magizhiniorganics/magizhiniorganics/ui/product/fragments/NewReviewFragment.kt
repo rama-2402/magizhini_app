@@ -33,7 +33,6 @@ class NewReviewFragment : Fragment(), KodeinAware {
     private var _binding: FragmentNewReviewBinding? = null
     private val binding get() = _binding!!
 
-    private var mRating: Int = 5
     private var mRatingImageUri: Uri? = null
     private var imageExtension: String = ""
 
@@ -75,6 +74,7 @@ class NewReviewFragment : Fragment(), KodeinAware {
                 "added" -> {
                     binding.ivReviewImage.visibility = View.GONE
                     binding.edtDescription.setText("")
+                    mRatingImageUri = null
                 }
             }
         }
@@ -82,22 +82,6 @@ class NewReviewFragment : Fragment(), KodeinAware {
 
     private fun clickListeners() {
         with(binding) {
-//            srSmileyRating.setTitle(SmileyRating.Type.TERRIBLE, "Bad")
-//            srSmileyRating.setTitle(SmileyRating.Type.BAD, "Not Satisfied")
-//            srSmileyRating.setTitle(SmileyRating.Type.OKAY, "Satisfied")
-//            srSmileyRating.setTitle(SmileyRating.Type.GOOD, "Great")
-//            srSmileyRating.setTitle(SmileyRating.Type.GREAT, "Awesome")
-//            srSmileyRating.setSmileySelectedListener { type ->
-//                mRating = when (type) {
-//                    SmileyRating.Type.TERRIBLE -> 1
-//                    SmileyRating.Type.BAD -> 2
-//                    SmileyRating.Type.OKAY -> 3
-//                    SmileyRating.Type.GOOD -> 4
-//                    SmileyRating.Type.GREAT -> 5
-//                    else -> 5
-//                }
-//            }
-
             btnAddImage.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                 lifecycleScope.launch {
@@ -112,26 +96,27 @@ class NewReviewFragment : Fragment(), KodeinAware {
 
             btnSaveReview.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                Review(
-                    "",
-                    productViewModel.userProfile.name,
-                    productViewModel.userProfile.profilePicUrl,
-                    System.currentTimeMillis(),
+                productViewModel.userProfile?.let { profile ->
+                    Review(
+                        "",
+                        profile.name,
+                        profile.profilePicUrl,
+                        System.currentTimeMillis(),
 //                    mRating,
-                    srSmileyRating.count,
-                    getReviewContent()
-                ).also { review ->
-                    productViewModel.upsertProductReview(
-                        review,
-                        productViewModel.product.id,
-                        mRatingImageUri,
-                        mRatingImageUri?.let { GlideLoader().imageExtension(requireActivity(),  mRatingImageUri)!! } ?: ""
-                    )
+                        srSmileyRating.count,
+                        getReviewContent()
+                    ).also { review ->
+                        productViewModel.upsertProductReview(
+                            review,
+                            mRatingImageUri,
+                            mRatingImageUri?.let { GlideLoader().imageExtension(requireActivity(),  mRatingImageUri)!! } ?: ""
+                        )
 //                    lifecycleScope.launch {
 //                        if (productViewModel.upsertProductReview(review, productViewModel.product, mRatingImageUri, imageExtension)) {
 //                            clearData()
 //                        }
 //                    }
+                    }
                 }
             }
         }

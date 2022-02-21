@@ -19,9 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEnti
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvShoppingItemsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.DiffUtils
 
 open class ShoppingMainAdapter(
@@ -33,6 +31,7 @@ open class ShoppingMainAdapter(
 
     //we are defining this as a global variable coz this has to be accesible by the extension function that calculated the discounted price
     var discountedPrice: Float = 0F
+    var totalPrice: Float = 0f
     //getting the current user id so that favorites can be added to firestore data
     val id: String =
         SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
@@ -48,7 +47,6 @@ open class ShoppingMainAdapter(
     override fun onBindViewHolder(holder: ShoppingMainViewHolder, position: Int) {
 
         val product = products[position]
-        val productId = product.id
         var selectedVariant: Int = 0
 
         //setting the variant details by default
@@ -89,15 +87,6 @@ open class ShoppingMainAdapter(
             spProductVariant.adapter = adapter
             spProductVariant.setSelection(selectedVariant)
 
-            //if discount is available then we make the discount layout visible and set the discount amount and percentage
-            if (product.discountAvailable) {
-                setDiscountedValues(holder, product, selectedVariant)
-            } else {
-                clDiscountLayout.visibility = View.INVISIBLE
-                tvDiscount.visibility = View.INVISIBLE
-                tvPrice.text = variantPrice.toString()
-            }
-
             //click listener for the spinner item selection
             spProductVariant.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
@@ -115,13 +104,8 @@ open class ShoppingMainAdapter(
                     variantPrice = variant.variantPrice.toFloat()
 
                     //setting the original price without discount
-                    tvDiscount.text = "Rs: $variantPrice"
+                    tvDiscount.setTextAnimation("Rs: $variantPrice")
                     tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
-
-
-                    if (!product.discountAvailable) {
-                        discountedPrice = variantPrice.toString().toFloat()
-                    }
                     setDiscountedValues(holder, product, variantposition)
                     setCartItems(product, variantName, selectedVariant, holder)
                     checkVariantAvailability(holder, variant)
@@ -129,11 +113,8 @@ open class ShoppingMainAdapter(
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                     checkVariantAvailability(holder, product.variants[selectedVariant])
-                    tvDiscount.text = "Rs: $variantPrice"
+                    tvDiscount.setTextAnimation("Rs: $variantPrice")
                     tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
-                    if (!product.discountAvailable) {
-                        discountedPrice = variantPrice.toString().toFloat()
-                    }
                     setDiscountedValues(holder, product, 0)
                     setCartItems(product, variantName, holder = holder)
                 }
@@ -147,7 +128,6 @@ open class ShoppingMainAdapter(
             }
 
             tvAddItem.setOnClickListener {
-                tvAddItem.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
                 val maxOrderQuantity = product.variants[selectedVariant].inventory
                 if (limited) {
                     selectedVariant = product.defaultVariant
@@ -165,12 +145,11 @@ open class ShoppingMainAdapter(
                                     position,
                                     variantName,
                                     1,
-                                    tvPrice.text.toString().toFloat(),
+                                    totalPrice,
                                     variantPrice,
                                     selectedVariant,
                                     maxOrderQuantity
                                 )
-//                            }
                         }
                         else -> {
                             onItemClickListener.deleteCartItemFromShoppingMain(product, variantName, position)
@@ -198,14 +177,18 @@ open class ShoppingMainAdapter(
                 tvDiscountAmt.text =
                     getDiscountPercent(currentVariant.variantPrice.toFloat(), currentVariant.discountPrice.toFloat()).toString()
                 discountedPrice = currentVariant.discountPrice.toFloat()
-                tvPrice.text = currentVariant.discountPrice.toString()
-                clDiscountLayout.visibility = View.VISIBLE
-                tvDiscount.visibility = View.VISIBLE
+                totalPrice = currentVariant.discountPrice.toFloat()
+                tvPrice.setTextAnimation(totalPrice.toString(), 200)
+                clDiscountLayout.fadInAnimation(200)
+//                clDiscountLayout.visibility = View.VISIBLE
+                tvDiscount.fadInAnimation(200)
+//                tvDiscount.visibility = View.VISIBLE
             } else {
                 discountedPrice = currentVariant.variantPrice.toFloat()
-                tvPrice.text = currentVariant.variantPrice.toString()
-                clDiscountLayout.visibility = View.GONE
-                tvDiscount.visibility = View.INVISIBLE
+                totalPrice = discountedPrice
+                tvPrice.setTextAnimation(totalPrice.toString())
+                clDiscountLayout.fadOutAnimation(200)
+                tvDiscount.fadOutAnimation(200)
             }
         }
     }
@@ -222,20 +205,20 @@ open class ShoppingMainAdapter(
                 Constants.LIMITED -> {
                     ivCountBg.visibility = View.VISIBLE
                     tvItemCount.visibility = View.VISIBLE
-                    tvItemCount.text = "Available: ${variant.inventory}"
+                    tvItemCount.setTextAnimation("Available: ${variant.inventory}")
                     tvAddItem.isEnabled = true
                 }
                 Constants.OUT_OF_STOCK -> {
                     ivCountBg.visibility = View.VISIBLE
                     tvItemCount.visibility = View.VISIBLE
-                    tvItemCount.text = "Out of Stock"
+                    tvItemCount.setTextAnimation("Out of Stock")
                     tvAddItem.isEnabled = false
 
                 }
                 Constants.NO_LIMIT -> {
                     ivCountBg.visibility = View.GONE
                     tvItemCount.visibility = View.GONE
-                    tvItemCount.text = ""
+                    tvItemCount.setTextAnimation("")
                     tvAddItem.isEnabled = true
                 }
             }

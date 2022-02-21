@@ -879,8 +879,6 @@ class Firestore(
         }
     }
 
-
-
     //reviews
     suspend fun productReviewsListener(id: String, viewModel: ViewModel) = withContext(Dispatchers.IO) {
         try {
@@ -1008,6 +1006,7 @@ class Firestore(
                 false
             }
     }
+
 
 
     //cancel Subscription
@@ -1175,6 +1174,9 @@ class Firestore(
             false
         }
     }
+
+
+
     //Renew subscription
     suspend fun renewSubscription(sub: SubscriptionEntity, updatedCancelledDates: ArrayList<Long>): NetworkResult =
         withContext(Dispatchers.IO) {
@@ -1237,6 +1239,8 @@ class Firestore(
                 false
             }
         }
+
+
 
     //wallet
     suspend fun getWalletAmount(id: String): Float {
@@ -1385,8 +1389,8 @@ class Firestore(
         }
 
     suspend fun generateSubscriptionID(id: String): String =
-        mFireStore.collection(Constants.SUBSCRIPTION)
-            .document(Constants.SUB_ACTIVE)
+        mFireStore.collection(SUBSCRIPTION)
+            .document(SUB_ACTIVE)
             .collection(id)
             .document().id
 

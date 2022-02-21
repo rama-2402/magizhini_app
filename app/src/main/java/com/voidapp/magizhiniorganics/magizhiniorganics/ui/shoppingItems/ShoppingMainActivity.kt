@@ -36,7 +36,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATIO
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
@@ -103,15 +106,15 @@ class ShoppingMainActivity :
     }
 
     private fun observeLiveData() {
-        viewModel.position.observe(this, {
+        viewModel.position.observe(this) {
             adapter.products[it] = viewModel.productToRefresh
             adapter.notifyItemChanged(it)
-        })
+        }
 
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.getProfile()
         }
-        viewModel.allProduct.observe(this, {
+        viewModel.allProduct.observe(this) {
             viewModel.selectedChip = Constants.ALL
             viewModel.selectedCategory = ALL_PRODUCTS
             mItems = it as MutableList<ProductEntity>
@@ -119,61 +122,58 @@ class ShoppingMainActivity :
             hideShimmer()
             adapter.setData(it)
             binding.cpAll.isChecked = true
-        })
-        viewModel.subscriptions.observe(this, {
+        }
+        viewModel.subscriptions.observe(this) {
             viewModel.selectedChip = Constants.SUBSCRIPTION
             viewModel.selectedCategory = ALL_PRODUCTS
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
-        })
-        viewModel.allProductsInCategory.observe(this, {
+        }
+        viewModel.allProductsInCategory.observe(this) {
             viewModel.selectedChip = Constants.CATEGORY
             viewModel.selectedCategory = categoryFilter
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
-        })
-        viewModel.allFavorites.observe(this, {
+        }
+        viewModel.allFavorites.observe(this) {
             viewModel.selectedChip = Constants.FAVORITES
             viewModel.selectedCategory = ALL_PRODUCTS
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
-        })
-        viewModel.discountAvailableProducts.observe(this, {
+        }
+        viewModel.discountAvailableProducts.observe(this) {
             viewModel.selectedChip = Constants.DISCOUNT
             viewModel.selectedCategory = ALL_PRODUCTS
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
-        })
-        viewModel.getAllCartItems().observe(this, {
+        }
+        viewModel.getAllCartItems().observe(this) {
             if (it.isEmpty()) {
-                cartBtn.badgeValue = it.size
-                cartBtn.visibleBadge(false)
+                cartBtn.badgeValue = 0
+//                cartBtn.visibleBadge(false)
             } else {
                 cartBtn.visibleBadge(true)
-                cartBtn.badgeValue = it.size
+                var quantities = 0
+                it.forEach { cart ->
+                    quantities += cart.quantity
+                }
+                cartBtn.badgeValue = quantities
             }
             cartAdapter.setCartData(it as MutableList<CartEntity>)
-        })
-        viewModel.availableCategoryNames.observe(this, {
+        }
+        viewModel.availableCategoryNames.observe(this) {
             showListBottomSheet(this, it as ArrayList<String>)
-        })
-        viewModel.getCartItemsPrice().observe(this, {
-            if (it != null) {
-                mCartPrice = it
-                if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                    checkoutText.text = "Rs: $mCartPrice"
-                }
-            } else {
-                mCartPrice = 0f
-                if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                    checkoutText.text = "Rs: $mCartPrice"
-                }
+        }
+        viewModel.getCartItemsPrice().observe(this) {
+            mCartPrice = it ?: 0f
+            if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                checkoutText.setTextAnimation("Rs: $mCartPrice", 200)
             }
-        })
+        }
     }
 
     private fun checkProductsToDisplay() {
@@ -307,29 +307,35 @@ class ShoppingMainActivity :
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                mFilteredItems.clear()
-                val searchText = newText!!.lowercase(Locale.getDefault())
-                if (searchText.isNotEmpty()) {
-                    mItems.forEach loop@ { it ->
-                        if (it.name.lowercase().contains(searchText) || it.description.lowercase().contains(searchText)) {
-                            mFilteredItems.add(it)
-                        } else {
-                            for (label in it.labels) {
-                                if (label.lowercase().contains(searchText)) {
+                    var searchJob: Job? = Job()
+                    searchJob?.cancel()
+                    searchJob = lifecycleScope.launch {
+                        delay(500)
+                        mFilteredItems.clear()
+                        val searchText = newText!!.lowercase(Locale.getDefault())
+                        if (searchText.isNotEmpty()) {
+                            mItems.forEach loop@ { it ->
+                                if (it.name.lowercase().contains(searchText) || it.description.lowercase().contains(searchText)) {
                                     mFilteredItems.add(it)
-                                    return@loop
+                                } else {
+                                    for (label in it.labels) {
+                                        if (label.lowercase().contains(searchText)) {
+                                            mFilteredItems.add(it)
+                                            return@loop
+                                        }
+                                    }
                                 }
                             }
+                            adapter.products = mFilteredItems
+                            adapter.notifyDataSetChanged()
+                        } else {
+                            mFilteredItems.clear()
+                            binding.cpAll.isChecked = true
+                            adapter.products = mItems
+                            adapter.notifyDataSetChanged()
                         }
                     }
-                    adapter.products = mFilteredItems
-                    adapter.notifyDataSetChanged()
-                } else {
-                    mFilteredItems.clear()
-                    binding.cpAll.isChecked = true
-                    adapter.products = mItems
-                    adapter.notifyDataSetChanged()
-                }
+                searchJob = null
                 return false
             }
         })
@@ -385,10 +391,12 @@ class ShoppingMainActivity :
 
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        checkoutText.text = "Rs: $mCartPrice"
+                        checkoutText.setTextAnimation("Rs: $mCartPrice", 200)
+//                        checkoutText.text = "Rs: $mCartPrice"
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
-                        checkoutText.text = "CHECKOUT"
+                        checkoutText.setTextAnimation("CHECKOUT", 200)
+//                        checkoutText.text = "CHECKOUT"
                     }
                 }
             }

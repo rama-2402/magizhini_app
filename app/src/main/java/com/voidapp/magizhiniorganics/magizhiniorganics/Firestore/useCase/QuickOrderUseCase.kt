@@ -240,6 +240,7 @@ class QuickOrderUseCase(
         amount: Float
     ): Flow<NetworkResult> = flow<NetworkResult> {
 
+        delay(1000)
         emit(NetworkResult.Success("placing", null))
 
         val transactionMap: HashMap<String, Any> = hashMapOf()

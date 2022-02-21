@@ -148,7 +148,6 @@ class ShoppingMainViewModel(
     }
 
     private suspend fun updateShoppingMainPage() {
-        delay(125)
         when(selectedChip) {
             Constants.ALL -> getAllProductsStatic()
             Constants.CATEGORY -> getAllProductByCategoryStatic(selectedCategory)
@@ -181,8 +180,6 @@ class ShoppingMainViewModel(
             dbRepository.upsertCart(cartEntity)
             product.variantInCart.add(variant)
             dbRepository.upsertProduct(product)
-//            getAllCartItems()
-//        updateShoppingMainPage()
             withContext(Dispatchers.Main) {
                 productToRefresh = product
                 _position.value = position
@@ -192,11 +189,6 @@ class ShoppingMainViewModel(
 
     fun updateCartItem(id: Int, updatedCount: Int) = viewModelScope.launch (Dispatchers.IO) {
         dbRepository.updateCartItem(id, updatedCount)
-//        getAllCartItems()
-    }
-
-    fun upsertProduct(product: ProductEntity) = viewModelScope.launch (Dispatchers.IO) {
-        dbRepository.upsertProduct(product)
     }
 
     fun updateFavorites(id: String, product: ProductEntity, position: Int) = viewModelScope.launch(Dispatchers.IO) {

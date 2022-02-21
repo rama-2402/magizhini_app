@@ -53,7 +53,6 @@ class InvoiceActivity :
     AddressAdapter.OnAddressClickListener,
     AddressDialogClickListener
 {
-
     override val kodein: Kodein by kodein()
     private val factory: CheckoutViewModelFactory by instance()
     private lateinit var binding: ActivityCheckoutBinding
@@ -116,7 +115,7 @@ class InvoiceActivity :
         val orderDetailsMap = hashMapOf<String, Any>()
         orderDetailsMap["deliveryPreference"] = binding.spDeliveryPreference.selectedItem
         orderDetailsMap["deliveryNote"] = binding.etDeliveryNote.text.toString().trim()
-        orderDetailsMap["appliedCoupon"] = if (viewModel.couponAppliedPrice != null) {
+        orderDetailsMap["appliedCoupon"] = if (viewModel.couponPrice != null) {
             binding.etCoupon.text.toString().trim()
         } else {
             ""
@@ -161,12 +160,10 @@ class InvoiceActivity :
 
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
-
         cartBottomSheet.isDraggable = true
 
         cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
                         val content = if(viewModel.isCWMCart) {
@@ -239,7 +236,6 @@ class InvoiceActivity :
                 is CheckoutViewModel.UiUpdate.UpdateCartData -> {
                     setDataToViews()
                     event.count?.let {
-                        Log.e("qq", "vm: ${event.count} ${event.position}", )
                         cartAdapter.updateItemsCount(event.position, event.count)
                     } ?: cartAdapter.deleteCartItem(event.position)
                 }
@@ -357,7 +353,7 @@ class InvoiceActivity :
                     )
                 )
             } else {
-                viewModel.couponAppliedPrice = null
+                viewModel.couponPrice = null
                 viewModel.currentCoupon = null
                 setDataToViews()
                 etCoupon.setText("")
@@ -383,7 +379,7 @@ class InvoiceActivity :
             }
             when(paymentMethod) {
                 "Online" -> {
-                    val mrp = (viewModel.couponAppliedPrice ?: viewModel.getCartPrice(cartItems)) + viewModel.getDeliveryCharge()
+                    val mrp = (viewModel.couponPrice ?: viewModel.getCartPrice(cartItems)) + viewModel.getDeliveryCharge()
                     viewModel.userProfile?.let {
                         startPayment(
                             this@InvoiceActivity,
@@ -441,13 +437,13 @@ class InvoiceActivity :
             }
             val cartOriginalPrice = viewModel.getCartOriginalPrice(cartItems)
             with(binding) {
-                tvSavingsInCouponAmt.text = "${viewModel.couponAppliedPrice ?: 0f}"
+                tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0f}"
                 tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(cartItems).toString()
                 cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
                 tvMrpAmount.text = cartOriginalPrice.toString()
                 tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
                 tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
-                val totalPrice = cartPrice + binding.tvDeliveryChargeAmt.text.toString().toFloat() - (viewModel.couponAppliedPrice ?: 0f)
+                val totalPrice = cartPrice + binding.tvDeliveryChargeAmt.text.toString().toFloat() - (viewModel.couponPrice ?: 0f)
                 tvTotalAmt.setTextAnimation(totalPrice.toString())
                 if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                     checkoutText.setTextAnimation("Rs: $cartPrice")
@@ -470,7 +466,7 @@ class InvoiceActivity :
                     showToast(this@InvoiceActivity, "Enter a coupon code")
                     return@setOnClickListener
                 }
-                viewModel.couponAppliedPrice?.let {
+                viewModel.couponPrice?.let {
                     applyUiChangesWithCoupon(false)
                 } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim(), viewModel.totalCartItems)
             }

@@ -52,7 +52,7 @@
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.48703703703703705" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_subscription_history.xml" value="0.44880546075085326" />
-        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.5053658536585366" />
+        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.4847328244274809" />
         <entry key="app/src/main/res/layout/activity_video_player.xml" value="0.5421875" />
         <entry key="app/src/main/res/layout/activity_wallet.xml" value="0.33" />
         <entry key="app/src/main/res/layout/content_subscription_product.xml" value="0.5432291666666667" />
@@ -99,7 +99,7 @@
         <entry key="app/src/main/res/layout/rv_review_items.xml" value="0.5" />
         <entry key="app/src/main/res/layout/rv_reviews.xml" value="0.375" />
         <entry key="app/src/main/res/layout/rv_right_chathead.xml" value="0.4786458333333333" />
-        <entry key="app/src/main/res/layout/rv_shopping_items.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/rv_shopping_items.xml" value="0.25" />
         <entry key="app/src/main/res/layout/rv_subscription_history.xml" value="0.5432291666666667" />
         <entry key="app/src/main/res/layout/rv_subscription_history_item.xml" value="0.5" />
         <entry key="app/src/main/res/layout/rv_testimonial_left_item.xml" value="0.5421875" />

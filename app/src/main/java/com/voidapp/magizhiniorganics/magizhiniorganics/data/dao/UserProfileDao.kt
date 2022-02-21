@@ -81,6 +81,9 @@ interface UserProfileDao {
     @Query("SELECT * FROM CartEntity WHERE variant = :id")
     fun getCartItem(id: Int): CartEntity
 
+    @Query("SELECT * FROM CartEntity WHERE productId = :productID AND variant = :selectedVariantName")
+    fun getCartItemByProduct(productID: String, selectedVariantName: String): CartEntity?
+
     @Query("SELECT * FROM CartEntity")
     fun getAllCartItems(): LiveData<List<CartEntity>>
 

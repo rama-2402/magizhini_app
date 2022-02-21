@@ -112,7 +112,7 @@ class CartAdapter(
             if (count < limit) {
                 when(viewModel) {
                     is ShoppingMainViewModel -> viewModel.updateCartItem(id, count+1)
-                    is ProductViewModel -> viewModel.updateCartItem(id, count+1)
+                    is ProductViewModel -> viewModel.updateCartItem(id, count+1, position, "add")
                     is CheckoutViewModel -> viewModel.updateCartItem(id, count+1, position)
                     is DishViewModel -> viewModel.updateCartItem(position, count+1)
                 }
@@ -124,7 +124,7 @@ class CartAdapter(
             if (count > 1) {
                 when(viewModel) {
                     is ShoppingMainViewModel -> viewModel.updateCartItem(id, count-1)
-                    is ProductViewModel -> viewModel.updateCartItem(id, count-1)
+                    is ProductViewModel -> viewModel.updateCartItem(id, count-1, position, "remove")
                     is CheckoutViewModel -> viewModel.updateCartItem(id, count-1, position)
                     is DishViewModel -> viewModel.updateCartItem(position, count-1)
                 }
@@ -134,7 +134,7 @@ class CartAdapter(
 //            holder.delete.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             when(viewModel) {
                 is ShoppingMainViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)
-                is ProductViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant)
+                is ProductViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant, position)
                 is CheckoutViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant, position)
                 is DishViewModel -> viewModel.deleteItemFromCart(position)
             }
@@ -158,10 +158,22 @@ class CartAdapter(
         setCartData(items)
     }
 
+    fun addCartItem(cartEntity: CartEntity) {
+        val items = cartItems.map { it.copy() } as MutableList
+        items.add(cartEntity.copy())
+        setCartData(items)
+        this.notifyDataSetChanged()
+    }
+
+    fun emptyCart() {
+        setCartData(mutableListOf())
+    }
+
     fun setCartData(newList: MutableList<CartEntity>) {
         val diffUtil = CartDiffUtil(cartItems, newList)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
         cartItems = newList
         diffResult.dispatchUpdatesTo(this)
     }
+
 }

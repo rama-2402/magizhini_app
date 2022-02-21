@@ -60,6 +60,7 @@ class DatabaseRepository(
     fun getAllCartItem() = db.getUserProfileDao().getAllCartItem()
 
     fun getCartItem(id: Int) = db.getUserProfileDao().getCartItem(id)
+    fun getCartItemByProduct(productID: String, selectedVariantName: String): CartEntity? = db.getUserProfileDao().getCartItemByProduct(productID, selectedVariantName)
 
     fun getAllproducts() = db.getUserProfileDao().getAllProducts()
 

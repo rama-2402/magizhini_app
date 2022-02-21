@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentReviewsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadOutAnimation
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
@@ -39,9 +42,14 @@ class ReviewsFragment : Fragment(), KodeinAware, ReviewAdapter.ReviewItemClickLi
         binding.viewmodel = productViewModel
 
         initRecyclerView()
+        initData()
         initLiveData()
 
         return binding.root
+    }
+
+    private fun initData() {
+        productViewModel.getProductReviews()
     }
 
     override fun previewImage(url: String) {
@@ -60,10 +68,19 @@ class ReviewsFragment : Fragment(), KodeinAware, ReviewAdapter.ReviewItemClickLi
     }
 
     private fun initLiveData() {
-        productViewModel.reviews.observe(viewLifecycleOwner, {
-            adapter.reviews = it
-            adapter.notifyDataSetChanged()
-        })
+        productViewModel.reviews.observe(viewLifecycleOwner) {
+//            adapter.reviews = it
+//            adapter.notifyDataSetChanged()
+            it?.let {
+                binding.apply {
+                    llEmptyLayout.visibility = View.GONE
+                    adapter.reviews = it
+                    adapter.notifyDataSetChanged()
+                }
+            } ?: binding.apply {
+                llEmptyLayout.fadInAnimation(200)
+            }
+        }
     }
 
 }

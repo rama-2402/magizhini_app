@@ -3,9 +3,11 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.product
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Paint
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -14,7 +16,6 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
@@ -23,20 +24,16 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProductBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -44,46 +41,44 @@ import org.kodein.di.generic.instance
 import kotlin.math.abs
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.HOME_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NO_LIMIT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OUT_OF_STOCK
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_PAGE
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import kotlinx.coroutines.flow.collect
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_NAME
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import ru.nikartm.support.ImageBadgeView
+
+/*
+* todo
+*  set up coupon code as a dialog with more details
+* */
 
 class ProductActivity :
     BaseActivity(),
     KodeinAware
 {
-
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityProductBinding
 
     private val factory: ProductViewModelFactory by instance()
     private lateinit var viewModel: ProductViewModel
 
-    private var userId: String = ""
-
-    private var mCartItems: MutableList<CartEntity> = mutableListOf()
-    private var mProduct: ProductEntity = ProductEntity()
-    private var mProductId: String = ""
-    private var mProductName: String = ""
-    private var mVariants: ArrayList<String> = arrayListOf()
-    private var mSelectedVariant: Int = 0
-    private var mFinalPrice: Float = 0f
-    private var mCartPrice: Float? = 0f
-
     private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
-    private lateinit var cartBtn: ImageBadgeView
-    private lateinit var cartAdapter: CartAdapter
     private lateinit var checkoutText: TextView
+    private lateinit var cartBtn: ImageBadgeView
+    private lateinit var filterBtn: ImageView
+    private lateinit var cartAdapter: CartAdapter
 
     private lateinit var dialogAddCouponBs: BottomSheetDialog
-    private var mCoupon: CouponEntity = CouponEntity()
-    private var isCouponApplied: Boolean = false
 
     private var isPreviewVisible: Boolean = false
+
+    companion object {
+        const val ANIMATION_DURATION: Long = 200
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,37 +87,36 @@ class ProductActivity :
         viewModel = ViewModelProvider(this, factory).get(ProductViewModel::class.java)
         binding.viewmodel = viewModel
 
-        mProductId = intent.getStringExtra(Constants.PRODUCTS).toString()
-        mProductName = intent.getStringExtra(Constants.PRODUCT_NAME).toString()
         viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
-        viewModel.productID = mProductId
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = ""
-        binding.tvProductName.text = mProductName
+        binding.tvProductName.text = intent.getStringExtra(PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
 
+        initData(intent.getStringExtra(PRODUCTS).toString())
         cartBottomSheet()
         initLiveData()
         initViewPager()
         initClickListeners()
-
-        //getting the current user id so that favorites can be added to firestore data
-        userId = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
     }
 
-    @SuppressLint("SetTextI18n")
+    private fun initData(productID: String) {
+        viewModel.getProfileData()
+        viewModel.getProductByID(productID)
+        viewModel.getAllCartItem()
+    }
+
     private fun cartBottomSheet() {
         val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
-        cartBtn = findViewById(R.id.ivCart)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
-        val filterBtn: ImageView = findViewById(R.id.ivFilter)
+        filterBtn = findViewById(R.id.ivFilter)
+        cartBtn = findViewById(R.id.ivCart)
         checkoutText = findViewById(R.id.tvCheckOut)
 
-        checkoutText.text = "Rs: $mCartPrice"
-        filterBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_coupon))
+        setBottomSheetIcon("coupon")
 
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
@@ -139,13 +133,17 @@ class ProductActivity :
 
         cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        checkoutText.text = "Rs: $mCartPrice"
+                        checkoutText.setTextAnimation(
+                            "Rs: ${viewModel.getCartPrice(viewModel.cartItems)}",
+                            ANIMATION_DURATION
+                        )
+                        setBottomSheetIcon("delete")
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
-                        checkoutText.text = "CHECKOUT"
+                        checkoutText.setTextAnimation("CHECKOUT", ANIMATION_DURATION)
+                        setBottomSheetIcon("coupon")
                     }
                 }
             }
@@ -159,7 +157,11 @@ class ProductActivity :
         }
         filterBtn.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            showAddCouponDialog()
+            if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                viewModel.clearCart()
+            } else {
+                showAddCouponDialog()
+            }
         }
         checkoutBtn.setOnClickListener {
             if (NetworkHelper.isOnline(this)) {
@@ -175,6 +177,21 @@ class ProductActivity :
         }
     }
 
+    private fun setBottomSheetIcon(content: String) {
+        val icon =  when(content) {
+            "coupon" -> R.drawable.ic_coupon
+            "delete" -> R.drawable.ic_delete
+            else -> R.drawable.ic_filter
+        }
+        filterBtn.setImageDrawable(ContextCompat.getDrawable(this, icon))
+        filterBtn.imageTintList =
+            if (content == "delete") {
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
+        } else {
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
+        }
+    }
+
     private fun showAddCouponDialog() {
         //BS to add referral number
         dialogAddCouponBs = BottomSheetDialog(this, R.style.BottomSheetDialog)
@@ -185,10 +202,10 @@ class ProductActivity :
         dialogAddCouponBs.dismissWithAnimation = true
 
         //if coupon is applied then the edt filed and the button view will be chaged accordingly
-        if (isCouponApplied) {
+        viewModel.currentCoupon?.let { coupon ->
             with(view) {
-                etReferralNumber.setText(mCoupon.code)
-                etReferralNumber.isEnabled = false
+                etReferralNumber.setText(coupon.code)
+                etReferralNumber.disable()
                 btnApply.setBackgroundColor(ContextCompat.getColor(this@ProductActivity, R.color.matteRed))
                 btnApply.text = "Remove"
             }
@@ -200,112 +217,158 @@ class ProductActivity :
         //verifying if the referral number is empty and assigning it to the userProfile object
         view.btnApply.setOnClickListener {
             val code = view.etReferralNumber.text.toString().trim()
-
-            when {
-                code.isEmpty() -> {
-                    view.etlReferralNumber.error = "* Enter a valid code"
-                    return@setOnClickListener
-                }
-                isCouponApplied -> {
-                    //if coupn is  applied that means the next apply trigger will be to remove the coupon.
-                    //So when remove is clciked it will set the live data to false and close the BS.
-                    //observer will trigger the price change and all that is with it.
-                    viewModel.removeCouponCode()
-                    dialogAddCouponBs.dismiss()
-                    Toast.makeText(this, "Coupon Removed", Toast.LENGTH_SHORT).show()
-                }
-                !isCouponApplied -> {
-                    if(viewModel.isCouponAvailable(code, mProduct.category)) {
-                        view.etlReferralNumber.isErrorEnabled = false
-                        Toast.makeText(this, "Coupon Applied", Toast.LENGTH_SHORT).show()
-                        view.btnApply.text = "Remove"
-                        view.btnApply.setBackgroundColor(
-                            ContextCompat.getColor(
-                                this,
-                                R.color.matteRed
-                            )
-                        )
-                        UIUtil.hideKeyboard(this)
-                        dialogAddCouponBs.dismiss()
-                    } else {
-                        view.etlReferralNumber.error =
-                            "Coupon expired or does not exist. Try different code"
-                    }
-                }
+            if (code.isEmpty()) {
+                view.etlReferralNumber.error = "* Enter a valid code"
+                return@setOnClickListener
+            }
+            if (viewModel.currentCoupon == null) {
+                viewModel.verifyCoupon(code)
+                dialogAddCouponBs.dismiss()
+            } else {
+                applyUiChangesWithCoupon(false, view)
+                dialogAddCouponBs.dismiss()
+                Toast.makeText(this, "Coupon Removed", Toast.LENGTH_SHORT).show()
             }
         }
-        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED)
-            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
         dialogAddCouponBs.show()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean, view: DialogBottomAddReferralBinding?) {
+        binding.apply {
+            if (isCouponApplied) {
+                view?.apply {
+                    etReferralNumber.disable()
+                    etReferralNumber.setText(viewModel.currentCoupon?.code ?: "")
+                    btnApply.text = "Remove"
+                    btnApply.setBackgroundColor(
+                        ContextCompat.getColor(
+                            baseContext,
+                            R.color.matteRed
+                        )
+                    )
+                }
+                populateProductData()
+            } else {
+                viewModel.couponPrice = null
+                viewModel.currentCoupon = null
+                setPrice(viewModel.product!!.variants[viewModel.selectedVariantPosition])
+                view?.apply {
+                    etReferralNumber.enable()
+                    etReferralNumber.setText("")
+                    btnApply.text = "Apply"
+                    btnApply.setBackgroundColor(
+                        ContextCompat.getColor(
+                            baseContext,
+                            R.color.green_base
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     private fun initLiveData() {
-
-        viewModel.getProfileData()
-        viewModel.getAllCoupons(Constants.ACTIVE)
-
-        viewModel.getProductById(mProductId).observe(this, {
-            viewModel.product = it
-            mProduct = it
-            setProductDetailsToScreen()
-            refreshLimitedItemCount()
-            viewModel.setUpProductListener(it.id)
-            viewModel.getProductReviews(it.id)
-        })
-
-        viewModel.itemCount.observe(this, {
-            mProduct.variants.clear()
-            mProduct.variants.addAll(it)
-            refreshLimitedItemCount()
-        })
-
-        viewModel.getAllCartItems().observe(this, { it ->
-            mCartItems = it as MutableList<CartEntity>
-            cartAdapter.setCartData(mCartItems)
-            if (it.isEmpty()) {
-                cartBtn.badgeValue = it.size
-                cartBtn.visibleBadge(false)
-            } else {
-                cartBtn.visibleBadge(true)
-                cartBtn.badgeValue = it.size
-            }
-            setCheckoutText()
-        })
-
-        viewModel.getCartItemsPrice().observe(this, {
-            if (it != null) {
-                mCartPrice = it
-                if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                    checkoutText.text = "Rs: $mCartPrice"
+        viewModel.uiUpdate.observe(this) { event ->
+            when(event) {
+                is ProductViewModel.UiUpdate.PopulateProductData -> {
+                    event.product?.let {
+                        binding.spProductVariant.setSelection(viewModel.selectedVariantPosition)
+                        populateProductData()
+                        refreshLimitedItemCount()
+                    } ?: showErrorSnackBar(event.message!!, true)
                 }
-            } else {
-                mCartPrice = 0f
-                if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                    checkoutText.text = "Rs: $mCartPrice"
+                is ProductViewModel.UiUpdate.UpdateLimitedItemCount -> {
+                    refreshLimitedItemCount()
                 }
-            }
-        })
-
-        //getting all the coupons
-        viewModel.couponIndex.observe(this, {
-            mCoupon = viewModel.coupons[it]
-        })
-
-        viewModel.isCouponApplied.observe(this, {
-                isCouponApplied = it
-                setPrice(mSelectedVariant)
-        })
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.status.collect { result ->
-                when(result) {
-                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
-                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
-                    is NetworkResult.Loading -> showProgressDialog()
-                    else -> Unit
+                is ProductViewModel.UiUpdate.UpdateFavorites -> {
+                    setFavorites(event.isFavorite)
                 }
+                is ProductViewModel.UiUpdate.CheckStoragePermission -> {
+                    if (PermissionsUtil.hasStoragePermission(this)) {
+                        showToast(this, "Storage Permission Granted")
+                        viewModel.previewImage("granted")
+                    } else {
+                        showExitSheet(this, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                    }
+                }
+                is ProductViewModel.UiUpdate.OpenPreviewImage -> {
+                    isPreviewVisible = true
+                    val url = event.imageUrl ?: event.imageUri
+                    with(binding) {
+                        GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, url!!, ivPreviewImage)
+                        ivPreviewImage.visible()
+                        ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.scale_big))
+                    }
+                }
+                is ProductViewModel.UiUpdate.CouponApplied -> {
+                    event.message?.let {
+                        applyUiChangesWithCoupon(true, null)
+                        viewModel.setNullCoupon()
+                    }
+                }
+                is ProductViewModel.UiUpdate.PopulateCartData -> {
+                    event.cartItems?.let {
+                        updateBadgeValue()
+                        cartAdapter.setCartData(it as MutableList<CartEntity>)
+                    } ?: showToast(this, "Looks like your cart is Empty")
+                }
+                is ProductViewModel.UiUpdate.UpdateCartData -> {
+                    updateBadgeValue()
+                    event.count?.let {
+                        cartAdapter.updateItemsCount(event.position, event.count)
+                    } ?: let {
+                        cartAdapter.deleteCartItem(event.position)
+                        setAddButton()
+                    }
+                }
+                is ProductViewModel.UiUpdate.AddCartItem -> {
+                    updateBadgeValue()
+                    event.cartEntity?.let {
+                        cartAdapter.addCartItem(it)
+                    } ?: showErrorSnackBar("Failed to add in Cart", true)
+                }
+                is ProductViewModel.UiUpdate.CartCleared -> {
+                    cartAdapter.emptyCart()
+                    updateBadgeValue()
+                    populateProductData()
+                    refreshLimitedItemCount()
+                }
+                is ProductViewModel.UiUpdate.Empty -> return@observe
+                else -> Unit
             }
+            viewModel.setEmptyStatus()
+        }
+
+        viewModel.uiEvent.observe(this) { event ->
+            when(event) {
+                is UIEvent.Toast -> showToast(this, event.message, event.duration)
+                is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
+                is UIEvent.ProgressBar -> {
+                    if (event.visibility) {
+                        showProgressDialog()
+                    } else {
+                        hideProgressDialog()
+                    }
+                }
+                is UIEvent.EmptyUIEvent -> return@observe
+                else -> Unit
+            }
+            viewModel.setEmptyUiEvent()
+        }
+    }
+
+    private fun updateBadgeValue() {
+        cartBtn.badgeValue = viewModel.cartItemsCount
+        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+            checkoutText.setTextAnimation(
+                "Rs: ${viewModel.getCartPrice(viewModel.cartItems)}",
+                ANIMATION_DURATION
+            )
+        } else {
+            checkoutText.setTextAnimation(
+                "CHECKOUT",
+                ANIMATION_DURATION
+            )
         }
     }
 
@@ -317,21 +380,25 @@ class ProductActivity :
                 variantposition: Int,
                 id: Long
             ) {
-                mSelectedVariant = variantposition
-                setPrice(mSelectedVariant)
+                viewModel.selectedVariantPosition = variantposition
+                viewModel.updateVariantName(variantposition)
+                setPrice(viewModel.product!!.variants[variantposition])
                 refreshLimitedItemCount()
-                setAddButtonContent(getVariantName(mSelectedVariant))
+                setAddButtonContent(
+                    viewModel.selectedVariantName
+                )
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                setAddButtonContent(getVariantName(mSelectedVariant))
+                setAddButtonContent(
+                    viewModel.selectedVariantName
+                )
             }
         }
 
         binding.ivFavourite.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            mProduct.favorite = !mProduct.favorite
-            viewModel.updateFavorites(userId, mProduct)
+            viewModel.updateFavorites()
         }
 
         binding.btnAdd.setOnClickListener {
@@ -352,7 +419,7 @@ class ProductActivity :
 
         binding.tbAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
             title = if (abs(verticalOffset) -appBarLayout.totalScrollRange == 0) {
-                mProductName
+                viewModel.product?.name
             } else {
                 ""
             }
@@ -363,66 +430,62 @@ class ProductActivity :
         }
     }
 
-    private fun setCheckoutText() {
-        if (cartBottomSheet.state == BottomSheetBehavior.STATE_COLLAPSED) {
-            checkoutText.text = "CHECKOUT"
-        } else {
-            checkoutText.text = "Rs: $mCartPrice"
+    private fun populateProductData() {
+        viewModel.product?.let { product ->
+            GlideLoader().loadUserPicture(this, product.thumbnailUrl, binding.ivProductThumbnail)
+            setPrice(product.variants[viewModel.selectedVariantPosition])
+            setFavorites(product.favorite)
+            setVariantAdapter(product.variants)
+            setAddButtonContent(
+                viewModel.selectedVariantName
+            )
         }
     }
 
-    private fun setProductDetailsToScreen() {
-        GlideLoader().loadUserPicture(this, mProduct.thumbnailUrl, binding.ivProductThumbnail)
-        binding.tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
-        setPrice(mSelectedVariant)
-        setFavorites()
-        setVariantAdapter()
-        setAddButtonContent(getVariantName(mSelectedVariant))
-    }
-
-    private fun setFavorites() {
+    private fun setFavorites(isFavorite: Boolean) {
         //setting the favorties icon for the products
-        if (mProduct.favorite) {
+        if (isFavorite) {
             binding.ivFavourite.setImageResource(R.drawable.ic_favorite_filled)
         } else {
             binding.ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
         }
     }
 
-    private fun setVariantAdapter() {
-        if (mVariants.isEmpty()) {
-            mProduct.variants.indices.forEach { i ->
-                mVariants.add(getVariantName(i))
-            }
-            val spinnerAdapter = ArrayAdapter(
-                binding.spProductVariant.context,
-                R.layout.support_simple_spinner_dropdown_item,
-                mVariants
-            )
-            binding.spProductVariant.adapter = spinnerAdapter
+    private fun setVariantAdapter(productVariants: ArrayList<ProductVariant>) {
+        val variants = arrayListOf<String>()
+        productVariants.indices.forEach { i ->
+            variants.add(viewModel.getVariantName(i))
         }
+        val spinnerAdapter = ArrayAdapter(
+            binding.spProductVariant.context,
+            R.layout.support_simple_spinner_dropdown_item,
+            variants
+        )
+        binding.spProductVariant.adapter = spinnerAdapter
     }
 
-    private fun setAddButtonContent(variant: String) {
-        if (mProduct.variantInCart.contains(variant)) {
-            setRemoveButton()
-        } else {
-            setAddButton()
+    private fun setAddButtonContent(variantName: String) {
+        viewModel.product?.let {
+            if (it.variantInCart.contains(variantName)) {
+                setRemoveButton()
+            } else {
+                setAddButton()
+            }
         }
     }
 
     @SuppressLint("SetTextI18n")
     private fun refreshLimitedItemCount() {
-        val variant = mProduct.variants[mSelectedVariant]
+        val variant = viewModel.product!!.variants[viewModel.selectedVariantPosition]
         when(variant.status) {
-            Constants.NO_LIMIT -> {
+            NO_LIMIT -> {
                 binding.tvLimited.hide()
             }
-            Constants.OUT_OF_STOCK -> {
+            OUT_OF_STOCK -> {
                 binding.tvLimited.visible()
                 binding.tvLimited.text = "Out of Stock "
             }
-            Constants.LIMITED -> {
+            LIMITED -> {
                 binding.tvLimited.visible()
                 binding.tvLimited.text = "(Only ${variant.inventory} in Stock) "
             }
@@ -432,88 +495,57 @@ class ProductActivity :
         }
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun setPrice(position: Int) {
-        if (mProduct.discountAvailable && mProduct.variants[position].discountPrice != 0.0) {
-            binding.tvOriginalPrice.visible()
-            binding.tvDiscount.visible()
-            binding.tvDiscountPercent.visible()
-            binding.tvOriginalPrice.text = "Rs. ${getVariantOriginalPrice(position)} "
-//            binding.tvDiscountedPrice.text = "Rs. ${viewModel.getDiscountedPrice(mProduct, position)} "
-            //we get the discounted price from viewmodel if there is any and passing it to check if there is coupon discount available
-            //here we are checking if the coupon is applied. If applied then we will update with coupon amount else
-            //we return the same original amount with or without discount
-            mFinalPrice = updatedPriceWithCouponApplied(getVariantPrice(position))
-            binding.tvDiscountedPrice.text = "Rs. $mFinalPrice"
-            setDiscountPercent()
-        } else {
-            binding.tvOriginalPrice.remove()
-            binding.tvDiscount.remove()
-            binding.tvDiscountPercent.remove()
-            binding.tvPrice.text = "MRP : "
-            mFinalPrice = updatedPriceWithCouponApplied(getVariantPrice(position))
-            binding.tvDiscountedPrice.text = "Rs. $mFinalPrice "
-        }
-    }
+    private fun setPrice(variant: ProductVariant) {
+            if (
+                variant.discountPrice != 0.0
+            ) {
+                binding.apply {
+                    tvOriginalPrice.setTextAnimation(
+                        "Rs: ${variant.variantPrice}",
+                        ANIMATION_DURATION
+                    )
+                    tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                    tvDiscount.fadInAnimation(ANIMATION_DURATION)
+                    tvDiscountedPrice.setTextAnimation(
+                        "Rs: ${viewModel.getSelectedItemPrice()}",
+                        ANIMATION_DURATION
+                    )
+                    tvDiscountPercent.setTextAnimation(
+                        "${viewModel.getDiscountPercent(variant.variantPrice.toFloat(), variant.discountPrice.toFloat())}% Off",
+                        ANIMATION_DURATION
+                    )
+                }
+            } else {
+                binding.apply {
+                    tvOriginalPrice.fadOutAnimation(ANIMATION_DURATION)
+                    tvOriginalPrice.remove()
+                    tvDiscount.fadOutAnimation(ANIMATION_DURATION)
+                    tvDiscountPercent.fadOutAnimation(ANIMATION_DURATION)
+                    tvDiscountedPrice.setTextAnimation("Rs. ${viewModel.getSelectedItemPrice()}")
+                    viewModel.currentCoupon?.let {
+                        tvOriginalPrice.setTextAnimation(
+                            "Rs: ${variant.variantPrice}",
+                            ANIMATION_DURATION
+                        )
+                        tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                    }
 
-    @SuppressLint("SetTextI18n")
-    private fun setDiscountPercent() {
-        val variant = mProduct.variants[mSelectedVariant]
-        //if the variant has discount then that percent will be displayed if not the
-        //products general discount percent will be displayed
-
-        if (variant.discountPrice != 0.0) {
-            binding.tvDiscountPercent.text = "${getDiscountPercent(variant.variantPrice.toFloat(), variant.discountPrice.toFloat())}% Off"
-        }
-    }
-
-    private fun getDiscountPercent(price: Float, discountPrice: Float): Float
-        = ((price-discountPrice)/price)*100
-
-    private fun getVariantName(position: Int): String
-        = "${mProduct.variants[position].variantName} ${mProduct.variants[position].variantType}"
-
-
-    private fun getVariantOriginalPrice(position: Int)
-        = mProduct.variants[position].variantPrice.toFloat()
-
-    private fun getVariantPrice(position: Int): Float {
-        return if (mProduct.variants[position].discountPrice == 0.0) {
-            mProduct.variants[position].variantPrice.toFloat()
-        } else {
-            mProduct.variants[position].discountPrice.toFloat()
-        }
+                }
+            }
     }
 
 
     private fun addToCart() {
-        if(isProductAvailable()) {
-            viewModel.upsertCartItem(
-                mProductId,
-                mProduct.name,
-                mProduct.thumbnailUrl,
-                getVariantName(mSelectedVariant),
-                1,
-                mFinalPrice ,
-                getVariantOriginalPrice(mSelectedVariant),
-                mCoupon.code,
-                mProduct.variants[mSelectedVariant].inventory,
-                mSelectedVariant
-            )
-            mProduct.variantInCart.add(getVariantName(mSelectedVariant))
-            viewModel.upsertProduct(mProduct)
+        if(viewModel.isProductAvailable()) {
+            viewModel.upsertCartItem()
             setRemoveButton()
         } else {
             showErrorSnackBar("Product Out of Stock", true)
         }
     }
 
-    private fun isProductAvailable(): Boolean {
-        return mProduct.variants[mSelectedVariant].status != Constants.OUT_OF_STOCK
-    }
-
     private fun removeFromCart() {
-        viewModel.deleteProductFromCart(mProduct, getVariantName(mSelectedVariant))
+        viewModel.deleteProductFromCart()
         setAddButton()
     }
 
@@ -530,18 +562,6 @@ class ProductActivity :
             text = "Add"
             setIconResource(R.drawable.ic_add)
             setBackgroundColor(ContextCompat.getColor(baseContext, R.color.green_base))
-        }
-    }
-
-    private fun updatedPriceWithCouponApplied(itemPrice: Float): Float {
-        return if (isCouponApplied) {
-            if (mCoupon.type == "Percentage") {
-                (itemPrice - (itemPrice * mCoupon.amount.toFloat()) / 100).toFloat()
-            } else {
-                (itemPrice - mCoupon.amount.toFloat())
-            }
-        } else {
-            itemPrice
         }
     }
 
@@ -594,7 +614,7 @@ class ProductActivity :
     override fun onBackPressed() {
         when {
             isPreviewVisible -> {
-                binding.ivPreviewImage.startAnimation(scaleSmall)
+                binding.ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.scale_small))
                 binding.ivPreviewImage.visibility = View.GONE
                 isPreviewVisible = false
             }
@@ -604,6 +624,15 @@ class ProductActivity :
                 navigateToPreviousPage()
             }
         }
+    }
+
+    override fun onDestroy() {
+        viewModel.apply {
+            userProfile = null
+            product = null
+            currentCoupon = null
+        }
+        super.onDestroy()
     }
 
     fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
@@ -626,44 +655,6 @@ class ProductActivity :
             } else {
                 showToast(this, "Storage Permission Denied")
                 showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
-            }
-        }
-    }
-
-    private fun onSuccessCallback(message: String, data: Any?) {
-        when(message) {
-            "toast" -> showToast(this, data as String)
-            "permission" -> {
-                if (PermissionsUtil.hasStoragePermission(this)) {
-                    showToast(this, "Storage Permission Granted")
-                    viewModel.previewImage("granted")
-                } else {
-                    showExitSheet(this, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
-                }
-            }
-            "review" -> {
-                hideProgressDialog()
-                showToast(this, data as String)
-                viewModel.previewImage("added")
-            }
-            "preview" -> {
-                isPreviewVisible = true
-                with(binding) {
-                    GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, data as String, ivPreviewImage)
-                    ivPreviewImage.visible()
-                    ivPreviewImage.startAnimation(scaleBig)
-                }
-            }
-        }
-        viewModel.setEmptyResult()
-    }
-
-    private fun onFailedCallback(message: String, data: Any?) {
-        when(message) {
-            "toast" -> showToast(this, data as String)
-            "review" -> {
-                hideProgressDialog()
-                showToast(this, data as String)
             }
         }
     }
