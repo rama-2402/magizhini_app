@@ -9,6 +9,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -59,7 +60,7 @@ class DishActivity :
     private lateinit var ingredientsAdapter: IngredientsAdapter
     private lateinit var cartAdapter: CartAdapter
 
-    private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
+    private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
     private lateinit var cartBtn: ImageBadgeView
     private lateinit var checkoutText: TextView
 
@@ -124,7 +125,7 @@ class DishActivity :
     }
 
     private fun populateCartBottomSheet() {
-        val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
+        val bottomSheet = findViewById<ConstraintLayout>(R.id.clBottomCart)
         val filterBtn = findViewById<ImageView>(R.id.ivFilter)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)

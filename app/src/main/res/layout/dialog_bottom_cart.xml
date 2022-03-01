@@ -3,18 +3,41 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clBottomCart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="88dp"
+        android:background="@color/transparent"
+        android:elevation="40dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+            android:background="@drawable/bottom_sheet_shadow"
+            android:src="@drawable/bottom_sheet_shadow"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <LinearLayout
+        android:id="@+id/llBottomCart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:background="@drawable/shape_round_rectangle_16"
-        android:backgroundTint="@color/gray200"
-        android:elevation="@dimen/material_size_24"
-        app:behavior_hideable="false"
-        app:behavior_peekHeight="84dp"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        android:backgroundTint="@color/gray50"
+        android:layout_marginTop="@dimen/material_size_8"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
 
                 <ImageView
                     android:id="@+id/ivBottomSheetIndicator"
@@ -39,14 +62,10 @@
                         android:id="@+id/ivCart"
                         android:layout_width="0dp"
                         android:layout_height="45dp"
-                        android:layout_marginStart="@dimen/material_size_8"
                         android:layout_weight="1"
                         android:layout_gravity="end"
                         android:padding="4dp"
                         android:scaleType="center"
-                        android:background="@drawable/shape_round_rectangle_8"
-                        android:backgroundTint="@color/white"
-                        android:elevation="@dimen/material_size_2"
                         app:ibv_badgeValue="0"
                         app:ibv_badgeTextSize="12sp"
                         app:ibv_fixedBadgeRadius="8dp"
@@ -76,8 +95,6 @@
                         android:id="@+id/rlCheckOutBtn"
                         android:layout_width="0dp"
                         android:layout_height="45dp"
-                        android:layout_marginStart="@dimen/material_size_8"
-                        android:layout_marginEnd="@dimen/material_size_8"
                         android:layout_weight="5"
                         android:background="@drawable/shape_round_rectangle_8"
                         android:elevation="@dimen/material_size_2"
@@ -115,11 +132,8 @@
                         android:id="@+id/ivFilter"
                         android:layout_width="0dp"
                         android:layout_height="45dp"
-                        android:layout_marginEnd="@dimen/material_size_8"
                         android:layout_weight="1"
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
-                        android:background="@drawable/shape_round_rectangle_8"
-                        android:elevation="@dimen/material_size_2"
                         android:foreground="?android:attr/selectableItemBackgroundBorderless"
                         android:backgroundTint="@color/white"
                         android:scaleType="centerInside"
@@ -142,4 +156,5 @@
                     android:layout_width="match_parent"
                     android:layout_height="80dp" />
     </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -110,9 +110,9 @@ class PurchaseHistoryActivity :
     private fun initLiveData() {
         viewModel.getProfileData("${mFilterMonth}${mFilterYear}")
 
-        viewModel.moveToProductReview.observe(this, {
+        viewModel.moveToProductReview.observe(this) {
             moveToProductDetails(viewModel.productId, viewModel.productName)
-        })
+        }
 
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->
@@ -195,7 +195,7 @@ class PurchaseHistoryActivity :
             listOf(),
             viewModel,
             arrayListOf(),
-            ""
+            "purchaseHistory"
         )
     }
 

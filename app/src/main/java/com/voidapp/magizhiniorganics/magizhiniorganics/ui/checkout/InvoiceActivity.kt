@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
@@ -58,7 +59,7 @@ class InvoiceActivity :
     private lateinit var binding: ActivityCheckoutBinding
     private lateinit var viewModel: CheckoutViewModel
 
-    private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
+    private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
     private lateinit var checkoutText: TextView
     private lateinit var cartBtn: ImageBadgeView
 
@@ -153,7 +154,7 @@ class InvoiceActivity :
     }
 
     private fun setCartBottom() {
-        val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
+        val bottomSheet = findViewById<ConstraintLayout>(R.id.clBottomCart)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         checkoutText = findViewById(R.id.tvCheckOut)
         cartBtn = findViewById(R.id.ivCart)

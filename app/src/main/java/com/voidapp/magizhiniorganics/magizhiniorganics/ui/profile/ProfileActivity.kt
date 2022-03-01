@@ -293,6 +293,7 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     //assigning the data of birth date
     fun onDobSelected(date: Long) {
         binding.tvDob.text = TimeUtil().getCustomDate(dateLong = date)
+        SharedPref(this).putData(Constants.DOB, Constants.STRING, TimeUtil().getCustomDate(dateLong = date).substring(0,5))
         mProfile.dob = date.toString()
     }
 

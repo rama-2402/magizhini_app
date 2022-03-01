@@ -67,7 +67,7 @@ class UpdateDataService (
             val getSpecialsTwo = async { specialsTwo() }
             val getSpecialsThree = async { specialsThree() }
             val getSpecialsBanners = async { specialBanners() }
-            val getAllNotifications = async { getAllData(USER_NOTIFICATIONS) }
+//            val getAllNotifications = async { getAllData(USER_NOTIFICATIONS) }
             val couponData = async { getAllData(Constants.COUPON) }
             val deliveryChargeData = async { getAllData(Constants.DELIVERY_CHARGE) }
             val testimonialsData = async { getAllData(TESTIMONIALS) }
@@ -81,7 +81,7 @@ class UpdateDataService (
             getSpecialsTwo.await()
             getSpecialsThree.await()
             getSpecialsBanners.await()
-            val notificationSnapshot = getAllNotifications.await()
+//            val notificationSnapshot = getAllNotifications.await()
             val couponSnapshot = couponData.await()
             val deliveryChargeSnapshot = deliveryChargeData.await()
 
@@ -91,8 +91,8 @@ class UpdateDataService (
                 async { filterDataAndUpdateRoom(Constants.BANNER, bannerSnapshot) }
             val updateProduct =
                 async { filterDataAndUpdateRoom(Constants.PRODUCTS, productSnapshot) }
-            val updateNotifications =
-                async { filterDataAndUpdateRoom(Constants.USER_NOTIFICATIONS, notificationSnapshot) }
+//            val updateNotifications =
+//                async { filterDataAndUpdateRoom(Constants.USER_NOTIFICATIONS, notificationSnapshot) }
             val updateCoupon =
                 async { filterDataAndUpdateRoom(Constants.COUPON, couponSnapshot) }
             val updateDeliveryCharge =
@@ -103,7 +103,7 @@ class UpdateDataService (
             updateCategory.await()
             updateProduct.await()
             updateBanner.await()
-            updateNotifications.await()
+//            updateNotifications.await()
             updateTestimonials.await()
             updateCoupon.await()
             updateDeliveryCharge.await()
@@ -215,15 +215,15 @@ class UpdateDataService (
                             }
                         }
                     }
-                    USER_NOTIFICATIONS -> {
-                        repository.deleteAllNotifications()
-                        for (d in snapshot.documents) {
-                            val notification = d.toObject(UserNotification::class.java)
-                            notification!!.id = d.id
-                            val notificationEntity: UserNotificationEntity = notification.toUserNotificationEntity()
-                            repository.upsertNotification(notificationEntity)
-                        }
-                    }
+//                    USER_NOTIFICATIONS -> {
+//                        repository.deleteAllNotifications()
+//                        for (d in snapshot.documents) {
+//                            val notification = d.toObject(UserNotification::class.java)
+//                            notification!!.id = d.id
+//                            val notificationEntity: UserNotificationEntity = notification.toUserNotificationEntity()
+//                            repository.upsertNotification(notificationEntity)
+//                        }
+//                    }
                     Constants.COUPON -> {
                         repository.deleteCoupons()
                         for (d in snapshot.documents) {
@@ -276,12 +276,12 @@ class UpdateDataService (
                         .orderBy(Constants.BANNER_ORDER, Query.Direction.ASCENDING)
                         .get().await()
                 }
-                USER_NOTIFICATIONS -> {
-                    mFireStore.collection(USER_NOTIFICATIONS)
-                        .document(USER_NOTIFICATIONS)
-                        .collection(userID)
-                        .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get().await()
-                }
+//                USER_NOTIFICATIONS -> {
+//                    mFireStore.collection(USER_NOTIFICATIONS)
+//                        .document(USER_NOTIFICATIONS)
+//                        .collection(userID)
+//                        .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get().await()
+//                }
                 Constants.COUPON -> {
                     mFireStore.collection(Constants.COUPON)
                         .orderBy(Constants.PROFILE_NAME, Query.Direction.ASCENDING)

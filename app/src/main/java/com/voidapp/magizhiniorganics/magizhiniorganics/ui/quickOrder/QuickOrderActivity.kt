@@ -163,10 +163,10 @@ class QuickOrderActivity :
                     return@setOnClickListener
                 }
                 viewModel.quickOrder?.let {
-                    if (it.orderPlaced) {
-                        showToast(this@QuickOrderActivity,"Order already placed. Please check your Purchase History for know the progress")
-                        return@setOnClickListener
-                    }
+//                    if (it.orderPlaced) {
+//                        showToast(this@QuickOrderActivity,"Order already placed. Please check your Purchase History for know the progress")
+//                        return@setOnClickListener
+//                    }
                     if (it.cart.isEmpty()) {
                         showErrorSnackBar("Estimate not yet available. Please wait", true)
                         return@setOnClickListener
@@ -292,7 +292,7 @@ class QuickOrderActivity :
                             populateEstimateDetails(it)
                         }
                     } else {
-                        showErrorSnackBar(event.message, true)
+                        showErrorSnackBar(event.message as String, true)
                     }
                     hideProgressDialog()
                 }
@@ -376,8 +376,14 @@ class QuickOrderActivity :
 
     private fun updatePriceButton() {
         lifecycleScope.launch {
-            binding.btnGetEstimate.text =
-                "Rs:${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()} \n (${viewModel.quickOrder?.cart?.size} Items)"
+            viewModel.quickOrder?.let {
+                var cartSize = 0
+                it.cart.forEach { cart ->
+                    cartSize += cart.quantity
+                }
+                binding.btnGetEstimate.text =
+                    "Rs:${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()} \n ($cartSize Items)"
+            }
         }
     }
 
@@ -433,7 +439,7 @@ class QuickOrderActivity :
                         showExitSheet(
                             this@QuickOrderActivity,
                             "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                            "close"
+                            ""
                         )
                         return@launch
                     }
@@ -469,7 +475,7 @@ class QuickOrderActivity :
                         showExitSheet(
                             this@QuickOrderActivity,
                             "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                            "close"
+                            ""
                         )
                         return@launch
                     }

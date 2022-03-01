@@ -53,6 +53,20 @@
         <item>10</item>
     </string-array>
 
+    <!--click action for banners-->
+    <string-array name="click_action">
+        <item>Product</item>
+        <item>Category</item>
+        <item>Quick Order</item>
+        <item>Order History</item>
+        <item>Subscription</item>
+        <item>Cook with Magizhini</item>
+        <item>Referral</item>
+        <item>Wallet</item>
+        <item>Description</item>
+        <item>Open</item>
+    </string-array>
+
     <!--    months names filter-->
     <string-array name="months_name">
         <item>January</item>

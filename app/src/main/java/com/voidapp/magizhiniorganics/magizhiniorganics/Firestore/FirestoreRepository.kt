@@ -106,6 +106,7 @@ class FirestoreRepository (
     //updateToken
     suspend fun updateToken(token: String): BirthdayCard? = firestore.updateToken(token)
     suspend fun getSupportToken(id: String): String = firestore.getSupportToken(id)
+    suspend fun updateNotifications(userID: String): Boolean = firestore.updateNotifications(userID)
 
 
     //cwm

@@ -9,8 +9,10 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil.bind
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -60,7 +62,7 @@ class ShoppingMainActivity :
     private val factory: ShoppingMainViewModelFactory by instance()
     private lateinit var viewModel: ShoppingMainViewModel
 
-    private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
+    private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
     private lateinit var cartBtn: ImageBadgeView
     private lateinit var checkoutText: TextView
     private var item: MenuItem? = null
@@ -350,6 +352,10 @@ class ShoppingMainActivity :
         binding.cpCategoryFilter.isChecked = true
 //        hideListBottomSheet()
         viewModel.getAllProductByCategoryStatic(categoryFilter)
+        if (categoryFilter == SUBSCRIPTION) {
+            binding.cpSubscriptions.isChecked = true
+//            viewModel.getAllSubscriptions()
+        }
     }
 
     private fun initRecyclerView() {
@@ -373,7 +379,7 @@ class ShoppingMainActivity :
     }
 
     private fun setCartBottom() {
-        val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
+        val bottomSheet = findViewById<ConstraintLayout>(R.id.clBottomCart)
         val filterBtn = findViewById<ImageView>(R.id.ivFilter)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)

@@ -39,8 +39,8 @@ class HomeViewModel (
     val recyclerPosition: LiveData<Int> = _recyclerPosition
     private var _specialBanners: MutableLiveData<List<SpecialBanners>> = MutableLiveData()
     val specialBanners: LiveData<List<SpecialBanners>> = _specialBanners
-    private var _notifications: MutableLiveData<List<UserNotificationEntity>> = MutableLiveData()
-    val notifications: LiveData<List<UserNotificationEntity>> = _notifications
+    private var _notifications: MutableLiveData<List<UserNotificationEntity>?> = MutableLiveData()
+    val notifications: LiveData<List<UserNotificationEntity>?> = _notifications
 
     val bannersList: MutableList<SpecialBanners> = mutableListOf()
 
@@ -320,11 +320,9 @@ class HomeViewModel (
 
     fun getAllNotifications() = viewModelScope.launch(Dispatchers.IO) {
         val notifications = dbRepository.getAllNotifications()
-        if (!notifications.isNullOrEmpty()) {
             withContext(Dispatchers.Main) {
                 _notifications.value = notifications
             }
-        }
     }
 
     fun applyReferralNumber(currentUserID: String, code: String) = viewModelScope.launch {

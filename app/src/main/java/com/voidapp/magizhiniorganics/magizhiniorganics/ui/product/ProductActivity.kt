@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -66,7 +67,7 @@ class ProductActivity :
     private val factory: ProductViewModelFactory by instance()
     private lateinit var viewModel: ProductViewModel
 
-    private var cartBottomSheet: BottomSheetBehavior<LinearLayout> = BottomSheetBehavior()
+    private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
     private lateinit var checkoutText: TextView
     private lateinit var cartBtn: ImageBadgeView
     private lateinit var filterBtn: ImageView
@@ -109,7 +110,7 @@ class ProductActivity :
     }
 
     private fun cartBottomSheet() {
-        val bottomSheet = findViewById<LinearLayout>(R.id.clBottomCart)
+        val bottomSheet = findViewById<ConstraintLayout>(R.id.clBottomCart)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
         filterBtn = findViewById(R.id.ivFilter)
@@ -183,7 +184,9 @@ class ProductActivity :
             "delete" -> R.drawable.ic_delete
             else -> R.drawable.ic_filter
         }
+        filterBtn.fadOutAnimation(300)
         filterBtn.setImageDrawable(ContextCompat.getDrawable(this, icon))
+        filterBtn.fadInAnimation(300)
         filterBtn.imageTintList =
             if (content == "delete") {
                 ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))

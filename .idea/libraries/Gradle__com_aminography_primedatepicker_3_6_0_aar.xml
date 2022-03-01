@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.aminography:primedatepicker:3.6.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/b2ad86a197da62ab9eab71774490aaf2/transformed/jetified-primedatepicker-3.6.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b2ad86a197da62ab9eab71774490aaf2/transformed/jetified-primedatepicker-3.6.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b2ad86a197da62ab9eab71774490aaf2/transformed/jetified-primedatepicker-3.6.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b40f3910522f59576bba176816a74e17/transformed/jetified-primedatepicker-3.6.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b40f3910522f59576bba176816a74e17/transformed/jetified-primedatepicker-3.6.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/b40f3910522f59576bba176816a74e17/transformed/jetified-primedatepicker-3.6.0/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.aminography/primedatepicker/3.6.0/3024f4a5475cff8828334f1fe1f33ee7ddbbbca8/primedatepicker-3.6.0-javadoc.jar!/" />

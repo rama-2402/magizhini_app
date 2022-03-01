@@ -17,6 +17,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUCCESS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -96,12 +97,19 @@ class QuickOrderUseCase(
                     .document(userID)
                     .get().await()
 
-                if (quickOrderDoc.exists()) {
-                    quickOrder = quickOrderDoc.toObject(QuickOrder::class.java)
-                    NetworkResult.Success("estimate", quickOrder)
-                } else {
-                    NetworkResult.Success("estimate", null)
-                }
+            if (quickOrderDoc.exists()) {
+                quickOrderDoc.toObject(QuickOrder::class.java)?.let {
+                    NetworkResult.Success("estimate", it)
+                } ?: NetworkResult.Success("estimate", null)
+            } else {
+                NetworkResult.Success("estimate", null)
+            }
+//            if (quickOrderDoc.exists()) {
+//                    quickOrder = quickOrderDoc.toObject(QuickOrder::class.java)
+//                    NetworkResult.Success("estimate", quickOrder)
+//                } else {
+//                    NetworkResult.Success("estimate", null)
+//                }
             } catch (e: Exception) {
                 NetworkResult.Failed("estimate", e.message.toString())
             }
@@ -289,7 +297,12 @@ class QuickOrderUseCase(
                 phoneNumber = orderDetailsMap["phoneNumber"].toString()
             ).let {
                 when(fbRepository.placeOrder(it)) {
-                    is NetworkResult.Success -> true
+                    is NetworkResult.Success -> {
+                        if (!cart.isNullOrEmpty()) {
+                            deleteQuickOrder(orderDetailsMap["userID"].toString())
+                        }
+                        true
+                    }
                     is NetworkResult.Failed -> false
                     else -> false
                 }
@@ -305,6 +318,43 @@ class QuickOrderUseCase(
                 .collection(QUICK_ORDER)
                 .document(userID)
                 .update("orderPlaced", true).await()
+        } catch (e: Exception) {
+
+        }
+    }
+
+    private suspend fun deleteQuickOrder(userID: String) = withContext(Dispatchers.IO){
+        try {
+            val mFireStoreStorage = FirebaseStorage.getInstance().reference
+            val quickOrderToDelete =
+                fireStore.collection(QUICK_ORDER).document(userID).get().await().toObject(QuickOrder::class.java)
+
+            quickOrderToDelete?.let {
+                val storeUpdate = async {
+                    fireStore
+                        .collection(Constants.QUICK_ORDER)
+                        .document(userID)
+                        .delete()
+                }
+                val deleteQuickOrderImages = async {
+                    val storage = FirebaseStorage.getInstance()
+                    for (i in it.imageUrl.indices) {
+                        val url = it.imageUrl[i]
+                        val imageName = storage.getReferenceFromUrl(url).name
+                        Log.e("qw", "updateCartItemsInOrder: $imageName", )
+                        val sRef: StorageReference = mFireStoreStorage.child(
+                            "$ORDER_ESTIMATE_PATH${it.customerID}/$imageName"
+                        )
+                        sRef.delete()
+//                    mFireStoreStorage.child(
+//                        "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/$imageName"
+//                    ).delete().await()
+                    }
+                }
+
+                deleteQuickOrderImages.await()
+                storeUpdate.await()
+            }
         } catch (e: Exception) {
 
         }

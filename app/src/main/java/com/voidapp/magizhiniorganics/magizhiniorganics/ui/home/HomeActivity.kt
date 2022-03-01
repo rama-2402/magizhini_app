@@ -66,13 +66,21 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_BANNER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OPEN
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_BANNER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_BANNER
 import kotlinx.coroutines.tasks.await
 
@@ -151,8 +159,7 @@ class HomeActivity :
 //                viewModel.logCrash("FCM token failed", task.exception)
             } else {
                 if (
-                    intent?.getBooleanExtra("day", false) == true
-                ) {
+                    intent?.getBooleanExtra("day", false) == true) {
                     viewModel.updateToken(task.result)
                 }
             }
@@ -258,9 +265,12 @@ class HomeActivity :
             DESCRIPTION -> {
                 showDescriptionBs(banner.description)
             }
-            CWM_BANNER -> navigateToCWM()
-            WALLET_BANNER -> navigateToWallet()
-            QUICK_ORDER_BANNER -> navigateToQuickOrder()
+            QUICK_ORDER -> navigateToQuickOrder()
+            CWM -> navigateToCWM()
+            WALLET -> navigateToWallet()
+            REFERRAL -> showReferralBs(SharedPref(this@HomeActivity).getData(USER_ID, STRING, "").toString())
+            ORDER_HISTORY -> navigateToQuickOrder()
+            SUBSCRIPTION -> displaySelectedCategory(SUBSCRIPTION)
             OPEN -> {
                 isPreviewOpened = true
                 GlideLoader().loadUserPictureWithoutCrop(this@HomeActivity, banner.url, binding.ivPreviewImage)
@@ -275,10 +285,10 @@ class HomeActivity :
 
     private fun observers() {
         viewModel.getDataToPopulate()
-        viewModel.getAllNotifications()
 
         viewModel.notifications.observe(this) {
             if (it.isNullOrEmpty()) {
+                binding.ivNotification.badgeValue = 0
                 binding.ivNotification.visibleBadge(false)
             } else {
                 binding.ivNotification.apply {
@@ -717,7 +727,7 @@ class HomeActivity :
         viewModel.getAllNotifications()
         super.onResume()
     }
-
+//
 //    override fun onRestart() {
 //        viewModel.getAllNotifications()
 //        super.onRestart()

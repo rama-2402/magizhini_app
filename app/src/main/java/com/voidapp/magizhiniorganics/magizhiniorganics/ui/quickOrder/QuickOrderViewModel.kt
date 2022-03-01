@@ -22,6 +22,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.IOException
 
+//delete the quick order data when placing order after getting the estimate
+//delete the images in quick order as well
+
 class QuickOrderViewModel(
     private val fbRepository: FirestoreRepository,
     private val dbRepository: DatabaseRepository,
@@ -36,7 +39,7 @@ class QuickOrderViewModel(
 
     var orderID: String? = null
     var placeOrderByCOD: Boolean = false
-    var couponAppliedPrice: Float? = 0f
+    var couponAppliedPrice: Float? = null
     var deliveryCharge: Float = 0f
 
     var mCheckedAddressPosition: Int = 0
@@ -187,8 +190,8 @@ class QuickOrderViewModel(
         val result = QuickOrderUseCase(fbRepository)
             .checkForPreviousEstimate(userID = userProfile!!.id)
         when(result) {
-            is NetworkResult.Success -> _uiUpdate.value = UiUpdate.EstimateData("", result.data as QuickOrder, true)
-            is NetworkResult.Failed -> _uiUpdate.value = UiUpdate.EstimateData(result.message, null, false)
+            is NetworkResult.Success -> _uiUpdate.value = UiUpdate.EstimateData("", result.data?.let { it as QuickOrder }, true)
+            is NetworkResult.Failed -> _uiUpdate.value = UiUpdate.EstimateData(result.data?.let { it as String } ?: "Server Error! Try later", null, false)
             else -> Unit
         }
     }

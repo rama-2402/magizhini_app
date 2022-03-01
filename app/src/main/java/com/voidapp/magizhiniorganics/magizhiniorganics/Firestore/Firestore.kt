@@ -1455,6 +1455,27 @@ class Firestore(
         }
     }
 
+    suspend fun updateNotifications(userID: String): Boolean = withContext(Dispatchers.IO){
+        return@withContext try {
+            val notificationsDoc = mFireStore.collection(USER_NOTIFICATIONS)
+                .document(USER_NOTIFICATIONS)
+                .collection(userID)
+                .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get().await()
+
+            repository.deleteAllNotifications()
+
+            for (doc in notificationsDoc.documents) {
+                val notification = doc.toObject(UserNotification::class.java)
+                notification!!.id = doc.id
+                val notificationEntity: UserNotificationEntity = notification.toUserNotificationEntity()
+                repository.upsertNotification(notificationEntity)
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     //Tokens
     suspend fun updateToken(tokenString: String): BirthdayCard? = withContext(Dispatchers.IO) {
         val profileDB = repository.getProfileData()
@@ -1467,14 +1488,10 @@ class Firestore(
                         .document(token.id)
                         .set(token, SetOptions.merge()).await()
 
-                    Log.e("qw", "${profile.id}", )
-
                     val doc = mFireStore.collection(USERS)
                         .document(profile.id)
                         .collection("birthdayCard")
                         .document("user").get().await()
-
-                    Log.e("fs", "$doc", )
 
                     if (doc.exists()) {
                         return@withContext doc.toObject(BirthdayCard::class.java)

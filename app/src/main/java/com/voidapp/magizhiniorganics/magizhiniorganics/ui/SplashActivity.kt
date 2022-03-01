@@ -31,6 +31,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.Firestore
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Token
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DOB
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
@@ -44,9 +45,12 @@ import org.kodein.di.generic.instance
 import kotlin.RuntimeException
 
 @SuppressLint("CustomSplashScreen")
-class SplashActivity : BaseActivity() {
+class SplashActivity : BaseActivity(), KodeinAware {
 
     private lateinit var binding: ActivitySplashBinding
+    override val kodein: Kodein by kodein()
+
+    private val fbRepository: FirestoreRepository by instance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
@@ -171,13 +175,34 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun navigateToHomeScreen(newDayCheck: Boolean) = lifecycleScope.launch {
-        delay(1000)
-        binding.progressCircular.remove()
-        Intent(this@SplashActivity, HomeActivity::class.java).also {
-            it.putExtra("day", newDayCheck)
-            startActivity(it)
-            finish()
-            finishAffinity()
+        if (fbRepository.updateNotifications(SharedPref(this@SplashActivity).getData(USER_ID, STRING, "").toString())) {
+            binding.progressCircular.remove()
+            Intent(this@SplashActivity, HomeActivity::class.java).also {
+//                if (
+//                    SharedPref(this@SplashActivity).getData(DOB, STRING, "").toString() == "${TimeUtil().getCurrentDateNumber()}/${TimeUtil().getMonthNumber()}"
+//                ) {
+//                    it.putExtra("day", newDayCheck)
+//                } else {
+                    it.putExtra("day", newDayCheck)
+//                }
+                startActivity(it)
+                finish()
+                finishAffinity()
+            }
+        } else {
+            binding.progressCircular.remove()
+            Intent(this@SplashActivity, HomeActivity::class.java).also {
+//                if (
+//                    SharedPref(this@SplashActivity).getData(DOB, STRING, "").toString() == "${TimeUtil().getCurrentDateNumber()}/${TimeUtil().getMonthNumber()}"
+//                ) {
+//                    it.putExtra("day", newDayCheck)
+//                } else {
+                    it.putExtra("day", newDayCheck)
+//                }
+                startActivity(it)
+                finish()
+                finishAffinity()
+            }
         }
     }
 
