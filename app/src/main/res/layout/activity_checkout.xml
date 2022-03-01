@@ -65,11 +65,11 @@
                     android:fontFamily="@font/roboto"/>
 
                 <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivWallet"
+                    android:id="@+id/ivCustomerSupport"
                     android:layout_width="@dimen/material_size_24"
                     android:layout_height="@dimen/material_size_24"
                     android:layout_gravity="end"
-                    android:src="@drawable/ic_wallet"
+                    android:src="@drawable/ic_upport_agent"
                     android:layout_marginEnd="@dimen/material_size_16"
                     android:contentDescription="@string/favorites_icon"
                     app:tint="@color/white"
@@ -476,49 +476,7 @@
                             android:textColor="@color/black"
                             android:textCursorDrawable="@null" />
                     </com.google.android.material.textfield.TextInputLayout>
-                    <RadioGroup
-                        android:id="@+id/rgPaymentType"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:layout_gravity="center"
-                        app:layout_constraintEnd_toStartOf="@id/etlDeliveryNote"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/etlDeliveryNote">
 
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/rbCod"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:buttonTint="@color/green_base"
-                            android:text=" COD"
-                            android:textSize="16sp"
-                            android:checked="true"
-                            android:textColor="@color/gray700"/>
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/rbUpi"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:buttonTint="@color/green_base"
-                            android:text=" Online"
-                            android:textSize="16sp"
-                            android:textColor="@color/gray700"/>
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/rbWallet"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:buttonTint="@color/green_base"
-                            android:text=" Wallet (0.00)"
-                            android:textSize="16sp"
-                            android:textColor="@color/gray700"/>
-                    </RadioGroup>
                 </androidx.constraintlayout.widget.ConstraintLayout>
                 <View
                     android:id="@+id/vBottomEmpty"

@@ -59,9 +59,11 @@ import android.util.Log
 import com.google.firebase.BuildConfig
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.voidapp.magizhiniorganics.magizhiniorganics.PartnersAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
@@ -95,7 +97,8 @@ class HomeActivity :
     KodeinAware,
     HomeListener,
     TestimonialsAdapter.TestimonialItemClickListener,
-    NavigationView.OnNavigationItemSelectedListener
+    NavigationView.OnNavigationItemSelectedListener,
+    PartnersAdapter.PartnersItemClickListener
 {
 
     //DI Injection with kodein
@@ -181,20 +184,20 @@ class HomeActivity :
     }
 
     private fun clickListeners() {
-        binding.cpShowAll.setOnClickListener(this)
-        binding.cpBestSellers.setOnClickListener(this)
-        binding.cpSpecialOne.setOnClickListener(this)
-        binding.cpSpecialTwo.setOnClickListener(this)
-        binding.cpSpecialThree.setOnClickListener(this)
-        binding.cpTestimonials.setOnClickListener(this)
-        binding.fabCart.setOnClickListener(this)
-        binding.ivNotification.setOnClickListener {
-            Intent(this, NotificationsActivity::class.java).also {
-                startActivity(it)
-                onPause()
-            }
-        }
         binding.apply {
+            cpShowAll.setOnClickListener(this@HomeActivity)
+            cpBestSellers.setOnClickListener(this@HomeActivity)
+            cpSpecialOne.setOnClickListener(this@HomeActivity)
+            cpSpecialTwo.setOnClickListener(this@HomeActivity)
+            cpSpecialThree.setOnClickListener(this@HomeActivity)
+            cpTestimonials.setOnClickListener(this@HomeActivity)
+            fabCart.setOnClickListener(this@HomeActivity)
+            ivNotification.setOnClickListener {
+                Intent(this@HomeActivity, NotificationsActivity::class.java).also {
+                    startActivity(it)
+                    onPause()
+                }
+            }
             ivBannerOne.setOnClickListener {
                 mSelectedBanner = viewModel.bannersList[0]
                 selectedBanner(mSelectedBanner.toBannerEntity())
@@ -243,6 +246,32 @@ class HomeActivity :
                 mSelectedBanner = viewModel.bannersList[11]
                 selectedBanner(mSelectedBanner.toBannerEntity())
             }
+            svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+                when {
+                    scrollY < oldScrollY && binding.fabCart.isGone -> {
+                        binding.fabCart.startAnimation(scaleBig)
+                        binding.fabCart.visibility = View.VISIBLE
+                    }
+                    scrollY > oldScrollY && binding.fabCart.isVisible -> {
+                        binding.fabCart.startAnimation(scaleSmall)
+                        binding.fabCart.visibility = View.GONE
+                    }
+                    scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight -> {
+                        Log.e("qw", "partners", )
+                        viewModel.getPartnersData()
+                    }
+                }
+//            if (scrollY < oldScrollY && binding.fabCart.isGone) {
+//                binding.fabCart.startAnimation(scaleBig)
+//                binding.fabCart.visibility = View.VISIBLE
+//            } else if (scrollY > oldScrollY && binding.fabCart.isVisible) {
+//                binding.fabCart.startAnimation(scaleSmall)
+//                binding.fabCart.visibility = View.GONE
+//            }
+//            if (scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight) {
+//                // end of the scroll view
+//            }
+            })
         }
     }
 
@@ -271,14 +300,7 @@ class HomeActivity :
             REFERRAL -> showReferralBs(SharedPref(this@HomeActivity).getData(USER_ID, STRING, "").toString())
             ORDER_HISTORY -> navigateToQuickOrder()
             SUBSCRIPTION -> displaySelectedCategory(SUBSCRIPTION)
-            OPEN -> {
-                isPreviewOpened = true
-                GlideLoader().loadUserPictureWithoutCrop(this@HomeActivity, banner.url, binding.ivPreviewImage)
-                binding.ivPreviewImage.startAnimation(
-                    AnimationUtils.loadAnimation(this@HomeActivity, R.anim.scale_big)
-                )
-                binding.ivPreviewImage.visible()
-            }
+            OPEN -> openPreview(banner.url)
             else -> Unit
         }
     }
@@ -404,16 +426,6 @@ class HomeActivity :
             testimonialsAdapter.testimonials = it
             testimonialsAdapter.notifyDataSetChanged()
         }
-
-        binding.svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-            if (scrollY < oldScrollY && binding.fabCart.isGone) {
-                binding.fabCart.startAnimation(scaleBig)
-                binding.fabCart.visibility = View.VISIBLE
-            } else if (scrollY > oldScrollY && binding.fabCart.isVisible) {
-                binding.fabCart.startAnimation(scaleSmall)
-                binding.fabCart.visibility = View.GONE
-            }
-        })
         viewModel.referralStatus.observe(this) {
             hideProgressDialog()
             if (it) {
@@ -432,6 +444,15 @@ class HomeActivity :
                 showErrorSnackBar("Referral Already Applied", true)
             } else {
                 showReferralBs(it)
+            }
+        }
+        viewModel.partners.observe(this) { partners ->
+            partners?.let {
+                binding.rvPartners.adapter = PartnersAdapter(
+                    it,
+                    this
+                )
+                binding.rvPartners.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
             }
         }
 //        //scroll change listener to hide the fab when scrolling down
@@ -962,5 +983,18 @@ class HomeActivity :
         showListBottomSheet(this, arrayListOf("Share My Referral Code", "Have a Referral Code? Enter here..."), "referral")
     }
 
+    private fun openPreview(imageUrl: String) {
+        isPreviewOpened = true
+        GlideLoader().loadUserPictureWithoutCrop(this@HomeActivity, imageUrl, binding.ivPreviewImage)
+        binding.ivPreviewImage.startAnimation(
+            AnimationUtils.loadAnimation(this@HomeActivity, R.anim.scale_big)
+        )
+        binding.ivPreviewImage.visible()
+    }
 
+    override fun selectedPartner(partner: Partners) {
+        when(partner.clickAction) {
+            "Open" -> openPreview(partner.imageUrl)
+        }
+    }
 }

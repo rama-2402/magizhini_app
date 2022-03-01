@@ -11,6 +11,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
@@ -302,7 +303,13 @@ class CheckoutViewModel(
                     dbRepository.upsertProduct(product)
                 }
             }
+            cwmDish.clear()
+            totalCartItems.clear()
             dbRepository.clearCart()
+            withContext(Dispatchers.Main) {
+                _uiEvent.value = UIEvent.Toast("Cart Items Emptied")
+                _uiUpdate.value = UiUpdate.CartCleared(null)
+            }
             true
         } catch (e: Exception) {
             _status.value = NetworkResult.Failed("orderPlaced", null)
@@ -540,7 +547,7 @@ class CheckoutViewModel(
 
 
     fun updateTransaction(transaction: TransactionHistory) = viewModelScope.launch (Dispatchers.IO) {
-        _status.value = fbRepository.updateTransaction(transaction)
+        _status.value = fbRepository.updateTransaction(transaction, "Magizhini purchase")
     }
 
     private suspend fun generateOrderID(): String = withContext(Dispatchers.IO) {
@@ -559,6 +566,7 @@ class CheckoutViewModel(
         data class UpdateCartData(val message: String, val position: Int, val count: Int?): UiUpdate()
         //cart
         data class PopulateCartData(val cartItems: List<CartEntity>?): UiUpdate()
+        data class CartCleared(val message: String?): UiUpdate()
         //order
         data class ValidatingPurchase(val message: String): UiUpdate()
         data class StartingTransaction(val message: String): UiUpdate()

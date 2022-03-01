@@ -143,6 +143,7 @@ object Constants {
     const val DEFAULT_PRODUCT_VARIANT: String = "defaultProductVariant"
     const val REFERRER_NUMBER: String = "referrerNumber"
     const val FAVORITES: String = "favorites"
+    const val PARTNERS: String = "Partners"
 
     //product status
     const val PRODUCTS: String = "Products"

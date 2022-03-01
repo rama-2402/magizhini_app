@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -32,13 +33,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDial
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
 import kotlinx.coroutines.*
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -62,6 +61,7 @@ class InvoiceActivity :
     private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
     private lateinit var checkoutText: TextView
     private lateinit var cartBtn: ImageBadgeView
+    private lateinit var filterBtn: ImageView
 
     private lateinit var addressAdapter: AddressAdapter
     private lateinit var cartAdapter: CartAdapter
@@ -158,6 +158,9 @@ class InvoiceActivity :
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         checkoutText = findViewById(R.id.tvCheckOut)
         cartBtn = findViewById(R.id.ivCart)
+        filterBtn = findViewById(R.id.ivFilter)
+
+        setBottomSheetIcon("wallet")
 
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
@@ -173,9 +176,11 @@ class InvoiceActivity :
                             "Rs: ${viewModel.getCartPrice(viewModel.totalCartItems)}"
                         }
                         checkoutText.setTextAnimation(content)
+                        setBottomSheetIcon("delete")
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         checkoutText.setTextAnimation("PLACE ORDER")
+                        setBottomSheetIcon("wallet")
                     }
                 }
             }
@@ -184,9 +189,32 @@ class InvoiceActivity :
             }
         })
 
+        filterBtn.setOnClickListener {
+            if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                lifecycleScope.launch {
+                    if(viewModel.isCWMCart) {
+                        viewModel.clearCart(viewModel.cwmDish)
+                    } else {
+                        viewModel.clearCart(viewModel.totalCartItems)
+                    }
+                }
+            } else {
+                Intent(this, WalletActivity::class.java).also { intent ->
+                    intent.putExtra(NAVIGATION, CHECKOUT_PAGE)
+                    startActivity(intent)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                }
+            }
+        }
+
         cartBtn.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            cartBottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
+            if(cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+            } else {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
 
         checkoutBtn.setOnClickListener {
@@ -203,6 +231,24 @@ class InvoiceActivity :
             }
             showListBottomSheet(this, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
         }
+    }
+
+    private fun setBottomSheetIcon(content: String) {
+        val icon =  when(content) {
+            "coupon" -> R.drawable.ic_coupon
+            "delete" -> R.drawable.ic_delete
+            "wallet" -> R.drawable.ic_wallet
+            else -> R.drawable.ic_filter
+        }
+        filterBtn.fadOutAnimation(300)
+        filterBtn.setImageDrawable(ContextCompat.getDrawable(this, icon))
+        filterBtn.fadInAnimation(300)
+        filterBtn.imageTintList =
+            if (content == "delete") {
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
+            } else {
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
+            }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -318,6 +364,11 @@ class InvoiceActivity :
                     showErrorSnackBar(event.message, false)
                     setDataToViews()
                     applyUiChangesWithCoupon(true)
+                }
+                is CheckoutViewModel.UiUpdate.CartCleared -> {
+                    cartAdapter.emptyCart()
+                    setDataToViews()
+                    applyUiChangesWithCoupon(false)
                 }
                 is CheckoutViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
@@ -486,8 +537,8 @@ class InvoiceActivity :
             onBackPressed()
         }
 
-        binding.ivWallet.setOnClickListener {
-            Intent(this, WalletActivity::class.java).also {
+        binding.ivCustomerSupport.setOnClickListener {
+            Intent(this, ChatActivity::class.java).also {
                 it.putExtra(NAVIGATION, CHECKOUT_PAGE)
                 startActivity(it)
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)

@@ -394,15 +394,12 @@ class ShoppingMainActivity :
 
         cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
                         checkoutText.setTextAnimation("Rs: $mCartPrice", 200)
-//                        checkoutText.text = "Rs: $mCartPrice"
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         checkoutText.setTextAnimation("CHECKOUT", 200)
-//                        checkoutText.text = "CHECKOUT"
                     }
                 }
             }

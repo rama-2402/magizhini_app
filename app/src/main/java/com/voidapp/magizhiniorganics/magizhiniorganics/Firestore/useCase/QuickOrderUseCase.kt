@@ -178,7 +178,7 @@ class QuickOrderUseCase(
 
     private suspend fun makeTransactionEntry(transactionHistory: TransactionHistory): String {
         return try {
-            when(val result = fbRepository.updateTransaction(transactionHistory)) {
+            when(val result = fbRepository.updateTransaction(transactionHistory, "Quick Order Purchase")) {
                 is NetworkResult.Success -> result.data.toString()
                 is NetworkResult.Failed -> "failed"
                 else -> "failed"

@@ -50,9 +50,7 @@
                     android:id="@+id/llVisibleLayout"
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
-                    android:layout_marginStart="@dimen/material_size_8"
                     android:layout_marginTop="@dimen/material_size_8"
-                    android:layout_marginEnd="@dimen/material_size_8"
                     android:elevation="@dimen/material_size_8"
                     android:gravity="top"
                     android:orientation="horizontal"
@@ -136,14 +134,12 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:foreground="?android:attr/selectableItemBackgroundBorderless"
                         android:backgroundTint="@color/white"
-                        android:scaleType="centerInside"
                         android:src="@drawable/ic_filter"
+                        android:padding="@dimen/material_size_8"
                         app:tint="@color/green_base"
                         />
 
                 </LinearLayout>
-
-
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvCart"
                     android:layout_width="match_parent"

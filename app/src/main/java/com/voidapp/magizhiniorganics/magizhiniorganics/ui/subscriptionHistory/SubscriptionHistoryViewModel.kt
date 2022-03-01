@@ -149,7 +149,7 @@ class SubscriptionHistoryViewModel(
     }
 
     fun updateTransaction(transaction: TransactionHistory) = viewModelScope.launch (Dispatchers.IO) {
-        _status.value = fbRepository.updateTransaction(transaction)
+        _status.value = fbRepository.updateTransaction(transaction, "Subscription Renewal")
     }
 
     suspend fun renewSubscription(sub: SubscriptionEntity, transactionID: String) {

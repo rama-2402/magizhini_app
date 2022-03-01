@@ -28,3 +28,10 @@ data class TestimonialsEntity (
     @ColumnInfo
     var order: Int = 0
 )
+
+data class Partners(
+    var id: String = "",
+    var partnerName: String = "",
+    var imageUrl: String = "",
+    var clickAction: String = ""
+)

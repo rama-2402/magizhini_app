@@ -1,11 +1,13 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
+import android.provider.Telephony
 import android.util.Log
 import androidx.lifecycle.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +43,8 @@ class HomeViewModel (
     val specialBanners: LiveData<List<SpecialBanners>> = _specialBanners
     private var _notifications: MutableLiveData<List<UserNotificationEntity>?> = MutableLiveData()
     val notifications: LiveData<List<UserNotificationEntity>?> = _notifications
+    private var _partners: MutableLiveData<List<Partners>?> = MutableLiveData()
+    val partners: LiveData<List<Partners>?> = _partners
 
     val bannersList: MutableList<SpecialBanners> = mutableListOf()
 
@@ -342,5 +346,12 @@ class HomeViewModel (
 
     fun updateBirthdayCard(customerID: String) = viewModelScope.launch(Dispatchers.IO) {
         fbRepository.updateBirthdayCard(customerID)
+    }
+
+    fun getPartnersData() = viewModelScope.launch(Dispatchers.IO) {
+        val currentPartners: List<Partners>? = fbRepository.getAllPartners()
+        withContext(Dispatchers.Main) {
+            _partners.value = currentPartners
+        }
     }
 }

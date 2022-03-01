@@ -94,7 +94,7 @@ class FirestoreRepository (
 
     suspend fun generateOrderID(): String = firestore.generateOrderID()
 
-    suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult = firestore.updateTransaction(transaction)
+    suspend fun updateTransaction(transaction: TransactionHistory, comments: String): NetworkResult = firestore.updateTransaction(transaction, comments)
     suspend fun createGlobalTransactionEntry(globalTransaction: GlobalTransaction): Boolean = firestore.createGlobalTransactionEntry(globalTransaction)
 //    suspend fun updateTransaction(transaction: TransactionHistory): String = firestore.updateTransaction(transaction)
 
@@ -113,5 +113,7 @@ class FirestoreRepository (
     suspend fun getAllCWMDishes(): NetworkResult = firestore.getAllCWMDishes()
     suspend fun getDishDetails(dishID: String): NetworkResult = firestore.getDishDetails(dishID)
     suspend fun updateBirthdayCard(customerID: String) = firestore.updateBirthdayCard(customerID)
+
+    suspend fun getAllPartners(): List<Partners>? = firestore.getAllPartners()
 
 }

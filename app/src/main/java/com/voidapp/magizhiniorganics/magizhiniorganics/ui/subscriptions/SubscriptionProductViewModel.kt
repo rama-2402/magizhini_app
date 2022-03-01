@@ -165,7 +165,7 @@ class SubscriptionProductViewModel(
     }
 
     fun updateTransaction(transaction: TransactionHistory) = viewModelScope.launch (Dispatchers.IO) {
-        _status.value = fbRepository.updateTransaction(transaction)
+        _status.value = fbRepository.updateTransaction(transaction, "New subscription purchase")
     }
 
     suspend fun generateSubscriptionID(id: String): String = withContext(Dispatchers.IO) {

@@ -23,6 +23,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_DISHE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PARTNERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
@@ -318,7 +319,7 @@ class Firestore(
                 purpose = ADD_MONEY,
                 transactionFor = "Magizhini Referral Bonus"
             ).let {
-                when(updateTransaction(it)) {
+                when(updateTransaction(it, "Magizhini Referral Bonus")) {
                     is NetworkResult.Failed -> false
                     else -> true
                 }
@@ -361,7 +362,7 @@ class Firestore(
                 status = SUCCESS,
                 purpose = ADD_MONEY
             ).let {
-                when(updateTransaction(it)) {
+                when(updateTransaction(it, "Magizhini Referral Bonus")) {
                     is NetworkResult.Success -> true
                     else -> false
                 }
@@ -1342,7 +1343,7 @@ class Firestore(
         }
     }
 
-    suspend fun updateTransaction(transaction: TransactionHistory): NetworkResult =
+    suspend fun updateTransaction(transaction: TransactionHistory, comments: String): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val path = mFireStore.collection(WALLET)
@@ -1366,7 +1367,7 @@ class Firestore(
                             transactionAmount = transaction.amount,
                             transactionDirection = "Added Money to User Wallet",
                             timestamp = transaction.timestamp,
-                            transactionReason = ""
+                            transactionReason = comments
                         ).let {
                             if (transaction.purpose == ADD_MONEY) {
                                 it.transactionReason = "This transaction may be Adding extra Money to Wallet or REFUND"
@@ -1610,6 +1611,43 @@ class Firestore(
                 .document("user").delete()
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: deleting birthday card greeting", it) }
+        }
+    }
+
+    suspend fun getAllPartners(): List<Partners>? = withContext(Dispatchers.IO) {
+        val partners = mutableListOf<Partners>()
+        return@withContext try {
+            val partnersDoc = mFireStore
+                .collection(PARTNERS)
+                .get()
+                .await()
+            if (partnersDoc.isEmpty) {
+                partners.add(
+                    Partners(
+                        "",
+                        "Eyalvathu Karavel",
+                        "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/partners%2Feyalvathu_karavel.jpg?alt=media&token=b69cfd95-2bba-4322-a734-919e47c99362",
+                        "Open"
+                    )
+                )
+                return@withContext partners
+
+            }
+            for (doc in partnersDoc.documents) {
+                val partner = doc.toObject(Partners::class.java)
+                partner?.let { partners.add(it) }
+            }
+            partners
+        } catch (e: Exception) {
+            partners.add(
+                Partners(
+                    "",
+                    "Eyalvathu Karavel",
+                    "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/partners%2Feyalvathu_karavel.jpg?alt=media&token=b69cfd95-2bba-4322-a734-919e47c99362",
+                    "Open"
+                )
+            )
+            partners
         }
     }
 }
