@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:$USER_HOME$/Android/Sdk/icons/material/materialicons/delete/baseline_delete_24.xml" />
+                                      <entry key="url" value="file:$USER_HOME$/Android/Sdk/icons/material/materialicons/work/baseline_work_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,8 +28,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="ff5b5b" />
-                            <entry key="outputName" value="ic_delete_red" />
+                            <entry key="color" value="242424" />
+                            <entry key="outputName" value="ic_careers" />
                           </map>
                         </option>
                       </PersistentState>

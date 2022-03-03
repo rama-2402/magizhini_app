@@ -42,7 +42,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BROADCAST
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DESCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.HOME_PAGE
@@ -57,34 +56,26 @@ import org.kodein.di.generic.instance
 import android.content.pm.ResolveInfo
 import android.util.Log
 import com.google.firebase.BuildConfig
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
-import com.voidapp.magizhiniorganics.magizhiniorganics.PartnersAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PartnersAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts.ContactUsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_BANNER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OPEN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_BANNER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_BANNER
-import kotlinx.coroutines.tasks.await
 
 
 import java.util.*
@@ -859,7 +850,9 @@ class HomeActivity :
                     }
                 }
                 R.id.menuContactUs -> {
-                    showListBottomSheet(this, arrayListOf("Call", "WhatsApp", "E-Mail"))
+                    Intent(this, ContactUsActivity::class.java).also {
+                        startActivity(it)
+                    }
                 }
                 R.id.menuContactDeveloper -> {
                     showListBottomSheet(this, arrayListOf("WhatsApp", "E-Mail"), "developer")
@@ -905,28 +898,6 @@ class HomeActivity :
             }
             "E-Mail" -> {
                 shareToGMail(arrayOf("rama_void@zohomail.in"), "", "")
-            }
-        }
-    }
-
-    fun selectedContactMethod(selectedItem: String) {
-        when(selectedItem) {
-            "Call" -> {
-                this.callNumberIntent("7299827393")
-            }
-            "WhatsApp" -> {
-                val message = ""
-                startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(
-                            "https://api.whatsapp.com/send?phone=+917299827393&text=$message"
-                        )
-                    )
-                )
-            }
-            "E-Mail" -> {
-                shareToGMail(arrayOf("magizhiniOrganics2018@gmail.com"), "", "")
             }
         }
     }

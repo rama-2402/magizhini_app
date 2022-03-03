@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        tools:context=".ui.business.contacts.NewPartnerActivity">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/apbAppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green_base"
+            android:gravity="center"
+            app:iconTint="@color/white">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/tbToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivBackBtn"
+                    android:layout_width="32dp"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="@dimen/material_size_4"
+                    android:src="@drawable/ic_back"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:id="@+id/tvToolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:fontFamily="@font/roboto"
+                    android:text="New Partner Registration"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_large" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivSend"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
+                    android:layout_gravity="end"
+                    android:src="@drawable/ic_send"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:contentDescription="@string/favorites_icon"
+                    app:tint="@color/white"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etlPartnerName"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:hint="Name"
+                app:boxStrokeColor="@color/green_base"
+                app:flow_wrapMode="aligned"
+                android:textColorHint="@color/green_base"
+                app:endIconMode="clear_text"
+                app:hintTextColor="@color/green_base"
+                android:layout_marginTop="@dimen/material_size_4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:startIconDrawable="@drawable/ic_person"
+                app:startIconTint="@color/green_base">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPartnerName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:cursorVisible="true"
+                    android:inputType="textShortMessage"
+                    android:singleLine="true"
+                    android:textColorHint="@color/green_base"
+                    android:textColor="@color/gray700"
+                    android:textCursorDrawable="@null"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etlBusinessName"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:hint="Business Name"
+                app:boxStrokeColor="@color/green_base"
+                app:flow_wrapMode="aligned"
+                android:textColorHint="@color/green_base"
+                app:endIconMode="clear_text"
+                app:hintTextColor="@color/green_base"
+                android:layout_marginTop="@dimen/material_size_4"
+                app:layout_constraintTop_toBottomOf="@id/etlPartnerName"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:startIconDrawable="@drawable/ic_person"
+                app:startIconTint="@color/green_base">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etBusinessName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:cursorVisible="true"
+                    android:inputType="textShortMessage"
+                    android:singleLine="true"
+                    android:textColorHint="@color/green_base"
+                    android:textColor="@color/gray700"
+                    android:textCursorDrawable="@null"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etlPhoneNumber"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:hint="Alternate Phone"
+                app:boxStrokeColor="@color/green_base"
+                app:flow_wrapMode="aligned"
+                android:textColorHint="@color/green_base"
+                app:endIconMode="clear_text"
+                app:hintTextColor="@color/green_base"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="@dimen/material_size_4"
+                app:layout_constraintTop_toBottomOf="@id/etlBusinessName"
+                app:prefixText="+91"
+                app:startIconDrawable="@drawable/ic_phone_msg"
+                app:startIconTint="@color/green_base">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPhoneNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:cursorVisible="true"
+                    android:inputType="number"
+                    android:maxLength="10"
+                    android:textColorHint="@color/green_base"
+                    android:textColor="@color/gray700"
+                    android:textCursorDrawable="@null"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etlEmailID"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:hint="Email ID"
+                app:boxStrokeColor="@color/green_base"
+                app:flow_wrapMode="aligned"
+                android:textColorHint="@color/green_base"
+                app:endIconMode="clear_text"
+                app:hintTextColor="@color/green_base"
+                android:layout_marginTop="@dimen/material_size_4"
+                app:layout_constraintTop_toBottomOf="@id/etlPhoneNumber"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:startIconDrawable="@drawable/ic_email"
+                app:startIconTint="@color/green_base">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmailID"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:cursorVisible="true"
+                    android:inputType="textEmailAddress"
+                    android:singleLine="true"
+                    android:textColorHint="@color/green_base"
+                    android:textColor="@color/gray700"
+                    android:textCursorDrawable="@null"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etlSocialMedia"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:hint="Social Media"
+                app:boxStrokeColor="@color/green_base"
+                app:flow_wrapMode="aligned"
+                android:textColorHint="@color/green_base"
+                app:endIconMode="clear_text"
+                app:hintTextColor="@color/green_base"
+                android:layout_marginTop="@dimen/material_size_4"
+                app:layout_constraintTop_toBottomOf="@id/etlEmailID"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:startIconDrawable="@drawable/ic_notify_on"
+                app:startIconTint="@color/green_base">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSocialMedia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:cursorVisible="true"
+                    android:inputType="textEmailAddress"
+                    android:singleLine="true"
+                    android:textColorHint="@color/green_base"
+                    android:textColor="@color/gray700"
+                    android:textCursorDrawable="@null"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etlShortDescription"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:hint="Short Proposal Description"
+                app:boxStrokeColor="@color/green_base"
+                app:flow_wrapMode="aligned"
+                android:textColorHint="@color/green_base"
+                android:gravity="top"
+                app:endIconMode="clear_text"
+                app:hintTextColor="@color/green_base"
+                android:nestedScrollingEnabled="true"
+                android:layout_marginBottom="@dimen/material_size_8"
+                android:layout_marginTop="@dimen/material_size_4"
+                app:layout_constraintTop_toBottomOf="@id/etlSocialMedia"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etShortDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:cursorVisible="true"
+                    android:gravity="top"
+                    android:inputType="textLongMessage"
+                    android:nestedScrollingEnabled="true"
+                    android:singleLine="false"
+                    android:textColorHint="@color/green_base"
+                    android:textColor="@color/gray700"
+                    android:textCursorDrawable="@null"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</layout>

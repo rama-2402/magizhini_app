@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.PhoneAuthCredential
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
@@ -115,5 +116,6 @@ class FirestoreRepository (
     suspend fun updateBirthdayCard(customerID: String) = firestore.updateBirthdayCard(customerID)
 
     suspend fun getAllPartners(): List<Partners>? = firestore.getAllPartners()
+    suspend fun sendNewPartnerRequest(newPartner: BusinessViewModel.NewPartner): NetworkResult = firestore.sendNewPartnerRequest(newPartner)
 
 }

@@ -24,11 +24,17 @@
         android:supportsRtl="true"
         android:theme="@style/splashScreenTheme">
         <activity
+            android:name=".ui.business.contacts.NewPartnerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.business.contacts.ContactUsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.quickOrder.QuickOrderActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden"/>
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.cwm.dish.DishActivity"
             android:exported="false"

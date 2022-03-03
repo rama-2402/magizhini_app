@@ -14,6 +14,7 @@ import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
@@ -22,6 +23,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADD_MONEY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_DISHES
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NEW_PARTNERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PARTNERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
@@ -1639,6 +1641,7 @@ class Firestore(
             }
             partners
         } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: deleting birthday card greeting", it) }
             partners.add(
                 Partners(
                     "",
@@ -1648,6 +1651,20 @@ class Firestore(
                 )
             )
             partners
+        }
+    }
+
+    suspend fun sendNewPartnerRequest(newPartner: BusinessViewModel.NewPartner): NetworkResult = withContext(Dispatchers.IO){
+        return@withContext try {
+            mFireStore
+                .collection(NEW_PARTNERS)
+                .document()
+                .set(newPartner, SetOptions.merge())
+                .await()
+            NetworkResult.Success("", null)
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: sending new partner request failed", it) }
+            NetworkResult.Failed("", null)
         }
     }
 }

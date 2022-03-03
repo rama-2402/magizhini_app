@@ -24,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.ncorti.slidetoact.SlideToActView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts.ContactUsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
@@ -287,6 +288,12 @@ open class BaseActivity : AppCompatActivity() {
                 }
                 is InvoiceActivity -> activity.moveToCustomerSupport()
                 is HomeActivity -> activity.showReferralOptions()
+                is ContactUsActivity -> {
+                    when(data) {
+                        "business" -> activity.addNewPartnerAccount()
+                        "career" -> activity.sendCareerMail()
+                    }
+                }
             }
         }
         exitBottomSheetDialog.show()
@@ -421,8 +428,6 @@ open class BaseActivity : AppCompatActivity() {
                         when(data) {
                             "referral" -> activity.referralAction(selectedItem)
                             "developer" -> activity.selectedContactMethodForDeveloper(selectedItem)
-                            else -> activity.selectedContactMethod(selectedItem)
-
                         }
                     }
                     is SubscriptionProductActivity -> {
@@ -443,6 +448,9 @@ open class BaseActivity : AppCompatActivity() {
                     is InvoiceActivity -> {
                         hideListBottomSheet()
                         activity.selectedPaymentMode(selectedItem)
+                    }
+                    is ContactUsActivity -> {
+                        activity.selectedContactMethod(selectedItem)
                     }
                 }
 

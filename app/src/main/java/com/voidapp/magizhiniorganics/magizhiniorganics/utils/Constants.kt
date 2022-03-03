@@ -144,6 +144,7 @@ object Constants {
     const val REFERRER_NUMBER: String = "referrerNumber"
     const val FAVORITES: String = "favorites"
     const val PARTNERS: String = "Partners"
+    const val NEW_PARTNERS: String = "NewPartners"
 
     //product status
     const val PRODUCTS: String = "Products"

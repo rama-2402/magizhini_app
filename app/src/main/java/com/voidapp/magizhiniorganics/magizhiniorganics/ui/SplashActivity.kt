@@ -83,7 +83,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
     private fun backgroundCheck(isNewDay: String, isNewUser: String, month: Int) {
         if (isNewUser == "") {
             lifecycleScope.launch {
-                delay(1500)
+                delay(1000)
                 Intent(this@SplashActivity, OnBoardingActivity::class.java).also {
                     startActivity(it)
                     finish()

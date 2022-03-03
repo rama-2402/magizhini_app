@@ -1,14 +1,11 @@
-package com.voidapp.magizhiniorganics.magizhiniorganics
+package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.AdapterView
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvPartnerItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
 
 class PartnersAdapter(
     val partners: List<Partners>,

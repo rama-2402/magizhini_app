@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        tools:context=".ui.business.contacts.ContactUsActivity">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/apbAppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green_base"
+            android:gravity="center"
+            app:iconTint="@color/white">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/tbToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivBackBtn"
+                    android:layout_width="32dp"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="@dimen/material_size_4"
+                    android:src="@drawable/ic_back"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:id="@+id/tvToolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:fontFamily="@font/roboto"
+                    android:text="Contact Us"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_large" />
+
+                <!--                <com.google.android.material.imageview.ShapeableImageView-->
+                <!--                    android:id="@+id/ivFilter"-->
+                <!--                    android:layout_width="@dimen/material_size_24"-->
+                <!--                    android:layout_height="@dimen/material_size_24"-->
+                <!--                    android:layout_gravity="end"-->
+                <!--                    android:src="@drawable/ic_filter"-->
+                <!--                    android:layout_marginEnd="@dimen/material_size_16"-->
+                <!--                    android:contentDescription="@string/favorites_icon"-->
+                <!--                    app:tint="@color/white"-->
+                <!--                    android:background="?android:attr/selectableItemBackgroundBorderless"-->
+                <!--                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>-->
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/ivContactUs"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:background="@drawable/shape_round_rectangle_8"
+                android:contentDescription="@string/favorites_icon"
+                android:elevation="@dimen/material_size_4"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                android:paddingStart="@dimen/material_size_24"
+                android:paddingTop="@dimen/material_size_24"
+                android:paddingEnd="@dimen/material_size_24"
+                android:paddingBottom="@dimen/material_size_48"
+                android:src="@drawable/ic_contact"
+                app:layout_constraintEnd_toStartOf="@id/ivBecomePartner"
+                app:layout_constraintHeight_percent=".2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent=".3"
+                app:tint="@color/green_base" />
+
+            <TextView
+                android:id="@+id/tvContactUs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/material_size_8"
+                android:elevation="4dp"
+                android:gravity="center"
+                android:text="Contact Us"
+                android:textColor="@color/gray700"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/ivContactUs"
+                app:layout_constraintEnd_toEndOf="@id/ivContactUs"
+                app:layout_constraintStart_toStartOf="@id/ivContactUs" />
+
+            <ImageView
+                android:id="@+id/ivBecomePartner"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:background="@drawable/shape_round_rectangle_8"
+                android:contentDescription="@string/favorites_icon"
+                android:elevation="@dimen/material_size_4"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                android:paddingStart="@dimen/material_size_24"
+                android:paddingTop="@dimen/material_size_24"
+                android:paddingEnd="@dimen/material_size_24"
+                android:paddingBottom="@dimen/material_size_48"
+                android:src="@drawable/ic_partner"
+                app:layout_constraintEnd_toStartOf="@id/ivCareers"
+                app:layout_constraintHeight_percent=".2"
+                app:layout_constraintStart_toEndOf="@id/ivContactUs"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent=".3"
+                app:tint="@color/green_base" />
+
+            <TextView
+                android:id="@+id/tvBecomePartner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/material_size_8"
+                android:elevation="4dp"
+                android:gravity="center"
+                android:text="Become \n Partner"
+                android:textColor="@color/gray700"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/ivBecomePartner"
+                app:layout_constraintEnd_toEndOf="@id/ivBecomePartner"
+                app:layout_constraintStart_toStartOf="@id/ivBecomePartner" />
+
+            <ImageView
+                android:id="@+id/ivCareers"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:background="@drawable/shape_round_rectangle_8"
+                android:contentDescription="@string/favorites_icon"
+                android:elevation="@dimen/material_size_4"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                android:paddingStart="@dimen/material_size_24"
+                android:paddingTop="@dimen/material_size_24"
+                android:paddingEnd="@dimen/material_size_24"
+                android:paddingBottom="@dimen/material_size_48"
+                android:src="@drawable/ic_careers"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent=".2"
+                app:layout_constraintStart_toEndOf="@id/ivBecomePartner"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent=".3"
+                app:tint="@color/green_base" />
+
+            <TextView
+                android:id="@+id/tvCareers"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/material_size_8"
+                android:elevation="4dp"
+                android:gravity="center"
+                android:text="Careers"
+                android:textColor="@color/gray700"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/ivCareers"
+                app:layout_constraintEnd_toEndOf="@id/ivCareers"
+                app:layout_constraintStart_toStartOf="@id/ivCareers" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</layout>
