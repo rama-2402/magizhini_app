@@ -510,6 +510,7 @@ class ProductViewModel(
                         dbRepository.upsertProduct(product)
                     }
                 }
+                cartItems.clear()
             }
             val clearCart = async {
                 product?.let {
@@ -517,7 +518,6 @@ class ProductViewModel(
                     it.variantInCart.clear()
                 }
                 cartItemsCount = 0
-                cartItems.clear()
                 dbRepository.clearCart()
             }
             clearInProduct.await()

@@ -29,22 +29,22 @@ class DatePickerLib {
                 datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
         }
 
-    fun startSubscriptionDate(activity: SubscriptionProductActivity) {
-        //val themeFactory = object: DarkThemeFactory() {}
-
-            val callback = SingleDayPickCallback { date ->
-                activity.filterDate(date.timeInMillis)
-            }
-            val min = CalendarFactory.newInstance(CalendarType.CIVIL)
-            min.add(Calendar.DAY_OF_MONTH, +1)
-                val today = CivilCalendar()
-                val datePicker = PrimeDatePicker.dialogWith(today)
-                    .pickSingleDay(callback)
-                    .minPossibleDate(min)
-                    //.applyTheme(themeFactory)
-                    .build()
-                datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
-        }
+//    fun startSubscriptionDate(activity: SubscriptionProductActivity) {
+//        //val themeFactory = object: DarkThemeFactory() {}
+//
+//            val callback = SingleDayPickCallback { date ->
+//                activity.filterDate(date.timeInMillis)
+//            }
+//            val min = CalendarFactory.newInstance(CalendarType.CIVIL)
+//            min.add(Calendar.DAY_OF_MONTH, +1)
+//                val today = CivilCalendar()
+//                val datePicker = PrimeDatePicker.dialogWith(today)
+//                    .pickSingleDay(callback)
+//                    .minPossibleDate(min)
+//                    //.applyTheme(themeFactory)
+//                    .build()
+//                datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
+//        }
 
 //    fun pickMultipleDates(activity: SubscriptionHistoryActivity, minDate: Int, maxDate: Int) {
 //        val callback = MultipleDaysPickCallback { dates ->

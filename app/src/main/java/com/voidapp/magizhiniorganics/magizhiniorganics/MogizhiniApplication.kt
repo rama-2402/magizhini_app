@@ -9,6 +9,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.UserDatabase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.ProfileUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
+import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.SubscriptionUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModelFactory
@@ -49,6 +50,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         //use cases
         bind() from provider { ProfileUseCase(instance(), instance()) }
         bind() from provider { QuickOrderUseCase(instance()) }
+        bind() from provider { SubscriptionUseCase(instance()) }
 
         //viewModels
         bind() from provider { SignInViewModelFactory(instance(), instance()) }
@@ -61,7 +63,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { ConversationViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { WalletViewModelFactory(instance(), instance()) }
-        bind() from provider { SubscriptionProductViewModelFactory(instance(), instance()) }
+        bind() from provider { SubscriptionProductViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { SubscriptionViewModelFactory(instance(), instance()) }
         bind() from provider { NotificationsViewModelFactory(instance(), instance()) }
         bind() from provider { CWMViewModelFactory(instance(), instance()) }

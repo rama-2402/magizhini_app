@@ -1095,7 +1095,11 @@ class Firestore(
             }
         }
 
-    suspend fun generateSubscription(subscription: Subscription):NetworkResult = withContext(Dispatchers.IO) {
+    suspend fun generateSubscription(
+        subscription: Subscription,
+        userName: String? = null,
+        transactionID: String? = null
+    ):NetworkResult = withContext(Dispatchers.IO) {
         val sub = subscription.toSubscriptionEntity()
         try {
             val updateLocal = async { updateLocalSubscription(sub) }
@@ -1108,11 +1112,31 @@ class Firestore(
                 e.message?.let { logCrash("firestore: uploading the generated sub to local Db", it) }
                 false
             } }
+            val createGlobalTransaction = async {
+                if (subscription.paymentMode != WALLET) {
+                    GlobalTransaction(
+                            id = "",
+                            userID =  subscription.customerID,
+                            userName = userName!!,
+                            userMobileNumber = subscription.phoneNumber,
+                            transactionID = transactionID!!,
+                            transactionType = subscription.paymentMode,
+                            transactionAmount = subscription.estimateAmount,
+                            transactionDirection = SUBSCRIPTION,
+                            timestamp = System.currentTimeMillis(),
+                            transactionReason = "${subscription.productName} ${subscription.variantName} New Subscription"
+                        ).let { return@async createGlobalTransactionEntry(it) }
+                } else {
+                    return@async true
+                }
+            }
+
 
             if (
                 updateStore.await() &&
                 updateLocal.await() &&
                 updateCloud.await() &&
+                createGlobalTransaction.await() &&
                 createSubInDB.await()
             ) {
                 if (subscription.subType != MONTHLY) {
@@ -1391,10 +1415,10 @@ class Firestore(
             }
         }
 
-    suspend fun generateSubscriptionID(id: String): String =
+    suspend fun generateSubscriptionID(): String =
         mFireStore.collection(SUBSCRIPTION)
             .document(SUB_ACTIVE)
-            .collection(id)
+            .collection("Sub")
             .document().id
 
 

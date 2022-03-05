@@ -640,7 +640,7 @@ class InvoiceActivity :
             LocationCode = addressMap["LocationCode"].toString(),
             LocationCodePosition = addressMap["LocationCodePosition"].toString().toInt(),
             city = addressMap["city"].toString()
-        ).let { address ->
+        ).also { address ->
             if (isNew) {
                 viewModel.addAddress(address)
             } else {

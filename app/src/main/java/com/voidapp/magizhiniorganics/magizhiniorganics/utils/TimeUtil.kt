@@ -48,6 +48,12 @@ class TimeUtil {
         return monthFormat.format(System.currentTimeMillis()).toInt()
     }
 
+    fun getMonthNumber(dateLong: Long): Int {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = dateLong
+        return calendar[Calendar.MONTH]
+    }
+
     fun getYear(dateLong: Long = 0L): String {
         val year = SimpleDateFormat("yyyy")
         val date = if (dateLong == 0L) {
@@ -56,6 +62,16 @@ class TimeUtil {
             dateLong
         }
         return year.format(date)
+    }
+
+    fun getDateNumber(dateLong: Long): String {
+        val dateFormat = SimpleDateFormat("dd")
+        val date = if (dateLong == 0L) {
+            System.currentTimeMillis()
+        } else {
+            dateLong
+        }
+        return dateFormat.format(date)
     }
 
     fun getCurrentYearMonthDate(): Int {

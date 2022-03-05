@@ -113,6 +113,19 @@ class LoadStatusDialog: DialogFragment() {
                     playAnimation()
                 }
             }
+            //subscription part
+            "validating" -> {
+                binding.ltAnimImg.apply {
+                    setAnimation(R.raw.validating_purchase)
+                    playAnimation()
+                }
+            }
+            "fail" -> {
+                binding.ltAnimImg.apply {
+                    setAnimation(R.raw.empty)
+                    playAnimation()
+                }
+            }
         }
     }
 

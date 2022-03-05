@@ -86,7 +86,6 @@ class ProductActivity :
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_product)
         viewModel = ViewModelProvider(this, factory).get(ProductViewModel::class.java)
-        binding.viewmodel = viewModel
 
         viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
 
@@ -427,10 +426,6 @@ class ProductActivity :
                 ""
             }
         })
-
-        binding.ivPreviewImage.setOnClickListener {
-            onBackPressed()
-        }
     }
 
     private fun populateProductData() {

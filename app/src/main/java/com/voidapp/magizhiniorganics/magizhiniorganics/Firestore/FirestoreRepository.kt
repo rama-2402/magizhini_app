@@ -66,9 +66,9 @@ class FirestoreRepository (
     suspend fun cancelOrder(orderEntity: OrderEntity): NetworkResult = firestore.cancelOrder(orderEntity)
 
     //subscription
-    suspend fun generateSubscription(subscription: Subscription): NetworkResult = firestore.generateSubscription(subscription)
+    suspend fun generateSubscription(subscription: Subscription, userName: String?, transactionID: String?): NetworkResult = firestore.generateSubscription(subscription, userName, transactionID)
 
-    suspend fun generateSubscriptionID(id: String): String = firestore.generateSubscriptionID(id)
+    suspend fun generateSubscriptionID(): String = firestore.generateSubscriptionID()
 
     suspend fun renewSubscription(sub: SubscriptionEntity, updatedCancelledDates: ArrayList<Long>): NetworkResult = firestore.renewSubscription(sub, updatedCancelledDates)
 

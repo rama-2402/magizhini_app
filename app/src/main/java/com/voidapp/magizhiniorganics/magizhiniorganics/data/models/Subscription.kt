@@ -14,7 +14,7 @@ data class Subscription(
     var basePay: Float = 0f,
     var paymentMode: String = "Wallet",
     var estimateAmount: Float = 0f,
-    var subType: String = "Single Purchase",
+    var subType: String = "Monthly",
     var status: String = "",
     var customDates: ArrayList<String> = arrayListOf(),
     var deliveredDates: ArrayList<Long> = arrayListOf(),

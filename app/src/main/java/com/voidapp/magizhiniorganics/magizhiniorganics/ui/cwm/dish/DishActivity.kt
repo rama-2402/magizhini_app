@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcelable
@@ -10,6 +11,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -32,9 +34,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.CWMViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.CWMViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -44,7 +46,10 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
 import java.util.ArrayList
-
+/*
+* TODO
+*  Need to add reviews like in product sub page instead of the cart page
+* */
 class DishActivity :
     BaseActivity(),
     KodeinAware,
@@ -63,6 +68,7 @@ class DishActivity :
     private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
     private lateinit var cartBtn: ImageBadgeView
     private lateinit var checkoutText: TextView
+    private lateinit var filterBtn: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,10 +132,10 @@ class DishActivity :
 
     private fun populateCartBottomSheet() {
         val bottomSheet = findViewById<ConstraintLayout>(R.id.clBottomCart)
-        val filterBtn = findViewById<ImageView>(R.id.ivFilter)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
         cartBtn = findViewById(R.id.ivCart)
+        filterBtn = findViewById<ImageView>(R.id.ivFilter)
 
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
@@ -140,13 +146,18 @@ class DishActivity :
 
         cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        checkoutText.text = "Rs: ${viewModel.dish.totalPrice}"
+                        checkoutText.setTextAnimation(
+                            "Rs: ${viewModel.dish.totalPrice}",
+                            ProductActivity.ANIMATION_DURATION
+                        )
+//                        setBottomSheetIcon("delete")
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
-                        checkoutText.text = "CHECKOUT"
+                        checkoutText.setTextAnimation("CHECKOUT",
+                            ProductActivity.ANIMATION_DURATION
+                        )
                     }
                 }
             }

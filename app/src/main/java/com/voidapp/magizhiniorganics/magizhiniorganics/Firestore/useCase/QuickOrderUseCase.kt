@@ -97,19 +97,13 @@ class QuickOrderUseCase(
                     .document(userID)
                     .get().await()
 
-            if (quickOrderDoc.exists()) {
-                quickOrderDoc.toObject(QuickOrder::class.java)?.let {
-                    NetworkResult.Success("estimate", it)
-                } ?: NetworkResult.Success("estimate", null)
-            } else {
-                NetworkResult.Success("estimate", null)
-            }
-//            if (quickOrderDoc.exists()) {
-//                    quickOrder = quickOrderDoc.toObject(QuickOrder::class.java)
-//                    NetworkResult.Success("estimate", quickOrder)
-//                } else {
-//                    NetworkResult.Success("estimate", null)
-//                }
+                if (quickOrderDoc.exists()) {
+                    quickOrderDoc.toObject(QuickOrder::class.java)?.let {
+                        NetworkResult.Success("estimate", it)
+                    } ?: NetworkResult.Success("estimate", null)
+                } else {
+                    NetworkResult.Success("estimate", null)
+                }
             } catch (e: Exception) {
                 NetworkResult.Failed("estimate", e.message.toString())
             }
@@ -332,7 +326,7 @@ class QuickOrderUseCase(
             quickOrderToDelete?.let {
                 val storeUpdate = async {
                     fireStore
-                        .collection(Constants.QUICK_ORDER)
+                        .collection(QUICK_ORDER)
                         .document(userID)
                         .delete()
                 }
@@ -341,7 +335,6 @@ class QuickOrderUseCase(
                     for (i in it.imageUrl.indices) {
                         val url = it.imageUrl[i]
                         val imageName = storage.getReferenceFromUrl(url).name
-                        Log.e("qw", "updateCartItemsInOrder: $imageName", )
                         val sRef: StorageReference = mFireStoreStorage.child(
                             "$ORDER_ESTIMATE_PATH${it.customerID}/$imageName"
                         )

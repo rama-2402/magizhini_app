@@ -19,14 +19,13 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WEDNESDAY
 
 class CustomSubDaysDialog (
     private val context: Context,
-    private val days: ArrayList<String>,
+    private val days: MutableList<String>,
     private val activity: Activity
 ){
 
     private val bottomSheetDialog: BottomSheetDialog = BottomSheetDialog(context, R.style.BottomSheetDialog)
 
     init {
-
         val view: DialogCustomSubDaysBinding =
             DataBindingUtil.inflate(
                 LayoutInflater.from(context),

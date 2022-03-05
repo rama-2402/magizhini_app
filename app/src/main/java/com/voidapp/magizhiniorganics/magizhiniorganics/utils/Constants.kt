@@ -48,6 +48,7 @@ object Constants {
     const val MINUTE_MILLIS: Int = 60 * SECOND_MILLIS
     const val HOUR_MILLIS: Int = 60 * MINUTE_MILLIS
     const val DAY_MILLIS: Int = 24 * HOUR_MILLIS
+    const val SINGLE_DAY_LONG: Long = 86400000
 
     //collection data
     const val ADMIN: String = "Admin"

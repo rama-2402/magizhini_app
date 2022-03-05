@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -180,7 +181,8 @@ class ShoppingMainActivity :
 
     private fun checkProductsToDisplay() {
         //live data of the products and items in the list
-        if (categoryFilter == Constants.ALL_PRODUCTS) {
+        Log.e("qw", "setFilteredProducts: $categoryFilter", )
+        if (categoryFilter == ALL_PRODUCTS) {
             viewModel.getAllProductsStatic()
         } else {
             setFilteredProducts()
@@ -469,7 +471,7 @@ class ShoppingMainActivity :
                 Intent(this, SubscriptionProductActivity::class.java).also {
                     it.putExtra(Constants.PRODUCTS, product.id)
                     it.putExtra(Constants.PRODUCT_NAME, product.name)
-                    it.putExtra(NAVIGATION, viewModel.selectedCategory)
+                    it.putExtra(NAVIGATION, SUBSCRIPTION)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                     onPause()

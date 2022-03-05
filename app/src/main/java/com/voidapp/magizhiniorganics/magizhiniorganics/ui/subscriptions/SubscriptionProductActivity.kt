@@ -1,10 +1,12 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -18,21 +20,29 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
+import com.google.android.material.tabs.TabLayoutMediator
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ProductViewPager
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.SubProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionProductBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddressBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
@@ -42,6 +52,13 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATIO
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomSubDaysDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SINGLE_DAY_LONG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_ACTIVE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.kodein.di.Kodein
@@ -50,176 +67,107 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.math.abs
 
 class SubscriptionProductActivity :
     BaseActivity(),
     KodeinAware,
     PaymentResultListener,
-    ReviewAdapter.ReviewItemClickListener
+    ReviewAdapter.ReviewItemClickListener,
+    AddressDialogClickListener
 {
-
-    //TODO CREATE AN INFO ABOUT WHAT SUB IS
 
     override val kodein: Kodein by kodein()
     private val factory: SubscriptionProductViewModelFactory by instance()
     private lateinit var viewModel: SubscriptionProductViewModel
     private lateinit var binding: ActivitySubscriptionProductBinding
 
-    private var mProduct = ProductEntity()
-    private var mProductId: String = ""
-    private var mProductName: String = ""
-    private var mStartDate: Long = System.currentTimeMillis() + 86400000
-
-    private var newReview: Boolean = false
     private var isPreviewVisible: Boolean = false
-    private var reviewImageUri: Uri? = null
-
-    private lateinit var adapter: ReviewAdapter
-    private lateinit var variantAdapter: ArrayAdapter<String>
-    private lateinit var mAddressBottomSheet: BottomSheetDialog
-
-    //sub class variables
-    private var oSubscription = Subscription()
-    private val paymentList = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_subscription_product)
         viewModel = ViewModelProvider(this, factory).get(SubscriptionProductViewModel::class.java)
-        binding.viewmodel = viewModel
 
-        mProductId = intent.getStringExtra(Constants.PRODUCTS).toString()
-        mProductName = intent.getStringExtra(Constants.PRODUCT_NAME).toString()
-        viewModel.mProductID = mProductId
         viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = ""
-        binding.tvProductName.text = mProductName
+        binding.tvProductName.text = intent.getStringExtra(Constants.PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
-
-        oSubscription.customerID = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
-        oSubscription.startDate = System.currentTimeMillis()
 
         Checkout.preload(applicationContext)
 
-        initRecyclerView()
-        initData()
+        initData(intent.getStringExtra(PRODUCTS).toString())
         initLiveData()
+        initViewPager()
     }
 
     override fun onPaymentSuccess(response: String?) {
         showSuccessDialog("", "Processing payment ...", "wallet")
-        startTransaction(response!!)
+        generateSubscriptionMap(response!!)
     }
+
+    private fun generateSubscriptionMap(response: String?) {
+        val subscriptionsMap = hashMapOf<String, Any>()
+        subscriptionsMap["subType"] = binding.spSubscriptionType.selectedItem.toString()
+        subscriptionsMap["monthYear"] = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
+        subscriptionsMap["variantPosition"] = binding.spVariants.selectedItemPosition
+        subscriptionsMap["subTypePosition"] = binding.spSubscriptionType.selectedItemPosition
+        subscriptionsMap["status"] = SUB_ACTIVE
+        subscriptionsMap["paymentMode"] = response?.let {
+            "Online"
+        } ?: WALLET
+        viewModel.generateSubscription(subscriptionsMap, response)
+    }
+
 
     override fun onPaymentError(p0: Int, p1: String?) {
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
-    private fun startTransaction(transactionID: String = "") {
-        oSubscription.productID = mProductId
-        oSubscription.productName = mProductName
-        oSubscription.monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
-        oSubscription.phoneNumber = viewModel.userProfile.phNumber
-        oSubscription.status = Constants.SUB_ACTIVE
-        if (mStartDate == 0L) {
-            filterDate(System.currentTimeMillis() + (1000 * 60 * 60 * 24))
-        }
-        viewModel.generateSubscription(oSubscription, transactionID)
-    }
-
-    private fun initRecyclerView() {
-        adapter = ReviewAdapter(
-            this,
-            arrayListOf(),
-            this
-        )
-        binding.rvReviews.layoutManager = LinearLayoutManager(this)
-        binding.rvReviews.adapter = adapter
-    }
-
-    fun filterDate(date: Long) {
-        if (date < System.currentTimeMillis()) {
-            showErrorSnackBar("Pick a valid date", true)
-        } else {
-            binding.tvFromDate.text = TimeUtil().getCustomDate(dateLong = date)
-            mStartDate = date
-            oSubscription.startDate = date
-            setEndDate()
-            generateEstimate(binding.spSubscriptionType.selectedItemPosition, "dateFilter")
-        }
-    }
-
-    private fun setEndDate() {
-        val cal = Calendar.getInstance()
-        cal.timeInMillis = oSubscription.startDate
-        cal.add(Calendar.DATE, 29)  //since we add the start date as well, we add remaining 29 days to get a total of 30 days
-        oSubscription.endDate = cal.timeInMillis
+    private fun initViewPager() {
+        val adapter = SubProductViewPager(supportFragmentManager, lifecycle)
+        binding.vpFragmentContent.adapter = adapter
+        TabLayoutMediator(binding.tlTabLayout, binding.vpFragmentContent) { tab, position ->
+            when(position) {
+                0 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_about_us)
+                1 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_reviews)
+                2 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_write_review)
+            }
+        }.attach()
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun clickListeners() {
+    private fun initListeners() {
         with(binding) {
             ivCalendar.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                DatePickerLib().startSubscriptionDate(this@SubscriptionProductActivity)
+                showCalendarDialog()
             }
             ivShowCustomDaysDialog.setOnClickListener {
                 CustomSubDaysDialog(
                     this@SubscriptionProductActivity,
-                    oSubscription.customDates,
+                    viewModel.customSubDays,
                     this@SubscriptionProductActivity
                 ).show()
             }
-            edtDescription.setOnTouchListener { _, _ ->
-                binding.svBody.requestDisallowInterceptTouchEvent(true)
-                false
-            }
-
             ivWallet.setOnClickListener {
                 Intent(this@SubscriptionProductActivity, WalletActivity::class.java).also {
                     it.putExtra(NAVIGATION, PRODUCTS)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    onPause()
                 }
             }
-
-            cpAddReview.setOnClickListener {
-                it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                newReview = if (newReview) {
-                    closeReview()
-                    false
-                } else {
-                    addReview()
-                    true
-                }
-            }
-
             svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
                 if (scrollY < oldScrollY && binding.fabSubscribe.isGone) {
                     fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
-                    fabSubscribe.visibility = View.VISIBLE
+                    fabSubscribe.visible()
                 } else if (scrollY > oldScrollY && binding.fabSubscribe.isVisible) {
                     fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
-                    fabSubscribe.visibility = View.GONE
-                }
-            })
-
-            //scroll change listener to hide the fab when scrolling down
-            rvReviews.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
-                    super.onScrolled(recyclerView, up, down)
-                    if (down > 0 && binding.fabSubscribe.isVisible) {
-                        fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
-                        fabSubscribe.visibility = View.GONE
-                    } else if (down < 0 && binding.fabSubscribe.isGone) {
-                        fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
-                        fabSubscribe.visibility = View.VISIBLE
-                    }
+                    fabSubscribe.remove()
                 }
             })
             spSubscriptionType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -231,18 +179,18 @@ class SubscriptionProductActivity :
                     if (position == 2) {
                         CustomSubDaysDialog(
                             this@SubscriptionProductActivity,
-                            oSubscription.customDates,
+                            viewModel.customSubDays,
                             this@SubscriptionProductActivity
                         ).show()
                         ivShowCustomDaysDialog.visible()
                     } else {
                         ivShowCustomDaysDialog.remove()
-                        generateEstimate(position)
+                        generateEstimate(position, spVariants.selectedItemPosition)
                     }
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
-                    generateEstimate(0)
+                    generateEstimate(0, spVariants.selectedItemPosition)
                 }
             }
             spVariants.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -251,151 +199,80 @@ class SubscriptionProductActivity :
                     view: View?,
                     position: Int,
                     id: Long) {
-                    oSubscription.variantName = "${mProduct.variants[position].variantName} ${mProduct.variants[position].variantType}"
-                    oSubscription.basePay = mProduct.variants[position].variantPrice.toFloat()
                     setDataToDisplay(position)
-                    generateEstimate(spSubscriptionType.selectedItemPosition)
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
-                    oSubscription.variantName = "${mProduct.variants[0].variantName} ${mProduct.variants[0].variantType}"
                     setDataToDisplay(0)
-                    generateEstimate(0)
                 }
             }
             fabSubscribe.setOnClickListener {
-                if (cpAddReview.text == "cancel") {
-                    return@setOnClickListener
-                } else {
-                     lifecycleScope.launch(Dispatchers.IO) {
-                        oSubscription.id = viewModel.generateSubscriptionID("${TimeUtil().getMonth()}${TimeUtil().getYear()}")
-                    }
-                    showAddressBs(viewModel.userProfile.address[0])
+                viewModel.address?.let {
+                    openAddressDialog(it)
+                } ?:let {
+                    viewModel.userProfile?.let {
+                        openAddressDialog(it.address[0])
+                    } ?:  showErrorSnackBar("User Profile Details not available", true)
                 }
             }
             tbAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
                 title = if (abs(verticalOffset) -appBarLayout.totalScrollRange == 0) {
-                    mProductName
+                    viewModel.product?.name
                 } else {
                     ""
                 }
             })
-            ivPreviewImage.setOnClickListener {
-                onBackPressed()
-            }
-            btnAddImage.setOnClickListener {
-                it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                if (PermissionsUtil.hasStoragePermission(this@SubscriptionProductActivity)) {
-                    getAction.launch(pickImageIntent)
-                } else {
-                    showExitSheet(this@SubscriptionProductActivity, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
-                }
-            }
-
-//            srSmileyRating.setSmileySelectedListener { type ->
-//                mRating = when (type) {
-//                    SmileyRating.Type.TERRIBLE -> 1
-//                    SmileyRating.Type.BAD -> 2
-//                    SmileyRating.Type.OKAY -> 3
-//                    SmileyRating.Type.GOOD -> 4
-//                    SmileyRating.Type.GREAT -> 5
-//                    else -> 5
-//                }
-//            }
-
-            btnSaveReview.setOnClickListener {
-                it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                Review(
-                    "",
-                    viewModel.userProfile.name,
-                    viewModel.userProfile.profilePicUrl,
-                    System.currentTimeMillis(),
-//                    mRating,
-                    srSmileyRating.count,
-                    getReviewContent()
-                ).also { review ->
-                    showProgressDialog()
-                    viewModel.upsertProductReview(
-                        review,
-                        mProduct.id,
-                        reviewImageUri,
-                        reviewImageUri?.let { GlideLoader().imageExtension(this@SubscriptionProductActivity,  reviewImageUri)!! } ?: ""
-                    )
-                }
-            }
             ivInfo.setOnClickListener {
                 showDescriptionBs(resources.getString(R.string.subscription_info))
             }
         }
     }
 
-    //this will populate the add/edit address bottom sheet
-    private fun showAddressBs(address: Address) {
-        mAddressBottomSheet = BottomSheetDialog(this, R.style.BottomSheetDialog)
-        val view: DialogBottomAddressBinding =
-            DataBindingUtil.inflate(
-                LayoutInflater.from(this),
-                R.layout.dialog_bottom_address,
-                null,
-                false
-            )
-
-        if (address.userId.isNotEmpty()) {
-            with(view) {
-                etProfileName.setText(address.userId)
-                etAddressOne.setText(address.addressLineTwo)
-                etAddressTwo.setText(address.addressLineTwo)
-                spArea.setSelection(address.LocationCodePosition)
-            }
-        }
-
-        view.btnSaveAddress.text = "Proceed to payment"
-
-        view.btnSaveAddress.setOnClickListener {
-            when {
-                validateAddress(view.etProfileName.text.toString()) -> view.etProfileName.error =
-                    "*required"
-                validateAddress(view.etAddressOne.text.toString()) -> view.etAddressOne.error =
-                    "*required"
-                validateAddress(view.etAddressTwo.text.toString()) -> view.etAddressTwo.error =
-                    "*required"
-                else -> {
-                    val newAddress = Address(
-                        view.etProfileName.text.toString().trim(),
-                        view.etAddressOne.text.toString().trim(),
-                        view.etAddressTwo.text.toString().trim(),
-                        view.spArea.selectedItem.toString(),
-                        view.spArea.selectedItemPosition,
-                        "Chennai"
-                    )
-                    oSubscription.address = newAddress
-                    hideAddressBs()
-
-                    showListBottomSheet(this, paymentList as ArrayList<String>)
-                }
-            }
-        }
-
-        mAddressBottomSheet.setCancelable(true)
-        mAddressBottomSheet.setCanceledOnTouchOutside(true)
-        mAddressBottomSheet.setContentView(view.root)
-
-        mAddressBottomSheet.show()
+    private fun openAddressDialog(address: Address) {
+        val dialog = AddressDialog()
+        val bundle = Bundle()
+        bundle.putParcelable("address", address)
+        dialog.arguments = bundle
+        dialog.show(supportFragmentManager, "addressDialog")
     }
 
-    private fun hideAddressBs() = mAddressBottomSheet.dismiss()
+    private fun showCalendarDialog() {
+        val calendar = Calendar.getInstance()
+        val dialog = DatePickerDialog(this, { _, year, month, day_of_month ->
+            calendar[Calendar.YEAR] = year
+            calendar[Calendar.MONTH] = month
+            calendar[Calendar.DAY_OF_MONTH] = day_of_month
+            viewModel.subStartDate = calendar.timeInMillis
+            setDataToDisplay(binding.spVariants.selectedItemPosition)
+        }, calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH])
+        //this part is to preselect the already selected startsub date
+        dialog.updateDate(
+            TimeUtil().getYear(dateLong = viewModel.subStartDate).toInt(),
+            TimeUtil().getMonthNumber(dateLong = viewModel.subStartDate),
+            TimeUtil().getDateNumber(dateLong = viewModel.subStartDate).toInt()
+        )
+        dialog.datePicker.minDate = calendar.timeInMillis + SINGLE_DAY_LONG
+        dialog.show()
+    }
 
-    fun selectedPaymentMode(paymentMode: String) {
-        oSubscription.paymentMode = paymentMode
+    fun selectedPaymentMode(paymentMode: String) = lifecycleScope.launch {
+        val estimate = viewModel.getEstimateAmount(
+            binding.spSubscriptionType.selectedItemPosition,
+            binding.spVariants.selectedItemPosition
+        )
+        if (estimate == 0.0) {
+            showErrorSnackBar("Server Error! Try again later", true)
+            return@launch
+        }
         if (paymentMode == "Online") {
-            with(viewModel.userProfile) {
+            viewModel.userProfile?.let {
                 startPayment(
                     this@SubscriptionProductActivity,
-                    mailId,
-                    oSubscription.estimateAmount * 100,
-                    name,
-                    id,
-                    phNumber
+                    it.mailId,
+                    estimate.toFloat() * 100,
+                    it.name,
+                    it.id,
+                    it.phNumber
                 ).also { status ->
                     if (!status) {
                         Toast.makeText(this@SubscriptionProductActivity,"Error in processing payment. Try Later ", Toast.LENGTH_SHORT).show()
@@ -403,215 +280,156 @@ class SubscriptionProductActivity :
                 }
             }
         } else {
-            showSwipeConfirmationDialog(this, "swipe right to make payment")
+            viewModel.wallet?.let {
+                if (it.amount < estimate) {
+                    showErrorSnackBar("Insufficient Balance in Wallet.", true)
+                    return@launch
+                }
+                showSwipeConfirmationDialog(this@SubscriptionProductActivity, "swipe right to make payment")
+            } ?: showErrorSnackBar("Server Error! Failed to fetch Wallet", true)
         }
     }
 
-    private fun validateAddress(text: String?): Boolean {
-        return text.isNullOrBlank()
-    }
-
-    private fun generateEstimate(position: Int = 0, filter: String = "") = lifecycleScope.launch {
-        if (filter != "dateFilter") {
-            filterDate(mStartDate)
-            return@launch
-        }
-        when(position) {
-            0 -> {
-                oSubscription.subType = Constants.MONTHLY
-                binding.tvEstimate.text = "Estimate (30 days cycle)"
-                val price = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toFloat() * 30
-                binding.tvEstimateAmount.text = "Rs: $price"
-                oSubscription.estimateAmount = price
-                oSubscription.cancelledDates.clear()
-                setEndDate()
-            }
-            1 -> {
-                showProgressDialog()
-                val cancelledDatesJob = async { viewModel.setCancelDates(oSubscription.startDate) }
-                val cancelledDatesList = cancelledDatesJob.await()
-                oSubscription.cancelledDates.clear()
-                oSubscription.cancelledDates.addAll(cancelledDatesList)
-                oSubscription.subType = Constants.ALTERNATE_DAYS
-                binding.tvEstimate.text = "Estimate (15/30 days cycle)"
-                val price = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toFloat() * 15
-                binding.tvEstimateAmount.text = "Rs: $price"
-                oSubscription.estimateAmount = price
-                hideProgressDialog()
-            }
-            2 -> {
-                showProgressDialog()
-                val cancelledDatesJob = async { viewModel.setCancelDates(oSubscription.startDate, oSubscription.customDates) }
-                val cancelledDatesList = cancelledDatesJob.await()
-                oSubscription.cancelledDates.clear()
-                oSubscription.cancelledDates.addAll(cancelledDatesList)
-                oSubscription.subType = Constants.CUSTOM_DAYS
-                binding.tvEstimate.text = "Estimate (${30 - oSubscription.cancelledDates.size}/30 days cycle)"
-                val price = mProduct.variants[binding.spVariants.selectedItemPosition].variantPrice.toFloat() * (30 - oSubscription.cancelledDates.size)
-                binding.tvEstimateAmount.text = "Rs: $price"
-                oSubscription.estimateAmount = price
-                hideProgressDialog()
+    private fun generateEstimate(
+        selectedSubsType: Int,
+        selectedVariantPosition: Int
+    ) {
+        lifecycleScope.launch {
+            viewModel.getCancelDates(viewModel.subStartDate, selectedSubsType)
+            binding.apply {
+                when(selectedSubsType) {
+                    0 -> {
+                        tvEstimate.setTextAnimation("(30 days cycle)")
+                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * 30}")
+                        viewModel.customSubDays.clear()
+                    }
+                    1 -> {
+                        tvEstimate.setTextAnimation("(15/30 days cycle)")
+                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * 15}")
+                        viewModel.customSubDays.clear()
+                    }
+                    2 -> {
+                        val deliverableDates = 30 - viewModel.subCancelledDates.size
+                        tvEstimate.setTextAnimation("($deliverableDates/30 days cycle)")
+                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * deliverableDates}")
+                    }
+                }
             }
         }
     }
 
-    private fun getReviewContent(): String {
-        return if (binding.edtDescription.text.isNullOrEmpty()) {
-            ""
-        } else {
-            binding.edtDescription.text.toString().trim()
-        }
-    }
-
-    private fun initData() {
-        showShimmer()
-        viewModel.getProductByID(mProductId)
-        viewModel.getProfileData()
+    private fun initData(productID: String) {
+        viewModel.getProductByID(productID)
     }
 
     private fun initLiveData() {
-        viewModel.product.observe(this) {
-            mProduct = it
-            val variantNames = arrayListOf<String>()
-            mProduct.variants.forEach { variant ->
+        viewModel.uiUpdate.observe(this) { event ->
+            when(event) {
+                is SubscriptionProductViewModel.UiUpdate.PopulateProduct -> {
+                    event.product?.let {
+                        populateProductDetails(it)
+                        initListeners()
+                    } ?: let {
+                        showToast(this, "Product Not Available")
+                        onBackPressed()
+                    }
+                }
+                is SubscriptionProductViewModel.UiUpdate.CheckStoragePermission -> {
+                    if (PermissionsUtil.hasStoragePermission(this)) {
+                        showToast(this, "Storage Permission Granted")
+                        viewModel.previewImage("granted")
+                    } else {
+                        showExitSheet(this, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                    }
+                }
+                is SubscriptionProductViewModel.UiUpdate.OpenPreviewImage -> {
+                    isPreviewVisible = true
+                    val url = event.imageUrl ?: event.imageUri
+                    with(binding) {
+                        GlideLoader().loadUserPictureWithoutCrop(this@SubscriptionProductActivity, url!!, ivPreviewImage)
+                        ivPreviewImage.visible()
+                        ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@SubscriptionProductActivity, R.anim.scale_big))
+                    }
+                }
+                is SubscriptionProductViewModel.UiUpdate.CreateStatusDialog -> {
+                    LoadStatusDialog.newInstance("", "Creating Subscription...", "placingOrder").show(supportFragmentManager,
+                        Constants.LOAD_DIALOG
+                    )
+                }
+                is SubscriptionProductViewModel.UiUpdate.ValidatingTransaction -> {
+                    updateLoadStatusDialog(event.message!!, event.data!!)
+                }
+                is SubscriptionProductViewModel.UiUpdate.PlacingSubscription -> {
+                    updateLoadStatusDialog(event.message!!, event.data!!)
+                }
+                is SubscriptionProductViewModel.UiUpdate.PlacedSubscription -> {
+                    updateLoadStatusDialog(event.message!!, event.data!!)
+                }
+                is SubscriptionProductViewModel.UiUpdate.DismissStatusDialog -> {
+                    (supportFragmentManager.findFragmentByTag(Constants.LOAD_DIALOG) as? DialogFragment)?.dismiss()
+                    if (event.status) {
+                        showExitSheet(this@SubscriptionProductActivity, "Subscription created Successfully! \n\n You can manager your subscriptions in Subscription History page. To go to Subscription History click PROCEED below. ", "purchaseHistory")
+                    } else {
+                        showExitSheet(this, "Server Error! Something went wrong while creating your subscription. \n \n If Money is already debited, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
+                    }
+                }
+                is SubscriptionProductViewModel.UiUpdate.Empty -> return@observe
+                else -> Unit
+            }
+            viewModel.setEmptyStatus()
+        }
+
+        viewModel.uiEvent.observe(this) { event ->
+            when(event) {
+                is UIEvent.Toast -> showToast(this, event.message, event.duration)
+                is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
+                is UIEvent.ProgressBar -> {
+                    if (event.visibility) {
+                        showProgressDialog()
+                    } else {
+                        hideProgressDialog()
+                    }
+                }
+                is UIEvent.EmptyUIEvent -> return@observe
+                else -> Unit
+            }
+            viewModel.setEmptyUiEvent()
+        }
+    }
+
+    private fun updateLoadStatusDialog(message: String, data: String) {
+        LoadStatusDialog.statusContent = message
+        LoadStatusDialog.statusText.value = data
+    }
+
+    private fun populateProductDetails(product: ProductEntity) {
+        binding.apply {
+            val variantNames = mutableListOf<String>()
+            product.variants.forEach { variant ->
                 variantNames.add("${variant.variantName} ${variant.variantType}")
             }
-            variantAdapter = ArrayAdapter(
-                binding.spVariants.popupContext,
+
+            spVariants.adapter = ArrayAdapter(
+                spVariants.popupContext,
                 R.layout.support_simple_spinner_dropdown_item,
                 variantNames
             )
-            binding.spVariants.adapter = variantAdapter
-            setDataToDisplay(0)
-            clickListeners()
-        }
-
-        viewModel.reviews.observe(this) {
-            if (it.isEmpty()) {
-                hideShimmer()
-                binding.llEmptyLayout.visible()
-            } else {
-                hideShimmer()
-                it.sortByDescending { review ->
-                    review.timeStamp
-                }
-                binding.llEmptyLayout.remove()
-                adapter.setData(it)
-            }
-        }
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.wallet.collect { result ->
-                when(result) {
-                    is NetworkResult.Success -> {
-                        with(result.data as Wallet) {
-                            viewModel.liveWallet = this
-                            paymentList.clear()
-                            paymentList.add("Online")
-                            paymentList.add("Wallet - (${this.amount})")
-                        }
-                    }
-                    is NetworkResult.Failed -> showErrorSnackBar(result.data as String, true)
-                    else -> Unit
-                }
-            }
-        }
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.status.collect { result ->
-                when(result) {
-                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
-                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
-                    is NetworkResult.Loading -> {
-                        if (result.message == "") {
-                            showProgressDialog()
-                        } else {
-                            showSuccessDialog("", result.message, result.data)
-                        }
-                    }
-                    else -> Unit
-                }
-            }
         }
     }
 
     private fun setDataToDisplay(variantPosition: Int) {
-        val nextDate = System.currentTimeMillis() + (1000 * 60 * 60 * 24)
         with(binding) {
-            GlideLoader().loadUserPicture(this@SubscriptionProductActivity, mProduct.thumbnailUrl, ivProductThumbnail)
-            tvDiscountedPrice.text = "Rs. ${mProduct.variants[variantPosition].variantPrice}"
-            tvFromDate.text = TimeUtil().getCustomDate(dateLong = nextDate)
-            tvEstimateAmount.text = "Rs: ${mProduct.variants[variantPosition].variantPrice}"
+            viewModel.product?.let {
+                GlideLoader().loadUserPicture(this@SubscriptionProductActivity, it.thumbnailUrl, ivProductThumbnail)
+                tvDiscountedPrice.setTextAnimation("Rs. ${it.variants[variantPosition].variantPrice}")
+                tvFromDate.setTextAnimation(TimeUtil().getCustomDate(dateLong = viewModel.subStartDate))
+                generateEstimate(spSubscriptionType.selectedItemPosition, variantPosition)
+            }
         }
     }
 
     fun approved(status: Boolean) {
-        showSuccessDialog("", "Processing payment from Wallet...", "wallet")
-        lifecycleScope.launch {
-            if (viewModel.checkWalletForBalance(oSubscription.estimateAmount)) {
-                withContext(Dispatchers.IO) {
-                    with(oSubscription) {
-                        viewModel.makeTransactionFromWallet(
-                            estimateAmount,
-                            customerID,
-                            id,
-                            "Remove"
-                        )
-                    }
-                }
-            } else {
-                delay(1000)
-                hideSuccessDialog()
-                showErrorSnackBar(
-                    "Insufficient balance in Wallet. Pick another payment method",
-                    true
-                )
-            }
-        }
-    }
-
-    private fun addReview() {
-        with(binding) {
-            cpAddReview.text = "cancel"
-            cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_close_white_24dp)
-            cpAddReview.chipBackgroundColor = ContextCompat.getColorStateList(cpAddReview.context, R.color.matteRed)
-            llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_in_right))
-            llEmptyLayout.startAnimation(AnimationUtils.loadAnimation(llEmptyLayout.context, R.anim.slide_out_left))
-            rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_out_left))
-//            srSmileyRating.setTitle(SmileyRating.Type.TERRIBLE, "Bad")
-//            srSmileyRating.setTitle(SmileyRating.Type.BAD, "Not Satisfied")
-//            srSmileyRating.setTitle(SmileyRating.Type.OKAY, "Satisfied")
-//            srSmileyRating.setTitle(SmileyRating.Type.GOOD, "Great")
-//            srSmileyRating.setTitle(SmileyRating.Type.GREAT, "Awesome")
-//            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_close))
-            fabSubscribe.remove()
-            lifecycleScope.launch {
-                delay(400)
-                llNewReview.visible()
-                rvReviews.remove()
-                llEmptyLayout.remove()
-            }
-        }
-    }
-
-    private fun closeReview() {
-        with(binding) {
-            cpAddReview.text = "Add Review"
-            edtDescription.setText("")
-            ivReviewImage.remove()
-            cpAddReview.chipIcon = ContextCompat.getDrawable(this@SubscriptionProductActivity, R.drawable.ic_add)
-            cpAddReview.chipBackgroundColor = ContextCompat.getColorStateList(cpAddReview.context, R.color.green_base)
-            llNewReview.startAnimation(AnimationUtils.loadAnimation(llNewReview.context, R.anim.slide_out_right))
-            llEmptyLayout.startAnimation(AnimationUtils.loadAnimation(llEmptyLayout.context, R.anim.slide_in_left))
-            rvReviews.startAnimation(AnimationUtils.loadAnimation(rvReviews.context, R.anim.slide_in_left))
-            fabSubscribe.startAnimation(AnimationUtils.loadAnimation(fabSubscribe.context, R.anim.fab_open))
-            lifecycleScope.launch {
-                delay(400)
-                llNewReview.remove()
-                rvReviews.visible()
-                llEmptyLayout.visible()
-            }
-        }
+        generateSubscriptionMap(null)
     }
 
     //Title bar back button press function
@@ -622,74 +440,6 @@ class SubscriptionProductActivity :
                 true
             }
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun onSuccessCallback(message: String, data: Any?) {
-        when(message) {
-            "review" -> {
-                hideProgressDialog()
-                showToast(this, data as String)
-                closeReview()
-            }
-            "transaction" -> viewModel.updateTransaction(data as TransactionHistory)
-            "transactionID" -> lifecycleScope.launch {
-                if (oSubscription.status == Constants.CANCELLED) {
-                    delay(1500)
-                    hideSuccessDialog()
-                    showExitSheet(
-                        this@SubscriptionProductActivity,
-                        "Outstanding Balance for Delivery Cancelled Dates, Delivery Failed Days and Remaining Days is Added to the Wallet Successfully!\n" +
-                                " \n" +
-                                " Please Click the message to contact Customer Support for any queries or further assistance",
-                        "cs"
-                    )
-                } else {
-                    startTransaction()
-                }
-            }
-            "sub" -> lifecycleScope.launch {
-                delay(1500)
-                hideSuccessDialog()
-                showSuccessDialog("", data as String)
-                delay(1500)
-                hideSuccessDialog()
-                showExitSheet(this@SubscriptionProductActivity, "Subscription created Successfully! \n\n You can manager your subscriptions in Subscription History page. To go to Subscription History click PROCEED below. ", "purchaseHistory")
-            }
-        }
-
-        viewModel.emptyResult()
-    }
-
-    private fun onFailedCallback(message: String, data: Any?) {
-        when(message) {
-            "review" -> {
-                hideProgressDialog()
-                showToast(this, data as String)
-            }
-            "transaction" -> {
-                hideSuccessDialog()
-                showErrorSnackBar(data!! as String, true)
-            }
-            "transactionID" -> {
-                hideSuccessDialog()
-                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
-            }
-        }
-        viewModel.emptyResult()
-    }
-
-    private fun showShimmer() {
-        with(binding) {
-            flShimmerPlaceholder.visible()
-            rvReviews.remove()
-        }
-    }
-
-    private fun hideShimmer() {
-        with(binding) {
-            flShimmerPlaceholder.remove()
-            rvReviews.visible()
         }
     }
 
@@ -706,7 +456,7 @@ class SubscriptionProductActivity :
             Constants.SUB_HISTORY_PAGE -> finish()
             else -> {
                 Intent(this, ShoppingMainActivity::class.java).also {
-                    it.putExtra(Constants.CATEGORY, Constants.ALL_PRODUCTS)
+                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                     finish()
@@ -752,14 +502,6 @@ class SubscriptionProductActivity :
 
     fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
 
-    private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        reviewImageUri = result.data?.data
-        reviewImageUri?.let { uri ->
-            GlideLoader().loadUserPicture(this, uri, binding.ivReviewImage)
-            binding.ivReviewImage.visible()
-        }
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -772,7 +514,7 @@ class SubscriptionProductActivity :
                 grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
                 showToast(this, "Storage Permission Granted")
-                getAction.launch(pickImageIntent)
+                viewModel.previewImage("granted")
             } else {
                 showToast(this, "Storage Permission Denied")
                 showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
@@ -789,9 +531,29 @@ class SubscriptionProductActivity :
         if (dates.isNullOrEmpty()) {
             binding.spSubscriptionType.setSelection(0)
         } else {
-            oSubscription.customDates.clear()
-            oSubscription.customDates.addAll(dates)
-            generateEstimate(2)
+            viewModel.customSubDays.clear()
+            viewModel.customSubDays.addAll(dates)
+            generateEstimate(2, binding.spVariants.selectedItemPosition)
+        }
+    }
+
+    //from address dialog
+    override fun savedAddress(addressMap: HashMap<String, Any>, isNew: Boolean) {
+        Address(
+            userId = addressMap["userId"].toString(),
+            addressLineOne = addressMap["addressLineOne"].toString(),
+            addressLineTwo = addressMap["addressLineTwo"].toString(),
+            LocationCode = addressMap["LocationCode"].toString(),
+            LocationCodePosition = addressMap["LocationCodePosition"].toString().toInt(),
+            city = addressMap["city"].toString()
+        ).also { address ->
+            viewModel.address = address
+            viewModel.wallet?.let {
+                showListBottomSheet(this, arrayListOf("Online", "Wallet - Rs: ${it.amount}"))
+            } ?:let {
+                showToast(this, "Wallet Data not available")
+                selectedPaymentMode("Online")
+            }
         }
     }
 }
