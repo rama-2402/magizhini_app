@@ -10,73 +10,111 @@
         <include
             layout="@layout/dialog_bottom_cart"
             />
+
+        <com.ortiz.touchview.TouchImageView
+            android:id="@+id/ivPreviewImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:elevation="@dimen/material_size_32"
+            android:background="@color/black"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:background="@color/white"
             android:id="@+id/llLayout">
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/apbAppBarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/green_base"
-            android:gravity="center"
-            android:layout_gravity="center"
-            app:iconTint="@color/white">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/tbToolbar"
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/apbAppBarLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                >
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivBackBtn"
-                    android:padding="@dimen/material_size_4"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/ic_back"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                    app:tint="@color/white"
-                    android:layout_marginEnd="@dimen/material_size_16"/>
-                <TextView
-                    android:id="@+id/tvToolbarTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dish Name"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:layout_marginStart="@dimen/material_size_8"
-                    android:textSize="@dimen/text_size_large"
-                    android:textColor="@color/white"
-                    android:fontFamily="@font/roboto"/>
+                android:background="@color/green_base"
+                android:gravity="center"
+                android:layout_gravity="center"
+                app:iconTint="@color/white">
 
-<!--                <com.google.android.material.imageview.ShapeableImageView-->
-<!--                    android:id="@+id/ivSave"-->
-<!--                    android:layout_width="@dimen/material_size_24"-->
-<!--                    android:layout_height="@dimen/material_size_24"-->
-<!--                    android:layout_gravity="end"-->
-<!--                    android:src="@drawable/ic_save"-->
-<!--                    android:layout_marginEnd="@dimen/material_size_16"-->
-<!--                    app:tint="@color/white"-->
-<!--                    android:background="?android:attr/selectableItemBackgroundBorderless"-->
-<!--                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>-->
-            </androidx.appcompat.widget.Toolbar>
-        </com.google.android.material.appbar.AppBarLayout>
-        <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-            android:id="@+id/youtube_player_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvIngredients"
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/tbToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    >
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBackBtn"
+                        android:padding="@dimen/material_size_4"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_back"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/white"
+                        android:layout_marginEnd="@dimen/material_size_16"/>
+                    <TextView
+                        android:id="@+id/tvToolbarTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dish Name"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:textSize="@dimen/text_size_large"
+                        android:textColor="@color/white"
+                        android:fontFamily="@font/roboto"/>
+
+                    <!--                <com.google.android.material.imageview.ShapeableImageView-->
+                    <!--                    android:id="@+id/ivSave"-->
+                    <!--                    android:layout_width="@dimen/material_size_24"-->
+                    <!--                    android:layout_height="@dimen/material_size_24"-->
+                    <!--                    android:layout_gravity="end"-->
+                    <!--                    android:src="@drawable/ic_save"-->
+                    <!--                    android:layout_marginEnd="@dimen/material_size_16"-->
+                    <!--                    app:tint="@color/white"-->
+                    <!--                    android:background="?android:attr/selectableItemBackgroundBorderless"-->
+                    <!--                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>-->
+                </androidx.appcompat.widget.Toolbar>
+            </com.google.android.material.appbar.AppBarLayout>
+            <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+                android:id="@+id/youtube_player_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="82dp"/>
-            <View
-                android:id="@+id/vBottomEmpty"
-                android:layout_width="wrap_content"
-                android:layout_height="120dp"/>
-        </LinearLayout>
+                android:layout_height="wrap_content" />
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tlTabLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:tabGravity="fill"
+                    app:tabInlineLabel="true"
+                    app:tabMode="fixed"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    app:tabIndicatorColor="@color/green_base"
+                    app:tabIconTint="@color/green_base" />
+                <ScrollView
+                    android:id="@+id/svReviews"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:elevation="@dimen/material_size_4"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    >
+                    <LinearLayout
+                    android:id="@+id/llViewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    >
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/vpFragmentContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="500dp"
+                    android:background="@drawable/shape_round_rectangle_8"/>
+                <View
+                    android:id="@+id/vBottomEmpty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="120dp"/>
+                    </LinearLayout>
+                </ScrollView>
+    </LinearLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

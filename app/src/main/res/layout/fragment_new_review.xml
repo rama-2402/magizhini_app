@@ -10,10 +10,10 @@
     </data>
 <androidx.core.widget.NestedScrollView
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="400dp"
+    android:layout_height="wrap_content"
     tools:context=".ui.product.fragments.NewReviewFragment"
     android:orientation="vertical"
     android:background="@drawable/shape_round_rectangle_8"

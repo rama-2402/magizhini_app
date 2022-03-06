@@ -27,6 +27,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts.ContactUsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
@@ -253,6 +254,12 @@ open class BaseActivity : AppCompatActivity() {
                     }
                 }
                 is ProductActivity -> {
+                    when(data) {
+                        "permission" -> activity.proceedToRequestPermission()
+                        "setting" -> activity.proceedToRequestManualPermission()
+                    }
+                }
+                is DishActivity -> {
                     when(data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()

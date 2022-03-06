@@ -7,7 +7,7 @@
         android:id="@+id/clBottomCart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:behavior_hideable="false"
+        app:behavior_hideable="true"
         app:behavior_peekHeight="88dp"
         android:background="@color/transparent"
         android:elevation="40dp"

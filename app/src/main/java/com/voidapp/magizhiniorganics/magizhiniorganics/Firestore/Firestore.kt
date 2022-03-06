@@ -15,6 +15,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
@@ -885,7 +887,8 @@ class Firestore(
     //reviews
     suspend fun productReviewsListener(id: String, viewModel: ViewModel) = withContext(Dispatchers.IO) {
         try {
-            mFireStore
+            val listenerRegistration =
+                mFireStore
                 .collection("Reviews")
                 .document("Products")
                 .collection(id)
@@ -905,9 +908,15 @@ class Firestore(
                         when(viewModel) {
                             is SubscriptionProductViewModel -> viewModel.reviewListener(reviews)
                             is ProductViewModel -> viewModel.reviewListener(reviews)
+                            is DishViewModel -> viewModel.reviewListener(reviews)
                         }
                     }
                 }
+            when(viewModel) {
+                is SubscriptionProductViewModel -> viewModel.listener(listenerRegistration)
+//                is ProductViewModel -> viewModel.reviewListener(reviews)
+                else -> Unit
+            }
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: getting product reviews", it) }
         }

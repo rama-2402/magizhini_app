@@ -39,6 +39,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATIO
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.*
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -512,6 +513,14 @@ class InvoiceActivity :
 //                binding.nsvScrollBody.requestDisallowInterceptTouchEvent(true)
 //                false
 //            }
+            KeyboardVisibilityEvent.setEventListener(this@InvoiceActivity
+            ) { isOpen ->
+                if (isOpen) {
+                    cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+                } else {
+                    cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                }
+            }
             btnApplyCoupon.setOnClickListener {
                 val couponCode: String = binding.etCoupon.text.toString().trim()
                 if (couponCode.isNullOrEmpty()) {

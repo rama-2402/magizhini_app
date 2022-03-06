@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -18,12 +19,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.tabs.TabLayoutMediator
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AllCWMAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.IngredientsAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.DishViewPager
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.SubProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
@@ -40,6 +44,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -55,20 +61,22 @@ class DishActivity :
     KodeinAware,
     IngredientsAdapter.IngredientsClickListener
 {
-
     override val kodein: Kodein by kodein()
 
     private lateinit var binding: ActivityDishBinding
     private lateinit var viewModel: DishViewModel
     private val factory: DishViewModelFactory by instance()
 
-    private lateinit var ingredientsAdapter: IngredientsAdapter
     private lateinit var cartAdapter: CartAdapter
 
     private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
     private lateinit var cartBtn: ImageBadgeView
     private lateinit var checkoutText: TextView
     private lateinit var filterBtn: ImageView
+
+    private lateinit var player: YouTubePlayer
+
+    private var isPreviewVisible: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +88,7 @@ class DishActivity :
 
         initData()
         initRecyclerView()
+        initViewPager()
         initObservers()
         initListeners()
     }
@@ -101,6 +110,30 @@ class DishActivity :
                 }
             }
         }
+
+        viewModel.storagePermissionCheck.observe(this) { check ->
+            check?.let {
+                if (PermissionsUtil.hasStoragePermission(this)) {
+                    showToast(this, "Storage Permission Granted")
+                    viewModel.previewImage("granted")
+                } else {
+                    showExitSheet(this, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                }
+                viewModel.setStoragePermission(null)
+            }
+        }
+
+        viewModel.openPreviewImage.observe(this) { url ->
+            url?.let {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+                isPreviewVisible = true
+                with(binding) {
+                    GlideLoader().loadUserPictureWithoutCrop(this@DishActivity, it, ivPreviewImage)
+                    ivPreviewImage.visible()
+                    ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@DishActivity, R.anim.scale_big))
+                }
+            }
+        }
     }
 
     private fun initListeners() {
@@ -108,25 +141,40 @@ class DishActivity :
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
+            KeyboardVisibilityEvent.setEventListener(this@DishActivity
+            ) { isOpen ->
+                if (isOpen) {
+                    cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+                    player.pause()
+                    binding.youtubePlayerView.remove()
+                } else {
+                    cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                    player.play()
+                    binding.youtubePlayerView.visible()
+                }
+            }
         }
     }
 
     private fun initData() {
         binding.youtubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
-                youTubePlayer.loadVideo(viewModel.dish.videoID, 0f)
+                player = youTubePlayer
+                youTubePlayer.loadVideo(viewModel.dish!!.videoID, 0f)
             }
         })
 
         viewModel.cartItems.clear()
-        for (item in viewModel.dish.ingredients) {
+        for (item in viewModel.dish!!.ingredients) {
             viewModel.cartItems.add(item.toCartEntity())
         }
+
+        viewModel.getUserProfile()
     }
 
     private fun populateDishDetails() {
         binding.apply {
-            tvToolbarTitle.text = viewModel.dish.dishName
+            tvToolbarTitle.text = viewModel.dish?.dishName
         }
     }
 
@@ -149,10 +197,9 @@ class DishActivity :
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
                         checkoutText.setTextAnimation(
-                            "Rs: ${viewModel.dish.totalPrice}",
+                            "Rs: ${viewModel.dish!!.totalPrice}",
                             ProductActivity.ANIMATION_DURATION
                         )
-//                        setBottomSheetIcon("delete")
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         checkoutText.setTextAnimation("CHECKOUT",
@@ -192,7 +239,6 @@ class DishActivity :
                     it.putExtra("cwm", true)
                     startActivity(it)
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    onPause()
                 }
             } else {
                 showErrorSnackBar("Please check network connection", true)
@@ -201,44 +247,45 @@ class DishActivity :
     }
 
     private fun initRecyclerView() {
-        ingredientsAdapter = IngredientsAdapter(
-            this,
-            mutableListOf(),
-            this
-        )
         cartAdapter = CartAdapter(
             this,
             mutableListOf(),
             viewModel
         )
-
-        binding.apply {
-            rvIngredients.layoutManager = LinearLayoutManager(this@DishActivity)
-            rvIngredients.adapter = ingredientsAdapter
-        }
         populateDishDetails()
         populateCartBottomSheet()
         populateRecyclerView(viewModel.cartItems)
     }
 
     private fun populateRecyclerView(ingredients: MutableList<CartEntity>) {
-        ingredientsAdapter.ingredients = ingredients
-        ingredientsAdapter.notifyDataSetChanged()
-        cartBtn.badgeValue = ingredients.size
+        cartBtn.badgeValue = viewModel.getCartSize(ingredients)
         cartAdapter.cartItems = ingredients
         cartAdapter.notifyDataSetChanged()
     }
 
+    private fun initViewPager() {
+        val adapter = DishViewPager(supportFragmentManager, lifecycle)
+        binding.vpFragmentContent.adapter = adapter
+        TabLayoutMediator(binding.tlTabLayout, binding.vpFragmentContent) { tab, position ->
+            when(position) {
+                0 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_reviews)
+                1 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_write_review)
+            }
+        }.attach()
+    }
 
     private suspend fun onSuccessCallback(message: String, data: Any?) {
         when(message) {
+            "image" -> {
+                hideProgressDialog()
+                showToast(this, data as String)
+            }
             "status" -> {
                 hideProgressDialog()
-
             }
             "update" -> {
                 data as MutableList<CartEntity>
-                checkoutText.text = "Rs: ${viewModel.dish.totalPrice}"
+                checkoutText.text = "Rs: ${viewModel.dish!!.totalPrice}"
                 populateRecyclerView(data)
             }
 
@@ -249,6 +296,10 @@ class DishActivity :
 
     private suspend fun onFailedCallback(message: String, data: Any?) {
         when(message) {
+            "image" -> {
+                hideProgressDialog()
+                showErrorSnackBar(data as String, true)
+            }
             "status" -> {
                 delay(1000)
                 hideSuccessDialog()
@@ -267,26 +318,55 @@ class DishActivity :
     }
 
     override fun onBackPressed() {
-        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else {
-            Intent(this, AllCWMActivity::class.java).also {
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                finish()
+        when {
+            isPreviewVisible -> {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                binding.ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_small))
+                binding.ivPreviewImage.visibility = View.GONE
+                isPreviewVisible = false
+            }
+            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED ->
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+            else -> {
+                Intent(this, AllCWMActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    finish()
+                }
             }
         }
     }
 
-    private fun Cart.toCartEntity() = CartEntity(
-        id = id,
-        variant = variant,
-        productId = productId,
-        productName = productName,
-        thumbnailUrl = thumbnailUrl,
-        quantity = quantity,
-        maxOrderQuantity = maxOrderQuantity,
-        price = price,
-        originalPrice = originalPrice
-    )
+    fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
+
+    fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
+            if(
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                showToast(this, "Storage Permission Granted")
+                viewModel.previewImage("granted")
+            } else {
+                showToast(this, "Storage Permission Denied")
+                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        viewModel.apply {
+            dish = null
+            userProfile = null
+        }
+        super.onDestroy()
+    }
+
 }

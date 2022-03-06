@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.models
 
 import android.os.Parcelable
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import kotlinx.parcelize.Parcelize
 
@@ -17,3 +18,15 @@ data class Cart(
     var originalPrice: Float = 0F,
     var variantIndex: Int = 0
 ): Parcelable
+
+private fun Cart.toCartEntity() = CartEntity(
+    id = id,
+    variant = variant,
+    productId = productId,
+    productName = productName,
+    thumbnailUrl = thumbnailUrl,
+    quantity = quantity,
+    maxOrderQuantity = maxOrderQuantity,
+    price = price,
+    originalPrice = originalPrice
+)

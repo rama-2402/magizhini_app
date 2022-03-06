@@ -50,6 +50,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OUT_OF_ST
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_NAME
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import ru.nikartm.support.ImageBadgeView
 
 /*
@@ -294,6 +295,7 @@ class ProductActivity :
                     }
                 }
                 is ProductViewModel.UiUpdate.OpenPreviewImage -> {
+                    cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
                     isPreviewVisible = true
                     val url = event.imageUrl ?: event.imageUri
                     with(binding) {
@@ -375,6 +377,14 @@ class ProductActivity :
     }
 
     private fun initClickListeners() {
+        KeyboardVisibilityEvent.setEventListener(this
+        ) { isOpen ->
+            if (isOpen) {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+            } else {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        }
         binding.spProductVariant.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -612,6 +622,7 @@ class ProductActivity :
     override fun onBackPressed() {
         when {
             isPreviewVisible -> {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
                 binding.ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.scale_small))
                 binding.ivPreviewImage.visibility = View.GONE
                 isPreviewVisible = false

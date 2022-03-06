@@ -2,7 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -11,9 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil.bind
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -44,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -181,7 +179,6 @@ class ShoppingMainActivity :
 
     private fun checkProductsToDisplay() {
         //live data of the products and items in the list
-        Log.e("qw", "setFilteredProducts: $categoryFilter", )
         if (categoryFilter == ALL_PRODUCTS) {
             viewModel.getAllProductsStatic()
         } else {
@@ -204,6 +201,24 @@ class ShoppingMainActivity :
     }
 
     private fun clickListeners() {
+
+        KeyboardVisibilityEvent.setEventListener(this
+        ) { isOpen ->
+            if (isOpen) {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+            } else {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        }
+
+        binding.rvShoppingItems.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                when {
+                    dy > 0 -> cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+                    dy < 0 -> cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                }
+            }
+        })
 
         binding.ivBackBtn.setOnClickListener {
             onBackPressed()
@@ -236,6 +251,8 @@ class ShoppingMainActivity :
                 R.id.cpCategoryFilter -> {
                     //kept this chip as the default check in xml so that the bottom sheet wont be
                     //triggered when a category of product was selected from home screen
+
+                    binding.svHorizontalChipScroll.fullScroll(View.FOCUS_RIGHT)
                     binding.cpCategoryFilter.also {
                         it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                     }

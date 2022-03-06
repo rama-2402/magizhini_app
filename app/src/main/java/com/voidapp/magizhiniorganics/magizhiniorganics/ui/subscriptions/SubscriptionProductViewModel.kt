@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ListenableWorker
+import com.google.firebase.firestore.ListenerRegistration
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.SubscriptionUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
@@ -337,6 +338,16 @@ class SubscriptionProductViewModel(
         cal.timeInMillis = subStartDate
         cal.add(Calendar.DATE, 29)  //since we add the start date as well, we add remaining 29 days to get a total of 30 days
         return cal.timeInMillis
+    }
+
+    var listener: ListenerRegistration? = null
+
+    fun listener(listenerRegistration: ListenerRegistration) {
+       listener = listenerRegistration
+    }
+
+    fun remove() {
+        listener?.remove()
     }
 
     sealed class UiUpdate {
