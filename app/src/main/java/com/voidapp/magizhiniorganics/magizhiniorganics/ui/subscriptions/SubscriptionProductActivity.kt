@@ -147,7 +147,12 @@ class SubscriptionProductActivity :
         with(binding) {
             ivCalendar.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-                showCalendarDialog()
+//                showCalendarDialog()
+                val selectedDateMap = HashMap<String, Long>()
+                selectedDateMap["date"] = viewModel.subStartDate
+                selectedDateMap["month"] = viewModel.subStartDate
+                selectedDateMap["year"] = viewModel.subStartDate
+                DatePickerLib.showCalendar(this@SubscriptionProductActivity, this@SubscriptionProductActivity, System.currentTimeMillis() + SINGLE_DAY_LONG, null, selectedDateMap)
             }
             ivShowCustomDaysDialog.setOnClickListener {
                 CustomSubDaysDialog(
@@ -238,24 +243,29 @@ class SubscriptionProductActivity :
         dialog.show(supportFragmentManager, "addressDialog")
     }
 
-    private fun showCalendarDialog() {
-        val calendar = Calendar.getInstance()
-        val dialog = DatePickerDialog(this, { _, year, month, day_of_month ->
-            calendar[Calendar.YEAR] = year
-            calendar[Calendar.MONTH] = month
-            calendar[Calendar.DAY_OF_MONTH] = day_of_month
-            viewModel.subStartDate = calendar.timeInMillis
-            setDataToDisplay(binding.spVariants.selectedItemPosition)
-        }, calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH])
-        //this part is to preselect the already selected startsub date
-        dialog.updateDate(
-            TimeUtil().getYear(dateLong = viewModel.subStartDate).toInt(),
-            TimeUtil().getMonthNumber(dateLong = viewModel.subStartDate),
-            TimeUtil().getDateNumber(dateLong = viewModel.subStartDate).toInt()
-        )
-        dialog.datePicker.minDate = calendar.timeInMillis + SINGLE_DAY_LONG
-        dialog.show()
+    fun selectedCalendarDate(date: Long) {
+        viewModel.subStartDate = date
+        setDataToDisplay(binding.spVariants.selectedItemPosition)
     }
+//
+//    private fun showCalendarDialog() {
+//        val calendar = Calendar.getInstance()
+//        val dialog = DatePickerDialog(this, { _, year, month, day_of_month ->
+//            calendar[Calendar.YEAR] = year
+//            calendar[Calendar.MONTH] = month
+//            calendar[Calendar.DAY_OF_MONTH] = day_of_month
+//            viewModel.subStartDate = calendar.timeInMillis
+//            setDataToDisplay(binding.spVariants.selectedItemPosition)
+//        }, calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH])
+//        //this part is to preselect the already selected startsub date
+//        dialog.updateDate(
+//            TimeUtil().getYear(dateLong = viewModel.subStartDate).toInt(),
+//            TimeUtil().getMonthNumber(dateLong = viewModel.subStartDate),
+//            TimeUtil().getDateNumber(dateLong = viewModel.subStartDate).toInt()
+//        )
+//        dialog.datePicker.minDate = calendar.timeInMillis + SINGLE_DAY_LONG
+//        dialog.show()
+//    }
 
     fun selectedPaymentMode(paymentMode: String) = lifecycleScope.launch {
         val estimate = viewModel.getEstimateAmount(

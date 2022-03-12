@@ -15,6 +15,7 @@ import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Query
@@ -26,10 +27,21 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PROFILE_PIC_PATH
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USERS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.*
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -37,7 +49,10 @@ import org.kodein.di.generic.instance
 import java.io.IOException
 import java.util.*
 
-class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
+class ProfileActivity :
+    BaseActivity(),
+    KodeinAware
+{
 
     lateinit var binding: ActivityProfileBinding
     override val kodein by kodein()
@@ -45,33 +60,13 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     private lateinit var viewModel: ProfileViewModel
     private val factory: ProfileViewModelFactory by instance()
 
-    private var mProfile: UserProfile = UserProfile()
-
-    private var mProfilePicUri: Uri? = null
-    private var mProfilePicUrl: String = ""
-
-    private var mCurrentUserId: String? = ""
-    private var mPhoneNumber: String = ""
-    private var isNewUser: Boolean = false
-
-    private var mLatitude: String = ""
-    private var mLongitude: String = ""
-    private var mAddress:  String = ""
-
-    private lateinit var dialogBsAddReferral: BottomSheetDialog
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        isNewUser = intent.getBooleanExtra(Constants.STATUS, false)
-        mCurrentUserId = intent.getStringExtra(Constants.USER_ID).toString()
-        mPhoneNumber = intent.getStringExtra(Constants.PHONE_NUMBER).toString()
 
         //setting the theme and view binding
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_profile)
         viewModel = ViewModelProvider(this, factory).get(ProfileViewModel::class.java)
-        binding.viewmodel = viewModel
 
         with(binding) {
             ivHeader.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
@@ -79,6 +74,9 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             llProfileName.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
             svProfileBody.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_up))
         }
+
+        viewModel.phoneNumber = intent.getStringExtra(PHONE_NUMBER).toString()
+        viewModel.userID = intent.getStringExtra(USER_ID).toString()
 
         lifecycleScope.launch {
             delay(1010)
@@ -90,133 +88,103 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         clickListeners()
 
         if (savedInstanceState != null) {
-            mProfilePicUri = savedInstanceState.getString(Constants.PROFILE_PIC_URI)?.toUri()
-            mProfilePicUri?.let { GlideLoader().loadUserPicture(this, it, binding.ivProfilePic) }
+            viewModel.phoneNumber = savedInstanceState.getString(PHONE_NUMBER)
         }
     }
 
     private fun observers() {
-        viewModel.userProfile.observe(this) { userData ->
-            mProfile = userData.toUserProfile()
-            viewModel.getAllActiveOrders().observe(this) {
-                mProfile.purchaseHistory.clear()
-                mProfile.purchaseHistory.addAll(it)
-            }
-            viewModel.getAllActiveSubscriptions().observe(this) {
-                mProfile.subscriptions.clear()
-                mProfile.subscriptions.addAll(it)
-            }
-            setUserDetailsFromDao(userData)
-        }
-        viewModel.referralStatus.observe(this) {
-            hideProgressDialog()
-            if (it) {
-                dialogBsAddReferral.dismiss()
-                binding.tvReferral.remove()
-                showErrorSnackBar(
-                    "Referral added Successfully. Your referral bonus will be added to your Wallet.",
-                    false,
-                    LONG
-                )
-            } else {
-                mProfile.referrerNumber = ""
-                showToast(this, "No account with the given number. Please check again")
-            }
-        }
-        viewModel.profileUploadStatus.observe(this) { status ->
-            if (status) {
-                hideProgressDialog()
-                successDialogAndTransition()
-            } else {
-                hideProgressDialog()
-                showErrorSnackBar("Server Error! Profile Creation failed. Try later", true)
-            }
-        }
-        viewModel.profileImageUploadStatus.observe(this) { status ->
-            if (status == "failed") {
-                hideProgressDialog()
-                showErrorSnackBar("Server Error! Image Update failed. Try later", true)
-            } else {
-                mProfile.profilePicUrl = status
-                viewModel.uploadProfile(mProfile)
-            }
-        }
-    }
 
-    private fun activityInit() {
-        binding.ivProfilePic.clipToOutline = true
-        lifecycleScope.launch {
-            if (isNewUser) {
-                mProfile.id = mCurrentUserId.toString()
-                binding.tvPhoneNumber.text = mPhoneNumber
-                if (viewModel.checkForReferral(mCurrentUserId!!)) {
-                    binding.tvReferral.remove()
-                } else {
-                    viewModel.createNewUserWallet(mCurrentUserId!!)
+        viewModel.uiEvent.observe(this) { event ->
+            when(event) {
+                is UIEvent.Toast -> showToast(this, event.message, event.duration)
+                is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
+                is UIEvent.ProgressBar -> {
+                    if (event.visibility) {
+                        showProgressDialog()
+                    } else {
+                        hideProgressDialog()
+                    }
                 }
-            } else {
-                viewModel.getUserProfile()
+                is UIEvent.EmptyUIEvent -> return@observe
+                else -> Unit
             }
+            viewModel.setEmptyUiEvent()
         }
-    }
 
-    private fun clickListeners() {
-        with(binding) {
-            ivProfilePic.setOnClickListener(this@ProfileActivity)
-            btnSaveProfile.setOnClickListener(this@ProfileActivity)
-            llDob.setOnClickListener(this@ProfileActivity)
-            tvReferral.setOnClickListener(this@ProfileActivity)
-            llGps.setOnClickListener(this@ProfileActivity)
-        }
-    }
-
-    //generating the profile model for uploading to firestore
-    //and assigning it to mProfile variable for later use
-    private fun generateProfileModel(): UserProfile {
-        generateAddressObject()
-        with(mProfile) {
-            name = binding.etProfileName.text.toString().trim()
-            phNumber = binding.tvPhoneNumber.text.toString().trim()
-            alternatePhNumber = binding.etAlternateNumber.text.toString().trim()
-            dob = binding.tvDob.text.toString()
-            mailId = binding.etEmailId.text.toString().trim()
-        }
-        return mProfile
-    }
-
-    private fun generateAddressObject() {
-        if (mProfile.address.isNotEmpty()) {
-            with(mProfile.address[0]) {
-                userId = binding.etProfileName.text.toString().trim()
-                addressLineOne = binding.etAddressOne.text.toString().trim()
-                addressLineTwo = binding.etAddressTwo.text.toString().trim()
-                city = binding.spCity.selectedItem.toString()
-                LocationCode = binding.spArea.selectedItem.toString()
-                LocationCodePosition = binding.spArea.selectedItemPosition
-                gpsLatitude = mLatitude
-                gpsLongitude = mLongitude
-                gpsAddress = mAddress
+        viewModel.uiUpdate.observe(this) { event ->
+            when(event) {
+                is ProfileViewModel.UiUpdate.PopulateProfileData -> {
+                    event.profile?.let {    //profile data will be populated if user data exists
+                        populateProfileDetails(it)
+                    } ?:let {   //new wallet will be created since this is a new user
+                        viewModel.userID?.let {
+                            viewModel.createNewUserWallet(it)
+                        }
+                    }
+                }
+                is ProfileViewModel.UiUpdate.ReferralStatus -> {
+                    binding.tvReferral.remove()
+                    event.message?.let {
+                        if (event.status) {
+                            showErrorSnackBar(
+                                "Referral added Successfully. Your referral bonus will be added to your Wallet.",
+                                false,
+                                LONG
+                            )
+                        } else {
+                            binding.tvReferral.visible()
+                            showErrorSnackBar(
+                                event.message.toString(),
+                                true,
+                                LONG
+                            )
+                        }
+                    }
+               }
+                is ProfileViewModel.UiUpdate.ProfilePicUrl-> {
+                    event.imageUrl?.let {
+                        //uploaded pic url
+                        generateProfileModel(it)
+                    } ?: let {
+                        dismissLoadStatusDialog()
+                        showErrorSnackBar(event.message!!, true)
+                    }
+                }
+                is ProfileViewModel.UiUpdate.ProfileUploadStatus -> {
+                    dismissLoadStatusDialog()
+                    if (event.status) {
+                        SharedPref(this).putData(LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
+                        newUserTransitionFromProfile()
+                    } else {
+                        showErrorSnackBar(event.message!!, true)
+                    }
+                }
+                is ProfileViewModel.UiUpdate.ShowLoadStatusDialog -> showLoadStatusDialog("", event.message!!, event.data!!)
+                is ProfileViewModel.UiUpdate.UpdateLoadStatusDialog -> updateLoadStatusDialogText(event.data!!, event.message!!)
+                is ProfileViewModel.UiUpdate.Empty -> return@observe
+                else -> Unit
             }
-        } else {
-            Address (
-                userId = binding.etProfileName.text.toString().trim(),
-                addressLineOne = binding.etAddressOne.text.toString().trim(),
-                addressLineTwo = binding.etAddressTwo.text.toString().trim(),
-                city = binding.spCity.selectedItem.toString(),
-                LocationCode = binding.spArea.selectedItem.toString(),
-                LocationCodePosition = binding.spArea.selectedItemPosition,
-                gpsLatitude = mLatitude,
-                gpsLongitude = mLongitude,
-                gpsAddress = mAddress
-            ).also {
-                mProfile.address.add(it)
-            }
+            viewModel.setEmptyStatus()
         }
     }
 
-    //setting the user details that is received from DAO
-    private fun setUserDetailsFromDao(userProfile: UserProfileEntity) {
-        with(binding) {
+    private fun showLoadStatusDialog(title: String, body: String, content: String) {
+        LoadStatusDialog.newInstance(title, body, content).show(supportFragmentManager,
+            Constants.LOAD_DIALOG
+        )
+    }
+
+    private fun dismissLoadStatusDialog() {
+        (supportFragmentManager.findFragmentByTag(Constants.LOAD_DIALOG) as? DialogFragment)?.dismiss()
+    }
+
+    private fun updateLoadStatusDialogText(data: String, message: String) {
+        LoadStatusDialog.statusContent = message
+        LoadStatusDialog.statusText.value = data
+    }
+
+    private fun populateProfileDetails(userProfile: UserProfileEntity) {
+        binding.apply {
             etProfileName.setText(userProfile.name)
             tvDob.text = userProfile.dob
             tvPhoneNumber.text = userProfile.phNumber
@@ -226,126 +194,179 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             etAddressTwo.setText(userProfile.address[0].addressLineTwo)
             spArea.setSelection(userProfile.address[0].LocationCodePosition)
             tvGps.text = userProfile.address[0].gpsAddress
-            mProfilePicUrl = userProfile.profilePicUrl
-            mLatitude = userProfile.address[0].gpsLatitude
-            mLongitude = userProfile.address[0].gpsLongitude
-            mAddress = userProfile.address[0].gpsAddress
+//            mLatitude = userProfile.address[0].gpsLatitude
+//            mLongitude = userProfile.address[0].gpsLongitude
+//            mAddress = userProfile.address[0].gpsAddress
             tvReferral.remove()
-            //hinding the referral code area for existing user
+            //hiding the referral code area for existing user
+            if (userProfile.profilePicUrl != "") {
+                GlideLoader().loadUserPicture(this@ProfileActivity, userProfile.profilePicUrl, ivProfilePic)
+            }
         }
-        GlideLoader().loadUserPicture(this, mProfilePicUrl, binding.ivProfilePic)
+
+        viewModel.getAllActiveOrders().observe(this) {
+            it?.let {
+                viewModel.purchaseHistory.clear()
+                viewModel.purchaseHistory.addAll(it)
+            }
+        }
+        viewModel.getAllActiveSubscriptions().observe(this) {
+            it?.let {
+                viewModel.subscriptions.clear()
+                viewModel.subscriptions.addAll(it)
+            }
+        }
+    }
+
+    private fun activityInit() {
+        binding.ivProfilePic.clipToOutline = true
+        viewModel.getUserProfile()
+    }
+
+    private fun clickListeners() {
+        with(binding) {
+            ivProfilePic.setOnClickListener {
+                if (PermissionsUtil.hasStoragePermission(this@ProfileActivity)) {
+                    getAction.launch(pickImageIntent)
+                } else {
+                    showExitSheet(this@ProfileActivity, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                }
+            }
+            btnSaveProfile.setOnClickListener {
+                profileDataValidation()
+            }
+            llDob.setOnClickListener{
+                viewModel.DobLong?.let {
+                    val selectedDateMap = HashMap<String, Long>()
+                    selectedDateMap["date"] = it
+                    selectedDateMap["month"] = it
+                    selectedDateMap["year"] = it
+                    DatePickerLib.showCalendar(this@ProfileActivity, this@ProfileActivity, null, System.currentTimeMillis(), selectedDateMap)
+                } ?:let {
+                    DatePickerLib.showCalendar(this@ProfileActivity, this@ProfileActivity, null, System.currentTimeMillis(), null)
+                }
+            }
+            tvReferral.setOnClickListener{
+                showExitSheet(this@ProfileActivity, "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus! Click Proceed to Continue", "referral")
+            }
+            llGps.setOnClickListener{
+                //implements maps and gps location picker if needed
+            }
+        }
+    }
+
+    //generating the profile model for uploading to firestore
+    //and assigning it to mProfile variable for later use
+    private fun generateProfileModel(profilePicUrl: String) {
+        viewModel.userProfile?.let {
+            viewModel.profilePicUri?.let {
+                updateUserProfile(profilePicUrl)
+            } ?: updateUserProfile(it.profilePicUrl)
+        } ?: createNewUserModel(profilePicUrl)
+    }
+
+    private fun createNewUserModel(profilePicUrl: String) {
+        val address = arrayListOf<Address>(generateAddressObject())
+        UserProfile(
+            id = viewModel.userID!!,
+            name = binding.etProfileName.text.toString().trim(),
+            phNumber = binding.tvPhoneNumber.text.toString().trim(),
+            alternatePhNumber = binding.etAlternateNumber.text.toString().trim(),
+            dob = binding.tvDob.text.toString(),
+            address = address,
+            mailId = binding.etEmailId.text.toString().trim(),
+            profilePicUrl = profilePicUrl,
+            referrerNumber = viewModel.referralCode ?: ""
+        ).let { profile ->
+            viewModel.uploadProfile(profile)
+        }
+    }
+
+    private fun updateUserProfile(profilePicUrl: String) {
+        viewModel.userProfile?.let { profile ->
+            profile.id = viewModel.userID!!
+            profile.name = binding.etProfileName.text.toString().trim()
+            profile.phNumber = binding.tvPhoneNumber.text.toString().trim()
+            profile.alternatePhNumber = binding.etAlternateNumber.text.toString().trim()
+            profile.dob = binding.tvDob.text.toString()
+            profile.address[0] = generateAddressObject()
+            profile.mailId = binding.etEmailId.text.toString().trim()
+            profile.profilePicUrl = profilePicUrl
+            profile.purchaseHistory.addAll(viewModel.purchaseHistory)
+            profile.subscriptions.addAll(viewModel.subscriptions)
+            viewModel.uploadProfile(profile = profile.toUserProfile())
+        }
+    }
+
+    private fun generateAddressObject(): Address {
+        return Address (
+            userId = binding.etProfileName.text.toString().trim(),
+            addressLineOne = binding.etAddressOne.text.toString().trim(),
+            addressLineTwo = binding.etAddressTwo.text.toString().trim(),
+            city = binding.spCity.selectedItem.toString(),
+            LocationCode = binding.spArea.selectedItem.toString(),
+            LocationCodePosition = binding.spArea.selectedItemPosition,
+//            gpsLatitude = mLatitude,
+//            gpsLongitude = mLongitude,
+//            gpsAddress = mAddress
+        )
     }
 
     //validating the data entered before uploading
     private fun profileDataValidation() {
-        if (binding.etAddressOne.text.isNullOrEmpty()) {
-                binding.etlAddressOne.error = "* required"
-                return
-        }
-        if (binding.etAddressTwo.text.isNullOrEmpty()) {
-             binding.etlAddressTwo.error = "* required"
-             return
-        }
-        generateProfileModel()
-        //address lines, name, dob, are mandatory
-        //if mProfilePicUri is null that means the user didnot select any pic from storage so
-        //if it is for the first time url will be empty and that will be assigned to mProfile class
-        //if there is already a picture but edited rest of the profile page then the already present pic's url will be taken back
-        with(mProfile) {
+        binding.apply {
             when {
-                name.isEmpty() -> {
-                    binding.etlProfileName.error = "* required"
-                    return@with
+                etProfileName.text.isNullOrEmpty() -> {
+                    etProfileName.error = "*required"
+                    return@apply
                 }
-                mailId.isEmpty() -> {
-                    binding.etlEmailId.error = "* required"
-                    return@with
+                etEmailId.text.isNullOrEmpty() -> {
+                    etEmailId.error = "*required"
+                    return@apply
                 }
-                !Patterns.EMAIL_ADDRESS.matcher(mailId).matches() -> {
-                    binding.etlEmailId.error = "* Enter a valid Email ID"
-                    return@with
+                !Patterns.EMAIL_ADDRESS.matcher(etEmailId.text.toString().trim()).matches() -> {
+                    binding.etlEmailId.error = "*Enter a valid Email ID"
+                    return@apply
                 }
-                dob == " DD / MM / YYYY " -> {
-                    binding.tvDob.error = "* required"
-                    this@ProfileActivity.hideKeyboard()
-                    showToast(this@ProfileActivity, "Please select Date of Birth")
-                    return@with
+                etAddressOne.text.isNullOrEmpty() -> {
+                    etlAddressOne.error = "* required"
+                    return@apply
                 }
-                mProfilePicUri == null -> {
-                    mProfile.profilePicUrl = mProfilePicUrl
-                    showProgressDialog()
-                    //uploading only the changed data. since uri is empty profile pic is not changed
-                    viewModel.uploadProfile(mProfile)
+                etAddressTwo.text.isNullOrEmpty() -> {
+                    etlAddressTwo.error = "* required"
+                    return@apply
                 }
-                mProfilePicUri != null -> {
-                    showProgressDialog()
-                    //uploading the profile pic first and thereby then chaining to upload the rest of the data
-                    viewModel.uploadProfilePic (
-                        Constants.PROFILE_PIC_PATH,
-                        mProfilePicUri!!,
-                        GlideLoader().imageExtension(this@ProfileActivity,  mProfilePicUri!!)!!
-                    )
+                tvDob.text.toString() == " DD / MM / YYYY " -> {
+                    showErrorSnackBar("Date of Birth required", true)
+                    return@apply
+                }
+                else -> {
+                    viewModel.profilePicUri?.let {
+                        viewModel.uploadProfilePic(
+                            PROFILE_PIC_PATH,
+                            it,
+                            GlideLoader().imageExtension(this@ProfileActivity,  it)!!
+                        )
+                    } ?: generateProfileModel("")
                 }
             }
         }
     }
 
-    //assigning the data of birth date
-    fun onDobSelected(date: Long) {
+    fun selectedCalendarDate(date: Long) {
+        // todo uploading dob should be in 00/00/0000 format
         binding.tvDob.text = TimeUtil().getCustomDate(dateLong = date)
+        viewModel.DobLong = date
         SharedPref(this).putData(Constants.DOB, Constants.STRING, TimeUtil().getCustomDate(dateLong = date).substring(0,5))
-        mProfile.dob = date.toString()
     }
 
-    fun exitProfileWithoutChange() {
-        //on back pressed if it is new user the app is closed if not it means the user is already logged in so it will move to home activity
-        if(isNewUser) {
-            finish()
-        } else {
-            transitionFromProfile()
-        }
-    }
-
-    private fun successDialogAndTransition() {
-        //on save profile btn press if new user the success dialog will be shown else profile updated text will be shown with sucess dialog
-        if (isNewUser) {
-            SharedPref(this).putData(Constants.USER_ID, Constants.STRING, mCurrentUserId!!)
-            SharedPref(this).putData(Constants.PHONE_NUMBER, Constants.STRING, mPhoneNumber)
-            SharedPref(this).putData(Constants.LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
-            showSuccessDialog()
-        } else {
-            showSuccessDialog("Profile Updated", "" )
-        }
-
-        //a delay of 2 seconds for the success dialog to fully display the animation
-        lifecycleScope.launch {
-            delay(2000)
-            hideSuccessDialog()
-            newUserTransitionFromProfile()
-        }
-
-    }
-
-    private fun transitionFromProfile() {
-        //movement of profile to home activity for old user
-            Intent(this, HomeActivity::class.java).also {
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                finish()
-            }
-    }
-
-    private fun newUserTransitionFromProfile() {
-        Intent(this, HomeActivity::class.java).also {
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-            finish()
-        }
+    fun openReferral() {
+        showReferralBs()
     }
 
     private fun showReferralBs() {
         //BS to add referral number
-        dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
+        val dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
 
         val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(LayoutInflater.from(applicationContext),R.layout.dialog_bottom_add_referral,null,false)
         dialogBsAddReferral.setCancelable(true)
@@ -359,25 +380,56 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 view.etlReferralNumber.error = "* Enter a valid code"
             return@setOnClickListener
             } else {
-                showProgressDialog()
-                mProfile.referrerNumber = code
-                viewModel.applyReferralNumber(mCurrentUserId!!, code)
+                dialogBsAddReferral.dismiss()
+                viewModel.applyReferralNumber(code)
             }
         }
 
         dialogBsAddReferral.show()
     }
 
-    override fun onBackPressed() {
-        if (isNewUser) {
-            showExitSheet(this, "Cancel Registration")
-        } else {
-            showExitSheet(this, "Exit Profile Update")
+    fun exitProfileWithoutChange() {
+        //on back pressed if it is new user the app is closed if not it means the user is already logged in so it will move to home activity
+        viewModel.userProfile?.let {
+            transitionFromProfile()
+        } ?:let {
+            finish()
+            finishAffinity()
         }
     }
 
+    private fun transitionFromProfile() {
+        //movement of profile to home activity for old user
+        Intent(this, HomeActivity::class.java).also {
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            finish()
+        }
+    }
+
+    private fun newUserTransitionFromProfile() {
+        Intent(this, HomeActivity::class.java).also {
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            finish()
+        }
+    }
+
+    override fun onResume() {
+        viewModel.userID = SharedPref(this).getData(USER_ID, STRING, "").toString()
+        viewModel.phoneNumber = SharedPref(this).getData(PHONE_NUMBER, STRING, "").toString()
+        binding.tvPhoneNumber.text = viewModel.phoneNumber
+        super.onResume()
+    }
+
+    override fun onBackPressed() {
+        viewModel.userProfile?.let {
+            showExitSheet(this, "Exit Profile Update")
+        } ?: showExitSheet(this, "Cancel Registration")
+    }
+
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
-        outState.putString(Constants.PROFILE_PIC_URI, mProfilePicUri.toString())
+        outState.putString(PHONE_NUMBER, viewModel.phoneNumber.toString())
         super.onSaveInstanceState(outState, outPersistentState)
     }
 
@@ -386,8 +438,8 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
 
     private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        mProfilePicUri = result.data?.data
-        mProfilePicUri?.let { uri -> GlideLoader().loadUserPicture(this, uri, binding.ivProfilePic) }
+        viewModel.profilePicUri = result.data?.data
+        viewModel.profilePicUri?.let { uri -> GlideLoader().loadUserPicture(this, uri, binding.ivProfilePic) }
     }
 
     override fun onRequestPermissionsResult(
@@ -406,41 +458,6 @@ class ProfileActivity : BaseActivity(), View.OnClickListener, KodeinAware {
             } else {
                 showToast(this, "Storage Permission Denied")
                 showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
-            }
-        }
-    }
-
-    override fun onClick(v: View?) {
-        if (v != null) {
-            when (v) {
-                binding.ivProfilePic -> {
-                    if (PermissionsUtil.hasStoragePermission(this)) {
-                        getAction.launch(pickImageIntent)
-                    } else {
-                        showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
-                    }
-                }
-                binding.btnSaveProfile -> {
-                    profileDataValidation()
-//                    viewModel.deleteprof()
-                }
-                binding.llDob -> {
-                    DatePickerLib().pickDob(this)
-                }
-                binding.tvReferral -> {
-                    showReferralBs()
-                }
-                binding.llGps -> {
-//                    if(!PermissionsUtil().isGpsEnabled(this)) {
-//                        startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-//                    } else {
-//                        generateProfileModel()
-//                        Intent(this, MapsActivity::class.java).also {
-//                            startActivity(it)
-//                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-//                        }
-//                    }
-                }
             }
         }
     }

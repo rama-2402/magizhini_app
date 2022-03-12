@@ -127,12 +127,15 @@ class Firestore(
     //check if the user profile exists and getting the data from store
     suspend fun checkUserProfileDetails(): String = withContext(Dispatchers.IO) {
         try {
-            val snapShot = mFireStore.collection(Constants.USERS)
+            val snapShot = mFireStore.collection(USERS)
                 .document(mFirebaseAuth.currentUser!!.uid).get().await()
             //getting the profile data and if exists we do the code below or we dismiss the progress dialog for new profile creation
             if (snapShot.exists()) {
                 //we create a profile object of the snapshot and converting it to profile entity class to update it in room database
                 val profile = snapShot.toObject(UserProfile::class.java)
+                if (profile?.name == "") {
+                    return@withContext ""
+                }
                 val userProfileEntity = profile!!.toUserProfileEntity()
                 repository.upsertProfile(userProfileEntity)
 
@@ -246,26 +249,29 @@ class Firestore(
                 false
             } else {
                 val profile = profileDoc.documents[0].toObject(UserProfile::class.java)
-                if (fromHomeMenu) {
+                val addReferralNumberToProfile = async {
                     mFireStore.collection(USERS).document(currentUserID).update("referrerNumber", code).await()
                     val currentUserProfile = repository.getProfileData()!!
                     currentUserProfile.referralId = code
                     repository.upsertProfile(currentUserProfile)
+                    true
                 }
-
                 val checkReferralLimit = async { checkReferralLimit(profile!!.id)  }
                 val addReferralBonusToReferrer = async { addReferralBonusToReferrer(profile!!) }
                 val addReferralBonusToCurrentUser = async { addReferralBonusToCurrentUser(currentUserID) }
 
                 if (checkReferralLimit.await()) {
                     addReferralBonusToReferrer.await() &&
-                    addReferralBonusToCurrentUser.await()
+                    addReferralBonusToCurrentUser.await() &&
+                    addReferralNumberToProfile.await()
                 } else {
                     addReferralBonusToCurrentUser.await()
                 }
             }
         } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: applying referral", it) }
+            e.message?.let {
+                logCrash("firestore: applying referral", it)
+            }
             false
         }
     }
@@ -396,21 +402,26 @@ class Firestore(
 
     suspend fun checkForReferral(userID: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            val currentUserID = if (userID.isNullOrEmpty()) {
-                getCurrentUserId()!!
-            } else {
-                userID
-            }
-            val doc = mFireStore.collection(WALLET)
-                        .document(WALLET)
-                        .collection("Users")
-                        .document(currentUserID)
-                .get().await().toObject(Wallet::class.java)
-            if (doc != null) {
-                return@withContext doc.amount != 0f
-            }else {
-                return@withContext false
-            }
+//            val currentUserID = if (userID.isNullOrEmpty()) {
+//                getCurrentUserId()!!
+//            } else {
+//                userID
+//            }
+//            val doc = mFireStore.collection(WALLET)
+//                        .document(WALLET)
+//                        .collection("Users")
+//                        .document(currentUserID)
+//                .get().await().toObject(Wallet::class.java)
+//            if (doc != null) {
+//                return@withContext doc.amount != 0f
+//            }else {
+//                return@withContext false
+//            }
+            val profiles = mFireStore
+                .collection("users")
+                .whereEqualTo("phNumber", "+91$userID")
+                .get().await()
+            !profiles.documents.isNullOrEmpty()
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: checking for existing referral", it) }
             return@withContext false

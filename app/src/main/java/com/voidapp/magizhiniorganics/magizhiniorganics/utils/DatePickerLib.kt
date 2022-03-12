@@ -1,5 +1,8 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
+import android.app.Activity
+import android.app.DatePickerDialog
+import android.content.Context
 import com.aminography.primecalendar.civil.CivilCalendar
 import com.aminography.primecalendar.common.CalendarFactory
 import com.aminography.primecalendar.common.CalendarType
@@ -10,24 +13,61 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivit
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import java.util.*
+import kotlin.collections.HashMap
 
 
-class DatePickerLib {
+object DatePickerLib {
 
-
-    fun pickDob(activity: ProfileActivity) {
-        //val themeFactory = object: DarkThemeFactory() {}
-
-            val callback = SingleDayPickCallback { date ->
-                activity.onDobSelected(date.timeInMillis)
-            }
-                val today = CivilCalendar()
-                val datePicker = PrimeDatePicker.dialogWith(today)
-                    .pickSingleDay(callback)
-                    //.applyTheme(themeFactory)
-                    .build()
-                datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
+    fun showCalendar(context: Context, activity: Activity, minDate: Long?, maxDate: Long?, selectedDate: HashMap<String, Long>?) {
+        val calendar = Calendar.getInstance()
+        val dialog = DatePickerDialog(context, { _, year, month, day_of_month ->
+            calendar[Calendar.YEAR] = year
+            calendar[Calendar.MONTH] = month
+            calendar[Calendar.DAY_OF_MONTH] = day_of_month
+            selectedCalendarDate(activity, calendar.timeInMillis)
+        }, calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH])
+        //this part is to preselect the already selected startsub date
+        selectedDate?.let {
+            dialog.updateDate(
+                TimeUtil().getYear(dateLong = selectedDate["year"].toString().toLong()).toInt(),
+                TimeUtil().getMonthNumber(dateLong = selectedDate["month"].toString().toLong()),
+                TimeUtil().getDateNumber(dateLong = selectedDate["date"].toString().toLong()).toInt()
+            )
         }
+        minDate?.let {
+            dialog.datePicker.minDate = it
+        }
+        maxDate?.let {
+            dialog.datePicker.maxDate = it
+        }
+        dialog.show()
+    }
+
+    private fun selectedCalendarDate(activity: Activity, date: Long) {
+        when(activity) {
+            is SubscriptionProductActivity -> {
+                activity.selectedCalendarDate(date)
+            }
+            is ProfileActivity -> {
+                activity.selectedCalendarDate(date)
+            }
+        }
+    }
+
+
+//    fun pickDob(activity: ProfileActivity) {
+//        //val themeFactory = object: DarkThemeFactory() {}
+//
+//            val callback = SingleDayPickCallback { date ->
+//                activity.onDobSelected(date.timeInMillis)
+//            }
+//                val today = CivilCalendar()
+//                val datePicker = PrimeDatePicker.dialogWith(today)
+//                    .pickSingleDay(callback)
+//                    //.applyTheme(themeFactory)
+//                    .build()
+//                datePicker.show(activity.supportFragmentManager, "magizhiniOrganics")
+//        }
 
 //    fun startSubscriptionDate(activity: SubscriptionProductActivity) {
 //        //val themeFactory = object: DarkThemeFactory() {}

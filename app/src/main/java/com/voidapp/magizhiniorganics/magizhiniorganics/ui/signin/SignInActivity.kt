@@ -24,6 +24,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivit
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import kotlinx.coroutines.*
@@ -239,6 +240,8 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         when (val status = viewModel.checkUserProfileDetails()) {
             "" -> {
                 mCurrentUserID = viewModel.getCurrentUserId()!!
+                SharedPref(this).putData(USER_ID, STRING, mCurrentUserID)
+                SharedPref(this).putData(PHONE_NUMBER, STRING, mPhoneNumber)
                 viewModel.createNewCustomerProfile()
                 startGetProfileDataService()
                 startGetAllDataService("profile")
@@ -259,9 +262,9 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
     private fun navigateToProfilePage() {
         Intent(this@SignInActivity, ProfileActivity::class.java).also {
-            it.putExtra(Constants.PHONE_NUMBER, mPhoneNumber)
-            it.putExtra(Constants.USER_ID, mCurrentUserID)
-            it.putExtra(Constants.STATUS, true)
+            it.putExtra(PHONE_NUMBER, mPhoneNumber)
+            it.putExtra(USER_ID, mCurrentUserID)
+//            it.putExtra(STATUS, true)
             startActivity(it)
             finish()
         }

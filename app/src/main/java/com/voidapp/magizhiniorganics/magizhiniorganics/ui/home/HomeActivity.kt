@@ -1,9 +1,13 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
+
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -19,67 +23,64 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.BuildConfig
 import com.google.firebase.messaging.FirebaseMessaging
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PartnersAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.TestimonialsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SpecialBanners
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.VideoPlayerActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts.ContactUsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DESCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.HOME_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
-import kotlinx.coroutines.*
-import org.imaginativeworld.whynotimagecarousel.listener.CarouselListener
-import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
-import org.kodein.di.KodeinAware
-import org.kodein.di.android.kodein
-import org.kodein.di.generic.instance
-import android.content.pm.ResolveInfo
-import android.util.Log
-import com.google.firebase.BuildConfig
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PartnersAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts.ContactUsActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OPEN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
-
-
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.imaginativeworld.whynotimagecarousel.listener.CarouselListener
+import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
+import org.kodein.di.KodeinAware
+import org.kodein.di.android.kodein
+import org.kodein.di.generic.instance
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class HomeActivity :
@@ -91,7 +92,6 @@ class HomeActivity :
     NavigationView.OnNavigationItemSelectedListener,
     PartnersAdapter.PartnersItemClickListener
 {
-
     //DI Injection with kodein
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
@@ -183,6 +183,10 @@ class HomeActivity :
             cpSpecialThree.setOnClickListener(this@HomeActivity)
             cpTestimonials.setOnClickListener(this@HomeActivity)
             fabCart.setOnClickListener(this@HomeActivity)
+            ivFacebook.setOnClickListener(this@HomeActivity)
+            ivInstagram.setOnClickListener(this@HomeActivity)
+            ivLinkedIn.setOnClickListener(this@HomeActivity)
+            ivTelegram.setOnClickListener(this@HomeActivity)
             ivNotification.setOnClickListener {
                 Intent(this@HomeActivity, NotificationsActivity::class.java).also {
                     startActivity(it)
@@ -248,7 +252,7 @@ class HomeActivity :
                         binding.fabCart.visibility = View.GONE
                     }
                     scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight -> {
-                        Log.e("qw", "partners", )
+                        Log.e("qw", "partners")
                         viewModel.getPartnersData()
                     }
                 }
@@ -697,7 +701,22 @@ class HomeActivity :
                         showErrorSnackBar("Please check network connection", true)
                     }
                 }
+                binding.ivInstagram -> openInBrowser("https://www.instagram.com/magizhini_organics/?utm_medium=copy_link")
+                binding.ivFacebook -> openInBrowser("https://www.facebook.com/organicshopping/")
+                binding.ivTelegram -> openInBrowser("https://t.me/coder_lane")
+                binding.ivLinkedIn -> openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
             }
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 
@@ -800,53 +819,25 @@ class HomeActivity :
                 R.id.menuPrivacyPolicy -> {
                     lifecycleScope.launch {
                         delay(200)
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                            intent.data = Uri.parse("https://rama-2402.github.io/privacy-policy/")
-                            startActivity(Intent.createChooser(intent, "Open link with"))
-                        } catch (e: Exception) {
-                            println("The current phone does not have a browser installed")
-                        }
+                        openInBrowser("https://rama-2402.github.io/privacy-policy/")
                     }
                 }
                 R.id.menuDisclaimer -> {
                     lifecycleScope.launch {
                         delay(200)
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                            intent.data = Uri.parse("https://rama-2402.github.io/disclaimer/")
-                            startActivity(Intent.createChooser(intent, "Open link with"))
-                        } catch (e: Exception) {
-                            println("The current phone does not have a browser installed")
-                        }
+                        openInBrowser("https://rama-2402.github.io/disclaimer/")
                     }
                 }
                 R.id.menuTermsOfUse -> {
                     lifecycleScope.launch {
                         delay(200)
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                            intent.data = Uri.parse("https://rama-2402.github.io/terms-of-use/")
-                            startActivity(Intent.createChooser(intent, "Open link with"))
-                        } catch (e: Exception) {
-                            println("The current phone does not have a browser installed")
-                        }
+                        openInBrowser("https://rama-2402.github.io/terms-of-use/")
                     }
                 }
                 R.id.menuReturn -> {
                     lifecycleScope.launch {
                         delay(200)
-                        try {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                            intent.data = Uri.parse("https://rama-2402.github.io/return-policy/")
-                            startActivity(Intent.createChooser(intent, "Open link with"))
-                        } catch (e: Exception) {
-                            println("The current phone does not have a browser installed")
-                        }
+                        openInBrowser("https://rama-2402.github.io/return-policy/")
                     }
                 }
                 R.id.menuContactUs -> {

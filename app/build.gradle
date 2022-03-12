@@ -188,8 +188,8 @@ dependencies {
     //youtube player integration         https://github.com/PierfrancescoSoffritti/android-youtube-player
     implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:11.0.1'
 
-    // debugImplementation because LeakCanary should only run in debug builds.
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
+//    // debugImplementation because LeakCanary should only run in debug builds.
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
 
     //zoom image    https://github.com/MikeOrtiz/TouchImageView
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'

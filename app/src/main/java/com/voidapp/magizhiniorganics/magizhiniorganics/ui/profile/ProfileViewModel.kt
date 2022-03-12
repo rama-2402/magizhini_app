@@ -10,7 +10,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -19,66 +22,92 @@ class ProfileViewModel (
     val fbRepository: FirestoreRepository
         ) : ViewModel() {
 
-    private var _isNewUser: MutableLiveData<Boolean> = MutableLiveData()
-    val isNewUser: LiveData<Boolean> = _isNewUser
-    private var _userProfile: MutableLiveData<UserProfileEntity> = MutableLiveData()
-    val userProfile: LiveData<UserProfileEntity> = _userProfile
-    private var _profileUploadStatus: MutableLiveData<Boolean> = MutableLiveData()
-    val profileUploadStatus: LiveData<Boolean> = _profileUploadStatus
-    private var _referralStatus: MutableLiveData<Boolean> = MutableLiveData()
-    val referralStatus: LiveData<Boolean> = _referralStatus
-    private var _profileImageUploadStatus: MutableLiveData<String> = MutableLiveData()
-    val profileImageUploadStatus: LiveData<String> = _profileImageUploadStatus
+    var userID: String? = null
+    var phoneNumber: String? = null
+    var DobLong: Long? = null
+    var referralCode: String? = null
+    var profilePicUri: Uri? = null
+
+    val purchaseHistory: MutableList<String> = mutableListOf()
+    val subscriptions:  MutableList<String> = mutableListOf()
+
+    var userProfile: UserProfileEntity? = null
+
+    private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
+    val uiUpdate: LiveData<UiUpdate> = _uiUpdate
+    private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
+    val uiEvent: LiveData<UIEvent> = _uiEvent
+
+    fun setEmptyUiEvent() {
+        _uiEvent.value = UIEvent.EmptyUIEvent
+    }
+
+    fun setEmptyStatus() {
+        _uiUpdate.value = UiUpdate.Empty
+    }
 
     fun getUserProfile() = viewModelScope.launch (Dispatchers.IO) {
-        val profile = dbRepository.getProfileData()!!
-        withContext(Dispatchers.Main) {
-         _userProfile.value = profile
+        dbRepository.getProfileData()?.let { profile ->
+            withContext(Dispatchers.Main) {
+                if (profile.name != "") {
+                    if (profile.referralId != "") {
+                        referralCode = profile.referralId
+                        _uiUpdate.value = UiUpdate.ReferralStatus(false, null)
+                    }
+                    userProfile = profile
+                    _uiUpdate.value = UiUpdate.PopulateProfileData(profile, null)
+                } else {
+                    _uiUpdate.value = UiUpdate.ReferralStatus(true, null)
+                }
+            }
+        } ?: withContext(Dispatchers.Main) {
+            _uiUpdate.value = UiUpdate.PopulateProfileData(null, null)
         }
     }
 
-    fun getAllActiveOrders() = dbRepository.getAllActiveOrders()
+    fun uploadProfile(profile: UserProfile) = viewModelScope.launch {
+        profilePicUri?.let {
+            userProfile?.let {
+                _uiUpdate.value = UiUpdate.UpdateLoadStatusDialog("Updating Your Profile... ", "upload")
+            } ?:let { _uiUpdate.value = UiUpdate.UpdateLoadStatusDialog("Creating Your Profile... ", "upload") }
+        } ?:let {
+            userProfile?.let {
+                _uiUpdate.value = UiUpdate.ShowLoadStatusDialog("Updating Your Profile... ", "upload")
+            } ?:let { _uiUpdate.value = UiUpdate.ShowLoadStatusDialog("Creating Your Profile... ", "upload") }
+        }
 
-    fun getAllActiveSubscriptions() = dbRepository.getAllActiveSubscriptions()
-
-    fun uploadProfile(profile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         val status = fbRepository.uploadProfile(profile)
-        withContext(Dispatchers.Main) {
-            _profileUploadStatus.value = status
+        delay(1800)
+        if (status) {
+            userProfile?.let {
+                _uiUpdate.value =
+                    UiUpdate.UpdateLoadStatusDialog("Profile Updated successfully... ", "success")
+            } ?:let {
+                _uiUpdate.value =
+                    UiUpdate.UpdateLoadStatusDialog("Profile Created successfully... ", "success")
+            }
+            delay(1800)
+            _uiUpdate.value = UiUpdate.ProfileUploadStatus(true, null)
+        } else {
+            userProfile?.let {
+                _uiUpdate.value = UiUpdate.UpdateLoadStatusDialog( "Server Error! Failed to update profile. Try later", "fail")
+            } ?: let {
+                _uiUpdate.value = UiUpdate.UpdateLoadStatusDialog( "Server Error! Failed to create profile. Try later", "fail")
+            }
+            delay(1000)
+            _uiUpdate.value = UiUpdate.ProfileUploadStatus(false, null)
         }
-//        if (fsRepository.uploadProfile(profile)) {
-//            CustomerProfile(
-//                profile.id,
-//                profile.name,
-//                profile.profilePicUrl
-//            ).also {
-//                if (fbRepository.uploadUserProfile(it)) {
-//                    withContext(Dispatchers.Main) {
-//                        _profileUploadStatus.value = true
-//                    }
-//                } else {
-//                        _profileUploadStatus.value = false
-//                }
-//            }
-//        } else {
-//            withContext(Dispatchers.Main) {
-//                _profileUploadStatus.value = false
-//            }
-//        }
     }
 
-    fun uploadProfilePic(path: String, uri: Uri, extension: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun uploadProfilePic(path: String, uri: Uri, extension: String) = viewModelScope.launch {
+        _uiUpdate.value = UiUpdate.ShowLoadStatusDialog("Uploading Profile Picture...", "upload")
         val status = fbRepository.uploadImage(path, uri, extension)
         if (
             status == "failed"
         ) {
-            withContext(Dispatchers.Main) {
-                _profileImageUploadStatus.value = "failed"
-            }
+            _uiUpdate.value = UiUpdate.ProfilePicUrl(null, "Server Error! Failed to upload Profile Picture")
         } else {
-            withContext(Dispatchers.Main) {
-                _profileImageUploadStatus.value = status
-            }
+            _uiUpdate.value = UiUpdate.ProfilePicUrl(status, "Server Error! Failed to upload Profile Picture")
         }
     }
 
@@ -92,14 +121,47 @@ class ProfileViewModel (
         ).also {
             fbRepository.createWallet(it)
         }
+
+        UserProfile(
+            id = userID!!,
+            phNumber = phoneNumber!!
+        ).let {
+            fbRepository.uploadProfile(it)
+        }
     }
 
-    fun applyReferralNumber(currentUserID: String, code: String) = viewModelScope.launch {
-        _referralStatus.value = fbRepository.applyReferralNumber(currentUserID, code)
+    fun applyReferralNumber(code: String) = viewModelScope.launch {
+        _uiEvent.value = UIEvent.ProgressBar(true)
+        if(fbRepository.checkForReferral(code)) {
+            val referralStatus = userID?.let { fbRepository.applyReferralNumber(it, code) } ?: false
+            delay(500)
+            _uiEvent.value = UIEvent.ProgressBar(false)
+            _uiUpdate.value = UiUpdate.ReferralStatus(referralStatus, "Server Error! Failed to apply referral")
+        } else {
+            _uiEvent.value = UIEvent.ProgressBar(false)
+            _uiUpdate.value = UiUpdate.ReferralStatus(false, "There is no profile associated with the number. Please enter a valid mobile of the Referrer Account")
+        }
+
     }
 
-    suspend fun checkForReferral(userID: String): Boolean = withContext(Dispatchers.IO){
-        return@withContext fbRepository.checkForReferral(userID)
-    }
+    fun getAllActiveOrders() = dbRepository.getAllActiveOrders()
+    fun getAllActiveSubscriptions() = dbRepository.getAllActiveSubscriptions()
 
+
+    sealed class UiUpdate {
+        //load satus dialog
+        data class ShowLoadStatusDialog(val message: String?, val data: String?): UiUpdate()
+        data class UpdateLoadStatusDialog(val message: String?, val data: String?): UiUpdate()
+        object DismissLoadStatusDialog: UiUpdate()
+
+        //profile data
+        data class PopulateProfileData(val profile: UserProfileEntity?, val message: String?): UiUpdate()
+        data class ProfilePicUrl(val imageUrl: String?, val message: String?): UiUpdate()
+        data class ProfileUploadStatus(val status: Boolean, val message: String?): UiUpdate()
+
+        //referral
+        data class ReferralStatus(val status: Boolean, val message: String?): UiUpdate()
+
+        object Empty: UiUpdate()
+    }
 }

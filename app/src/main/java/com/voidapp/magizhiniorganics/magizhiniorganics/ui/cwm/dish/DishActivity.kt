@@ -25,7 +25,6 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AllCWMAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.IngredientsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.DishViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.SubProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
@@ -58,8 +57,7 @@ import java.util.ArrayList
 * */
 class DishActivity :
     BaseActivity(),
-    KodeinAware,
-    IngredientsAdapter.IngredientsClickListener
+    KodeinAware
 {
     override val kodein: Kodein by kodein()
 
@@ -307,14 +305,6 @@ class DishActivity :
             }
         }
         viewModel.setEmptyStatus()
-    }
-
-    override fun selectedItem(productID: String) {
-        //todo something
-    }
-
-    override fun setFavorites(productID: String) {
-        //todo if favorites implemented
     }
 
     override fun onBackPressed() {

@@ -59,18 +59,18 @@ class SplashActivity : BaseActivity(), KodeinAware {
         binding.progressCircular.animate()
 
         val sRef = this.getSharedPreferences(Constants.USERS, Context.MODE_PRIVATE)
-        val isNewUser = sRef.getString(Constants.USER_ID, "")
+        val isNewUser = sRef.getBoolean(Constants.LOGIN_STATUS, true)
         val isNewDay = sRef.getString(Constants.DATE, Constants.DATE)
         val month = sRef.getInt("month", TimeUtil().getMonthNumber())
 
         binding.tvStatus.setOnClickListener {
-            checkNetwork(isNewDay!!, isNewUser!!, month)
+            checkNetwork(isNewDay!!, isNewUser, month)
         }
 
-        checkNetwork(isNewDay!!, isNewUser!!, month)
+        checkNetwork(isNewDay!!, isNewUser, month)
     }
 
-    private fun checkNetwork(isNewDay: String, isNewUser: String, month: Int) {
+    private fun checkNetwork(isNewDay: String, isNewUser: Boolean, month: Int) {
         if (!NetworkHelper.isOnline(this)) {
             showRetry()
             showToast(this, "Please check your Internet connection")
@@ -80,8 +80,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
         }
     }
 
-    private fun backgroundCheck(isNewDay: String, isNewUser: String, month: Int) {
-        if (isNewUser == "") {
+    private fun backgroundCheck(isNewDay: String, isNewUser: Boolean, month: Int) {
+        if (isNewUser) {
             lifecycleScope.launch {
                 delay(1000)
                 Intent(this@SplashActivity, OnBoardingActivity::class.java).also {

@@ -107,7 +107,6 @@
                         app:bottomShadowHeight="36dp"
                         app:carouselType="BLOCK"
                         app:imagePlaceholder="@drawable/ic_app_placeholder"
-                        app:imageScaleType="centerCrop"
                         app:indicatorMargin="0dp"
                         app:infiniteCarousel="true"
                         app:layout_constraintCircleRadius="16dp"
@@ -626,6 +625,47 @@
                             android:textSize="16sp"
                             android:textStyle="italic" />
                     </LinearLayout>
+                    <HorizontalScrollView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        >
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/material_size_4"
+                            android:layout_marginStart="@dimen/material_size_8"
+                            android:layout_marginEnd="@dimen/material_size_8"
+                            android:layout_marginBottom="@dimen/material_size_8">
+                            <ImageView
+                                android:id="@+id/ivFacebook"
+                                android:layout_width="56dp"
+                                android:layout_height="56dp"
+                                android:src="@drawable/facebook"
+                                android:layout_marginStart="@dimen/material_size_8"
+                                android:layout_marginEnd="@dimen/material_size_4"/>
+                            <ImageView
+                                android:id="@+id/ivInstagram"
+                                android:layout_width="56dp"
+                                android:layout_height="56dp"
+                                android:src="@drawable/instagram"
+                                android:layout_marginStart="@dimen/material_size_4"
+                                android:layout_marginEnd="@dimen/material_size_4"/>
+                            <ImageView
+                                android:id="@+id/ivLinkedIn"
+                                android:layout_width="56dp"
+                                android:layout_height="56dp"
+                                android:src="@drawable/linkedin"
+                                android:layout_marginStart="@dimen/material_size_4"
+                                android:layout_marginEnd="@dimen/material_size_4"/>
+                            <ImageView
+                                android:id="@+id/ivTelegram"
+                                android:layout_width="56dp"
+                                android:layout_height="56dp"
+                                android:src="@drawable/telegram"
+                                android:layout_marginStart="@dimen/material_size_4"
+                                android:layout_marginEnd="@dimen/material_size_8"/>
+                        </LinearLayout>
+                    </HorizontalScrollView>
                 </LinearLayout>
             </me.didik.component.StickyNestedScrollView>
 
@@ -642,20 +682,20 @@
                 app:tint="@color/white" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-                        <com.google.android.material.navigation.NavigationView
-                            android:id="@+id/nvNavigationView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="start"
-                            android:isScrollContainer="true"
-                            android:overScrollMode="always"
-                            android:scrollbars="vertical"
-                            app:headerLayout="@layout/nav_header"
-                            app:menu="@menu/nav_menu"
-                            android:backgroundTint="@color/white"
-                            app:itemTextColor="@color/gray700"
-                            app:itemIconTint="@color/green_base"
-                            />
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/nvNavigationView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:isScrollContainer="true"
+            android:overScrollMode="always"
+            android:scrollbars="vertical"
+            app:headerLayout="@layout/nav_header"
+            app:menu="@menu/nav_menu"
+            android:backgroundTint="@color/white"
+            app:itemTextColor="@color/gray700"
+            app:itemIconTint="@color/green_base"
+            />
 
     </androidx.drawerlayout.widget.DrawerLayout>
 </layout>

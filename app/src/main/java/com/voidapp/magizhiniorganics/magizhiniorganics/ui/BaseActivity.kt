@@ -219,8 +219,8 @@ open class BaseActivity : AppCompatActivity() {
             hideExitSheet()
             when(activity) {
                 is ProfileActivity -> {
-                    if (data == "") {
-                        activity.exitProfileWithoutChange()
+                    when (data) {
+                        "" -> activity.exitProfileWithoutChange()
                     }
                 }
                 is PurchaseHistoryActivity -> {
@@ -244,6 +244,7 @@ open class BaseActivity : AppCompatActivity() {
                     when(data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
+                        "referral" -> activity.openReferral()
                     }
                 }
                 is SubscriptionProductActivity -> {
