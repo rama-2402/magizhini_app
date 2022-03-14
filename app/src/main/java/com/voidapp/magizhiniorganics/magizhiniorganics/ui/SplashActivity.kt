@@ -33,6 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Token
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DOB
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
@@ -59,7 +60,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
         binding.progressCircular.animate()
 
         val sRef = this.getSharedPreferences(Constants.USERS, Context.MODE_PRIVATE)
-        val isNewUser = sRef.getBoolean(Constants.LOGIN_STATUS, true)
+        val isNewUser = sRef.getBoolean(LOGIN_STATUS, true)
         val isNewDay = sRef.getString(Constants.DATE, Constants.DATE)
         val month = sRef.getInt("month", TimeUtil().getMonthNumber())
 
@@ -127,7 +128,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
                 startWork("")
             }
         } else {
-            navigateToHomeScreen(false)
+            navigateToHomeScreen(true)
         }
     }
 

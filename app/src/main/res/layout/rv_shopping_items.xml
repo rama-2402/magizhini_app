@@ -133,7 +133,7 @@
         android:textColor="@color/black"
         android:fontFamily="@font/roboto"
         android:textSize="16sp"
-        android:singleLine="true"
+        android:lines="2"
         android:ellipsize="end"
         android:layout_marginStart="@dimen/material_size_16"
         app:layout_constraintEnd_toEndOf="parent"
@@ -183,10 +183,11 @@
         android:text="Rs: 500"
         android:textColor="@color/grey"
         android:textSize="14sp"
-        android:textStyle="italic"
-        app:layout_constraintBottom_toTopOf="@+id/spProductVariant"
-        app:layout_constraintStart_toStartOf="@+id/tvRs"
-        app:layout_constraintTop_toBottomOf="@+id/tvRs" />
+        android:textStyle="bold"
+        android:layout_marginStart="@dimen/material_size_8"
+        app:layout_constraintBottom_toBottomOf="@+id/tvPrice"
+        app:layout_constraintStart_toEndOf="@+id/tvPrice"
+        app:layout_constraintTop_toTopOf="@+id/tvPrice" />
 
 <!--    <it.sephiroth.android.library.numberpicker.NumberPicker-->
 <!--        android:id="@+id/npOrderCount"-->
@@ -223,19 +224,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvProductName" />
 
-        <Spinner
-            android:id="@+id/spProductVariant"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/material_size_8"
-            android:layout_marginEnd="@dimen/material_size_8"
-            android:theme="@style/mySpinnerItemStyle"
-            android:popupBackground="@drawable/shape_round_rectangle_8"
-            android:background="@drawable/bg_material_box"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ivFavourite"
-            app:layout_constraintStart_toEndOf="@id/clProductItem"
-            app:layout_constraintTop_toBottomOf="@id/tvDiscount"/>
+    <Spinner
+        android:id="@+id/spProductVariant"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/material_size_8"
+        android:layout_marginEnd="@dimen/material_size_8"
+        android:background="@drawable/bg_material_box"
+        android:popupBackground="@drawable/shape_round_rectangle_8"
+        android:theme="@style/mySpinnerItemStyle"
+        app:layout_constraintBottom_toBottomOf="@+id/clProductItem"
+        app:layout_constraintEnd_toStartOf="@id/ivFavourite"
+        app:layout_constraintStart_toEndOf="@id/clProductItem" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivFavourite"

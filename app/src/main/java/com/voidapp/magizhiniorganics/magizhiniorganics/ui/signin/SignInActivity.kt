@@ -22,6 +22,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STATUS
@@ -271,6 +273,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private fun navigateToHomePage() {
+        SharedPref(this).putData(LOGIN_STATUS, BOOLEAN, false)
         Intent(this, HomeActivity::class.java).also {
             startActivity(it)
         }

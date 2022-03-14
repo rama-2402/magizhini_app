@@ -93,13 +93,15 @@
                 tools:showIn="@layout/activity_home">
 
                 <LinearLayout
+                    android:id="@+id/body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
                     <org.imaginativeworld.whynotimagecarousel.ImageCarousel
                         android:id="@+id/cvBanner"
                         android:layout_width="match_parent"
-                        android:layout_height="225dp"
+                        android:layout_height="255dp"
                         android:elevation="10dp"
                         app:autoPlay="true"
                         app:autoPlayDelay="2000"
@@ -113,9 +115,9 @@
                         app:showBottomShadow="true"
                         app:showCaption="false"
                         app:showIndicator="true"
+                        app:imageScaleType="fitXY"
                         app:showNavigationButtons="false"
-                        app:showTopShadow="false" />
-
+                        app:showTopShadow="false"/>
                     <LinearLayout
                         android:id="@+id/stickyCategory"
                         android:layout_width="match_parent"

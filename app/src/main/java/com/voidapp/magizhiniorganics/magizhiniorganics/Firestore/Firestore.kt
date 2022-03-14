@@ -282,9 +282,9 @@ class Firestore(
         )
         return@withContext try {
             val referralLimit = mFireStore.collection(REFERRAL).document(referrerID).get().await()
-            if (referralLimit.exists()) {
+            if (referralLimit != null) {
                 val referral = referralLimit.toObject(Referral::class.java)!!
-                if (referral.totalReferrals != 10) {
+                if (referral.totalReferrals <= 10) {
                     referral.totalReferrals = referral.totalReferrals + 1
                     mFireStore.collection(REFERRAL).document(referrerID).update("totalReferrals", referral.totalReferrals).await()
                     true
@@ -1540,7 +1540,7 @@ class Firestore(
                         .collection("birthdayCard")
                         .document("user").get().await()
 
-                    if (doc.exists()) {
+                    if (doc != null) {
                         return@withContext doc.toObject(BirthdayCard::class.java)
                     } else {
                         return@withContext null
