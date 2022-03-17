@@ -2,12 +2,20 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.Toast
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -15,36 +23,39 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.gson.annotations.Until
+import androidx.recyclerview.widget.RecyclerView
+import com.aminography.primedatepicker.utils.gone
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderListAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityQuickOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOAD_DIALOG
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
+import org.kodein.di.android.retainedSubKodein
 import org.kodein.di.generic.instance
+import ru.nikartm.support.ImageBadgeView
 
 class QuickOrderActivity :
     BaseActivity(),
@@ -61,6 +72,12 @@ class QuickOrderActivity :
     private lateinit var viewModel: QuickOrderViewModel
     private val factory: QuickOrderViewModelFactory by instance()
 
+    private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
+    private lateinit var cartBtn: ImageBadgeView
+    private lateinit var checkoutText: TextView
+    private lateinit var filterBtn: ImageView
+
+    private lateinit var cartAdapter: CartAdapter
     private lateinit var addressAdapter: AddressAdapter
     private lateinit var quickOrderListAdapter: QuickOrderListAdapter
 
@@ -113,14 +130,16 @@ class QuickOrderActivity :
                     showToast(this@QuickOrderActivity, "Enter a coupon code")
                     return@setOnClickListener
                 }
-                viewModel.quickOrder?.let {
-                    if (it.cart.isEmpty()) {
-                        showErrorSnackBar("Coupon can be applied only after receiving Estimate Data", true)
-                    } else {
-                        viewModel.couponAppliedPrice?.let {
-                            applyUiChangesWithCoupon(false)
-                        } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim())
+                if (viewModel.quickOrder?.cart?.isEmpty() ?: true) {
+                    etCoupon.setText("")
+                    if (KeyboardVisibilityEvent.isKeyboardVisible(this@QuickOrderActivity)) {
+                        this@QuickOrderActivity.hideKeyboard()
                     }
+                    showErrorSnackBar("Coupon can be applied only after receiving Estimate Data", true)
+                } else {
+                    viewModel.couponAppliedPrice?.let {
+                        applyUiChangesWithCoupon(false)
+                    } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim())
                 }
             }
             ivHelp.setOnClickListener {
@@ -136,22 +155,22 @@ class QuickOrderActivity :
                     }
                 }
             }
-            ivPreviewImage.setOnClickListener {
-                onBackPressed()
-            }
+            nsvScrollBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+                viewModel.quickOrder?.let {
+                    when {
+                        scrollY < oldScrollY -> cartBottomSheet.state =
+                            BottomSheetBehavior.STATE_COLLAPSED
+                        scrollY > oldScrollY -> cartBottomSheet.state =
+                            BottomSheetBehavior.STATE_HIDDEN
+                    }
+                }
+            })
             btnGetEstimate.setOnClickListener {
                 if (viewModel.quickOrder == null && viewModel.orderListUri.isNullOrEmpty()) {
                     showErrorSnackBar("Please add your purchase list image to get Estimate", true)
                     return@setOnClickListener
                 }
-                viewModel.quickOrder?.let {
-                    if (it.cart.isEmpty()) {
-                        showErrorSnackBar("Estimate is not available yet. Please wait", true)
-                        return@setOnClickListener
-                    } else {
-                        cartItemsDialog(it.cart)
-                    }
-                } ?: showExitSheet(this@QuickOrderActivity, "To get Estimate price, Your List will be sent for validation and we will contact you with the price breakdown for each product and Total Order. Please click PROCEED below to start uploading order list.", "estimate")
+                showExitSheet(this@QuickOrderActivity, "To get Estimate price, Your List will be sent for validation and we will contact you with the price breakdown for each product and Total Order. Please click PROCEED below to start uploading order list.", "estimate")
             }
             btnPlaceOrder.setOnClickListener {
                 if (viewModel.quickOrder == null && viewModel.orderListUri.isNullOrEmpty()) {
@@ -161,16 +180,6 @@ class QuickOrderActivity :
                         showExitSheet(this@QuickOrderActivity, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
                     }
                     return@setOnClickListener
-                }
-                viewModel.quickOrder?.let {
-//                    if (it.orderPlaced) {
-//                        showToast(this@QuickOrderActivity,"Order already placed. Please check your Purchase History for know the progress")
-//                        return@setOnClickListener
-//                    }
-                    if (it.cart.isEmpty()) {
-                        showErrorSnackBar("Estimate not yet available. Please wait", true)
-                        return@setOnClickListener
-                    }
                 }
                 showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
             }
@@ -269,6 +278,37 @@ class QuickOrderActivity :
                     dismissLoadStatusDialog()
                     showErrorSnackBar(event.message, true)
                 }
+                is QuickOrderViewModel.UiUpdate.DeletingImages -> {
+                    showLoadStatusDialog(
+                        "",
+                        event.message,
+                        "upload"
+                    )
+                }
+                is QuickOrderViewModel.UiUpdate.DeletingQuickOrder -> {
+                    event.data?.let {
+                        when(event.data) {
+                            "order" -> updateLoadStatusDialogText("placingOrder", event.message)
+                            "success" -> lifecycleScope.launch{
+                                updateLoadStatusDialogText(
+                                    "success",
+                                    event.message
+                                )
+                                resetQuickOrderUI()
+                                delay(1800)
+                                dismissLoadStatusDialog()
+                            }
+                            else -> lifecycleScope.launch {
+                                updateLoadStatusDialogText(
+                                    "fail",
+                                    event.message
+                                )
+                                delay(1800)
+                                dismissLoadStatusDialog()
+                            }
+                        }
+                    }
+                }
                 is QuickOrderViewModel.UiUpdate.ValidatingPurchase -> {
                     showLoadStatusDialog(
                         "",
@@ -290,6 +330,9 @@ class QuickOrderActivity :
                     if (event.isSuccess) {
                         event.data?.let {
                             populateEstimateDetails(it)
+                        } ?:let {
+                            setCartBottom(null)
+                            cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
                         }
                     } else {
                         showErrorSnackBar(event.message as String, true)
@@ -301,11 +344,47 @@ class QuickOrderActivity :
                     showErrorSnackBar(event.message, false)
                     applyUiChangesWithCoupon(true)
                 }
+                is QuickOrderViewModel.UiUpdate.UpdateCartData -> {
+                    lifecycleScope.launch {
+                        checkoutText.setTextAnimation(
+                            "Rs: ${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
+                            200
+                        )
+                        updateCartBadge(viewModel.quickOrder!!.cart)
+                    }
+                    event.count?.let {
+                        cartAdapter.updateItemsCount(event.position, it)
+                    } ?: cartAdapter.deleteCartItem(event.position)
+                }
                 is QuickOrderViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
             }
             viewModel.setEmptyStatus()
         }
+    }
+
+    private fun resetQuickOrderUI() {
+        binding.apply {
+            applyUiChangesWithCoupon(false)
+            etDeliveryNote.setText("")
+            btnGetEstimate.visible()
+            btnPlaceOrder.visible()
+            quickOrderListAdapter.quickOrderList = listOf()
+            quickOrderListAdapter.quickOrderListUrl = listOf()
+            quickOrderListAdapter.notifyDataSetChanged()
+            cartAdapter.cartItems = mutableListOf()
+            cartAdapter.notifyDataSetChanged()
+            cartBtn.badgeValue = 0
+        }
+        viewModel.apply {
+            orderListUri.clear()
+            quickOrder = null
+            orderID = null
+            placeOrderByCOD = false
+            couponAppliedPrice = null
+        }
+        updatePlaceOrderButton()
+        cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     private fun initRecyclerView() {
@@ -328,19 +407,143 @@ class QuickOrderActivity :
         binding.rvOrderList.layoutManager =
             GridLayoutManager(this, 3)
         binding.rvOrderList.adapter = quickOrderListAdapter
+
+        cartAdapter = CartAdapter(
+            this,
+            mutableListOf(),
+            viewModel
+        )
     }
 
-    private fun cartItemsDialog(cartItems: ArrayList<Cart>) {
-        val entityMap = cartItems.map { it.toCartEntity() }
-        val orderItemsAdapter = OrderItemsAdapter(
-            this,
-            entityMap,
-            viewModel,
-            arrayListOf(),
-            "quickOrder"
-        )
-        ItemsBottomSheet(this, orderItemsAdapter).show()
+
+    private fun setCartBottom(cartEntity: ArrayList<Cart>?) {
+        val bottomSheet = findViewById<ConstraintLayout>(R.id.clBottomCart)
+        filterBtn = findViewById<ImageView>(R.id.ivFilter)
+        val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
+        val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
+        checkoutText = findViewById<TextView>(R.id.tvCheckOut)
+
+        cartBtn = findViewById(R.id.ivCart)
+
+        cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
+
+        cartRecycler.layoutManager = LinearLayoutManager(this)
+        cartAdapter.cartItems = if (cartEntity == null) {
+            mutableListOf<CartEntity>()
+        } else {
+            cartEntity.map { it.toCartEntity() } as MutableList<CartEntity>
+        }
+        cartAdapter.notifyDataSetChanged()
+        cartRecycler.adapter = cartAdapter
+
+        filterBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_wallet))
+        if (viewModel.quickOrder?.orderPlaced ?: false) {
+            checkoutText.text = "PURCHASE HISTORY"
+        }
+        cartBottomSheet.isDraggable = true
+
+        cartEntity?.let { cart ->
+            cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            lifecycleScope.launch {
+                                checkoutText.setTextAnimation(
+                                    "Rs: ${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
+                                    200
+                                )
+                            }
+                            if (cart.isNotEmpty()) {
+                                setBottomSheetIcon("delete")
+                            }
+                        }
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            checkoutText.setTextAnimation("CHECKOUT", 200)
+                            setBottomSheetIcon("wallet")
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                }
+            })
+
+            cartBtn.setOnClickListener {
+                it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                cartBottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+
+            filterBtn.setOnClickListener {
+                it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                    cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                    if (cart.isNotEmpty()) {
+                        showExitSheet(this, "Do you wish to delete and Create a New Order", "delete")
+                    }
+                } else {
+                    Intent(this, WalletActivity::class.java).also { intent ->
+                        intent.putExtra(Constants.NAVIGATION, Constants.QUICK_ORDER)
+                        startActivity(intent)
+                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                    }
+                }
+            }
+
+            checkoutBtn.setOnClickListener {
+                if (NetworkHelper.isOnline(this)) {
+                    when {
+                        viewModel.quickOrder?.orderPlaced == true -> {
+                            Intent(this, PurchaseHistoryActivity::class.java).also { intent ->
+                                startActivity(intent)
+                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                                finish()
+                            }
+//                            showErrorSnackBar("Order placed already. Please check Order History for more details", true)
+//                            return@setOnClickListener
+                        }
+                        cart.isEmpty() -> {
+                            showErrorSnackBar("Estimate not yet available. Please wait", true)
+                            return@setOnClickListener
+                        }
+                        else -> showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
+
+                    }
+                } else {
+                    showErrorSnackBar("Please check network connection", true)
+                }
+            }
+        }
     }
+
+    private fun setBottomSheetIcon(content: String) {
+        val icon =  when(content) {
+            "coupon" -> R.drawable.ic_coupon
+            "delete" -> R.drawable.ic_delete
+            "wallet" -> R.drawable.ic_wallet
+            else -> R.drawable.ic_filter
+        }
+        filterBtn.fadOutAnimation(300)
+        filterBtn.setImageDrawable(ContextCompat.getDrawable(this, icon))
+        filterBtn.fadInAnimation(300)
+        filterBtn.imageTintList =
+            if (content == "delete") {
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
+            } else {
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
+            }
+    }
+
+//    private fun cartItemsDialog(cartItems: ArrayList<Cart>) {
+//        val entityMap = cartItems.map { it.toCartEntity() }
+//        val orderItemsAdapter = OrderItemsAdapter(
+//            this,
+//            entityMap,
+//            viewModel,
+//            arrayListOf(),
+//            "quickOrder"
+//        )
+//        ItemsBottomSheet(this, orderItemsAdapter).show()
+//    }
 
     private fun showLoadStatusDialog(title: String, body: String, content: String) {
         LoadStatusDialog.newInstance(title, body, content).show(supportFragmentManager, LOAD_DIALOG)
@@ -368,10 +571,15 @@ class QuickOrderActivity :
             if (quickOrder.note.isNotEmpty()) {
                 ivNotification.badgeValue = 1
             }
-            updatePriceButton()
-            updatePlaceOrderButton()
-            showToast(this@QuickOrderActivity, "Click Total Price to get Individual Item Price", LONG)
+            btnGetEstimate.remove()
+            btnPlaceOrder.remove()
+            setCartBottom(quickOrder.cart)
+            updateCartBadge(quickOrder.cart)
         }
+    }
+
+    private fun updateCartBadge(cart: ArrayList<Cart>) {
+        cartBtn.badgeValue = viewModel.getCartItemsQuantity(cart)
     }
 
     private fun updatePriceButton() {
@@ -390,7 +598,7 @@ class QuickOrderActivity :
     private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
         binding.apply {
             if (isCouponApplied) {
-                updatePriceButton()
+//                updatePriceButton()
                 etCoupon.disable()
                 btnApplyCoupon.text = "Remove"
                 btnApplyCoupon.setBackgroundColor(
@@ -400,7 +608,7 @@ class QuickOrderActivity :
                     )
                 )
             } else {
-                updatePriceButton()
+//                updatePriceButton()
                 viewModel.couponAppliedPrice = null
                 etCoupon.enable()
                 btnApplyCoupon.text = "Apply"
@@ -439,7 +647,7 @@ class QuickOrderActivity :
                         showExitSheet(
                             this@QuickOrderActivity,
                             "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                            ""
+                            "close"
                         )
                         return@launch
                     }
@@ -475,7 +683,7 @@ class QuickOrderActivity :
                         showExitSheet(
                             this@QuickOrderActivity,
                             "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                            ""
+                            "close"
                         )
                         return@launch
                     }
@@ -519,6 +727,10 @@ class QuickOrderActivity :
         return orderDetailsMap
     }
 
+    fun deleteQuickOrder() {
+         viewModel.deleteQuickOrder()
+    }
+
     fun sendEstimateRequest() {
         val imageExtensionList = mutableListOf<String>()
         for (uri in viewModel.orderListUri) {
@@ -553,12 +765,15 @@ class QuickOrderActivity :
     override fun onBackPressed() {
         when {
             isPreviewOpened -> {
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
                 binding.ivPreviewImage.startAnimation(
                     AnimationUtils.loadAnimation(this, R.anim.scale_small)
                 )
                 binding.ivPreviewImage.remove()
                 isPreviewOpened = false
             }
+            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED ->
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
             else -> {
                 Intent(this, HomeActivity::class.java).also {
                     startActivity(it)
@@ -629,17 +844,15 @@ class QuickOrderActivity :
 
     //from order list adapter
     override fun selectedListImage(position: Int, imageUri: Any) {
-        lifecycleScope.launch {
-            binding.apply {
-                isPreviewOpened = true
-                GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
-                ivPreviewImage.startAnimation(
-                    AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.scale_big)
-                )
-                ivPreviewImage.visible()
-            }
+        cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+        binding.apply {
+            isPreviewOpened = true
+            GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
+            ivPreviewImage.startAnimation(
+                AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.scale_big)
+            )
+            ivPreviewImage.visible()
         }
-
     }
 
     override fun deleteListItem(position: Int, imageUri: Any) {

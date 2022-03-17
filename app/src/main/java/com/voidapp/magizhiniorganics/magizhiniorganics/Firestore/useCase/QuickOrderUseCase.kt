@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase
 
 import android.net.Uri
 import android.util.Log
+import androidx.work.ListenableWorker
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
@@ -339,9 +340,6 @@ class QuickOrderUseCase(
                             "$ORDER_ESTIMATE_PATH${it.customerID}/$imageName"
                         )
                         sRef.delete()
-//                    mFireStoreStorage.child(
-//                        "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/$imageName"
-//                    ).delete().await()
                     }
                 }
 
@@ -352,4 +350,42 @@ class QuickOrderUseCase(
 
         }
     }
+
+    suspend fun deleteQuickOrder(
+        quickOrder: QuickOrder
+    ): Flow<NetworkResult> = flow<NetworkResult> {
+
+        emit(NetworkResult.Success("Deleting Your Order List Image...", "image"))
+
+        try {
+            val storage = FirebaseStorage.getInstance()
+            val storageReference = FirebaseStorage.getInstance().reference
+            for (i in quickOrder.imageUrl.indices) {
+                val url = quickOrder.imageUrl[i]
+                val imageName = storage.getReferenceFromUrl(url).name
+                storageReference.child(
+                    "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/$imageName"
+                ).delete().await()
+            }
+            delay(1000)
+            emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
+        } catch (e: Exception) {
+            fbRepository.logCrash("quickOrder", e.message.toString())
+            delay(1000)
+            emit(NetworkResult.Failed("Failed to delete Images. Please try again later", "order"))
+        }
+
+        try {
+            fireStore
+                .collection(QUICK_ORDER)
+                .document(quickOrder.customerID)
+                .delete().await()
+            delay(1000)
+            emit(NetworkResult.Success("Quick Order Request is removed successfully...", "success"))
+        } catch (e: Exception) {
+            fbRepository.logCrash("quickOrder", e.message.toString())
+            delay(1000)
+            emit(NetworkResult.Failed("Failed to remove your order request. Please try again later", "failed"))
+        }
+    }.flowOn(Dispatchers.IO)
 }

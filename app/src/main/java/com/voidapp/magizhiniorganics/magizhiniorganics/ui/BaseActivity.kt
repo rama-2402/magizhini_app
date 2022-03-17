@@ -42,6 +42,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadOutAnimation
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 
 open class BaseActivity : AppCompatActivity() {
@@ -95,6 +96,18 @@ open class BaseActivity : AppCompatActivity() {
         it.data = Uri.parse("tel:$number")
         startActivity(it)
     }
+
+//    fun isKeyboardVisible(activity: Activity): Boolean {
+//        var isVisible: Boolean = false
+//        val listener = KeyboardVisibilityEvent.setEventListener(activity) {
+//            it
+//        }
+//        KeyboardVisibilityEvent.setEventListener(activity) { isOpen ->
+//            isVisible = isOpen
+//        }
+//
+//        return isVisible
+//    }
 
     fun Activity.hideKeyboard() = UIUtil.hideKeyboard(this)
 
@@ -285,6 +298,7 @@ open class BaseActivity : AppCompatActivity() {
                         "setting" -> activity.proceedToRequestManualPermission()
                         "estimate" -> activity.sendEstimateRequest()
                         "cs" -> activity.moveToCustomerSupport()
+                        "delete" -> activity.deleteQuickOrder()
                         "close" -> activity.onBackPressed()
                     }
                 }

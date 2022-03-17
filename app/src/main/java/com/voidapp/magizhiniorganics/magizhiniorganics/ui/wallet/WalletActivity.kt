@@ -32,6 +32,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.kodein.di.Kodein
@@ -406,6 +407,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                     finish()
                 }
             }
+            QUICK_ORDER -> finish()
             else -> finish()
         }
     }

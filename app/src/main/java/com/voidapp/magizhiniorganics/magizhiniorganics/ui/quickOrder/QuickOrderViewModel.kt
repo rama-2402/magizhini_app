@@ -13,6 +13,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
@@ -422,6 +423,51 @@ class QuickOrderViewModel(
         return discountPrice
     }
 
+    fun getCartItemsQuantity(cartItems: ArrayList<Cart>): Int {
+        var quantities = 0
+        cartItems.forEach {
+            quantities += it.quantity
+        }
+        return quantities
+    }
+
+    fun deleteQuickOrder() = viewModelScope.launch {
+        quickOrder?.let {
+            quickOrderUseCase
+                .deleteQuickOrder(it)
+                .collect { result ->
+                    when(result) {
+                        is NetworkResult.Success -> {
+                           when(result.data) {
+                               "image" -> _uiUpdate.value = UiUpdate.DeletingImages(result.message, result.data.toString())
+                               else -> _uiUpdate.value = UiUpdate.DeletingQuickOrder(result.message, result.data.toString())
+                           }
+                        }
+                        is NetworkResult.Failed -> {
+                           when(result.data) {
+                               "image" -> _uiUpdate.value = UiUpdate.DeletingImages(result.message, "failed")
+                               else -> _uiUpdate.value = UiUpdate.DeletingQuickOrder(result.message, "failed")
+                           }
+                        }
+                    }
+                }
+        }
+    }
+
+    fun updateCartItem(position: Int, count: Int) {
+        quickOrder?.let {
+            it.cart[position].quantity = count
+            _uiUpdate.value = UiUpdate.UpdateCartData(position, count)
+        }
+    }
+
+    fun deleteItemFromCart(position: Int) {
+        quickOrder?.let {
+            it.cart.removeAt(position)
+            _uiUpdate.value = UiUpdate.UpdateCartData(position, null)
+        }
+    }
+
     sealed class UiUpdate {
         data class WalletData(val wallet: Wallet): UiUpdate()
 
@@ -447,6 +493,14 @@ class QuickOrderViewModel(
         data class OrderPlaced(val message: String): UiUpdate()
         data class WalletTransactionFailed(val message: String): UiUpdate()
         data class OrderPlacementFailed(val message: String): UiUpdate()
+
+        //update cart
+        data class UpdateCartData(val position: Int, val count: Int?): UiUpdate()
+
+        //deleting quick order
+        data class DeletingImages(val message: String, val data: String?): UiUpdate()
+        data class DeletingQuickOrder(val message: String, val data: String?): UiUpdate()
+
         object Empty: UiUpdate()
     }
 }

@@ -122,11 +122,9 @@ class HomeActivity :
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
         viewModel = ViewModelProvider(this, factory).get(HomeViewModel::class.java)
-        binding.viewmodel = viewModel
         viewModel.homeListener = this
 
         setSupportActionBar(binding.tbToolbar)
-        binding.tbToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white))
 
         val menuToggle = ActionBarDrawerToggle(
             this,
@@ -244,15 +242,18 @@ class HomeActivity :
             svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
                 when {
                     scrollY < oldScrollY && binding.fabCart.isGone -> {
-                        binding.fabCart.startAnimation(scaleBig)
+                        binding.fabCart.startAnimation(
+                            AnimationUtils.loadAnimation(this@HomeActivity, R.anim.scale_big)
+                        )
                         binding.fabCart.visibility = View.VISIBLE
                     }
                     scrollY > oldScrollY && binding.fabCart.isVisible -> {
-                        binding.fabCart.startAnimation(scaleSmall)
+                        binding.fabCart.startAnimation(
+                            AnimationUtils.loadAnimation(this@HomeActivity, R.anim.scale_small)
+                        )
                         binding.fabCart.visibility = View.GONE
                     }
                     scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight -> {
-                        Log.e("qw", "partners")
                         viewModel.getPartnersData()
                     }
                 }

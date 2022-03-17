@@ -24,7 +24,7 @@
 
     <item
         android:id="@+id/menuQuickOrder"
-        android:icon="@drawable/ic_add_cart"
+        android:icon="@drawable/ic_attach_picture"
         android:title="QUICK ORDER" />
 
     <item

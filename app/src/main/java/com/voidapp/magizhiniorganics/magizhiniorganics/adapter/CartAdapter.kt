@@ -20,6 +20,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
@@ -115,6 +116,7 @@ class CartAdapter(
                     is ProductViewModel -> viewModel.updateCartItem(id, count+1, position, "add")
                     is CheckoutViewModel -> viewModel.updateCartItem(id, count+1, position)
                     is DishViewModel -> viewModel.updateCartItem(position, count+1)
+                    is QuickOrderViewModel -> viewModel.updateCartItem(position, count+1)
                 }
             }
         }
@@ -127,6 +129,7 @@ class CartAdapter(
                     is ProductViewModel -> viewModel.updateCartItem(id, count-1, position, "remove")
                     is CheckoutViewModel -> viewModel.updateCartItem(id, count-1, position)
                     is DishViewModel -> viewModel.updateCartItem(position, count-1)
+                    is QuickOrderViewModel -> viewModel.updateCartItem(position, count-1)
                 }
             }
         }
@@ -137,6 +140,7 @@ class CartAdapter(
                 is ProductViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant, position)
                 is CheckoutViewModel -> viewModel.deleteCartItem(id, cartItem.productId, cartItem.variant, position)
                 is DishViewModel -> viewModel.deleteItemFromCart(position)
+                is QuickOrderViewModel -> viewModel.deleteItemFromCart(position)
             }
         }
     }
@@ -149,7 +153,7 @@ class CartAdapter(
         val items = cartItems.map { it.copy() } as MutableList
         items.removeAt(position)
         setCartData(items)
-        this.notifyDataSetChanged()
+//        this.notifyDataSetChanged()
     }
 
     fun updateItemsCount(position: Int, count: Int) {

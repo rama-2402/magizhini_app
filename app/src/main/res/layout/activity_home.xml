@@ -3,12 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-        <variable
-            name="viewmodel"
-            type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel" />
-    </data>
-
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/dlDrawerLayout"
         android:layout_width="match_parent"
@@ -52,8 +46,8 @@
                     android:layout_gravity="center"
                     android:background="@color/green_base"
                     android:foregroundGravity="center"
-                    app:title="Magizhini Organics"
                     android:gravity="center"
+                    app:title="Magizhini Organics"
                     app:iconTint="@color/white"
                     app:navigationIcon="@color/white"
                     app:titleTextColor="@color/white" >
@@ -101,7 +95,7 @@
                     <org.imaginativeworld.whynotimagecarousel.ImageCarousel
                         android:id="@+id/cvBanner"
                         android:layout_width="match_parent"
-                        android:layout_height="255dp"
+                        android:layout_height="225dp"
                         android:elevation="10dp"
                         app:autoPlay="true"
                         app:autoPlayDelay="2000"
