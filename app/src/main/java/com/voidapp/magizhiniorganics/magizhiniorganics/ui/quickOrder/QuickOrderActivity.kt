@@ -108,6 +108,9 @@ class QuickOrderActivity :
 
     private fun initListeners() {
         binding.apply {
+            /*
+            * This is a keyboard listener that changes visibility of buttons when typing for coupon or description
+            * */
             KeyboardVisibilityEvent.setEventListener(this@QuickOrderActivity
             ) { isOpen ->
                 if (!isOpen) {
@@ -128,6 +131,10 @@ class QuickOrderActivity :
                     showToast(this@QuickOrderActivity, "Enter a coupon code")
                     return@setOnClickListener
                 }
+                /*
+                * checking if cart is empty so that we can determine if estimate is received
+                * since estimate data is posted with cart items filled
+                * */
                 if (viewModel.quickOrder?.cart?.isEmpty() ?: true) {
                     etCoupon.setText("")
                     if (KeyboardVisibilityEvent.isKeyboardVisible(this@QuickOrderActivity)) {
@@ -135,6 +142,9 @@ class QuickOrderActivity :
                     }
                     showErrorSnackBar("Coupon can be applied only after receiving Estimate Data", true)
                 } else {
+                    /*
+                    * if couponAppliedPrice is not null that mean coupon is already applied. So it has to be removed
+                    * */
                     viewModel.couponAppliedPrice?.let {
                         applyUiChangesWithCoupon(false)
                     } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim())
@@ -164,6 +174,9 @@ class QuickOrderActivity :
                 }
             })
             btnGetEstimate.setOnClickListener {
+                /*
+                * If there is no quick order and the uri is empty then nothing is selected
+                * */
                 if (viewModel.quickOrder == null && viewModel.orderListUri.isNullOrEmpty()) {
                     showErrorSnackBar("Please add your purchase list image to get Estimate", true)
                     return@setOnClickListener
@@ -171,6 +184,10 @@ class QuickOrderActivity :
                 showExitSheet(this@QuickOrderActivity, "To get Estimate price, Your List will be sent for validation and we will contact you with the price breakdown for each product and Total Order. Please click PROCEED below to start uploading order list.", "estimate")
             }
             btnPlaceOrder.setOnClickListener {
+                /*
+                * So if quick order is null and there is no uri means no pic is added yet. Hence for first pic to be uploaded
+                * we click from place order button
+                * */
                 if (viewModel.quickOrder == null && viewModel.orderListUri.isNullOrEmpty()) {
                     if (PermissionsUtil.hasStoragePermission(this@QuickOrderActivity)) {
                         getAction.launch(pickImageIntent)
@@ -239,6 +256,7 @@ class QuickOrderActivity :
                     }
                 }
                 is QuickOrderViewModel.UiUpdate.OrderPlacementFailed -> {
+                    viewModel.placeOrderByCOD = false
                     dismissLoadStatusDialog()
                     showExitSheet(
                         this,
@@ -257,6 +275,11 @@ class QuickOrderActivity :
                     updateLoadStatusDialogText("upload", event.message)
                 }
                 is QuickOrderViewModel.UiUpdate.UploadComplete -> {
+                    /*
+                    * This comes after the images are uploaded. So if the user chose COD then we move
+                    * to COD method to place order with COD option. If COD is false that means the user has
+                    * requested only for get estimate request
+                    * */
                     if (viewModel.placeOrderByCOD) {
                         viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
                     } else {
@@ -273,6 +296,7 @@ class QuickOrderActivity :
                     }
                 }
                 is QuickOrderViewModel.UiUpdate.UploadFailed -> {
+                    viewModel.placeOrderByCOD = false
                     dismissLoadStatusDialog()
                     showErrorSnackBar(event.message, true)
                 }
@@ -284,6 +308,10 @@ class QuickOrderActivity :
                     )
                 }
                 is QuickOrderViewModel.UiUpdate.DeletingQuickOrder -> {
+                    /*
+                    * This is the callback to delete quick order request from customer
+                    * by using the delete icon in the expanded cart bottomsheet
+                    * */
                     event.data?.let {
                         when(event.data) {
                             "order" -> updateLoadStatusDialogText("placingOrder", event.message)
@@ -325,10 +353,16 @@ class QuickOrderActivity :
                     }
                 }
                 is QuickOrderViewModel.UiUpdate.EstimateData -> {
+//                    isSuccess means there is estimate data available
                     if (event.isSuccess) {
                         event.data?.let {
+                            //if data is not null there is estimate request available to be displayed
                             populateEstimateDetails(it)
                         } ?:let {
+                            /*
+                            * since null no previous request is available and we do the empty page animation
+                            * we hide the cart bottom sheet
+                            */
                             binding.clBody.visible()
                             binding.clBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
                             binding.rvAddress.visible()

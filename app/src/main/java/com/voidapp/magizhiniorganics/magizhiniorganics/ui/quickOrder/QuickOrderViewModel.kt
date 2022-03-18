@@ -77,6 +77,7 @@ class QuickOrderViewModel(
                     _uiUpdate.value = UiUpdate.AddressUpdate("address", it.address, true)
                 }
             }
+            // while getting the address data we also check for previous estimate request and get the user wallet
             checkForPreviousEstimate()
             getWallet(userProfile!!.id)
         } catch (e: IOException) {
@@ -116,6 +117,7 @@ class QuickOrderViewModel(
         }
     }
 
+    //this func is to update the address change to the firestore
     private suspend fun updateAddress(id: String, address: ArrayList<Address>, status: String) {
         if (status == "add") {
             fbRepository.addAddress(id, address[0])
@@ -196,14 +198,21 @@ class QuickOrderViewModel(
             .checkForPreviousEstimate(userID = userProfile!!.id)
         when(result) {
             is NetworkResult.Success -> {
+                /*
+                * If there is quick order data available then we pass it to populate it's data
+                * Then we check if order is placed for that quick order and if placed then we
+                * pass only the delivery address details and rest of the order details to be populated
+                * */
                 result.data?.let { it ->
                     it as QuickOrder
                     _uiUpdate.value =
                         UiUpdate.EstimateData("", it, true)
                     delay(1500)
                     if (it.orderPlaced) {
+                        //incase order is placed we override estimate data with this new ones and hide progress dialog
                         updateAddressToOrderAddress(it.orderID)
                     } else {
+                        //if no order placed then we hide the progressbar immediately
                         _uiEvent.value = UIEvent.ProgressBar(false)
                     }
                 } ?:let {
@@ -419,6 +428,9 @@ class QuickOrderViewModel(
         dbRepository.getCouponByCode(couponCode)?.let { coupon ->
             appliedCoupon = coupon
             val cartPrice = getTotalCartPrice()
+            /*
+            * If the coupon is for all categories we accept it else throw error
+            * */
             if (!coupon.categories.contains(ALL)) {
                 withContext(Dispatchers.Main) {
                     _uiEvent.value = UIEvent.Toast("Coupon Applies only for few product categories")
@@ -493,6 +505,11 @@ class QuickOrderViewModel(
         } else {
             quickOrder?.let {
                 it.cart[position].quantity = count
+                /*
+                * Here we are updating the checkout text with updated price for the changed cart value
+                * We are checking if the updated cart price still holds to the coupon's minimum purchase limit values
+                * If not we remove the coupon automatically and notify user
+                * */
                 appliedCoupon?.let { coupon ->
                     val cartPrice = getTotalCartPrice()
                     if (cartPrice >= coupon.purchaseLimit) {
