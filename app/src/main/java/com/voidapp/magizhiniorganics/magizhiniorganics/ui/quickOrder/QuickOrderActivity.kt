@@ -93,10 +93,10 @@ class QuickOrderActivity :
         initRecyclerView()
         initData()
 
-        binding.apply {
-            rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
-            nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
-        }
+//        binding.apply {
+            binding.rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
+//            nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
+//        }
 
         initObservers()
         initListeners()
@@ -337,7 +337,6 @@ class QuickOrderActivity :
                     } else {
                         showErrorSnackBar(event.message as String, true)
                     }
-                    hideProgressDialog()
                 }
                 is QuickOrderViewModel.UiUpdate.CouponApplied -> {
                     this.hideKeyboard()
@@ -448,17 +447,25 @@ class QuickOrderActivity :
                     when (newState) {
                         BottomSheetBehavior.STATE_EXPANDED -> {
                             lifecycleScope.launch {
-                                checkoutText.setTextAnimation(
-                                    "Rs: ${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
-                                    200
-                                )
-                            }
-                            if (cart.isNotEmpty()) {
-                                setBottomSheetIcon("delete")
+                                if (viewModel.quickOrder?.orderPlaced ?: false) {
+                                    checkoutText.text = "PURCHASE HISTORY"
+                                } else {
+                                    checkoutText.setTextAnimation(
+                                        "Rs: ${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
+                                        200
+                                    )
+                                    if (cart.isNotEmpty()) {
+                                        setBottomSheetIcon("delete")
+                                    }
+                                }
                             }
                         }
                         BottomSheetBehavior.STATE_COLLAPSED -> {
-                            checkoutText.setTextAnimation("CHECKOUT", 200)
+                            if (viewModel.quickOrder?.orderPlaced ?: false) {
+                                checkoutText.text = "PURCHASE HISTORY"
+                            } else {
+                                checkoutText.setTextAnimation("CHECKOUT", 200)
+                            }
                             setBottomSheetIcon("wallet")
                         }
                     }
@@ -477,7 +484,7 @@ class QuickOrderActivity :
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                 if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                     cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-                    if (cart.isNotEmpty()) {
+                    if (cart.isNotEmpty() && checkoutText.text != "PURCHASE HISTORY") {
                         showExitSheet(this, "Do you wish to delete and Create a New Order", "delete")
                     }
                 } else {
@@ -575,6 +582,9 @@ class QuickOrderActivity :
             btnPlaceOrder.remove()
             setCartBottom(quickOrder.cart)
             updateCartBadge(quickOrder.cart)
+            nsvScrollBody.visible()
+//            rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
+            nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
         }
     }
 

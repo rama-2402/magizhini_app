@@ -56,7 +56,9 @@ data class ProductEntity(
     @ColumnInfo
     var reviews: ArrayList<Review> = arrayListOf(),
     @ColumnInfo
-    var labels: ArrayList<String> = arrayListOf()
+    var labels: ArrayList<String> = arrayListOf(),
+    @ColumnInfo
+    var extras: ArrayList<String> = arrayListOf()
 ): Parcelable
 
 

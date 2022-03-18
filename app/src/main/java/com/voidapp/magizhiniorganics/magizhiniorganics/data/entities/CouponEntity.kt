@@ -33,5 +33,7 @@ data class CouponEntity(
     @ColumnInfo
     var expiryDate: String = Constants.DATE_CODE,
     @ColumnInfo
-    var categories: ArrayList<String> = arrayListOf()
+    var categories: ArrayList<String> = arrayListOf(),
+    @ColumnInfo
+    var extras: ArrayList<String> = arrayListOf()
 ): Parcelable

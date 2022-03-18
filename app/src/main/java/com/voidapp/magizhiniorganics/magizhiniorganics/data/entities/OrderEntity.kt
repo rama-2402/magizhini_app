@@ -37,5 +37,7 @@ data class OrderEntity(
     @ColumnInfo
     var monthYear: String = "",
     @ColumnInfo
-    var phoneNumber: String = ""
+    var phoneNumber: String = "",
+    @ColumnInfo
+    var extras: ArrayList<String> = arrayListOf()
 )

@@ -19,5 +19,6 @@ data class Subscription(
     var customDates: ArrayList<String> = arrayListOf(),
     var deliveredDates: ArrayList<Long> = arrayListOf(),
     var cancelledDates: ArrayList<Long> = arrayListOf(),
-    var notDeliveredDates: ArrayList<Long> = arrayListOf()
+    var notDeliveredDates: ArrayList<Long> = arrayListOf(),
+    var extras: ArrayList<String> = arrayListOf()
 )

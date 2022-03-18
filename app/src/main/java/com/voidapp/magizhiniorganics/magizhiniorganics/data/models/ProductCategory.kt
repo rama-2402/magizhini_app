@@ -12,5 +12,6 @@ data class ProductCategory (
     var discountType: String = "percent",
     var discountAmount: Int = 0,
     var products: ArrayList<String> = ArrayList(),
-    var activated: Boolean = true
+    var activated: Boolean = true,
+    var extras: ArrayList<String> = arrayListOf()
 )

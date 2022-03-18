@@ -22,4 +22,5 @@ data class Product(
     var productType: String="",
     var activated: Boolean = true,
     var labels: ArrayList<String> = arrayListOf(),
+    var extras: ArrayList<String> = arrayListOf()
 ): Parcelable

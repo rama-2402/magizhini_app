@@ -289,13 +289,14 @@ class QuickOrderUseCase(
                 price = transactionMap["amount"].toString().toFloat(),
                 orderStatus = PENDING,
                 monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}",
-                phoneNumber = orderDetailsMap["phoneNumber"].toString()
+                phoneNumber = orderDetailsMap["phoneNumber"].toString(),
+                extras = arrayListOf(QUICK_ORDER)
             ).let {
                 when(fbRepository.placeOrder(it)) {
                     is NetworkResult.Success -> {
-                        if (!cart.isNullOrEmpty()) {
-                            deleteQuickOrder(orderDetailsMap["userID"].toString())
-                        }
+//                        if (!cart.isNullOrEmpty()) {
+//                            deleteQuickOrder(orderDetailsMap["userID"].toString())
+//                        }
                         true
                     }
                     is NetworkResult.Failed -> false

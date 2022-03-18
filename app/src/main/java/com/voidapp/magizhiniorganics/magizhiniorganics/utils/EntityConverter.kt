@@ -23,7 +23,8 @@ fun UserProfile.toUserProfileEntity() = UserProfileEntity(
     subscribedMonths = subscribedMonths,
     subscriptions = subscriptions,
     member = member,
-    membershipType = membershipType
+    membershipType = membershipType,
+    extras = extras
 )
 
 fun UserProfile.toCustomerProfile() = CustomerProfile(
@@ -31,7 +32,8 @@ fun UserProfile.toCustomerProfile() = CustomerProfile(
     profileName = name,
     phoneNumber = phNumber,
     thumbnailName = id,
-    thumbnailUrl = profilePicUrl
+    thumbnailUrl = profilePicUrl,
+    extras = extras
 )
 
 fun ProductCategory.toProductCategoryEntity() = ProductCategoryEntity(
@@ -44,7 +46,8 @@ fun ProductCategory.toProductCategoryEntity() = ProductCategoryEntity(
     discountType = discountType,
     discountAmount = discountAmount,
     products = products,
-    activated = activated
+    activated = activated,
+    extras = extras
 )
 
 fun Product.toProductEntity() = ProductEntity(
@@ -62,7 +65,8 @@ fun Product.toProductEntity() = ProductEntity(
     productType = productType,
     variants = variants,
     labels = labels,
-    activated = activated
+    activated = activated,
+    extras = extras
 )
 
 fun UserNotification.toUserNotificationEntity() = UserNotificationEntity(
@@ -88,7 +92,8 @@ fun Coupon.toCouponEntity() = CouponEntity(
     maxDiscount = maxDiscount,
     from = from,
     expiryDate = expiryDate,
-    categories = categories
+    categories = categories,
+    extras = extras
 )
 
 fun Banner.toBannerEntity() = BannerEntity(
@@ -123,7 +128,8 @@ fun Order.toOrderEntity() = OrderEntity(
     price = price,
     orderStatus = orderStatus,
     monthYear = monthYear,
-    phoneNumber = phoneNumber
+    phoneNumber = phoneNumber,
+    extras = extras
 )
 
 fun Cart.toCartEntity() = CartEntity(
@@ -163,7 +169,8 @@ fun Subscription.toSubscriptionEntity() = SubscriptionEntity(
     customDates = customDates,
     deliveredDates = deliveredDates,
     cancelledDates = cancelledDates,
-    notDeliveredDates = notDeliveredDates
+    notDeliveredDates = notDeliveredDates,
+    extras = extras
 )
 
 fun ProductSpecials.toBestSellers() = BestSellers(
@@ -220,7 +227,8 @@ fun UserProfileEntity.toUserProfile() = UserProfile(
     subscribedMonths = subscribedMonths,
     subscriptions = subscriptions,
     member = member,
-    membershipType = membershipType
+    membershipType = membershipType,
+    extras = extras
 )
 
 fun ProductCategoryEntity.toProductCategory() = ProductCategory(
@@ -233,7 +241,8 @@ fun ProductCategoryEntity.toProductCategory() = ProductCategory(
     discountType = discountType,
     discountAmount = discountAmount,
     products = products,
-    activated = activated
+    activated = activated,
+    extras = extras
 )
 
 fun ProductEntity.toProduct() = Product(
@@ -251,7 +260,8 @@ fun ProductEntity.toProduct() = Product(
     productType = productType,
     variants = variants,
     labels = labels,
-    activated = activated
+    activated = activated,
+    extras = extras
 )
 
 fun CouponEntity.toCoupon() = Coupon(
@@ -266,7 +276,8 @@ fun CouponEntity.toCoupon() = Coupon(
     maxDiscount = maxDiscount,
     from = from,
     expiryDate = expiryDate,
-    categories = categories
+    categories = categories,
+    extras = extras
 )
 
 fun BannerEntity.toBanner() = Banner(
@@ -292,7 +303,8 @@ fun OrderEntity.toOrder() = Order(
     price = price,
     orderStatus = orderStatus,
     monthYear = monthYear,
-    phoneNumber = phoneNumber
+    phoneNumber = phoneNumber,
+    extras = extras
 )
 
 
@@ -315,5 +327,6 @@ fun SubscriptionEntity.toSubscription() = Subscription(
     customDates = customDates,
     deliveredDates = deliveredDates,
     cancelledDates = cancelledDates,
-    notDeliveredDates = notDeliveredDates
+    notDeliveredDates = notDeliveredDates,
+    extras = extras
 )

@@ -11,5 +11,6 @@ data class CWMFood(
     var thumbnailUrl: String = "",
     var ingredients: ArrayList<Cart> = arrayListOf<Cart>(),
     var totalPrice: Float = 0f,
-    var discountedPrice: Float = 0f
+    var discountedPrice: Float = 0f,
+    var extras: ArrayList<String> = arrayListOf()
 ): Parcelable

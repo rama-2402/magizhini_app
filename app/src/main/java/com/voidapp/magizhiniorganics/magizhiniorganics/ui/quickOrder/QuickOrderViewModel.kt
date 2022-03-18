@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -191,8 +192,18 @@ class QuickOrderViewModel(
         val result = QuickOrderUseCase(fbRepository)
             .checkForPreviousEstimate(userID = userProfile!!.id)
         when(result) {
-            is NetworkResult.Success -> _uiUpdate.value = UiUpdate.EstimateData("", result.data?.let { it as QuickOrder }, true)
-            is NetworkResult.Failed -> _uiUpdate.value = UiUpdate.EstimateData(result.data?.let { it as String } ?: "Server Error! Try later", null, false)
+            is NetworkResult.Success -> {
+                _uiUpdate.value =
+                    UiUpdate.EstimateData("", result.data?.let { it as QuickOrder }, true)
+                delay(1500)
+                _uiEvent.value = UIEvent.ProgressBar(false)
+            }
+            is NetworkResult.Failed -> {
+                _uiUpdate.value = UiUpdate.EstimateData(result.data?.let { it as String }
+                    ?: "Server Error! Try later", null, false)
+                delay(1500)
+                _uiEvent.value = UIEvent.ProgressBar(false)
+            }
             else -> Unit
         }
     }
@@ -455,16 +466,24 @@ class QuickOrderViewModel(
     }
 
     fun updateCartItem(position: Int, count: Int) {
-        quickOrder?.let {
-            it.cart[position].quantity = count
-            _uiUpdate.value = UiUpdate.UpdateCartData(position, count)
+        if (quickOrder?.orderPlaced ?: false) {
+            _uiEvent.value = UIEvent.Toast("Can't change cart. Order placed already")
+        } else {
+            quickOrder?.let {
+                it.cart[position].quantity = count
+                _uiUpdate.value = UiUpdate.UpdateCartData(position, count)
+            }
         }
     }
 
     fun deleteItemFromCart(position: Int) {
-        quickOrder?.let {
-            it.cart.removeAt(position)
-            _uiUpdate.value = UiUpdate.UpdateCartData(position, null)
+        if (quickOrder?.orderPlaced ?: false) {
+            _uiEvent.value = UIEvent.Toast("Can't change cart. Order placed already")
+        } else {
+            quickOrder?.let {
+                it.cart.removeAt(position)
+                _uiUpdate.value = UiUpdate.UpdateCartData(position, null)
+            }
         }
     }
 

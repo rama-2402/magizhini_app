@@ -41,5 +41,7 @@ data class UserProfileEntity (
     @ColumnInfo
     var member: Boolean = false,
     @ColumnInfo
-    var membershipType: String = ""
+    var membershipType: String = "",
+    @ColumnInfo
+    var extras: ArrayList<String> = arrayListOf()
 )

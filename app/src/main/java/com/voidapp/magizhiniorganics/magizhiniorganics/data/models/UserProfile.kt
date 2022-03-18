@@ -22,7 +22,8 @@ data class UserProfile(
     var subscribedMonths: ArrayList<String> = arrayListOf(),
     var subscriptions: ArrayList<String> = arrayListOf(),
     var member: Boolean = false,
-    var membershipType: String = ""
+    var membershipType: String = "",
+    var extras: ArrayList<String> = arrayListOf()
 ): Parcelable
 
 @Parcelize

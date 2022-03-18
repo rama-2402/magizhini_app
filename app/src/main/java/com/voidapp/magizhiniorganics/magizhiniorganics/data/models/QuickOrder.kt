@@ -14,5 +14,7 @@ data class QuickOrder(
     var imageUrl: ArrayList<String> = arrayListOf(),
     var cart: ArrayList<Cart> = arrayListOf(),
     var note: String = "",
-    var orderPlaced: Boolean = false
+    var orderPlaced: Boolean = false,
+    var extras: ArrayList<String> = arrayListOf()
+
 ): Parcelable

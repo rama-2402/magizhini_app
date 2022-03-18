@@ -177,6 +177,7 @@ open class BaseActivity : AppCompatActivity() {
 
         mProgressDialog.setCancelable(false)
         mProgressDialog.setCanceledOnTouchOutside(false)
+        mProgressDialog.window?.setDimAmount(0f)
         mProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         //Start the dialog and display it on screen.
         mProgressDialog.show()

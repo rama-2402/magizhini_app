@@ -44,5 +44,7 @@ data class SubscriptionEntity(
     @ColumnInfo
     var cancelledDates: ArrayList<Long> = arrayListOf(),
     @ColumnInfo
-    var notDeliveredDates: ArrayList<Long> = arrayListOf()
+    var notDeliveredDates: ArrayList<Long> = arrayListOf(),
+    @ColumnInfo
+    var extras: ArrayList<String> = arrayListOf()
 )
