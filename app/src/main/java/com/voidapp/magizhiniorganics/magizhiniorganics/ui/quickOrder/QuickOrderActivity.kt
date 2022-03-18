@@ -94,8 +94,6 @@ class QuickOrderActivity :
         initRecyclerView()
         initData()
 
-        binding.rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
-
         initObservers()
         initListeners()
     }
@@ -105,10 +103,6 @@ class QuickOrderActivity :
             viewModel.userProfile = UserProfileEntity()
             viewModel.addressContainer = Address()
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
         viewModel.getAddress()
     }
 
@@ -117,11 +111,13 @@ class QuickOrderActivity :
             KeyboardVisibilityEvent.setEventListener(this@QuickOrderActivity
             ) { isOpen ->
                 if (!isOpen) {
-                    binding.btnGetEstimate.visible()
-                    binding.btnPlaceOrder.visible()
+                    viewModel.quickOrder?:let {
+                        binding.btnGetEstimate.visible()
+                        binding.btnPlaceOrder.visible()
+                    }
                 } else {
-                    binding.btnPlaceOrder.hide()
-                    binding.btnGetEstimate.hide()
+                    binding.btnPlaceOrder.remove()
+                    binding.btnGetEstimate.remove()
                 }
             }
             ivBackBtn.setOnClickListener {
@@ -333,6 +329,10 @@ class QuickOrderActivity :
                         event.data?.let {
                             populateEstimateDetails(it)
                         } ?:let {
+                            binding.clBody.visible()
+                            binding.clBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
+                            binding.rvAddress.visible()
+                            binding.rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
                             setCartBottom(null)
                             cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
                         }
@@ -344,18 +344,16 @@ class QuickOrderActivity :
                     populateOrderDetails(event.order)
                 }
                 is QuickOrderViewModel.UiUpdate.CouponApplied -> {
-                    this.hideKeyboard()
-                    showErrorSnackBar(event.message, false)
-                    applyUiChangesWithCoupon(true)
+                    updateCheckoutText()
+                    event.message?.let {
+                        this.hideKeyboard()
+                        showErrorSnackBar(it, false)
+                        applyUiChangesWithCoupon(true)
+                    } ?: applyUiChangesWithCoupon(false)
                 }
                 is QuickOrderViewModel.UiUpdate.UpdateCartData -> {
-                    lifecycleScope.launch {
-                        checkoutText.setTextAnimation(
-                            "Rs: ${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
-                            200
-                        )
-                        updateCartBadge(viewModel.quickOrder!!.cart)
-                    }
+                    updateCheckoutText()
+                    updateCartBadge()
                     event.count?.let {
                         cartAdapter.updateItemsCount(event.position, it)
                     } ?: cartAdapter.deleteCartItem(event.position)
@@ -385,6 +383,7 @@ class QuickOrderActivity :
             orderID = null
             placeOrderByCOD = false
             couponAppliedPrice = null
+            appliedCoupon = null
         }
         updatePlaceOrderButton()
         cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
@@ -418,7 +417,6 @@ class QuickOrderActivity :
         )
     }
 
-
     private fun setCartBottom(cartEntity: ArrayList<Cart>?) {
         val bottomSheet = findViewById<ConstraintLayout>(R.id.clBottomCart)
         filterBtn = findViewById<ImageView>(R.id.ivFilter)
@@ -440,41 +438,15 @@ class QuickOrderActivity :
         cartRecycler.adapter = cartAdapter
 
         filterBtn.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_wallet))
-        if (viewModel.quickOrder?.orderPlaced ?: false) {
-            checkoutText.text = "PURCHASE HISTORY"
-        }
+
+        updateCheckoutText()
         cartBottomSheet.isDraggable = true
 
         cartEntity?.let { cart ->
             cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    when (newState) {
-                        BottomSheetBehavior.STATE_EXPANDED -> {
-                            lifecycleScope.launch {
-                                if (viewModel.quickOrder?.orderPlaced ?: false) {
-                                    checkoutText.text = "PURCHASE HISTORY"
-                                } else {
-                                    checkoutText.setTextAnimation(
-                                        "Rs: ${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
-                                        200
-                                    )
-                                    if (cart.isNotEmpty()) {
-                                        setBottomSheetIcon("delete")
-                                    }
-                                }
-                            }
-                        }
-                        BottomSheetBehavior.STATE_COLLAPSED -> {
-                            if (viewModel.quickOrder?.orderPlaced ?: false) {
-                                checkoutText.text = "PURCHASE HISTORY"
-                            } else {
-                                checkoutText.setTextAnimation("CHECKOUT", 200)
-                            }
-                            setBottomSheetIcon("wallet")
-                        }
-                    }
+                    updateCheckoutText()
                 }
-
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 }
             })
@@ -542,6 +514,40 @@ class QuickOrderActivity :
             }
     }
 
+    private fun updateCheckoutText() {
+        when(cartBottomSheet.state) {
+            BottomSheetBehavior.STATE_COLLAPSED -> {
+                if (viewModel.quickOrder?.orderPlaced ?: false) {
+                    checkoutText.text = "PURCHASE HISTORY"
+                } else {
+                    checkoutText.setTextAnimation("CHECKOUT", 200)
+                }
+                setBottomSheetIcon("wallet")
+            }
+            BottomSheetBehavior.STATE_EXPANDED -> {
+                lifecycleScope.launch {
+                    if (viewModel.quickOrder?.orderPlaced ?: false) {
+                        checkoutText.text = "PURCHASE HISTORY"
+                    } else {
+                        checkoutText.setTextAnimation(
+                            "Rs: ${viewModel.couponAppliedPrice ?: viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
+                            200
+                        )
+                        if (viewModel.quickOrder?.cart?.isNotEmpty() ?: false) {
+                            setBottomSheetIcon("delete")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateCartBadge() {
+        viewModel.quickOrder?.let {
+            cartBtn.badgeValue = viewModel.getCartItemsQuantity(it.cart)
+        }
+    }
+
     private fun showLoadStatusDialog(title: String, body: String, content: String) {
         LoadStatusDialog.newInstance(title, body, content).show(supportFragmentManager, LOAD_DIALOG)
     }
@@ -567,12 +573,14 @@ class QuickOrderActivity :
             if (quickOrder.note.isNotEmpty()) {
                 ivNotification.badgeValue = 1
             }
+            setCartBottom(quickOrder.cart)
+            updateCartBadge()
+            clBody.visible()
+            clBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
+            rvAddress.visible()
+            rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
             btnGetEstimate.remove()
             btnPlaceOrder.remove()
-            setCartBottom(quickOrder.cart)
-            updateCartBadge(quickOrder.cart)
-            nsvScrollBody.visible()
-            nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
         }
     }
 
@@ -581,6 +589,10 @@ class QuickOrderActivity :
             populateAddressDetails(arrayListOf(order.address))
             etDeliveryNote.setText(order.deliveryNote)
             etCoupon.setText(order.appliedCoupon)
+            if (order.appliedCoupon.isNotEmpty()) {
+                applyUiChangesWithCoupon(true)
+            }
+            btnApplyCoupon.disable()
             hideProgressDialog()
             val preferences = resources.getStringArray(R.array.delivery_preference_array)
             for (i in preferences.indices) {
@@ -590,10 +602,6 @@ class QuickOrderActivity :
                 }
             }
         }
-    }
-
-    private fun updateCartBadge(cart: ArrayList<Cart>) {
-        cartBtn.badgeValue = viewModel.getCartItemsQuantity(cart)
     }
 
     private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
@@ -609,7 +617,9 @@ class QuickOrderActivity :
                 )
             } else {
                 viewModel.couponAppliedPrice = null
+                viewModel.appliedCoupon = null
                 etCoupon.enable()
+                etCoupon.setText("")
                 btnApplyCoupon.text = "Apply"
                 btnApplyCoupon.setBackgroundColor(
                     ContextCompat.getColor(
@@ -646,7 +656,7 @@ class QuickOrderActivity :
                         showExitSheet(
                             this@QuickOrderActivity,
                             "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                            "close"
+                            "okay"
                         )
                         return@launch
                     }
@@ -682,7 +692,7 @@ class QuickOrderActivity :
                         showExitSheet(
                             this@QuickOrderActivity,
                             "Generate Estimate to get the Total Price for the Items in the list to pay online or choose Cash on Delivery to place order immediately",
-                            "close"
+                            "okay"
                         )
                         return@launch
                     }

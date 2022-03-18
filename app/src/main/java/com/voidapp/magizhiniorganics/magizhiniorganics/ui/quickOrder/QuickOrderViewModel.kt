@@ -17,6 +17,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
@@ -39,6 +40,7 @@ class QuickOrderViewModel(
     var addressContainer: Address? = null
     var quickOrder: QuickOrder? = null
     var wallet: Wallet? = null
+    var appliedCoupon: CouponEntity? = null
 
     var orderID: String? = null
     var placeOrderByCOD: Boolean = false
@@ -204,6 +206,9 @@ class QuickOrderViewModel(
                     } else {
                         _uiEvent.value = UIEvent.ProgressBar(false)
                     }
+                } ?:let {
+                    _uiUpdate.value =
+                        UiUpdate.EstimateData("", null, true)
                 }
             }
             is NetworkResult.Failed -> {
@@ -412,6 +417,7 @@ class QuickOrderViewModel(
 
     fun verifyCoupon(couponCode: String) = viewModelScope.launch(Dispatchers.IO) {
         dbRepository.getCouponByCode(couponCode)?.let { coupon ->
+            appliedCoupon = coupon
             val cartPrice = getTotalCartPrice()
             if (!coupon.categories.contains(ALL)) {
                 withContext(Dispatchers.Main) {
@@ -439,15 +445,14 @@ class QuickOrderViewModel(
 
     private fun couponDiscount(coupon: CouponEntity, cartPrice: Float): Float {
         var discountPrice = when (coupon.type) {
-            "percent" -> (cartPrice * coupon.amount / 100)
-            "rupees" -> coupon.amount
-            else -> 0f
-        }
+                "percent" -> (cartPrice * coupon.amount / 100)
+                "rupees" -> coupon.amount
+                else -> 0f
+            }
 
-        if (discountPrice > coupon.maxDiscount) {
-            discountPrice = coupon.maxDiscount
-        }
-
+            if (discountPrice > coupon.maxDiscount) {
+                discountPrice = coupon.maxDiscount
+            }
         return discountPrice
     }
 
@@ -488,6 +493,17 @@ class QuickOrderViewModel(
         } else {
             quickOrder?.let {
                 it.cart[position].quantity = count
+                appliedCoupon?.let { coupon ->
+                    val cartPrice = getTotalCartPrice()
+                    if (cartPrice >= coupon.purchaseLimit) {
+                        couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
+                    } else {
+                        _uiUpdate.value =
+                            UiUpdate.CouponApplied(null)
+                        _uiEvent.value =
+                            UIEvent.Toast("Coupon Discount Removed. Total Cart Price is less than Coupon limit.", LONG)
+                    }
+                }
                 _uiUpdate.value = UiUpdate.UpdateCartData(position, count)
             }
         }
@@ -499,6 +515,17 @@ class QuickOrderViewModel(
         } else {
             quickOrder?.let {
                 it.cart.removeAt(position)
+                appliedCoupon?.let { coupon ->
+                    val cartPrice = getTotalCartPrice()
+                    if (cartPrice >= coupon.purchaseLimit) {
+                        couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
+                    } else {
+                        _uiUpdate.value =
+                            UiUpdate.CouponApplied(null)
+                        _uiEvent.value =
+                            UIEvent.Toast("Coupon Discount Removed. Total Cart Price is less than Coupon limit.", LONG)
+                    }
+                }
                 _uiUpdate.value = UiUpdate.UpdateCartData(position, null)
             }
         }
@@ -521,7 +548,7 @@ class QuickOrderViewModel(
         data class PopulateOrderDetails(val order: OrderEntity): UiUpdate()
 
         //coupon
-        data class CouponApplied(val message: String): UiUpdate()
+        data class CouponApplied(val message: String?): UiUpdate()
 
         //order
         data class ValidatingPurchase(val message: String): UiUpdate()

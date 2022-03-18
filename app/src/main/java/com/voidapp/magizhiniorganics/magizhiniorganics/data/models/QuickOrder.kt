@@ -16,5 +16,4 @@ data class QuickOrder(
     var note: String = "",
     var orderPlaced: Boolean = false,
     var extras: ArrayList<String> = arrayListOf()
-
 ): Parcelable

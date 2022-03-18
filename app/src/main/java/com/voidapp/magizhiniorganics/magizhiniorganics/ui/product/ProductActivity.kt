@@ -53,11 +53,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import ru.nikartm.support.ImageBadgeView
 
-/*
-* todo
-*  set up coupon code as a dialog with more details
-* */
-
 class ProductActivity :
     BaseActivity(),
     KodeinAware

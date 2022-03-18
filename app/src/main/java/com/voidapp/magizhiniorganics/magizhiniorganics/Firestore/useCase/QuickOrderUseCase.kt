@@ -294,16 +294,33 @@ class QuickOrderUseCase(
             ).let {
                 when(fbRepository.placeOrder(it)) {
                     is NetworkResult.Success -> {
-//                        if (!cart.isNullOrEmpty()) {
-//                            deleteQuickOrder(orderDetailsMap["userID"].toString())
-//                        }
-                        true
+                        if (!cart.isNullOrEmpty()) {
+                            updateQuickOrderCart(cart, it.customerId)
+                        } else {
+                            true
+                        }
                     }
                     is NetworkResult.Failed -> false
                     else -> false
                 }
             }
         } catch (e: Exception) {
+            false
+        }
+    }
+
+    private suspend fun updateQuickOrderCart(
+        cart: ArrayList<CartEntity>,
+        customerID: String
+    ): Boolean = withContext(Dispatchers.IO){
+        return@withContext try {
+            fireStore
+                .collection(QUICK_ORDER)
+                .document(customerID)
+                .update("cart", cart).await()
+            true
+        }catch (e: Exception) {
+            fbRepository.logCrash("quickOrder: updating the cart", e.message.toString())
             false
         }
     }
@@ -315,7 +332,7 @@ class QuickOrderUseCase(
                 .document(userID)
                 .update("orderPlaced", true).await()
         } catch (e: Exception) {
-
+            fbRepository.logCrash("quickOrder: updating order placed", e.message.toString())
         }
     }
 
@@ -348,7 +365,7 @@ class QuickOrderUseCase(
                 storeUpdate.await()
             }
         } catch (e: Exception) {
-
+            fbRepository.logCrash("quickOrder", e.message.toString())
         }
     }
 

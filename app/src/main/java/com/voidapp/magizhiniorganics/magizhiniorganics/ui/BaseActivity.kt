@@ -221,6 +221,11 @@ open class BaseActivity : AppCompatActivity() {
                 view.tvCancelText.text = "Close"
                 view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
             }
+            "okay" -> {
+                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvCancelText.text = "Proceed"
+                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+            }
             else -> {
                 view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
                 view.tvCancelText.text = "Proceed"
@@ -301,6 +306,7 @@ open class BaseActivity : AppCompatActivity() {
                         "cs" -> activity.moveToCustomerSupport()
                         "delete" -> activity.deleteQuickOrder()
                         "close" -> activity.onBackPressed()
+                        else -> hideExitSheet()
                     }
                 }
                 is SubscriptionHistoryActivity -> {
