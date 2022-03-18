@@ -12,6 +12,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOr
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
@@ -193,10 +194,17 @@ class QuickOrderViewModel(
             .checkForPreviousEstimate(userID = userProfile!!.id)
         when(result) {
             is NetworkResult.Success -> {
-                _uiUpdate.value =
-                    UiUpdate.EstimateData("", result.data?.let { it as QuickOrder }, true)
-                delay(1500)
-                _uiEvent.value = UIEvent.ProgressBar(false)
+                result.data?.let { it ->
+                    it as QuickOrder
+                    _uiUpdate.value =
+                        UiUpdate.EstimateData("", it, true)
+                    delay(1500)
+                    if (it.orderPlaced) {
+                        updateAddressToOrderAddress(it.orderID)
+                    } else {
+                        _uiEvent.value = UIEvent.ProgressBar(false)
+                    }
+                }
             }
             is NetworkResult.Failed -> {
                 _uiUpdate.value = UiUpdate.EstimateData(result.data?.let { it as String }
@@ -205,6 +213,15 @@ class QuickOrderViewModel(
                 _uiEvent.value = UIEvent.ProgressBar(false)
             }
             else -> Unit
+        }
+    }
+
+    private fun updateAddressToOrderAddress(orderID: String) = viewModelScope.launch(Dispatchers.IO) {
+        dbRepository.getOrderByID(orderID)?.let { order ->
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value =
+                    UiUpdate.PopulateOrderDetails(order)
+            }
         }
     }
 
@@ -501,6 +518,7 @@ class QuickOrderViewModel(
 
         //estimateData
         data class EstimateData(val message: String, val data: QuickOrder?, val isSuccess: Boolean): UiUpdate()
+        data class PopulateOrderDetails(val order: OrderEntity): UiUpdate()
 
         //coupon
         data class CouponApplied(val message: String): UiUpdate()

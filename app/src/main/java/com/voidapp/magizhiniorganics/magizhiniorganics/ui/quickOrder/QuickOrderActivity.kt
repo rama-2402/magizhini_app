@@ -33,6 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderListAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
@@ -93,10 +94,7 @@ class QuickOrderActivity :
         initRecyclerView()
         initData()
 
-//        binding.apply {
-            binding.rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
-//            nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
-//        }
+        binding.rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
 
         initObservers()
         initListeners()
@@ -107,6 +105,10 @@ class QuickOrderActivity :
             viewModel.userProfile = UserProfileEntity()
             viewModel.addressContainer = Address()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
         viewModel.getAddress()
     }
 
@@ -338,6 +340,9 @@ class QuickOrderActivity :
                         showErrorSnackBar(event.message as String, true)
                     }
                 }
+                is QuickOrderViewModel.UiUpdate.PopulateOrderDetails -> {
+                    populateOrderDetails(event.order)
+                }
                 is QuickOrderViewModel.UiUpdate.CouponApplied -> {
                     this.hideKeyboard()
                     showErrorSnackBar(event.message, false)
@@ -371,8 +376,7 @@ class QuickOrderActivity :
             quickOrderListAdapter.quickOrderList = listOf()
             quickOrderListAdapter.quickOrderListUrl = listOf()
             quickOrderListAdapter.notifyDataSetChanged()
-            cartAdapter.cartItems = mutableListOf()
-            cartAdapter.notifyDataSetChanged()
+            cartAdapter.emptyCart()
             cartBtn.badgeValue = 0
         }
         viewModel.apply {
@@ -505,8 +509,6 @@ class QuickOrderActivity :
                                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                                 finish()
                             }
-//                            showErrorSnackBar("Order placed already. Please check Order History for more details", true)
-//                            return@setOnClickListener
                         }
                         cart.isEmpty() -> {
                             showErrorSnackBar("Estimate not yet available. Please wait", true)
@@ -540,18 +542,6 @@ class QuickOrderActivity :
             }
     }
 
-//    private fun cartItemsDialog(cartItems: ArrayList<Cart>) {
-//        val entityMap = cartItems.map { it.toCartEntity() }
-//        val orderItemsAdapter = OrderItemsAdapter(
-//            this,
-//            entityMap,
-//            viewModel,
-//            arrayListOf(),
-//            "quickOrder"
-//        )
-//        ItemsBottomSheet(this, orderItemsAdapter).show()
-//    }
-
     private fun showLoadStatusDialog(title: String, body: String, content: String) {
         LoadStatusDialog.newInstance(title, body, content).show(supportFragmentManager, LOAD_DIALOG)
     }
@@ -566,7 +556,6 @@ class QuickOrderActivity :
     }
 
     private fun populateAddressDetails(addresses: List<Address>) {
-        updatePriceButton()
         addressAdapter.setAddressData(addresses)
     }
 
@@ -583,8 +572,23 @@ class QuickOrderActivity :
             setCartBottom(quickOrder.cart)
             updateCartBadge(quickOrder.cart)
             nsvScrollBody.visible()
-//            rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
             nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
+        }
+    }
+
+    private fun populateOrderDetails(order: OrderEntity) {
+        binding.apply {
+            populateAddressDetails(arrayListOf(order.address))
+            etDeliveryNote.setText(order.deliveryNote)
+            etCoupon.setText(order.appliedCoupon)
+            hideProgressDialog()
+            val preferences = resources.getStringArray(R.array.delivery_preference_array)
+            for (i in preferences.indices) {
+                if (preferences[i] == order.deliveryPreference) {
+                    spDeliveryPreference.setSelection(i)
+                    return
+                }
+            }
         }
     }
 
@@ -592,23 +596,9 @@ class QuickOrderActivity :
         cartBtn.badgeValue = viewModel.getCartItemsQuantity(cart)
     }
 
-    private fun updatePriceButton() {
-        lifecycleScope.launch {
-            viewModel.quickOrder?.let {
-                var cartSize = 0
-                it.cart.forEach { cart ->
-                    cartSize += cart.quantity
-                }
-                binding.btnGetEstimate.text =
-                    "Rs:${viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()} \n ($cartSize Items)"
-            }
-        }
-    }
-
     private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
         binding.apply {
             if (isCouponApplied) {
-//                updatePriceButton()
                 etCoupon.disable()
                 btnApplyCoupon.text = "Remove"
                 btnApplyCoupon.setBackgroundColor(
@@ -618,7 +608,6 @@ class QuickOrderActivity :
                     )
                 )
             } else {
-//                updatePriceButton()
                 viewModel.couponAppliedPrice = null
                 etCoupon.enable()
                 btnApplyCoupon.text = "Apply"
@@ -827,14 +816,22 @@ class QuickOrderActivity :
         viewModel.mCheckedAddressPosition = position
         addressAdapter.checkedAddressPosition = position
         addressAdapter.notifyDataSetChanged()
-        updatePriceButton()
+//        updatePriceButton()
     }
 
     override fun addAddress(position: Int) {
+        if (viewModel.quickOrder?.orderPlaced ?: false) {
+            showErrorSnackBar("Can't edit Address. Order placed already", true)
+            return
+        }
         AddressDialog().show(supportFragmentManager, "addressDialog")
     }
 
     override fun deleteAddress(position: Int) {
+        if (viewModel.quickOrder?.orderPlaced ?: false) {
+            showErrorSnackBar("Can't edit Address. Order placed already", true)
+            return
+        }
         viewModel.deleteAddress(position)
         viewModel.mCheckedAddressPosition = 0
         addressAdapter.checkedAddressPosition = 0
@@ -842,6 +839,10 @@ class QuickOrderActivity :
     }
 
     override fun updateAddress(position: Int) {
+        if (viewModel.quickOrder?.orderPlaced ?: false) {
+            showErrorSnackBar("Can't edit Address. Order placed already", true)
+            return
+        }
         viewModel.addressPosition = position
         viewModel.userProfile?.let {
             val dialog = AddressDialog()
