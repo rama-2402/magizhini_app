@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -12,10 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AllCWMAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityAllCwmBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity

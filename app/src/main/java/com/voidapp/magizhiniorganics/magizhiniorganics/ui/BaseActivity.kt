@@ -12,10 +12,8 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.TextView
-import android.widget.Toast
+import android.webkit.MimeTypeMap
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -41,8 +39,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadOutAnimation
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 
 open class BaseActivity : AppCompatActivity() {
@@ -111,8 +107,8 @@ open class BaseActivity : AppCompatActivity() {
 
     fun Activity.hideKeyboard() = UIUtil.hideKeyboard(this)
 
-    fun showToast(context: Context ,message: String, type: String = Constants.SHORT) {
-        when(type) {
+    fun showToast(context: Context, message: String, type: String = Constants.SHORT) {
+        when (type) {
             Constants.SHORT -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             Constants.LONG -> Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
@@ -121,7 +117,7 @@ open class BaseActivity : AppCompatActivity() {
     fun openLink(content: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
             intent.data = Uri.parse(content)
             startActivity(Intent.createChooser(intent, "Open link with"))
         } catch (e: Exception) {
@@ -140,7 +136,8 @@ open class BaseActivity : AppCompatActivity() {
         }
 
         val snackBarView = snackBar.view
-        val text = snackBarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+        val text =
+            snackBarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
         text.setTextColor(ContextCompat.getColor(text.context, R.color.white))
 
         if (errorMessage) {
@@ -150,7 +147,7 @@ open class BaseActivity : AppCompatActivity() {
                     R.color.matteRed
                 )
             )
-        }else{
+        } else {
             snackBarView.setBackgroundColor(
                 ContextCompat.getColor(
                     this,
@@ -203,7 +200,8 @@ open class BaseActivity : AppCompatActivity() {
                 LayoutInflater.from(baseContext),
                 R.layout.dialog_bottom_exit_confirmation,
                 null,
-                false)
+                false
+            )
 
         exitBottomSheetDialog.setCancelable(true)
         exitBottomSheetDialog.setContentView(view.root)
@@ -211,39 +209,79 @@ open class BaseActivity : AppCompatActivity() {
         when (data) {
             "Cancel for some days" -> view.tvCancelText.text = data as String
             "cs" -> {
-                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvConfirmationText.setTextColor(
+                    ContextCompat.getColor(
+                        view.tvConfirmationText.context,
+                        R.color.gray700
+                    )
+                )
                 view.tvCancelText.text = "Contact Support"
-                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+                view.tvCancelText.setTextColor(
+                    ContextCompat.getColor(
+                        view.tvConfirmationText.context,
+                        R.color.matteRed
+                    )
+                )
             }
-            "close"-> {
+            "close" -> {
                 exitBottomSheetDialog.setCancelable(false)
-                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvConfirmationText.setTextColor(
+                    ContextCompat.getColor(
+                        view.tvConfirmationText.context,
+                        R.color.gray700
+                    )
+                )
                 view.tvCancelText.text = "Close"
-                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+                view.tvCancelText.setTextColor(
+                    ContextCompat.getColor(
+                        view.tvConfirmationText.context,
+                        R.color.matteRed
+                    )
+                )
             }
             "okay" -> {
-                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvConfirmationText.setTextColor(
+                    ContextCompat.getColor(
+                        view.tvConfirmationText.context,
+                        R.color.gray700
+                    )
+                )
                 view.tvCancelText.text = "Proceed"
-                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+                view.tvCancelText.setTextColor(
+                    ContextCompat.getColor(
+                        view.tvConfirmationText.context,
+                        R.color.matteRed
+                    )
+                )
             }
             else -> {
-                view.tvConfirmationText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.gray700))
+                view.tvConfirmationText.setTextColor(
+                    ContextCompat.getColor(
+                        view.tvConfirmationText.context,
+                        R.color.gray700
+                    )
+                )
                 view.tvCancelText.text = "Proceed"
-                view.tvCancelText.setTextColor(ContextCompat.getColor(view.tvConfirmationText.context, R.color.matteRed))
+                view.tvCancelText.setTextColor(
+                    ContextCompat.getColor(
+                        view.tvConfirmationText.context,
+                        R.color.matteRed
+                    )
+                )
             }
         }
 
         view.tvConfirmationText.text = confirmation
         view.tvConfirmationText.setOnClickListener {
             hideExitSheet()
-            when(activity) {
+            when (activity) {
                 is ProfileActivity -> {
                     when (data) {
                         "" -> activity.exitProfileWithoutChange()
                     }
                 }
                 is PurchaseHistoryActivity -> {
-                    when(data) {
+                    when (data) {
                         "" -> activity.cancellationConfirmed()
                     }
                 }
@@ -258,48 +296,48 @@ open class BaseActivity : AppCompatActivity() {
 
         view.tvCancelText.setOnClickListener {
             hideExitSheet()
-            when(activity) {
+            when (activity) {
                 is ProfileActivity -> {
-                    when(data) {
+                    when (data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                         "referral" -> activity.openReferral()
                     }
                 }
                 is SubscriptionProductActivity -> {
-                    when(data) {
+                    when (data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                         "purchaseHistory" -> activity.navigateToOtherPage(data as String)
                     }
                 }
                 is ProductActivity -> {
-                    when(data) {
+                    when (data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                     }
                 }
                 is DishActivity -> {
-                    when(data) {
+                    when (data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                     }
                 }
                 is PurchaseHistoryActivity -> {
-                    when(data) {
+                    when (data) {
                         "cs" -> activity.moveToCustomerSupport()
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                     }
                 }
                 is ConversationActivity -> {
-                    when(data) {
+                    when (data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                     }
                 }
                 is QuickOrderActivity -> {
-                    when(data) {
+                    when (data) {
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
                         "estimate" -> activity.sendEstimateRequest()
@@ -310,7 +348,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                 }
                 is SubscriptionHistoryActivity -> {
-                    when(data) {
+                    when (data) {
                         "cs" -> activity.moveToCustomerSupport()
                         "price" -> activity.showPaymentMethod()
                     }
@@ -318,7 +356,7 @@ open class BaseActivity : AppCompatActivity() {
                 is InvoiceActivity -> activity.moveToCustomerSupport()
                 is HomeActivity -> activity.showReferralOptions()
                 is ContactUsActivity -> {
-                    when(data) {
+                    when (data) {
                         "business" -> activity.addNewPartnerAccount()
                         "career" -> activity.sendCareerMail()
                     }
@@ -332,16 +370,19 @@ open class BaseActivity : AppCompatActivity() {
         exitBottomSheetDialog.dismiss()
     }
 
-    fun showSuccessDialog(title: String = getString(R.string.msg_profile_activated),
-                          body: String = getString(R.string.msg_welcome),
-                          content: String = "") {
+    fun showSuccessDialog(
+        title: String = getString(R.string.msg_profile_activated),
+        body: String = getString(R.string.msg_welcome),
+        content: String = ""
+    ) {
 
         mSuccessDialog = Dialog(this, R.style.CustomAlertDialog)
         val view: DialogSuccessBinding = DataBindingUtil.inflate(
-                                            LayoutInflater.from(baseContext),
-                                            R.layout.dialog_success,
-                                            null,
-                                            false)
+            LayoutInflater.from(baseContext),
+            R.layout.dialog_success,
+            null,
+            false
+        )
 
         val windowParams = WindowManager.LayoutParams()
         windowParams.copyFrom(mSuccessDialog.window?.attributes)
@@ -355,7 +396,7 @@ open class BaseActivity : AppCompatActivity() {
 
         view.tvTitle.text = title
         view.tvBody.text = body
-        when(content) {
+        when (content) {
             "limited" -> {
                 view.ltAnimImg.setAnimation(R.raw.validating_purchase)
                 view.tvTitle.remove()
@@ -397,7 +438,8 @@ open class BaseActivity : AppCompatActivity() {
                 LayoutInflater.from(baseContext),
                 R.layout.dialog_bottom_description,
                 null,
-                false)
+                false
+            )
 
         mDescriptionBottomSheet.setCancelable(true)
         mDescriptionBottomSheet.setCanceledOnTouchOutside(true)
@@ -425,7 +467,7 @@ open class BaseActivity : AppCompatActivity() {
 
         val listView = view.lvBottomList
 
-        val adapter : ArrayAdapter<String> =
+        val adapter: ArrayAdapter<String> =
             ArrayAdapter(
                 this,
                 android.R.layout.simple_list_item_activated_1,
@@ -434,15 +476,14 @@ open class BaseActivity : AppCompatActivity() {
 
         listView.adapter = adapter
         listView.onItemClickListener =
-            AdapterView.OnItemClickListener {
-                    parent: AdapterView<*>?,
-                    _: View?,
-                    position: Int,
-                    _: Long ->
+            AdapterView.OnItemClickListener { parent: AdapterView<*>?,
+                                              _: View?,
+                                              position: Int,
+                                              _: Long ->
 
                 val selectedItem = parent!!.getItemAtPosition(position) as String
 
-                when(activity) {
+                when (activity) {
                     is ShoppingMainActivity -> {
                         hideListBottomSheet()
                         activity.categoryFilter = selectedItem
@@ -454,7 +495,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     is HomeActivity -> {
                         hideListBottomSheet()
-                        when(data) {
+                        when (data) {
                             "referral" -> activity.referralAction(selectedItem)
                             "developer" -> activity.selectedContactMethodForDeveloper(selectedItem)
                         }
@@ -465,7 +506,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     is SubscriptionHistoryActivity -> {
                         hideListBottomSheet()
-                        when(data) {
+                        when (data) {
                             "filter" -> activity.setSubscriptionFilter(selectedItem)
                             "payment" -> activity.selectedPaymentMode(selectedItem)
                         }
@@ -502,7 +543,8 @@ open class BaseActivity : AppCompatActivity() {
                 LayoutInflater.from(baseContext),
                 R.layout.dialog_swipe_confirmation,
                 null,
-                false)
+                false
+            )
 
         view.swipe.text = content
 

@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -12,15 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.NotificationsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.SwipeGesture
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserNotificationEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserNotification
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityNotificationsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
@@ -36,7 +29,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_NOTI
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
@@ -118,7 +110,7 @@ class NotificationsActivity :
     }
 
     private fun initObservers() {
-        viewModel.notifications.observe(this, {
+        viewModel.notifications.observe(this) {
             hideProgressDialog()
             if (it.isEmpty()) {
                 showEmptyScreen()
@@ -130,13 +122,15 @@ class NotificationsActivity :
                 binding.tvToolbarTitle.text = "Notifications (${viewModel.allNotifications.size})"
                 notificationsAdapter.notifyDataSetChanged()
 
-                if (!SharedPref(this).getData(USER_NOTIFICATIONS, BOOLEAN, false).toString().toBoolean()) {
+                if (!SharedPref(this).getData(USER_NOTIFICATIONS, BOOLEAN, false).toString()
+                        .toBoolean()
+                ) {
                     showToast(this, "Swipe Left or Right to clear Notification")
                     SharedPref(this).putData(USER_NOTIFICATIONS, BOOLEAN, true)
                 }
 
             }
-        })
+        }
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->
                 when(result) {
@@ -225,11 +219,12 @@ class NotificationsActivity :
                     } ?: showErrorSnackBar("Product does not Exist", true)
                 }
                 CATEGORY -> {
-                    val category = viewModel.getCategoryName(notification.clickContent)
-                    Intent(this@NotificationsActivity, ShoppingMainActivity::class.java).also {
-                        it.putExtra(CATEGORY, category)
-                        startActivity(it)
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    viewModel.getCategoryName(notification.clickContent)?.let { category ->
+                        Intent(this@NotificationsActivity, ShoppingMainActivity::class.java).also {
+                            it.putExtra(CATEGORY, category)
+                            startActivity(it)
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        }
                     }
                 }
                 PURCHASE -> {

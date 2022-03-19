@@ -16,11 +16,9 @@ import com.google.firebase.messaging.RemoteMessage
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SplashActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ONLINE_STATUS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import kotlin.random.Random
 

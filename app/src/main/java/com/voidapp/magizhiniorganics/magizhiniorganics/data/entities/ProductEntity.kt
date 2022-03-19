@@ -4,12 +4,8 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.parcelize.Parcelize
 
 @Entity

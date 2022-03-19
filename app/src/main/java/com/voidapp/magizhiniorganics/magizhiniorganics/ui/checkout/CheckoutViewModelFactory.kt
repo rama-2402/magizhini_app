@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 
 class CheckoutViewModelFactory(
     private val repository: DatabaseRepository,
@@ -13,7 +12,7 @@ class CheckoutViewModelFactory(
     private val quickOrderUseCase: QuickOrderUseCase
 ) : ViewModelProvider.NewInstanceFactory() {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CheckoutViewModel(repository, firestoreRepository, quickOrderUseCase) as T
     }
 }

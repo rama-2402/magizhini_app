@@ -2,7 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,20 +9,20 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeTopSellersBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class BestSellersAdapter(
     val context: Context,
     var products: List<ProductEntity>,
-    val viewModel: HomeViewModel,
-    var recycler: String
+    var recycler: String,
+    val onItemClickListener: BestSellerItemClickListener
 ) : RecyclerView.Adapter<BestSellersAdapter.ProductHomeViewHolder>() {
 
     inner class ProductHomeViewHolder(val binding: RvHomeTopSellersBinding) :
@@ -63,7 +62,8 @@ class BestSellersAdapter(
         with(holder.binding) {
             tvProductName.text = product.name
             checkVariantAvailability(holder, product.variants[variantInCartPosition])
-            GlideLoader().loadUserPicture(context, product.thumbnailUrl, ivProductThumbnail)
+
+            ivProductThumbnail.loadImg(product.thumbnailUrl)
 
 //            //setting the favorties icon for the products
 //            if (product.favorite) {
@@ -99,7 +99,7 @@ class BestSellersAdapter(
 
                 with(product.variants[variantInCartPosition]) {
                     tvDiscountAmt.text =
-                        getDiscountPercent(variantPrice.toFloat(), discountPrice.toFloat()).toString()
+                        "Upto ${getDiscountPercent(variantPrice.toFloat(), discountPrice.toFloat()).toInt()} % Off"
                     if (discountPrice != 0.0) {
                         discountedPriceForPurchase = discountPrice
                         tvPrice.text = "$variantDisplayName - Rs: ${discountPrice}"
@@ -125,15 +125,15 @@ class BestSellersAdapter(
                     if (product.variantInCart.isEmpty()) {
                         product.inCart = false
                     }
-                    removeItem(product, viewModel, position)
+                        removeItem(product, position)
                 } else {
                     product.variantInCart.add(variantName)
-                    addItem(product, viewModel, position, variantInCartPosition, discountedPriceForPurchase)
+                        addItem(product, position, variantInCartPosition, discountedPriceForPurchase)
                 }
             }
 
             ivProductThumbnail.setOnClickListener {
-                viewModel.moveToProductDetails(productID, product.name)
+                onItemClickListener.moveToProductDetails(productID, product.name, ivProductThumbnail)
             }
 
         }
@@ -148,13 +148,12 @@ class BestSellersAdapter(
 
     private fun addItem(
         product: ProductEntity,
-        viewModel: HomeViewModel,
         position: Int,
         variantPosition: Int,
         discountedPrice: Double
     ) {
         Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
-        viewModel.upsertCartItem(
+        onItemClickListener.upsertCartItem(
             product,
             "${product.variants[variantPosition].variantName} ${product.variants[variantPosition].variantType}",
             1,
@@ -168,11 +167,10 @@ class BestSellersAdapter(
 
     private fun removeItem(
         product: ProductEntity,
-        viewModel: HomeViewModel,
         position: Int
     ) {
         Toast.makeText(context, "Removed from Cart", Toast.LENGTH_SHORT).show()
-        viewModel.deleteCartItemFromShoppingMain(
+        onItemClickListener.deleteCartItemFromShoppingMain(
             product,
             "${product.variants[0].variantName} ${product.variants[0].variantType}",
             position,
@@ -203,5 +201,11 @@ class BestSellersAdapter(
                 }
             }
         }
+    }
+
+    interface BestSellerItemClickListener {
+        fun upsertCartItem(product: ProductEntity, variantName: String, itemCount: Int, discountedPrice: Float, originalPrice: Float, variantPosition: Int, position: Int, recycler: String)
+        fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int, recycler: String)
+        fun moveToProductDetails(productID: String,productName: String ,thumbnail: ShapeableImageView)
     }
 }

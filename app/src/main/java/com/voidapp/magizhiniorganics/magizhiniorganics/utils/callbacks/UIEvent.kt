@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks
 
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 
 sealed class UIEvent {

@@ -1,20 +1,23 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.product
 
 import android.annotation.SuppressLint
+import android.app.Instrumentation
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Paint
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,40 +25,41 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProductBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
-import org.kodein.di.Kodein
-import org.kodein.di.KodeinAware
-import org.kodein.di.android.kodein
-import org.kodein.di.generic.instance
-import kotlin.math.abs
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.HOME_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NO_LIMIT
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OUT_OF_STOCK
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_NAME
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import org.kodein.di.Kodein
+import org.kodein.di.KodeinAware
+import org.kodein.di.android.kodein
+import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
+import kotlin.math.abs
+
 
 class ProductActivity :
     BaseActivity(),
-    KodeinAware
+    KodeinAware,
+    ReviewAdapter.ReviewItemClickListener
 {
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityProductBinding
@@ -71,7 +75,7 @@ class ProductActivity :
 
     private lateinit var dialogAddCouponBs: BottomSheetDialog
 
-    private var isPreviewVisible: Boolean = false
+//    private var isPreviewVisible: Boolean = false
 
     companion object {
         const val ANIMATION_DURATION: Long = 200
@@ -96,9 +100,19 @@ class ProductActivity :
         initLiveData()
         initViewPager()
         initClickListeners()
+
+        binding.apply {
+            clProductDetails.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.slide_in_right_bounce))
+            llViewPager.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.slide_up))
+        }
     }
 
     private fun initData(productID: String) {
+        viewModel.reviewAdapter = ReviewAdapter(
+            this,
+            arrayListOf(),
+            this
+        )
         viewModel.getProfileData()
         viewModel.getProductByID(productID)
         viewModel.getAllCartItem()
@@ -114,6 +128,7 @@ class ProductActivity :
 
         setBottomSheetIcon("coupon")
 
+
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
         cartAdapter = CartAdapter(
@@ -125,6 +140,7 @@ class ProductActivity :
         cartRecycler.layoutManager = LinearLayoutManager(this)
         cartRecycler.adapter = cartAdapter
 
+        cartBottomSheet.isHideable = false
         cartBottomSheet.isDraggable = true
 
         cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
@@ -289,16 +305,24 @@ class ProductActivity :
                         showExitSheet(this, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
                     }
                 }
-                is ProductViewModel.UiUpdate.OpenPreviewImage -> {
-                    cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
-                    isPreviewVisible = true
-                    val url = event.imageUrl ?: event.imageUri
-                    with(binding) {
-                        GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, url!!, ivPreviewImage)
-                        ivPreviewImage.visible()
-                        ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.scale_big))
-                    }
-                }
+//                is ProductViewModel.UiUpdate.OpenPreviewImage -> {
+//                    val url = event.imageUri
+//                    Intent(this, PreviewActivity::class.java).also { intent ->
+//                        intent.putExtra("url", url!!.toString())
+//                        intent.putExtra("contentType", "image")
+//                        val options: ActivityOptionsCompat =
+//                            ActivityOptionsCompat.makeSceneTransitionAnimation(this, event.thumbnail, ViewCompat.getTransitionName(event.thumbnail)!!)
+//                        startActivity(intent, options.toBundle())
+//                    }
+////                    cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+////                    isPreviewVisible = true
+////                    val url = event.imageUrl ?: event.imageUri
+////                    with(binding) {
+////                        GlideLoader().loadUserPictureWithoutCrop(this@ProductActivity, url!!, ivPreviewImage)
+////                        ivPreviewImage.visible()
+////                        ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.scale_big))
+////                    }
+//                }
                 is ProductViewModel.UiUpdate.CouponApplied -> {
                     event.message?.let {
                         applyUiChangesWithCoupon(true, null)
@@ -435,7 +459,9 @@ class ProductActivity :
 
     private fun populateProductData() {
         viewModel.product?.let { product ->
-            GlideLoader().loadUserPicture(this, product.thumbnailUrl, binding.ivProductThumbnail)
+//            GlideLoader().loadUserPicture(this, product.thumbnailUrl, binding.ivProductThumbnail)
+            supportPostponeEnterTransition()
+            binding.ivProductThumbnail.loadImg(product.thumbnailUrl)
             setPrice(product.variants[viewModel.selectedVariantPosition])
             setFavorites(product.favorite)
             setVariantAdapter(product.variants)
@@ -568,6 +594,10 @@ class ProductActivity :
         }
     }
 
+    private fun navigateToPreviewActivity() {
+
+    }
+
     private fun initViewPager() {
         val adapter = ProductViewPager(supportFragmentManager, lifecycle)
         binding.vpFragmentContent.adapter = adapter
@@ -578,29 +608,6 @@ class ProductActivity :
                 2 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_write_review)
             }
         }.attach()
-    }
-
-    private fun navigateToPreviousPage() {
-        when(viewModel.navigateToPage) {
-            HOME_PAGE -> {
-                Intent(this, HomeActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                    finishAffinity()
-                }
-            }
-            ORDER_HISTORY_PAGE -> finish()
-            else -> {
-                Intent(this, ShoppingMainActivity::class.java).also {
-                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                    finishAffinity()
-                }
-            }
-        }
     }
 
     //Title bar back button press function
@@ -614,29 +621,34 @@ class ProductActivity :
         }
     }
 
-    override fun onBackPressed() {
-        when {
-            isPreviewVisible -> {
-                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-                binding.ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.scale_small))
-                binding.ivPreviewImage.visibility = View.GONE
-                isPreviewVisible = false
-            }
-            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED -> cartBottomSheet.state =
-                BottomSheetBehavior.STATE_COLLAPSED
-            else -> {
-                navigateToPreviousPage()
-            }
+    override fun onStop() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !isFinishing) {
+            Instrumentation().callActivityOnSaveInstanceState(this, Bundle())
         }
+        super.onStop()
     }
 
-    override fun onDestroy() {
-        viewModel.apply {
-            userProfile = null
-            product = null
-            currentCoupon = null
-        }
-        super.onDestroy()
+    override fun onBackPressed() {
+//        when {
+//            isPreviewVisible -> {
+//                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+//                binding.ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.scale_small))
+//                binding.ivPreviewImage.visibility = View.GONE
+//                isPreviewVisible = false
+//            }
+//            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED -> cartBottomSheet.state =
+//                BottomSheetBehavior.STATE_COLLAPSED
+//            else -> {
+                viewModel.apply {
+                    userProfile = null
+                    product = null
+                    currentCoupon = null
+                    reviewAdapter = null
+                }
+                super.onBackPressed()
+//            }
+//        }
     }
 
     fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
@@ -660,6 +672,16 @@ class ProductActivity :
                 showToast(this, "Storage Permission Denied")
                 showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
             }
+        }
+    }
+
+    override fun previewImage(url: String, thumbnail: ShapeableImageView) {
+        Intent(this, PreviewActivity::class.java).also { intent ->
+            intent.putExtra("url", url)
+            intent.putExtra("contentType", "image")
+            val options: ActivityOptionsCompat =
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, ViewCompat.getTransitionName(thumbnail)!!)
+            startActivity(intent, options.toBundle())
         }
     }
 }

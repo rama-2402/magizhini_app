@@ -2,22 +2,17 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.provider.SyncStateContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 
 class PurchaseHistoryAdapter(

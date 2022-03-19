@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
@@ -14,7 +13,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityConta
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein

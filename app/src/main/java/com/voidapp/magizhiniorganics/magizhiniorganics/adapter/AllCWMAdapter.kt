@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvDishItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class AllCWMAdapter(
     private val context: Context,
@@ -24,7 +24,7 @@ class AllCWMAdapter(
     override fun onBindViewHolder(holder: CWMViewHolder, position: Int) {
         val dish = dishes[position]
         holder.binding.apply {
-            GlideLoader().loadUserPicture(context, dish.thumbnailUrl, ivThumbnail)
+            ivThumbnail.loadImg(dish.thumbnailUrl)
             tvDishName.text = dish.dishName
 
             clDish.setOnClickListener {

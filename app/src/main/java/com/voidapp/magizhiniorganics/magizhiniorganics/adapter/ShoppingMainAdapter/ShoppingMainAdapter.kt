@@ -3,13 +3,12 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdap
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Paint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.*
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +17,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvShoppingItemsBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.DiffUtils
 
@@ -57,7 +55,7 @@ open class ShoppingMainAdapter(
 
         holder.binding.apply {
             //setting the thumbnail
-            GlideLoader().loadUserPicture(ivProductThumbnail.context, product.thumbnailUrl, ivProductThumbnail)
+            ivProductThumbnail.loadImg(product.thumbnailUrl)
 
             //details view
             tvProductName.text = product.name
@@ -112,9 +110,9 @@ open class ShoppingMainAdapter(
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
-                    checkVariantAvailability(holder, product.variants[selectedVariant])
                     tvDiscount.setTextAnimation("Rs: $variantPrice")
                     tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                    checkVariantAvailability(holder, product.variants[selectedVariant])
                     setDiscountedValues(holder, product, 0)
                     setCartItems(product, variantName, holder = holder)
                 }
@@ -137,7 +135,7 @@ open class ShoppingMainAdapter(
                 with(tvAddItem) {
                     when(text) {
                         "View" -> {
-                            onItemClickListener.navigateToProduct(product)
+                            onItemClickListener.navigateToProduct(product, ivProductThumbnail)
                         }
                         "Add" -> {
                                 onItemClickListener.upsertCartItem(
@@ -159,7 +157,7 @@ open class ShoppingMainAdapter(
             }
 
             ivProductThumbnail.setOnClickListener {
-                onItemClickListener.navigateToProduct(product)
+                onItemClickListener.navigateToProduct(product, ivProductThumbnail)
             }
         }
     }
@@ -175,7 +173,7 @@ open class ShoppingMainAdapter(
             //setting up the product discount info
             if (currentVariant.discountPrice != 0.0) {
                 tvDiscountAmt.text =
-                    getDiscountPercent(currentVariant.variantPrice.toFloat(), currentVariant.discountPrice.toFloat()).toString()
+                    "Upto ${getDiscountPercent(currentVariant.variantPrice.toFloat(), currentVariant.discountPrice.toFloat()).toInt()} % Off"
                 discountedPrice = currentVariant.discountPrice.toFloat()
                 totalPrice = currentVariant.discountPrice.toFloat()
                 tvPrice.setTextAnimation(totalPrice.toString(), 200)
@@ -276,7 +274,7 @@ open class ShoppingMainAdapter(
     interface ShoppingMainListener {
         fun limitedItemList(products: List<ProductEntity>)
         fun updateFavorites(id: String, product: ProductEntity, position: Int)
-        fun navigateToProduct(product: ProductEntity)
+        fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView)
         fun upsertCartItem(product: ProductEntity, position: Int , variant: String, count: Int, price: Float, originalPrice: Float, variantIndex: Int, maxOrderQuantity: Int)
         fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int)
     }

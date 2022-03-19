@@ -4,11 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -24,7 +25,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
@@ -38,7 +39,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -165,6 +168,7 @@ class InvoiceActivity :
 
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
+        cartBottomSheet.isHideable = false
         cartBottomSheet.isDraggable = true
 
         cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
@@ -583,26 +587,23 @@ class InvoiceActivity :
         if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
             cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
-            if (viewModel.navigateToPage == PRODUCTS) {
-                finish()
-            } else {
-                Intent(this, ShoppingMainActivity::class.java).also {
-                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                }
+            viewModel.apply {
+                userProfile = null
+                wallet = null
+                currentCoupon = null
             }
+            super.onBackPressed()
+//            if (viewModel.navigateToPage == PRODUCTS) {
+//                finish()
+//            } else {
+//                Intent(this, ShoppingMainActivity::class.java).also {
+//                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
+//                    startActivity(it)
+//                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+//                    finish()
+//                }
+//            }
         }
-    }
-
-    override fun onDestroy() {
-        viewModel.apply {
-            userProfile = null
-            wallet = null
-            currentCoupon = null
-        }
-        super.onDestroy()
     }
 
     fun moveToCustomerSupport() {

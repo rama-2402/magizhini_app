@@ -16,9 +16,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentNewReviewBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.imageExtension
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
@@ -43,13 +42,9 @@ class CWMNewReviewsFragment: Fragment(), KodeinAware {
         it?.let{ uri ->
             mRatingImageUri = uri
             binding.ivReviewImage.visibility = View.VISIBLE
-            GlideLoader().loadUserPicture(
-                requireContext(),
-                uri,
-                binding.ivReviewImage
-            )
+            binding.ivReviewImage.loadImg(uri)
             binding.ivReviewImage.scaleType = ImageView.ScaleType.CENTER_CROP
-            imageExtension = GlideLoader().imageExtension(requireActivity(),  mRatingImageUri)!!
+            imageExtension = imageExtension(requireActivity(),  mRatingImageUri)!!
         }
     }
 
@@ -110,7 +105,7 @@ class CWMNewReviewsFragment: Fragment(), KodeinAware {
                         dishViewModel.upsertProductReview(
                             review,
                             mRatingImageUri,
-                            mRatingImageUri?.let { GlideLoader().imageExtension(requireActivity(),  mRatingImageUri)!! } ?: ""
+                            mRatingImageUri?.let { imageExtension(requireActivity(),  mRatingImageUri)!! } ?: ""
                         )
                     }
                 }

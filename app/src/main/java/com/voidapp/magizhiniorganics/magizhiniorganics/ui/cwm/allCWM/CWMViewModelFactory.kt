@@ -10,7 +10,7 @@ class CWMViewModelFactory(
     private val firestoreRepository: FirestoreRepository
 ) : ViewModelProvider.NewInstanceFactory() {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CWMViewModel(repository, firestoreRepository) as T
     }
 }

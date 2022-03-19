@@ -1,15 +1,15 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
-import android.provider.Telephony
-import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -55,15 +55,9 @@ class HomeViewModel (
     var specialsTwoHeader = ""
     var specialsThreeHeader = ""
 
-    var homeListener: HomeListener? = null
-
     fun getAllBanners() = dbRepository.getAllBanners()
 
     fun getALlCategories() = dbRepository.getAllProductCategories()
-
-    fun selectedCategory(category: String) {
-        homeListener?.displaySelectedCategory(category)
-    }
 
     fun signOut() {
         fbRepository.signOut()
@@ -176,10 +170,6 @@ class HomeViewModel (
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: update product fav boolean status", it) }
         }
-    }
-
-    fun moveToProductDetails(id: String, name: String) {
-        homeListener?.moveToProductDetails(id, name)
     }
 
     fun getDataToPopulate() = viewModelScope.launch(Dispatchers.IO) {

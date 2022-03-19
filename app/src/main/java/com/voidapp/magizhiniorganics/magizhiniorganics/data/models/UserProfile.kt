@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.models
 
 import android.os.Parcelable
-import androidx.room.ColumnInfo
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

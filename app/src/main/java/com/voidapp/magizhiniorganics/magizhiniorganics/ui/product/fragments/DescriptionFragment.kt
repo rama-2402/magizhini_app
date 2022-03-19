@@ -1,18 +1,14 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.fragments
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentDescriptionBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein

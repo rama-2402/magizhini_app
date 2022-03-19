@@ -1,27 +1,19 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Messages
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.ChatDiffUtils
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.ReviewDiffUtil
-import kotlin.collections.ArrayList
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class ReviewAdapter(
     val context: Context,
@@ -30,7 +22,7 @@ class ReviewAdapter(
 ): RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>() {
 
     inner class ReviewViewHolder(val itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val profilePic: ImageView = itemView.findViewById(R.id.ivProfilePic)
+        val profilePic: ShapeableImageView = itemView.findViewById(R.id.ivProfilePic)
         val profileName: TextView = itemView.findViewById(R.id.tvProfileName)
         val timeStamp: TextView = itemView.findViewById(R.id.tvTimestamp)
         val ratings: ImageView = itemView.findViewById(R.id.ivReview)
@@ -51,12 +43,12 @@ class ReviewAdapter(
     override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
         val review = reviews[position]
         with(holder) {
-            GlideLoader().loadUserPicture(profilePic.context, review.userProfilePicUrl, profilePic)
+            profilePic.loadImg(review.userProfilePicUrl)
             if (review.reviewImageUrl.isEmpty()) {
                 reviewImage.visibility = View.GONE
             } else {
                 reviewImage.visibility = View.VISIBLE
-                GlideLoader().loadUserPicture(reviewImage.context, review.reviewImageUrl, reviewImage)
+                reviewImage.loadImg(review.reviewImageUrl)
             }
             profileName.text = review.userName
             timeStamp.text = TimeUtil().getCustomDate(dateLong = review.timeStamp)
@@ -72,11 +64,11 @@ class ReviewAdapter(
             reviewContent.text = getReviewContent(review.review)
 
             reviewImage.setOnClickListener {
-                onItemClickListener.previewImage(review.reviewImageUrl)
+                onItemClickListener.previewImage(review.reviewImageUrl, reviewImage)
             }
 
             profilePic.setOnClickListener {
-                onItemClickListener.previewImage(review.userProfilePicUrl)
+                onItemClickListener.previewImage(review.userProfilePicUrl, profilePic)
             }
         }
     }
@@ -101,6 +93,6 @@ class ReviewAdapter(
     }
 
     interface ReviewItemClickListener {
-        fun previewImage(url: String)
+        fun previewImage(url: String, thumbnail: ShapeableImageView)
     }
 }

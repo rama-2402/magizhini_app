@@ -1,8 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase
 
 import android.net.Uri
-import android.util.Log
-import androidx.work.ListenableWorker
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
@@ -10,7 +8,6 @@ import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_ESTIMATE_PATH
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PENDING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
@@ -25,7 +22,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import kotlin.Exception
 
 class QuickOrderUseCase(
     private val fbRepository: FirestoreRepository

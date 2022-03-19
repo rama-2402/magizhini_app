@@ -1,8 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
-import android.text.BoringLayout
-import android.view.View
-
 object Constants {
 
     //appName

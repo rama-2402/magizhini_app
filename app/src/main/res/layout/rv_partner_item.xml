@@ -17,7 +17,8 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:contentDescription="@string/product_thumbnail"
-        android:src="@drawable/ic_app_placeholder"
+        android:transitionName="thumbnail"
+        android:src="@drawable/ic_profile_placeholder"
         android:background="?android:attr/selectableItemBackground"
         app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
         />

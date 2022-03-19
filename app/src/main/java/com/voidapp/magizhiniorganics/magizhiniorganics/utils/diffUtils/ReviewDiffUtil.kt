@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils
 
 import androidx.recyclerview.widget.DiffUtil
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Messages
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 
 class ReviewDiffUtil(

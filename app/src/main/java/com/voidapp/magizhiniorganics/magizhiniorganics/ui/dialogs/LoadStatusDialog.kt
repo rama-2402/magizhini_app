@@ -1,22 +1,17 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogSuccessBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
-import kotlinx.coroutines.launch
 
 class LoadStatusDialog: DialogFragment() {
 

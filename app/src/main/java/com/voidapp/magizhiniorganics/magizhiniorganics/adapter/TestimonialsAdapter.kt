@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 
 class TestimonialsAdapter(
@@ -47,7 +47,7 @@ class TestimonialsAdapter(
     override fun onBindViewHolder(holder: TestimonialsViewHolder, position: Int) {
         val testimonial = testimonials[position]
         holder.apply {
-            GlideLoader().loadUserPicture(context, testimonial.thumbnailUrl, thumbnail)
+            thumbnail.loadImg(testimonial.thumbnailUrl)
             message.text = testimonial.message
             name.text = "- ${testimonial.title}"
 
@@ -55,13 +55,13 @@ class TestimonialsAdapter(
                 playBtn.visibility = View.GONE
             } else {
                 thumbnail.setOnClickListener {
-                    onItemClickListener.openVideo(testimonial.videoUrl)
+                    onItemClickListener.openVideo(testimonial.videoUrl, thumbnail)
                 }
                 playBtn.setOnClickListener {
-                    onItemClickListener.openVideo(testimonial.videoUrl)
+                    onItemClickListener.openVideo(testimonial.videoUrl, thumbnail)
                 }
                 body.setOnClickListener {
-                    onItemClickListener.openVideo(testimonial.videoUrl)
+                    onItemClickListener.openVideo(testimonial.videoUrl,thumbnail)
                 }
             }
         }
@@ -82,6 +82,6 @@ class TestimonialsAdapter(
     }
 
     interface TestimonialItemClickListener {
-        fun openVideo(url: String)
+        fun openVideo(url: String, thumbnail: ShapeableImageView)
     }
 }

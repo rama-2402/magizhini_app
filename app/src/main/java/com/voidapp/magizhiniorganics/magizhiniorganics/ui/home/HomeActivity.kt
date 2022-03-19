@@ -1,21 +1,21 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
@@ -26,12 +26,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.BuildConfig
 import com.google.firebase.messaging.FirebaseMessaging
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PartnersAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.TestimonialsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
@@ -42,7 +43,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.VideoPlayerActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts.ContactUsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
@@ -75,6 +76,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.imaginativeworld.whynotimagecarousel.ImageCarousel
 import org.imaginativeworld.whynotimagecarousel.listener.CarouselListener
 import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
 import org.kodein.di.KodeinAware
@@ -87,10 +89,11 @@ class HomeActivity :
     BaseActivity(),
     View.OnClickListener,
     KodeinAware,
-    HomeListener,
     TestimonialsAdapter.TestimonialItemClickListener,
     NavigationView.OnNavigationItemSelectedListener,
-    PartnersAdapter.PartnersItemClickListener
+    PartnersAdapter.PartnersItemClickListener,
+    BestSellersAdapter.BestSellerItemClickListener,
+    CategoryHomeAdapter.CategoryItemClickListener
 {
     //DI Injection with kodein
     override val kodein by kodein()
@@ -110,11 +113,11 @@ class HomeActivity :
 
     private lateinit var dialogBsAddReferral: BottomSheetDialog
 
-    private var isPreviewOpened: Boolean = false
+//    private var isPreviewOpened: Boolean = false
 
     //initializing the carousel item for the banners
-    val mItems: MutableList<CarouselItem> = mutableListOf()
-    private val mCategoriesList: ArrayList<String> = arrayListOf()
+//    val mItems: MutableList<CarouselItem> = mutableListOf()
+//    private val mCategoriesList: ArrayList<String> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,7 +125,6 @@ class HomeActivity :
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
         viewModel = ViewModelProvider(this, factory).get(HomeViewModel::class.java)
-        viewModel.homeListener = this
 
         setSupportActionBar(binding.tbToolbar)
 
@@ -188,7 +190,6 @@ class HomeActivity :
             ivNotification.setOnClickListener {
                 Intent(this@HomeActivity, NotificationsActivity::class.java).also {
                     startActivity(it)
-                    onPause()
                 }
             }
             ivBannerOne.setOnClickListener {
@@ -277,14 +278,14 @@ class HomeActivity :
                 try {
                     val product: ProductEntity? = viewModel.getProductByID(banner.description)
                     product?.let {
-                        moveToProductDetails(product.id, product.name)
+                        navigateToProductDetails(product.id, product.name, null)
                     } ?: showErrorSnackBar("Product is no longer Available", true)
                 } catch (e: Exception) {}
             }
             CATEGORY -> {
                 try {
                     val category = viewModel.getCategoryByID(banner.description)
-                    displaySelectedCategory(category)
+                    navigateToSelectedCategory(category)
                 } catch (e: Exception) {}
             }
             DESCRIPTION -> {
@@ -295,8 +296,8 @@ class HomeActivity :
             WALLET -> navigateToWallet()
             REFERRAL -> showReferralBs(SharedPref(this@HomeActivity).getData(USER_ID, STRING, "").toString())
             ORDER_HISTORY -> navigateToQuickOrder()
-            SUBSCRIPTION -> displaySelectedCategory(SUBSCRIPTION)
-            OPEN -> openPreview(banner.url)
+            SUBSCRIPTION -> navigateToSelectedCategory(SUBSCRIPTION)
+            OPEN -> openPreview(banner.url, binding.cvBanner)
             else -> Unit
         }
     }
@@ -331,9 +332,9 @@ class HomeActivity :
             generateBanners(bannersCarousel, banners)
         })
         viewModel.getALlCategories().observe(this, Observer {
-            it.forEach { cat ->
-                mCategoriesList.add(cat.name)
-            }
+//            it.forEach { cat ->
+//                mCategoriesList.add(cat.name)
+//            }
             adapter.categories = it
             adapter.notifyDataSetChanged()
         })
@@ -404,18 +405,18 @@ class HomeActivity :
         }
         viewModel.specialBanners.observe(this) {
             with(binding) {
-                GlideLoader().loadUserPicture(this@HomeActivity, it[0].url, ivBannerOne)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[1].url, ivBannerTwo)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[2].url, ivBannerThree)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[3].url, ivBannerFour)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[4].url, ivBannerFive)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[5].url, ivBannerSix)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[6].url, ivBannerSeven)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[7].url, ivBannerEight)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[8].url, ivBannerNine)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[9].url, ivBannerTen)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[10].url, ivBannerEleven)
-                GlideLoader().loadUserPicture(this@HomeActivity, it[11].url, ivBannerTwelve)
+                ivBannerOne.loadImg(it[0].url)
+                ivBannerTwo.loadImg(it[1].url)
+                ivBannerThree.loadImg(it[2].url)
+                ivBannerFour.loadImg(it[3].url)
+                ivBannerFive.loadImg(it[4].url)
+                ivBannerSix.loadImg(it[5].url)
+                ivBannerSeven.loadImg(it[6].url)
+                ivBannerEight.loadImg(it[7].url)
+                ivBannerNine.loadImg(it[8].url)
+                ivBannerTen.loadImg(it[9].url)
+                ivBannerEleven.loadImg(it[10].url)
+                ivBannerTwelve.loadImg(it[11].url)
             }
         }
         viewModel.testimonials.observe(this) {
@@ -477,7 +478,7 @@ class HomeActivity :
         bannerItems: List<BannerEntity>
     ) {
 
-        mItems.addAll(bannerCarouselItems)
+//        mItems.addAll(bannerCarouselItems)
 
         //adding the data to carousel items
         binding.cvBanner.addData(bannerCarouselItems)
@@ -495,32 +496,32 @@ class HomeActivity :
         adapter = CategoryHomeAdapter(
             this,
             listOf(),
-            viewModel
+            this
         )
 
         bestSellersAdapter = BestSellersAdapter(
             this,
             listOf(),
-            viewModel,
-            "bestSeller"
+            "bestSeller",
+            this
         )
         specialsOneAdapter = BestSellersAdapter(
             this,
             listOf(),
-            viewModel,
-            "one"
+            "one",
+            this
         )
         specialsTwoAdapter = BestSellersAdapter(
             this,
             listOf(),
-            viewModel,
-            "two"
+            "two",
+            this
         )
         specialsThreeAdapter = BestSellersAdapter(
             this,
             listOf(),
-            viewModel,
-            "three"
+            "three",
+            this
         )
         testimonialsAdapter = TestimonialsAdapter(
             this,
@@ -573,27 +574,6 @@ class HomeActivity :
         dialogBsAddReferral.show()
     }
 
-    override fun displaySelectedCategory(category: String) {
-        Intent(this, ShoppingMainActivity::class.java).also {
-            it.putExtra(CATEGORY, category)
-            it.putExtra(NAVIGATION, HOME_PAGE)
-            startActivity(it)
-//            onPause()
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-        }
-    }
-
-    override fun moveToProductDetails(id: String, name: String) {
-        Intent(this, ProductActivity::class.java).also {
-            it.putExtra(PRODUCTS, id)
-            it.putExtra(Constants.PRODUCT_NAME, name)
-            it.putExtra(NAVIGATION, HOME_PAGE)
-            startActivity(it)
-//            onPause()
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-        }
-    }
-
 /*
     //This will lock the vertical scrolling when horizontal child is scrolling and vice versa
             binding.rvHomeItems.setOnTouchListener { v, event ->
@@ -602,21 +582,17 @@ class HomeActivity :
             }
 */
 
-    override fun onDataTransactionFailure(message: String) {
-        showErrorSnackBar(message, true)
-    }
-
     override fun onBackPressed() {
         when {
             binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START) ->
                 binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
-            isPreviewOpened -> {
-                binding.ivPreviewImage.startAnimation(
-                    AnimationUtils.loadAnimation(this, R.anim.scale_small)
-                )
-                binding.ivPreviewImage.remove()
-                isPreviewOpened = false
-            }
+//            isPreviewOpened -> {
+//                binding.ivPreviewImage.startAnimation(
+//                    AnimationUtils.loadAnimation(this, R.anim.scale_small)
+//                )
+//                binding.ivPreviewImage.remove()
+//                isPreviewOpened = false
+//            }
             else -> {
                 finish()
                 finishAffinity()
@@ -724,7 +700,7 @@ class HomeActivity :
     private fun moveToAllProducts() {
         lifecycleScope.launch {
             delay(150)
-            displaySelectedCategory(Constants.ALL_PRODUCTS)
+            navigateToSelectedCategory(ALL_PRODUCTS)
         }
     }
 
@@ -752,6 +728,51 @@ class HomeActivity :
             Intent(this@HomeActivity, QuickOrderActivity::class.java).also {
                 startActivity(it)
             }
+        }
+    }
+
+    private fun navigateToSelectedCategory(category: String) {
+        Intent(this, ShoppingMainActivity::class.java).also {
+            it.putExtra(CATEGORY, category)
+            it.putExtra(NAVIGATION, HOME_PAGE)
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        }
+    }
+
+    private fun navigateToProductDetails(productID: String, productName: String, thumbnail: ShapeableImageView?) {
+        Intent(this, ProductActivity::class.java).also { intent ->
+            intent.putExtra(PRODUCTS, productID)
+            intent.putExtra(Constants.PRODUCT_NAME, productName)
+            intent.putExtra(NAVIGATION, HOME_PAGE)
+            thumbnail?.let { image ->
+                val options: ActivityOptionsCompat =
+                        ActivityOptionsCompat.makeSceneTransitionAnimation(this, image, ViewCompat.getTransitionName(image)!!)
+
+                startActivity(intent, options.toBundle())
+            } ?:let {
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
+//            onPause()
+        }
+    }
+
+    private fun navigateToPreview(url: String,thumbnail: ShapeableImageView?, carouselItem: ImageCarousel?,contentType: String) {
+        Intent(this, PreviewActivity::class.java).also { intent ->
+            intent.putExtra("url", url)
+            intent.putExtra("contentType", contentType)
+            thumbnail?.let {
+                val options: ActivityOptionsCompat =
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(this, it, "video")
+                startActivity(intent, options.toBundle())
+            }
+            carouselItem?.let {
+                val options: ActivityOptionsCompat =
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(this, it, "thumbnail")
+                startActivity(intent, options.toBundle())
+            }
+//            startActivity(it)
         }
     }
 
@@ -868,11 +889,8 @@ class HomeActivity :
         }
     }
 
-    override fun openVideo(url: String) {
-        Intent(this, VideoPlayerActivity::class.java).also {
-            it.putExtra("url", url)
-            startActivity(it)
-        }
+    override fun openVideo(url: String, thumbnail: ShapeableImageView) {
+       navigateToPreview(url, thumbnail, null, "video")
     }
 
     fun selectedContactMethodForDeveloper(selectedItem: String) {
@@ -946,18 +964,52 @@ class HomeActivity :
         showListBottomSheet(this, arrayListOf("Share My Referral Code", "Have a Referral Code? Enter here..."), "referral")
     }
 
-    private fun openPreview(imageUrl: String) {
-        isPreviewOpened = true
-        GlideLoader().loadUserPictureWithoutCrop(this@HomeActivity, imageUrl, binding.ivPreviewImage)
-        binding.ivPreviewImage.startAnimation(
-            AnimationUtils.loadAnimation(this@HomeActivity, R.anim.scale_big)
-        )
-        binding.ivPreviewImage.visible()
+    private fun openPreview(imageUrl: String, carouselItem: ImageCarousel) {
+        navigateToPreview(imageUrl, null, carouselItem, "image")
+//        isPreviewOpened = true
+//        GlideLoader().loadUserPictureWithoutCrop(this@HomeActivity, imageUrl, binding.ivPreviewImage)
+//        binding.ivPreviewImage.startAnimation(
+//            AnimationUtils.loadAnimation(this@HomeActivity, R.anim.scale_big)
+//        )
+//        binding.ivPreviewImage.visible()
     }
 
-    override fun selectedPartner(partner: Partners) {
+    //from partners adapter
+    override fun selectedPartner(partner: Partners, thumbnail: ShapeableImageView) {
         when(partner.clickAction) {
-            "Open" -> openPreview(partner.imageUrl)
+            "Open" -> navigateToPreview(partner.imageUrl, thumbnail, null, "image")
         }
+    }
+
+    //from best sellers adapter
+    override fun upsertCartItem(
+        product: ProductEntity,
+        variantName: String,
+        itemCount: Int,
+        discountedPrice: Float,
+        originalPrice: Float,
+        variantPosition: Int,
+        position: Int,
+        recycler: String
+    ) {
+        viewModel.upsertCartItem(product, variantName, itemCount, discountedPrice, originalPrice, variantPosition, position, recycler)
+    }
+
+    override fun deleteCartItemFromShoppingMain(
+        product: ProductEntity,
+        variantName: String,
+        position: Int,
+        recycler: String
+    ) {
+        viewModel.deleteCartItemFromShoppingMain(product, variantName, position, recycler)
+    }
+
+    override fun moveToProductDetails(productID: String,productName: String, thumbnail: ShapeableImageView) {
+        navigateToProductDetails(productID, productName, thumbnail )
+    }
+
+    //from categories adapter
+    override fun selectedCategory(categoryName: String) {
+        navigateToSelectedCategory(categoryName)
     }
 }

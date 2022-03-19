@@ -1,9 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport
 
-import android.app.Dialog
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -12,14 +9,12 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ContactsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ChatViewPager
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.SupportProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityChatBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -28,8 +23,7 @@ import org.kodein.di.generic.instance
 class ChatActivity :
     BaseActivity(),
     KodeinAware,
-    ContactsAdapter.ContactItemClickListener
-{
+    ContactsAdapter.ContactItemClickListener {
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityChatBinding
@@ -55,11 +49,7 @@ class ChatActivity :
         }
         viewModel.currentUserProfile.observe(this) {
             //setting the toolbar data - profile pic and user name
-            GlideLoader().loadUserPicture(
-                this@ChatActivity,
-                it.profilePicUrl,
-                binding.ivProfileImage
-            )
+            binding.ivProfileImage.loadImg(it.profilePicUrl)
             binding.tvProfileName.text = it.name
         }
     }
@@ -68,7 +58,7 @@ class ChatActivity :
         val adapter = ChatViewPager(supportFragmentManager, lifecycle)
         binding.vpFragmentContent.adapter = adapter
         TabLayoutMediator(binding.tlTabLayout, binding.vpFragmentContent) { tab, position ->
-            when(position) {
+            when (position) {
                 0 -> {
                     tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_chat)
                     tab.icon!!.setTint(ContextCompat.getColor(this, R.color.matteGreen))
@@ -110,22 +100,22 @@ class ChatActivity :
     }
 
     override fun onPause() {
-        viewModel.updateProfileStatus( false, System.currentTimeMillis())
+        viewModel.updateProfileStatus(false, System.currentTimeMillis())
         super.onPause()
     }
 
     override fun onDestroy() {
-        viewModel.updateProfileStatus( false, System.currentTimeMillis())
+        viewModel.updateProfileStatus(false, System.currentTimeMillis())
         super.onDestroy()
     }
 
     override fun onResume() {
-        viewModel.updateProfileStatus( true)
+        viewModel.updateProfileStatus(true)
         super.onResume()
     }
 
     override fun onRestart() {
-        viewModel.updateProfileStatus( true)
+        viewModel.updateProfileStatus(true)
         super.onRestart()
     }
 

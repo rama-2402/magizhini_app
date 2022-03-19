@@ -3,9 +3,10 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvPartnerItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class PartnersAdapter(
     val partners: List<Partners>,
@@ -22,11 +23,11 @@ class PartnersAdapter(
     override fun onBindViewHolder(holder: PartnersViewHolder, position: Int) {
         val partner = partners[position]
         holder.binding.apply {
-            GlideLoader().loadUserPicture(ivThumbnail.context, partner.imageUrl, ivThumbnail)
+            ivThumbnail.loadImg(partner.imageUrl)
             tvName.text = partner.partnerName
 
             clPartnerItem.setOnClickListener {
-                onItemClickListener.selectedPartner(partner)
+                onItemClickListener.selectedPartner(partner, ivThumbnail)
             }
         }
     }
@@ -36,7 +37,7 @@ class PartnersAdapter(
     }
 
     interface PartnersItemClickListener {
-        fun selectedPartner(partner: Partners)
+        fun selectedPartner(partner: Partners, thumbnail: ShapeableImageView)
     }
 
 }

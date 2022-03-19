@@ -4,8 +4,6 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.work.ListenableWorker
-import androidx.work.Operation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.firestore.*
@@ -16,7 +14,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
@@ -26,7 +23,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_DISHE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NEW_PARTNERS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PARTNERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB

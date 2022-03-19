@@ -3,16 +3,15 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.services
 import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
-import androidx.work.Data
 import androidx.work.WorkerParameters
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirestoreRegistrar
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.PinCodesEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BEST_SELLERS
@@ -20,10 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_S
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_ONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_THREE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_TWO
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.TESTIMONIALS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_NOTIFICATIONS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.tasks.await
@@ -32,7 +28,6 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import kotlin.Exception
 
 class UpdateDataService (
     context: Context,

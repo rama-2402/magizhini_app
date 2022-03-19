@@ -1,21 +1,21 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Product
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ShoppingMainViewModel(
     private val dbRepository: DatabaseRepository,
@@ -28,6 +28,8 @@ class ShoppingMainViewModel(
     var selectedChip: String = Constants.ALL
     var selectedCategory: String = ""
     var profile = UserProfileEntity()
+
+    var categoriesAdapter: ItemsBottomSheet? = null
 
     private var _allProducts: MutableLiveData<List<ProductEntity>> = MutableLiveData()
     val allProduct: LiveData<List<ProductEntity>> = _allProducts
@@ -51,6 +53,7 @@ class ShoppingMainViewModel(
     }
     fun getAllCartItems() = dbRepository.getAllCartItems()
     fun getCartItemsPrice() = dbRepository.getCartPrice()
+    fun getALlCategories() = dbRepository.getAllProductCategories()
 
     fun getAllProductsStatic() = viewModelScope.launch(Dispatchers.Default) {
         val productsJob = async { dbRepository.getAllProductsStatic() }
@@ -100,12 +103,12 @@ class ShoppingMainViewModel(
             _discountAvailableProducts.value = products
         }
     }
-    fun getAllCategoryNames() = viewModelScope.launch (Dispatchers.IO) {
-        val names = dbRepository.getAllCategoryNames()
-        withContext(Dispatchers.Main) {
-            _availableCategoryNames.value = names
-        }
-    }
+//    fun getAllCategoryNames() = viewModelScope.launch (Dispatchers.IO) {
+//        val names = dbRepository.getAllCategoryNames()
+//        withContext(Dispatchers.Main) {
+//            _availableCategoryNames.value = names
+//        }
+//    }
 
     fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int) = viewModelScope.launch (Dispatchers.IO) {
         dbRepository.deleteProductFromCart(product.id, variantName)
@@ -250,6 +253,7 @@ class ShoppingMainViewModel(
             shoppingMainListener?.limitedItemList(products)
         }
     }
+
 }
 
 

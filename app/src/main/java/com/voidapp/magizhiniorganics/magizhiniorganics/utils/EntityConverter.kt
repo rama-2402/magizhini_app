@@ -2,7 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import kotlin.math.max
 
 //data class to entity class converter
 

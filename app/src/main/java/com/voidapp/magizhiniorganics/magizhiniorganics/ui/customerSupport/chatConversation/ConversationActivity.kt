@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation
 
-import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -38,12 +37,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.io.IOException
 
 class ConversationActivity :
     BaseActivity(),
@@ -193,7 +190,7 @@ class ConversationActivity :
 
     private fun setTypingStatus(supportProfile: SupportProfile) {
         binding.apply {
-            GlideLoader().loadUserPicture(this@ConversationActivity, supportProfile.thumbnailUrl, ivProfileImage)
+            ivProfileImage.loadImg(supportProfile.thumbnailUrl)
             tvProfileName.text = supportProfile.profileName
             if (supportProfile.typing) {
                 tvStatus.text = "typing..."
@@ -206,7 +203,7 @@ class ConversationActivity :
     override fun openImage(url: String) {
         binding.apply {
             isPreviewOpened = true
-            GlideLoader().loadUserPictureWithoutCrop(this@ConversationActivity, url, ivPreviewImage)
+//            GlideLoader().loadUserPictureWithoutCrop(this@ConversationActivity, url, ivPreviewImage)
             binding.ivPreviewImage.startAnimation(scaleBig)
             binding.ivPreviewImage.visible()
         }
@@ -289,7 +286,7 @@ class ConversationActivity :
         imageMessage?.let {
             viewModel.updateProfileWithPic(
                 it,
-                GlideLoader().imageExtension(this,  it)!!,
+                imageExtension(this,  it)!!,
             )}
     }
 

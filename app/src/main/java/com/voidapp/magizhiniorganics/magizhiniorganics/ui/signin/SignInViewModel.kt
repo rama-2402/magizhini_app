@@ -5,13 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.PhoneAuthCredential
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirebaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SignInViewModel(
     private val fbRepository: FirestoreRepository,

@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider

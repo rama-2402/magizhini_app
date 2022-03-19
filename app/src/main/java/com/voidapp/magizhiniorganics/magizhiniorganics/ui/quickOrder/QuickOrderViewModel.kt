@@ -1,8 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 
 import android.net.Uri
-import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,8 +12,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
@@ -23,7 +23,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkRe
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toCartEntity
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import java.io.IOException
 
 //delete the quick order data when placing order after getting the estimate

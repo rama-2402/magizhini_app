@@ -1,19 +1,14 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 
-import android.icu.util.TimeUnit
-import android.provider.SyncStateContract
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aminography.primecalendar.PrimeCalendar
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.GlobalTransaction
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -26,17 +21,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.Period
-import java.time.temporal.ChronoUnit
 import java.util.*
-import kotlin.collections.ArrayList
 
 class SubscriptionHistoryViewModel(
     val fbRepository: FirestoreRepository,

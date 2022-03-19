@@ -29,6 +29,7 @@
             app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
             android:contentDescription="@string/product_thumbnail"
             android:scaleType="fitCenter"
+            android:transitionName="thumbnail"
             android:src="@drawable/ic_app_placeholder"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -72,68 +73,31 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clDiscountLayout"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_discount"
+            android:backgroundTint="@color/redA700"
+            android:padding="@dimen/material_size_4"
             android:visibility="gone"
-            android:layout_margin="@dimen/material_size_4"
-            android:background="@drawable/shape_round_rectangle_6"
-            android:backgroundTint="@color/green_base"
-            android:elevation="@dimen/material_size_4"
+            android:elevation="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/tvUpto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/material_size_4"
-                android:text="UPTO"
-                android:textColor="@color/white"
-                android:textSize="6sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="SmallSp" />
 
             <TextView
                 android:id="@+id/tvDiscountAmt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="50"
+                android:text=""
                 android:textColor="@color/white"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tvDiscountType"
-                app:layout_constraintHorizontal_bias="0.5"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_marginStart="@dimen/material_size_4"
+                android:layout_marginEnd="@dimen/material_size_4"
                 app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.523"
-                tools:ignore="SmallSp" />
-
-            <TextView
-                android:id="@+id/tvDiscountType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/material_size_2"
-                android:text="%"
-                android:textColor="@color/white"
-                android:textSize="7sp"
-                app:layout_constraintBottom_toBottomOf="@id/tvDiscountAmt"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/tvDiscountAmt"
-                tools:ignore="SmallSp" />
-
-            <TextView
-                android:id="@+id/tvOff"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/material_size_4"
-                android:text="Off"
-                android:textColor="@color/white"
-                android:textSize="6sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 tools:ignore="SmallSp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 <!--        <com.google.android.material.imageview.ShapeableImageView-->

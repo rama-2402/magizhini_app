@@ -1,20 +1,15 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.res.ColorStateList
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvSubscriptionHistoryItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 

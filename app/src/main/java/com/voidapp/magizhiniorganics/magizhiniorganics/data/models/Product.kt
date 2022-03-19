@@ -1,8 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.models
 
 import android.os.Parcelable
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

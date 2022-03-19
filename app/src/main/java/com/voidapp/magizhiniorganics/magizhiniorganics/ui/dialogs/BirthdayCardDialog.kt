@@ -6,11 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBirthdayCardBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddressBinding
 
 class BirthdayCardDialog: DialogFragment() {
 

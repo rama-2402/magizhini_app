@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.contextaware.withContextAvailable
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySplashBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.CleanDatabaseService
@@ -16,34 +15,21 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataServic
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDeliveryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
-import kotlin.math.abs
-import androidx.work.WorkManager
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
-import com.google.firebase.messaging.FirebaseMessaging
-import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.Firestore
-import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Token
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DOB
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import kotlin.RuntimeException
+import kotlin.math.abs
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity(), KodeinAware {

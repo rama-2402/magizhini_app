@@ -1,53 +1,40 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile
 
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
-import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Query
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfileBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
+import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfileBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PROFILE_PIC_PATH
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.io.IOException
-import java.util.*
 
 class ProfileActivity :
     BaseActivity(),
@@ -200,7 +187,7 @@ class ProfileActivity :
             tvReferral.remove()
             //hiding the referral code area for existing user
             if (userProfile.profilePicUrl != "") {
-                GlideLoader().loadUserPicture(this@ProfileActivity, userProfile.profilePicUrl, ivProfilePic)
+                ivProfilePic.loadImg(userProfile.profilePicUrl)
             }
         }
 
@@ -345,7 +332,7 @@ class ProfileActivity :
                         viewModel.uploadProfilePic(
                             PROFILE_PIC_PATH,
                             it,
-                            GlideLoader().imageExtension(this@ProfileActivity,  it)!!
+                            imageExtension(this@ProfileActivity,  it)!!
                         )
                     } ?: generateProfileModel("")
                 }
@@ -439,7 +426,7 @@ class ProfileActivity :
 
     private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         viewModel.profilePicUri = result.data?.data
-        viewModel.profilePicUri?.let { uri -> GlideLoader().loadUserPicture(this, uri, binding.ivProfilePic) }
+        viewModel.profilePicUri?.let { uri -> binding.ivProfilePic.loadImg(uri) }
     }
 
     override fun onRequestPermissionsResult(

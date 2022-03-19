@@ -2,7 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils
 
 import androidx.recyclerview.widget.DiffUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
-import kotlin.collections.listOf as listOf
 
 class DiffUtils(
     private val oldList: List<ProductEntity>,

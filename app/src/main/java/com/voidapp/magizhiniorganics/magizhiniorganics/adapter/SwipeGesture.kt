@@ -1,16 +1,12 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
+import android.content.Context
 import android.graphics.Canvas
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import android.content.Context
-
-import androidx.core.content.ContextCompat
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
-
-
 
 
 abstract class SwipeGesture(val context: Context): ItemTouchHelper.SimpleCallback(

@@ -1,34 +1,27 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.ListenableWorker
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.firestore.ListenerRegistration
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.SubscriptionUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SINGLE_DAY_LONG
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -36,7 +29,6 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class SubscriptionProductViewModel(
     private val dbRepository: DatabaseRepository,
@@ -133,8 +125,8 @@ class SubscriptionProductViewModel(
         _previewImage.value = content
     }
 
-    fun openPreview(url: String, content: String) {
-        _uiUpdate.value = UiUpdate.OpenPreviewImage(content, url, null)
+    fun openPreview(url: String, content: String, thumbnail: ShapeableImageView) {
+        _uiUpdate.value = UiUpdate.OpenPreviewImage(content, url, null, thumbnail)
     }
 
     fun upsertProductReview(
@@ -355,7 +347,7 @@ class SubscriptionProductViewModel(
         //review
         data class CheckStoragePermission(val message: String?): UiUpdate()
         //preview
-        data class OpenPreviewImage(val message: String?, val imageUrl: String?, val imageUri: Uri?): UiUpdate()
+        data class OpenPreviewImage(val message: String?, val imageUrl: String?, val imageUri: Uri?, val thumbnail: ShapeableImageView): UiUpdate()
 
         //status dialog
         data class CreateStatusDialog(val message: String?, val data: String?): UiUpdate()

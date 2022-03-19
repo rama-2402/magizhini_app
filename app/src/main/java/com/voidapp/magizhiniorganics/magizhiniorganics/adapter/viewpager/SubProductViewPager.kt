@@ -4,9 +4,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.fragments.DescriptionFragment
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.fragments.NewReviewFragment
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.fragments.ReviewsFragment
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.fragments.SubDescriptionFragment
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.fragments.SubNewReviewFragment
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.fragments.SubReviewsFragment

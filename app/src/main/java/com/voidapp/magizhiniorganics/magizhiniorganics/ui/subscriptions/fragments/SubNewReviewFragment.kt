@@ -13,13 +13,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentDescriptionBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentNewReviewBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.imageExtension
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
@@ -44,13 +42,9 @@ class SubNewReviewFragment: Fragment(), KodeinAware {
         it?.let{ uri ->
             mRatingImageUri = uri
             binding.ivReviewImage.visibility = View.VISIBLE
-            GlideLoader().loadUserPicture(
-                requireContext(),
-                uri,
-                binding.ivReviewImage
-            )
+            binding.ivReviewImage.loadImg(uri)
             binding.ivReviewImage.scaleType = ImageView.ScaleType.CENTER_CROP
-            imageExtension = GlideLoader().imageExtension(requireActivity(),  mRatingImageUri)!!
+            imageExtension = imageExtension(requireActivity(),  mRatingImageUri)!!
         }
     }
 
@@ -110,7 +104,7 @@ class SubNewReviewFragment: Fragment(), KodeinAware {
                         productViewModel.upsertProductReview(
                             review,
                             mRatingImageUri,
-                            mRatingImageUri?.let { GlideLoader().imageExtension(requireActivity(),  mRatingImageUri)!! } ?: ""
+                            mRatingImageUri?.let { imageExtension(requireActivity(),  mRatingImageUri)!! } ?: ""
                         )
                     }
                 }

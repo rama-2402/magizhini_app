@@ -1,10 +1,12 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.business
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

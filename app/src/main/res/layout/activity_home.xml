@@ -102,11 +102,12 @@
                         app:autoWidthFixing="true"
                         app:bottomShadowHeight="36dp"
                         app:carouselType="BLOCK"
-                        app:imagePlaceholder="@drawable/ic_app_placeholder"
+                        app:imagePlaceholder="@drawable/carousel_default_placeholder"
                         app:indicatorMargin="0dp"
                         app:infiniteCarousel="true"
                         app:layout_constraintCircleRadius="16dp"
                         app:showBottomShadow="true"
+                        android:transitionName="thumbnail"
                         app:showCaption="false"
                         app:showIndicator="true"
                         app:imageScaleType="fitXY"
@@ -210,7 +211,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         android:elevation="@dimen/material_size_4"
                         />
                     <com.google.android.material.imageview.ShapeableImageView
@@ -227,7 +228,7 @@
                         android:elevation="@dimen/material_size_4"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivBannerThree"
@@ -243,7 +244,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
 
                     <LinearLayout
@@ -303,7 +304,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivBannerFive"
@@ -319,7 +320,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivBannerSix"
@@ -335,7 +336,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <LinearLayout
                         android:id="@+id/stickySpecialsTwo"
@@ -394,7 +395,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivBannerEight"
@@ -410,7 +411,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivBannerNine"
@@ -426,7 +427,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <LinearLayout
                         android:id="@+id/stickySpecialsThree"
@@ -485,7 +486,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivBannerEleven"
@@ -501,7 +502,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivBannerTwelve"
@@ -517,7 +518,7 @@
                         app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
                         android:contentDescription="@string/product_thumbnail"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_app_placeholder"
+                        android:src="@drawable/carousel_default_placeholder"
                         />
                     <LinearLayout
                         android:id="@+id/stickyTestimonials"

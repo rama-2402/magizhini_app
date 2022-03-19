@@ -6,21 +6,11 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.AsyncListDiffer
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeRvAdapter.CategoryHomeAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductCategoryEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvNotificationItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvQuickorderListItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class QuickOrderListAdapter(
     private val context: Context,
@@ -74,11 +64,7 @@ class QuickOrderListAdapter(
                     tvListPageNumber.text = "Page: ${position}"
 
                     //loading the product images
-                    GlideLoader().loadUserPicture(
-                        context,
-                        uri,
-                        ivListPage
-                    )
+                    ivListPage.loadImg(uri.toString())
                     ivListPage.clipToOutline = true
 
                     ivListPage.setOnClickListener {
@@ -94,11 +80,7 @@ class QuickOrderListAdapter(
                 tvListPageNumber.text = "Page: ${position + 1}"
 
                 //loading the product images
-                GlideLoader().loadUserPicture(
-                    context,
-                    url,
-                    ivListPage
-                )
+                ivListPage.loadImg(url)
                 ivListPage.clipToOutline = true
 
                 ivListPage.setOnClickListener {

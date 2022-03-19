@@ -1,7 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.models
 
-import android.os.Parcelable
-
 data class ProductCategory (
     var id: String = "",
     var name: String = "",

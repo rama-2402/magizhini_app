@@ -10,7 +10,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

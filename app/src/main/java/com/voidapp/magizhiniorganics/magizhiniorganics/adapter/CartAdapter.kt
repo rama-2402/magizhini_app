@@ -4,12 +4,12 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Paint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DiffUtil
@@ -23,8 +23,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewMod
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import kotlin.io.path.createTempDirectory
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class CartAdapter(
     val context: Context,
@@ -65,7 +64,7 @@ class CartAdapter(
         val id = cartItem.id
 
         //loading the thumbnail
-        GlideLoader().loadUserPicture(holder.productThumbNail.context, cartItem.thumbnailUrl, holder.productThumbNail)
+        holder.productThumbNail.loadImg(cartItem.thumbnailUrl)
         holder.productThumbNail.clipToOutline = true
 
         holder.productName.text = cartItem.productName

@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Product
 import kotlinx.android.parcel.Parcelize
 
 @Entity

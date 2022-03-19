@@ -6,13 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserNotificationEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserNotification
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvNotificationItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvTransactionItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.GlideLoader
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils.addCharAtIndex
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class NotificationsAdapter(
     private val context: Context,
@@ -39,7 +35,7 @@ class NotificationsAdapter(
                 tvMessage.text = notification.message
             }
             if (notification.imageUrl != "") {
-                GlideLoader().loadUserPicture(context, notification.imageUrl, ivMessage)
+                ivMessage.loadImg(notification.imageUrl)
             } else {
                 ivMessage.visibility = View.GONE
             }

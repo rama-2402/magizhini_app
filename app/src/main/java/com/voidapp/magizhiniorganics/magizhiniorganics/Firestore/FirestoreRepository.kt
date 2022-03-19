@@ -3,15 +3,14 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.PhoneAuthCredential
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserNotificationEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 
 class FirestoreRepository (

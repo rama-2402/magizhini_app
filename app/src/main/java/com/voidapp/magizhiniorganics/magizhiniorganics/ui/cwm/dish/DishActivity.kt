@@ -2,10 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -23,20 +20,14 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AllCWMAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.DishViewPager
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.SubProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityAllCwmBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityDishBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.CWMViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.CWMViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
@@ -44,13 +35,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkRe
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
-import java.util.ArrayList
+
 /*
 * TODO
 *  Need to add reviews like in product sub page instead of the cart page
@@ -126,7 +116,7 @@ class DishActivity :
                 cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
                 isPreviewVisible = true
                 with(binding) {
-                    GlideLoader().loadUserPictureWithoutCrop(this@DishActivity, it, ivPreviewImage)
+//                    GlideLoader().loadUserPictureWithoutCrop(this@DishActivity, it, ivPreviewImage)
                     ivPreviewImage.visible()
                     ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@DishActivity, R.anim.scale_big))
                 }

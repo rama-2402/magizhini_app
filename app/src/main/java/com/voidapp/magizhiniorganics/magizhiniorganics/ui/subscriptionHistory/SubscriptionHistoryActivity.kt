@@ -2,8 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Message
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -22,7 +20,6 @@ import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.SubscriptionHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionHistoryBinding
@@ -30,7 +27,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCalenda
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOM_DAYS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
@@ -129,7 +125,7 @@ class SubscriptionHistoryActivity :
     }
 
     private fun liveDateObservers() {
-        viewModel.activeSub.observe(this, {
+        viewModel.activeSub.observe(this) {
             mAllSubscriptions.clear()
             lifecycleScope.launch {
                 if (it.isEmpty()) {
@@ -143,7 +139,7 @@ class SubscriptionHistoryActivity :
                     hideShimmer()
                 }
             }
-        })
+        }
 
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->

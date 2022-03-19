@@ -1,9 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.entities
 
 import android.os.Parcelable
-import androidx.room.*
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.android.parcel.Parcelize
 

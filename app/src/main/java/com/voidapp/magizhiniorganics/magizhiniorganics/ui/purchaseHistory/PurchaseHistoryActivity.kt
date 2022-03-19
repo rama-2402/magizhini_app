@@ -15,7 +15,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.work.*
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.workDataOf
 import com.google.gson.Gson
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
@@ -27,6 +30,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurch
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -37,8 +42,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -176,10 +179,10 @@ class PurchaseHistoryActivity :
     }
 
     private fun showCartBottomSheet() =
-        ItemsBottomSheet(this, orderItemsAdapter).show()
+        ItemsBottomSheet(this, orderItemsAdapter, null).show()
 
     private fun hideCartBottomSheet() =
-        ItemsBottomSheet(this, orderItemsAdapter).dismiss()
+        ItemsBottomSheet(this, orderItemsAdapter, null).dismiss()
 
     private fun initRecyclerView() {
         ordersAdapter = PurchaseHistoryAdapter(

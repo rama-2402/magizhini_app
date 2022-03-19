@@ -12,6 +12,7 @@
         android:layout_height="@dimen/material_size_48"
         app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
         app:layout_constraintTop_toTopOf="parent"
+        android:transitionName="thumbnail"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/tvProfileName"/>
     <TextView
@@ -89,6 +90,7 @@
             android:id="@+id/ivReviewImage"
             android:layout_width="match_parent"
             android:layout_marginTop="@dimen/material_size_8"
+            android:transitionName="thumbnail"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_app_placeholder"
             android:layout_height="200dp"

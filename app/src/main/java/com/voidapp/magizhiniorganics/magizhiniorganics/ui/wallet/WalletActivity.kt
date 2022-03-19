@@ -26,15 +26,18 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityWalle
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
-import kotlinx.coroutines.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -86,7 +89,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     private fun liveDataObservers() {
-        viewModel.transactions.observe(this, {
+        viewModel.transactions.observe(this) {
             if (it.isNullOrEmpty()) {
                 hideShimmer()
                 binding.llEmptyLayout.visible()
@@ -103,10 +106,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
                 transactionAdapter.notifyDataSetChanged()
                 hideShimmer()
             }
-        })
-        viewModel.profile.observe(this, {
+        }
+        viewModel.profile.observe(this) {
             mProfile = it
-        })
+        }
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->
                 when(result) {

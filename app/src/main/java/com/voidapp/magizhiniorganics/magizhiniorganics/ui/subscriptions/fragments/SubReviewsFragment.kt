@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentDescriptionBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentReviewsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModelFactory
@@ -51,9 +51,13 @@ class SubReviewsFragment: Fragment(), KodeinAware, ReviewAdapter.ReviewItemClick
         productViewModel.getProductReviews()
     }
 
-    override fun previewImage(url: String) {
-        productViewModel.openPreview(url, "preview")
+    override fun previewImage(url: String, thumbnail: ShapeableImageView) {
+        productViewModel.openPreview(url, "preview", thumbnail)
     }
+
+    //    override fun previewImage(url: String) {
+//        productViewModel.openPreview(url, "preview")
+//    }
 
     private fun initRecyclerView() {
         binding.rvReviews.layoutManager = LinearLayoutManager(requireContext())

@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,15 +10,10 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
 
 class AddressAdapter(
     val context: Context,

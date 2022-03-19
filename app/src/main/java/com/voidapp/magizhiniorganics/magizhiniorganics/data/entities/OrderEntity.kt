@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
 
 @Entity
 data class OrderEntity(

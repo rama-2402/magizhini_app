@@ -52,13 +52,10 @@ android {
 
 dependencies {
 
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.8'
-    implementation 'com.google.firebase:firebase-analytics-ktx:20.1.0'
-    def room_version = "2.2.1"
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.9'
+    implementation 'com.google.firebase:firebase-analytics-ktx:20.1.1'
+
     def kodein_version = "6.4.0"
-    def lifecycle_version = "2.0.0"
-    //work manager
-    def work_version = "2.6.0"
 
 //    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-beta01")
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
@@ -80,21 +77,21 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
-    implementation 'com.google.firebase:firebase-database-ktx:20.0.3'
-    implementation 'com.google.firebase:firebase-messaging:23.0.0'
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.0'
+    implementation 'com.google.firebase:firebase-database-ktx:20.0.4'
+    implementation 'com.google.firebase:firebase-messaging:23.0.2'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.2'
 
-    implementation 'com.google.firebase:firebase-storage-ktx:20.0.0'
-    implementation 'com.google.firebase:firebase-auth-ktx:21.0.1'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.0.1'
+    implementation 'com.google.firebase:firebase-storage-ktx:20.0.1'
+    implementation 'com.google.firebase:firebase-auth-ktx:21.0.2'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.0.2'
 
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.4.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.4.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.4.1'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.4.1'
 
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.5.2-native-mt'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
 
     // Retrofit
@@ -103,25 +100,25 @@ dependencies {
 
 
     // ViewModel
-    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
     //noinspection LifecycleAnnotationProcessorWithJava8
-    kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+    kapt "androidx.lifecycle:lifecycle-compiler:2.4.1"
 
     // WorkManager Kotlin + coroutines      https://developer.android.com/topic/libraries/architecture/workmanager/basics
-    implementation "androidx.work:work-runtime-ktx:$work_version"
+    implementation "androidx.work:work-runtime-ktx:2.7.1"
 
     // Kodein
     implementation "org.kodein.di:kodein-di-generic-jvm:$kodein_version"
     implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_version"
 
     // Room and Architectural Components
-    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-runtime:2.4.2"
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
-    implementation "androidx.room:room-ktx:2.3.0"
-    kapt "androidx.room:room-compiler:$room_version"
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
+    implementation "androidx.room:room-ktx:2.4.2"
+    kapt "androidx.room:room-compiler:2.4.2"
 
     //MultiDex support
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -135,7 +132,7 @@ dependencies {
     // OTP timer    https://github.com/rehmanmuradali/ticker?utm_source=android-arsenal.com&utm_medium=referral&utm_campaign=7322
     implementation 'com.github.rehmanmuradali:ticker:1.0.1'
 
-    //datePicker https://github.com/aminography/PrimeDatePicker
+//    //datePicker https://github.com/aminography/PrimeDatePicker
     implementation 'com.aminography:primedatepicker:3.6.0'
     implementation 'com.aminography:primecalendar:1.7.0'
 
@@ -181,7 +178,7 @@ dependencies {
     implementation 'io.github.nikartm:image-support:2.0.0'
     
     //exo player
-    implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
+    implementation 'com.google.android.exoplayer:exoplayer:2.17.1'
 
     //start rating      https://github.com/whinc/RatingBar
     implementation 'com.github.whinc:ratingbar:1.1.1'
@@ -194,4 +191,8 @@ dependencies {
 
     //zoom image    https://github.com/MikeOrtiz/TouchImageView
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
+//
+//    implementation("io.coil-kt:coil:2.0.0-rc01")
+//    implementation("io.coil-kt:coil-gif:2.0.0-rc01")
+
 }

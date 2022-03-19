@@ -10,8 +10,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseReposito
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
@@ -420,7 +421,6 @@ class CheckoutViewModel(
             NetworkResult.Failed("ootItems", "Failed to validated Purchases. Please try again later")
         }
     }
-
 
     fun proceedForWalletPayment(
         orderDetailsMap: HashMap<String, Any>

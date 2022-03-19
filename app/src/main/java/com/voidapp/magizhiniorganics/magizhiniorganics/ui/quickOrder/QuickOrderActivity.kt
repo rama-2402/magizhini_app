@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -13,18 +12,14 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.aminography.primedatepicker.utils.gone
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
@@ -44,17 +39,17 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOAD_DIALOG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
-import org.kodein.di.android.retainedSubKodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
 
@@ -777,7 +772,7 @@ class QuickOrderActivity :
     fun sendEstimateRequest() {
         val imageExtensionList = mutableListOf<String>()
         for (uri in viewModel.orderListUri) {
-            imageExtensionList.add(GlideLoader().imageExtension(this@QuickOrderActivity, uri)!!)
+            imageExtensionList.add(imageExtension(this@QuickOrderActivity, uri)!!)
         }
 
         viewModel.sendGetEstimateRequest (
@@ -902,7 +897,7 @@ class QuickOrderActivity :
         cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
         binding.apply {
             isPreviewOpened = true
-            GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
+//            GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
             ivPreviewImage.startAnimation(
                 AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.scale_big)
             )

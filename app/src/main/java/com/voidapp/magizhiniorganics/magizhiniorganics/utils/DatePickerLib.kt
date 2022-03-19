@@ -3,17 +3,9 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Context
-import com.aminography.primecalendar.civil.CivilCalendar
-import com.aminography.primecalendar.common.CalendarFactory
-import com.aminography.primecalendar.common.CalendarType
-import com.aminography.primedatepicker.picker.PrimeDatePicker
-import com.aminography.primedatepicker.picker.callback.MultipleDaysPickCallback
-import com.aminography.primedatepicker.picker.callback.SingleDayPickCallback
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import java.util.*
-import kotlin.collections.HashMap
 
 
 object DatePickerLib {

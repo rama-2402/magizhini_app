@@ -10,21 +10,26 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityShoppingMainBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
@@ -54,7 +59,9 @@ import java.util.*
 class ShoppingMainActivity :
     BaseActivity(),
     KodeinAware,
-    ShoppingMainAdapter.ShoppingMainListener {
+    ShoppingMainAdapter.ShoppingMainListener,
+    CategoryHomeAdapter.CategoryItemClickListener
+{
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityShoppingMainBinding
@@ -173,6 +180,19 @@ class ShoppingMainActivity :
             mCartPrice = it ?: 0f
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 checkoutText.setTextAnimation("Rs: $mCartPrice", 200)
+            }
+        }
+        viewModel.getALlCategories().observe(this) {
+            CategoryHomeAdapter(
+                this,
+                it,
+                this
+            ).let { adapter ->
+                viewModel.categoriesAdapter = ItemsBottomSheet(
+                    this,
+                    null,
+                    adapter
+                )
             }
         }
     }
@@ -306,7 +326,10 @@ class ShoppingMainActivity :
     }
 
     private fun openCategoryFilterDialog() {
-        viewModel.getAllCategoryNames()
+        viewModel.categoriesAdapter?.let {
+            it.show()
+        }
+//        viewModel.getAllCategoryNames()
     }
 
     private fun collapseSearchBar() {
@@ -482,24 +505,33 @@ class ShoppingMainActivity :
         }
     }
 
-    private fun navigateToProductDetails(product: ProductEntity) {
+    private fun navigateToProductDetails(product: ProductEntity, thumbnail: ShapeableImageView) {
         if (NetworkHelper.isOnline(this)) {
             if (product.productType == SUBSCRIPTION) {
                 Intent(this, SubscriptionProductActivity::class.java).also {
                     it.putExtra(Constants.PRODUCTS, product.id)
                     it.putExtra(Constants.PRODUCT_NAME, product.name)
                     it.putExtra(NAVIGATION, SUBSCRIPTION)
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    onPause()
+                    val options: ActivityOptionsCompat =
+                        ViewCompat.getTransitionName(thumbnail)?.let { it1 ->
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail,
+                                it1
+                            )
+                        }!!
+                    startActivity(it, options.toBundle())
                 }
             } else {
                 Intent(this, ProductActivity::class.java).also {
                     it.putExtra(Constants.PRODUCTS, product.id)
                     it.putExtra(Constants.PRODUCT_NAME, product.name)
                     it.putExtra(NAVIGATION, viewModel.selectedCategory)
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    val options: ActivityOptionsCompat =
+                        ViewCompat.getTransitionName(thumbnail)?.let { it1 ->
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail,
+                                it1
+                            )
+                        }!!
+                    startActivity(it, options.toBundle())
                     onPause()
                 }
             }
@@ -531,8 +563,8 @@ class ShoppingMainActivity :
         viewModel.updateFavorites(id, product, position)
     }
 
-    override fun navigateToProduct(product: ProductEntity) {
-        navigateToProductDetails(product)
+    override fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView) {
+        navigateToProductDetails(product, thumbnail)
     }
 
     override fun upsertCartItem(
@@ -556,5 +588,14 @@ class ShoppingMainActivity :
     override fun limitedItemList(products: List<ProductEntity>) {
         hideShimmer()
         displayLimitedItems(products = products as MutableList<ProductEntity>)
+    }
+
+    //category BS
+    override fun selectedCategory(categoryName: String) {
+        viewModel.categoriesAdapter?.let {
+            it.dismiss()
+        }
+        categoryFilter = categoryName
+        setFilteredProducts()
     }
 }

@@ -12,7 +12,7 @@ class SubscriptionProductViewModelFactory(
     private val subscriptionUseCase: SubscriptionUseCase
 ) : ViewModelProvider.NewInstanceFactory() {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return SubscriptionProductViewModel(dbRepository, fbRepository, subscriptionUseCase) as T
     }
 }

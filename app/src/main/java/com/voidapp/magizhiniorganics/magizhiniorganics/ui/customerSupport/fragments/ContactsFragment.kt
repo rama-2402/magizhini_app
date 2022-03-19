@@ -4,11 +4,10 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.provider.ContactsContract
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,8 +17,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.SupportProfil
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentContactsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein

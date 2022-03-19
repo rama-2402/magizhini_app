@@ -23,4 +23,7 @@
     <color name="flatGray">#7f8c8d</color>
     <color name="grey">#B6B6B6</color>
     <color name="lightGrey">#DFDFDF</color>
+    <color name="gray700">#616161</color>
+    <color name="orange200">#FFCC80</color>
+
 </resources>

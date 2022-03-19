@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -22,6 +21,7 @@
             android:layout_width="0dp"
             app:layout_constraintWidth_percent=".4"
             android:layout_height="150dp"
+            android:transitionName="thumbnail"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_app_placeholder"
             app:layout_constraintBottom_toBottomOf="parent"

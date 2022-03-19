@@ -6,8 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserNotification
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserNotificationEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,8 +52,8 @@ class NotificationsViewModel(
         return@withContext dbRepository.getProductWithIdForUpdate(id)
     }
 
-    suspend fun getCategoryName(id: String): String = withContext(Dispatchers.IO) {
-        return@withContext dbRepository.getCategoryByID(id)!!
+    suspend fun getCategoryName(id: String): String? = withContext(Dispatchers.IO) {
+        return@withContext dbRepository.getCategoryByID(id)
     }
 
     fun deleteNotification() = viewModelScope.launch {

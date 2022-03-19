@@ -1,26 +1,24 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.product
 
 import android.net.Uri
-import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.ListenableWorker
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class ProductViewModel(
@@ -28,6 +26,7 @@ class ProductViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
+    var reviewAdapter: ReviewAdapter? = null
     var navigateToPage: String = ""
 
     var userProfile: UserProfileEntity? = null
@@ -149,9 +148,9 @@ class ProductViewModel(
         _previewImage.value = content
     }
 
-    fun openPreview(url: String, content: String) {
-        _uiUpdate.value = UiUpdate.OpenPreviewImage(content, url, null)
-    }
+//    fun openPreview(url: String, content: String, thumbnail: ShapeableImageView) {
+//        _uiUpdate.value = UiUpdate.OpenPreviewImage(content, url, null, thumbnail)
+//    }
 
     fun upsertProductReview(
         review: Review,
@@ -548,7 +547,7 @@ class ProductViewModel(
         //review
         data class CheckStoragePermission(val message: String?): UiUpdate()
         //preview
-        data class OpenPreviewImage(val message: String?, val imageUrl: String?, val imageUri: Uri?): UiUpdate()
+//        data class OpenPreviewImage(val message: String?, val imageUrl: String?, val imageUri: Uri?, val thumbnail: ShapeableImageView): UiUpdate()
 
         object Empty: UiUpdate()
     }

@@ -1,21 +1,18 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions
 
 import android.annotation.SuppressLint
-import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
@@ -23,27 +20,23 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.SubProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionProductBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddressBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomSubDaysDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
@@ -51,25 +44,15 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomSubDaysDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SINGLE_DAY_LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_ACTIVE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.math.abs
 
 class SubscriptionProductActivity :
@@ -105,6 +88,11 @@ class SubscriptionProductActivity :
         initData(intent.getStringExtra(PRODUCTS).toString())
         initLiveData()
         initViewPager()
+
+        binding.apply {
+            clProductDetails.startAnimation(AnimationUtils.loadAnimation(this@SubscriptionProductActivity, R.anim.slide_in_right_bounce))
+            llViewPager.startAnimation(AnimationUtils.loadAnimation(this@SubscriptionProductActivity, R.anim.slide_up))
+        }
     }
 
     override fun onPaymentSuccess(response: String?) {
@@ -358,7 +346,7 @@ class SubscriptionProductActivity :
                     isPreviewVisible = true
                     val url = event.imageUrl ?: event.imageUri
                     with(binding) {
-                        GlideLoader().loadUserPictureWithoutCrop(this@SubscriptionProductActivity, url!!, ivPreviewImage)
+//                        GlideLoader().loadUserPictureWithoutCrop(this@SubscriptionProductActivity, url!!, ivPreviewImage)
                         ivPreviewImage.visible()
                         ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@SubscriptionProductActivity, R.anim.scale_big))
                     }
@@ -432,7 +420,7 @@ class SubscriptionProductActivity :
     private fun setDataToDisplay(variantPosition: Int) {
         with(binding) {
             viewModel.product?.let {
-                GlideLoader().loadUserPicture(this@SubscriptionProductActivity, it.thumbnailUrl, ivProductThumbnail)
+                ivProductThumbnail.loadImg(it.thumbnailUrl)
                 tvDiscountedPrice.setTextAnimation("Rs. ${it.variants[variantPosition].variantPrice}")
                 tvFromDate.setTextAnimation(TimeUtil().getCustomDate(dateLong = viewModel.subStartDate))
                 generateEstimate(spSubscriptionType.selectedItemPosition, variantPosition)
@@ -478,12 +466,22 @@ class SubscriptionProductActivity :
         }
     }
 
-    override fun previewImage(url: String) {
-        isPreviewVisible = true
-        GlideLoader().loadUserPicture(this, url, binding.ivPreviewImage)
-        binding.ivPreviewImage.visible()
-        binding.ivPreviewImage.startAnimation(scaleBig)
+    override fun previewImage(url: String, thumbnail: ShapeableImageView) {
+        Intent(this, PreviewActivity::class.java).also { intent ->
+            intent.putExtra("url", url)
+            intent.putExtra("contentType", "image")
+            val options: ActivityOptionsCompat =
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, ViewCompat.getTransitionName(thumbnail)!!)
+            startActivity(intent, options.toBundle())
+        }
     }
+//
+//    override fun previewImage(url: String, ) {
+//        isPreviewVisible = true
+//        GlideLoader().loadUserPicture(this, url, binding.ivPreviewImage)
+//        binding.ivPreviewImage.visible()
+//        binding.ivPreviewImage.startAnimation(scaleBig)
+//    }
 
     override fun onBackPressed() {
         when {
