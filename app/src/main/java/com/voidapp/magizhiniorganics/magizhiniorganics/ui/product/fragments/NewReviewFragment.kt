@@ -40,7 +40,7 @@ class NewReviewFragment : Fragment(), KodeinAware {
         it?.let{ uri ->
             mRatingImageUri = uri
             binding.ivReviewImage.visibility = View.VISIBLE
-            binding.ivReviewImage.loadImg(uri)
+            binding.ivReviewImage.loadImg(uri) {}
             binding.ivReviewImage.scaleType = ImageView.ScaleType.CENTER_CROP
             imageExtension = imageExtension(requireActivity(),  mRatingImageUri)!!
         }

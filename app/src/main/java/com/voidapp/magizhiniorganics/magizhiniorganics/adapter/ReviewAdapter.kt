@@ -43,12 +43,12 @@ class ReviewAdapter(
     override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
         val review = reviews[position]
         with(holder) {
-            profilePic.loadImg(review.userProfilePicUrl)
+            profilePic.loadImg(review.userProfilePicUrl) {}
             if (review.reviewImageUrl.isEmpty()) {
                 reviewImage.visibility = View.GONE
             } else {
                 reviewImage.visibility = View.VISIBLE
-                reviewImage.loadImg(review.reviewImageUrl)
+                reviewImage.loadImg(review.reviewImageUrl) {}
             }
             profileName.text = review.userName
             timeStamp.text = TimeUtil().getCustomDate(dateLong = review.timeStamp)

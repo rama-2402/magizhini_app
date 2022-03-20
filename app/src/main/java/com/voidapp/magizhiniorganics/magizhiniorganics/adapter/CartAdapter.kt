@@ -64,7 +64,7 @@ class CartAdapter(
         val id = cartItem.id
 
         //loading the thumbnail
-        holder.productThumbNail.loadImg(cartItem.thumbnailUrl)
+        holder.productThumbNail.loadImg(cartItem.thumbnailUrl)  {}
         holder.productThumbNail.clipToOutline = true
 
         holder.productName.text = cartItem.productName

@@ -35,7 +35,7 @@ class NotificationsAdapter(
                 tvMessage.text = notification.message
             }
             if (notification.imageUrl != "") {
-                ivMessage.loadImg(notification.imageUrl)
+                ivMessage.loadImg(notification.imageUrl) {}
             } else {
                 ivMessage.visibility = View.GONE
             }

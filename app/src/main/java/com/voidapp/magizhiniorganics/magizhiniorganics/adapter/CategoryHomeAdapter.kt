@@ -35,7 +35,7 @@ class CategoryHomeAdapter(
             tvProductName.text = categoryEntity.name
 
             //loading the product images
-            ivProductThumbnail.loadImg(categoryEntity.thumbnailUrl)
+            ivProductThumbnail.loadImg(categoryEntity.thumbnailUrl)  {}
             ivProductThumbnail.clipToOutline = true
 
             cvProductItem.setOnClickListener {

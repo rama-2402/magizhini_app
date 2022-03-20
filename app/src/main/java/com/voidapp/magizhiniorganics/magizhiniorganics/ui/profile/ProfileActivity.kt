@@ -187,7 +187,9 @@ class ProfileActivity :
             tvReferral.remove()
             //hiding the referral code area for existing user
             if (userProfile.profilePicUrl != "") {
-                ivProfilePic.loadImg(userProfile.profilePicUrl)
+                ivProfilePic.loadImg(userProfile.profilePicUrl) {
+                    supportStartPostponedEnterTransition()
+                }
             }
         }
 
@@ -426,7 +428,10 @@ class ProfileActivity :
 
     private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         viewModel.profilePicUri = result.data?.data
-        viewModel.profilePicUri?.let { uri -> binding.ivProfilePic.loadImg(uri) }
+        viewModel.profilePicUri?.let { uri -> binding.ivProfilePic.loadImg(uri) {
+            supportStartPostponedEnterTransition()
+        }
+        }
     }
 
     override fun onRequestPermissionsResult(

@@ -47,7 +47,7 @@ class TestimonialsAdapter(
     override fun onBindViewHolder(holder: TestimonialsViewHolder, position: Int) {
         val testimonial = testimonials[position]
         holder.apply {
-            thumbnail.loadImg(testimonial.thumbnailUrl)
+            thumbnail.loadImg(testimonial.thumbnailUrl) {}
             message.text = testimonial.message
             name.text = "- ${testimonial.title}"
 

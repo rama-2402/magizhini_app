@@ -22,6 +22,7 @@ class ShoppingMainViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
+    var selectedProductPosition: Int? = null
     var navigateToPage: String = ""
     var shoppingMainListener: ShoppingMainAdapter.ShoppingMainListener? = null
 
@@ -251,6 +252,12 @@ class ShoppingMainViewModel(
         }
         withContext(Dispatchers.Main) {
             shoppingMainListener?.limitedItemList(products)
+        }
+    }
+
+    fun refreshProduct() = viewModelScope.launch(Dispatchers.IO) {
+        productToRefresh?.let {
+
         }
     }
 

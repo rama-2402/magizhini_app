@@ -49,7 +49,7 @@ class ChatActivity :
         }
         viewModel.currentUserProfile.observe(this) {
             //setting the toolbar data - profile pic and user name
-            binding.ivProfileImage.loadImg(it.profilePicUrl)
+            binding.ivProfileImage.loadImg(it.profilePicUrl) {}
             binding.tvProfileName.text = it.name
         }
     }

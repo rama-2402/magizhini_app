@@ -23,7 +23,7 @@ class PartnersAdapter(
     override fun onBindViewHolder(holder: PartnersViewHolder, position: Int) {
         val partner = partners[position]
         holder.binding.apply {
-            ivThumbnail.loadImg(partner.imageUrl)
+            ivThumbnail.loadImg(partner.imageUrl) {}
             tvName.text = partner.partnerName
 
             clPartnerItem.setOnClickListener {

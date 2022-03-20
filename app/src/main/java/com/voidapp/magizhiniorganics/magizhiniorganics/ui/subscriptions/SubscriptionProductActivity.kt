@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.transition.doOnEnd
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -419,9 +420,17 @@ class SubscriptionProductActivity :
 
     private fun setDataToDisplay(variantPosition: Int) {
         with(binding) {
-            viewModel.product?.let {
-                ivProductThumbnail.loadImg(it.thumbnailUrl)
-                tvDiscountedPrice.setTextAnimation("Rs. ${it.variants[variantPosition].variantPrice}")
+            viewModel.product?.let { product ->
+                window.sharedElementEnterTransition = android.transition.TransitionSet()
+                    .addTransition(android.transition.ChangeImageTransform())
+                    .addTransition(android.transition.ChangeBounds())
+                    .apply {
+                        doOnEnd { binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {} }
+                    }
+                ivProductThumbnail.loadImg(product.thumbnailUrl) {
+                    supportStartPostponedEnterTransition()
+                }
+                tvDiscountedPrice.setTextAnimation("Rs. ${product.variants[variantPosition].variantPrice}")
                 tvFromDate.setTextAnimation(TimeUtil().getCustomDate(dateLong = viewModel.subStartDate))
                 generateEstimate(spSubscriptionType.selectedItemPosition, variantPosition)
             }

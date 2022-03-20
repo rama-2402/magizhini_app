@@ -63,7 +63,7 @@ class BestSellersAdapter(
             tvProductName.text = product.name
             checkVariantAvailability(holder, product.variants[variantInCartPosition])
 
-            ivProductThumbnail.loadImg(product.thumbnailUrl)
+            ivProductThumbnail.loadImg(product.thumbnailUrl) {}
 
 //            //setting the favorties icon for the products
 //            if (product.favorite) {

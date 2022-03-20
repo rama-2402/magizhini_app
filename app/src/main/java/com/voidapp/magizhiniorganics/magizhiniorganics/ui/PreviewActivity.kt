@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.core.transition.doOnEnd
 import androidx.databinding.DataBindingUtil
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -53,7 +54,15 @@ class PreviewActivity : BaseActivity() {
                 }
             })
         } else {
-            binding.ivPreviewImage.loadOriginal(url)
+
+            window.sharedElementEnterTransition = android.transition.TransitionSet()
+                .addTransition(android.transition.ChangeImageTransform())
+                .addTransition(android.transition.ChangeBounds())
+                .apply {
+                    doOnEnd { binding.ivPreviewImage.loadOriginal(url) {} }
+                }
+
+        binding.ivPreviewImage.loadOriginal(url){}
 //            GlideLoader().loadUserPictureWithoutCrop(this, url, binding.ivPreviewImage)
 //            binding.ivPreviewImage.visible()
             progressGone()

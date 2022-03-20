@@ -113,6 +113,11 @@ class ShoppingMainActivity :
         checkProductsToDisplay()
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.refreshProduct()
+    }
+
     private fun observeLiveData() {
         viewModel.position.observe(this) {
             adapter.products[it] = viewModel.productToRefresh
@@ -563,7 +568,8 @@ class ShoppingMainActivity :
         viewModel.updateFavorites(id, product, position)
     }
 
-    override fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView) {
+    override fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView, position: Int) {
+        viewModel.selectedProductPosition = position
         navigateToProductDetails(product, thumbnail)
     }
 

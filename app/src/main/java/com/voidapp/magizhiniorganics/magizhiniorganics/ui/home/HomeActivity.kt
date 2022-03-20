@@ -405,18 +405,18 @@ class HomeActivity :
         }
         viewModel.specialBanners.observe(this) {
             with(binding) {
-                ivBannerOne.loadImg(it[0].url)
-                ivBannerTwo.loadImg(it[1].url)
-                ivBannerThree.loadImg(it[2].url)
-                ivBannerFour.loadImg(it[3].url)
-                ivBannerFive.loadImg(it[4].url)
-                ivBannerSix.loadImg(it[5].url)
-                ivBannerSeven.loadImg(it[6].url)
-                ivBannerEight.loadImg(it[7].url)
-                ivBannerNine.loadImg(it[8].url)
-                ivBannerTen.loadImg(it[9].url)
-                ivBannerEleven.loadImg(it[10].url)
-                ivBannerTwelve.loadImg(it[11].url)
+                ivBannerOne.loadImg(it[0].url) {}
+                ivBannerTwo.loadImg(it[1].url) {}
+                ivBannerThree.loadImg(it[2].url) {}
+                ivBannerFour.loadImg(it[3].url) {}
+                ivBannerFive.loadImg(it[4].url) {}
+                ivBannerSix.loadImg(it[5].url) {}
+                ivBannerSeven.loadImg(it[6].url) {}
+                ivBannerEight.loadImg(it[7].url) {}
+                ivBannerNine.loadImg(it[8].url) {}
+                ivBannerTen.loadImg(it[9].url) {}
+                ivBannerEleven.loadImg(it[10].url) {}
+                ivBannerTwelve.loadImg(it[11].url) {}
             }
         }
         viewModel.testimonials.observe(this) {

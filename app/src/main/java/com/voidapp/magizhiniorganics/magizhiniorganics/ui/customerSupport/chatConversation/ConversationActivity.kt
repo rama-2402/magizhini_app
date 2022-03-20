@@ -190,7 +190,7 @@ class ConversationActivity :
 
     private fun setTypingStatus(supportProfile: SupportProfile) {
         binding.apply {
-            ivProfileImage.loadImg(supportProfile.thumbnailUrl)
+            ivProfileImage.loadImg(supportProfile.thumbnailUrl) {}
             tvProfileName.text = supportProfile.profileName
             if (supportProfile.typing) {
                 tvStatus.text = "typing..."

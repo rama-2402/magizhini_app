@@ -55,7 +55,7 @@ open class ShoppingMainAdapter(
 
         holder.binding.apply {
             //setting the thumbnail
-            ivProductThumbnail.loadImg(product.thumbnailUrl)
+            ivProductThumbnail.loadImg(product.thumbnailUrl) {}
 
             //details view
             tvProductName.text = product.name
@@ -135,7 +135,7 @@ open class ShoppingMainAdapter(
                 with(tvAddItem) {
                     when(text) {
                         "View" -> {
-                            onItemClickListener.navigateToProduct(product, ivProductThumbnail)
+                            onItemClickListener.navigateToProduct(product, ivProductThumbnail, position)
                         }
                         "Add" -> {
                                 onItemClickListener.upsertCartItem(
@@ -157,7 +157,7 @@ open class ShoppingMainAdapter(
             }
 
             ivProductThumbnail.setOnClickListener {
-                onItemClickListener.navigateToProduct(product, ivProductThumbnail)
+                onItemClickListener.navigateToProduct(product, ivProductThumbnail, position)
             }
         }
     }
@@ -273,7 +273,7 @@ open class ShoppingMainAdapter(
     interface ShoppingMainListener {
         fun limitedItemList(products: List<ProductEntity>)
         fun updateFavorites(id: String, product: ProductEntity, position: Int)
-        fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView)
+        fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView, position: Int)
         fun upsertCartItem(product: ProductEntity, position: Int , variant: String, count: Int, price: Float, originalPrice: Float, variantIndex: Int, maxOrderQuantity: Int)
         fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int)
     }

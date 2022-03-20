@@ -17,11 +17,16 @@ import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.transition.doOnEnd
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.ChangeBounds
+import androidx.transition.ChangeImageTransform
+import androidx.transition.Transition
+import androidx.transition.TransitionSet
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -94,6 +99,8 @@ class ProductActivity :
         title = ""
         binding.tvProductName.text = intent.getStringExtra(PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
+
+        supportPostponeEnterTransition()
 
         initData(intent.getStringExtra(PRODUCTS).toString())
         cartBottomSheet()
@@ -287,7 +294,7 @@ class ProductActivity :
                 is ProductViewModel.UiUpdate.PopulateProductData -> {
                     event.product?.let {
                         binding.spProductVariant.setSelection(viewModel.selectedVariantPosition)
-                        populateProductData()
+                        populateProductData(true)
                         refreshLimitedItemCount()
                     } ?: showErrorSnackBar(event.message!!, true)
                 }
@@ -457,11 +464,20 @@ class ProductActivity :
         })
     }
 
-    private fun populateProductData() {
+    private fun populateProductData(isFirstCall: Boolean = false) {
         viewModel.product?.let { product ->
 //            GlideLoader().loadUserPicture(this, product.thumbnailUrl, binding.ivProductThumbnail)
-            supportPostponeEnterTransition()
-            binding.ivProductThumbnail.loadImg(product.thumbnailUrl)
+            if (isFirstCall) {
+                window.sharedElementEnterTransition = android.transition.TransitionSet()
+                    .addTransition(android.transition.ChangeImageTransform())
+                    .addTransition(android.transition.ChangeBounds())
+                    .apply {
+                        doOnEnd { binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {} }
+                    }
+            }
+            binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {
+                supportStartPostponedEnterTransition()
+            }
             setPrice(product.variants[viewModel.selectedVariantPosition])
             setFavorites(product.favorite)
             setVariantAdapter(product.variants)

@@ -64,7 +64,7 @@ class QuickOrderListAdapter(
                     tvListPageNumber.text = "Page: ${position}"
 
                     //loading the product images
-                    ivListPage.loadImg(uri.toString())
+                    ivListPage.loadImg(uri.toString()) {}
                     ivListPage.clipToOutline = true
 
                     ivListPage.setOnClickListener {
@@ -80,7 +80,7 @@ class QuickOrderListAdapter(
                 tvListPageNumber.text = "Page: ${position + 1}"
 
                 //loading the product images
-                ivListPage.loadImg(url)
+                ivListPage.loadImg(url) {}
                 ivListPage.clipToOutline = true
 
                 ivListPage.setOnClickListener {

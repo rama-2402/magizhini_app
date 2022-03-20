@@ -24,7 +24,7 @@ class AllCWMAdapter(
     override fun onBindViewHolder(holder: CWMViewHolder, position: Int) {
         val dish = dishes[position]
         holder.binding.apply {
-            ivThumbnail.loadImg(dish.thumbnailUrl)
+            ivThumbnail.loadImg(dish.thumbnailUrl) {}
             tvDishName.text = dish.dishName
 
             clDish.setOnClickListener {
