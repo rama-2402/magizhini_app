@@ -102,16 +102,16 @@ open class ShoppingMainAdapter(
                     variantPrice = variant.variantPrice.toFloat()
 
                     //setting the original price without discount
-                    tvDiscount.setTextAnimation("Rs: $variantPrice")
-                    tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+//                    tvDiscount.setTextAnimation("Rs: $variantPrice")
+//                    tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
                     setDiscountedValues(holder, product, variantposition)
                     setCartItems(product, variantName, selectedVariant, holder)
                     checkVariantAvailability(holder, variant)
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
-                    tvDiscount.setTextAnimation("Rs: $variantPrice")
-                    tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+//                    tvDiscount.setTextAnimation("Rs: $variantPrice")
+//                    tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
                     checkVariantAvailability(holder, product.variants[selectedVariant])
                     setDiscountedValues(holder, product, 0)
                     setCartItems(product, variantName, holder = holder)
@@ -173,14 +173,13 @@ open class ShoppingMainAdapter(
             //setting up the product discount info
             if (currentVariant.discountPrice != 0.0) {
                 tvDiscountAmt.text =
-                    "Upto ${getDiscountPercent(currentVariant.variantPrice.toFloat(), currentVariant.discountPrice.toFloat()).toInt()} % Off"
+                    "${getDiscountPercent(currentVariant.variantPrice.toFloat(), currentVariant.discountPrice.toFloat()).toInt()}% Off"
                 discountedPrice = currentVariant.discountPrice.toFloat()
                 totalPrice = currentVariant.discountPrice.toFloat()
                 tvPrice.setTextAnimation(totalPrice.toString(), 200)
+                tvDiscount.setTextAnimation("Rs: ${currentVariant.variantPrice}", 200)
+                tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
                 clDiscountLayout.fadInAnimation(200)
-//                clDiscountLayout.visibility = View.VISIBLE
-                tvDiscount.fadInAnimation(200)
-//                tvDiscount.visibility = View.VISIBLE
             } else {
                 discountedPrice = currentVariant.variantPrice.toFloat()
                 totalPrice = discountedPrice

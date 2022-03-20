@@ -1,18 +1,17 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.TextView
+import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvOrderItemsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 
 class PurchaseHistoryAdapter(
@@ -21,18 +20,10 @@ class PurchaseHistoryAdapter(
     private val onItemClickListener: PurchaseHistoryListener
 ): RecyclerView.Adapter<PurchaseHistoryAdapter.PurchaseHistoryViewHolder>() {
 
-    inner class PurchaseHistoryViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        val orderId: TextView = itemView.findViewById(R.id.tvOrderId)
-        val orderStatus: TextView = itemView.findViewById(R.id.tvOrderStatus)
-        val purchaseDate: TextView = itemView.findViewById(R.id.tvPurchaseDate)
-        val cartPrice: TextView = itemView.findViewById(R.id.tvCartPrice)
-        val paymentStatus: TextView = itemView.findViewById(R.id.tvPaymentStatus)
-        val showCart: ShapeableImageView = itemView.findViewById(R.id.ivShowCart)
-        val liveStatus: TextView = itemView.findViewById(R.id.tvStatusText)
-    }
+    inner class PurchaseHistoryViewHolder(val binding: RvOrderItemsBinding): RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PurchaseHistoryViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.rv_order_items, parent, false)
+        val view = RvOrderItemsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return PurchaseHistoryViewHolder(view)
     }
 
@@ -40,74 +31,67 @@ class PurchaseHistoryAdapter(
 
         val order = orders[position]
 
-        with(holder) {
-            orderId.text = order.orderId
-
-            purchaseDate.text = order.purchaseDate
-            cartPrice.text = "Rs. ${order.price}"
-
-            when(order.isPaymentDone) {
-                true -> {
-                    paymentStatus.text = "(paid - ${order.paymentMethod})"
-                    holder.paymentStatus.setTextColor(ContextCompat.getColor(context, R.color.matteGreen))
-                }
-                false -> {
-                    paymentStatus.text = "(${order.paymentMethod})"
-                    holder.paymentStatus.setTextColor(ContextCompat.getColor(context, R.color.matteGreen))
-                }
+        with(holder.binding) {
+            tvOrderId.text = order.orderId
+            tvOrderStatus.isActivated = true
+            tvDate.text = "${order.purchaseDate} - ${order.paymentMethod} - Rs: ${order.price}"
+            var itemCount = 0
+            order.cart.forEach {
+                itemCount += it.quantity
             }
+            tvDeliveryPreference.text = order.deliveryPreference
+            tvDeliveryNote.text = order.deliveryNote
+            ivCart.badgeValue = itemCount
+            tvAddress.text = "${order.address.userId}, ${order.address.addressLineOne}, ${order.address.addressLineTwo}, ${order.address.LocationCode}, ${order.address.city}"
 
             when(order.orderStatus) {
                 Constants.CANCELLED -> {
-                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancelled_order))
-                    showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
-                    orderStatus.text = "Cancelled"
-                    orderStatus.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
-                    orderStatus.elevation = 0f
-                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
-                    liveStatus.text = "Order Cancelled"
-
+                    btnSend.background = ContextCompat.getDrawable(context, R.drawable.bg_order_history_failed)
+                    tvCancel.text = "CANCELLED"
+                    tvOrderStatus.text = "Order Cancelled"
                 }
                 Constants.SUCCESS -> {
-                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
-                    showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteGreen))
-                    orderStatus.text = "Invoice"
-                    orderStatus.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.green_base))
-                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.white))
-                    liveStatus.text = "Products Delivered"
+                    btnSend.background = ContextCompat.getDrawable(context, R.drawable.bg_order_history_invoice)
+                    tvCancel.text = "INVOICE"
+                    tvOrderStatus.text = "Products Delivered"
                 }
                 Constants.FAILED -> {
-                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancelled_order))
-                    showCart.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed))
-                    orderStatus.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
-                    orderStatus.elevation = 0f
-                    orderStatus.text = "Delivery \n Failed"
-                    orderStatus.setTextColor(ContextCompat.getColor(context, R.color.matteRed))
-                    liveStatus.text = "Failed to Deliver"
+                    btnSend.background = ContextCompat.getDrawable(context, R.drawable.bg_order_history_failed)
+                    tvCancel.text = "FAILED"
+                    tvOrderStatus.text = "Failed to Deliver"
                 }
                 Constants.PENDING -> {
-                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.carbon_delivery))
-                    orderStatus.text = "Cancel"
-                    liveStatus.text = "Getting ready to be packed"
+                    btnSend.background = ContextCompat.getDrawable(context, R.drawable.bg_order_history_cancel)
+                    tvCancel.text = "CANCEL"
+                    tvOrderStatus.text = "Getting ready to be packed"
                 }
                 else -> {
-                    showCart.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.carbon_delivery))
-                    orderStatus.text = "Cancel"
-                    liveStatus.text = order.orderStatus
+                    btnSend.background = ContextCompat.getDrawable(context, R.drawable.bg_order_history_cancel)
+                    tvCancel.text = "CANCEL"
+                    tvOrderStatus.text = order.orderStatus
                 }
             }
 
-            showCart.setOnClickListener {
-                showCart.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-                cancelOrder(position, order.orderStatus)
+            ivCart.setOnClickListener {
+                if (tvOrderId.isFocused) {
+                    tvOrderId.clearFocus()
+                }
+                ivCart.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
+                onItemClickListener.showCart(order.cart)
             }
 
-            orderStatus.setOnClickListener {
-                orderStatus.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-                cancelOrder(position, order.orderStatus)
+            btnSend.setOnClickListener {
+                if (tvOrderId.isFocused) {
+                    tvOrderId.clearFocus()
+                }
+                cancelOrder(position, order.orderStatus, order.price)
             }
 
             itemView.setOnClickListener {
+                if (tvOrderId.isFocused) {
+                    tvOrderId.clearFocus()
+                    return@setOnClickListener
+                }
                 onItemClickListener.showCart(order.cart)
             }
 
@@ -118,14 +102,17 @@ class PurchaseHistoryAdapter(
         return orders.size
     }
 
-    private fun cancelOrder(position: Int, status: String) {
+    private fun cancelOrder(position: Int, status: String, price: Float) {
         when (status) {
-            Constants.SUCCESS -> {
-                onItemClickListener.generateInvoice(position)
-            }
-            else -> {
-                onItemClickListener.cancelOrder(position)
-            }
+            Constants.SUCCESS -> onItemClickListener.generateInvoice(position)
+            Constants.CANCELLED -> onItemClickListener.openExitSheet(
+                "This Order has been cancelled. If you have already paid. Don't Worry. your order amount Rs: $price will be refunded in 3 to 5 Business Days. If not done already please click Contact Support to contact our Customer Support Team"
+            )
+            Constants.FAILED -> onItemClickListener.openExitSheet(
+                "The Order Delivery is Failed. If you have already paid. Don't Worry. your order amount Rs: $price will be refunded in 3 to 5 Business Days. If not done already please click Contact Support to contact our Customer Support Team"
+            )
+            else -> onItemClickListener.cancelOrder(position)
+
         }
     }
 
@@ -133,5 +120,6 @@ class PurchaseHistoryAdapter(
         fun showCart(cart: List<CartEntity>)
         fun cancelOrder(position: Int)
         fun generateInvoice(position: Int)
+        fun openExitSheet(message: String)
     }
 }

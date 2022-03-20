@@ -342,7 +342,6 @@ class PurchaseHistoryActivity :
 
     override fun generateInvoice(position: Int) {
         mInvoiceOrder = mOrderHistory[position]
-//        createPDF(mInvoiceOrder)
         if (PermissionsUtil.hasStoragePermission(this)) {
             createPDF(mInvoiceOrder)
         } else {
@@ -355,7 +354,6 @@ class PurchaseHistoryActivity :
         prodNames: MutableList<CartEntity>,
         serial: Int
     ) {
-        Log.e("TAG", "createPDF: pg 1")
 
         val phoneNumber =
             SharedPref(this).getData(Constants.PHONE_NUMBER, Constants.STRING, "")
@@ -467,8 +465,6 @@ class PurchaseHistoryActivity :
         var lastEndingHeight = 0f
 
         for (index in prodNames.indices) {    //prodnames
-
-            Log.e("TAG", "createPDF: a")
 
             val product = prodNames[0]
 
@@ -890,5 +886,9 @@ class PurchaseHistoryActivity :
         mFilterMonth = month
         mFilterYear = year
         fetchData()
+    }
+
+    override fun openExitSheet(message: String) {
+        showExitSheet(this, message, "cs")
     }
 }

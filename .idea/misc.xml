@@ -7,6 +7,9 @@
         <entry key="../../.gradle/caches/transforms-3/21ca1e72fa28527da38d7b43acaae0eb/transformed/jetified-whynotimagecarousel-2.0.5/res/drawable/bottom_top_shadow.xml" value="0.2195" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/drawable/bg_dialog_indicator.xml" value="0.4865" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/drawable/bg_discount.xml" value="0.4865" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/drawable/bg_order_history_btn.xml" value="0.394" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/drawable/bg_order_history_failed.xml" value="0.4865" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/drawable/bg_order_history_invoice.xml" value="0.4865" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_all_cwm.xml" value="0.25050454086781027" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_chat.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_home.xml" value="0.5182291666666666" />
@@ -17,6 +20,7 @@
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_splash.xml" value="0.2510090817356206" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_subscription_product.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_video_player.xml" value="0.5182291666666666" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/dialog_bottom_cart.xml" value="0.1" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/dialog_bottom_item_list.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/dialog_loading.xml" value="0.1" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/fragment_chat.xml" value="0.5182291666666666" />
@@ -27,7 +31,7 @@
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_home_product_items.xml" value="0.2510090817356206" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_home_top_sellers.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_list_item.xml" value="0.5182291666666666" />
-        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_order_items.xml" value="0.5182291666666666" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_order_items.xml" value="0.5" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_partner_item.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_quickorder_list_item.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_review_items.xml" value="0.35625" />

@@ -99,7 +99,7 @@ class BestSellersAdapter(
 
                 with(product.variants[variantInCartPosition]) {
                     tvDiscountAmt.text =
-                        "Upto ${getDiscountPercent(variantPrice.toFloat(), discountPrice.toFloat()).toInt()} % Off"
+                        "${getDiscountPercent(variantPrice.toFloat(), discountPrice.toFloat()).toInt()}% Off"
                     if (discountPrice != 0.0) {
                         discountedPriceForPurchase = discountPrice
                         tvPrice.text = "$variantDisplayName - Rs: ${discountPrice}"

@@ -17,8 +17,6 @@
 <!--        <item name="android:textColorPrimary">@color/white</item>-->
         <!-- Customize your theme here. -->
         <item name="android:windowContentTransitions">true</item>
-
-
         <item name="android:windowSharedElementEnterTransition">@transition/enter</item>
         <item name="android:windowSharedElementExitTransition">@transition/exit</item>
 
