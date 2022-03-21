@@ -789,12 +789,12 @@ class Firestore(
                 ) {
                     NetworkResult.Success("cancel", true)
                 } else {
-                    NetworkResult.Failed("cancel", false)
+                    NetworkResult.Failed("Server Error! Failed to cancel order.", false)
                 }
             }
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: cancelling order parent job", it) }
-            NetworkResult.Failed("cancel", false)
+            NetworkResult.Failed(e.message.toString(), null)
         }
     }
 
@@ -1391,6 +1391,7 @@ class Firestore(
                 val path = mFireStore.collection(WALLET)
                     .document("Transaction")
                     .collection(transaction.fromID)
+
                 transaction.id = path.document().id
 
                 val makeTransactionEntry = async {
@@ -1411,9 +1412,9 @@ class Firestore(
                             timestamp = transaction.timestamp,
                             transactionReason = comments
                         ).let {
-                            if (transaction.purpose == ADD_MONEY) {
-                                it.transactionReason = "This transaction may be Adding extra Money to Wallet or REFUND"
-                            }
+//                            if (transaction.purpose == ADD_MONEY) {
+//                                it.transactionReason = "This transaction may be Adding extra Money to Wallet or REFUND"
+//                            }
                             createGlobalTransactionEntry(it)
                         }
                      }
@@ -1423,11 +1424,11 @@ class Firestore(
                 ) {
                     NetworkResult.Success("transactionID", transaction.id)
                 } else {
-                    NetworkResult.Failed("transactionID", null)
+                    NetworkResult.Failed("Server Error! Failed to update transaction status.", null)
                 }
             } catch (e: Exception) {
                 e.message?.let { logCrash("firestore: updating the wallet transaction", it) }
-                NetworkResult.Failed("transactionID", null)
+                NetworkResult.Failed(e.message.toString(), null)
             }
         }
 
@@ -1550,6 +1551,17 @@ class Firestore(
     }
 
     suspend fun getSupportToken(id: String): String = withContext(Dispatchers.IO) {
+        return@withContext try {
+            mFireStore.collection(TOKENS)
+                .document(id)
+                .get().await().toObject(Token::class.java)?.token ?: ""
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: getting customer Token", it) }
+            ""
+        }
+    }
+
+    suspend fun getCustomerToken(id: String): String = withContext(Dispatchers.IO) {
         return@withContext try {
             mFireStore.collection(TOKENS)
                 .document(id)

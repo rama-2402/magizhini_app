@@ -1,52 +1,102 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs
 
 import android.app.Activity
+import android.app.DatePickerDialog
+import android.app.Dialog
 import android.content.Context
+import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCalendarFilterBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.CalendarFilerDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import java.util.*
 
-class CalendarFilterDialog(
-    private val context: Context,
-    private val activity: Activity,
-    private val month: String,
-    private val year: String,
-){
+class CalendarFilterDialog: DialogFragment(){
 
-    private val bottomSheetDialog: BottomSheetDialog = BottomSheetDialog(context, R.style.BottomSheetDialog)
+    companion object {
+        private const val MAX_YEAR = 2050
 
-    init {
+        fun newInstance(
+            month: String = "January",
+            year: Int = 2022
+        ): CalendarFilterDialog {
+            val args = Bundle()
+            args.putString("month", month)
+            args.putInt("year", year)
+            val fragment = CalendarFilterDialog()
+            fragment.arguments = args
+            return fragment
+        }
+    }
 
-        val view: DialogCalendarFilterBinding =
-            DataBindingUtil.inflate(
-                LayoutInflater.from(context),
-                R.layout.dialog_calendar_filter,
-                null,
-                false)
+    private var _binding: DialogCalendarFilterBinding? = null
+    private val binding get() = _binding!!
 
-        bottomSheetDialog.setCancelable(true)
-        bottomSheetDialog.setContentView(view.root)
+    private var onItemClickListener: CalendarFilerDialogClickListener? = null
 
-        with(view) {
-            spMonth.setSelection(getMonthPosition(month))
-            spYear.setSelection(getYearPosition(year))
-            btnFilter.setOnClickListener {
-                when(activity) {
-                    is PurchaseHistoryActivity -> {
-                        dismiss()
-                        activity.filterOrders(spMonth.selectedItem.toString(), spYear.selectedItem.toString())
-                    }
-                    is WalletActivity -> {
-                        dismiss()
-                        activity.filterTransactions(spMonth.selectedItem.toString(), spYear.selectedItem.toString())
-                    }
-                }
-            }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = DialogCalendarFilterBinding.inflate(requireActivity().layoutInflater)
+        isCancelable = false
 
+        val month = arguments?.getString("month") ?: "January"
+        val year = arguments?.getInt("year") ?: 2022
+
+        binding.pickerMonth.run {
+            minValue = 0
+            maxValue = 11
+            value = getMonthPosition(month)
+            displayedValues = arrayOf("Jan","Feb","Mar","Apr","May","June","July",
+                "Aug","Sep","Oct","Nov","Dec")
+
+        }
+
+        binding.pickerYear.run {
+            minValue = 2022
+            maxValue = MAX_YEAR
+            value = year
+        }
+
+        binding.tvOk.setOnClickListener {
+            onItemClickListener?.selectedFilter(getMonthFromPosition(binding.pickerMonth.value), binding.pickerYear.value.toString())
+        }
+
+        binding.tvCancel.setOnClickListener {
+            onItemClickListener?.cancelDialog()
+        }
+
+        return binding.root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setStyle(STYLE_NORMAL, R.style.CustomAlertDialog)
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onAttach(context: Context) {
+
+        super.onAttach(context)
+
+        onItemClickListener = if (context is CalendarFilerDialogClickListener) {
+            context
+        } else {
+            throw RuntimeException (
+                context.toString() + "CalendarFilerClickListener needed"
+            )
         }
     }
 
@@ -65,6 +115,24 @@ class CalendarFilterDialog(
             "November" -> 10
             "December" -> 11
             else -> 0
+        }
+    }
+
+    private fun getMonthFromPosition(monthNumber: Int): String {
+        return when(monthNumber) {
+            0 -> "January"
+            1 -> "February"
+            2 -> "March"
+            3 -> "April"
+            4 -> "May"
+            5 -> "June"
+            6 -> "July"
+            7 -> "August"
+            8 -> "September"
+            9 -> "October"
+            10 -> "November"
+            11 -> "December"
+            else -> "January"
         }
     }
 
@@ -94,7 +162,9 @@ class CalendarFilterDialog(
         }
     }
 
-    fun show() = bottomSheetDialog.show()
+    override fun onDetach() {
+        _binding = null
+        super.onDetach()
+    }
 
-    fun dismiss() = bottomSheetDialog.dismiss()
 }

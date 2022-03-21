@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 
 class AddressAdapter(

@@ -12,6 +12,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +20,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.workDataOf
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.gson.Gson
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
@@ -32,18 +34,18 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.CalendarFilerDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CANCELLED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -57,7 +59,8 @@ import kotlin.math.ceil
 class PurchaseHistoryActivity :
     BaseActivity(),
     KodeinAware,
-    PurchaseHistoryAdapter.PurchaseHistoryListener
+    PurchaseHistoryAdapter.PurchaseHistoryListener,
+    CalendarFilerDialogClickListener
 {
     override val kodein: Kodein by kodein()
 
@@ -69,11 +72,9 @@ class PurchaseHistoryActivity :
     private lateinit var orderItemsAdapter: OrderItemsAdapter
     private var mOrderHistory: MutableList<OrderEntity> = mutableListOf()
 
-    private var mFilterMonth = "January"
-    private var mFilterYear = "2021"
-    private var mCancelOrder = OrderEntity()
-    private var mCancelOrderPosition = 0
-    private var mInvoiceOrder = OrderEntity()
+//    private var mCancelOrder = OrderEntity()
+//    private var mCancelOrderPosition = 0
+//    private var mInvoiceOrder = OrderEntity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,15 +85,17 @@ class PurchaseHistoryActivity :
 
         title = ""
         setSupportActionBar(binding.tbToolbar)
-        mFilterMonth = TimeUtil().getMonth()
-        mFilterYear = TimeUtil().getYear()
-        binding.tvToolbarTitle.text = "$mFilterMonth $mFilterYear"
 
         showShimmer()
 
+        initData()
         initRecyclerView()
         initLiveData()
         initListeners()
+    }
+
+    private fun initData() {
+        viewModel.getProfileData()
     }
 
     private fun initListeners() {
@@ -101,62 +104,129 @@ class PurchaseHistoryActivity :
         }
 
         binding.ivFilter.setOnClickListener {
-            CalendarFilterDialog(this, this, mFilterMonth, mFilterYear).show()
+            showCalendarFilterDialog(viewModel.filterMonth, viewModel.filterYear)
         }
     }
 
     private fun fetchData() {
         showShimmer()
-        viewModel.getAllPurchaseHistory("${mFilterMonth}${mFilterYear}")
+        viewModel.getAllPurchaseHistory()
     }
 
     private fun initLiveData() {
-        viewModel.getProfileData("${mFilterMonth}${mFilterYear}")
+        viewModel.uiEvent.observe(this) { event ->
+            when(event) {
+                is UIEvent.Toast -> showToast(this, event.message, event.duration)
+                is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
+                is UIEvent.ProgressBar -> {
+                    if (event.visibility) {
+                        showProgressDialog()
+                    } else {
+                        hideProgressDialog()
+                    }
+                }
+                is UIEvent.EmptyUIEvent -> return@observe
+                else -> Unit
+            }
+            viewModel.setEmptyUiEvent()
+        }
+        viewModel.uiUpdate.observe(this) { event ->
+            when(event) {
+                is PurchaseHistoryViewModel.UiUpdate.PopulatePurchaseHistory -> {
+                    binding.tvToolbarTitle.text = "${viewModel.filterMonth}${viewModel.filterYear}"
+                    /*
+                    * If purchase history is null and message is null -> no history available
+                    * if purchase history null and message non null -> some error occurred
+                    * if purchase history non null -> data available
+                    * */
+                    event.purchaseHistory?.let {
+                        populatePurchaseHistory(it as MutableList<OrderEntity>)
+                    } ?:let {
+                        event.message?.let { message ->
+                            hideShimmer()
+                            showErrorSnackBar(message, true)
+                        } ?: emptyPurchaseHistoryUI()
+                    }
+                }
+                is PurchaseHistoryViewModel.UiUpdate.OrderCancelStatus -> {
+                    if (event.status) {
+                        viewModel.order?.let { order ->
+                            order.orderStatus = CANCELLED
+                            ordersAdapter.updateOrder(viewModel.orderPosition!!, order)
+                            viewModel.purchaseHistory[viewModel.orderPosition!!] = order
+                            if (order.paymentMethod != "COD") {
+                                viewModel.makeTransactionFromWallet(
+                                    order.price,
+                                    order.customerId,
+                                    "Refund",
+                                    "Add"
+                                )
+                            } else {
+                                hideProgressDialog()
+                                showToast(this, "Order Cancelled", Constants.SHORT)
+                            }
+                        }
+                    } else {
+                        hideProgressDialog()
+                        showErrorSnackBar(event.message!!, true)
+                    }
+                }
+                is PurchaseHistoryViewModel.UiUpdate.RefundStatus -> {
+                    hideProgressDialog()
+                    viewModel.order?.let { order ->
+                        if (event.status) {
+                            showExitSheet(this, "Order cancelled successfully. Your Total Order Amount Rs:${order.price} for the Order ID: ${order.orderId} has been Refunded to your Wallet.", "close")
+                        } else {
+                            showExitSheet(this, event.message!!, "cs")
+                        }
+                    }
+                }
+                is PurchaseHistoryViewModel.UiUpdate.Empty -> return@observe
+                else -> Unit
+            }
+            viewModel.setEmptyStatus()
+        }
 
         viewModel.moveToProductReview.observe(this) {
             moveToProductDetails(viewModel.productId, viewModel.productName)
         }
+    }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.status.collect { result ->
-                when(result) {
-                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
-                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
-                    is NetworkResult.Loading -> {
-                        if (result.message == "") {
-                            showProgressDialog()
-                        } else {
-                            showSuccessDialog("", result.message, result.data)
-                        }
-                    }
-                    else -> Unit
-                }
-            }
+    private fun populatePurchaseHistory(orders: MutableList<OrderEntity>) {
+        binding.llEmptyLayout.remove()
+        ordersAdapter.setPurchaseHistoryData(orders)
+        hideShimmer()
+    }
+
+    private fun emptyPurchaseHistoryUI() {
+        hideShimmer()
+        binding.apply {
+            llEmptyLayout.visible()
         }
     }
 
-    private fun startWorkerThread(order: OrderEntity) {
-        val stringConvertedOrder = order.toStringConverter(order)
-        val workRequest: WorkRequest =
-            OneTimeWorkRequestBuilder<UpdateTotalOrderItemService>()
-                .setInputData(
-                    workDataOf(
-                        "order" to stringConvertedOrder,
-                        Constants.STATUS to false
-                    )
-                )
-                .build()
-
-        WorkManager.getInstance(this).enqueue(workRequest)
-    }
-
-    private fun OrderEntity.toStringConverter(order: OrderEntity): String {
-        return Gson().toJson(order)
-    }
+//    private fun startWorkerThread(order: OrderEntity) {
+//        val stringConvertedOrder = order.toStringConverter(order)
+//        val workRequest: WorkRequest =
+//            OneTimeWorkRequestBuilder<UpdateTotalOrderItemService>()
+//                .setInputData(
+//                    workDataOf(
+//                        "order" to stringConvertedOrder,
+//                        Constants.STATUS to false
+//                    )
+//                )
+//                .build()
+//
+//        WorkManager.getInstance(this).enqueue(workRequest)
+//    }
+//
+//    private fun OrderEntity.toStringConverter(order: OrderEntity): String {
+//        return Gson().toJson(order)
+//    }
 
     fun cancellationConfirmed() {
         showProgressDialog()
-        viewModel.confirmCancellation(mCancelOrder)
+        viewModel.confirmCancellation()
     }
 
     fun moveToCustomerSupport() {
@@ -172,7 +242,6 @@ class PurchaseHistoryActivity :
         Intent(this, ProductActivity::class.java).also {
             it.putExtra(Constants.PRODUCTS, productId)
             it.putExtra(Constants.PRODUCT_NAME, productName)
-            it.putExtra(NAVIGATION, ORDER_HISTORY_PAGE)
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
@@ -216,15 +285,6 @@ class PurchaseHistoryActivity :
         }
     }
 
-    override fun onBackPressed() {
-        Intent(this, HomeActivity::class.java).also {
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-            finish()
-            finishAffinity()
-        }
-    }
-
     private fun createPDF(order: OrderEntity) {
         val items = mutableListOf<CartEntity>()
         items.addAll(order.cart)
@@ -247,86 +307,13 @@ class PurchaseHistoryActivity :
                 grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
                 showToast(this, "Storage Permission Granted")
-                createPDF(mInvoiceOrder)
+                showProgressDialog()
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                viewModel.order?.let { createPDF(it) }
             } else {
                 showToast(this, "Storage Permission Denied")
                 showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
             }
         }
-    }
-
-    private fun onSuccessCallback(message: String, data: Any?) {
-        when(message) {
-            "orders" -> {
-                lifecycleScope.launch {
-                    binding.tvToolbarTitle.text = "$mFilterMonth $mFilterYear"
-                    if (data == null) {
-                        hideShimmer()
-                        binding.llEmptyLayout.visible()
-                    } else {
-                        binding.llEmptyLayout.remove()
-                        data as MutableList<OrderEntity>
-                        mOrderHistory.clear()
-                        mOrderHistory.sortByDescending {
-                            it.purchaseDate
-                        }
-                        mOrderHistory.addAll(data)
-                        ordersAdapter.orders = mOrderHistory
-                        ordersAdapter.notifyDataSetChanged()
-                        delay(1000)
-                        hideShimmer()
-                    }
-                }
-            }
-            "cancel" -> {
-                startWorkerThread(mCancelOrder)
-                    mOrderHistory[mCancelOrderPosition].orderStatus = Constants.CANCELLED
-                    ordersAdapter.orders[mCancelOrderPosition] = mOrderHistory[mCancelOrderPosition]
-                    ordersAdapter.notifyDataSetChanged()
-                    if (mOrderHistory[mCancelOrderPosition].paymentMethod == WALLET) {
-                        viewModel.makeTransactionFromWallet(
-                            mOrderHistory[mCancelOrderPosition].price,
-                            mOrderHistory[mCancelOrderPosition].customerId,
-                            "Refund",
-                            "Add"
-                        )
-                    } else {
-                        hideProgressDialog()
-                        showToast(this, "Order Cancelled", Constants.SHORT)
-                        showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
-                    }
-            }
-            "transaction" -> {
-                data as TransactionHistory
-                viewModel.updateTransaction(data)
-            }
-            "transactionID" -> {
-                hideProgressDialog()
-                showToast(this, "Order Cancelled", Constants.SHORT)
-                showExitSheet(this, "Delivery Cancelled for Order ID: ${mCancelOrder.orderId}. Based on your mode of payment, the purchase amount of Rs: ${mCancelOrder.price} will be refunded in 4 to 5 Business days. \n \n For further queries please click this message to contact Customer Support", "cs")
-            }
-        }
-        viewModel.setEmptyStatus()
-    }
-
-    private suspend fun onFailedCallback(message: String, data: Any?) {
-        when(message) {
-            "cancel" -> {
-                hideProgressDialog()
-                showErrorSnackBar("Server Error! Order cancellation failed. Try later", true)
-            }
-            "transaction" -> {
-                delay(1000)
-                hideProgressDialog()
-                showErrorSnackBar(data!! as String, true)
-            }
-            "transactionID" -> {
-                delay(1000)
-                hideProgressDialog()
-                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
-            }
-        }
-        viewModel.setEmptyStatus()
     }
 
     override fun showCart(cart: List<CartEntity>) {
@@ -335,18 +322,55 @@ class PurchaseHistoryActivity :
     }
 
     override fun cancelOrder(position: Int) {
-        mCancelOrderPosition = position
-        mCancelOrder = mOrderHistory[position]
-        showExitSheet(this, "Confirm Cancellation")
+        viewModel.orderPosition = position
+        viewModel.order = viewModel.purchaseHistory[position]
+        showExitSheet(this, "The following order with order ID:${viewModel.order?.orderId} will be cancelled. If you have already paid for the purchase Don't worry. Your order amount Rs: ${viewModel.order?.price} will be refunded back to your Magizhini Wallet within 30 minutes. Click PROCEED to confirm cancellation.")
+    }
+
+    override fun openExitSheet(message: String) {
+        showExitSheet(this, message, "cs")
+    }
+
+    override fun selectedFilter(month: String, year: String) {
+        viewModel.filterMonth = month
+        viewModel.filterYear = year
+        dismissCalendarFilterDialog()
+        fetchData()
+    }
+
+    override fun cancelDialog() {
+        dismissCalendarFilterDialog()
+    }
+
+    private fun showCalendarFilterDialog(month: String, year: String) {
+        CalendarFilterDialog.newInstance(month, year.toInt()).show(supportFragmentManager,
+            "calendar"
+        )
+    }
+
+    private fun dismissCalendarFilterDialog() {
+        (supportFragmentManager.findFragmentByTag("calendar") as? DialogFragment)?.dismiss()
     }
 
     override fun generateInvoice(position: Int) {
-        mInvoiceOrder = mOrderHistory[position]
+        viewModel.orderPosition = position
+        viewModel.order = viewModel.purchaseHistory[position]
         if (PermissionsUtil.hasStoragePermission(this)) {
-            createPDF(mInvoiceOrder)
+            showProgressDialog()
+            createPDF(viewModel.order!!)
         } else {
             showExitSheet(this, "The App Needs Storage Permission to save PDF invoice. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
         }
+    }
+
+    override fun onDestroy() {
+        viewModel.let {
+            it.purchaseHistory.clear()
+            it.orderPosition = null
+            it.profile = null
+            it.order = null
+        }
+        super.onDestroy()
     }
 
     private fun singlePageDoc(
@@ -619,7 +643,8 @@ class PurchaseHistoryActivity :
                             }
                         }
                     } catch (e: Exception) {
-                        Log.e("TAG", "createPdf: ${e.message}")
+                        hideProgressDialog()
+                        showErrorSnackBar("Failed to generate Invoice. Try later", true)
                     }
                     pdfDocument.close()
                     openPdfInvoice(pdfUri!!)
@@ -632,7 +657,8 @@ class PurchaseHistoryActivity :
                         val fileOutput = FileOutputStream(file)
                         pdfDocument.writeTo(fileOutput)
                     } catch (e: Exception) {
-                        Log.e("TAG", "otherPages: ${e.message}")
+                        hideProgressDialog()
+                        showErrorSnackBar("Failed to generate Invoice. Try later", true)
                     }
                     pdfDocument.close()
                     openFolder()
@@ -831,7 +857,8 @@ class PurchaseHistoryActivity :
                             }
                         }
                     } catch (e: Exception) {
-                        Log.e("TAG", "createPdf: ${e.message}")
+                        hideProgressDialog()
+                        showErrorSnackBar("Failed to generate Invoice. Try later", true)
                     }
                     pdfDocument.close()
                     openPdfInvoice(pdfUri!!)
@@ -845,7 +872,8 @@ class PurchaseHistoryActivity :
                         val fileOutput = FileOutputStream(file)
                         pdfDocument.writeTo(fileOutput)
                     } catch (e: Exception) {
-                        Log.e("TAG", "otherPages: ${e.message}")
+                        hideProgressDialog()
+                        showErrorSnackBar("Failed to generate Invoice. Try later", true)
                     }
                     pdfDocument.close()
                     openFolder()
@@ -862,10 +890,11 @@ class PurchaseHistoryActivity :
             it.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
         }
         val intent = Intent.createChooser(target, "Open folder in")
+        hideProgressDialog()
         try {
             startActivity(intent)
         } catch (e: IOException) {
-            Log.e("TAG", "openFolder: ${e.message}", )
+            showErrorSnackBar("Failed to generate Invoice. Try later", true)
         }
     }
 
@@ -875,20 +904,11 @@ class PurchaseHistoryActivity :
             it.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
         }
         val intent = Intent.createChooser(target, "Open PDF in")
+        hideProgressDialog()
         try {
             startActivity(intent)
         } catch (e: IOException) {
-            Log.e("TAG", "openFolder: ${e.message}", )
+            showErrorSnackBar("Failed to generate Invoice. Try later", true)
         }
-    }
-
-    fun filterOrders(month: String, year: String) {
-        mFilterMonth = month
-        mFilterYear = year
-        fetchData()
-    }
-
-    override fun openExitSheet(message: String) {
-        showExitSheet(this, message, "cs")
     }
 }

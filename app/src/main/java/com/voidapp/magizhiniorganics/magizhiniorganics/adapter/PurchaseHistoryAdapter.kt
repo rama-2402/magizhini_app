@@ -4,13 +4,14 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.LinearLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.firestore.index.OrderedCodeWriter
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvOrderItemsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 
@@ -113,6 +114,46 @@ class PurchaseHistoryAdapter(
             )
             else -> onItemClickListener.cancelOrder(position)
 
+        }
+    }
+
+    fun updateOrder(position: Int, order: OrderEntity) {
+        var items: MutableList<OrderEntity>? = orders.map { it.copy() } as MutableList
+        items?.let {
+            it[position] = order
+            setPurchaseHistoryData(it)
+        }
+        items = null
+    }
+
+    fun setPurchaseHistoryData(newList: List<OrderEntity>) {
+        val diffUtil = PurchaseHistoryDiffUtil(orders, newList)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
+        orders = newList as ArrayList<OrderEntity>
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    class PurchaseHistoryDiffUtil(
+        private val oldList: List<OrderEntity>,
+        private val newList: List<OrderEntity>
+    ): DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].orderId == newList[newItemPosition].orderId
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return when {
+                oldList[oldItemPosition].orderStatus != newList[newItemPosition].orderStatus -> false
+                else -> true
+            }
         }
     }
 

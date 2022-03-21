@@ -16,9 +16,12 @@ import com.google.firebase.messaging.RemoteMessage
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SplashActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ONLINE_STATUS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import kotlin.random.Random
 
@@ -37,6 +40,7 @@ class FirebaseService : FirebaseMessagingService() {
         val isOnline = SharedPref(this).getData(ONLINE_STATUS, BOOLEAN, false).toString().toBoolean()
         val intent = when(message.data["activity"]) {
             CUSTOMER_SUPPORT -> Intent(this, ChatActivity::class.java)
+            WALLET -> Intent(this, WalletActivity::class.java)
             else -> Intent(this, SplashActivity::class.java)
         }
         when {

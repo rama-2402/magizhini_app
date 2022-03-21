@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.transition.doOnEnd
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -12,6 +13,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPreviewBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadOriginal
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class PreviewActivity : BaseActivity() {
 
@@ -29,30 +32,33 @@ class PreviewActivity : BaseActivity() {
             binding.ivPreviewImage.remove()
 //            binding.videoView.visible()
 //        val sampleUrl = "https://drive.google.com/uc?id=1ZIyHXhh7UOGWFFs2aBs2TCSHh7MXUcPs"
-            val exo = ExoPlayer.Builder(this)
-            player = exo.build()
-            binding.videoView.player = player
-            // Build the media item.
-            val mediaItem: MediaItem = MediaItem.fromUri(Uri.parse(url))
-            // Set the media item to be played.
-            player.setMediaItem(mediaItem)
-            // Prepare the player.
-            player.prepare()
-            // Start the playback.
-            player.play()
-            player.addListener(object : Player.Listener{
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    when(playbackState) {
-                        ExoPlayer.STATE_BUFFERING -> progressVisible()
-                        ExoPlayer.STATE_READY -> progressGone()
-                        ExoPlayer.STATE_ENDED -> {
-                            player.stop()
-                            finish()
+            lifecycleScope.launch {
+                delay(1000)
+                val exo = ExoPlayer.Builder(this@PreviewActivity)
+                player = exo.build()
+                binding.videoView.player = player
+                // Build the media item.
+                val mediaItem: MediaItem = MediaItem.fromUri(Uri.parse(url))
+                // Set the media item to be played.
+                player.setMediaItem(mediaItem)
+                // Prepare the player.
+                player.prepare()
+                // Start the playback.
+                player.play()
+                player.addListener(object : Player.Listener{
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        when(playbackState) {
+                            ExoPlayer.STATE_BUFFERING -> progressVisible()
+                            ExoPlayer.STATE_READY -> progressGone()
+                            ExoPlayer.STATE_ENDED -> {
+                                player.stop()
+                                finish()
+                            }
+                            else -> Unit
                         }
-                        else -> Unit
                     }
-                }
-            })
+                })
+            }
         } else {
 
             window.sharedElementEnterTransition = android.transition.TransitionSet()

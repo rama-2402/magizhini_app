@@ -149,9 +149,9 @@ class LoadStatusDialog: DialogFragment() {
     }
 
     override fun onDetach() {
-        super.onDetach()
         binding.ltAnimImg.cancelAnimation()
         _statusText.removeObservers(this)
         _binding = null
+        super.onDetach()
     }
 }

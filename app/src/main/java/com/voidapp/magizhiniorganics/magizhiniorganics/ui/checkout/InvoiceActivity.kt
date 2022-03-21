@@ -587,11 +587,6 @@ class InvoiceActivity :
         if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
             cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
-            viewModel.apply {
-                userProfile = null
-                wallet = null
-                currentCoupon = null
-            }
             super.onBackPressed()
 //            if (viewModel.navigateToPage == PRODUCTS) {
 //                finish()
@@ -606,10 +601,19 @@ class InvoiceActivity :
         }
     }
 
+    override fun onDestroy() {
+        viewModel.apply {
+            userProfile = null
+            wallet = null
+            currentCoupon = null
+        }
+        super.onDestroy()
+    }
+
     fun moveToCustomerSupport() {
         Intent(this, ChatActivity::class.java).also {
             startActivity(it)
-            finish()
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
         }
     }
     //from address adapter

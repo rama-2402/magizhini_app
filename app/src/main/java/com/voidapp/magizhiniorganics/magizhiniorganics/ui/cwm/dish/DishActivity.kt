@@ -299,21 +299,9 @@ class DishActivity :
 
     override fun onBackPressed() {
         when {
-            isPreviewVisible -> {
-                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-                binding.ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_small))
-                binding.ivPreviewImage.visibility = View.GONE
-                isPreviewVisible = false
-            }
             cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED ->
                 cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-            else -> {
-                Intent(this, AllCWMActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                }
-            }
+            else -> super.onBackPressed()
         }
     }
 

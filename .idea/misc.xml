@@ -15,6 +15,7 @@
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_home.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_preview.xml" value="0.2713541666666667" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_product.xml" value="0.5182291666666666" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_purchase_history.xml" value="0.2510090817356206" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_quick_order.xml" value="0.1" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_shopping_main.xml" value="0.1" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_splash.xml" value="0.2510090817356206" />
@@ -22,7 +23,9 @@
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_video_player.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/dialog_bottom_cart.xml" value="0.1" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/dialog_bottom_item_list.xml" value="0.5182291666666666" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/dialog_calendar_filter.xml" value="0.25" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/dialog_loading.xml" value="0.1" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/dialog_success.xml" value="0.3745471014492754" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/fragment_chat.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/fragment_new_review.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_chat_item.xml" value="0.2510090817356206" />

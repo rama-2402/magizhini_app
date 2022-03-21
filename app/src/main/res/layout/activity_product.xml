@@ -14,18 +14,6 @@
             layout="@layout/dialog_bottom_cart"
             />
 
-        <com.ortiz.touchview.TouchImageView
-            android:id="@+id/ivPreviewImage"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            android:elevation="@dimen/material_size_32"
-            android:background="@color/black"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
         <!--    TOOLBAR LAYOUT-->
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/tbAppBar"

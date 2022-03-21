@@ -23,3 +23,9 @@ data class Order(
     var phoneNumber: String = "",
     var extras: ArrayList<String> = arrayListOf()
 ): Parcelable
+
+/*Extras array order
+* quick order
+* refund status
+*
+* */

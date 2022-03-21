@@ -117,4 +117,9 @@
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
+<!--    Number picker divider color to black-->
+    <style name="MyAppTheme.NumberPicker" parent="Theme.MagizhiniOrganics.NoActionBar">
+        <item name="android:colorControlNormal"> @color/gray700 </item>
+    </style>
+
 </resources>

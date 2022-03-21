@@ -344,13 +344,8 @@ class SubscriptionProductActivity :
                     }
                 }
                 is SubscriptionProductViewModel.UiUpdate.OpenPreviewImage -> {
-                    isPreviewVisible = true
                     val url = event.imageUrl ?: event.imageUri
-                    with(binding) {
-//                        GlideLoader().loadUserPictureWithoutCrop(this@SubscriptionProductActivity, url!!, ivPreviewImage)
-                        ivPreviewImage.visible()
-                        ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@SubscriptionProductActivity, R.anim.scale_big))
-                    }
+                    previewImage(url as String, event.thumbnail)
                 }
                 is SubscriptionProductViewModel.UiUpdate.CreateStatusDialog -> {
                     LoadStatusDialog.newInstance("", "Creating Subscription...", "placingOrder").show(supportFragmentManager,
@@ -452,29 +447,6 @@ class SubscriptionProductActivity :
         }
     }
 
-    private fun navigateToPreviousPage() {
-        when(viewModel.navigateToPage) {
-            Constants.HOME_PAGE -> {
-                Intent(this, HomeActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                    finishAffinity()
-                }
-            }
-            Constants.SUB_HISTORY_PAGE -> finish()
-            else -> {
-                Intent(this, ShoppingMainActivity::class.java).also {
-                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                    finishAffinity()
-                }
-            }
-        }
-    }
-
     override fun previewImage(url: String, thumbnail: ShapeableImageView) {
         Intent(this, PreviewActivity::class.java).also { intent ->
             intent.putExtra("url", url)
@@ -484,25 +456,9 @@ class SubscriptionProductActivity :
             startActivity(intent, options.toBundle())
         }
     }
-//
-//    override fun previewImage(url: String, ) {
-//        isPreviewVisible = true
-//        GlideLoader().loadUserPicture(this, url, binding.ivPreviewImage)
-//        binding.ivPreviewImage.visible()
-//        binding.ivPreviewImage.startAnimation(scaleBig)
-//    }
 
     override fun onBackPressed() {
-        when {
-            isPreviewVisible -> {
-                binding.ivPreviewImage.startAnimation(scaleSmall)
-                binding.ivPreviewImage.remove()
-                isPreviewVisible = false
-            }
-            else -> {
-                navigateToPreviousPage()
-            }
-        }
+        super.onBackPressed()
     }
 
     fun navigateToOtherPage(content: String) {

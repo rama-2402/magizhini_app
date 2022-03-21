@@ -61,6 +61,7 @@ import ru.nikartm.support.ImageBadgeView
 import kotlin.math.abs
 
 
+
 class ProductActivity :
     BaseActivity(),
     KodeinAware,
@@ -79,8 +80,6 @@ class ProductActivity :
     private lateinit var cartAdapter: CartAdapter
 
     private lateinit var dialogAddCouponBs: BottomSheetDialog
-
-//    private var isPreviewVisible: Boolean = false
 
     companion object {
         const val ANIMATION_DURATION: Long = 200
@@ -656,15 +655,20 @@ class ProductActivity :
 //            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED -> cartBottomSheet.state =
 //                BottomSheetBehavior.STATE_COLLAPSED
 //            else -> {
-                viewModel.apply {
-                    userProfile = null
-                    product = null
-                    currentCoupon = null
-                    reviewAdapter = null
-                }
+
                 super.onBackPressed()
 //            }
 //        }
+    }
+
+    override fun onDestroy() {
+        viewModel.apply {
+            userProfile = null
+            product = null
+            currentCoupon = null
+            reviewAdapter = null
+        }
+        super.onDestroy()
     }
 
     fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)

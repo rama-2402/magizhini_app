@@ -181,7 +181,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
         binding.ivWalletFilter.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            CalendarFilterDialog(this, this, mFilterMonth, mFilterYear).show()
+//            CalendarFilterDialog(this, this, mFilterMonth, mFilterYear).show()
         }
 
         binding.ivInfo.setOnClickListener {

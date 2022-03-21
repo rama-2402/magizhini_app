@@ -280,11 +280,6 @@ open class BaseActivity : AppCompatActivity() {
                         "" -> activity.exitProfileWithoutChange()
                     }
                 }
-                is PurchaseHistoryActivity -> {
-                    when (data) {
-                        "" -> activity.cancellationConfirmed()
-                    }
-                }
                 is SubscriptionHistoryActivity -> {
                     when (data) {
                         "" -> activity.confirmCancellation()
@@ -328,6 +323,8 @@ open class BaseActivity : AppCompatActivity() {
                         "cs" -> activity.moveToCustomerSupport()
                         "permission" -> activity.proceedToRequestPermission()
                         "setting" -> activity.proceedToRequestManualPermission()
+                        "close" -> hideExitSheet()
+                        "" -> activity.cancellationConfirmed()
                     }
                 }
                 is ConversationActivity -> {
