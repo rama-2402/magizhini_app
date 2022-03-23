@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,16 +16,18 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ACTIVE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADD_MONEY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALTERNATE_DAYS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CANCELLED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOM_DAYS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SINGLE_DAY_LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
-import kotlinx.coroutines.Dispatchers
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,45 +36,95 @@ class SubscriptionHistoryViewModel(
     val dbRepository: DatabaseRepository
 ): ViewModel() {
 
-    var liveWallet: Wallet = Wallet()
-    var currentUserProfile: UserProfileEntity = UserProfileEntity()
+    var subscription: SubscriptionEntity? = null
+    val subscriptionsList: MutableList<SubscriptionEntity> = mutableListOf()
+    var subPosition: Int = 0
+
+    var liveWallet: Wallet? = null
+    var currentUserProfile: UserProfileEntity? = null
+
     private var updatedCustomDaysForSubRenewal: Int = 0
     private val updatedCancelledDaysForSubRenewal = arrayListOf<Long>()
-
-    private var _activeSubs: MutableLiveData<MutableList<SubscriptionEntity>> = MutableLiveData()
-    val activeSub: LiveData<MutableList<SubscriptionEntity>> = _activeSubs
 
     private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(
         NetworkResult.Empty)
     val status: StateFlow<NetworkResult> = _status
 
+    private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
+    val uiUpdate: LiveData<UiUpdate> = _uiUpdate
+    private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
+    val uiEvent: LiveData<UIEvent> = _uiEvent
+
+    fun setEmptyUiEvent() {
+        _uiEvent.value = UIEvent.EmptyUIEvent
+    }
+
     fun setEmptyStatus() {
-        _status.value = NetworkResult.Empty
+        _uiUpdate.value = UiUpdate.Empty
     }
 
     fun getProfile() = viewModelScope.launch(Dispatchers.IO) {
-        val profile = dbRepository.getProfileData()!!
-        getWallet(profile.id)
-        withContext(Dispatchers.Main) {
-            currentUserProfile = profile
+        try {
+            dbRepository.getProfileData()?.let { profile ->
+                getWallet(profile.id)
+                withContext(Dispatchers.Main) {
+                    currentUserProfile = profile
+                }
+            }
+        } catch (e: IOException) {
+            fbRepository.logCrash("subHistoryVM: getting profile data", e.message.toString())
         }
     }
 
     private suspend fun getWallet(id: String) {
-        val suspendProfile = dbRepository.getProfileData()!!
-        _status.value = fbRepository.getWallet(id)
-    }
-
-    fun getSubscriptions(status: String) = viewModelScope.launch(Dispatchers.IO) {
-        val subs = dbRepository.getAllSubscriptionsHistory(status)
-        withContext(Dispatchers.Main) {
-            _activeSubs.value = subs as MutableList<SubscriptionEntity>
+        when(val walletStatus = fbRepository.getWallet(id)) {
+            is NetworkResult.Success -> liveWallet = walletStatus.data as Wallet
+            is NetworkResult.Failed -> {
+                withContext(Dispatchers.Main) {
+                    _uiEvent.value =
+                        UIEvent.SnackBar(walletStatus.data as String, true)
+                }
+            }
+            else -> Unit
         }
     }
 
-    fun cancelSubscription(sub: SubscriptionEntity) = viewModelScope.launch(Dispatchers.IO) {
-        sub.status = Constants.CANCELLED
-        _status.value = fbRepository.cancelSubscription(sub)
+    fun getSubscriptions(status: String) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val subs = dbRepository.getAllSubscriptionsHistory(status)
+            subscriptionsList.clear()
+            subscriptionsList.addAll(subs)
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value =
+                    UiUpdate.PopulateSubscriptions(subs.map { it.copy() } as MutableList<SubscriptionEntity>, null)
+            }
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("subHistoryVM: getting subscriptions", it) }
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value =
+                    UiUpdate.PopulateSubscriptions(null, "Failed to fetch subscriptions. Try again later")
+            }
+        }
+
+    }
+
+    fun cancelSubscription() = viewModelScope.launch {
+        subscription?.let {
+            _uiUpdate.value =
+                UiUpdate.ShowLoadStatusDialog("Cancelling your Subscription...", "upload")
+            it.status = CANCELLED
+            val status = fbRepository.cancelSubscription(it)
+            delay(1000)
+            when(status) {
+                is NetworkResult.Success -> _uiUpdate.value = UiUpdate.SubCancelStatus(true, null)
+                is NetworkResult.Failed -> {
+                    _uiUpdate.value = UiUpdate.SubCancelStatus(false, status.message)
+                    delay(1000)
+                    _uiUpdate.value = UiUpdate.DismissLoadStatusDialog
+                }
+                else -> Unit
+            }
+        }
     }
 
     suspend fun cancelDate(sub: SubscriptionEntity ,cancelDate: Long) =
@@ -89,32 +142,45 @@ class SubscriptionHistoryViewModel(
             }
         }
 
-
-    fun checkWalletForBalance(amount: Float): Boolean {
-        return liveWallet.amount >= amount
-    }
-
-    suspend fun calculateBalance(sub: SubscriptionEntity): Float = withContext(Dispatchers.Default) {
-        return@withContext if(sub.subType == CUSTOM_DAYS) {
-            var totalSubDays = 0
-            val dayFormat = SimpleDateFormat("EEEE", Locale.ENGLISH)
-            for (dateLong in sub.startDate..sub.endDate step 86400000) {
-                if (sub.customDates.contains(dayFormat.format(dateLong))) {
-                    totalSubDays += 1
+    private suspend fun calculateBalance(sub: SubscriptionEntity): Float = withContext(Dispatchers.Default) {
+        return@withContext when(sub.subType) {
+            CUSTOM_DAYS -> {
+                var totalSubDays = 0
+                val dayFormat = SimpleDateFormat("EEEE", Locale.ENGLISH)
+                for (dateLong in sub.startDate..sub.endDate step 86400000) {
+                    if (sub.customDates.contains(dayFormat.format(dateLong))) {
+                        totalSubDays += 1
+                    }
                 }
+                val totalAmountPaid = totalSubDays * sub.basePay
+                val amountForDelivery = sub.deliveredDates.size * sub.basePay
+                totalAmountPaid - amountForDelivery
             }
-            val totalAmountPaid = totalSubDays * sub.basePay
-            val amountForDelivery = sub.deliveredDates.size * sub.basePay
-            totalAmountPaid - amountForDelivery
-        } else {
-            val totalSubPeriod = (sub.endDate - sub.startDate + 86400000)/86400000
-            val totalSubscriptionRenewals = totalSubPeriod / 30
-            val amountForDelivery = sub.deliveredDates.size * sub.basePay
-            (sub.estimateAmount * totalSubscriptionRenewals) - amountForDelivery
+            else -> {
+                val totalSubPeriod = ((sub.endDate - sub.startDate) + 86400000) / 86400000
+                val totalSubscriptionRenewals = totalSubPeriod / 30
+                val amountForDelivery = sub.deliveredDates.size * sub.basePay
+                (sub.estimateAmount * totalSubscriptionRenewals) - amountForDelivery
+            }
         }
     }
 
-    suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String, transactionType: String) {
+    fun initiateWalletTransaction(amount: Float, id: String, orderID: String, transactionType: String) = viewModelScope.launch {
+        _uiUpdate.value = UiUpdate.ShowLoadStatusDialog("Initiating Payment from Wallet...", "transaction")
+        makeTransactionFromWallet(amount, id, orderID, transactionType)
+    }
+
+    fun refundSubBalance() = viewModelScope.launch {
+        delay(1000)
+        _uiUpdate.value = UiUpdate.UpdateLoadStatusDialog("Wallet Refund Initiated... please wait", "transaction")
+
+        val refundAmountJob = async { calculateBalance(subscription!!) }
+        val refundAmount = refundAmountJob.await()
+
+        makeTransactionFromWallet(refundAmount, subscription!!.customerID, subscription!!.id, "Add")
+    }
+
+    private suspend fun makeTransactionFromWallet(amount: Float, id: String, orderID: String, transactionType: String) {
         if (fbRepository.makeTransactionFromWallet(amount, id, transactionType)) {
             TransactionHistory (
                 orderID,
@@ -131,48 +197,107 @@ class SubscriptionHistoryViewModel(
                 if (transactionType == "Add") {
                     it.purpose = ADD_MONEY
                 }
-                _status.value = NetworkResult.Success("transaction", it)
+                val transactionStatus = fbRepository.updateTransaction(
+                    it,
+                    if (transactionType == "Add") {
+                        "Subscription Cancellation Refund"
+                    } else {
+                        "Subscription (ID: $orderID) Renewal "
+                    }
+                )
+                when(transactionStatus) {
+                    is NetworkResult.Success -> {
+                        delay(1000)
+                        _uiUpdate.value =
+                            UiUpdate.TransactionStatus(true, null, "renew")
+                        if (subscription!!.status == CANCELLED) {
+                            delay(1800)
+                            _uiUpdate.value = UiUpdate.DismissLoadStatusDialog
+                        }
+                    }
+                    is NetworkResult.Failed -> {
+                        _uiUpdate.value =
+                            UiUpdate.TransactionStatus(false, transactionStatus.message, "fail")
+                        delay(1000)
+                        _uiUpdate.value = UiUpdate.DismissLoadStatusDialog
+
+                    }
+                    else -> Unit
+                }
             }
         } else {
-            _status.value = NetworkResult.Failed("transaction", "Server Error. Failed to make transaction from Wallet. Try other payment method")
+            _uiUpdate.value =
+                UiUpdate.TransactionStatus(false, "Server Error. Failed to make transaction from Wallet. Try other payment method", "fail")
+            delay(1000)
+            _uiUpdate.value = UiUpdate.DismissLoadStatusDialog
         }
-    }
-
-    fun updateTransaction(transaction: TransactionHistory) = viewModelScope.launch (Dispatchers.IO) {
-        _status.value = fbRepository.updateTransaction(transaction, "Subscription Renewal")
     }
 
     suspend fun renewSubscription(sub: SubscriptionEntity, transactionID: String) {
         sub.cancelledDates.addAll(updatedCancelledDaysForSubRenewal)
         if (sub.paymentMode == "Online") {
-            GlobalTransaction(
-                id = "",
-                userID = currentUserProfile.id,
-                userName = currentUserProfile.name,
-                userMobileNumber = currentUserProfile.phNumber,
-                transactionID = transactionID,
-                transactionType = "Online Payment",
-                transactionAmount = sub.estimateAmount,
-                transactionDirection = SUBSCRIPTION,
-                timestamp = System.currentTimeMillis(),
-                transactionReason = "${sub.productName} ${sub.variantName} Subscription Renewal Transaction"
-            ).let {
-                fbRepository.createGlobalTransactionEntry(it)
+            currentUserProfile?.let { profile ->
+                GlobalTransaction(
+                    id = "",
+                    userID = profile.id,
+                    userName = profile.name,
+                    userMobileNumber = profile.phNumber,
+                    transactionID = transactionID,
+                    transactionType = "Online Payment",
+                    transactionAmount = sub.estimateAmount,
+                    transactionDirection = SUBSCRIPTION,
+                    timestamp = System.currentTimeMillis(),
+                    transactionReason = "${sub.productName} ${sub.variantName} Subscription Renewal Transaction"
+                ).let {
+                    fbRepository.createGlobalTransactionEntry(it)
+                }
             }
         }
         if (sub.subType == MONTHLY) {
-            _status.value = fbRepository.renewSubscription(sub, arrayListOf())
+            val status = fbRepository.renewSubscription(sub, arrayListOf())
+            updateRenewalStatus(status)
         } else {
-            _status.value = fbRepository.renewSubscription(sub, updatedCancelledDaysForSubRenewal)
+            val status = fbRepository.renewSubscription(sub, updatedCancelledDaysForSubRenewal)
+            updateRenewalStatus(status)
+        }
+    }
+
+    private fun updateRenewalStatus(status: NetworkResult) = viewModelScope.launch {
+        when(status) {
+            is NetworkResult.Success -> {
+                delay(1000)
+                _uiUpdate.value =
+                    UiUpdate.SubRenewalStatus(true, null)
+                delay(1800)
+                _uiUpdate.value =
+                    UiUpdate.DismissLoadStatusDialog
+            }
+            is NetworkResult.Failed -> {
+                delay(1000)
+                _uiUpdate.value =
+                    UiUpdate.SubRenewalStatus(false, status.message)
+                delay(1000)
+                _uiUpdate.value =
+                    UiUpdate.DismissLoadStatusDialog
+            }
+            else -> Unit
         }
     }
 
     suspend fun getCancellationDays(sub: SubscriptionEntity) : ArrayList<Long> = withContext (Dispatchers.Default) {
-        val singeDateDifference = 86400000
+        val singeDateDifference: Long = 86400000
         val cancelledDates = arrayListOf<Long>()
-        var startDate = sub.endDate
+        var startDate = sub.endDate + SINGLE_DAY_LONG
         updatedCancelledDaysForSubRenewal.clear()
         if (sub.subType == ALTERNATE_DAYS) {
+            val endDateLimit = sub.endDate - (2 * SINGLE_DAY_LONG)
+            sub.cancelledDates.forEach {
+                if (it >= endDateLimit) {
+                    if (TimeUtil().getCustomDate(dateLong = it) == TimeUtil().getCustomDate(dateLong = sub.endDate)) {
+                        startDate = sub.endDate
+                    }
+                }
+            }
             for (i in 1..15) {
                 startDate += (2 * singeDateDifference)
                 cancelledDates.add(startDate)
@@ -194,9 +319,8 @@ class SubscriptionHistoryViewModel(
     }
 
     suspend fun getUpdatedEstimateForNewSubJob(sub: SubscriptionEntity): Float = withContext(Dispatchers.Default) {
-        val updatedProduct = dbRepository.getProductWithIdForUpdate(sub.productID)
-        updatedProduct?.let {
-            if (updatedProduct.status != ACTIVE) {
+        dbRepository.getProductWithIdForUpdate(sub.productID)?.let {
+            if (it.status != ACTIVE || it.productType != SUBSCRIPTION) {
                 //THIS CODE CAN BE USED IF WE WANT THE RENEWED SUB TO HAVE NEW UPDATED PRICES
 //            var variantPosition = 0
 //            for (i in updatedProduct.variants.indices) {
@@ -208,19 +332,33 @@ class SubscriptionHistoryViewModel(
 //            _status.value = NetworkResult.Success("basePay", updatedProduct.variants[variantPosition].variantPrice)
 
                 val estimateAmount = when(sub.subType) {
-//                CUSTOM_DAYS -> (updatedProduct.variants[variantPosition].variantPrice * updatedCustomDaysForSubRenewal).toFloat()
-//                ALTERNATE_DAYS -> (updatedProduct.variants[variantPosition].variantPrice * 15).toFloat()
-//                else -> (updatedProduct.variants[variantPosition].variantPrice * 30).toFloat()
                     CUSTOM_DAYS -> (sub.basePay * updatedCustomDaysForSubRenewal)
                     ALTERNATE_DAYS -> (sub.basePay * 15)
                     else -> (sub.basePay * 30)
                 }
-//            _status.value = NetworkResult.Success("basePay", estimateAmount)
                 return@withContext estimateAmount
             } else {
                 return@withContext 0f
             }
         } ?: return@withContext 0f
+    }
 
+    sealed class UiUpdate {
+        //sub
+        data class PopulateSubscriptions(val subscriptions: MutableList<SubscriptionEntity>?, val message: String?): UiUpdate()
+        data class UpdateSubscription(val subscription: SubscriptionEntity, val position: Int): UiUpdate()
+        //load status dialog
+        data class ShowLoadStatusDialog(val message: String?, val data: String?): UiUpdate()
+        data class UpdateLoadStatusDialog(val message: String?, val data: String?): UiUpdate()
+        object DismissLoadStatusDialog: UiUpdate()
+        //sub renewal
+        data class SubRenewalStatus(val status: Boolean, val message: String?): UiUpdate()
+        //sub cancel
+        data class SubCancelStatus(val status: Boolean, val message: String?): UiUpdate()
+        //wallet
+        data class TransactionStatus(val status: Boolean, val message: String?, val data: String?): UiUpdate()
+
+
+        object Empty : UiUpdate()
     }
 }

@@ -1308,8 +1308,12 @@ class Firestore(
             val wallet = mFireStore.collection(WALLET)
                 .document(WALLET)
                 .collection("Users")
-                .document(currentUserID).get().await().toObject(Wallet::class.java)!!
-            NetworkResult.Success("wallet", wallet)
+                .document(currentUserID).get().await().toObject(Wallet::class.java)
+
+            wallet?.let {
+                NetworkResult.Success("wallet", it)
+            } ?: NetworkResult.Failed("wallet", "Server Error. Failed to fetch Wallet.")
+
         } catch (e: Exception) {
             e.message?.let { logCrash("checkout: getting wallet", it) }
             NetworkResult.Failed("wallet", "Server Error. Failed to fetch Wallet.")

@@ -199,6 +199,7 @@ class SubscriptionProductViewModel(
                 sub.productName = it.name
                 val variantName = "${it.variants[subscriptionMap["variantPosition"].toString().toInt()].variantName} ${it.variants[subscriptionMap["variantPosition"].toString().toInt()].variantType}"
                 sub.variantName = variantName
+                sub.basePay = it.variants[subscriptionMap["variantPosition"].toString().toInt()].variantPrice.toFloat()
             }
             sub.startDate = subStartDate
             sub.endDate = generateSubEndDate()
@@ -206,9 +207,7 @@ class SubscriptionProductViewModel(
             sub.subType = subscriptionMap["subType"].toString()
             sub.monthYear = subscriptionMap["monthYear"].toString()
             sub.status = subscriptionMap["status"].toString()
-            val mrp = getEstimateAmount(subscriptionMap["subTypePosition"].toString().toInt(), subscriptionMap["variantPosition"].toString().toInt())
-            sub.basePay = mrp.toFloat()
-            sub.estimateAmount = mrp.toFloat()
+            sub.estimateAmount = getEstimateAmount(subscriptionMap["subTypePosition"].toString().toInt(), subscriptionMap["variantPosition"].toString().toInt()).toFloat()
 
             if (sub.paymentMode == "Online") {
                 placeSubscriptionWithOnline(sub, transactionID!!)

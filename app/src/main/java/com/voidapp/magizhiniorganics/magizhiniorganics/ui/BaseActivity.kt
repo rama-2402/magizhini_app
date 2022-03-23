@@ -280,11 +280,6 @@ open class BaseActivity : AppCompatActivity() {
                         "" -> activity.exitProfileWithoutChange()
                     }
                 }
-                is SubscriptionHistoryActivity -> {
-                    when (data) {
-                        "" -> activity.confirmCancellation()
-                    }
-                }
                 is QuickOrderActivity -> activity.onBackPressed()
             }
         }
@@ -348,6 +343,8 @@ open class BaseActivity : AppCompatActivity() {
                     when (data) {
                         "cs" -> activity.moveToCustomerSupport()
                         "price" -> activity.showPaymentMethod()
+                        "close" -> hideExitSheet()
+                        "" -> activity.confirmCancellation()
                     }
                 }
                 is InvoiceActivity -> activity.moveToCustomerSupport()

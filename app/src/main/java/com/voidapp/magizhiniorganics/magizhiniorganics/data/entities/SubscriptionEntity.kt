@@ -34,7 +34,7 @@ data class SubscriptionEntity(
     @ColumnInfo
     var estimateAmount: Float = 0f,
     @ColumnInfo
-    var subType: String = "Single Purchase",
+    var subType: String = "Monthly",
     @ColumnInfo
     var status: String = "Active",
     @ColumnInfo

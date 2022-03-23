@@ -69,14 +69,12 @@ class SubscriptionProductActivity :
     private lateinit var viewModel: SubscriptionProductViewModel
     private lateinit var binding: ActivitySubscriptionProductBinding
 
-    private var isPreviewVisible: Boolean = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_subscription_product)
         viewModel = ViewModelProvider(this, factory).get(SubscriptionProductViewModel::class.java)
 
-        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
+        supportPostponeEnterTransition()
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -236,25 +234,6 @@ class SubscriptionProductActivity :
         viewModel.subStartDate = date
         setDataToDisplay(binding.spVariants.selectedItemPosition)
     }
-//
-//    private fun showCalendarDialog() {
-//        val calendar = Calendar.getInstance()
-//        val dialog = DatePickerDialog(this, { _, year, month, day_of_month ->
-//            calendar[Calendar.YEAR] = year
-//            calendar[Calendar.MONTH] = month
-//            calendar[Calendar.DAY_OF_MONTH] = day_of_month
-//            viewModel.subStartDate = calendar.timeInMillis
-//            setDataToDisplay(binding.spVariants.selectedItemPosition)
-//        }, calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH])
-//        //this part is to preselect the already selected startsub date
-//        dialog.updateDate(
-//            TimeUtil().getYear(dateLong = viewModel.subStartDate).toInt(),
-//            TimeUtil().getMonthNumber(dateLong = viewModel.subStartDate),
-//            TimeUtil().getDateNumber(dateLong = viewModel.subStartDate).toInt()
-//        )
-//        dialog.datePicker.minDate = calendar.timeInMillis + SINGLE_DAY_LONG
-//        dialog.show()
-//    }
 
     fun selectedPaymentMode(paymentMode: String) = lifecycleScope.launch {
         val estimate = viewModel.getEstimateAmount(
@@ -327,8 +306,17 @@ class SubscriptionProductActivity :
         viewModel.uiUpdate.observe(this) { event ->
             when(event) {
                 is SubscriptionProductViewModel.UiUpdate.PopulateProduct -> {
-                    event.product?.let {
-                        populateProductDetails(it)
+                    event.product?.let { product ->
+                        window.sharedElementEnterTransition = android.transition.TransitionSet()
+                            .addTransition(android.transition.ChangeImageTransform())
+                            .addTransition(android.transition.ChangeBounds())
+                            .apply {
+                                doOnEnd { binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {} }
+                            }
+                        binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {
+                            supportStartPostponedEnterTransition()
+                        }
+                        populateProductDetails(product)
                         initListeners()
                     } ?: let {
                         showToast(this, "Product Not Available")
@@ -416,15 +404,6 @@ class SubscriptionProductActivity :
     private fun setDataToDisplay(variantPosition: Int) {
         with(binding) {
             viewModel.product?.let { product ->
-                window.sharedElementEnterTransition = android.transition.TransitionSet()
-                    .addTransition(android.transition.ChangeImageTransform())
-                    .addTransition(android.transition.ChangeBounds())
-                    .apply {
-                        doOnEnd { binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {} }
-                    }
-                ivProductThumbnail.loadImg(product.thumbnailUrl) {
-                    supportStartPostponedEnterTransition()
-                }
                 tvDiscountedPrice.setTextAnimation("Rs. ${product.variants[variantPosition].variantPrice}")
                 tvFromDate.setTextAnimation(TimeUtil().getCustomDate(dateLong = viewModel.subStartDate))
                 generateEstimate(spSubscriptionType.selectedItemPosition, variantPosition)

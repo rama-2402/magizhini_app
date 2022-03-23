@@ -77,7 +77,7 @@ class PurchaseHistoryAdapter(
                 if (tvOrderId.isFocused) {
                     tvOrderId.clearFocus()
                 }
-                ivCart.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
+//                ivCart.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
                 onItemClickListener.showCart(order.cart)
             }
 

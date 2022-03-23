@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
 
-    <data>
-
-        <variable
-            name="viewmodel"
-            type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel" />
-    </data>
-
     <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/white"
         tools:context=".ui.subscriptions.SubscriptionProductActivity">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/tbAppBar"
             android:layout_width="match_parent"
             android:layout_height="300dp"
+            android:background="@color/transparent"
             android:fitsSystemWindows="true"
             android:theme="@style/ThemeOverlay.MaterialComponents.Dark">
 
@@ -27,6 +22,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:fitsSystemWindows="true"
+                android:background="@color/transparent"
                 app:contentScrim="@color/green_base"
                 app:expandedTitleMargin="@dimen/material_size_16"
                 app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
@@ -93,9 +89,9 @@
         <!--    MAIN BODY LAYOUT-->
         <androidx.core.widget.NestedScrollView
             android:id="@+id/svBody"
+            android:background="@color/white"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <LinearLayout
