@@ -609,10 +609,6 @@ class ProductActivity :
         }
     }
 
-    private fun navigateToPreviewActivity() {
-
-    }
-
     private fun initViewPager() {
         val adapter = ProductViewPager(supportFragmentManager, lifecycle)
         binding.vpFragmentContent.adapter = adapter
@@ -642,23 +638,6 @@ class ProductActivity :
             Instrumentation().callActivityOnSaveInstanceState(this, Bundle())
         }
         super.onStop()
-    }
-
-    override fun onBackPressed() {
-//        when {
-//            isPreviewVisible -> {
-//                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-//                binding.ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.scale_small))
-//                binding.ivPreviewImage.visibility = View.GONE
-//                isPreviewVisible = false
-//            }
-//            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED -> cartBottomSheet.state =
-//                BottomSheetBehavior.STATE_COLLAPSED
-//            else -> {
-
-                super.onBackPressed()
-//            }
-//        }
     }
 
     override fun onDestroy() {

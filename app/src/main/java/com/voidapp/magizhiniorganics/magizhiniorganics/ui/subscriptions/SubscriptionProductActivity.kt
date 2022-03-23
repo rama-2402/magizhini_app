@@ -331,10 +331,6 @@ class SubscriptionProductActivity :
                         showExitSheet(this, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
                     }
                 }
-                is SubscriptionProductViewModel.UiUpdate.OpenPreviewImage -> {
-                    val url = event.imageUrl ?: event.imageUri
-                    previewImage(url as String, event.thumbnail)
-                }
                 is SubscriptionProductViewModel.UiUpdate.CreateStatusDialog -> {
                     LoadStatusDialog.newInstance("", "Creating Subscription...", "placingOrder").show(supportFragmentManager,
                         Constants.LOAD_DIALOG
@@ -517,6 +513,7 @@ class SubscriptionProductActivity :
             wallet = null
             userProfile = null
             address = null
+            reviewAdapter = null
         }
         super.onDestroy()
     }

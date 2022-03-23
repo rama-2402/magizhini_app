@@ -58,7 +58,7 @@ fun ShapeableImageView.loadImg(url: Any, loadOnlyFromCache: Boolean = false, onL
         Glide
             .with(this.context)
             .load(url) // URI of the image
-            .centerCrop() // Scale type of the image.
+//            .centerCrop() // Scale type of the image.
             .placeholder(R.drawable.carousel_default_placeholder) // A default place holder if image is failed to load.
             .transition(DrawableTransitionOptions.withCrossFade())
             .apply(requestOptions)
@@ -139,7 +139,7 @@ fun ShapeableImageView.loadOriginal(url: Any) {
 }
 
 @SuppressLint("CheckResult")
-fun ImageView.loadOriginal(url: Any, loadOnlyFromCache: Boolean = true, onLoadingFinished: () -> Unit) {
+fun ImageView.loadOriginal(url: Any, loadOnlyFromCache: Boolean = false, onLoadingFinished: () -> Unit) {
     try {
         val listener = object : RequestListener<Drawable> {
             override fun onLoadFailed(
@@ -182,16 +182,6 @@ fun ImageView.loadOriginal(url: Any, loadOnlyFromCache: Boolean = true, onLoadin
     } catch (e: IOException) {
         e.printStackTrace()
     }
-}
-
-fun showImageChooser(activity: Activity) {
-    // An intent for launching the image selection of phone storage.
-    val galleryIntent = Intent(
-        Intent.ACTION_PICK,
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-    )
-    // Launches the image selection of phone storage using the constant code.
-    activity.startActivityForResult(galleryIntent, Constants.PICK_IMAGE_REQUEST_CODE)
 }
 
 fun imageExtension(activity: Activity, uri: Uri?): String? {

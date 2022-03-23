@@ -1,7 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish
 
+import android.app.Instrumentation
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -9,23 +11,28 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.DishViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityDishBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
@@ -47,7 +54,8 @@ import ru.nikartm.support.ImageBadgeView
 * */
 class DishActivity :
     BaseActivity(),
-    KodeinAware
+    KodeinAware,
+    ReviewAdapter.ReviewItemClickListener
 {
     override val kodein: Kodein by kodein()
 
@@ -62,9 +70,7 @@ class DishActivity :
     private lateinit var checkoutText: TextView
     private lateinit var filterBtn: ImageView
 
-    private lateinit var player: YouTubePlayer
-
-    private var isPreviewVisible: Boolean = false
+    private var player: YouTubePlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,18 +116,6 @@ class DishActivity :
                 viewModel.setStoragePermission(null)
             }
         }
-
-        viewModel.openPreviewImage.observe(this) { url ->
-            url?.let {
-                cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
-                isPreviewVisible = true
-                with(binding) {
-//                    GlideLoader().loadUserPictureWithoutCrop(this@DishActivity, it, ivPreviewImage)
-                    ivPreviewImage.visible()
-                    ivPreviewImage.startAnimation(AnimationUtils.loadAnimation(this@DishActivity, R.anim.scale_big))
-                }
-            }
-        }
     }
 
     private fun initListeners() {
@@ -133,11 +127,11 @@ class DishActivity :
             ) { isOpen ->
                 if (isOpen) {
                     cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
-                    player.pause()
+                    player?.pause()
                     binding.youtubePlayerView.remove()
                 } else {
                     cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-                    player.play()
+                    player?.play()
                     binding.youtubePlayerView.visible()
                 }
             }
@@ -145,6 +139,12 @@ class DishActivity :
     }
 
     private fun initData() {
+        viewModel.reviewAdapter = ReviewAdapter(
+            this,
+            arrayListOf(),
+            this
+        )
+
         binding.youtubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 player = youTubePlayer
@@ -188,11 +188,13 @@ class DishActivity :
                             "Rs: ${viewModel.dish!!.totalPrice}",
                             ProductActivity.ANIMATION_DURATION
                         )
+                        player?.pause()
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         checkoutText.setTextAnimation("CHECKOUT",
                             ProductActivity.ANIMATION_DURATION
                         )
+                        player?.play()
                     }
                 }
             }
@@ -222,7 +224,6 @@ class DishActivity :
         checkoutBtn.setOnClickListener {
             if (NetworkHelper.isOnline(this)) {
                 Intent(this, InvoiceActivity::class.java).also {
-                    it.putExtra(Constants.NAVIGATION, PRODUCTS)
                     it.putParcelableArrayListExtra("dish", viewModel.cartItems as ArrayList<CartEntity>)
                     it.putExtra("cwm", true)
                     startActivity(it)
@@ -260,6 +261,17 @@ class DishActivity :
                 1 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_write_review)
             }
         }.attach()
+    }
+
+    override fun previewImage(url: String, thumbnail: ShapeableImageView) {
+        player?.pause()
+        Intent(this, PreviewActivity::class.java).also { intent ->
+            intent.putExtra("url", url)
+            intent.putExtra("contentType", "image")
+            val options: ActivityOptionsCompat =
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, ViewCompat.getTransitionName(thumbnail)!!)
+            startActivity(intent, options.toBundle())
+        }
     }
 
     private suspend fun onSuccessCallback(message: String, data: Any?) {
@@ -329,10 +341,18 @@ class DishActivity :
         }
     }
 
+    override fun onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !isFinishing) {
+            Instrumentation().callActivityOnSaveInstanceState(this, Bundle())
+        }
+        super.onStop()
+    }
+
     override fun onDestroy() {
         viewModel.apply {
             dish = null
             userProfile = null
+            reviewAdapter = null
         }
         super.onDestroy()
     }

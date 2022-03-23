@@ -18,6 +18,7 @@
         android:id="@+id/ivListPage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:transitionName="thumbnail"
         android:contentDescription="@string/product_thumbnail"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_app_placeholder"

@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
@@ -27,6 +28,7 @@ class DishViewModel(
 
     var dish: CWMFood? = null
     var userProfile: UserProfileEntity? = null
+    var reviewAdapter: ReviewAdapter? = null
     val cartItems = mutableListOf<CartEntity>()
     var positionToUpdate = 0
 
@@ -40,8 +42,6 @@ class DishViewModel(
 
     private val _storagePermissionCheck: MutableLiveData<Boolean?> = MutableLiveData()
     val storagePermissionCheck: LiveData<Boolean?> = _storagePermissionCheck
-    private val _openPreviewImage: MutableLiveData<String?> = MutableLiveData()
-    val openPreviewImage: LiveData<String?> = _openPreviewImage
 
     private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(
         NetworkResult.Empty)
@@ -99,10 +99,6 @@ class DishViewModel(
 
     fun previewImage(content: String) {
         _previewImage.value = content
-    }
-
-    fun openPreview(url: String, content: String) {
-        _openPreviewImage.value = url
     }
 
     fun upsertProductReview(

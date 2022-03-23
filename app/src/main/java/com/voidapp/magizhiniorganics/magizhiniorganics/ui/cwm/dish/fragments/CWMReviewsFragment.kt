@@ -20,8 +20,7 @@ import org.kodein.di.generic.instance
 
 class CWMReviewsFragment:
     Fragment(),
-    KodeinAware,
-    ReviewAdapter.ReviewItemClickListener
+    KodeinAware
 {
 
     override val kodein: Kodein by kodein()
@@ -55,23 +54,14 @@ class CWMReviewsFragment:
         dishViewModel.getProductReviews()
     }
 
-    override fun previewImage(url: String, thumbnail: ShapeableImageView) {
-        dishViewModel.openPreview(url, "preview")
-    }
-
-//    override fun previewImage(url: String) {
-//        dishViewModel.openPreview(url, "preview")
-//    }
-
     private fun initRecyclerView() {
         binding.rvReviews.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = ReviewAdapter(
-            requireContext(),
-            arrayListOf(),
-            this
-        )
-        binding.rvReviews.adapter = adapter
+        dishViewModel.reviewAdapter?.let {
+            adapter = it
+            binding.rvReviews.adapter = adapter
+        }
+
     }
 
     private fun initLiveData() {

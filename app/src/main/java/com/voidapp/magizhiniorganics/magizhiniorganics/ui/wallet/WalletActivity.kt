@@ -399,19 +399,4 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             rvTransactionHistory.visible()
         }
     }
-
-    override fun onBackPressed() {
-        when(viewModel.navigateToPage) {
-            CHECKOUT_PAGE -> {
-                Intent(this, InvoiceActivity::class.java).also {
-                    it.putExtra(NAVIGATION, ALL_PRODUCTS)
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
-                }
-            }
-            QUICK_ORDER -> finish()
-            else -> finish()
-        }
-    }
 }

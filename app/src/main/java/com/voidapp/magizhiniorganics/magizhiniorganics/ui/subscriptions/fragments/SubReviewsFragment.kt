@@ -18,7 +18,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
 
-class SubReviewsFragment: Fragment(), KodeinAware, ReviewAdapter.ReviewItemClickListener {
+class SubReviewsFragment: Fragment(), KodeinAware {
 
     override val kodein: Kodein by kodein()
 
@@ -51,10 +51,6 @@ class SubReviewsFragment: Fragment(), KodeinAware, ReviewAdapter.ReviewItemClick
         productViewModel.getProductReviews()
     }
 
-    override fun previewImage(url: String, thumbnail: ShapeableImageView) {
-        productViewModel.openPreview(url, "preview", thumbnail)
-    }
-
     //    override fun previewImage(url: String) {
 //        productViewModel.openPreview(url, "preview")
 //    }
@@ -62,12 +58,10 @@ class SubReviewsFragment: Fragment(), KodeinAware, ReviewAdapter.ReviewItemClick
     private fun initRecyclerView() {
         binding.rvReviews.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = ReviewAdapter(
-            requireContext(),
-            arrayListOf(),
-            this
-        )
-        binding.rvReviews.adapter = adapter
+        productViewModel.reviewAdapter?.let{
+            adapter = it
+            binding.rvReviews.adapter = adapter
+        }
     }
 
     private fun initLiveData() {

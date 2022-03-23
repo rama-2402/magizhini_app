@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -11,7 +12,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
 import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
@@ -21,6 +25,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.imageview.ShapeableImageView
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -35,6 +40,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityQuickOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
@@ -76,8 +82,6 @@ class QuickOrderActivity :
     private lateinit var cartAdapter: CartAdapter
     private lateinit var addressAdapter: AddressAdapter
     private lateinit var quickOrderListAdapter: QuickOrderListAdapter
-
-    private var isPreviewOpened: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -802,14 +806,6 @@ class QuickOrderActivity :
 
     override fun onBackPressed() {
         when {
-            isPreviewOpened -> {
-                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-                binding.ivPreviewImage.startAnimation(
-                    AnimationUtils.loadAnimation(this, R.anim.scale_small)
-                )
-                binding.ivPreviewImage.remove()
-                isPreviewOpened = false
-            }
             cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED ->
                 cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
             else -> {
@@ -893,15 +889,17 @@ class QuickOrderActivity :
     }
 
     //from order list adapter
-    override fun selectedListImage(position: Int, imageUri: Any) {
-        cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
-        binding.apply {
-            isPreviewOpened = true
-//            GlideLoader().loadUserPictureWithoutCrop(this@QuickOrderActivity, imageUri, ivPreviewImage)
-            ivPreviewImage.startAnimation(
-                AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.scale_big)
-            )
-            ivPreviewImage.visible()
+    override fun selectedListImage(position: Int, imageUri: Any, thumbnail: ShapeableImageView) {
+        Intent(this, PreviewActivity::class.java).also { intent ->
+            viewModel.quickOrder?.let {
+                intent.putExtra("url", imageUri.toString())
+            }?:let {
+                intent.setData(imageUri.toString().toUri())
+            }
+            intent.putExtra("contentType", "image")
+            val options: ActivityOptionsCompat =
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, ViewCompat.getTransitionName(thumbnail)!!)
+            startActivity(intent, options.toBundle())
         }
     }
 

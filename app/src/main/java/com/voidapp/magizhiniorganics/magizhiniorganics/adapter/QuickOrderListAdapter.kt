@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvQuickorderListItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
@@ -65,10 +66,10 @@ class QuickOrderListAdapter(
 
                     //loading the product images
                     ivListPage.loadImg(uri.toString()) {}
-                    ivListPage.clipToOutline = true
+//                    ivListPage.clipToOutline = true
 
                     ivListPage.setOnClickListener {
-                        onItemClickListener.selectedListImage(position-1, uri)
+                        onItemClickListener.selectedListImage(position-1, uri, ivListPage)
                     }
                     ivDelete.setOnClickListener {
                         onItemClickListener.deleteListItem(position-1, uri)
@@ -81,10 +82,10 @@ class QuickOrderListAdapter(
 
                 //loading the product images
                 ivListPage.loadImg(url) {}
-                ivListPage.clipToOutline = true
+//                ivListPage.clipToOutline = true
 
                 ivListPage.setOnClickListener {
-                    onItemClickListener.selectedListImage(position, url)
+                    onItemClickListener.selectedListImage(position, url, ivListPage)
                 }
                 ivDelete.setOnClickListener {
                     onItemClickListener.deleteListItem(position, url)
@@ -102,7 +103,7 @@ class QuickOrderListAdapter(
     }
 
     interface QuickOrderClickListener {
-        fun selectedListImage(position: Int, imageUri: Any)
+        fun selectedListImage(position: Int, imageUri: Any, thumbnail: ShapeableImageView)
         fun deleteListItem(position: Int, imageUri: Any)
         fun addImage()
     }

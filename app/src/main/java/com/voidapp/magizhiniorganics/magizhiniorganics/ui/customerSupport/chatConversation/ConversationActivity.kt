@@ -5,16 +5,21 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.ShapeDrawable
 import android.os.Bundle
+import android.service.controls.templates.ThumbnailTemplate
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ConversationAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Messages
@@ -24,6 +29,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.SupportProfil
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityConversationBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.RetrofitInstance
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
@@ -53,9 +59,6 @@ class ConversationActivity :
     private val factory: ConversationViewModelFactory by instance()
     private lateinit var viewModel: ConversationViewModel
     private lateinit var adapter: ConversationAdapter
-
-    private var isPreviewOpened: Boolean = false
-    private lateinit var mProgressDialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -200,30 +203,22 @@ class ConversationActivity :
             }
         }
     }
-    override fun openImage(url: String) {
-        binding.apply {
-            isPreviewOpened = true
-//            GlideLoader().loadUserPictureWithoutCrop(this@ConversationActivity, url, ivPreviewImage)
-            binding.ivPreviewImage.startAnimation(scaleBig)
-            binding.ivPreviewImage.visible()
+    override fun openImage(url: String, thumbnail: ShapeableImageView) {
+        Intent(this, PreviewActivity::class.java).also { intent ->
+            intent.putExtra("url", url)
+            intent.putExtra("contentType", "image")
+            val options: ActivityOptionsCompat =
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, ViewCompat.getTransitionName(thumbnail)!!)
+            startActivity(intent, options.toBundle())
         }
     }
 
     override fun onBackPressed() {
-        when {
-            isPreviewOpened -> {
-                binding.ivPreviewImage.startAnimation(scaleSmall)
-                binding.ivPreviewImage.remove()
-                isPreviewOpened = false
-            }
-            else -> {
-                viewModel.updateTypingStatus(false)
-                Intent(this, ChatActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                }
-            }
+        viewModel.updateTypingStatus(false)
+        Intent(this, ChatActivity::class.java).also {
+            startActivity(it)
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            finish()
         }
     }
 
@@ -320,35 +315,5 @@ class ConversationActivity :
         SharedPref(this).putData(ONLINE_STATUS, BOOLEAN, true)
         viewModel.updateProfileStatus( true)
         super.onResume()
-    }
-
-    override fun showProgressDialog() {
-
-        mProgressDialog = Dialog(this)
-
-        /*Set the screen content from a layout resource.
-        The resource will be inflated, adding all top-level views to the screen.*/
-        mProgressDialog.setContentView(R.layout.dialog_loading)
-
-//        val lottie = mProgressDialog.findViewById<LottieAnimationView>(R.id.lottie_progress)
-//        lottie.animate()
-
-        mProgressDialog.setCancelable(false)
-        mProgressDialog.setCanceledOnTouchOutside(false)
-        mProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        mProgressDialog.window?.setDimAmount(0f)
-        //Start the dialog and display it on screen.
-        mProgressDialog.show()
-    }
-
-    /**
-     * This function is used to dismiss the progress dialog if it is visible to user.
-     */
-    override fun hideProgressDialog() {
-//        val lottie = mProgressDialog.findViewById<LottieAnimationView>(R.id.lottie_progress)
-//        lottie.cancelAnimation()
-        if (mProgressDialog.isShowing) {
-            mProgressDialog.dismiss()
-        }
     }
 }

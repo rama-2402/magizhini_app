@@ -9,6 +9,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.firestore.ListenerRegistration
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.SubscriptionUseCase
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
@@ -35,7 +36,6 @@ class SubscriptionProductViewModel(
     private val fbRepository: FirestoreRepository,
     private val subscriptionUseCase: SubscriptionUseCase
 ): ViewModel() {
-    var navigateToPage: String = ""
 
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
@@ -46,6 +46,7 @@ class SubscriptionProductViewModel(
     var wallet: Wallet? = null
     var userProfile: UserProfileEntity? = null
     var address: Address? = null
+    var reviewAdapter: ReviewAdapter? = null
 
     var subStartDate: Long = System.currentTimeMillis() + SINGLE_DAY_LONG
     val customSubDays: MutableList<String> = mutableListOf()
@@ -123,10 +124,6 @@ class SubscriptionProductViewModel(
 
     fun previewImage(content: String) {
         _previewImage.value = content
-    }
-
-    fun openPreview(url: String, content: String, thumbnail: ShapeableImageView) {
-        _uiUpdate.value = UiUpdate.OpenPreviewImage(content, url, null, thumbnail)
     }
 
     fun upsertProductReview(
@@ -345,8 +342,6 @@ class SubscriptionProductViewModel(
         data class PopulateProduct(val product: ProductEntity?): UiUpdate()
         //review
         data class CheckStoragePermission(val message: String?): UiUpdate()
-        //preview
-        data class OpenPreviewImage(val message: String?, val imageUrl: String?, val imageUri: Uri?, val thumbnail: ShapeableImageView): UiUpdate()
 
         //status dialog
         data class CreateStatusDialog(val message: String?, val data: String?): UiUpdate()
