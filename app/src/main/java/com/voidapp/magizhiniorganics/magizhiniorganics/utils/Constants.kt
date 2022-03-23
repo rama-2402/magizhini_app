@@ -92,6 +92,7 @@ object Constants {
     const val SUB_HISTORY_PAGE: String = "subHistoryPage"
     const val ORDER_HISTORY_PAGE: String = "orderHistoryPage"
     const val WALLET_PAGE: String = "walletPage"
+    const val QUICK_ORDER_PAGE: String = "quickOrder"
     const val CUSTOMER_SUPPORT_PAGE: String = "customerSupport"
 
     //filters data

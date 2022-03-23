@@ -6,6 +6,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -72,6 +74,12 @@ class SubscriptionUseCase(
                         emit(NetworkResult.Failed("wallet", "Server Error! Failed to make transaction"))
                         return@flow
                     } else {
+                        PushNotificationUseCase(fbRepository).sendPushNotification(
+                            subscription.customerID,
+                            "New Payment from Magizhini Wallet",
+                            "You have paid Rs: ${subscription.estimateAmount} for a New Subscription of ${subscription.productName} - ${subscription.variantName} starting from ${TimeUtil().getCustomDate(dateLong = subscription.startDate)}",
+                            WALLET_PAGE
+                        )
                         delay(1000)
                         emit(NetworkResult.Success("validating", "Creating Subscription..."))
                         if (placeSubscription(subscription, userName, transactionID)) {
@@ -101,7 +109,15 @@ class SubscriptionUseCase(
     ): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
             when (fbRepository.generateSubscription(subscription, userName, transactionID)) {
-                is NetworkResult.Success -> true
+                is NetworkResult.Success -> {
+                    PushNotificationUseCase(fbRepository).sendPushNotification(
+                        subscription.customerID,
+                        "New Subscription Created",
+                        "Thanks for Subscribing to our product ${subscription.productName} - ${subscription.variantName} starting from ${TimeUtil().getCustomDate(dateLong = subscription.startDate)}. You can manage your subscriptions from Subscription History Page",
+                        Constants.SUB_HISTORY_PAGE
+                    )
+                    true
+                }
                 is NetworkResult.Failed -> false
                 else -> false
             }

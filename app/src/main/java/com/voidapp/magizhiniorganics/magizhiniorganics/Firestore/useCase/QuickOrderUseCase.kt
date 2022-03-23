@@ -8,10 +8,14 @@ import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_ESTIMATE_PATH
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PENDING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUCCESS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.Dispatchers
@@ -80,6 +84,14 @@ class QuickOrderUseCase(
                         .set(it, SetOptions.merge())
                         .await()
 
+
+                    PushNotificationUseCase(fbRepository).sendPushNotification(
+                        it.customerID,
+                        "Estimate Request Sent",
+                        "Thank you for using Magizhini Quick Order Services. We have received your Order Estimate Request. We will get back to you as soon as possible with an Estimate Amount",
+                        QUICK_ORDER_PAGE
+                    )
+
                     emit(NetworkResult.Success("complete", imageUrl))
                 }
             } catch (e: Exception) {
@@ -137,6 +149,12 @@ class QuickOrderUseCase(
                                 emit(NetworkResult.Failed("wallet", "Server Error! Failed to make transaction"))
                                 return@flow
                             } else {
+                                PushNotificationUseCase(fbRepository).sendPushNotification(
+                                    orderDetailsMap["userID"].toString(),
+                                    "New Payment from Magizhini Wallet",
+                                    "You have paid Rs: ${amount} for your recent Magizhini purchase with Order ID: ${orderDetailsMap["orderID"].toString()}",
+                                    WALLET_PAGE
+                                )
                                 delay(1000)
                                 emit(NetworkResult.Success("order", "Placing order..."))
                                 val transactionMap: HashMap<String, Any> = hashMapOf()
@@ -290,6 +308,12 @@ class QuickOrderUseCase(
             ).let {
                 when(fbRepository.placeOrder(it)) {
                     is NetworkResult.Success -> {
+                        PushNotificationUseCase(fbRepository).sendPushNotification(
+                            it.customerId,
+                            "Order Placed",
+                            "Thanks for purchasing in Magizhini Organics. Your Order (ID: ${it.orderId} is received. We will notify during every step till delivery. You can check you order progress in Order History page.)",
+                            ORDER_HISTORY_PAGE
+                        )
                         if (!cart.isNullOrEmpty()) {
                             updateQuickOrderCart(cart, it.customerId)
                         } else {
