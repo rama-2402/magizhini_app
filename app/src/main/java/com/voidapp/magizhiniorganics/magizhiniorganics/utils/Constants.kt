@@ -94,6 +94,7 @@ object Constants {
     const val WALLET_PAGE: String = "walletPage"
     const val QUICK_ORDER_PAGE: String = "quickOrder"
     const val CUSTOMER_SUPPORT_PAGE: String = "customerSupport"
+    const val CWM_PAGE: String = "cwmPage"
 
     //filters data
     const val ALL: String = "all"

@@ -122,7 +122,8 @@ class QuickOrderUseCase(
         orderDetailsMap: HashMap<String, Any>,
         amount: Float,
         purpose: String,
-        cart: ArrayList<CartEntity>
+        cart: ArrayList<CartEntity>,
+        isQuickOrder: Boolean
         ): Flow<NetworkResult> =
             flow<NetworkResult> {
                 try {
@@ -162,7 +163,7 @@ class QuickOrderUseCase(
                                 transactionMap["amount"] = amount
                                 transactionMap["paymentMode"] = "Wallet"
                                 transactionMap["paymentDone"] = true
-                                if (placeOrder(transactionMap, orderDetailsMap, cart)) {
+                                if (placeOrder(transactionMap, orderDetailsMap, cart, isQuickOrder)) {
                                     updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
                                     delay(1000)
                                     emit(NetworkResult.Success("success", "Order Placed Successfully..."))
@@ -202,7 +203,8 @@ class QuickOrderUseCase(
         amount: Float,
         purpose: String,
         reason: String,
-        cart: ArrayList<CartEntity>
+        cart: ArrayList<CartEntity>,
+        isQuickOrder: Boolean
     ): Flow<NetworkResult> =
         flow<NetworkResult> {
             try {
@@ -231,7 +233,8 @@ class QuickOrderUseCase(
                         if (placeOrder(
                                 transactionMap,
                                 orderDetailsMap,
-                                cart
+                                cart,
+                                isQuickOrder
                         )) {
                             updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
                             delay(1000)
@@ -254,7 +257,8 @@ class QuickOrderUseCase(
     suspend fun placeCashOnDeliveryOrder(
         orderDetailsMap: HashMap<String, Any>,
         cart: ArrayList<CartEntity>,
-        amount: Float
+        amount: Float,
+        isQuickOrder: Boolean
     ): Flow<NetworkResult> = flow<NetworkResult> {
 
         delay(1000)
@@ -270,7 +274,8 @@ class QuickOrderUseCase(
             placeOrder(
                 transactionMap,
                 orderDetailsMap,
-                cart
+                cart,
+                isQuickOrder
             )
         ) {
             updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
@@ -285,7 +290,8 @@ class QuickOrderUseCase(
     private suspend fun placeOrder(
         transactionMap: HashMap<String, Any>,
         orderDetailsMap: HashMap<String, Any>,
-        cart: ArrayList<CartEntity>
+        cart: ArrayList<CartEntity>,
+        isQuickOrder: Boolean
     ): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
             Order(
@@ -303,9 +309,11 @@ class QuickOrderUseCase(
                 price = transactionMap["amount"].toString().toFloat(),
                 orderStatus = PENDING,
                 monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}",
-                phoneNumber = orderDetailsMap["phoneNumber"].toString(),
-                extras = arrayListOf(QUICK_ORDER)
+                phoneNumber = orderDetailsMap["phoneNumber"].toString()
             ).let {
+                if (isQuickOrder) {
+                    it.extras = arrayListOf(QUICK_ORDER)
+                }
                 when(fbRepository.placeOrder(it)) {
                     is NetworkResult.Success -> {
                         PushNotificationUseCase(fbRepository).sendPushNotification(
@@ -314,7 +322,7 @@ class QuickOrderUseCase(
                             "Thanks for purchasing in Magizhini Organics. Your Order (ID: ${it.orderId} is received. We will notify during every step till delivery. You can check you order progress in Order History page.)",
                             ORDER_HISTORY_PAGE
                         )
-                        if (!cart.isNullOrEmpty()) {
+                        if (!cart.isNullOrEmpty() && isQuickOrder) {
                             updateQuickOrderCart(cart, it.customerId)
                         } else {
                             true
@@ -339,7 +347,7 @@ class QuickOrderUseCase(
                 .document(customerID)
                 .update("cart", cart).await()
             true
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             fbRepository.logCrash("quickOrder: updating the cart", e.message.toString())
             false
         }

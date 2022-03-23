@@ -19,9 +19,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatAc
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ONLINE_STATUS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import kotlin.random.Random
 
@@ -40,7 +45,31 @@ class FirebaseService : FirebaseMessagingService() {
         val isOnline = SharedPref(this).getData(ONLINE_STATUS, BOOLEAN, false).toString().toBoolean()
         val intent = when(message.data["activity"]) {
             CUSTOMER_SUPPORT -> Intent(this, ChatActivity::class.java)
-            WALLET -> Intent(this, WalletActivity::class.java)
+            WALLET_PAGE -> Intent(this, WalletActivity::class.java)
+            ORDER_HISTORY_PAGE -> {
+                val intent = Intent(this, SplashActivity::class.java).also {
+                    it.putExtra("navigate", ORDER_HISTORY_PAGE)
+                }
+                intent
+            }
+            SUB_HISTORY_PAGE -> {
+                val intent = Intent(this, SplashActivity::class.java).also {
+                    it.putExtra("navigate", SUB_HISTORY_PAGE)
+                }
+                intent
+            }
+            QUICK_ORDER_PAGE -> {
+                val intent = Intent(this, SplashActivity::class.java).also {
+                    it.putExtra("navigate", QUICK_ORDER_PAGE)
+                }
+                intent
+            }
+            CWM_PAGE -> {
+                val intent = Intent(this, SplashActivity::class.java).also {
+                    it.putExtra("navigate", CWM_PAGE)
+                }
+                intent
+            }
             else -> Intent(this, SplashActivity::class.java)
         }
         when {

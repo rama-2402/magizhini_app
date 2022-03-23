@@ -444,7 +444,8 @@ class CheckoutViewModel(
                             orderDetailsMap,
                             mrp,
                             PURCHASE,
-                            cart = cartItems as ArrayList<CartEntity>
+                            cart = cartItems as ArrayList<CartEntity>,
+                            false
                         )
                         .collect { result ->
                             withContext(Dispatchers.Main) {
@@ -495,7 +496,8 @@ class CheckoutViewModel(
                 .placeCashOnDeliveryOrder(
                     orderDetailsMap,
                     cartItems as ArrayList<CartEntity>,
-                    mrp
+                    mrp,
+                    false
                 ).onEach { result ->
                     when(result) {
                         is NetworkResult.Success -> {
@@ -527,7 +529,8 @@ class CheckoutViewModel(
                 mrp,
                 PURCHASE,
                 "Product Purchase Online Transaction",
-                cartItems as ArrayList<CartEntity>
+                cartItems as ArrayList<CartEntity>,
+                false
             ).collect { result ->
                 when(result) {
                     is NetworkResult.Success -> {

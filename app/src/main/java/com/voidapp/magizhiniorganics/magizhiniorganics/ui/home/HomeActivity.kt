@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -61,17 +62,21 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DESCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.HOME_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OPEN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import kotlinx.coroutines.delay
@@ -164,13 +169,33 @@ class HomeActivity :
         clickListeners()
 
         lifecycleScope.launch {
-            delay(1000)
-            SharedPref(this@HomeActivity).putData(
-                Constants.DATE,
-                STRING,
-                TimeUtil().getCurrentDate()
-            )
+            intent.getStringExtra("navigate")?.let {
+                navigateToPageFromNotification(it)
+            } ?:let {
+                SharedPref(this@HomeActivity).putData(
+                    Constants.DATE,
+                    STRING,
+                    TimeUtil().getCurrentDate()
+                )
+            }
             hideProgressDialog()
+        }
+    }
+
+    private fun navigateToPageFromNotification(filter: String) {
+        when(filter) {
+            ORDER_HISTORY_PAGE -> {
+                Intent(this@HomeActivity, PurchaseHistoryActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
+            SUB_HISTORY_PAGE -> {
+                Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
+            QUICK_ORDER_PAGE -> navigateToQuickOrder()
+            CWM_PAGE -> navigateToCWM()
         }
     }
 
@@ -295,7 +320,11 @@ class HomeActivity :
             CWM -> navigateToCWM()
             WALLET -> navigateToWallet()
             REFERRAL -> showReferralBs(SharedPref(this@HomeActivity).getData(USER_ID, STRING, "").toString())
-            ORDER_HISTORY -> navigateToQuickOrder()
+            ORDER_HISTORY -> {
+                Intent(this@HomeActivity, PurchaseHistoryActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
             SUBSCRIPTION -> navigateToSelectedCategory(SUBSCRIPTION)
             OPEN -> openPreview(banner.url, binding.cvBanner)
             else -> Unit

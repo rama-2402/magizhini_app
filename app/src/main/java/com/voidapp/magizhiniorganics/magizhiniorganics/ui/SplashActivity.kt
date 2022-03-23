@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
@@ -49,25 +50,26 @@ class SplashActivity : BaseActivity(), KodeinAware {
         val isNewUser = sRef.getBoolean(LOGIN_STATUS, true)
         val isNewDay = sRef.getString(Constants.DATE, Constants.DATE)
         val month = sRef.getInt("month", TimeUtil().getMonthNumber())
+        val navigation = intent.getStringExtra("navigate")
 
         binding.tvStatus.setOnClickListener {
-            checkNetwork(isNewDay!!, isNewUser, month)
+            checkNetwork(isNewDay!!, isNewUser, month, navigation)
         }
 
-        checkNetwork(isNewDay!!, isNewUser, month)
+        checkNetwork(isNewDay!!, isNewUser, month, navigation)
     }
 
-    private fun checkNetwork(isNewDay: String, isNewUser: Boolean, month: Int) {
+    private fun checkNetwork(isNewDay: String, isNewUser: Boolean, month: Int, navigation: String?) {
         if (!NetworkHelper.isOnline(this)) {
             showRetry()
             showToast(this, "Please check your Internet connection")
         } else {
             hideRetry()
-            backgroundCheck(isNewDay, isNewUser, month)
+            backgroundCheck(isNewDay, isNewUser, month, navigation)
         }
     }
 
-    private fun backgroundCheck(isNewDay: String, isNewUser: Boolean, month: Int) {
+    private fun backgroundCheck(isNewDay: String, isNewUser: Boolean, month: Int, navigation: String?) {
         if (isNewUser) {
             lifecycleScope.launch {
                 delay(1000)
@@ -90,35 +92,35 @@ class SplashActivity : BaseActivity(), KodeinAware {
                             OneTimeWorkRequestBuilder<CleanDatabaseService>().build()
 
                         WorkManager.getInstance(this@SplashActivity).enqueue(cleanDatabaseWorkRequest)
-                        updateDatabaseWorkRequest(false, isNewDay)
+                        updateDatabaseWorkRequest(false, isNewDay, navigation)
                     }
                     abs(month - TimeUtil().getMonthNumber()) > 1 -> {
                         showToast(
                             this@SplashActivity,
                             "Updating the product catalog. Please Wait..."
                         )
-                        updateDatabaseWorkRequest(true, isNewDay)
+                        updateDatabaseWorkRequest(true, isNewDay, navigation)
                     }
-                    else -> updateDatabaseWorkRequest(false, isNewDay)
+                    else -> updateDatabaseWorkRequest(false, isNewDay, navigation)
                 }
             }
         }
     }
 
-    private fun updateDatabaseWorkRequest(wipe: Boolean, isNewDay: String) {
+    private fun updateDatabaseWorkRequest(wipe: Boolean, isNewDay: String, navigation: String?) {
         if (isNewDay != TimeUtil().getCurrentDate()) {
             if (wipe) {
                 SharedPref(this).putData("month", INT, TimeUtil().getMonthNumber())
-                startWork("wipe")
+                startWork("wipe", navigation)
             }else {
-                startWork("")
+                startWork("", navigation)
             }
         } else {
-            navigateToHomeScreen(true)
+            navigateToHomeScreen(true, navigation)
         }
     }
 
-    private fun startWork(wipe: String) {
+    private fun startWork(wipe: String, navigation: String?) {
         val userID = SharedPref(this).getData(USER_ID, STRING, "")
         val workRequest: WorkRequest =
             OneTimeWorkRequestBuilder<UpdateDataService>()
@@ -152,7 +154,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
                         )
                     }
                     WorkInfo.State.SUCCEEDED -> {
-                        navigateToHomeScreen(true)
+                        navigateToHomeScreen(true, navigation)
                     }
                     else -> {
 //                        navigateToHomeScreen()
@@ -161,7 +163,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
             }
     }
 
-    private fun navigateToHomeScreen(newDayCheck: Boolean) = lifecycleScope.launch {
+    private fun navigateToHomeScreen(newDayCheck: Boolean, navigation: String?) = lifecycleScope.launch {
         if (fbRepository.updateNotifications(SharedPref(this@SplashActivity).getData(USER_ID, STRING, "").toString())) {
             binding.progressCircular.remove()
             Intent(this@SplashActivity, HomeActivity::class.java).also {
@@ -170,7 +172,10 @@ class SplashActivity : BaseActivity(), KodeinAware {
 //                ) {
 //                    it.putExtra("day", newDayCheck)
 //                } else {
-                    it.putExtra("day", newDayCheck)
+                navigation?.let { nav ->
+                    it.putExtra("navigate", nav)
+                }
+                it.putExtra("day", newDayCheck)
 //                }
                 startActivity(it)
                 finish()
@@ -184,6 +189,9 @@ class SplashActivity : BaseActivity(), KodeinAware {
 //                ) {
 //                    it.putExtra("day", newDayCheck)
 //                } else {
+                navigation?.let { nav ->
+                    it.putExtra("navigate", nav)
+                }
                     it.putExtra("day", newDayCheck)
 //                }
                 startActivity(it)

@@ -334,7 +334,8 @@ class QuickOrderViewModel(
                             orderDetailsMap,
                             mrp,
                             PURCHASE,
-                            cart = cartEntity as ArrayList<CartEntity>
+                            cart = cartEntity as ArrayList<CartEntity>,
+                            true
                             )
                         .collect { result ->
                             withContext(Dispatchers.Main) {
@@ -380,7 +381,8 @@ class QuickOrderViewModel(
                 .placeCashOnDeliveryOrder(
                     orderDetailsMap,
                     cartEntity as ArrayList<CartEntity>,
-                    mrp
+                    mrp,
+                    true
                 ).onEach { result ->
                     when(result) {
                         is NetworkResult.Success -> {
@@ -408,7 +410,8 @@ class QuickOrderViewModel(
                 mrp,
                 PURCHASE,
                 "Product Purchase Online Transaction",
-                cartEntity as ArrayList<CartEntity>
+                cartEntity as ArrayList<CartEntity>,
+                true
             ).collect { result ->
                 when(result) {
                     is NetworkResult.Success -> {

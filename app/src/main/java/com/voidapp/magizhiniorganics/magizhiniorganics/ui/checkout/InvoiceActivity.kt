@@ -311,7 +311,7 @@ class InvoiceActivity :
                         if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                             cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
                         }
-                        onBackPressed()
+
                     }
                 }
                 is CheckoutViewModel.UiUpdate.WalletTransactionFailed -> {
@@ -320,7 +320,7 @@ class InvoiceActivity :
                         dismissLoadStatusDialog()
                         showExitSheet(
                             this@InvoiceActivity,
-                            "Server Error! Transaction Failed. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. Click CUSTOMER SUPPORT to open customer support",
+                            "Server Error! Transaction Failed. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount.  \n \n Click CUSTOMER SUPPORT to open customer support",
                             "cs"
                         )
                     }
@@ -329,7 +329,7 @@ class InvoiceActivity :
                     dismissLoadStatusDialog()
                     showExitSheet(
                         this,
-                        "Server Error! Failed to place order. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. Click CUSTOMER SUPPORT to open customer support",
+                        "Server Error! Failed to place order. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. \n \n Click CUSTOMER SUPPORT to open customer support",
                         "cs"
                     )
                 }
