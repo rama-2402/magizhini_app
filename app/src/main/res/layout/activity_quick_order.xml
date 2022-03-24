@@ -16,18 +16,6 @@
         android:background="@color/green100"
         tools:context=".ui.quickOrder.QuickOrderActivity">
 
-        <com.ortiz.touchview.TouchImageView
-            android:id="@+id/ivPreviewImage"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            android:elevation="@dimen/material_size_24"
-            android:background="@color/black"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/apbAppBarLayout"
             android:layout_width="match_parent"

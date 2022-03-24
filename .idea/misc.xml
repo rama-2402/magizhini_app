@@ -12,7 +12,9 @@
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/drawable/bg_order_history_invoice.xml" value="0.4865" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_all_cwm.xml" value="0.25050454086781027" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_chat.xml" value="0.5182291666666666" />
-        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_home.xml" value="0.5182291666666666" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_conversation.xml" value="0.38813405797101447" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_dish.xml" value="0.38813405797101447" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_home.xml" value="0.21925958572058177" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_preview.xml" value="0.2713541666666667" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_product.xml" value="0.2522361359570662" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/activity_purchase_history.xml" value="0.2510090817356206" />
@@ -33,6 +35,7 @@
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_dish_item.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_home_category_items.xml" value="0.2510090817356206" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_home_product_items.xml" value="0.2510090817356206" />
+        <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_home_specials_item.xml" value="0.33" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_home_top_sellers.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_left_chathead.xml" value="0.5182291666666666" />
         <entry key="..\:/magizhini/magizhini_app/app/src/main/res/layout/rv_list_item.xml" value="0.5182291666666666" />

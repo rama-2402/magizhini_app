@@ -17,18 +17,6 @@
         tools:context=".ui.customerSupport.ChatActivity"
         android:background="@color/white">
 
-        <com.ortiz.touchview.TouchImageView
-            android:id="@+id/ivPreviewImage"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            android:elevation="@dimen/material_size_24"
-            android:background="@color/black"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
 <!--            the header layout with back button, name and prof pic-->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/llHeader"

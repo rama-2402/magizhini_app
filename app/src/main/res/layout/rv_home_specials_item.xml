@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/stickyBestSellers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:tag="sticky"
+        android:background="@color/white"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/tvBestSellers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/material_size_8"
+            android:layout_weight="4"
+            android:fontFamily="@font/roboto"
+            android:paddingStart="@dimen/material_size_8"
+            android:text="Top Customer Purchases"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="italic" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/cpBestSellers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/material_size_8"
+            app:rippleColor="@color/green_base"
+            android:backgroundTint="@color/green_base"
+            android:text="Show All"
+            android:textColor="@color/white"
+            app:chipCornerRadius="@dimen/material_size_8"
+            />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTopPurchases"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:isScrollContainer="true"
+        android:nestedScrollingEnabled="false" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivBannerOne"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:background="@drawable/shape_round_rectangle_8"
+        android:layout_marginTop="@dimen/material_size_4"
+        android:layout_marginBottom="@dimen/material_size_4"
+        android:layout_marginStart="@dimen/material_size_8"
+        android:layout_marginEnd="@dimen/material_size_8"
+        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+        android:contentDescription="@string/product_thumbnail"
+        android:scaleType="fitCenter"
+        android:src="@drawable/carousel_default_placeholder"
+        android:elevation="@dimen/material_size_4"
+        />
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivBannerTwo"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:background="@drawable/shape_round_rectangle_8"
+        android:layout_marginTop="@dimen/material_size_4"
+        android:layout_marginBottom="@dimen/material_size_4"
+        android:layout_marginStart="@dimen/material_size_8"
+        android:layout_marginEnd="@dimen/material_size_8"
+        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+        android:elevation="@dimen/material_size_4"
+        android:contentDescription="@string/product_thumbnail"
+        android:scaleType="fitCenter"
+        android:src="@drawable/carousel_default_placeholder"
+        />
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivBannerThree"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:background="@drawable/shape_round_rectangle_8"
+        android:elevation="@dimen/material_size_4"
+        android:layout_marginTop="@dimen/material_size_4"
+        android:layout_marginBottom="@dimen/material_size_4"
+        android:layout_marginStart="@dimen/material_size_8"
+        android:layout_marginEnd="@dimen/material_size_8"
+        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+        android:contentDescription="@string/product_thumbnail"
+        android:scaleType="fitCenter"
+        android:src="@drawable/carousel_default_placeholder"
+        />
+
+
+
+</LinearLayout>
+</layout>

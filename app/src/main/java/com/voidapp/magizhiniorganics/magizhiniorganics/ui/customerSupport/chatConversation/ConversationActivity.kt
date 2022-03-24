@@ -163,9 +163,6 @@ class ConversationActivity :
                         viewModel.updateTypingStatus(false)
                     }
                 }
-            ivPreviewImage.setOnClickListener {
-                onBackPressed()
-            }
         }
     }
 

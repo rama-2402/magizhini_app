@@ -16,60 +16,59 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:background="@drawable/shape_round_rectangle_8"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         android:elevation="@dimen/material_size_4"
-        >
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivProductThumbnail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="?android:attr/selectableItemBackground"
-            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
             android:contentDescription="@string/product_thumbnail"
             android:scaleType="fitCenter"
-            android:transitionName="thumbnail"
             android:src="@drawable/ic_app_placeholder"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:transitionName="thumbnail"
             app:layout_constraintBottom_toBottomOf="parent"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
         <View
             android:id="@+id/ivCountBg"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:elevation="@dimen/material_size_2"
             android:background="@drawable/bg_gradient_transparent_rounded"
-            app:layout_constraintTop_toTopOf="@id/tvProductName"
+            android:elevation="@dimen/material_size_2"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/tvProductName" />
 
         <TextView
             android:id="@+id/tvProductName"
             android:layout_width="match_parent"
             android:layout_height="75dp"
-            android:fontFamily="@font/roboto"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:gravity="bottom|center_horizontal"
             android:layout_marginStart="@dimen/material_size_2"
             android:layout_marginEnd="@dimen/material_size_2"
-            android:text="kaatuyanam Rice/ somethign something"
             android:layout_marginBottom="@dimen/material_size_4"
-            android:maxLines="3"
-            android:ellipsize="marquee"
-            android:lines="3"
             android:elevation="@dimen/material_size_2"
+            android:ellipsize="marquee"
             android:focusable="true"
             android:focusableInTouchMode="true"
+            android:fontFamily="@font/roboto"
+            android:gravity="bottom|center_horizontal"
+            android:lines="3"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:maxLines="3"
             android:scrollHorizontally="true"
-            android:marqueeRepeatLimit ="marquee_forever"
+            android:text="kaatuyanam Rice/ somethign something"
+            android:textColor="@color/white"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clDiscountLayout"
@@ -77,9 +76,9 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bg_discount"
             android:backgroundTint="@color/redA700"
+            android:elevation="8dp"
             android:padding="@dimen/material_size_4"
             android:visibility="gone"
-            android:elevation="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -87,74 +86,74 @@
                 android:id="@+id/tvDiscountAmt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                android:textSize="12sp"
                 android:layout_marginStart="@dimen/material_size_4"
                 android:layout_marginEnd="@dimen/material_size_4"
-                app:layout_constraintHorizontal_chainStyle="packed"
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 tools:ignore="SmallSp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-<!--        <com.google.android.material.imageview.ShapeableImageView-->
-<!--            android:id="@+id/ivFavourite"-->
-<!--            android:layout_width="@dimen/material_size_32"-->
-<!--            android:layout_height="@dimen/material_size_32"-->
-<!--            android:foreground="?android:attr/selectableItemBackground"-->
-<!--            android:background="@color/lightGreen900"-->
-<!--            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"-->
-<!--            android:contentDescription="@string/product_thumbnail"-->
-<!--            android:scaleType="fitCenter"-->
-<!--            android:src="@drawable/ic_favorite_outline"-->
-<!--            app:tint="@color/green_base"-->
-<!--            android:layout_margin="@dimen/material_size_8"-->
-<!--            app:layout_constraintTop_toTopOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            />-->
+        <!--        <com.google.android.material.imageview.ShapeableImageView-->
+        <!--            android:id="@+id/ivFavourite"-->
+        <!--            android:layout_width="@dimen/material_size_32"-->
+        <!--            android:layout_height="@dimen/material_size_32"-->
+        <!--            android:foreground="?android:attr/selectableItemBackground"-->
+        <!--            android:background="@color/lightGreen900"-->
+        <!--            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"-->
+        <!--            android:contentDescription="@string/product_thumbnail"-->
+        <!--            android:scaleType="fitCenter"-->
+        <!--            android:src="@drawable/ic_favorite_outline"-->
+        <!--            app:tint="@color/green_base"-->
+        <!--            android:layout_margin="@dimen/material_size_8"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/ivAdd"
-        android:layout_width="@dimen/material_size_32"
-        android:layout_height="@dimen/material_size_32"
-        app:layout_constraintTop_toBottomOf="@id/clProductItem"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_margin="@dimen/material_size_4"
-        android:foreground="?android:attr/selectableItemBackground"
-        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
-        android:contentDescription="@string/product_thumbnail"
-        android:src="@drawable/ic_add"
-        android:scaleType="centerInside"
-        android:background="@drawable/shape_round_rectangle_8"
-        android:backgroundTint="@color/green_base"
-        />
+<!--    <com.google.android.material.imageview.ShapeableImageView-->
+<!--        android:id="@+id/ivAdd"-->
+<!--        android:layout_width="@dimen/material_size_32"-->
+<!--        android:layout_height="@dimen/material_size_32"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/clProductItem"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        android:layout_margin="@dimen/material_size_4"-->
+<!--        android:foreground="?android:attr/selectableItemBackground"-->
+<!--        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"-->
+<!--        android:contentDescription="@string/product_thumbnail"-->
+<!--        android:src="@drawable/ic_add"-->
+<!--        android:scaleType="centerInside"-->
+<!--        android:background="@drawable/shape_round_rectangle_8"-->
+<!--        android:backgroundTint="@color/green_base"-->
+<!--        />-->
 
     <TextView
         android:id="@+id/tvPrice"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="1 Kg - Rs: 1000.0"
-        android:ellipsize="marquee"
-        android:lines="1"
-        android:textColor="@color/gray700"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:scrollHorizontally="true"
-        android:marqueeRepeatLimit ="marquee_forever"
-        android:singleLine="true"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@id/ivAdd"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/ivAdd"
-        app:layout_constraintBottom_toBottomOf="@id/ivAdd"
         android:layout_marginStart="@dimen/material_size_4"
         android:layout_marginEnd="@dimen/material_size_4"
-    />
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:lines="1"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text="1 Kg - Rs: 1000.0"
+        android:textColor="@color/gray700"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clProductItem" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

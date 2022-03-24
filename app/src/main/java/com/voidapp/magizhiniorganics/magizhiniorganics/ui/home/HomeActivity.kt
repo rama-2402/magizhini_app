@@ -26,19 +26,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.BuildConfig
 import com.google.firebase.messaging.FirebaseMessaging
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CategoryHomeAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PartnersAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.TestimonialsAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SpecialBanners
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
@@ -50,7 +48,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
@@ -98,7 +95,8 @@ class HomeActivity :
     NavigationView.OnNavigationItemSelectedListener,
     PartnersAdapter.PartnersItemClickListener,
     BestSellersAdapter.BestSellerItemClickListener,
-    CategoryHomeAdapter.CategoryItemClickListener
+    CategoryHomeAdapter.CategoryItemClickListener,
+    HomeSpecialsAdapter.HomeSpecialsItemClickListener
 {
     //DI Injection with kodein
     override val kodein by kodein()
@@ -108,12 +106,9 @@ class HomeActivity :
     private lateinit var viewModel: HomeViewModel
     private lateinit var binding: ActivityHomeBinding
     private lateinit var adapter: CategoryHomeAdapter
-    private lateinit var bestSellersAdapter: BestSellersAdapter
-    private lateinit var specialsOneAdapter: BestSellersAdapter
-    private lateinit var specialsTwoAdapter: BestSellersAdapter
-    private lateinit var specialsThreeAdapter: BestSellersAdapter
     private lateinit var testimonialsAdapter: TestimonialsAdapter
-    private var mSelectedBanner: SpecialBanners = SpecialBanners()
+    private lateinit var homeSpecialsAdapter: HomeSpecialsAdapter
+
     private val banners = mutableListOf<BannerEntity>()
 
     private lateinit var dialogBsAddReferral: BottomSheetDialog
@@ -168,18 +163,17 @@ class HomeActivity :
         observers()
         clickListeners()
 
-        lifecycleScope.launch {
-            intent.getStringExtra("navigate")?.let {
-                navigateToPageFromNotification(it)
-            } ?:let {
-                SharedPref(this@HomeActivity).putData(
-                    Constants.DATE,
-                    STRING,
-                    TimeUtil().getCurrentDate()
-                )
-            }
-            hideProgressDialog()
+        intent.getStringExtra("navigate")?.let {
+            navigateToPageFromNotification(it)
+        } ?:let {
+            SharedPref(this@HomeActivity).putData(
+                Constants.DATE,
+                STRING,
+                TimeUtil().getCurrentDate()
+            )
         }
+        hideProgressDialog()
+
     }
 
     private fun navigateToPageFromNotification(filter: String) {
@@ -201,70 +195,6 @@ class HomeActivity :
 
     private fun clickListeners() {
         binding.apply {
-            cpShowAll.setOnClickListener(this@HomeActivity)
-            cpBestSellers.setOnClickListener(this@HomeActivity)
-            cpSpecialOne.setOnClickListener(this@HomeActivity)
-            cpSpecialTwo.setOnClickListener(this@HomeActivity)
-            cpSpecialThree.setOnClickListener(this@HomeActivity)
-            cpTestimonials.setOnClickListener(this@HomeActivity)
-            fabCart.setOnClickListener(this@HomeActivity)
-            ivFacebook.setOnClickListener(this@HomeActivity)
-            ivInstagram.setOnClickListener(this@HomeActivity)
-            ivLinkedIn.setOnClickListener(this@HomeActivity)
-            ivTelegram.setOnClickListener(this@HomeActivity)
-            ivNotification.setOnClickListener {
-                Intent(this@HomeActivity, NotificationsActivity::class.java).also {
-                    startActivity(it)
-                }
-            }
-            ivBannerOne.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[0]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerTwo.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[1]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerThree.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[2]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerFour.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[3]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerFive.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[4]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerSix.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[5]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerSeven.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[6]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerEight.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[7]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerNine.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[8]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerTen.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[9]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerEleven.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[10]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
-            ivBannerTwelve.setOnClickListener {
-                mSelectedBanner = viewModel.bannersList[11]
-                selectedBanner(mSelectedBanner.toBannerEntity())
-            }
             svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
                 when {
                     scrollY < oldScrollY && binding.fabCart.isGone -> {
@@ -283,16 +213,6 @@ class HomeActivity :
                         viewModel.getPartnersData()
                     }
                 }
-//            if (scrollY < oldScrollY && binding.fabCart.isGone) {
-//                binding.fabCart.startAnimation(scaleBig)
-//                binding.fabCart.visibility = View.VISIBLE
-//            } else if (scrollY > oldScrollY && binding.fabCart.isVisible) {
-//                binding.fabCart.startAnimation(scaleSmall)
-//                binding.fabCart.visibility = View.GONE
-//            }
-//            if (scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight) {
-//                // end of the scroll view
-//            }
             })
         }
     }
@@ -372,82 +292,6 @@ class HomeActivity :
                 showBirthDayCard(card)
             }
         }
-        viewModel.bestSellers.observe(this) {
-            binding.tvBestSellers.text = viewModel.bestSellerHeader
-            bestSellersAdapter.recycler = "bestSeller"
-            bestSellersAdapter.products = it
-            bestSellersAdapter.notifyDataSetChanged()
-        }
-        viewModel.specialsOne.observe(this) {
-            binding.tvSpecialsOne.text = viewModel.specialsOneHeader
-            specialsOneAdapter.recycler = "one"
-            specialsOneAdapter.products = it
-            specialsOneAdapter.notifyDataSetChanged()
-        }
-        viewModel.specialsTwo.observe(this) {
-            binding.tvSpecialsTwo.text = viewModel.specialsTwoHeader
-            specialsTwoAdapter.recycler = "two"
-            specialsTwoAdapter.products = it
-            specialsTwoAdapter.notifyDataSetChanged()
-        }
-        viewModel.specialsThree.observe(this) {
-            binding.tvSpecialsThree.text = viewModel.specialsThreeHeader
-            specialsThreeAdapter.recycler = "three"
-            specialsThreeAdapter.products = it
-            specialsThreeAdapter.notifyDataSetChanged()
-        }
-        viewModel.recyclerPosition.observe(this) {
-            when (viewModel.recyclerToRefresh) {
-                "bestSeller" -> {
-                    bestSellersAdapter.notifyItemChanged(it)
-                    with(viewModel) {
-                        getUpdatedSpecialsOne()
-                        getUpdatedSpecialsTwo()
-                        getUpdatedSpecialsThree()
-                    }
-                }
-                "one" -> {
-                    specialsOneAdapter.notifyItemChanged(it)
-                    with(viewModel) {
-                        getUpdatedBestSellers()
-                        getUpdatedSpecialsTwo()
-                        getUpdatedSpecialsThree()
-                    }
-                }
-                "two" -> {
-                    specialsTwoAdapter.notifyItemChanged(it)
-                    with(viewModel) {
-                        getUpdatedBestSellers()
-                        getUpdatedSpecialsOne()
-                        getUpdatedSpecialsThree()
-                    }
-                }
-                "three" -> {
-                    specialsThreeAdapter.notifyItemChanged(it)
-                    with(viewModel) {
-                        getUpdatedBestSellers()
-                        getUpdatedSpecialsOne()
-                        getUpdatedSpecialsTwo()
-                    }
-                }
-            }
-        }
-        viewModel.specialBanners.observe(this) {
-            with(binding) {
-                ivBannerOne.loadImg(it[0].url) {}
-                ivBannerTwo.loadImg(it[1].url) {}
-                ivBannerThree.loadImg(it[2].url) {}
-                ivBannerFour.loadImg(it[3].url) {}
-                ivBannerFive.loadImg(it[4].url) {}
-                ivBannerSix.loadImg(it[5].url) {}
-                ivBannerSeven.loadImg(it[6].url) {}
-                ivBannerEight.loadImg(it[7].url) {}
-                ivBannerNine.loadImg(it[8].url) {}
-                ivBannerTen.loadImg(it[9].url) {}
-                ivBannerEleven.loadImg(it[10].url) {}
-                ivBannerTwelve.loadImg(it[11].url) {}
-            }
-        }
         viewModel.testimonials.observe(this) {
             testimonialsAdapter.testimonials = it
             testimonialsAdapter.notifyDataSetChanged()
@@ -482,7 +326,7 @@ class HomeActivity :
             }
         }
 //        //scroll change listener to hide the fab when scrolling down
-//        binding.rvHomeItems.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//        binding.rvHomeSpecials.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 //            override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
 //                super.onScrolled(recyclerView, up, down)
 //                if (down > 0 && binding.fabCart.isVisible) {
@@ -492,6 +336,15 @@ class HomeActivity :
 //                }
 //            }
 //        })
+
+        binding.rvHomeSpecials.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(1)) {
+                    viewModel.getPartnersData()
+                }
+            }
+        })
     }
 
     private fun showBirthDayCard(card: BirthdayCard?) {
@@ -522,36 +375,37 @@ class HomeActivity :
 
     private fun generateRecyclerView() {
 
+        homeSpecialsAdapter = HomeSpecialsAdapter(
+            this,
+            listOf(),
+            listOf(),
+            listOf(),
+            this,
+            this
+        )
+
+        binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
+        binding.rvHomeSpecials.adapter = homeSpecialsAdapter
+/*
+    //This will lock the vertical scrolling when horizontal child is scrolling and vice versa
+            binding.rvHomeItems.setOnTouchListener { v, event ->
+                v.parent.requestDisallowInterceptTouchEvent(true)
+                false
+            }
+*/
+        viewModel.recyclerPosition.observe(this) {
+            homeSpecialsAdapter.bestSellers = viewModel.specialsProductsList
+            homeSpecialsAdapter.banners = viewModel.specialBannersList
+            homeSpecialsAdapter.titles = viewModel.specialsTitles
+            homeSpecialsAdapter.notifyDataSetChanged()
+        }
+
         adapter = CategoryHomeAdapter(
             this,
             listOf(),
             this
         )
 
-        bestSellersAdapter = BestSellersAdapter(
-            this,
-            listOf(),
-            "bestSeller",
-            this
-        )
-        specialsOneAdapter = BestSellersAdapter(
-            this,
-            listOf(),
-            "one",
-            this
-        )
-        specialsTwoAdapter = BestSellersAdapter(
-            this,
-            listOf(),
-            "two",
-            this
-        )
-        specialsThreeAdapter = BestSellersAdapter(
-            this,
-            listOf(),
-            "three",
-            this
-        )
         testimonialsAdapter = TestimonialsAdapter(
             this,
             mutableListOf(),
@@ -560,23 +414,18 @@ class HomeActivity :
 
         binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
         binding.rvHomeItems.adapter = adapter
-        binding.rvTopPurchases.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvTopPurchases.adapter = bestSellersAdapter
-        binding.rvSpecialsOne.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvSpecialsOne.adapter = specialsOneAdapter
-        binding.rvSpecialsTwo.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvSpecialsTwo.adapter = specialsTwoAdapter
-        binding.rvSpecialsThree.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvSpecialsThree.adapter = specialsThreeAdapter
-        binding.rvTestimonials.layoutManager =
-            LinearLayoutManager(this)
+        binding.rvTestimonials.layoutManager = LinearLayoutManager(this)
         binding.rvTestimonials.adapter = testimonialsAdapter
 //        val snapHelper: SnapHelper = GravitySnapHelper(Gravity.TOP)
-//        snapHelper.attachToRecyclerView(binding.rvHomeItems)
+//        snapHelper.attachToRecyclerView(binding.rvHomeSpecials)
+    }
+
+    override fun showAllProducts() {
+        moveToAllProducts()
+    }
+
+    override fun selectedSpecialBanner(banner: BannerEntity) {
+        selectedBanner(banner)
     }
 
     private fun showReferralBs(currentUserID: String) {
@@ -603,83 +452,23 @@ class HomeActivity :
         dialogBsAddReferral.show()
     }
 
-/*
-    //This will lock the vertical scrolling when horizontal child is scrolling and vice versa
-            binding.rvHomeItems.setOnTouchListener { v, event ->
-                v.parent.requestDisallowInterceptTouchEvent(true)
-                false
-            }
-*/
-
     override fun onBackPressed() {
         when {
             binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START) ->
                 binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
-//            isPreviewOpened -> {
-//                binding.ivPreviewImage.startAnimation(
-//                    AnimationUtils.loadAnimation(this, R.anim.scale_small)
-//                )
-//                binding.ivPreviewImage.remove()
-//                isPreviewOpened = false
-//            }
             else -> {
                 finish()
                 finishAffinity()
                 super.onBackPressed()
             }
         }
-//        if (binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-//            binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
-//        } else {
-//            finish()
-//            finishAffinity()
-//            super.onBackPressed()
-//        }
     }
-
-
 
     override fun onClick(v: View?) {
         if (v != null) {
             when (v) {
                 binding.cpShowAll -> {
                     binding.cpShowAll.startAnimation(
-                        AnimationUtils.loadAnimation(
-                            binding.cpShowAll.context,
-                            R.anim.bounce
-                        )
-                    )
-                    moveToAllProducts()
-                }
-                binding.cpBestSellers -> {
-                    binding.cpBestSellers.startAnimation(
-                        AnimationUtils.loadAnimation(
-                            binding.cpShowAll.context,
-                            R.anim.bounce
-                        )
-                    )
-                    moveToAllProducts()
-                }
-                binding.cpSpecialOne -> {
-                    binding.cpSpecialOne.startAnimation(
-                        AnimationUtils.loadAnimation(
-                            binding.cpShowAll.context,
-                            R.anim.bounce
-                        )
-                    )
-                    moveToAllProducts()
-                }
-                binding.cpSpecialTwo -> {
-                    binding.cpSpecialTwo.startAnimation(
-                        AnimationUtils.loadAnimation(
-                            binding.cpShowAll.context,
-                            R.anim.bounce
-                        )
-                    )
-                    moveToAllProducts()
-                }
-                binding.cpSpecialThree -> {
-                    binding.cpSpecialThree.startAnimation(
                         AnimationUtils.loadAnimation(
                             binding.cpShowAll.context,
                             R.anim.bounce
@@ -709,7 +498,7 @@ class HomeActivity :
                 }
                 binding.ivInstagram -> openInBrowser("https://www.instagram.com/magizhini_organics/?utm_medium=copy_link")
                 binding.ivFacebook -> openInBrowser("https://www.facebook.com/organicshopping/")
-                binding.ivTelegram -> openInBrowser("https://t.me/coder_lane")
+//                binding.ivTelegram -> openInBrowser("https://t.me/coder_lane")
                 binding.ivLinkedIn -> openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
             }
         }
@@ -809,11 +598,6 @@ class HomeActivity :
         viewModel.getAllNotifications()
         super.onResume()
     }
-//
-//    override fun onRestart() {
-//        viewModel.getAllNotifications()
-//        super.onRestart()
-//    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (NetworkHelper.isOnline(this)) {

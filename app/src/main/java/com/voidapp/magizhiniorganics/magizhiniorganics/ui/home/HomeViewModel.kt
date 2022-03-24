@@ -187,20 +187,46 @@ class HomeViewModel (
         getSpecialsThree.await()
         getSpecialBanners.await()
         getAllTestimonials.await()
+
+        withContext(Dispatchers.Main) {
+            _recyclerPosition.value = System.currentTimeMillis().toInt()
+        }
     }
+
+
+    val specialsProductsList: MutableList<List<ProductEntity>> = mutableListOf()
+    val specialsTitles: MutableList<String> = mutableListOf()
+    val specialBannersList: MutableList<List<BannerEntity>> = mutableListOf()
 
     private suspend fun getSpecialBanners() {
         try {
-            val banners = dbRepository.getSpecialBanners()
-            bannersList.clear()
-            withContext(Dispatchers.Main) {
-                bannersList.addAll(banners)
-                _specialBanners.value = banners
+//            val banners = dbRepository.getSpecialBanners()
+//            bannersList.clear()
+//            withContext(Dispatchers.Main) {
+//                bannersList.addAll(banners)
+//                _specialBanners.value = banners
+//            }
+            dbRepository.getSpecialBanners().let {
+                for (i in it.indices step 3) {
+                    val list: MutableList<BannerEntity> = mutableListOf<BannerEntity>()
+                    list.add(it[i].toBannerEntity())
+                    list.add(it[i+1].toBannerEntity())
+                    list.add(it[i+2].toBannerEntity())
+                    specialBannersList.add(list)
+                }
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl banners from db", it) }
         }
     }
+
+    fun SpecialBanners.toBannerEntity() = BannerEntity(
+        id = id,
+        url = url,
+        order = order,
+        type = type,
+        description = description
+    )
 
     private suspend fun getBestSellers() {
         try {
@@ -213,7 +239,9 @@ class HomeViewModel (
                 dbRepository.getProductWithIdForUpdate(items[item])?.let { products.add(it) }
             }
             withContext(Dispatchers.Main) {
-                _bestSellers.value = products
+                specialsTitles.add(bestSellerHeader)
+                specialsProductsList.add(products)
+//                _bestSellers.value = products
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating best sellers from db", it) }
@@ -230,7 +258,9 @@ class HomeViewModel (
                 dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
             withContext(Dispatchers.Main) {
-                _specialsOne.value = products
+                specialsTitles.add(specialsOneHeader)
+                specialsProductsList.add(products)
+//                _specialsOne.value = products
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl one from db", it) }
@@ -247,7 +277,9 @@ class HomeViewModel (
                 dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
             withContext(Dispatchers.Main) {
-                _specialsTwo.value = products
+                specialsTitles.add(specialsTwoHeader)
+                specialsProductsList.add(products)
+//                _specialsTwo.value = products
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl two from db", it) }
@@ -264,7 +296,9 @@ class HomeViewModel (
                 dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
             withContext(Dispatchers.Main) {
-                _specialsThree.value = products
+                specialsTitles.add(specialsThreeHeader)
+                specialsProductsList.add(products)
+//                _specialsThree.value = products
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl three from db", it) }
@@ -280,19 +314,6 @@ class HomeViewModel (
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating testimonials from db", it) }
         }
-    }
-
-    fun getUpdatedBestSellers() = viewModelScope.launch(Dispatchers.IO) {
-        getBestSellers()
-    }
-    fun getUpdatedSpecialsOne() = viewModelScope.launch(Dispatchers.IO) {
-        getSpecialsOne()
-    }
-    fun getUpdatedSpecialsTwo() = viewModelScope.launch(Dispatchers.IO) {
-        getSpecialsTwo()
-    }
-    fun getUpdatedSpecialsThree() = viewModelScope.launch(Dispatchers.IO) {
-        getSpecialsThree()
     }
 
     fun updateToken(token: String?)= viewModelScope.launch(Dispatchers.IO) {

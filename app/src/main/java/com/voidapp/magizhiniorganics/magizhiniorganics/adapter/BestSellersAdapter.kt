@@ -21,7 +21,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 class BestSellersAdapter(
     val context: Context,
     var products: List<ProductEntity>,
-    var recycler: String,
     val onItemClickListener: BestSellerItemClickListener
 ) : RecyclerView.Adapter<BestSellersAdapter.ProductHomeViewHolder>() {
 
@@ -29,9 +28,9 @@ class BestSellersAdapter(
         RecyclerView.ViewHolder(binding.root)
 
     private var variantDisplayName = ""
-    val id: String =
-        SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
-
+//    val id: String =
+//        SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
+//
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductHomeViewHolder {
         val view =
@@ -72,25 +71,25 @@ class BestSellersAdapter(
 //                ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
 //            }
 
-            if (!product.variantInCart.contains(variantName)) {
-                with(holder.binding) {
-                    ivAdd.backgroundTintList = ColorStateList.valueOf((ContextCompat.getColor(ivAdd.context, R.color.green_base)))
-                    ivAdd.setImageDrawable(
-                        ContextCompat.getDrawable(
-                            ivAdd.context,
-                            R.drawable.ic_add
-                        )
-                    )
-                }
-            } else {
-                ivAdd.backgroundTintList = ColorStateList.valueOf((ContextCompat.getColor(ivAdd.context, R.color.matteRed)))
-                ivAdd.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        ivAdd.context,
-                        R.drawable.ic_delete
-                    )
-                )
-            }
+//            if (!product.variantInCart.contains(variantName)) {
+//                with(holder.binding) {
+//                    ivAdd.backgroundTintList = ColorStateList.valueOf((ContextCompat.getColor(ivAdd.context, R.color.green_base)))
+//                    ivAdd.setImageDrawable(
+//                        ContextCompat.getDrawable(
+//                            ivAdd.context,
+//                            R.drawable.ic_add
+//                        )
+//                    )
+//                }
+//            } else {
+//                ivAdd.backgroundTintList = ColorStateList.valueOf((ContextCompat.getColor(ivAdd.context, R.color.matteRed)))
+//                ivAdd.setImageDrawable(
+//                    ContextCompat.getDrawable(
+//                        ivAdd.context,
+//                        R.drawable.ic_delete
+//                    )
+//                )
+//            }
 
             //if discount is available then we make the discount layout visible and set the discount amount and percentage
             if (product.variants[variantInCartPosition].discountPrice != 0.0) {
@@ -118,19 +117,19 @@ class BestSellersAdapter(
 //                viewModel.updateFavorites(id, product)
 //            }
 
-            ivAdd.setOnClickListener {
-                it.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-                if (product.variantInCart.contains(variantName)) {
-                    product.variantInCart.remove(variantName)
-                    if (product.variantInCart.isEmpty()) {
-                        product.inCart = false
-                    }
-                        removeItem(product, position)
-                } else {
-                    product.variantInCart.add(variantName)
-                        addItem(product, position, variantInCartPosition, discountedPriceForPurchase)
-                }
-            }
+//            ivAdd.setOnClickListener {
+//                it.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
+//                if (product.variantInCart.contains(variantName)) {
+//                    product.variantInCart.remove(variantName)
+//                    if (product.variantInCart.isEmpty()) {
+//                        product.inCart = false
+//                    }
+//                        removeItem(product, position)
+//                } else {
+//                    product.variantInCart.add(variantName)
+//                        addItem(product, position, variantInCartPosition, discountedPriceForPurchase)
+//                }
+//            }
 
             ivProductThumbnail.setOnClickListener {
                 onItemClickListener.moveToProductDetails(productID, product.name, ivProductThumbnail)
@@ -146,38 +145,6 @@ class BestSellersAdapter(
     private fun getDiscountPercent(price: Float, discountPrice: Float): Float
             = ((price-discountPrice)/price)*100
 
-    private fun addItem(
-        product: ProductEntity,
-        position: Int,
-        variantPosition: Int,
-        discountedPrice: Double
-    ) {
-        Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
-        onItemClickListener.upsertCartItem(
-            product,
-            "${product.variants[variantPosition].variantName} ${product.variants[variantPosition].variantType}",
-            1,
-            discountedPrice.toFloat(),
-            product.variants[variantPosition].variantPrice.toFloat(),
-            0,
-            position,
-            recycler
-        )
-    }
-
-    private fun removeItem(
-        product: ProductEntity,
-        position: Int
-    ) {
-        Toast.makeText(context, "Removed from Cart", Toast.LENGTH_SHORT).show()
-        onItemClickListener.deleteCartItemFromShoppingMain(
-            product,
-            "${product.variants[0].variantName} ${product.variants[0].variantType}",
-            position,
-            recycler
-        )
-    }
-
     private fun checkVariantAvailability(
         holder: BestSellersAdapter.ProductHomeViewHolder,
         variant: ProductVariant
@@ -186,18 +153,18 @@ class BestSellersAdapter(
             when (variant.status) {
                 Constants.LIMITED -> {
                     ivCountBg.visibility = View.VISIBLE
-                    ivAdd.isEnabled = true
+//                    ivAdd.isEnabled = true
                 }
                 Constants.OUT_OF_STOCK -> {
                     ivCountBg.visibility = View.VISIBLE
                     tvProductName.visibility = View.VISIBLE
                     tvProductName.text = "Out of Stock"
-                    ivAdd.isEnabled = false
+//                    ivAdd.isEnabled = false
 
                 }
                 Constants.NO_LIMIT -> {
                     ivCountBg.visibility = View.VISIBLE
-                    ivAdd.isEnabled = true
+//                    ivAdd.isEnabled = true
                 }
             }
         }
