@@ -271,7 +271,7 @@ interface UserProfileDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertTestimonial(testimonial: TestimonialsEntity)
     @Query("SELECT * FROM TestimonialsEntity ORDER BY `order`")
-    fun getAllTestimonials(): List<TestimonialsEntity>
+    fun getAllTestimonials(): List<TestimonialsEntity>?
     @Query("DELETE FROM TestimonialsEntity")
     fun deleteAllTestimonials()
 }

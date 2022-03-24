@@ -570,6 +570,7 @@ class ShoppingMainActivity :
 
     override fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView, position: Int) {
         viewModel.selectedProductPosition = position
+        viewModel.selectedProductID = product.id
         navigateToProductDetails(product, thumbnail)
     }
 

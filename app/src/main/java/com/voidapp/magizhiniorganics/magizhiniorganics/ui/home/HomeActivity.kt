@@ -5,7 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Telephony
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -108,8 +110,9 @@ class HomeActivity :
     private lateinit var adapter: CategoryHomeAdapter
     private lateinit var testimonialsAdapter: TestimonialsAdapter
     private lateinit var homeSpecialsAdapter: HomeSpecialsAdapter
+    private lateinit var partnersAdapter: PartnersAdapter
 
-    private val banners = mutableListOf<BannerEntity>()
+//    private val banners = mutableListOf<BannerEntity>()
 
     private lateinit var dialogBsAddReferral: BottomSheetDialog
 
@@ -159,6 +162,7 @@ class HomeActivity :
             }
         }
         generateRecyclerView()
+        initData()
         //getting all the data from room database
         observers()
         clickListeners()
@@ -173,6 +177,11 @@ class HomeActivity :
             )
         }
         hideProgressDialog()
+
+    }
+
+    private fun initData() {
+        viewModel.getDataToPopulate()
 
     }
 
@@ -210,7 +219,11 @@ class HomeActivity :
                         binding.fabCart.visibility = View.GONE
                     }
                     scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight -> {
-                        viewModel.getPartnersData()
+//                        viewModel.getPartnersData()
+                        if (viewModel.partners.isEmpty() ||  viewModel.testimonials.isEmpty()) {
+                            showProgressDialog()
+                            viewModel.getEndData()
+                        }
                     }
                 }
             })
@@ -252,79 +265,115 @@ class HomeActivity :
     }
 
     private fun observers() {
-        viewModel.getDataToPopulate()
-
-        viewModel.notifications.observe(this) {
-            if (it.isNullOrEmpty()) {
-                binding.ivNotification.badgeValue = 0
-                binding.ivNotification.visibleBadge(false)
-            } else {
-                binding.ivNotification.apply {
-                    visibleBadge(true)
-                    badgeValue = it.size
+        viewModel.uiUpdate.observe(this) { event ->
+            when(event) {
+                is HomeViewModel.UiUpdate.PopulateData -> {
+                    homeSpecialsAdapter.setBestSellerData(
+                        viewModel.specialBannersList,
+                        viewModel.specialsProductsList,
+                        viewModel.specialsTitles
+                    )
+//                    homeSpecialsAdapter.bestSellers = viewModel.specialsProductsList
+//                    homeSpecialsAdapter.banners = viewModel.specialBannersList
+//                    homeSpecialsAdapter.titles = viewModel.specialsTitles
+//                    homeSpecialsAdapter.notifyDataSetChanged()
                 }
+                is HomeViewModel.UiUpdate.ShowNotificationsCount -> {
+                    event.count?.let { binding.ivNotification.badgeValue = it }
+                }
+                is HomeViewModel.UiUpdate.PopulateEnd -> {
+                    hideProgressDialog()
+                    testimonialsAdapter.setTestimonialData(event.testimonials)
+                    event.partners?.let { partnersAdapter.setPartnersData(it) }
+                }
+                is HomeViewModel.UiUpdate.ShowBirthDayCard -> {
+                    event.birthdayCard?.let { card ->
+                        showBirthDayCard(card)
+                    }
+                }
+                is HomeViewModel.UiUpdate.AllowReferral -> {
+                    hideProgressDialog()
+                    if (event.status) {
+                        showReferralBs(event.message!!)
+                    } else {
+                        showErrorSnackBar(event.message!!, true)
+                    }
+                }
+                is HomeViewModel.UiUpdate.ReferralStatus -> {
+                    hideProgressDialog()
+                    if (event.status) {
+                        dialogBsAddReferral.dismiss()
+                        showErrorSnackBar(
+                            "Referral added Successfully. Referral bonus will be added to your Wallet.",
+                            false,
+                            Constants.LONG
+                        )
+                    } else {
+                        showToast(this, "No account with the given number. Please check again")
+                    }
+                }
+                else -> HomeViewModel.UiUpdate.Empty
             }
         }
+
+//        viewModel.notifications.observe(this) {
+//            if (it.isNullOrEmpty()) {
+//                binding.ivNotification.badgeValue = 0
+//                binding.ivNotification.visibleBadge(false)
+//            } else {
+//                binding.ivNotification.apply {
+//                    visibleBadge(true)
+//                    badgeValue = it.size
+//                }
+//            }
+//        }
         //observing the banners data and setting the banners
         viewModel.getAllBanners().observe(this, Observer {
-            banners.clear()
-            banners.addAll(it)
             val bannersCarousel: MutableList<CarouselItem> = mutableListOf()
-            for (banner in banners) {
-                //creating a mutable list baaner carousel item
+            for (banner in it) {
+                //creating a mutable list banner carousel item
                 bannersCarousel.add(
                     CarouselItem(
                         imageUrl = banner.url
                     )
                 )
             }
-            generateBanners(bannersCarousel, banners)
+            generateBanners(bannersCarousel, it)
         })
         viewModel.getALlCategories().observe(this, Observer {
-//            it.forEach { cat ->
-//                mCategoriesList.add(cat.name)
-//            }
-            adapter.categories = it
-            adapter.notifyDataSetChanged()
+            adapter.setCategoriesData(it)
+//            adapter.categories = it
+//            adapter.notifyDataSetChanged()
         })
-        viewModel.showBirthday.observe(this) {
-            it?.let { card ->
-                showBirthDayCard(card)
-            }
-        }
-        viewModel.testimonials.observe(this) {
-            testimonialsAdapter.testimonials = it
-            testimonialsAdapter.notifyDataSetChanged()
-        }
-        viewModel.referralStatus.observe(this) {
-            hideProgressDialog()
-            if (it) {
-                dialogBsAddReferral.dismiss()
-                showErrorSnackBar(
-                    "Referral added Successfully. Your referral bonus will be added to your Wallet.",
-                    false,
-                    Constants.LONG
-                )
-            } else {
-                showToast(this, "No account with the given number. Please check again")
-            }
-        }
-        viewModel.allowReferral.observe(this) {
-            if (it == "no") {
-                showErrorSnackBar("Referral Already Applied", true)
-            } else {
-                showReferralBs(it)
-            }
-        }
-        viewModel.partners.observe(this) { partners ->
-            partners?.let {
-                binding.rvPartners.adapter = PartnersAdapter(
-                    it,
-                    this
-                )
-                binding.rvPartners.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-            }
-        }
+//        viewModel.showBirthday.observe(this) {
+//            it?.let { card ->
+//                showBirthDayCard(card)
+//            }
+//        }
+//        viewModel.testimonials.observe(this) {
+//            testimonialsAdapter.testimonials = it
+//            testimonialsAdapter.notifyDataSetChanged()
+//        }
+//        viewModel.referralStatus.observe(this) {
+//            hideProgressDialog()
+//            if (it) {
+//                dialogBsAddReferral.dismiss()
+//                showErrorSnackBar(
+//                    "Referral added Successfully. Your referral bonus will be added to your Wallet.",
+//                    false,
+//                    Constants.LONG
+//                )
+//            } else {
+//                showToast(this, "No account with the given number. Please check again")
+//            }
+//        }
+//        viewModel.allowReferral.observe(this) {
+//            if (it == "no") {
+//                showErrorSnackBar("Referral Already Applied", true)
+//            } else {
+//                showReferralBs(it)
+//            }
+//        }
 //        //scroll change listener to hide the fab when scrolling down
 //        binding.rvHomeSpecials.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 //            override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
@@ -337,14 +386,14 @@ class HomeActivity :
 //            }
 //        })
 
-        binding.rvHomeSpecials.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (!recyclerView.canScrollVertically(1)) {
-                    viewModel.getPartnersData()
-                }
-            }
-        })
+//        binding.rvHomeSpecials.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+//                super.onScrollStateChanged(recyclerView, newState)
+//                if (!recyclerView.canScrollVertically(1)) {
+//                    viewModel.getPartnersData()
+//                }
+//            }
+//        })
     }
 
     private fun showBirthDayCard(card: BirthdayCard?) {
@@ -359,22 +408,18 @@ class HomeActivity :
         bannerCarouselItems: MutableList<CarouselItem>,
         bannerItems: List<BannerEntity>
     ) {
-
-//        mItems.addAll(bannerCarouselItems)
-
         //adding the data to carousel items
         binding.cvBanner.addData(bannerCarouselItems)
         //registering the lifecycle to prevent memory leak
         binding.cvBanner.registerLifecycle(this)
         binding.cvBanner.carouselListener = object : CarouselListener {
             override fun onClick(position: Int, carouselItem: CarouselItem) {
-                selectedBanner(banners[position])
+                selectedBanner(bannerItems[position])
             }
         }
     }
 
     private fun generateRecyclerView() {
-
         homeSpecialsAdapter = HomeSpecialsAdapter(
             this,
             listOf(),
@@ -383,9 +428,6 @@ class HomeActivity :
             this,
             this
         )
-
-        binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
-        binding.rvHomeSpecials.adapter = homeSpecialsAdapter
 /*
     //This will lock the vertical scrolling when horizontal child is scrolling and vice versa
             binding.rvHomeItems.setOnTouchListener { v, event ->
@@ -393,12 +435,6 @@ class HomeActivity :
                 false
             }
 */
-        viewModel.recyclerPosition.observe(this) {
-            homeSpecialsAdapter.bestSellers = viewModel.specialsProductsList
-            homeSpecialsAdapter.banners = viewModel.specialBannersList
-            homeSpecialsAdapter.titles = viewModel.specialsTitles
-            homeSpecialsAdapter.notifyDataSetChanged()
-        }
 
         adapter = CategoryHomeAdapter(
             this,
@@ -412,10 +448,19 @@ class HomeActivity :
             this
         )
 
+        partnersAdapter = PartnersAdapter(
+            listOf(),
+            this
+        )
+
+        binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
+        binding.rvHomeSpecials.adapter = homeSpecialsAdapter
         binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
         binding.rvHomeItems.adapter = adapter
         binding.rvTestimonials.layoutManager = LinearLayoutManager(this)
         binding.rvTestimonials.adapter = testimonialsAdapter
+        binding.rvPartners.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvPartners.adapter = partnersAdapter
 //        val snapHelper: SnapHelper = GravitySnapHelper(Gravity.TOP)
 //        snapHelper.attachToRecyclerView(binding.rvHomeSpecials)
     }
@@ -562,12 +607,15 @@ class HomeActivity :
         Intent(this, ProductActivity::class.java).also { intent ->
             intent.putExtra(PRODUCTS, productID)
             intent.putExtra(Constants.PRODUCT_NAME, productName)
-            intent.putExtra(NAVIGATION, HOME_PAGE)
             thumbnail?.let { image ->
                 val options: ActivityOptionsCompat =
                         ActivityOptionsCompat.makeSceneTransitionAnimation(this, image, ViewCompat.getTransitionName(image)!!)
-
-                startActivity(intent, options.toBundle())
+                if (Build.MANUFACTURER == "Xiaomi") {
+                    startActivity(intent)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                } else {
+                    startActivity(intent, options.toBundle())
+                }
             } ?:let {
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
@@ -779,12 +827,6 @@ class HomeActivity :
 
     private fun openPreview(imageUrl: String, carouselItem: ImageCarousel) {
         navigateToPreview(imageUrl, null, carouselItem, "image")
-//        isPreviewOpened = true
-//        GlideLoader().loadUserPictureWithoutCrop(this@HomeActivity, imageUrl, binding.ivPreviewImage)
-//        binding.ivPreviewImage.startAnimation(
-//            AnimationUtils.loadAnimation(this@HomeActivity, R.anim.scale_big)
-//        )
-//        binding.ivPreviewImage.visible()
     }
 
     //from partners adapter
@@ -792,29 +834,6 @@ class HomeActivity :
         when(partner.clickAction) {
             "Open" -> navigateToPreview(partner.imageUrl, thumbnail, null, "image")
         }
-    }
-
-    //from best sellers adapter
-    override fun upsertCartItem(
-        product: ProductEntity,
-        variantName: String,
-        itemCount: Int,
-        discountedPrice: Float,
-        originalPrice: Float,
-        variantPosition: Int,
-        position: Int,
-        recycler: String
-    ) {
-        viewModel.upsertCartItem(product, variantName, itemCount, discountedPrice, originalPrice, variantPosition, position, recycler)
-    }
-
-    override fun deleteCartItemFromShoppingMain(
-        product: ProductEntity,
-        variantName: String,
-        position: Int,
-        recycler: String
-    ) {
-        viewModel.deleteCartItemFromShoppingMain(product, variantName, position, recycler)
     }
 
     override fun moveToProductDetails(productID: String,productName: String, thumbnail: ShapeableImageView) {

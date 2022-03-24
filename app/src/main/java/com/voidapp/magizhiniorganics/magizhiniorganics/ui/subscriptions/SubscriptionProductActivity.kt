@@ -74,7 +74,7 @@ class SubscriptionProductActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_subscription_product)
         viewModel = ViewModelProvider(this, factory).get(SubscriptionProductViewModel::class.java)
 
-        supportPostponeEnterTransition()
+        postponeEnterTransition()
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -314,7 +314,7 @@ class SubscriptionProductActivity :
                                 doOnEnd { binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {} }
                             }
                         binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {
-                            supportStartPostponedEnterTransition()
+                            startPostponedEnterTransition()
                         }
                         populateProductDetails(product)
                         initListeners()

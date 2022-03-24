@@ -12,6 +12,7 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -23,10 +24,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.ChangeBounds
-import androidx.transition.ChangeImageTransform
-import androidx.transition.Transition
-import androidx.transition.TransitionSet
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -59,7 +56,6 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
 import kotlin.math.abs
-
 
 
 class ProductActivity :
@@ -99,7 +95,7 @@ class ProductActivity :
         binding.tvProductName.text = intent.getStringExtra(PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
 
-        supportPostponeEnterTransition()
+        postponeEnterTransition()
 
         initData(intent.getStringExtra(PRODUCTS).toString())
         cartBottomSheet()
@@ -465,17 +461,18 @@ class ProductActivity :
 
     private fun populateProductData(isFirstCall: Boolean = false) {
         viewModel.product?.let { product ->
-//            GlideLoader().loadUserPicture(this, product.thumbnailUrl, binding.ivProductThumbnail)
             if (isFirstCall) {
                 window.sharedElementEnterTransition = android.transition.TransitionSet()
                     .addTransition(android.transition.ChangeImageTransform())
                     .addTransition(android.transition.ChangeBounds())
                     .apply {
-                        doOnEnd { binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {} }
+                        doOnEnd { binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {
+                            startPostponedEnterTransition()
+                        } }
                     }
             }
             binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {
-                supportStartPostponedEnterTransition()
+                startPostponedEnterTransition()
             }
             setPrice(product.variants[viewModel.selectedVariantPosition])
             setFavorites(product.favorite)
@@ -483,6 +480,7 @@ class ProductActivity :
             setAddButtonContent(
                 viewModel.selectedVariantName
             )
+//            startPostponedEnterTransition()
         }
     }
 

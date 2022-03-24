@@ -22,6 +22,7 @@ class ShoppingMainViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
+    var selectedProductID: String = ""
     var selectedProductPosition: Int? = null
     var navigateToPage: String = ""
     var shoppingMainListener: ShoppingMainAdapter.ShoppingMainListener? = null
@@ -257,10 +258,14 @@ class ShoppingMainViewModel(
 
     fun refreshProduct() = viewModelScope.launch(Dispatchers.IO) {
         productToRefresh?.let {
-
+            dbRepository.getProductWithIdForUpdate(selectedProductID)?.let {
+                withContext(Dispatchers.Main) {
+                    productToRefresh = it
+                    _position.value = selectedProductPosition
+                }
+            }
         }
     }
-
 }
 
 

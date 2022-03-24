@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
@@ -78,6 +80,37 @@ class TestimonialsAdapter(
         } else {
             displaySideCounter += 1
             ODD_ORDER
+        }
+    }
+
+    fun setTestimonialData(newList: List<TestimonialsEntity>) {
+        val diffUtil = TestimonialsDiffUtil(testimonials, newList)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
+        testimonials = newList as ArrayList<TestimonialsEntity>
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    class TestimonialsDiffUtil(
+        private val oldList: List<TestimonialsEntity>,
+        private val newList: List<TestimonialsEntity>
+    ): DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].id == newList[newItemPosition].id
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return when {
+                oldList[oldItemPosition].id != newList[newItemPosition].id -> false
+                else -> true
+            }
         }
     }
 

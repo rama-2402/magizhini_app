@@ -64,33 +64,6 @@ class BestSellersAdapter(
 
             ivProductThumbnail.loadImg(product.thumbnailUrl) {}
 
-//            //setting the favorties icon for the products
-//            if (product.favorite) {
-//                ivFavourite.setImageResource(R.drawable.ic_favorite_filled)
-//            } else {
-//                ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
-//            }
-
-//            if (!product.variantInCart.contains(variantName)) {
-//                with(holder.binding) {
-//                    ivAdd.backgroundTintList = ColorStateList.valueOf((ContextCompat.getColor(ivAdd.context, R.color.green_base)))
-//                    ivAdd.setImageDrawable(
-//                        ContextCompat.getDrawable(
-//                            ivAdd.context,
-//                            R.drawable.ic_add
-//                        )
-//                    )
-//                }
-//            } else {
-//                ivAdd.backgroundTintList = ColorStateList.valueOf((ContextCompat.getColor(ivAdd.context, R.color.matteRed)))
-//                ivAdd.setImageDrawable(
-//                    ContextCompat.getDrawable(
-//                        ivAdd.context,
-//                        R.drawable.ic_delete
-//                    )
-//                )
-//            }
-
             //if discount is available then we make the discount layout visible and set the discount amount and percentage
             if (product.variants[variantInCartPosition].discountPrice != 0.0) {
                 clDiscountLayout.visibility = View.VISIBLE
@@ -109,27 +82,6 @@ class BestSellersAdapter(
                 discountedPriceForPurchase = product.variants[variantInCartPosition].variantPrice
                 tvPrice.text = "$variantDisplayName - Rs: ${product.variants[variantInCartPosition].variantPrice}"
             }
-//
-//            //favorites click listener
-//            ivFavourite.setOnClickListener {
-//                ivFavourite.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-//                product.favorite = !product.favorite
-//                viewModel.updateFavorites(id, product)
-//            }
-
-//            ivAdd.setOnClickListener {
-//                it.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-//                if (product.variantInCart.contains(variantName)) {
-//                    product.variantInCart.remove(variantName)
-//                    if (product.variantInCart.isEmpty()) {
-//                        product.inCart = false
-//                    }
-//                        removeItem(product, position)
-//                } else {
-//                    product.variantInCart.add(variantName)
-//                        addItem(product, position, variantInCartPosition, discountedPriceForPurchase)
-//                }
-//            }
 
             ivProductThumbnail.setOnClickListener {
                 onItemClickListener.moveToProductDetails(productID, product.name, ivProductThumbnail)
@@ -171,8 +123,6 @@ class BestSellersAdapter(
     }
 
     interface BestSellerItemClickListener {
-        fun upsertCartItem(product: ProductEntity, variantName: String, itemCount: Int, discountedPrice: Float, originalPrice: Float, variantPosition: Int, position: Int, recycler: String)
-        fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int, recycler: String)
         fun moveToProductDetails(productID: String,productName: String ,thumbnail: ShapeableImageView)
     }
 }

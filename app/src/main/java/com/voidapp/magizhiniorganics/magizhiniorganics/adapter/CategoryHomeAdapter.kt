@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductCategoryEntity
@@ -51,5 +52,37 @@ class CategoryHomeAdapter(
 
     interface CategoryItemClickListener {
         fun selectedCategory(categoryName: String)
+    }
+
+
+    fun setCategoriesData(newList: List<ProductCategoryEntity>) {
+        val diffUtil = CategoriesDiffUtil(categories, newList)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
+        categories = newList as ArrayList<ProductCategoryEntity>
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    class CategoriesDiffUtil(
+        private val oldList: List<ProductCategoryEntity>,
+        private val newList: List<ProductCategoryEntity>
+    ): DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].id == newList[newItemPosition].id
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return when {
+                oldList[oldItemPosition].id != newList[newItemPosition].id -> false
+                else -> true
+            }
+        }
     }
 }

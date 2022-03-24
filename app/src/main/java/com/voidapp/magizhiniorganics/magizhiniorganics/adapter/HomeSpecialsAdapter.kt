@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.AbsListView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
@@ -17,7 +18,7 @@ class HomeSpecialsAdapter(
     var titles: List<String>,
     var banners: List<List<BannerEntity>>,
     val onItemClickListener: HomeSpecialsItemClickListener,
-    val bestSellerItemClickListener: BestSellersAdapter.BestSellerItemClickListener
+    private val bestSellerItemClickListener: BestSellersAdapter.BestSellerItemClickListener
 ): RecyclerView.Adapter<HomeSpecialsAdapter.HomeSpecialsViewHolder>() {
 
     inner class HomeSpecialsViewHolder(val binding: RvHomeSpecialsItemBinding): RecyclerView.ViewHolder(binding.root)
@@ -71,4 +72,39 @@ class HomeSpecialsAdapter(
         fun showAllProducts()
         fun selectedSpecialBanner(banner: BannerEntity)
     }
+
+
+    fun setBestSellerData(newBanners: MutableList<List<BannerEntity>>, newBestSellers: MutableList<List<ProductEntity>>, newList: List<String>) {
+        val diffUtil = BestSellersDiffUtils(titles, newList)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
+        titles = newList as ArrayList<String>
+        banners = newBanners
+        bestSellers = newBestSellers
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    class BestSellersDiffUtils(
+        private val oldList: List<String>,
+        private val newList: List<String>
+    ): DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return when {
+                oldList[oldItemPosition] != newList[newItemPosition] -> false
+                else -> true
+            }
+        }
+    }
+
 }
