@@ -480,8 +480,8 @@ open class BaseActivity : AppCompatActivity() {
                 when (activity) {
                     is ShoppingMainActivity -> {
                         hideListBottomSheet()
-                        activity.categoryFilter = selectedItem
-                        activity.setFilteredProducts()
+//                        activity.categoryFilter = selectedItem
+                        activity.selectedCategory(selectedItem)
                     }
                     is WalletActivity -> {
                         hideListBottomSheet()

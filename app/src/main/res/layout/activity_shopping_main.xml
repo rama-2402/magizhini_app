@@ -81,7 +81,6 @@
                 app:singleLine="true"
                 app:singleSelection="true"
                 android:paddingEnd="@dimen/material_size_8"
-                app:checkedChip="@id/cpCategoryFilter"
                 >
 
                 <com.google.android.material.chip.Chip

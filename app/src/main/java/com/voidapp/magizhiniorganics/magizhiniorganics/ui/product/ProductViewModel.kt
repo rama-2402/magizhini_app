@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
@@ -24,7 +23,7 @@ import java.io.IOException
 class ProductViewModel(
     private val dbRepository: DatabaseRepository,
     private val fbRepository: FirestoreRepository
-): ViewModel() {
+) : ViewModel() {
 
     var reviewAdapter: ReviewAdapter? = null
     var navigateToPage: String = ""
@@ -37,6 +36,7 @@ class ProductViewModel(
     var selectedVariantName: String = ""
 
     val cartItems: MutableList<CartEntity> = mutableListOf()
+    val clearedIDsFromCart: MutableList<String> = mutableListOf()
     var cartItemsCount: Int = 0
 
     var couponPrice: Float? = null
@@ -66,7 +66,12 @@ class ProductViewModel(
         try {
             userProfile = dbRepository.getProfileData()
         } catch (e: IOException) {
-            e.message?.let { fbRepository.logCrash("sub product: getting the sub product from DB", it) }
+            e.message?.let {
+                fbRepository.logCrash(
+                    "sub product: getting the sub product from DB",
+                    it
+                )
+            }
         }
     }
 
@@ -99,7 +104,7 @@ class ProductViewModel(
             it.variants.clear()
             it.variants.addAll(variants)
         }
-       _uiUpdate.value = UiUpdate.UpdateLimitedItemCount(null)
+        _uiUpdate.value = UiUpdate.UpdateLimitedItemCount(null)
     }
 
     //review listener
@@ -118,8 +123,8 @@ class ProductViewModel(
         }
     }
 
-    fun getDiscountPercent(price: Float, discountPrice: Float): Float
-            = ((price-discountPrice)/price)*100
+    fun getDiscountPercent(price: Float, discountPrice: Float): Float =
+        ((price - discountPrice) / price) * 100
 
     fun getVariantName(position: Int): String {
         val variant = product!!.variants[position]
@@ -131,8 +136,8 @@ class ProductViewModel(
         selectedVariantName = "${variant.variantName} ${variant.variantType}"
     }
 
-    private fun getVariantOriginalPrice(position: Int)
-            = product!!.variants[position].variantPrice.toFloat()
+    private fun getVariantOriginalPrice(position: Int) =
+        product!!.variants[position].variantPrice.toFloat()
 
     fun isProductAvailable(): Boolean {
         return product?.let {
@@ -173,7 +178,8 @@ class ProductViewModel(
             if (imageUrl == "failed") {
                 withContext(Dispatchers.Main) {
                     _uiEvent.value = UIEvent.ProgressBar(false)
-                    _uiEvent.value = UIEvent.SnackBar("Server error! Failed to add Review Image", true)
+                    _uiEvent.value =
+                        UIEvent.SnackBar("Server error! Failed to add Review Image", true)
                 }
             } else {
                 review.reviewImageUrl = imageUrl
@@ -229,7 +235,8 @@ class ProductViewModel(
             true
         } catch (e: IOException) {
             e.message?.let {
-                fbRepository.logCrash("product activity: updating favorites to DB",
+                fbRepository.logCrash(
+                    "product activity: updating favorites to DB",
                     it
                 )
             }
@@ -237,23 +244,24 @@ class ProductViewModel(
         }
     }
 
-    private suspend fun storeFavoritesUpdate(id: String, product: ProductEntity): Boolean = withContext(Dispatchers.IO) {
-        try {
-            return@withContext if (product.favorite) {
-                fbRepository.addFavorites(id, product.id)
-            } else {
-                fbRepository.removeFavorites(id, product.id)
+    private suspend fun storeFavoritesUpdate(id: String, product: ProductEntity): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                return@withContext if (product.favorite) {
+                    fbRepository.addFavorites(id, product.id)
+                } else {
+                    fbRepository.removeFavorites(id, product.id)
+                }
+            } catch (e: IOException) {
+                e.message?.let {
+                    fbRepository.logCrash(
+                        "product activity: updating favorites to store",
+                        it
+                    )
+                }
+                false
             }
-        } catch (e: IOException) {
-            e.message?.let {
-                fbRepository.logCrash(
-                    "product activity: updating favorites to store",
-                    it
-                )
-            }
-            false
         }
-    }
 
     private suspend fun updateProduct(product: ProductEntity) = withContext(Dispatchers.IO) {
         try {
@@ -261,7 +269,8 @@ class ProductViewModel(
             true
         } catch (e: IOException) {
             e.message?.let {
-                fbRepository.logCrash("product activity: updating favorites to DB",
+                fbRepository.logCrash(
+                    "product activity: updating favorites to DB",
                     it
                 )
             }
@@ -271,7 +280,7 @@ class ProductViewModel(
 
     //live data of the cart items
 
-    fun getAllCartItem() = viewModelScope.launch (Dispatchers.IO) {
+    fun getAllCartItem() = viewModelScope.launch(Dispatchers.IO) {
         /*
         * we are making two different copies where one copy is passed initially and hard copy is made which is later used for recycler view
         * */
@@ -325,7 +334,8 @@ class ProductViewModel(
             }
         } catch (e: IOException) {
             e.message?.let {
-                fbRepository.logCrash("product activity: adding product to cart in DB",
+                fbRepository.logCrash(
+                    "product activity: adding product to cart in DB",
                     it
                 )
             }
@@ -358,41 +368,48 @@ class ProductViewModel(
     }
 
     //from cart adapter
-    fun updateCartItem(id: Int, updatedCount: Int, position: Int, addOrRemove: String) = viewModelScope.launch (Dispatchers.IO) {
-        try {
-            cartItemsCount = if (addOrRemove == "add") {
-                cartItemsCount + 1
-            } else {
-                cartItemsCount - 1
+    fun updateCartItem(id: Int, updatedCount: Int, position: Int, addOrRemove: String) =
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                cartItemsCount = if (addOrRemove == "add") {
+                    cartItemsCount + 1
+                } else {
+                    cartItemsCount - 1
+                }
+                dbRepository.updateCartItem(id, updatedCount)
+                cartItems[position].quantity = updatedCount
+                withContext(Dispatchers.Main) {
+                    _uiUpdate.value = UiUpdate.UpdateCartData("update", position, updatedCount)
+                }
+            } catch (e: Exception) {
+                e.message?.let { fbRepository.logCrash("checkout: updating cart item in db", it) }
             }
-            dbRepository.updateCartItem(id, updatedCount)
-            cartItems[position].quantity = updatedCount
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.UpdateCartData("update", position, updatedCount)
-            }
-        } catch (e: Exception) {
-            e.message?.let { fbRepository.logCrash("checkout: updating cart item in db", it) }
         }
-    }
 
-    fun deleteCartItem(id: Int, productId: String, variant: String, position: Int) = viewModelScope.launch (Dispatchers.IO) {
-        try {
-            cartItemsCount -= cartItems[position].quantity
-            cartItems.removeAt(position)
-            val delete = async { dbRepository.deleteCartItem(id) }
-            val updateProduct = async { updatingTheCartInProduct(product!!, variant) }
-            delete.await()
-            updateProduct.await()
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.UpdateCartData("delete", position, null)
+    fun deleteCartItem(id: Int, productId: String, variant: String, position: Int) =
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                cartItemsCount -= cartItems[position].quantity
+                cartItems.removeAt(position)
+                val delete = async { dbRepository.deleteCartItem(id) }
+                val updateProduct = async {
+                    dbRepository.getProductWithIdForUpdate(productId)?.let {
+                        updatingTheCartInProduct(it, variant)
+                    }
+                }
+                delete.await()
+                updateProduct.await()
+                withContext(Dispatchers.Main) {
+                    clearedIDsFromCart.add(productId)
+                    _uiUpdate.value = UiUpdate.UpdateCartData("delete", position, null)
+                }
+            } catch (e: Exception) {
+                e.message?.let { fbRepository.logCrash("checkout: deleting cart item in db", it) }
             }
-        } catch (e: Exception) {
-            e.message?.let { fbRepository.logCrash("checkout: deleting cart item in db", it) }
         }
-    }
 
     //this is called to remove item from cart by clicking remove button from prod page
-    fun deleteProductFromCart() = viewModelScope.launch (Dispatchers.IO) {
+    fun deleteProductFromCart() = viewModelScope.launch(Dispatchers.IO) {
         try {
             var cartItemPosition: Int = 0
             product?.let {
@@ -408,9 +425,9 @@ class ProductViewModel(
                     }
                     cartItemsCount -= cartItems[cartItemPosition].quantity
                     cartItems.removeAt(cartItemPosition)
-                    dbRepository.deleteProductFromCart(it.id, selectedVariantName)
+                    dbRepository.deleteProductFromCart(product!!.id, selectedVariantName)
                 }
-                val updateProduct = async { updatingTheCartInProduct(product!!, selectedVariantName) }
+                val updateProduct = async { updatingTheCartInProduct(it, selectedVariantName) }
                 delete.await()
                 updateProduct.await()
                 withContext(Dispatchers.Main) {
@@ -419,30 +436,33 @@ class ProductViewModel(
             }
         } catch (e: IOException) {
             e.message?.let {
-                fbRepository.logCrash("product activity:  to DB",
+                fbRepository.logCrash(
+                    "product activity:  to DB",
                     it
                 )
             }
         }
     }
 
-    private suspend fun updatingTheCartInProduct(product: ProductEntity, variant: String) = withContext(Dispatchers.IO) {
-        try {
-            product.variantInCart.remove(variant)
-            if (product.variantInCart.isEmpty()) {
-                product.inCart = false
+    private suspend fun updatingTheCartInProduct(product: ProductEntity, variant: String) =
+        withContext(Dispatchers.IO) {
+            try {
+                product.variantInCart.remove(variant)
+                if (product.variantInCart.isEmpty()) {
+                    product.inCart = false
+                }
+                dbRepository.upsertProduct(product)
+                true
+            } catch (e: IOException) {
+                e.message?.let {
+                    fbRepository.logCrash(
+                        "product activity: updating the product after remove from cart in db",
+                        it
+                    )
+                }
+                false
             }
-            dbRepository.upsertProduct(product)
-            true
-        } catch (e: IOException) {
-            e.message?.let {
-                fbRepository.logCrash("product activity: updating the product after remove from cart in db",
-                    it
-                )
-            }
-            false
         }
-    }
 
     fun getCartPrice(cartItems: List<CartEntity>): Float {
         return cartItems.indices
@@ -455,14 +475,15 @@ class ProductViewModel(
         if (couponCode == "") {
             return@launch
         } else {
-            val code: CouponEntity? = currentCoupon?.let{
+            val code: CouponEntity? = currentCoupon?.let {
                 currentCoupon
             } ?: dbRepository.getCouponByCode(couponCode)
             code?.let { coupon ->
                 if (!coupon.categories.contains(product!!.category)) {
                     withContext(Dispatchers.Main) {
                         currentCoupon = null
-                        _uiEvent.value = UIEvent.Toast("Coupon does not apply for products in this Category")
+                        _uiEvent.value =
+                            UIEvent.Toast("Coupon does not apply for products in this Category")
                     }
                     return@launch
                 }
@@ -470,7 +491,8 @@ class ProductViewModel(
                     currentCoupon = coupon
                     couponPrice = couponDiscount(coupon, getSelectedItemPrice())
                     withContext(Dispatchers.Main) {
-                        _uiEvent.value = UIEvent.Toast("Rs: $couponPrice Coupon Discount is Applied")
+                        _uiEvent.value =
+                            UIEvent.Toast("Rs: $couponPrice Coupon Discount is Applied")
                         _uiUpdate.value = UiUpdate.CouponApplied(true)
                     }
                 }
@@ -502,6 +524,7 @@ class ProductViewModel(
         try {
             val clearInProduct = async {
                 for (cartItem in cartItems) {
+                    clearedIDsFromCart.add(cartItem.productId)
                     val entity = dbRepository.getProductWithIdForUpdate(cartItem.productId)
                     entity?.let { product ->
                         product.inCart = false
@@ -534,21 +557,29 @@ class ProductViewModel(
     }
 
     sealed class UiUpdate {
-        data class PopulateProductData(val message: String?, val product: ProductEntity?): UiUpdate()
-        data class UpdateLimitedItemCount(val message: String?): UiUpdate()
-        data class UpdateFavorites(val isFavorite: Boolean): UiUpdate()
+        data class PopulateProductData(val message: String?, val product: ProductEntity?) :
+            UiUpdate()
+
+        data class UpdateLimitedItemCount(val message: String?) : UiUpdate()
+        data class UpdateFavorites(val isFavorite: Boolean) : UiUpdate()
+
         //coupon
-        data class CouponApplied(val message: Boolean?): UiUpdate()
+        data class CouponApplied(val message: Boolean?) : UiUpdate()
+
         //cart
-        data class PopulateCartData(val cartItems: List<CartEntity>?): UiUpdate()
-        data class AddCartItem(val cartEntity: CartEntity?): UiUpdate()
-        data class UpdateCartData(val message: String, val position: Int, val count: Int?): UiUpdate()
-        data class CartCleared(val message: String?): UiUpdate()
+        data class PopulateCartData(val cartItems: List<CartEntity>?) : UiUpdate()
+        data class AddCartItem(val cartEntity: CartEntity?) : UiUpdate()
+        data class UpdateCartData(val message: String, val position: Int, val count: Int?) :
+            UiUpdate()
+
+        data class CartCleared(val ids: MutableList<String>?) : UiUpdate()
+        data class ClearedProductIDs(val ids: MutableList<String>) : UiUpdate()
+
         //review
-        data class CheckStoragePermission(val message: String?): UiUpdate()
+        data class CheckStoragePermission(val message: String?) : UiUpdate()
         //preview
 //        data class OpenPreviewImage(val message: String?, val imageUrl: String?, val imageUri: Uri?, val thumbnail: ShapeableImageView): UiUpdate()
 
-        object Empty: UiUpdate()
+        object Empty : UiUpdate()
     }
 }

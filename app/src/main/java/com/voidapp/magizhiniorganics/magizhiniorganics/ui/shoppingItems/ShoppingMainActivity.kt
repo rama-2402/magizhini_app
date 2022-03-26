@@ -1,7 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -13,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.databinding.DataBindingUtil.bind
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +28,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.Favorites
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityShoppingMainBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
@@ -34,14 +38,18 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.DISCOUNT
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.FAVORITES
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -54,8 +62,6 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
 import java.util.*
-
-
 class ShoppingMainActivity :
     BaseActivity(),
     KodeinAware,
@@ -71,11 +77,12 @@ class ShoppingMainActivity :
     private var cartBottomSheet: BottomSheetBehavior<ConstraintLayout> = BottomSheetBehavior()
     private lateinit var cartBtn: ImageBadgeView
     private lateinit var checkoutText: TextView
+    private lateinit var filterBtn: ImageView
     private var item: MenuItem? = null
 
     private lateinit var cartAdapter: CartAdapter
     private lateinit var adapter: ShoppingMainAdapter
-    var categoryFilter: String = ALL_PRODUCTS
+//    var categoryFilter: String = ALL_PRODUCTS
     private var mCartPrice: Float? = 0f
     private var isFiltered: Boolean = false
 
@@ -92,12 +99,11 @@ class ShoppingMainActivity :
         viewModel.shoppingMainListener = this
 
         //getting the intent to check the type of chip we want to see
-        categoryFilter = intent.getStringExtra(Constants.CATEGORY).toString()
-        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
+        viewModel.categoryFilter = intent.getStringExtra(Constants.CATEGORY).toString()
 
         title = ""
         setSupportActionBar(binding.tbToolbar)
-        binding.tvToolbarTitle.text = categoryFilter
+        binding.tvToolbarTitle.text = viewModel.categoryFilter
 
         checkoutText = findViewById<TextView>(R.id.tvCheckOut)
 
@@ -105,23 +111,61 @@ class ShoppingMainActivity :
             showErrorSnackBar("Please check network connection", true)
         }
 
-        showProgressDialog()
         initRecyclerView()
+//        observers()
         observeLiveData()
         clickListeners()
         setCartBottom()
+//        initData(viewModel.categoryFilter)
         checkProductsToDisplay()
     }
+
+//    private fun initData(categoryFilter: String) {
+//        showShimmer()
+//        when(categoryFilter) {
+//            ALL -> binding.cpAll.isSelected = true
+//            SUBSCRIPTION -> binding.cpSubscriptions.isChecked = true
+//            FAVORITES -> binding.cpFavorites.isChecked = true
+//            DISCOUNT -> binding.cpDiscounts.isChecked = true
+//            LIMITED -> binding.cpLimitedItems.isChecked = true
+//            else -> binding.cpCategoryFilter.isChecked = true
+//        }
+//    }
 
     override fun onStart() {
         super.onStart()
         viewModel.refreshProduct()
     }
 
+    override fun onResume() {
+        super.onResume()
+        val productIDString = SharedPref(this).getData(PRODUCTS, STRING, "").toString()
+        if (productIDString != "") {
+            val productIDs: List<String> = productIDString.split(":")
+            viewModel.updateProducts(productIDs)
+            SharedPref(this).putData(PRODUCTS, STRING, "").toString()
+        }
+        viewModel.refreshProduct()
+//        when(viewModel.selectedChip) {
+//            CATEGORY -> selectedCategory(viewModel.selectedCategory)
+//            SUBSCRIPTION -> binding.cpSubscriptions.isChecked = true
+//            FAVORITES -> binding.cpFavorites.isChecked = true
+//            DISCOUNT -> binding.cpDiscounts.isChecked = true
+//            else -> binding.cpAll.isChecked = true
+//        }
+    }
+
     private fun observeLiveData() {
         viewModel.position.observe(this) {
             adapter.products[it] = viewModel.productToRefresh
             adapter.notifyItemChanged(it)
+        }
+
+        viewModel.changedPositions.observe(this) {
+            for (i in viewModel.changedProductsPositions.indices) {
+                adapter.products[viewModel.changedProductsPositions[i]] = viewModel.changedProducts[i]
+                adapter.notifyItemChanged(viewModel.changedProductsPositions[i])
+            }
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -134,7 +178,7 @@ class ShoppingMainActivity :
             adapter.limited = false
             hideShimmer()
             adapter.setData(it)
-            binding.cpAll.isChecked = true
+//            binding.cpAll.isChecked = true
         }
         viewModel.subscriptions.observe(this) {
             viewModel.selectedChip = Constants.SUBSCRIPTION
@@ -144,8 +188,8 @@ class ShoppingMainActivity :
             adapter.setData(it as MutableList<ProductEntity>)
         }
         viewModel.allProductsInCategory.observe(this) {
-            viewModel.selectedChip = Constants.CATEGORY
-            viewModel.selectedCategory = categoryFilter
+            viewModel.selectedChip = CATEGORY
+            viewModel.selectedCategory = viewModel.categoryFilter
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
@@ -204,16 +248,25 @@ class ShoppingMainActivity :
 
     private fun checkProductsToDisplay() {
         //live data of the products and items in the list
-        if (categoryFilter == ALL_PRODUCTS) {
-            viewModel.getAllProductsStatic()
-        } else {
-            setFilteredProducts()
+        when(viewModel.categoryFilter) {
+            ALL_PRODUCTS -> binding.cpAll.isChecked = true
+            SUBSCRIPTION -> binding.cpSubscriptions.isChecked = true
+            FAVORITES -> binding.cpFavorites.isChecked = true
+            DISCOUNT -> binding.cpDiscounts.isChecked = true
+            LIMITED -> binding.cpLimitedItems.isChecked = true
+            else -> selectedCategory(viewModel.categoryFilter)
         }
+//        if (viewModel.categoryFilter == ALL_PRODUCTS) {
+//            viewModel.getAllProductsStatic()
+//        } else {
+//            setFilteredProducts()
+//        }
     }
 
     private fun showShimmer() {
         with(binding) {
             flShimmerPlaceholder.visible()
+            binding.flShimmerPlaceholder.startShimmer()
             rvShoppingItems.hide()
         }
     }
@@ -221,6 +274,7 @@ class ShoppingMainActivity :
     private fun hideShimmer() {
         with(binding) {
             flShimmerPlaceholder.remove()
+            binding.flShimmerPlaceholder.stopShimmer()
             rvShoppingItems.visible()
         }
     }
@@ -259,9 +313,12 @@ class ShoppingMainActivity :
                     }
                     showShimmer()
                     isFiltered = false
-                    binding.flShimmerPlaceholder.startShimmer()
+                    binding.svHorizontalChipScroll.fullScroll(View.FOCUS_LEFT)
+//                    binding.flShimmerPlaceholder.startShimmer()
                     binding.tvToolbarTitle.text = "Product Store"
                     viewModel.getAllProductsStatic()
+//                    adapter.setData(viewModel.allProducts)
+//                    hideShimmer()
                 }
                 R.id.cpSubscriptions -> {
                     binding.cpSubscriptions.also {
@@ -269,21 +326,23 @@ class ShoppingMainActivity :
                     }
                     showShimmer()
                     isFiltered = false
-                    binding.flShimmerPlaceholder.startShimmer()
                     binding.tvToolbarTitle.text = "Subscriptions"
                     viewModel.getAllSubscriptions()
+//                    adapter.setData(viewModel.subscriptionProducts)
+//                    hideShimmer()
                 }
                 R.id.cpCategoryFilter -> {
                     //kept this chip as the default check in xml so that the bottom sheet wont be
                     //triggered when a category of product was selected from home screen
-
-                    binding.svHorizontalChipScroll.fullScroll(View.FOCUS_RIGHT)
+//                    binding.svHorizontalChipScroll.fullScroll(View.FOCUS_RIGHT)
                     binding.cpCategoryFilter.also {
                         it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                     }
                     if (!isFiltered) {
                         openCategoryFilterDialog()
                     }
+                    binding.svHorizontalChipScroll.fullScroll(View.FOCUS_RIGHT)
+//                    hideShimmer()
                 }
                 R.id.cpFavorites -> {
                     binding.cpFavorites.also {
@@ -291,9 +350,11 @@ class ShoppingMainActivity :
                     }
                     showShimmer()
                     isFiltered = false
-                    binding.flShimmerPlaceholder.startShimmer()
+//                    binding.flShimmerPlaceholder.startShimmer()
                     binding.tvToolbarTitle.text = "Favorites"
                     viewModel.getAllFavoritesStatic()
+//                    adapter.setData(viewModel.favoriteProducts)
+//                    hideShimmer()
                 }
                 R.id.cpDiscounts -> {
                     binding.cpDiscounts.also {
@@ -301,10 +362,12 @@ class ShoppingMainActivity :
                     }
                     showShimmer()
                     isFiltered = false
-                    binding.flShimmerPlaceholder.startShimmer()
+//                    binding.flShimmerPlaceholder.startShimmer()
                     binding.tvToolbarTitle.text = "Discounts"
                     //Querying the discount items straight from the room database and setting it in the adapter
                     viewModel.getAllDiscountProducts()
+//                    adapter.setData(viewModel.discountProducts)
+//                    hideShimmer()
                 }
                 R.id.cpLimitedItems -> {
                     binding.cpLimitedItems.also {
@@ -313,7 +376,7 @@ class ShoppingMainActivity :
                     binding.tvToolbarTitle.text = "Limited Items"
                     if(mLimitedItems.isEmpty()) {
                         showShimmer()
-                        binding.flShimmerPlaceholder.startShimmer()
+//                        binding.flShimmerPlaceholder.startShimmer()
                         viewModel.limitedItemsFilter()
                     } else {
                         displayLimitedItems(mLimitedItems)
@@ -391,22 +454,21 @@ class ShoppingMainActivity :
         return super.onCreateOptionsMenu(menu)
     }
 
-    fun setFilteredProducts() {
+    private fun setFilteredProducts() {
         showShimmer()
         binding.flShimmerPlaceholder.startShimmer()
-        binding.tvToolbarTitle.text = categoryFilter
+        binding.tvToolbarTitle.text = viewModel.categoryFilter
         isFiltered = true
         binding.cpCategoryFilter.isChecked = true
 //        hideListBottomSheet()
-        viewModel.getAllProductByCategoryStatic(categoryFilter)
-        if (categoryFilter == SUBSCRIPTION) {
+        viewModel.getAllProductByCategoryStatic(viewModel.categoryFilter)
+        if (viewModel.categoryFilter == SUBSCRIPTION) {
             binding.cpSubscriptions.isChecked = true
 //            viewModel.getAllSubscriptions()
         }
     }
 
     private fun initRecyclerView() {
-
         cartAdapter = CartAdapter(
             this,
             mutableListOf(),
@@ -421,13 +483,11 @@ class ShoppingMainActivity :
         )
         binding.rvShoppingItems.layoutManager = LinearLayoutManager(this)
         binding.rvShoppingItems.adapter = adapter
-
-        hideProgressDialog()
     }
 
     private fun setCartBottom() {
         val bottomSheet = findViewById<ConstraintLayout>(R.id.clBottomCart)
-        val filterBtn = findViewById<ImageView>(R.id.ivFilter)
+        filterBtn = findViewById<ImageView>(R.id.ivFilter)
         val checkoutBtn = findViewById<LinearLayout>(R.id.rlCheckOutBtn)
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
         cartBtn = findViewById(R.id.ivCart)
@@ -443,10 +503,15 @@ class ShoppingMainActivity :
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
+                        setBottomSheetIcon("delete")
                         checkoutText.setTextAnimation("Rs: $mCartPrice", 200)
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
+                        setBottomSheetIcon("filter")
                         checkoutText.setTextAnimation("CHECKOUT", 200)
+                        if (!viewModel.removedProductIDsFromCart.isNullOrEmpty()) {
+                            viewModel.updateProducts(viewModel.removedProductIDsFromCart)
+                        }
                     }
                 }
             }
@@ -462,8 +527,11 @@ class ShoppingMainActivity :
 
         filterBtn.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-            openCategoryFilterDialog()
+            if (cartBottomSheet.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                openCategoryFilterDialog()
+            } else {
+                viewModel.clearCart(cartAdapter.cartItems)
+            }
         }
 
         checkoutBtn.setOnClickListener {
@@ -480,6 +548,23 @@ class ShoppingMainActivity :
         }
     }
 
+    private fun setBottomSheetIcon(content: String) {
+        val icon =  when(content) {
+            "filter" -> R.drawable.ic_filter
+            "delete" -> R.drawable.ic_delete
+            else -> R.drawable.ic_filter
+        }
+        filterBtn.fadOutAnimation(300)
+        filterBtn.setImageDrawable(ContextCompat.getDrawable(this, icon))
+        filterBtn.fadInAnimation(300)
+        filterBtn.imageTintList =
+            if (content == "delete") {
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
+            } else {
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
+            }
+    }
+
 //    private fun getOnlyAvailableProducts(products: List<ProductEntity>?): List<ProductEntity> {
 //        val prodList = arrayListOf<ProductEntity>()
 //        products!!.forEach { product ->
@@ -489,26 +574,6 @@ class ShoppingMainActivity :
 //        }
 //        return prodList
 //    }
-
-    private fun navigateToPreviousPage() {
-        when(viewModel.navigateToPage) {
-            ORDER_HISTORY_PAGE -> {
-                Intent(this, PurchaseHistoryActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                }
-            }
-            else -> {
-                Intent(this, HomeActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                    finishAffinity()
-                }
-            }
-        }
-    }
 
     private fun navigateToProductDetails(product: ProductEntity, thumbnail: ShapeableImageView) {
         if (NetworkHelper.isOnline(this)) {
@@ -557,10 +622,11 @@ class ShoppingMainActivity :
     }
 
     override fun onBackPressed() {
-        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else {
-            navigateToPreviousPage()
+        when {
+            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED ->
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+            viewModel.selectedChip != ALL -> binding.cpAll.isChecked = true
+            else -> super.onBackPressed()
         }
     }
 
@@ -602,7 +668,12 @@ class ShoppingMainActivity :
         viewModel.categoriesAdapter?.let {
             it.dismiss()
         }
-        categoryFilter = categoryName
-        setFilteredProducts()
+        viewModel.categoryFilter = categoryName
+//        setFilteredProducts()
+        isFiltered = true
+        binding.cpCategoryFilter.isChecked = true
+        viewModel.getAllProductByCategoryStatic(categoryName)
     }
 }
+
+

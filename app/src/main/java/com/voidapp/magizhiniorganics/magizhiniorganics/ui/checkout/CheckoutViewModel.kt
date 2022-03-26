@@ -38,6 +38,7 @@ class CheckoutViewModel(
     var addressPosition: Int = 0
 
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
+    val clearedProductIDs: MutableList<String> = mutableListOf()
 
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
@@ -229,6 +230,7 @@ class CheckoutViewModel(
                 updateProduct.await()
             }
             withContext(Dispatchers.Main) {
+                clearedProductIDs.add(productId)
                 _uiUpdate.value = UiUpdate.UpdateCartData("delete", position, null)
             }
         } catch (e: Exception) {
@@ -299,6 +301,7 @@ class CheckoutViewModel(
             for (cartItem in cartItems) {
                 val entity = dbRepository.getProductWithIdForUpdate(cartItem.productId)
                 entity?.let { product ->
+                    clearedProductIDs.add(product.id)
                     product.inCart = false
                     product.variantInCart.clear()
                     dbRepository.upsertProduct(product)

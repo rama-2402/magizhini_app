@@ -1,17 +1,19 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CategoryHomeAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -22,6 +24,7 @@ class ShoppingMainViewModel(
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
+    var categoryFilter: String = ALL_PRODUCTS
     var selectedProductID: String = ""
     var selectedProductPosition: Int? = null
     var navigateToPage: String = ""
@@ -49,6 +52,8 @@ class ShoppingMainViewModel(
     val position: LiveData<Int> = _position
 
     var productToRefresh = ProductEntity()
+    private val currentProductsList: MutableList<ProductEntity> = mutableListOf()
+    val removedProductIDsFromCart: MutableList<String> = mutableListOf()
 
     fun getProfile() {
         profile = dbRepository.getProfileData()!!
@@ -56,6 +61,16 @@ class ShoppingMainViewModel(
     fun getAllCartItems() = dbRepository.getAllCartItems()
     fun getCartItemsPrice() = dbRepository.getCartPrice()
     fun getALlCategories() = dbRepository.getAllProductCategories()
+    fun getAllProducts() = dbRepository.getAllProducts()
+    fun getAllFavoriteProducts() = dbRepository.getAllFavorites()
+    fun getAllDiscount() = dbRepository.getAllDiscounts()
+    fun getAllProductsInCategory(category: String) = dbRepository.getAllProductsInCategory(category)
+
+    val allProducts: MutableList<ProductEntity> = mutableListOf()
+    val discountProducts: MutableList<ProductEntity> = mutableListOf()
+    val favoriteProducts: MutableList<ProductEntity> = mutableListOf()
+    val subscriptionProducts: MutableList<ProductEntity> = mutableListOf()
+    val limitedProducts: MutableList<ProductEntity> = mutableListOf()
 
     fun getAllProductsStatic() = viewModelScope.launch(Dispatchers.Default) {
         val productsJob = async { dbRepository.getAllProductsStatic() }
@@ -76,6 +91,8 @@ class ShoppingMainViewModel(
             }
         }
         withContext(Dispatchers.Main) {
+            currentProductsList.clear()
+            currentProductsList.addAll(products)
             _allProducts.value = products
         }
     }
@@ -83,6 +100,8 @@ class ShoppingMainViewModel(
     fun getAllSubscriptions() = viewModelScope.launch(Dispatchers.IO) {
         val products = dbRepository.getAllSubscriptions(Constants.SUBSCRIPTION)
         withContext(Dispatchers.Main) {
+            currentProductsList.clear()
+            currentProductsList.addAll(products)
             _subscriptions.value = products
         }
     }
@@ -90,18 +109,24 @@ class ShoppingMainViewModel(
     fun getAllProductByCategoryStatic(categoryFilter: String) = viewModelScope.launch(Dispatchers.IO) {
         val products = dbRepository.getAllProductByCategoryStatic(categoryFilter)
         withContext(Dispatchers.Main) {
+            currentProductsList.clear()
+            currentProductsList.addAll(products)
             _allProductsInCategory.value = products
         }
     }
     fun getAllFavoritesStatic() = viewModelScope.launch(Dispatchers.IO) {
         val products = dbRepository.getAllFavoritesStatic()
         withContext(Dispatchers.Main) {
+            currentProductsList.clear()
+            currentProductsList.addAll(products)
             _allFavorites.value = products
         }
     }
     fun getAllDiscountProducts() = viewModelScope.launch (Dispatchers.IO) {
         val products = dbRepository.getAllDiscountProducts()
         withContext(Dispatchers.Main) {
+            currentProductsList.clear()
+            currentProductsList.addAll(products)
             _discountAvailableProducts.value = products
         }
     }
@@ -140,10 +165,11 @@ class ShoppingMainViewModel(
         dbRepository.upsertProduct(productEntity)
 
         if (position < 0) {
-            withContext(Dispatchers.Main) {
-                productToRefresh = productEntity
-                updateShoppingMainPage()
-            }
+            removedProductIDsFromCart.add(productId)
+//            withContext(Dispatchers.Main) {
+//                productToRefresh = productEntity
+//                updateShoppingMainPage()
+//            }
         } else {
             withContext(Dispatchers.Main) {
                 productToRefresh = productEntity
@@ -252,6 +278,8 @@ class ShoppingMainViewModel(
             }
         }
         withContext(Dispatchers.Main) {
+            currentProductsList.clear()
+            currentProductsList.addAll(products)
             shoppingMainListener?.limitedItemList(products)
         }
     }
@@ -264,6 +292,51 @@ class ShoppingMainViewModel(
                     _position.value = selectedProductPosition
                 }
             }
+        }
+    }
+
+    val changedProductsPositions = mutableListOf<Int>()
+    val changedProducts = mutableListOf<ProductEntity>()
+    private val _changedPositions: MutableLiveData<Int> = MutableLiveData()
+    val changedPositions: LiveData<Int> = _changedPositions
+
+
+    fun updateProducts(productIDs: List<String>) = viewModelScope.launch(Dispatchers.IO) {
+        changedProducts.clear()
+        changedProductsPositions.clear()
+        for (id in productIDs.distinct()){
+            prod@
+            for (i in currentProductsList.indices) {
+                if (id == currentProductsList[i].id) {
+                    dbRepository.getProductWithIdForUpdate(currentProductsList[i].id)?.let {
+                        changedProducts.add(it)
+                        changedProductsPositions.add(i)
+                    }
+                    break@prod
+                }
+            }
+        }
+        withContext(Dispatchers.Main) {
+            removedProductIDsFromCart.clear()
+            _changedPositions.value = System.currentTimeMillis().toInt()
+        }
+    }
+
+    fun clearCart(cartItems: MutableList<CartEntity>) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            for (cartItem in cartItems) {
+                val entity = dbRepository.getProductWithIdForUpdate(cartItem.productId)
+                entity?.let { product ->
+                    removedProductIDsFromCart.add(product.id)
+                    product.inCart = false
+                    product.variantInCart.clear()
+                    dbRepository.upsertProduct(product)
+                }
+            }
+            dbRepository.clearCart()
+            updateProducts(removedProductIDsFromCart)
+        } catch (e: Exception) {
+            e.message?.let { fbRepository.logCrash("checkout: clearing cart from db", it) }
         }
     }
 }

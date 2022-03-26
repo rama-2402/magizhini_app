@@ -152,7 +152,7 @@ class CartAdapter(
         val items = cartItems.map { it.copy() } as MutableList
         items.removeAt(position)
         setCartData(items)
-//        this.notifyDataSetChanged()
+        this.notifyDataSetChanged()
     }
 
     fun updateItemsCount(position: Int, count: Int) {

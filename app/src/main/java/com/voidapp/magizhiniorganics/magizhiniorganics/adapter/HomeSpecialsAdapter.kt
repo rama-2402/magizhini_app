@@ -3,10 +3,12 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.AbsListView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeSpecialsItemBinding
@@ -42,6 +44,12 @@ class HomeSpecialsAdapter(
             ivBannerThree.loadImg(banner[2].url){}
 
             cpBestSellers.setOnClickListener {
+                it.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        it.context,
+                        R.anim.bounce
+                    )
+                )
                 onItemClickListener.showAllProducts()
             }
 

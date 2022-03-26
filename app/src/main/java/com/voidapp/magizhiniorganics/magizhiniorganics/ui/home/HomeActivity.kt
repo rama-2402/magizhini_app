@@ -58,6 +58,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
@@ -91,7 +92,6 @@ import java.util.*
 
 class HomeActivity :
     BaseActivity(),
-    View.OnClickListener,
     KodeinAware,
     TestimonialsAdapter.TestimonialItemClickListener,
     NavigationView.OnNavigationItemSelectedListener,
@@ -227,6 +227,44 @@ class HomeActivity :
                     }
                 }
             })
+            binding.cpShowAll.setOnClickListener{
+                cpShowAll.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        binding.cpShowAll.context,
+                        R.anim.bounce
+                    )
+                )
+                moveToAllProducts()
+            }
+            cpTestimonials.setOnClickListener{
+                cpTestimonials.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        binding.cpShowAll.context,
+                        R.anim.bounce
+                    )
+                )
+                moveToAllProducts()
+            }
+            fabCart.setOnClickListener{
+                if (NetworkHelper.isOnline(this@HomeActivity)) {
+                    Intent(this@HomeActivity, InvoiceActivity::class.java).also {
+                        startActivity(it)
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    }
+                } else {
+                    showErrorSnackBar("Please check network connection", true)
+                }
+            }
+            ivInstagram.setOnClickListener {
+                openInBrowser("https://www.instagram.com/magizhini_organics/?utm_medium=copy_link")
+            }
+            ivFacebook.setOnClickListener {
+                openInBrowser("https://www.facebook.com/organicshopping/")
+            }
+//          binding.ivTelegram -> openInBrowser("https://t.me/coder_lane")
+            ivLinkedIn.setOnClickListener {
+                openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
+            }
         }
     }
 
@@ -505,46 +543,6 @@ class HomeActivity :
                 finish()
                 finishAffinity()
                 super.onBackPressed()
-            }
-        }
-    }
-
-    override fun onClick(v: View?) {
-        if (v != null) {
-            when (v) {
-                binding.cpShowAll -> {
-                    binding.cpShowAll.startAnimation(
-                        AnimationUtils.loadAnimation(
-                            binding.cpShowAll.context,
-                            R.anim.bounce
-                        )
-                    )
-                    moveToAllProducts()
-                }
-                binding.cpTestimonials -> {
-                    binding.cpTestimonials.startAnimation(
-                        AnimationUtils.loadAnimation(
-                            binding.cpShowAll.context,
-                            R.anim.bounce
-                        )
-                    )
-                    moveToAllProducts()
-                }
-                binding.fabCart -> {
-                    if (NetworkHelper.isOnline(this)) {
-                        Intent(this, InvoiceActivity::class.java).also {
-                            it.putExtra(NAVIGATION, ALL_PRODUCTS)
-                            startActivity(it)
-                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                        }
-                    } else {
-                        showErrorSnackBar("Please check network connection", true)
-                    }
-                }
-                binding.ivInstagram -> openInBrowser("https://www.instagram.com/magizhini_organics/?utm_medium=copy_link")
-                binding.ivFacebook -> openInBrowser("https://www.facebook.com/organicshopping/")
-//                binding.ivTelegram -> openInBrowser("https://t.me/coder_lane")
-                binding.ivLinkedIn -> openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
             }
         }
     }

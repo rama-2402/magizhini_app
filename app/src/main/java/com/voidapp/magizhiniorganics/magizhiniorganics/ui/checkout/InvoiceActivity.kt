@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -204,11 +205,16 @@ class InvoiceActivity :
                     }
                 }
             } else {
-                Intent(this, WalletActivity::class.java).also { intent ->
-                    intent.putExtra(NAVIGATION, CHECKOUT_PAGE)
-                    startActivity(intent)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
+                if (NetworkHelper.isOnline(this)) {
+                    updatePreferenceData()
+                    Intent(this, WalletActivity::class.java).also { intent ->
+                        intent.putExtra(NAVIGATION, CHECKOUT_PAGE)
+                        startActivity(intent)
+                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                        finish()
+                    }
+                } else {
+                    showErrorSnackBar("Please check network connection", true)
                 }
             }
         }
@@ -311,7 +317,6 @@ class InvoiceActivity :
                         if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                             cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
                         }
-
                     }
                 }
                 is CheckoutViewModel.UiUpdate.WalletTransactionFailed -> {
@@ -551,6 +556,7 @@ class InvoiceActivity :
         }
 
         binding.ivCustomerSupport.setOnClickListener {
+            updatePreferenceData()
             Intent(this, ChatActivity::class.java).also {
                 it.putExtra(NAVIGATION, CHECKOUT_PAGE)
                 startActivity(it)
@@ -583,10 +589,23 @@ class InvoiceActivity :
 //        ItemsBottomSheet(this, orderItemsAdapter).show()
 //    }
 
+    private fun updatePreferenceData() {
+        val productIDString = SharedPref(this).getData(PRODUCTS, Constants.STRING, "").toString()
+        val productIDs: MutableList<String> = if (productIDString != "") {
+            productIDString.split(":") as MutableList<String>
+        } else {
+            mutableListOf<String>()
+        }
+        productIDs.addAll(viewModel.clearedProductIDs)
+        viewModel.clearedProductIDs.clear()
+        SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":")).toString()
+    }
+
     override fun onBackPressed() {
         if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
             cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
+            updatePreferenceData()
             super.onBackPressed()
 //            if (viewModel.navigateToPage == PRODUCTS) {
 //                finish()

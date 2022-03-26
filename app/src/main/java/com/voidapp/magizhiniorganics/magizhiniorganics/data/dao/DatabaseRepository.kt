@@ -62,7 +62,9 @@ class DatabaseRepository(
     fun getCartItem(id: Int) = db.getUserProfileDao().getCartItem(id)
     fun getCartItemByProduct(productID: String, selectedVariantName: String): CartEntity? = db.getUserProfileDao().getCartItemByProduct(productID, selectedVariantName)
 
-    fun getAllproducts() = db.getUserProfileDao().getAllProducts()
+    fun getAllProducts(): LiveData<List<ProductEntity>> = db.getUserProfileDao().getAllProducts()
+    fun getAllFavorites(): LiveData<List<ProductEntity>> = db.getUserProfileDao().getAllFavorites()
+    fun getAllDiscounts(): LiveData<List<ProductEntity>> = db.getUserProfileDao().getAllDiscounts()
 
     fun getProductWithId(id: String) = db.getUserProfileDao().getProductWithId(id)
 
