@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    <dimen name="material_size_2">2dp</dimen>-->
+<!--    <dimen name="material_size_4">4dp</dimen>-->
+<!--    <dimen name="material_size_8">8dp</dimen>-->
+<!--    <dimen name="material_size_12">12dp</dimen>-->
+<!--    <dimen name="material_size_16">16dp</dimen>-->
+<!--    <dimen name="material_size_24">24dp</dimen>-->
+<!--    <dimen name="material_size_32">32dp</dimen>-->
+<!--    <dimen name="material_size_48">48dp</dimen>-->
+<!--    -->
+<!--    -->
+<!--    <dimen name="text_size_large">20sp</dimen>-->
+    <dimen name="defaultButtonTextSize">15sp</dimen>
+    <dimen name="defaultDayLabelTextSize">13sp</dimen>
+    <dimen name="defaultDayLabelVerticalPadding">10dp</dimen>
+    <dimen name="defaultDividerInsetBottom">0dp</dimen>
+    <dimen name="defaultDividerInsetLeft">0dp</dimen>
+    <dimen name="defaultDividerInsetRight">0dp</dimen>
+    <dimen name="defaultDividerInsetTop">0dp</dimen>
+    <dimen name="defaultDividerThickness">1px</dimen>
+    <dimen name="defaultElementPaddingBottom">16dp</dimen>
+    <dimen name="defaultElementPaddingLeft">16dp</dimen>
+    <dimen name="defaultElementPaddingRight">16dp</dimen>
+    <dimen name="defaultElementPaddingTop">16dp</dimen>
+    <dimen name="defaultGapBetweenLines">6dp</dimen>
+    <dimen name="defaultGotoTextSize">20sp</dimen>
+    <dimen name="defaultMonthLabelBottomPadding">16dp</dimen>
+    <dimen name="defaultMonthLabelTextSize">20sp</dimen>
+    <dimen name="defaultMonthLabelTopPadding">16dp</dimen>
+    <dimen name="defaultPickedDayRoundSquareCornerRadius">8dp</dimen>
+    <dimen name="defaultTwoLineTextSize">15sp</dimen>
+    <dimen name="defaultWeekLabelBottomPadding">8dp</dimen>
+    <dimen name="defaultWeekLabelTextSize">13sp</dimen>
+    <dimen name="defaultWeekLabelTopPadding">8dp</dimen>
+    <dimen name="material_size_12">12dp</dimen>
+    <dimen name="material_size_16">16dp</dimen>
+    <dimen name="material_size_2">2dp</dimen>
+    <dimen name="material_size_24">24dp</dimen>
+    <dimen name="material_size_32">32dp</dimen>
+    <dimen name="material_size_4">4dp</dimen>
+    <dimen name="material_size_48">48dp</dimen>
+    <dimen name="material_size_64">64dp</dimen>
+    <dimen name="material_size_8">8dp</dimen>
+    <dimen name="text_size_header_multi_large">26sp</dimen>
+    <dimen name="text_size_header_multi_small">12sp</dimen>
+    <dimen name="text_size_large">20sp</dimen>
+    <dimen name="text_size_normal">15sp</dimen>
+    <dimen name="text_size_small">12sp</dimen>
+</resources>

@@ -136,7 +136,7 @@
     <TextView
         android:id="@+id/tvPrice"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="@dimen/material_size_4"
         android:layout_marginEnd="@dimen/material_size_4"
         android:ellipsize="marquee"

@@ -88,8 +88,9 @@
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/ltPiggyImg"
-                    android:layout_width="150dp"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    app:layout_constraintWidth_percent=".35"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -135,19 +136,21 @@
 
                 <TextView
                     android:id="@+id/tvTransactionDate"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/material_size_4"
                     android:fontFamily="@font/roboto"
                     android:text="21/12/2021"
-                    android:singleLine="true"
                     android:ellipsize="marquee"
+                    android:maxLines="1"
+                    android:singleLine="true"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
                     android:scrollHorizontally="true"
-                    android:marqueeRepeatLimit ="marquee_forever"
                     android:textColor="@color/gray700"
                     android:textSize="14dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="@id/tvTransactionText"
                     app:layout_constraintStart_toEndOf="@id/tvTransactionText"
                     app:layout_constraintTop_toTopOf="@id/tvTransactionText" />
@@ -170,20 +173,22 @@
 
                 <TextView
                     android:id="@+id/tvLastRechargeDate"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/material_size_8"
                     android:layout_marginTop="@dimen/material_size_8"
                     android:fontFamily="@font/roboto"
                     android:text="21/12/2021"
-                    android:singleLine="true"
                     android:ellipsize="marquee"
+                    android:maxLines="1"
+                    android:singleLine="true"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
                     android:scrollHorizontally="true"
-                    android:marqueeRepeatLimit ="marquee_forever"
                     android:textColor="@color/gray700"
                     android:textSize="12dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/tvLastRecharge"
                     app:layout_constraintTop_toBottomOf="@+id/tvTransactionText" />
 

@@ -74,11 +74,11 @@
                 tools:context=".ui.home.HomeActivity"
                 tools:showIn="@layout/activity_home">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    >
 
                     <org.imaginativeworld.whynotimagecarousel.ImageCarousel
                         android:id="@+id/cvBanner"
@@ -100,7 +100,11 @@
                         app:showIndicator="true"
                         app:imageScaleType="fitXY"
                         app:showNavigationButtons="false"
-                        app:showTopShadow="false"/>
+                        app:showTopShadow="false"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/stickyCategory"/>
                     <LinearLayout
                         android:id="@+id/stickyCategory"
                         android:layout_width="match_parent"
@@ -109,7 +113,9 @@
                         android:orientation="horizontal"
                         android:background="@color/white"
                         android:tag="sticky"
-                        android:weightSum="4">
+                        android:weightSum="4"
+                        app:layout_constraintTop_toBottomOf="@id/cvBanner"
+                        app:layout_constraintEnd_toEndOf="parent">
 
                         <TextView
                             android:id="@+id/tvCategoryHeading"
@@ -122,7 +128,8 @@
                             android:text="@string/product_categories"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:textStyle="italic" />
+                            android:textStyle="italic"
+                            android:tag="sticky"/>
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/cpShowAll"
@@ -132,7 +139,8 @@
                             android:backgroundTint="@color/green_base"
                             android:text="Show All"
                             android:textColor="@color/white"
-                            app:chipCornerRadius="@dimen/material_size_8" />
+                            app:chipCornerRadius="@dimen/material_size_8"
+                            android:tag="sticky"/>
                     </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
@@ -140,24 +148,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:isScrollContainer="true"
-                        android:nestedScrollingEnabled="false" />
+                        android:nestedScrollingEnabled="false"
+                        app:layout_constraintTop_toBottomOf="@id/stickyCategory"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/rvHomeSpecials"/>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvHomeSpecials"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:isScrollContainer="true"
-                        android:nestedScrollingEnabled="false" />
+                        android:nestedScrollingEnabled="false"
+                        app:layout_constraintTop_toBottomOf="@id/rvHomeItems"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/cpTestimonials"/>
 
-                    <LinearLayout
-                        android:id="@+id/stickyTestimonials"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:background="@color/white"
-                        android:orientation="horizontal"
-                        android:tag="sticky"
-                        android:weightSum="4">
+<!--                    <LinearLayout-->
+<!--                        android:id="@+id/stickyTestimonials"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:background="@color/white"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:tag="sticky"-->
+<!--                        android:weightSum="4">-->
 
                         <TextView
                             android:id="@+id/tvTestimonials"
@@ -170,7 +186,11 @@
                             android:text="Testimonials"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:textStyle="italic" />
+                            android:textStyle="italic"
+                            android:tag="sticky"
+                            app:layout_constraintTop_toTopOf="@id/cpTestimonials"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="@id/cpTestimonials"/>
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/cpTestimonials"
@@ -182,22 +202,29 @@
                             android:text="Go Shopping"
                             android:textColor="@color/white"
                             app:chipCornerRadius="@dimen/material_size_8"
+                            android:tag="sticky"
+                            app:layout_constraintTop_toBottomOf="@id/rvHomeSpecials"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintBottom_toTopOf="@id/rvTestimonials"
                             />
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvTestimonials"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/material_size_8"/>
-                    <LinearLayout
-                        android:id="@+id/stickyPartners"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:background="@color/white"
-                        android:orientation="horizontal"
-                        android:tag="sticky"
-                        android:weightSum="4">
+                        android:layout_marginBottom="@dimen/material_size_8"
+                        app:layout_constraintTop_toBottomOf="@id/cpTestimonials"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+<!--                    <LinearLayout-->
+<!--                        android:id="@+id/stickyPartners"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:background="@color/white"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:tag="sticky"-->
+<!--                        android:weightSum="4">-->
                         <TextView
                             android:id="@+id/tvPartners"
                             android:layout_width="match_parent"
@@ -209,7 +236,9 @@
                             android:text="Associated Partners &amp; Brands"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:textStyle="italic" />
+                            android:textStyle="italic"
+                            app:layout_constraintTop_toBottomOf="@id/rvTestimonials"
+                            app:layout_constraintStart_toStartOf="parent"/>
 <!--                        <com.google.android.material.chip.Chip-->
 <!--                            android:id="@+id/cpPartners"-->
 <!--                            android:layout_width="wrap_content"-->
@@ -221,23 +250,27 @@
 <!--                            android:textColor="@color/white"-->
 <!--                            app:chipCornerRadius="@dimen/material_size_8"-->
 <!--                            />-->
-                    </LinearLayout>
+<!--                    </LinearLayout>-->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvPartners"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
-                        android:layout_marginBottom="@dimen/material_size_8"/>
-                    <LinearLayout
-                        android:id="@+id/stickyFollowUs"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:background="@color/white"
-                        android:orientation="horizontal"
-                        android:tag="sticky"
-                        android:weightSum="4">
+                        android:layout_marginBottom="@dimen/material_size_8"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvPartners"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        />
+<!--                    <LinearLayout-->
+<!--                        android:id="@+id/stickyFollowUs"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:background="@color/white"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:tag="sticky"-->
+<!--                        android:weightSum="4">-->
                         <TextView
                             android:id="@+id/tvFollowUs"
                             android:layout_width="match_parent"
@@ -249,11 +282,17 @@
                             android:text="Follow Us"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:textStyle="italic" />
-                    </LinearLayout>
+                            android:textStyle="italic"
+                            android:tag="sticky"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/rvPartners"/>
+<!--                    </LinearLayout>-->
                     <HorizontalScrollView
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/tvFollowUs"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
                         >
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -292,7 +331,7 @@
                                 android:layout_marginEnd="@dimen/material_size_8"/>
                         </LinearLayout>
                     </HorizontalScrollView>
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </me.didik.component.StickyNestedScrollView>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton

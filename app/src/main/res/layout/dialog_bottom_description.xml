@@ -4,7 +4,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="450dp"
-    android:background="@drawable/shape_bottom_sheet_background"
+    android:background="@drawable/shape_round_rectangle_top_16"
     >
 
     <ImageView

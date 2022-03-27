@@ -4,6 +4,9 @@
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/170b0682843dd195dec1c7f1f8940ba3/transformed/jetified-ticker-1.0.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/170b0682843dd195dec1c7f1f8940ba3/transformed/jetified-ticker-1.0.1/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/170b0682843dd195dec1c7f1f8940ba3/transformed/jetified-ticker-1.0.1/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/bc5877dfa353e67985836b4c61993e6f/transformed/jetified-ticker-1.0.1/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/bc5877dfa353e67985836b4c61993e6f/transformed/jetified-ticker-1.0.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/bc5877dfa353e67985836b4c61993e6f/transformed/jetified-ticker-1.0.1/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

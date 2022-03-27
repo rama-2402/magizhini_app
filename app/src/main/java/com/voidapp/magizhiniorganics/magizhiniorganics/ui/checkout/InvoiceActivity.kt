@@ -211,7 +211,6 @@ class InvoiceActivity :
                         intent.putExtra(NAVIGATION, CHECKOUT_PAGE)
                         startActivity(intent)
                         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                        finish()
                     }
                 } else {
                     showErrorSnackBar("Please check network connection", true)
@@ -561,7 +560,6 @@ class InvoiceActivity :
                 it.putExtra(NAVIGATION, CHECKOUT_PAGE)
                 startActivity(it)
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                finish()
             }
         }
     }

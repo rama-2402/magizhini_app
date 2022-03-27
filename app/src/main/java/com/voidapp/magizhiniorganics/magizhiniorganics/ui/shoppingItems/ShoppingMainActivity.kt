@@ -483,6 +483,7 @@ class ShoppingMainActivity :
         )
         binding.rvShoppingItems.layoutManager = LinearLayoutManager(this)
         binding.rvShoppingItems.adapter = adapter
+        binding.rvShoppingItems.setHasFixedSize(true)
     }
 
     private fun setCartBottom() {

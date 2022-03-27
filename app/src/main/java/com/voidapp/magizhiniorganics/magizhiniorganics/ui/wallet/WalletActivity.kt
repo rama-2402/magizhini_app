@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +28,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.CalendarFilerDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
@@ -43,7 +45,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
+class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, CalendarFilerDialogClickListener {
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityWalletBinding
@@ -73,6 +75,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         with(binding) {
             cvWalletCard.startAnimation(AnimationUtils.loadAnimation(cvWalletCard.context, R.anim.slide_in_right_bounce))
             clBody.startAnimation(AnimationUtils.loadAnimation(clBody.context, R.anim.slide_up))
+            tvTransactionDate.isSelected = true
+            tvLastRechargeDate.isSelected = true
         }
 
         Checkout.preload(applicationContext)
@@ -181,6 +185,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
 
         binding.ivWalletFilter.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+            showCalendarFilterDialog(mFilterMonth, mFilterYear)
 //            CalendarFilterDialog(this, this, mFilterMonth, mFilterYear).show()
         }
 
@@ -264,6 +269,16 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
+    private fun showCalendarFilterDialog(month: String, year: String) {
+        CalendarFilterDialog.newInstance(month, year.toInt()).show(supportFragmentManager,
+            "calendar"
+        )
+    }
+
+    private fun dismissCalendarFilterDialog() {
+        (supportFragmentManager.findFragmentByTag("calendar") as? DialogFragment)?.dismiss()
+    }
+
     fun filterTransactions(month: String, year: String) = lifecycleScope.launch(Dispatchers.Default) {
 //        withContext(Dispatchers.Main) {
 //            showShimmer()
@@ -316,6 +331,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
     }
 
     fun setMonthFilter(month: String) = lifecycleScope.launch(Dispatchers.Default) {
+
 //        withContext(Dispatchers.Main) {
 //            showShimmer()
 //            binding.tvMonthFilter.text = month
@@ -398,5 +414,33 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener {
             flShimmerPlaceholder.remove()
             rvTransactionHistory.visible()
         }
+    }
+
+    override fun selectedFilter(month: String, year: String) {
+        dismissCalendarFilterDialog()
+        showShimmer()
+        mFilterMonth = month
+        mFilterYear = year
+        val filteredTransactions = mutableListOf<TransactionHistory>()
+        for (transaction in mTransactions) {
+            if (transaction.month == mFilterMonth && transaction.year == mFilterYear.toLong()) {
+                filteredTransactions.add(transaction)
+            }
+        }
+        if (filteredTransactions.isNullOrEmpty()) {
+            binding.llEmptyLayout.visible()
+        } else {
+            binding.llEmptyLayout.remove()
+            filteredTransactions.sortBy {
+                it.timestamp
+            }
+        }
+        transactionAdapter.transactions = filteredTransactions
+        transactionAdapter.notifyDataSetChanged()
+        hideShimmer()
+    }
+
+    override fun cancelDialog() {
+        dismissCalendarFilterDialog()
     }
 }

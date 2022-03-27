@@ -15,6 +15,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import java.io.IOException
@@ -63,6 +64,7 @@ fun ShapeableImageView.loadImg(url: Any, loadOnlyFromCache: Boolean = false, onL
             .placeholder(R.drawable.carousel_default_placeholder) // A default place holder if image is failed to load.
             .transition(DrawableTransitionOptions.withCrossFade())
             .apply(requestOptions)
+            .override(Target.SIZE_ORIGINAL)
             .listener(listener)
             .into(this) // the view in which the image will be loaded.
 
@@ -110,6 +112,7 @@ fun ImageView.loadImg(url: Any, loadOnlyFromCache: Boolean = false, onLoadingFin
             .placeholder(R.drawable.carousel_default_placeholder) // A default place holder if image is failed to load.
             .transition(DrawableTransitionOptions.withCrossFade())
             .apply(requestOptions)
+            .override(Target.SIZE_ORIGINAL)
             .listener(listener)
             .into(this) // the view in which the image will be loaded.
 
@@ -176,6 +179,7 @@ fun ImageView.loadOriginal(url: Any, loadOnlyFromCache: Boolean = false, onLoadi
 //            .centerCrop() // Scale type of the image.
             .placeholder(R.drawable.carousel_default_placeholder) // A default place holder if image is failed to load.
             .transition(DrawableTransitionOptions.withCrossFade())
+            .override(Target.SIZE_ORIGINAL)
             .apply(requestOptions)
             .listener(listener)
             .into(this) // the view in which the image will be loaded.

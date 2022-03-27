@@ -11,10 +11,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toBannerEntity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.IOException
 
 class HomeViewModel (
@@ -46,7 +43,7 @@ class HomeViewModel (
 //    val notifications: LiveData<List<UserNotificationEntity>?> = _notifications
 //    private var _partners: MutableLiveData<List<Partners>?> = MutableLiveData()
 //    val partners: LiveData<List<Partners>?> = _partners
-//
+
 //    val bannersList: MutableList<SpecialBanners> = mutableListOf()
 //
 //    var recyclerToRefresh = ""
@@ -59,11 +56,21 @@ class HomeViewModel (
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
 
-    val specialsProductsList: MutableList<List<ProductEntity>> = mutableListOf()
+//    val specialsProductsList: MutableList<List<ProductEntity>> = mutableListOf()
     val specialsTitles: MutableList<String> = mutableListOf()
-    val specialBannersList: MutableList<List<BannerEntity>> = mutableListOf()
+//    val specialBannersList: MutableList<List<BannerEntity>> = mutableListOf()
     val partners: MutableList<Partners> = mutableListOf()
     val testimonials: MutableList<TestimonialsEntity> = mutableListOf()
+
+    val bsOne: MutableList<ProductEntity> = mutableListOf()
+    val bsTwo: MutableList<ProductEntity> = mutableListOf()
+    val bsThree: MutableList<ProductEntity> = mutableListOf()
+    val bsFour: MutableList<ProductEntity> = mutableListOf()
+
+    val bannerOne: MutableList<BannerEntity> = mutableListOf()
+    val bannerTwo: MutableList<BannerEntity> = mutableListOf()
+    val bannerThree: MutableList<BannerEntity> = mutableListOf()
+    val bannerFour: MutableList<BannerEntity> = mutableListOf()
 
     fun setEmptyStatus() {
         _uiUpdate.value = UiUpdate.Empty
@@ -97,15 +104,22 @@ class HomeViewModel (
         }
     }
 
-    private suspend fun getSpecialBanners() {
+    private suspend fun getSpecialBanners() = withContext(Dispatchers.IO){
         try {
             dbRepository.getSpecialBanners().let {
+                var loopCounter = 0
                 for (i in it.indices step 3) {
                     val list: MutableList<BannerEntity> = mutableListOf<BannerEntity>()
                     list.add(it[i].toBannerEntity())
                     list.add(it[i+1].toBannerEntity())
                     list.add(it[i+2].toBannerEntity())
-                    specialBannersList.add(list)
+                    when(loopCounter) {
+                        0 -> bannerOne.addAll(list)
+                        1 -> bannerTwo.addAll(list)
+                        2 -> bannerThree.addAll(list)
+                        3 -> bannerFour.addAll(list)
+                    }
+                    loopCounter += 1
                 }
             }
         } catch (e: IOException) {
@@ -113,7 +127,7 @@ class HomeViewModel (
         }
     }
 
-    private suspend fun getBestSellers() {
+    private suspend fun getBestSellers() = withContext(Dispatchers.IO) {
         try {
             val bestSeller = dbRepository.getBestSellers()
 //            bestSellerHeader = bestSeller.name
@@ -123,16 +137,17 @@ class HomeViewModel (
             for (item in items.indices) {
                 dbRepository.getProductWithIdForUpdate(items[item])?.let { products.add(it) }
             }
-            withContext(Dispatchers.Main) {
+            bsOne.addAll(products)
+//            withContext(Dispatchers.Main) {
                 specialsTitles.add(bestSeller.name)
-                specialsProductsList.add(products)
+//                specialsProductsList.add(products)
 //                _bestSellers.value = products
-            }
+//            }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating best sellers from db", it) }
         }
     }
-    private suspend fun getSpecialsOne() {
+    private suspend fun getSpecialsOne() = withContext(Dispatchers.IO) {
         try {
             val one = dbRepository.getSpecialsOne()
 //            specialsOneHeader = one.name
@@ -142,16 +157,17 @@ class HomeViewModel (
             for (item in items.indices) {
                 dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
-            withContext(Dispatchers.Main) {
+            bsTwo.addAll(products)
+//            withContext(Dispatchers.Main) {
                 specialsTitles.add(one.name)
-                specialsProductsList.add(products)
+//                specialsProductsList.add(products)
 //                _specialsOne.value = products
-            }
+//            }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl one from db", it) }
         }
     }
-    private suspend fun getSpecialsTwo() {
+    private suspend fun getSpecialsTwo() = withContext(Dispatchers.IO) {
         try {
             val two = dbRepository.getSpecialsTwo()
 //            specialsTwoHeader = two.name
@@ -161,16 +177,17 @@ class HomeViewModel (
             for (item in items.indices) {
                 dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
-            withContext(Dispatchers.Main) {
+            bsThree.addAll(products)
+//            withContext(Dispatchers.Main) {
                 specialsTitles.add(two.name)
-                specialsProductsList.add(products)
+//                specialsProductsList.add(products)
 //                _specialsTwo.value = products
-            }
+//            }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl two from db", it) }
         }
     }
-    private suspend fun getSpecialsThree() {
+    private suspend fun getSpecialsThree() = withContext(Dispatchers.IO) {
         try {
             val three = dbRepository.getSpecialsThree()
 //            specialsThreeHeader = three.name
@@ -180,11 +197,12 @@ class HomeViewModel (
             for (item in items.indices) {
                 dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
             }
-            withContext(Dispatchers.Main) {
+            bsFour.addAll(products)
+//            withContext(Dispatchers.Main) {
                 specialsTitles.add(three.name)
-                specialsProductsList.add(products)
+//                specialsProductsList.add(products)
 //                _specialsThree.value = products
-            }
+//            }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("Home: populating spl three from db", it) }
         }

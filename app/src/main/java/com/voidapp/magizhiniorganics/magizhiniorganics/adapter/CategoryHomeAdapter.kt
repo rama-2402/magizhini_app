@@ -1,18 +1,23 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductCategoryEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeCategoryItemsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeProductItemsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.http.Url
+import java.io.InputStream
+import java.net.URL
+
 
 class CategoryHomeAdapter(
     val context: Context,
@@ -36,8 +41,17 @@ class CategoryHomeAdapter(
             tvProductName.text = categoryEntity.name
 
             //loading the product images
-            ivProductThumbnail.loadImg(categoryEntity.thumbnailUrl)  {}
-            ivProductThumbnail.clipToOutline = true
+//            CoroutineScope(Dispatchers.IO).launch {
+//                val url: URL = URL(categoryEntity.thumbnailUrl)
+//                val img: InputStream = url.content as InputStream
+//                val options = BitmapFactory.Options()
+//                options.inPreferredConfig = Bitmap.Config.RGB_565
+//                val image = BitmapFactory.decodeStream(img, null, options)
+//                withContext(Dispatchers.Main) {
+//                    image?.let { ivProductThumbnail.loadImg(it) {} }
+//                }
+//            }
+            ivProductThumbnail.loadImg(categoryEntity.thumbnailUrl) {}
 
             cvProductItem.setOnClickListener {
                 onItemClickListener.selectedCategory(categoryEntity.name)

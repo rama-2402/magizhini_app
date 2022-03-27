@@ -2,6 +2,8 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeTopSell
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.InputStream
+import java.net.URL
 
 class BestSellersAdapter(
     val context: Context,
@@ -42,14 +50,14 @@ class BestSellersAdapter(
         val product = products[position]
         val productID = product.id
         var variantInCartPosition: Int = 0
-        var discountedPriceForPurchase = 0.0
+
         for (i in product.variants.indices) {
             if (product.variants[0].status != Constants.LIMITED) {
                 variantInCartPosition = i
                 break
             }
         }
-        val variantName = "${product.variants[variantInCartPosition].variantName} ${product.variants[variantInCartPosition].variantType}"
+
         variantDisplayName = when (product.variants[variantInCartPosition].variantType) {
             "Kilogram" -> "${product.variants[variantInCartPosition].variantName}Kg"
             "Gram" -> "${product.variants[variantInCartPosition].variantName}g"
@@ -62,6 +70,17 @@ class BestSellersAdapter(
             tvProductName.text = product.name
             checkVariantAvailability(holder, product.variants[variantInCartPosition])
 
+//            CoroutineScope(Dispatchers.IO).launch {
+//                val url: URL = URL(product.thumbnailUrl)
+//                val img: InputStream = url.content as InputStream
+//                val options = BitmapFactory.Options()
+//                options.inPreferredConfig = Bitmap.Config.RGB_565
+//                val image = BitmapFactory.decodeStream(img, null, options)
+//                withContext(Dispatchers.Main) {
+//                    image?.let { ivProductThumbnail.loadImg(it) {} }
+//                }
+//            }
+
             ivProductThumbnail.loadImg(product.thumbnailUrl) {}
 
             //if discount is available then we make the discount layout visible and set the discount amount and percentage
@@ -73,13 +92,11 @@ class BestSellersAdapter(
                     tvDiscountAmt.text =
                         "${getDiscountPercent(variantPrice.toFloat(), discountPrice.toFloat()).toInt()}% Off"
                     if (discountPrice != 0.0) {
-                        discountedPriceForPurchase = discountPrice
                         tvPrice.text = "$variantDisplayName - Rs: ${discountPrice}"
                     }
                 }
             } else {
                 clDiscountLayout.visibility = View.INVISIBLE
-                discountedPriceForPurchase = product.variants[variantInCartPosition].variantPrice
                 tvPrice.text = "$variantDisplayName - Rs: ${product.variants[variantInCartPosition].variantPrice}"
             }
 

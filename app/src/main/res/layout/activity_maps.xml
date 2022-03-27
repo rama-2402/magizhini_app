@@ -29,7 +29,7 @@
         android:paddingEnd="40dp"
         android:elevation="10dp"
         android:gravity="center"
-        android:background="@drawable/shape_dialog_background"
+        android:background="@drawable/shape_round_rectangle_12"
         android:backgroundTint="@color/green_base">
 
       <TextView
@@ -54,7 +54,7 @@
         android:padding="@dimen/material_size_8"
         android:elevation="10dp"
         android:gravity="center"
-        android:background="@drawable/shape_dialog_background">
+        android:background="@drawable/shape_round_rectangle_12">
 
         <TextView
             android:id="@+id/hint_text"
@@ -83,7 +83,7 @@
         map:layout_constraintBottom_toBottomOf="parent"
         android:src="@drawable/ic_address"
         android:layout_margin="@dimen/material_size_24"
-        android:background="@drawable/shape_dialog_background"
+        android:background="@drawable/shape_round_rectangle_12"
         android:padding="8dp"
         android:elevation="20dp"/>
 

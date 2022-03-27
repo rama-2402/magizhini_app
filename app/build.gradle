@@ -53,18 +53,16 @@ android {
 dependencies {
 
     implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.9'
-    implementation 'com.google.firebase:firebase-analytics-ktx:20.1.1'
-
-    def kodein_version = "6.4.0"
+    implementation 'com.google.firebase:firebase-analytics-ktx:20.1.2'
 
 //    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-beta01")
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 
     implementation 'com.google.android.gms:play-services-maps:18.0.2'
     implementation 'com.google.android.gms:play-services-location:19.0.1'
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.8.9'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.6.10"
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'
@@ -82,8 +80,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx:23.0.2'
 
     implementation 'com.google.firebase:firebase-storage-ktx:20.0.1'
-    implementation 'com.google.firebase:firebase-auth-ktx:21.0.2'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.0.2'
+    implementation 'com.google.firebase:firebase-auth-ktx:21.0.3'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.1.0'
 
     implementation 'androidx.navigation:navigation-fragment-ktx:2.4.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.4.1'
@@ -109,8 +107,8 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.7.1"
 
     // Kodein
-    implementation "org.kodein.di:kodein-di-generic-jvm:$kodein_version"
-    implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_version"
+    implementation "org.kodein.di:kodein-di-generic-jvm:6.4.0"
+    implementation "org.kodein.di:kodein-di-framework-android-x:6.4.0"
 
     // Room and Architectural Components
     implementation "androidx.room:room-runtime:2.4.2"
@@ -133,8 +131,8 @@ dependencies {
     implementation 'com.github.rehmanmuradali:ticker:1.0.1'
 
 //    //datePicker https://github.com/aminography/PrimeDatePicker
-    implementation 'com.aminography:primedatepicker:3.6.0'
-    implementation 'com.aminography:primecalendar:1.7.0'
+//    implementation 'com.aminography:primedatepicker:3.6.0'
+//    implementation 'com.aminography:primecalendar:1.7.0'
 
     //keyboard display library      https://github.com/yshrsmz/KeyboardVisibilityEvent
     implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.1.0'
@@ -147,12 +145,6 @@ dependencies {
     // Optional: Circle Indicator (To fix the xml preview "Missing classes" error)  https://github.com/ImaginativeShohag/Why-Not-Image-Carousel?utm_source=android-arsenal.com&utm_medium=referral&utm_campaign=8053
     implementation 'me.relex:circleindicator:2.1.6'     //circle indicator onBoarding screen     https://github.com/ongakuer/CircleIndicator
     implementation 'org.imaginativeworld.whynotimagecarousel:whynotimagecarousel:2.0.5'
-//
-//    //rv snapping Homescreen    https://github.com/Ranjan101/RecyclerView-Google-Play
-//    implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
-
-    //rating animation  https://github.com/sujithkanna/SmileyRating?utm_source=android-arsenal.com&utm_medium=referral&utm_campaign=5424
-//    implementation 'com.github.sujithkanna:smileyrating:2.0.0'
 
     //shimmer loader for recycler view
     //github    https://github.com/facebook/shimmer-android

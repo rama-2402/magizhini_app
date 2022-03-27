@@ -7,8 +7,6 @@ import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Telephony
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -28,8 +26,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.navigation.NavigationView
@@ -41,6 +37,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntit
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
@@ -58,7 +55,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
@@ -107,9 +103,9 @@ class HomeActivity :
     //initializing the viewModel and binding for activity
     private lateinit var viewModel: HomeViewModel
     private lateinit var binding: ActivityHomeBinding
-    private lateinit var adapter: CategoryHomeAdapter
-    private lateinit var testimonialsAdapter: TestimonialsAdapter
-    private lateinit var homeSpecialsAdapter: HomeSpecialsAdapter
+//    private lateinit var adapter: CategoryHomeAdapter
+//    private lateinit var testimonialsAdapter: TestimonialsAdapter
+//    private lateinit var homeSpecialsAdapter: HomeSpecialsAdapter
     private lateinit var partnersAdapter: PartnersAdapter
 
 //    private val banners = mutableListOf<BannerEntity>()
@@ -182,7 +178,6 @@ class HomeActivity :
 
     private fun initData() {
         viewModel.getDataToPopulate()
-
     }
 
     private fun navigateToPageFromNotification(filter: String) {
@@ -306,23 +301,46 @@ class HomeActivity :
         viewModel.uiUpdate.observe(this) { event ->
             when(event) {
                 is HomeViewModel.UiUpdate.PopulateData -> {
-                    homeSpecialsAdapter.setBestSellerData(
-                        viewModel.specialBannersList,
-                        viewModel.specialsProductsList,
-                        viewModel.specialsTitles
-                    )
-//                    homeSpecialsAdapter.bestSellers = viewModel.specialsProductsList
-//                    homeSpecialsAdapter.banners = viewModel.specialBannersList
-//                    homeSpecialsAdapter.titles = viewModel.specialsTitles
-//                    homeSpecialsAdapter.notifyDataSetChanged()
+                    populateData()
+//                    HomeSpecialsAdapter(
+//                        this,
+//                        viewModel.specialsTitles,
+//                        this,
+//                        this
+//                    ).also {
+//                        it.bsOne.addAll(viewModel.bsOne)
+//                        it.bsTwo.addAll(viewModel.bsTwo)
+//                        it.bsThree.addAll(viewModel.bsThree)
+//                        it.bsFour.addAll(viewModel.bsOne)
+//                        it.bannerOne.addAll(viewModel.bannerOne)
+//                        it.bannerTwo.addAll(viewModel.bannerTwo)
+//                        it.bannerThree.addAll(viewModel.bannerThree)
+//                        it.bannerFour.addAll(viewModel.bannerFour)
+//                        binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
+//                        binding.rvHomeSpecials.adapter = it
+////                        binding.rvHomeSpecials.setItemViewCacheSize(20);
+//                    }
+//                    homeSpecialsAdapter.setBestSellerData(
+//                        viewModel.specialBannersList,
+//                        viewModel.specialsProductsList,
+//                        viewModel.specialsTitles
+//                    )
                 }
                 is HomeViewModel.UiUpdate.ShowNotificationsCount -> {
                     event.count?.let { binding.ivNotification.badgeValue = it }
                 }
                 is HomeViewModel.UiUpdate.PopulateEnd -> {
                     hideProgressDialog()
-                    testimonialsAdapter.setTestimonialData(event.testimonials)
-                    event.partners?.let { partnersAdapter.setPartnersData(it) }
+                    TestimonialsAdapter(
+                        event.testimonials as MutableList<TestimonialsEntity>,
+                        this
+                    ).also {
+                        binding.rvTestimonials.layoutManager = LinearLayoutManager(this)
+                        binding.rvTestimonials.adapter = it
+//                        binding.rvTestimonials.setItemViewCacheSize(20);
+                    }
+//                    testimonialsAdapter.setTestimonialData(event.testimonials)
+//                    event.partners?.let { partnersAdapter.setPartnersData(it) }
                 }
                 is HomeViewModel.UiUpdate.ShowBirthDayCard -> {
                     event.birthdayCard?.let { card ->
@@ -353,18 +371,6 @@ class HomeActivity :
                 else -> HomeViewModel.UiUpdate.Empty
             }
         }
-
-//        viewModel.notifications.observe(this) {
-//            if (it.isNullOrEmpty()) {
-//                binding.ivNotification.badgeValue = 0
-//                binding.ivNotification.visibleBadge(false)
-//            } else {
-//                binding.ivNotification.apply {
-//                    visibleBadge(true)
-//                    badgeValue = it.size
-//                }
-//            }
-//        }
         //observing the banners data and setting the banners
         viewModel.getAllBanners().observe(this, Observer {
             val bannersCarousel: MutableList<CarouselItem> = mutableListOf()
@@ -379,59 +385,23 @@ class HomeActivity :
             generateBanners(bannersCarousel, it)
         })
         viewModel.getALlCategories().observe(this, Observer {
-            adapter.setCategoriesData(it)
-//            adapter.categories = it
-//            adapter.notifyDataSetChanged()
+//            adapter.setCategoriesData(it)
+            CategoryHomeAdapter(
+                this,
+                it,
+                this
+            ).also { adapter ->
+                binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
+                binding.rvHomeItems.adapter = adapter
+//                binding.rvHomeItems.setItemViewCacheSize(20);
+            }
         })
-//        viewModel.showBirthday.observe(this) {
-//            it?.let { card ->
-//                showBirthDayCard(card)
-//            }
-//        }
-//        viewModel.testimonials.observe(this) {
-//            testimonialsAdapter.testimonials = it
-//            testimonialsAdapter.notifyDataSetChanged()
-//        }
-//        viewModel.referralStatus.observe(this) {
-//            hideProgressDialog()
-//            if (it) {
-//                dialogBsAddReferral.dismiss()
-//                showErrorSnackBar(
-//                    "Referral added Successfully. Your referral bonus will be added to your Wallet.",
-//                    false,
-//                    Constants.LONG
-//                )
-//            } else {
-//                showToast(this, "No account with the given number. Please check again")
-//            }
-//        }
-//        viewModel.allowReferral.observe(this) {
-//            if (it == "no") {
-//                showErrorSnackBar("Referral Already Applied", true)
-//            } else {
-//                showReferralBs(it)
-//            }
-//        }
-//        //scroll change listener to hide the fab when scrolling down
-//        binding.rvHomeSpecials.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//            override fun onScrolled(recyclerView: RecyclerView, up: Int, down: Int) {
-//                super.onScrolled(recyclerView, up, down)
-//                if (down > 0 && binding.fabCart.isVisible) {
-//                    binding.fabCart.hide()
-//                } else if (down < 0 && binding.fabCart.isGone) {
-//                    binding.fabCart.show()
-//                }
-//            }
-//        })
+    }
 
-//        binding.rvHomeSpecials.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-//                super.onScrollStateChanged(recyclerView, newState)
-//                if (!recyclerView.canScrollVertically(1)) {
-//                    viewModel.getPartnersData()
-//                }
-//            }
-//        })
+    private fun populateData() {
+        binding.apply {
+
+        }
     }
 
     private fun showBirthDayCard(card: BirthdayCard?) {
@@ -458,14 +428,14 @@ class HomeActivity :
     }
 
     private fun generateRecyclerView() {
-        homeSpecialsAdapter = HomeSpecialsAdapter(
-            this,
-            listOf(),
-            listOf(),
-            listOf(),
-            this,
-            this
-        )
+//        homeSpecialsAdapter = HomeSpecialsAdapter(
+//            this,
+//            listOf(),
+//            listOf(),
+//            listOf(),
+//            this,
+//            this
+//        )
 /*
     //This will lock the vertical scrolling when horizontal child is scrolling and vice versa
             binding.rvHomeItems.setOnTouchListener { v, event ->
@@ -474,31 +444,35 @@ class HomeActivity :
             }
 */
 
-        adapter = CategoryHomeAdapter(
-            this,
-            listOf(),
-            this
-        )
-
-        testimonialsAdapter = TestimonialsAdapter(
-            this,
-            mutableListOf(),
-            this
-        )
+//        adapter = CategoryHomeAdapter(
+//            this,
+//            listOf(),
+//            this
+//        )
+//
+//        testimonialsAdapter = TestimonialsAdapter(
+//            this,
+//            mutableListOf(),
+//            this
+//        )
 
         partnersAdapter = PartnersAdapter(
             listOf(),
             this
         )
 
-        binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
-        binding.rvHomeSpecials.adapter = homeSpecialsAdapter
-        binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
-        binding.rvHomeItems.adapter = adapter
-        binding.rvTestimonials.layoutManager = LinearLayoutManager(this)
-        binding.rvTestimonials.adapter = testimonialsAdapter
+//        binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
+//        binding.rvHomeSpecials.adapter = homeSpecialsAdapter
+//        binding.rvHomeSpecials.setItemViewCacheSize(20);
+//        binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
+//        binding.rvHomeItems.adapter = adapter
+//        binding.rvHomeItems.setItemViewCacheSize(20);
+//        binding.rvTestimonials.layoutManager = LinearLayoutManager(this)
+//        binding.rvTestimonials.adapter = testimonialsAdapter
+//        binding.rvTestimonials.setItemViewCacheSize(20);
         binding.rvPartners.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvPartners.adapter = partnersAdapter
+        binding.rvPartners.setItemViewCacheSize(20);
 //        val snapHelper: SnapHelper = GravitySnapHelper(Gravity.TOP)
 //        snapHelper.attachToRecyclerView(binding.rvHomeSpecials)
     }

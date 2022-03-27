@@ -16,7 +16,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 
 class TestimonialsAdapter(
-    private val context: Context,
     var testimonials: MutableList<TestimonialsEntity>,
     private val onItemClickListener: TestimonialItemClickListener
 ) : RecyclerView.Adapter<TestimonialsAdapter.TestimonialsViewHolder>() {
