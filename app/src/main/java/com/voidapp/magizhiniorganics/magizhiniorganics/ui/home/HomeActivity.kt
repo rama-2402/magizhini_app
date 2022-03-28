@@ -41,7 +41,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeB
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts.ContactUsActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.ContactUsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity

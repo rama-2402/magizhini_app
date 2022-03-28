@@ -19,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toCartEntity
@@ -273,7 +274,7 @@ class QuickOrderViewModel(
 
     fun sendGetEstimateRequest(imageExtensions: MutableList<String>) {
         viewModelScope.launch {
-            orderID = fbRepository.generateOrderID()
+            orderID = generateOrderID()
             val detailsMap: HashMap<String, String> = hashMapOf()
             userProfile?.let {
                 detailsMap["id"] = it.id
@@ -315,6 +316,12 @@ class QuickOrderViewModel(
                     }
                 }
         }
+    }
+
+    private fun generateOrderID(): String {
+        return userProfile?.let {
+            TimeUtil().getOrderIDFormat(it.phNumber.takeLast(4))
+        } ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
     }
 
     fun proceedForWalletPayment(

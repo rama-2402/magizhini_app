@@ -11,6 +11,7 @@ import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import androidx.core.app.ActivityCompat.startPostponedEnterTransition
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
@@ -61,6 +62,7 @@ fun ShapeableImageView.loadImg(url: Any, loadOnlyFromCache: Boolean = false, onL
             .with(this.context)
             .load(url) // URI of the image
 //            .centerCrop() // Scale type of the image.
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .placeholder(R.drawable.carousel_default_placeholder) // A default place holder if image is failed to load.
             .transition(DrawableTransitionOptions.withCrossFade())
             .apply(requestOptions)

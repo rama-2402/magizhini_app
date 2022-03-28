@@ -284,8 +284,10 @@ class SubscriptionProductViewModel(
             }.launchIn(this)
     }
 
-    private suspend fun generateSubscriptionID(): String = withContext(Dispatchers.IO) {
-        return@withContext fbRepository.generateSubscriptionID()
+    private fun generateSubscriptionID(): String {
+        return userProfile?.let {
+            TimeUtil().getOrderIDFormat(it.phNumber.takeLast(4))
+        } ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
     }
 
     suspend fun getEstimateAmount(subTypePosition: Int, selectedVariantPosition: Int): Double = withContext(Dispatchers.Default) {

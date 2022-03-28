@@ -1,4 +1,4 @@
-package com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.contacts
+package com.voidapp.magizhiniorganics.magizhiniorganics.ui.business
 
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,14 +9,8 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CareerAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Career
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityContactUsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -26,8 +20,7 @@ import java.util.*
 
 class ContactUsActivity :
     BaseActivity(),
-    KodeinAware,
-    CareerAdapter.CareerItemClickListener
+    KodeinAware
 {
     override val kodein: Kodein by kodein()
 
@@ -47,19 +40,7 @@ class ContactUsActivity :
     private fun initObservers() {
         viewModel.uiUpdate.observe(this){ event ->
             when(event) {
-                is BusinessViewModel.UiUpdate.OpenUrl -> {
-                    hideProgressDialog()
-                    if (event.career.isNullOrEmpty()) {
-                        showToast(this, "Thank you for showing interest. We are not Hiring right now. Please check back later.")
-                    } else {
-                        CareerAdapter(
-                            event.career,
-                            this
-                        ).also {
-                            ItemsBottomSheet(this, null, null, it).show()
-                        }
-                    }
-                }
+                is BusinessViewModel.UiUpdate.OpenUrl -> openInBrowser("")
                 else -> BusinessViewModel.UiUpdate.Empty
             }
         }
@@ -83,7 +64,7 @@ class ContactUsActivity :
                     return@setOnClickListener
                 }
                 showProgressDialog()
-                viewModel.getCareersDocLink()
+                openInBrowser("")
             }
         }
     }
@@ -149,17 +130,13 @@ class ContactUsActivity :
     }
 
     fun addNewPartnerAccount() {
-        Intent(this, NewPartnerActivity::class.java).also {
-            startActivity(it)
-        }
+        openInBrowser("https://forms.gle/eaCWzYVCetunTigd9")
+//        Intent(this, NewPartnerActivity::class.java).also {
+//            startActivity(it)
+//        }
     }
 
     fun sendCareerMail() {
         shareToGMail(arrayOf("magizhiniOrganics2018@gmail.com"), "Looking for Job in Magizhini Organcis", "")
-    }
-
-    override fun selectedCareer(career: Career) {
-        ItemsBottomSheet(this, null, null, null).dismiss()
-        openInBrowser(career.url)
     }
 }

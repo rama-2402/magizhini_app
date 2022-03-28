@@ -1710,20 +1710,6 @@ class Firestore(
         }
     }
 
-    suspend fun sendNewPartnerRequest(newPartner: NewPartner): NetworkResult = withContext(Dispatchers.IO){
-        return@withContext try {
-            mFireStore
-                .collection(NEW_PARTNERS)
-                .document()
-                .set(newPartner, SetOptions.merge())
-                .await()
-            NetworkResult.Success("", null)
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: sending new partner request failed", it) }
-            NetworkResult.Failed("", null)
-        }
-    }
-
     suspend fun getCareersDocLink(): MutableList<Career>? = withContext(Dispatchers.IO) {
         return@withContext try {
             val docs = mFireStore

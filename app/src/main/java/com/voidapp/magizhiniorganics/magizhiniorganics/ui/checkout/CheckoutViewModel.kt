@@ -16,6 +16,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.*
@@ -33,7 +34,6 @@ class CheckoutViewModel(
 
     var currentCoupon: CouponEntity? = null
     var couponPrice: Float? = null
-    var deliveryCharge: Float = 0f
     var checkedAddressPosition: Int = 0
     var addressPosition: Int = 0
 
@@ -45,15 +45,8 @@ class CheckoutViewModel(
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
     val uiEvent: LiveData<UIEvent> = _uiEvent
 
-    var navigateToPage: String = ALL_PRODUCTS
-
     var cwmDish: MutableList<CartEntity> = mutableListOf()
     var isCWMCart: Boolean = false
-
-    private var _coupons: MutableLiveData<List<CouponEntity>> = MutableLiveData()
-    val coupons: LiveData<List<CouponEntity>> = _coupons
-    private var _profile: MutableLiveData<UserProfileEntity> = MutableLiveData()
-    val profile: LiveData<UserProfileEntity> = _profile
 
     private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(NetworkResult.Empty)
     val status: StateFlow<NetworkResult> = _status
@@ -551,13 +544,10 @@ class CheckoutViewModel(
             }
     }
 
-
-    fun updateTransaction(transaction: TransactionHistory) = viewModelScope.launch (Dispatchers.IO) {
-        _status.value = fbRepository.updateTransaction(transaction, "Magizhini purchase")
-    }
-
-    private suspend fun generateOrderID(): String = withContext(Dispatchers.IO) {
-        return@withContext fbRepository.generateOrderID()
+    private fun generateOrderID(): String {
+        return userProfile?.let {
+            TimeUtil().getOrderIDFormat(it.phNumber.takeLast(4))
+        } ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
     }
 
     sealed class UiUpdate {

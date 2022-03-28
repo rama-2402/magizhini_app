@@ -84,7 +84,6 @@ class InvoiceActivity :
             onBackPressed()
         }
 
-        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
         val cartItems = intent.getParcelableArrayListExtra<CartEntity>("dish") ?: mutableListOf()
         viewModel.isCWMCart = intent.getBooleanExtra("cwm", false)
 

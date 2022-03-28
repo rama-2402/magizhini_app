@@ -54,6 +54,12 @@ class TimeUtil {
         return calendar[Calendar.MONTH]
     }
 
+    fun getOrderIDFormat(lastDigit: String): String {
+        val simpleFormat = SimpleDateFormat("yyMMddHHmmss")
+        val timeFormat = simpleFormat.format(System.currentTimeMillis())
+        return "$timeFormat$lastDigit"
+    }
+
     fun getYear(dateLong: Long = 0L): String {
         val year = SimpleDateFormat("yyyy")
         val date = if (dateLong == 0L) {
