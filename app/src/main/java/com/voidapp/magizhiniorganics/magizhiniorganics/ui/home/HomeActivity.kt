@@ -208,9 +208,9 @@ class HomeActivity :
                         binding.fabCart.visibility = View.GONE
                     }
                     scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight -> {
-                        showProgressDialog()
                         if (NetworkHelper.isOnline(this@HomeActivity)) {
                             if (viewModel.partners.isEmpty() || viewModel.testimonials.isEmpty()) {
+                                showProgressDialog()
                                 viewModel.getEndData()
                             }
                         } else {

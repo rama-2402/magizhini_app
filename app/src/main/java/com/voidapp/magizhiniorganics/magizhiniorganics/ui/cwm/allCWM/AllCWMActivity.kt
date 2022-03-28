@@ -135,8 +135,6 @@ class AllCWMActivity :
         Intent(this@AllCWMActivity, DishActivity::class.java).also {
             it.putExtra("dish", dish)
             startActivity(it)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-            finish()
         }
     }
 

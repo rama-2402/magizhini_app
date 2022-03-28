@@ -315,7 +315,13 @@ class SubscriptionProductActivity :
     }
 
     private fun initData(productID: String) {
+        viewModel.reviewAdapter = ReviewAdapter(
+            this,
+                arrayListOf(),
+            this
+        )
         viewModel.getProductByID(productID)
+
     }
 
     private fun initLiveData() {
