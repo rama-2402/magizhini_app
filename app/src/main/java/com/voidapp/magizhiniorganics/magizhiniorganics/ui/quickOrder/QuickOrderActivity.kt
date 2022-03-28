@@ -88,6 +88,11 @@ class QuickOrderActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_quick_order)
         viewModel = ViewModelProvider(this, factory).get(QuickOrderViewModel::class.java)
 
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            onBackPressed()
+        }
+
         Checkout.preload(applicationContext)
 
         initRecyclerView()
@@ -173,6 +178,10 @@ class QuickOrderActivity :
                 }
             })
             btnGetEstimate.setOnClickListener {
+                if (!NetworkHelper.isOnline(this@QuickOrderActivity)) {
+                    showErrorSnackBar("Please check your Internet Connection", true)
+                    return@setOnClickListener
+                }
                 /*
                 * If there is no quick order and the uri is empty then nothing is selected
                 * */
@@ -497,10 +506,13 @@ class QuickOrderActivity :
                         showExitSheet(this, "Do you wish to delete and Create a New Order", "delete")
                     }
                 } else {
+                    if (!NetworkHelper.isOnline(this@QuickOrderActivity)) {
+                        showErrorSnackBar("Please check your Internet Connection", true)
+                        return@setOnClickListener
+                    }
                     Intent(this, WalletActivity::class.java).also { intent ->
                         intent.putExtra(Constants.NAVIGATION, Constants.QUICK_ORDER)
                         startActivity(intent)
-                        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                     }
                 }
             }
@@ -511,7 +523,6 @@ class QuickOrderActivity :
                         viewModel.quickOrder?.orderPlaced == true -> {
                             Intent(this, PurchaseHistoryActivity::class.java).also { intent ->
                                 startActivity(intent)
-                                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                                 finish()
                             }
                         }
@@ -682,6 +693,10 @@ class QuickOrderActivity :
     }
 
     fun selectedPaymentMode(paymentMethod: String) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         lifecycleScope.launch {
             when(paymentMethod) {
                 "Online" -> {
@@ -787,8 +802,6 @@ class QuickOrderActivity :
     fun moveToCustomerSupport() {
         Intent(this, QuickOrderActivity::class.java).also {
             startActivity(it)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-            finish()
         }
     }
 
@@ -808,13 +821,7 @@ class QuickOrderActivity :
         when {
             cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED ->
                 cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-            else -> {
-                Intent(this, HomeActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                }
-            }
+            else -> super.onBackPressed()
         }
     }
 
@@ -863,6 +870,10 @@ class QuickOrderActivity :
     }
 
     override fun deleteAddress(position: Int) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         if (viewModel.quickOrder?.orderPlaced ?: false) {
             showErrorSnackBar("Can't edit Address. Order placed already", true)
             return
@@ -874,6 +885,10 @@ class QuickOrderActivity :
     }
 
     override fun updateAddress(position: Int) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         if (viewModel.quickOrder?.orderPlaced ?: false) {
             showErrorSnackBar("Can't edit Address. Order placed already", true)
             return
@@ -918,6 +933,10 @@ class QuickOrderActivity :
 
     //from address dialog
     override fun savedAddress(addressMap: HashMap<String, Any>, isNew: Boolean) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.addressContainer?.let { address ->
             address.userId = addressMap["userId"].toString()
             address.addressLineOne = addressMap["addressLineOne"].toString()

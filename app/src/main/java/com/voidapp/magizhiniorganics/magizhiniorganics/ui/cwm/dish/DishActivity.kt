@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -48,10 +49,7 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
 
-/*
-* TODO
-*  Need to add reviews like in product sub page instead of the cart page
-* */
+
 class DishActivity :
     BaseActivity(),
     KodeinAware,
@@ -79,6 +77,8 @@ class DishActivity :
 
         viewModel.dish = intent.getParcelableExtra<CWMFood>("dish")!!
         checkoutText = findViewById<TextView>(R.id.tvCheckOut)
+
+        showProgressDialog()
 
         initData()
         initRecyclerView()
@@ -149,6 +149,7 @@ class DishActivity :
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 player = youTubePlayer
                 youTubePlayer.loadVideo(viewModel.dish!!.videoID, 0f)
+                hideProgressDialog()
             }
         })
 
@@ -227,7 +228,6 @@ class DishActivity :
                     it.putParcelableArrayListExtra("dish", viewModel.cartItems as ArrayList<CartEntity>)
                     it.putExtra("cwm", true)
                     startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 }
             } else {
                 showErrorSnackBar("Please check network connection", true)

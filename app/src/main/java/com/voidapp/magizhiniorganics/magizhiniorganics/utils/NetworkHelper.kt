@@ -12,16 +12,7 @@ object NetworkHelper {
 
         var result = false
         (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).apply {
-             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                result = checkNetworkConnection(this, this.activeNetwork)
-             } else {
-                val networks = this.allNetworks
-                 for (network in networks) {
-                     if (checkNetworkConnection(this, network)) {
-                         result = true
-                     }
-                 }
-             }
+             result = checkNetworkConnection(this, this.activeNetwork)
         }
 
         return result
@@ -45,4 +36,6 @@ object NetworkHelper {
     fun isOnline(context: Context):Boolean {
         return NetworkHelper.isNetworkConnected(context)
     }
+
+
 }

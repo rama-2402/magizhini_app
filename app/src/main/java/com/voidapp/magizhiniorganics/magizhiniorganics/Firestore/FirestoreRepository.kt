@@ -115,6 +115,7 @@ class FirestoreRepository (
     suspend fun updateBirthdayCard(customerID: String) = firestore.updateBirthdayCard(customerID)
 
     suspend fun getAllPartners(): List<Partners>? = firestore.getAllPartners()
-    suspend fun sendNewPartnerRequest(newPartner: BusinessViewModel.NewPartner): NetworkResult = firestore.sendNewPartnerRequest(newPartner)
+    suspend fun sendNewPartnerRequest(newPartner: NewPartner): NetworkResult = firestore.sendNewPartnerRequest(newPartner)
+    suspend fun getCareersDocLink(): MutableList<Career>? = firestore.getCareersDocLink()
 
 }

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -16,6 +17,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentNewReviewBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.imageExtension
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import kotlinx.coroutines.delay
@@ -92,6 +94,10 @@ class SubNewReviewFragment: Fragment(), KodeinAware {
 
             btnSaveReview.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                if (!NetworkHelper.isOnline(requireContext())) {
+                    Toast.makeText(requireContext(), "Please check your Internet Connection", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
                 productViewModel.userProfile?.let { profile ->
                     Review(
                         "",

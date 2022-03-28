@@ -185,8 +185,6 @@ class ProductActivity :
                 Intent(this, InvoiceActivity::class.java).also {
                     it.putExtra(NAVIGATION, PRODUCTS)
                     startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
                 }
             } else {
                 showErrorSnackBar("Please check network connection", true)
@@ -447,10 +445,13 @@ class ProductActivity :
 
         binding.ivWallet.setOnClickListener {
             updatePreferenceData()
+            if (!NetworkHelper.isOnline(this)) {
+                showErrorSnackBar("Please check your Internet Connection", true)
+                return@setOnClickListener
+            }
             Intent(this, WalletActivity::class.java).also {
                 it.putExtra(NAVIGATION, PRODUCTS)
                 startActivity(it)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
         }
 
@@ -489,6 +490,10 @@ class ProductActivity :
     }
 
     private fun setFavorites(isFavorite: Boolean) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         //setting the favorties icon for the products
         if (isFavorite) {
             binding.ivFavourite.setImageResource(R.drawable.ic_favorite_filled)

@@ -15,6 +15,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityAllCwmBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -50,6 +51,11 @@ class AllCWMActivity :
 
         title = ""
         setSupportActionBar(binding.tbToolbar)
+
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            onBackPressed()
+        }
 
         initData()
         initRecyclerView()

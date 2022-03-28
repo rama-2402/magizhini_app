@@ -79,16 +79,21 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
             tvLastRechargeDate.isSelected = true
         }
 
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            onBackPressed()
+        }
+
         Checkout.preload(applicationContext)
 
-        showShimmer()
-        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
+
         lifecycleScope.launch {
-            delay(800)
-            clickListeners()
+            delay(1000)
+            showShimmer()
+            initRecyclerView()
             initLiveData()
             liveDataObservers()
-            initRecyclerView()
+            clickListeners()
         }
     }
 
@@ -208,6 +213,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
         })
 
         binding.fabAddMoney.setOnClickListener {
+            if (!NetworkHelper.isOnline(this)) {
+                showErrorSnackBar("Please check your Internet Connection", true)
+                return@setOnClickListener
+            }
             //BS to add Amount number
             val dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
 
@@ -279,84 +288,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
         (supportFragmentManager.findFragmentByTag("calendar") as? DialogFragment)?.dismiss()
     }
 
-    fun filterTransactions(month: String, year: String) = lifecycleScope.launch(Dispatchers.Default) {
-//        withContext(Dispatchers.Main) {
-//            showShimmer()
-//        }
-//        val filteredTransactions = mutableListOf<TransactionHistory>()
-//        for (transaction in mTransactions) {
-//            val transactionDate = TimeUtil().getCustomDate(dateLong = transaction.timestamp)
-//            val filteredDate = TimeUtil().getCustomDate(dateLong = date)
-//            if (transactionDate == filteredDate) {
-//                filteredTransactions.add(transaction)
-//            }
-//        }
-//        withContext(Dispatchers.Main) {
-//            if (filteredTransactions.isNullOrEmpty()) {
-//                binding.llEmptyLayout.visible()
-//            } else {
-//                binding.llEmptyLayout.remove()
-//                filteredTransactions.sortBy {
-//                    it.timestamp
-//                }
-//            }
-//            transactionAdapter.transactions = filteredTransactions
-//            transactionAdapter.notifyDataSetChanged()
-//            hideShimmer()
-//        }
-        withContext(Dispatchers.Main) {
-            showShimmer()
-            mFilterMonth = month
-            mFilterYear = year
-        }
-        val filteredTransactions = mutableListOf<TransactionHistory>()
-        for (transaction in mTransactions) {
-            if (transaction.month == mFilterMonth && transaction.year == mFilterYear.toLong()) {
-                filteredTransactions.add(transaction)
-            }
-        }
-        withContext(Dispatchers.Main) {
-            if (filteredTransactions.isNullOrEmpty()) {
-                binding.llEmptyLayout.visible()
-            } else {
-                binding.llEmptyLayout.remove()
-                filteredTransactions.sortBy {
-                    it.timestamp
-                }
-            }
-            transactionAdapter.transactions = filteredTransactions
-            transactionAdapter.notifyDataSetChanged()
-            hideShimmer()
-        }
-    }
-
-    fun setMonthFilter(month: String) = lifecycleScope.launch(Dispatchers.Default) {
-
-//        withContext(Dispatchers.Main) {
-//            showShimmer()
-//            binding.tvMonthFilter.text = month
-//        }
-//        val filteredTransactions = mutableListOf<TransactionHistory>()
-//        for (transaction in mTransactions) {
-//            if (transaction.month == month) {
-//                filteredTransactions.add(transaction)
-//            }
-//        }
-//        withContext(Dispatchers.Main) {
-//            if (filteredTransactions.isNullOrEmpty()) {
-//                binding.llEmptyLayout.visible()
-//            } else {
-//                binding.llEmptyLayout.remove()
-//                filteredTransactions.sortBy {
-//                    it.timestamp
-//                }
-//            }
-//            transactionAdapter.transactions = filteredTransactions
-//            transactionAdapter.notifyDataSetChanged()
-//            hideShimmer()
-//        }
-    }
-
     private suspend fun onSuccessCallback(message: String, data: Any?) {
         when(message) {
             "wallet" -> {
@@ -417,6 +348,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
     }
 
     override fun selectedFilter(month: String, year: String) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         dismissCalendarFilterDialog()
         showShimmer()
         mFilterMonth = month

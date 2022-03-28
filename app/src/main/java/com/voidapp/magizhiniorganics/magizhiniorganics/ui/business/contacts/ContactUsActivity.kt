@@ -9,10 +9,15 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CareerAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Career
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityContactUsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModel
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -21,7 +26,8 @@ import java.util.*
 
 class ContactUsActivity :
     BaseActivity(),
-    KodeinAware
+    KodeinAware,
+    CareerAdapter.CareerItemClickListener
 {
     override val kodein: Kodein by kodein()
 
@@ -35,6 +41,29 @@ class ContactUsActivity :
         viewModel = ViewModelProvider(this, factory).get(BusinessViewModel::class.java)
 
         initListeners()
+        initObservers()
+    }
+
+    private fun initObservers() {
+        viewModel.uiUpdate.observe(this){ event ->
+            when(event) {
+                is BusinessViewModel.UiUpdate.OpenUrl -> {
+                    hideProgressDialog()
+                    if (event.career.isNullOrEmpty()) {
+                        showToast(this, "Thank you for showing interest. We are not Hiring right now. Please check back later.")
+                    } else {
+                        CareerAdapter(
+                            event.career,
+                            this
+                        ).also {
+                            ItemsBottomSheet(this, null, null, it).show()
+                        }
+                    }
+                }
+                else -> BusinessViewModel.UiUpdate.Empty
+            }
+        }
+        viewModel.setEmptyUI()
     }
 
     private fun initListeners() {
@@ -49,7 +78,12 @@ class ContactUsActivity :
                 showExitSheet(this@ContactUsActivity, "Become a Business Partner with Magihini Organics by sending a request to us with your contact details and a short description of your business. We will Contact you shortly once reviewing your profile. Please click PROCEED to continue", "business")
             }
             ivCareers.setOnClickListener {
-                showExitSheet(this@ContactUsActivity, "Send us an email describing your short story, Work type you are interested with your resume and contact details such as your Name, Phone Number and Email ID. we will contact you based on our job requirements. Please click PROCEED to continue", "career")
+                if (!NetworkHelper.isOnline(this@ContactUsActivity)) {
+                    showErrorSnackBar("Please check your Internet Connection", true)
+                    return@setOnClickListener
+                }
+                showProgressDialog()
+                viewModel.getCareersDocLink()
             }
         }
     }
@@ -74,6 +108,17 @@ class ContactUsActivity :
             "E-Mail" -> {
                 shareToGMail(arrayOf("magizhiniOrganics2018@gmail.com"), "", "")
             }
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 
@@ -111,5 +156,10 @@ class ContactUsActivity :
 
     fun sendCareerMail() {
         shareToGMail(arrayOf("magizhiniOrganics2018@gmail.com"), "Looking for Job in Magizhini Organcis", "")
+    }
+
+    override fun selectedCareer(career: Career) {
+        ItemsBottomSheet(this, null, null, null).dismiss()
+        openInBrowser(career.url)
     }
 }

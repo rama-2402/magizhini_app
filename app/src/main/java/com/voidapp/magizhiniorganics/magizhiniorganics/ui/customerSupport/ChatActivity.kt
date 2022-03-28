@@ -14,6 +14,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityChatB
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -36,6 +37,11 @@ class ChatActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_chat)
         viewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
         binding.viewmodel = viewModel
+
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            onBackPressed()
+        }
 
         initData()
         initViewPager()
@@ -89,12 +95,15 @@ class ChatActivity :
     }
 
     private fun moveToConversationPage(supportProfile: SupportProfile) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.profile?.let { profile ->
             Intent(this, ConversationActivity::class.java).also {
                 it.putExtra(Constants.CUSTOMER_SUPPORT, supportProfile.id)
                 it.putExtra(Constants.PROFILE_NAME, profile.id)
                 startActivity(it)
-                finish()
             }
         }
     }

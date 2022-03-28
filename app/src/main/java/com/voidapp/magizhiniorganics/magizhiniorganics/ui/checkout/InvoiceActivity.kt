@@ -432,6 +432,10 @@ class InvoiceActivity :
     }
 
     fun selectedPaymentMode(paymentMethod: String) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         lifecycleScope.launch {
             val cartItems = if (viewModel.isCWMCart) {
                 viewModel.cwmDish
@@ -555,6 +559,10 @@ class InvoiceActivity :
         }
 
         binding.ivCustomerSupport.setOnClickListener {
+            if (!NetworkHelper.isOnline(this)) {
+                showErrorSnackBar("Please check your Internet Connection", true)
+                return@setOnClickListener
+            }
             updatePreferenceData()
             Intent(this, ChatActivity::class.java).also {
                 it.putExtra(NAVIGATION, CHECKOUT_PAGE)
@@ -627,12 +635,6 @@ class InvoiceActivity :
         super.onDestroy()
     }
 
-    fun moveToCustomerSupport() {
-        Intent(this, ChatActivity::class.java).also {
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-        }
-    }
     //from address adapter
     override fun selectedAddress(position: Int) {
         viewModel.checkedAddressPosition = position
@@ -642,16 +644,28 @@ class InvoiceActivity :
     }
 
     override fun addAddress(position: Int) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         AddressDialog().show(supportFragmentManager, "addressDialog")
     }
 
     override fun deleteAddress(position: Int) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.deleteAddress(position)
         viewModel.checkedAddressPosition = 0
         addressAdapter.checkedAddressPosition = 0
     }
 
     override fun updateAddress(position: Int) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.addressPosition = position
         viewModel.userProfile?.let {
             val dialog = AddressDialog()
@@ -664,6 +678,10 @@ class InvoiceActivity :
 
     //from address dialog
     override fun savedAddress(addressMap: HashMap<String, Any>, isNew: Boolean) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         Address(
             userId = addressMap["userId"].toString(),
             addressLineOne = addressMap["addressLineOne"].toString(),

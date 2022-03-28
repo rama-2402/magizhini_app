@@ -19,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeTopSell
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadSimple
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,6 +30,7 @@ import java.net.URL
 class BestSellersAdapter(
     val context: Context,
     var products: List<ProductEntity>,
+//    var recycler: String,
     val onItemClickListener: BestSellerItemClickListener
 ) : RecyclerView.Adapter<BestSellersAdapter.ProductHomeViewHolder>() {
 
@@ -81,7 +83,8 @@ class BestSellersAdapter(
 //                }
 //            }
 
-            ivProductThumbnail.loadImg(product.thumbnailUrl) {}
+            ivProductThumbnail.loadSimple(product.thumbnailUrl)
+//            ivProductThumbnail.loadImg(product.thumbnailUrl) {}
 
             //if discount is available then we make the discount layout visible and set the discount amount and percentage
             if (product.variants[variantInCartPosition].discountPrice != 0.0) {

@@ -172,7 +172,7 @@ open class BaseActivity : AppCompatActivity() {
 //        val lottie = mProgressDialog.findViewById<LottieAnimationView>(R.id.lottie_progress)
 //        lottie.animate()
 
-        mProgressDialog.setCancelable(false)
+        mProgressDialog.setCancelable(true)
         mProgressDialog.setCanceledOnTouchOutside(false)
         mProgressDialog.window?.setDimAmount(0f)
         mProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -275,11 +275,7 @@ open class BaseActivity : AppCompatActivity() {
         view.tvConfirmationText.setOnClickListener {
             hideExitSheet()
             when (activity) {
-                is ProfileActivity -> {
-                    when (data) {
-                        "" -> activity.exitProfileWithoutChange()
-                    }
-                }
+                is ProfileActivity -> activity.exitProfileWithoutChange()
                 is QuickOrderActivity -> activity.onBackPressed()
             }
         }
@@ -347,7 +343,6 @@ open class BaseActivity : AppCompatActivity() {
                         "" -> activity.confirmCancellation()
                     }
                 }
-                is InvoiceActivity -> activity.moveToCustomerSupport()
                 is HomeActivity -> activity.showReferralOptions()
                 is ContactUsActivity -> {
                     when (data) {
@@ -482,10 +477,6 @@ open class BaseActivity : AppCompatActivity() {
                         hideListBottomSheet()
 //                        activity.categoryFilter = selectedItem
                         activity.selectedCategory(selectedItem)
-                    }
-                    is WalletActivity -> {
-                        hideListBottomSheet()
-                        activity.setMonthFilter(selectedItem)
                     }
                     is HomeActivity -> {
                         hideListBottomSheet()

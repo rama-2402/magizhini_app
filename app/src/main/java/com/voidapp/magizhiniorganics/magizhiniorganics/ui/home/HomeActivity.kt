@@ -37,7 +37,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntit
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
@@ -54,7 +53,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
@@ -75,6 +74,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.imaginativeworld.whynotimagecarousel.ImageCarousel
@@ -94,8 +96,7 @@ class HomeActivity :
     PartnersAdapter.PartnersItemClickListener,
     BestSellersAdapter.BestSellerItemClickListener,
     CategoryHomeAdapter.CategoryItemClickListener,
-    HomeSpecialsAdapter.HomeSpecialsItemClickListener
-{
+    HomeSpecialsAdapter.HomeSpecialsItemClickListener {
     //DI Injection with kodein
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
@@ -103,20 +104,13 @@ class HomeActivity :
     //initializing the viewModel and binding for activity
     private lateinit var viewModel: HomeViewModel
     private lateinit var binding: ActivityHomeBinding
-//    private lateinit var adapter: CategoryHomeAdapter
-//    private lateinit var testimonialsAdapter: TestimonialsAdapter
-//    private lateinit var homeSpecialsAdapter: HomeSpecialsAdapter
+
+    private lateinit var adapter: CategoryHomeAdapter
+    private lateinit var testimonialsAdapter: TestimonialsAdapter
+    private lateinit var homeSpecialsAdapter: HomeSpecialsAdapter
     private lateinit var partnersAdapter: PartnersAdapter
 
-//    private val banners = mutableListOf<BannerEntity>()
-
     private lateinit var dialogBsAddReferral: BottomSheetDialog
-
-//    private var isPreviewOpened: Boolean = false
-
-    //initializing the carousel item for the banners
-//    val mItems: MutableList<CarouselItem> = mutableListOf()
-//    private val mCategoriesList: ArrayList<String> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -165,7 +159,7 @@ class HomeActivity :
 
         intent.getStringExtra("navigate")?.let {
             navigateToPageFromNotification(it)
-        } ?:let {
+        } ?: let {
             SharedPref(this@HomeActivity).putData(
                 Constants.DATE,
                 STRING,
@@ -181,7 +175,7 @@ class HomeActivity :
     }
 
     private fun navigateToPageFromNotification(filter: String) {
-        when(filter) {
+        when (filter) {
             ORDER_HISTORY_PAGE -> {
                 Intent(this@HomeActivity, PurchaseHistoryActivity::class.java).also {
                     startActivity(it)
@@ -214,15 +208,19 @@ class HomeActivity :
                         binding.fabCart.visibility = View.GONE
                     }
                     scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight -> {
-//                        viewModel.getPartnersData()
-                        if (viewModel.partners.isEmpty() ||  viewModel.testimonials.isEmpty()) {
-                            showProgressDialog()
-                            viewModel.getEndData()
+                        showProgressDialog()
+                        if (NetworkHelper.isOnline(this@HomeActivity)) {
+                            if (viewModel.partners.isEmpty() || viewModel.testimonials.isEmpty()) {
+                                viewModel.getEndData()
+                            }
+                        } else {
+                            hideProgressDialog()
+                            showErrorSnackBar("Please check your Network Connection", true)
                         }
                     }
                 }
             })
-            binding.cpShowAll.setOnClickListener{
+            binding.cpShowAll.setOnClickListener {
                 cpShowAll.startAnimation(
                     AnimationUtils.loadAnimation(
                         binding.cpShowAll.context,
@@ -231,7 +229,7 @@ class HomeActivity :
                 )
                 moveToAllProducts()
             }
-            cpTestimonials.setOnClickListener{
+            cpTestimonials.setOnClickListener {
                 cpTestimonials.startAnimation(
                     AnimationUtils.loadAnimation(
                         binding.cpShowAll.context,
@@ -240,11 +238,10 @@ class HomeActivity :
                 )
                 moveToAllProducts()
             }
-            fabCart.setOnClickListener{
+            fabCart.setOnClickListener {
                 if (NetworkHelper.isOnline(this@HomeActivity)) {
                     Intent(this@HomeActivity, InvoiceActivity::class.java).also {
                         startActivity(it)
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                     }
                 } else {
                     showErrorSnackBar("Please check network connection", true)
@@ -264,20 +261,22 @@ class HomeActivity :
     }
 
     private fun selectedBanner(banner: BannerEntity) = lifecycleScope.launch {
-        when(banner.type) {
+        when (banner.type) {
             PRODUCTS -> {
                 try {
                     val product: ProductEntity? = viewModel.getProductByID(banner.description)
                     product?.let {
                         navigateToProductDetails(product.id, product.name, null)
                     } ?: showErrorSnackBar("Product is no longer Available", true)
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                }
             }
             CATEGORY -> {
                 try {
                     val category = viewModel.getCategoryByID(banner.description)
                     navigateToSelectedCategory(category)
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                }
             }
             DESCRIPTION -> {
                 showDescriptionBs(banner.description)
@@ -285,7 +284,9 @@ class HomeActivity :
             QUICK_ORDER -> navigateToQuickOrder()
             CWM -> navigateToCWM()
             WALLET -> navigateToWallet()
-            REFERRAL -> showReferralBs(SharedPref(this@HomeActivity).getData(USER_ID, STRING, "").toString())
+            REFERRAL -> showReferralBs(
+                SharedPref(this@HomeActivity).getData(USER_ID, STRING, "").toString()
+            )
             ORDER_HISTORY -> {
                 Intent(this@HomeActivity, PurchaseHistoryActivity::class.java).also {
                     startActivity(it)
@@ -299,48 +300,21 @@ class HomeActivity :
 
     private fun observers() {
         viewModel.uiUpdate.observe(this) { event ->
-            when(event) {
+            when (event) {
                 is HomeViewModel.UiUpdate.PopulateData -> {
-                    populateData()
-//                    HomeSpecialsAdapter(
-//                        this,
-//                        viewModel.specialsTitles,
-//                        this,
-//                        this
-//                    ).also {
-//                        it.bsOne.addAll(viewModel.bsOne)
-//                        it.bsTwo.addAll(viewModel.bsTwo)
-//                        it.bsThree.addAll(viewModel.bsThree)
-//                        it.bsFour.addAll(viewModel.bsOne)
-//                        it.bannerOne.addAll(viewModel.bannerOne)
-//                        it.bannerTwo.addAll(viewModel.bannerTwo)
-//                        it.bannerThree.addAll(viewModel.bannerThree)
-//                        it.bannerFour.addAll(viewModel.bannerFour)
-//                        binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
-//                        binding.rvHomeSpecials.adapter = it
-////                        binding.rvHomeSpecials.setItemViewCacheSize(20);
-//                    }
-//                    homeSpecialsAdapter.setBestSellerData(
-//                        viewModel.specialBannersList,
-//                        viewModel.specialsProductsList,
-//                        viewModel.specialsTitles
-//                    )
+                    homeSpecialsAdapter.setBestSellerData(
+                        viewModel.bannersList,
+                        viewModel.bestSellersList,
+                        viewModel.specialsTitles
+                    )
                 }
                 is HomeViewModel.UiUpdate.ShowNotificationsCount -> {
                     event.count?.let { binding.ivNotification.badgeValue = it }
                 }
                 is HomeViewModel.UiUpdate.PopulateEnd -> {
                     hideProgressDialog()
-                    TestimonialsAdapter(
-                        event.testimonials as MutableList<TestimonialsEntity>,
-                        this
-                    ).also {
-                        binding.rvTestimonials.layoutManager = LinearLayoutManager(this)
-                        binding.rvTestimonials.adapter = it
-//                        binding.rvTestimonials.setItemViewCacheSize(20);
-                    }
-//                    testimonialsAdapter.setTestimonialData(event.testimonials)
-//                    event.partners?.let { partnersAdapter.setPartnersData(it) }
+                    testimonialsAdapter.setTestimonialData(event.testimonials)
+                    event.partners?.let { partnersAdapter.setPartnersData(it) }
                 }
                 is HomeViewModel.UiUpdate.ShowBirthDayCard -> {
                     event.birthdayCard?.let { card ->
@@ -385,23 +359,8 @@ class HomeActivity :
             generateBanners(bannersCarousel, it)
         })
         viewModel.getALlCategories().observe(this, Observer {
-//            adapter.setCategoriesData(it)
-            CategoryHomeAdapter(
-                this,
-                it,
-                this
-            ).also { adapter ->
-                binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
-                binding.rvHomeItems.adapter = adapter
-//                binding.rvHomeItems.setItemViewCacheSize(20);
-            }
+            adapter.setCategoriesData(it)
         })
-    }
-
-    private fun populateData() {
-        binding.apply {
-
-        }
     }
 
     private fun showBirthDayCard(card: BirthdayCard?) {
@@ -428,14 +387,42 @@ class HomeActivity :
     }
 
     private fun generateRecyclerView() {
-//        homeSpecialsAdapter = HomeSpecialsAdapter(
-//            this,
-//            listOf(),
-//            listOf(),
-//            listOf(),
-//            this,
-//            this
-//        )
+        adapter = CategoryHomeAdapter(
+            this,
+            listOf(),
+            this
+        ).also { adapter ->
+            binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
+            binding.rvHomeItems.adapter = adapter
+            binding.rvHomeItems.setItemViewCacheSize(20)
+        }
+        homeSpecialsAdapter = HomeSpecialsAdapter(
+            this,
+            mutableListOf(),
+            mutableListOf(),
+            mutableListOf(),
+            this,
+            this
+        ).also {
+            binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
+            binding.rvHomeSpecials.adapter = it
+            binding.rvHomeSpecials.setItemViewCacheSize(20)
+        }
+        testimonialsAdapter = TestimonialsAdapter(
+            mutableListOf(),
+            this
+        ).also {
+            binding.rvTestimonials.layoutManager = LinearLayoutManager(this)
+            binding.rvTestimonials.adapter = it
+        }
+        partnersAdapter = PartnersAdapter(
+            listOf(),
+            this
+        ).also {
+            binding.rvPartners.layoutManager =
+                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            binding.rvPartners.adapter = it
+        }
 /*
     //This will lock the vertical scrolling when horizontal child is scrolling and vice versa
             binding.rvHomeItems.setOnTouchListener { v, event ->
@@ -443,36 +430,6 @@ class HomeActivity :
                 false
             }
 */
-
-//        adapter = CategoryHomeAdapter(
-//            this,
-//            listOf(),
-//            this
-//        )
-//
-//        testimonialsAdapter = TestimonialsAdapter(
-//            this,
-//            mutableListOf(),
-//            this
-//        )
-
-        partnersAdapter = PartnersAdapter(
-            listOf(),
-            this
-        )
-
-//        binding.rvHomeSpecials.layoutManager = LinearLayoutManager(this)
-//        binding.rvHomeSpecials.adapter = homeSpecialsAdapter
-//        binding.rvHomeSpecials.setItemViewCacheSize(20);
-//        binding.rvHomeItems.layoutManager = GridLayoutManager(this, 3)
-//        binding.rvHomeItems.adapter = adapter
-//        binding.rvHomeItems.setItemViewCacheSize(20);
-//        binding.rvTestimonials.layoutManager = LinearLayoutManager(this)
-//        binding.rvTestimonials.adapter = testimonialsAdapter
-//        binding.rvTestimonials.setItemViewCacheSize(20);
-        binding.rvPartners.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvPartners.adapter = partnersAdapter
-        binding.rvPartners.setItemViewCacheSize(20);
 //        val snapHelper: SnapHelper = GravitySnapHelper(Gravity.TOP)
 //        snapHelper.attachToRecyclerView(binding.rvHomeSpecials)
     }
@@ -489,7 +446,12 @@ class HomeActivity :
         //BS to add referral number
         dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
 
-        val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(LayoutInflater.from(applicationContext),R.layout.dialog_bottom_add_referral,null,false)
+        val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(
+            LayoutInflater.from(applicationContext),
+            R.layout.dialog_bottom_add_referral,
+            null,
+            false
+        )
         dialogBsAddReferral.setCancelable(true)
         dialogBsAddReferral.setContentView(view.root)
         dialogBsAddReferral.dismissWithAnimation = true
@@ -502,7 +464,7 @@ class HomeActivity :
                 return@setOnClickListener
             } else {
                 showProgressDialog()
-                viewModel.applyReferralNumber(currentUserID ,code)
+                viewModel.applyReferralNumber(currentUserID, code)
             }
         }
 
@@ -524,7 +486,7 @@ class HomeActivity :
     private fun openInBrowser(url: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
             intent.data = Uri.parse(url)
             startActivity(Intent.createChooser(intent, "Open link with"))
         } catch (e: Exception) {
@@ -540,29 +502,41 @@ class HomeActivity :
     }
 
     private fun navigateToCWM() {
-        lifecycleScope.launch {
-            delay(200)
-            Intent(this@HomeActivity, AllCWMActivity::class.java).also {
-                startActivity(it)
+        if (NetworkHelper.isOnline(this@HomeActivity)) {
+            lifecycleScope.launch {
+                delay(200)
+                Intent(this@HomeActivity, AllCWMActivity::class.java).also {
+                    startActivity(it)
+                }
             }
+        } else {
+            showErrorSnackBar("Please check your Network Connection", true)
         }
     }
 
     private fun navigateToWallet() {
-        lifecycleScope.launch {
-            delay(200)
-            Intent(this@HomeActivity, WalletActivity::class.java).also {
-                startActivity(it)
+        if (NetworkHelper.isOnline(this@HomeActivity)) {
+            lifecycleScope.launch {
+                delay(200)
+                Intent(this@HomeActivity, WalletActivity::class.java).also {
+                    startActivity(it)
+                }
             }
+        } else {
+            showErrorSnackBar("Please check your Network Connection", true)
         }
     }
 
     private fun navigateToQuickOrder() {
-        lifecycleScope.launch {
-            delay(200)
-            Intent(this@HomeActivity, QuickOrderActivity::class.java).also {
-                startActivity(it)
+        if (NetworkHelper.isOnline(this@HomeActivity)) {
+            lifecycleScope.launch {
+                delay(200)
+                Intent(this@HomeActivity, QuickOrderActivity::class.java).also {
+                    startActivity(it)
+                }
             }
+        } else {
+            showErrorSnackBar("Please check your Network Connection", true)
         }
     }
 
@@ -571,32 +545,41 @@ class HomeActivity :
             it.putExtra(CATEGORY, category)
             it.putExtra(NAVIGATION, HOME_PAGE)
             startActivity(it)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
 
-    private fun navigateToProductDetails(productID: String, productName: String, thumbnail: ShapeableImageView?) {
+    private fun navigateToProductDetails(
+        productID: String,
+        productName: String,
+        thumbnail: ShapeableImageView?
+    ) {
         Intent(this, ProductActivity::class.java).also { intent ->
             intent.putExtra(PRODUCTS, productID)
             intent.putExtra(Constants.PRODUCT_NAME, productName)
             thumbnail?.let { image ->
                 val options: ActivityOptionsCompat =
-                        ActivityOptionsCompat.makeSceneTransitionAnimation(this, image, ViewCompat.getTransitionName(image)!!)
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        this,
+                        image,
+                        ViewCompat.getTransitionName(image)!!
+                    )
                 if (Build.MANUFACTURER == "Xiaomi") {
                     startActivity(intent)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 } else {
                     startActivity(intent, options.toBundle())
                 }
-            } ?:let {
+            } ?: let {
                 startActivity(intent)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
-//            onPause()
         }
     }
 
-    private fun navigateToPreview(url: String,thumbnail: ShapeableImageView?, carouselItem: ImageCarousel?,contentType: String) {
+    private fun navigateToPreview(
+        url: String,
+        thumbnail: ShapeableImageView?,
+        carouselItem: ImageCarousel?,
+        contentType: String
+    ) {
         Intent(this, PreviewActivity::class.java).also { intent ->
             intent.putExtra("url", url)
             intent.putExtra("contentType", contentType)
@@ -623,17 +606,25 @@ class HomeActivity :
         if (NetworkHelper.isOnline(this)) {
             when (item.itemId) {
                 R.id.menuLogOut -> {
-                    SharedPref(this).clearAllData()
-                    viewModel.signOut()
-                    finishAffinity()
-                    finish()
+                    if (NetworkHelper.isOnline(this@HomeActivity)) {
+                        SharedPref(this).clearAllData()
+                        viewModel.signOut()
+                        finishAffinity()
+                        finish()
+                    } else {
+                        showErrorSnackBar("Please check your Network Connection", true)
+                    }
                 }
                 R.id.menuProfile -> {
-                    lifecycleScope.launch {
-                        delay(200)
-                        Intent(this@HomeActivity, ProfileActivity::class.java).also {
-                            startActivity(it)
+                    if (NetworkHelper.isOnline(this@HomeActivity)) {
+                        lifecycleScope.launch {
+//                            delay(200)
+                            Intent(this@HomeActivity, ProfileActivity::class.java).also {
+                                startActivity(it)
+                            }
                         }
+                    } else {
+                        showErrorSnackBar("Please check your Network Connection", true)
                     }
                 }
                 R.id.menuOrders -> {
@@ -645,11 +636,15 @@ class HomeActivity :
                     }
                 }
                 R.id.menuContact -> {
-                    lifecycleScope.launch {
-                        delay(200)
-                        Intent(this@HomeActivity, ChatActivity::class.java).also {
-                            startActivity(it)
+                    if (NetworkHelper.isOnline(this@HomeActivity)) {
+                        lifecycleScope.launch {
+                            delay(200)
+                            Intent(this@HomeActivity, ChatActivity::class.java).also {
+                                startActivity(it)
+                            }
                         }
+                    } else {
+                        showErrorSnackBar("Please check your Network Connection", true)
                     }
                 }
                 R.id.menuWallet -> navigateToWallet()
@@ -665,7 +660,10 @@ class HomeActivity :
                 R.id.menuQuickOrder -> navigateToQuickOrder()
                 R.id.menuReferral -> {
                     binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
-                    showExitSheet(this, "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus! Click Proceed to Continue")
+                    showExitSheet(
+                        this,
+                        "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus! Click Proceed to Continue"
+                    )
                 }
                 R.id.menuSubDetails -> {
                     binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
@@ -704,15 +702,17 @@ class HomeActivity :
                     showListBottomSheet(this, arrayListOf("WhatsApp", "E-Mail"), "developer")
                 }
                 R.id.menuAboutUs -> {
-                    showDescriptionBs("ABOUT US \n\n  Magizhini Organics is a retail-focused Store offering food and related consumables produced from organics farming and Certified Organic food producers according to organic farming standards. \n\n\nABOUT ORGANIC FOOD:\n" +
-                            "\n" +
-                            "Any food product cultivated relying entirely on natural methods without compromising on the consumer's health can be called 'Organic' food. In other words, no chemicals, no unnatural fertilizers or pesticides and no farming methods that are not humane.\n" +
-                            "\n" +
-                            "Cultivating food the organic way is not as expensive or not viable as some make it out to be. Though it does cost the farmer more than the usual chemical dependent methods, at the same time it should not also be priced out of the reach of the ordinary consumer. Assuming that the ruling market prices for conventionally-grown food (read chemically-grown food) are fair, it is important that organic food also be prized more or less similar for pushing the customers towards more healthy organic intake, especially when consumers are aware that organic food is better than chemically-grown food in all respects, including taste, flavour and for their own health, besides that of the earth.\n" +
-                            "\n" +
-                            "Another aspect of the organic food 'issue' at least in India is a common problem faced by organic farmers: the lack of a ready market and often unremunerative prices for their produce. In many cases, the grower does not receive timely payments from middlemen including organic food traders. Interested buyers of organic food on the other hand, cannot find what they need, at least not at reasonable prices. Supplies are often erratic or unreliable and in some cases buyers are not even sure if the food they are buying is indeed organic.\n" +
-                            "\n" +
-                            "Taking all the above into account, we, Magizhini Organics, have started this initiative to supply organic food and food products in Chennai with a single click of button from your mobile in the comfort of your home. This is an attempt to link growers and processors with buyers to ensure a fair price for growers and easier availability of a wide variety of organic food at reasonable prices for buyers.")
+                    showDescriptionBs(
+                        "ABOUT US \n\n  Magizhini Organics is a retail-focused Store offering food and related consumables produced from organics farming and Certified Organic food producers according to organic farming standards. \n\n\nABOUT ORGANIC FOOD:\n" +
+                                "\n" +
+                                "Any food product cultivated relying entirely on natural methods without compromising on the consumer's health can be called 'Organic' food. In other words, no chemicals, no unnatural fertilizers or pesticides and no farming methods that are not humane.\n" +
+                                "\n" +
+                                "Cultivating food the organic way is not as expensive or not viable as some make it out to be. Though it does cost the farmer more than the usual chemical dependent methods, at the same time it should not also be priced out of the reach of the ordinary consumer. Assuming that the ruling market prices for conventionally-grown food (read chemically-grown food) are fair, it is important that organic food also be prized more or less similar for pushing the customers towards more healthy organic intake, especially when consumers are aware that organic food is better than chemically-grown food in all respects, including taste, flavour and for their own health, besides that of the earth.\n" +
+                                "\n" +
+                                "Another aspect of the organic food 'issue' at least in India is a common problem faced by organic farmers: the lack of a ready market and often unremunerative prices for their produce. In many cases, the grower does not receive timely payments from middlemen including organic food traders. Interested buyers of organic food on the other hand, cannot find what they need, at least not at reasonable prices. Supplies are often erratic or unreliable and in some cases buyers are not even sure if the food they are buying is indeed organic.\n" +
+                                "\n" +
+                                "Taking all the above into account, we, Magizhini Organics, have started this initiative to supply organic food and food products in Chennai with a single click of button from your mobile in the comfort of your home. This is an attempt to link growers and processors with buyers to ensure a fair price for growers and easier availability of a wide variety of organic food at reasonable prices for buyers."
+                    )
                 }
             }
             return true
@@ -723,11 +723,11 @@ class HomeActivity :
     }
 
     override fun openVideo(url: String, thumbnail: ShapeableImageView) {
-       navigateToPreview(url, thumbnail, null, "video")
+        navigateToPreview(url, thumbnail, null, "video")
     }
 
     fun selectedContactMethodForDeveloper(selectedItem: String) {
-        when(selectedItem) {
+        when (selectedItem) {
             "WhatsApp" -> {
                 val message = ""
                 startActivity(
@@ -766,19 +766,21 @@ class HomeActivity :
             )
             this.startActivity(emailIntent)
         } catch (e: PackageManager.NameNotFoundException) {
-            Toast.makeText(this, "Email App is not installed in your phone.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Email App is not installed in your phone.", Toast.LENGTH_SHORT)
+                .show()
             e.printStackTrace()
         }
     }
 
     fun referralAction(selectedItem: String) {
         val phoneNumber = SharedPref(this).getData(PHONE_NUMBER, STRING, "").toString()
-        if(selectedItem == "Share My Referral Code") {
+        if (selectedItem == "Share My Referral Code") {
             try {
                 val shareIntent = Intent(Intent.ACTION_SEND)
                 shareIntent.type = "text/plain"
                 shareIntent.putExtra(Intent.EXTRA_SUBJECT, "My application name")
-                var shareMessage = "\nHey I'm using Magizhini Organics for my Organic Food Purchases. Check it out! You can use my number $phoneNumber as Referral Number to get Exciting Referral Bonus!\n\n"
+                var shareMessage =
+                    "\nHey I'm using Magizhini Organics for my Organic Food Purchases. Check it out! You can use my number $phoneNumber as Referral Number to get Exciting Referral Bonus!\n\n"
                 shareMessage =
                     """
                     ${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
@@ -794,7 +796,11 @@ class HomeActivity :
     }
 
     fun showReferralOptions() {
-        showListBottomSheet(this, arrayListOf("Share My Referral Code", "Have a Referral Code? Enter here..."), "referral")
+        showListBottomSheet(
+            this,
+            arrayListOf("Share My Referral Code", "Have a Referral Code? Enter here..."),
+            "referral"
+        )
     }
 
     private fun openPreview(imageUrl: String, carouselItem: ImageCarousel) {
@@ -803,13 +809,17 @@ class HomeActivity :
 
     //from partners adapter
     override fun selectedPartner(partner: Partners, thumbnail: ShapeableImageView) {
-        when(partner.clickAction) {
+        when (partner.clickAction) {
             "Open" -> navigateToPreview(partner.imageUrl, thumbnail, null, "image")
         }
     }
 
-    override fun moveToProductDetails(productID: String,productName: String, thumbnail: ShapeableImageView) {
-        navigateToProductDetails(productID, productName, thumbnail )
+    override fun moveToProductDetails(
+        productID: String,
+        productName: String,
+        thumbnail: ShapeableImageView
+    ) {
+        navigateToProductDetails(productID, productName, thumbnail)
     }
 
     //from categories adapter

@@ -8,6 +8,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityNewPa
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.BusinessViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -55,6 +56,10 @@ class NewPartnerActivity :
             }
             ivSend.setOnClickListener {
                 if (dataValidated()) {
+                    if (!NetworkHelper.isOnline(this@NewPartnerActivity)) {
+                        showErrorSnackBar("Please check your Internet Connection", true)
+                        return@setOnClickListener
+                    }
                     val newPartnersMap = hashMapOf<String, String>()
                     newPartnersMap["name"] = etPartnerName.text.toString().trim()
                     newPartnersMap["business"] = etPartnerName.text.toString().trim()

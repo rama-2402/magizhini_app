@@ -60,6 +60,8 @@ class ConversationActivity :
     private lateinit var viewModel: ConversationViewModel
     private lateinit var adapter: ConversationAdapter
 
+    private var isOnline: Boolean = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
@@ -80,6 +82,20 @@ class ConversationActivity :
         viewModel.getToken()
         viewModel.getProfileData()
         viewModel.supportStatusListener()
+        internetConnectionChecked()
+    }
+
+    private fun internetConnectionChecked(){
+        NetworkManagerUtil(this).observe(this) { isNetworkAvailable ->
+            isNetworkAvailable?.let {
+                isOnline = it
+                if (it) {
+                    showErrorSnackBar("Connection Established", false)
+                } else {
+                    showErrorSnackBar("Please check your Network Connection", true)
+                }
+            }
+        }
     }
 
     private fun initObservers() {
@@ -92,6 +108,7 @@ class ConversationActivity :
         viewModel.liveSupportProfile.observe(this) {
             viewModel.supportProfile = it
             setTypingStatus(it)
+            checkOnlineStatus(it)
         }
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->
@@ -128,11 +145,7 @@ class ConversationActivity :
     private fun clickListeners() {
         with(binding) {
             ivBackBtn.setOnClickListener {
-                Intent(this@ConversationActivity, ChatActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-                    finish()
-                }
+                onBackPressed()
             }
             ivAddAttachment.setOnClickListener {
                 ivAddAttachment.startAnimation(AnimationUtils.loadAnimation(ivAddAttachment.context, R.anim.bounce))
@@ -170,22 +183,26 @@ class ConversationActivity :
         type: String,
         messageContent: String
         ) {
-        val message = Messages(
-            id = "",
-            fromId = viewModel.profile.id,
-            toId = viewModel.supportID,
-            message = messageContent,
-            type = type,
-            timeStamp = System.currentTimeMillis(),
-            seen = false
-        )
-        viewModel.sendMessage(message)
-        if (type == TEXT) {
-            sendNotification(messageContent)
+        if (isOnline) {
+            val message = Messages(
+                id = "",
+                fromId = viewModel.profile.id,
+                toId = viewModel.supportID,
+                message = messageContent,
+                type = type,
+                timeStamp = System.currentTimeMillis(),
+                seen = false
+            )
+            viewModel.sendMessage(message)
+            if (type == TEXT) {
+                sendNotification(messageContent)
+            } else {
+                sendNotification("Sent an image")
+            }
+            binding.edtMessageInputBox.setText("")
         } else {
-            sendNotification("Sent an image")
+            showToast(this, "Please check your Internet Connection")
         }
-        binding.edtMessageInputBox.setText("")
     }
 
     private fun setTypingStatus(supportProfile: SupportProfile) {
@@ -212,11 +229,7 @@ class ConversationActivity :
 
     override fun onBackPressed() {
         viewModel.updateTypingStatus(false)
-        Intent(this, ChatActivity::class.java).also {
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-            finish()
-        }
+        super.onBackPressed()
     }
 
     private fun sendNotification(message: String) {

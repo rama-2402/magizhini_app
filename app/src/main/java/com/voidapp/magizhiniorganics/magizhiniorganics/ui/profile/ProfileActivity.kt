@@ -56,9 +56,9 @@ class ProfileActivity :
         viewModel = ViewModelProvider(this, factory).get(ProfileViewModel::class.java)
 
         with(binding) {
-            ivHeader.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
-            tvProfile.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
-            llProfileName.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
+//            ivHeader.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
+//            tvProfile.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
+//            llProfileName.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
             svProfileBody.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_up))
         }
 
@@ -222,6 +222,10 @@ class ProfileActivity :
                 }
             }
             btnSaveProfile.setOnClickListener {
+                if (!NetworkHelper.isOnline(this@ProfileActivity)) {
+                    showErrorSnackBar("Please check your Internet Connection", true)
+                    return@setOnClickListener
+                }
                 profileDataValidation()
             }
             llDob.setOnClickListener{
@@ -413,8 +417,8 @@ class ProfileActivity :
 
     override fun onBackPressed() {
         viewModel.userProfile?.let {
-            showExitSheet(this, "Exit Profile Update")
-        } ?: showExitSheet(this, "Cancel Registration")
+            showExitSheet(this, "Exit Profile Update","close")
+        } ?: showExitSheet(this, "Cancel Registration", "close")
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {

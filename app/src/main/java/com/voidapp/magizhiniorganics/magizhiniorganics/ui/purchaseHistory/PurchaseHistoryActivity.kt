@@ -42,6 +42,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CANCELLED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
@@ -225,15 +226,22 @@ class PurchaseHistoryActivity :
 //    }
 
     fun cancellationConfirmed() {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         showProgressDialog()
         viewModel.confirmCancellation()
     }
 
     fun moveToCustomerSupport() {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         Intent(this, ChatActivity::class.java).also {
             startActivity(it)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-            finish()
         }
     }
 
@@ -243,7 +251,6 @@ class PurchaseHistoryActivity :
             it.putExtra(Constants.PRODUCTS, productId)
             it.putExtra(Constants.PRODUCT_NAME, productName)
             startActivity(it)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
 

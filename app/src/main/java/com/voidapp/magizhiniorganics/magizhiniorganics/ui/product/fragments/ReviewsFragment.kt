@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentReviewsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -45,6 +47,10 @@ class ReviewsFragment : Fragment(), KodeinAware {
     }
 
     private fun initData() {
+        if (!NetworkHelper.isOnline(requireContext())) {
+            Toast.makeText(requireContext(), "Please check your Internet Connection", Toast.LENGTH_SHORT).show()
+            return
+        }
         productViewModel.getProductReviews()
     }
 

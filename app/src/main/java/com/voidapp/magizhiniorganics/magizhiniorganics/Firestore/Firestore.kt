@@ -1710,7 +1710,7 @@ class Firestore(
         }
     }
 
-    suspend fun sendNewPartnerRequest(newPartner: BusinessViewModel.NewPartner): NetworkResult = withContext(Dispatchers.IO){
+    suspend fun sendNewPartnerRequest(newPartner: NewPartner): NetworkResult = withContext(Dispatchers.IO){
         return@withContext try {
             mFireStore
                 .collection(NEW_PARTNERS)
@@ -1721,6 +1721,29 @@ class Firestore(
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: sending new partner request failed", it) }
             NetworkResult.Failed("", null)
+        }
+    }
+
+    suspend fun getCareersDocLink(): MutableList<Career>? = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val docs = mFireStore
+                .collection("Contact")
+                .document("Career")
+                .collection("Magizhini")
+                .get().await()
+
+            if (!docs.isEmpty) {
+                val careers = mutableListOf<Career>()
+                for (doc in docs.documents) {
+                    doc.toObject(Career::class.java)?.let { careers.add(it) }
+                }
+                careers
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: getting the careers doc", it) }
+            null
         }
     }
 }

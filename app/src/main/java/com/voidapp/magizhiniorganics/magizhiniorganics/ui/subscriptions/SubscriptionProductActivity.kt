@@ -74,13 +74,18 @@ class SubscriptionProductActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_subscription_product)
         viewModel = ViewModelProvider(this, factory).get(SubscriptionProductViewModel::class.java)
 
-        postponeEnterTransition()
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = ""
         binding.tvProductName.text = intent.getStringExtra(Constants.PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
+
+        postponeEnterTransition()
+
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+        }
 
         Checkout.preload(applicationContext)
 
@@ -134,7 +139,6 @@ class SubscriptionProductActivity :
         with(binding) {
             ivCalendar.setOnClickListener {
                 it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-//                showCalendarDialog()
                 val selectedDateMap = HashMap<String, Long>()
                 selectedDateMap["date"] = viewModel.subStartDate
                 selectedDateMap["month"] = viewModel.subStartDate
@@ -149,6 +153,10 @@ class SubscriptionProductActivity :
                 ).show()
             }
             ivWallet.setOnClickListener {
+                if (!NetworkHelper.isOnline(this@SubscriptionProductActivity)) {
+                    showErrorSnackBar("Please check your Internet Connection", true)
+                    return@setOnClickListener
+                }
                 Intent(this@SubscriptionProductActivity, WalletActivity::class.java).also {
                     it.putExtra(NAVIGATION, PRODUCTS)
                     startActivity(it)
@@ -201,6 +209,10 @@ class SubscriptionProductActivity :
                 }
             }
             fabSubscribe.setOnClickListener {
+                if (!NetworkHelper.isOnline(this@SubscriptionProductActivity)) {
+                    showErrorSnackBar("Please check your Internet Connection", true)
+                    return@setOnClickListener
+                }
                 viewModel.address?.let {
                     openAddressDialog(it)
                 } ?:let {
@@ -236,6 +248,10 @@ class SubscriptionProductActivity :
     }
 
     fun selectedPaymentMode(paymentMode: String) = lifecycleScope.launch {
+        if (!NetworkHelper.isOnline(this@SubscriptionProductActivity)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return@launch
+        }
         val estimate = viewModel.getEstimateAmount(
             binding.spSubscriptionType.selectedItemPosition,
             binding.spVariants.selectedItemPosition
@@ -408,6 +424,10 @@ class SubscriptionProductActivity :
     }
 
     fun approved(status: Boolean) {
+        if (!NetworkHelper.isOnline(this@SubscriptionProductActivity)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         generateSubscriptionMap(null)
     }
 

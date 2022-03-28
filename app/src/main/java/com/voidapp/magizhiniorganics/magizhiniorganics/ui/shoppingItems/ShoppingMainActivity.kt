@@ -632,6 +632,10 @@ class ShoppingMainActivity :
     }
 
     override fun updateFavorites(id: String, product: ProductEntity, position: Int) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.updateFavorites(id, product, position)
     }
 
@@ -670,6 +674,7 @@ class ShoppingMainActivity :
             it.dismiss()
         }
         viewModel.categoryFilter = categoryName
+        binding.tvToolbarTitle.text = categoryName
 //        setFilteredProducts()
         isFiltered = true
         binding.cpCategoryFilter.isChecked = true

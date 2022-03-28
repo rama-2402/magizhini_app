@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductCategoryEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeProductItemsBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadSimple
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +52,8 @@ class CategoryHomeAdapter(
 //                    image?.let { ivProductThumbnail.loadImg(it) {} }
 //                }
 //            }
-            ivProductThumbnail.loadImg(categoryEntity.thumbnailUrl) {}
+            ivProductThumbnail.loadSimple(categoryEntity.thumbnailUrl)
+//            ivProductThumbnail.loadImg(categoryEntity.thumbnailUrl) {}
 
             cvProductItem.setOnClickListener {
                 onItemClickListener.selectedCategory(categoryEntity.name)

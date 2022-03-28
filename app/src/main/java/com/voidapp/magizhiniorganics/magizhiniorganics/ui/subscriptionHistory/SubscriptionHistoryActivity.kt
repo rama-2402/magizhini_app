@@ -60,6 +60,11 @@ class SubscriptionHistoryActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_subscription_history)
         viewModel = ViewModelProvider(this, factory).get(SubscriptionHistoryViewModel::class.java)
 
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            onBackPressed()
+        }
+
         showShimmer()
 
         initLiveDate()
@@ -247,7 +252,6 @@ class SubscriptionHistoryActivity :
         val cancelDates: MutableList<String> = mutableListOf()
 
         val calendarDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
-        viewModel.subscription = sub
 
         val view: DialogCalendarBinding =
             DataBindingUtil.inflate(
@@ -323,9 +327,13 @@ class SubscriptionHistoryActivity :
             it.startAnimation(AnimationUtils.loadAnimation(view.unsubscribe.context, R.anim.bounce))
             if (unSubscribe && sub.status == Constants.SUB_ACTIVE) {
                 calendarDialog.dismiss()
-                showExitSheet(this, "Cancel Subscription")
+                showExitSheet(this, "You will be Unsubscribed from ${viewModel.subscription!!.productName}. Outstanding Balance for Delivery Cancelled Dates, Delivery Failed Days and Remaining Days will be added to your Magizhini Wallet. Click PROCEED to continue")
             } else {
                 lifecycleScope.launch {
+                    if (!NetworkHelper.isOnline(this@SubscriptionHistoryActivity)) {
+                        showToast(this@SubscriptionHistoryActivity, "Please check your Internet Connection")
+                        return@launch
+                    }
                     val cancel = async { viewModel.cancelDate(sub, cancelDate) }
                     if (cancel.await()) {
                         val event =
@@ -364,6 +372,10 @@ class SubscriptionHistoryActivity :
     }
 
     fun confirmCancellation() {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.cancelSubscription()
     }
 
@@ -377,9 +389,12 @@ class SubscriptionHistoryActivity :
     }
 
     fun moveToCustomerSupport() {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         Intent(this, ChatActivity::class.java).also {
             startActivity(it)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
     }
 
@@ -398,6 +413,10 @@ class SubscriptionHistoryActivity :
     }
 
     fun selectedPaymentMode(payment: String) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.subscription ?: return
         when (payment) {
             "Online" -> {
@@ -436,6 +455,10 @@ class SubscriptionHistoryActivity :
     }
 
     fun approved(status: Boolean) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.liveWallet?.let {
             viewModel.subscription?.let { sub ->
                 if (it.amount >= sub.estimateAmount) {
@@ -468,6 +491,10 @@ class SubscriptionHistoryActivity :
     }
 
     override fun renewSub(position: Int) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         lifecycleScope.launch {
             showProgressDialog()
             viewModel.subPosition = position
@@ -503,6 +530,10 @@ class SubscriptionHistoryActivity :
     }
 
     override fun cancelSub(position: Int) {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.subPosition = position
         viewModel.subscription = viewModel.subscriptionsList[position]
         showExitSheet(this, "You will be Unsubscribed from ${viewModel.subscription!!.productName}. Outstanding Balance for Delivery Cancelled Dates, Delivery Failed Days and Remaining Days will be added to your Magizhini Wallet. Click PROCEED to continue")
@@ -510,10 +541,16 @@ class SubscriptionHistoryActivity :
 
     override fun showCalendar(position: Int) {
         showProgressDialog()
-        showCalendarDialog(viewModel.subscriptionsList[position])
+        viewModel.subPosition = position
+        viewModel.subscription = viewModel.subscriptionsList[position]
+        showCalendarDialog(viewModel.subscription!!)
     }
 
     fun showPaymentMethod() {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
         viewModel.liveWallet?.let {
             Toast.makeText(
                 this@SubscriptionHistoryActivity,

@@ -146,6 +146,7 @@
         <entry key="app/src/main/res/layout/nav_header.xml" value="0.25" />
         <entry key="app/src/main/res/layout/onboarding_viewpager.xml" value="0.33" />
         <entry key="app/src/main/res/layout/rv_address_item.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/rv_career_item.xml" value="0.25" />
         <entry key="app/src/main/res/layout/rv_cart_items.xml" value="0.5" />
         <entry key="app/src/main/res/layout/rv_chat_item.xml" value="0.5401041666666667" />
         <entry key="app/src/main/res/layout/rv_dish_item.xml" value="0.33" />

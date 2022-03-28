@@ -331,10 +331,22 @@ class SubscriptionHistoryViewModel(
 //            }
 //            _status.value = NetworkResult.Success("basePay", updatedProduct.variants[variantPosition].variantPrice)
 
+                var variantPosition = 1000
+                for (position in it.variants.indices) {
+                    if (sub.variantName == "${it.variants[position].variantName} ${it.variants[position].variantType}") {
+                        variantPosition = position
+                        break
+                    }
+                }
+
+                if (variantPosition == 1000) {
+                    return@withContext 0f
+                }
+
                 val estimateAmount = when(sub.subType) {
-                    CUSTOM_DAYS -> (sub.basePay * updatedCustomDaysForSubRenewal)
-                    ALTERNATE_DAYS -> (sub.basePay * 15)
-                    else -> (sub.basePay * 30)
+                    CUSTOM_DAYS -> (it.variants[variantPosition].variantPrice * updatedCustomDaysForSubRenewal).toFloat()
+                    ALTERNATE_DAYS -> (it.variants[variantPosition].variantPrice * 15).toFloat()
+                    else -> (it.variants[variantPosition].variantPrice * 30).toFloat()
                 }
                 return@withContext estimateAmount
             } else {
