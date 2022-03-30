@@ -36,3 +36,11 @@ data class BirthdayCard(
     var clickAction: String = "",
     var seen: Boolean = false
 ): Parcelable
+
+
+/*
+* Extras
+*
+* 0 -> referral bonus status :: yes -> if need to apply bonus for referrer in order placement :: no -> if no referral needed
+*
+* */

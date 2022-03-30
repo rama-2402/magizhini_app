@@ -25,7 +25,6 @@ data class Order(
 ): Parcelable
 
 /*Extras array order
-* quick order
-* refund status
-*
+* 0 -> quick order
+* 1 -> referral bonus for referrer :: if not equal to 0 -> send bonus to the number in that place
 * */

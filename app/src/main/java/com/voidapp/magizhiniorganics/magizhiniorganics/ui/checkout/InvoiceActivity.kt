@@ -302,6 +302,7 @@ class InvoiceActivity :
                     updateLoadStatusDialogText("placingOrder", event.message)
                 }
                 is CheckoutViewModel.UiUpdate.OrderPlaced -> {
+                    viewModel.updateReferralStatus()
                     updateLoadStatusDialogText("success", event.message)
                     val cartItems = if (viewModel.isCWMCart) {
                         viewModel.cwmDish
@@ -369,9 +370,15 @@ class InvoiceActivity :
                 }
                 is CheckoutViewModel.UiUpdate.CouponApplied -> {
                     this.hideKeyboard()
-                    showErrorSnackBar(event.message, false)
-                    setDataToViews()
-                    applyUiChangesWithCoupon(true)
+                    if (event.message != "") {
+                        showErrorSnackBar(event.message, false)
+                        setDataToViews()
+                        applyUiChangesWithCoupon(true)
+                    } else {
+                        viewModel.currentCoupon?.let {
+                            applyUiChangesWithCoupon(false)
+                        }
+                    }
                 }
                 is CheckoutViewModel.UiUpdate.CartCleared -> {
                     cartAdapter.emptyCart()
@@ -492,29 +499,30 @@ class InvoiceActivity :
         detailsJob = lifecycleScope.launch {
             delay(600)
             viewModel.currentCoupon?.let {
-                viewModel.verifyCoupon(it.code, cartItems)
-            }
-            val cartPrice = if (viewModel.isCWMCart) {
-                viewModel.getCartPrice(cartItems)
-            } else {
-                viewModel.getCartPrice(cartItems)
-            }
-            val cartOriginalPrice = viewModel.getCartOriginalPrice(cartItems)
-            with(binding) {
-                tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0f}"
-                tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(cartItems).toString()
-                cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
-                tvMrpAmount.text = cartOriginalPrice.toString()
-                tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
-                tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
-                val totalPrice = cartPrice + binding.tvDeliveryChargeAmt.text.toString().toFloat() - (viewModel.couponPrice ?: 0f)
-                tvTotalAmt.setTextAnimation(totalPrice.toString())
-                if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                    checkoutText.setTextAnimation("Rs: $cartPrice")
+                viewModel.verifyCoupon(it.code, cartItems).invokeOnCompletion {
+                    populateInvoiceValues(cartItems)
                 }
-            }
+            } ?: populateInvoiceValues(cartItems)
         }
         detailsJob = null
+    }
+
+    private fun populateInvoiceValues(cartItems: MutableList<CartEntity>) = lifecycleScope.launch {
+        val cartPrice = viewModel.getCartPrice(cartItems)
+        val cartOriginalPrice = viewModel.getCartOriginalPrice(cartItems)
+        with(binding) {
+            tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(cartItems).toString()
+            cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
+            tvMrpAmount.text = cartOriginalPrice.toString()
+            tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
+            tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
+            val totalPrice = cartPrice + binding.tvDeliveryChargeAmt.text.toString().toFloat() - (viewModel.couponPrice ?: 0f)
+            tvTotalAmt.setTextAnimation(totalPrice.toString())
+            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0f}"
+            if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+                checkoutText.setTextAnimation("Rs: $cartPrice")
+            }
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

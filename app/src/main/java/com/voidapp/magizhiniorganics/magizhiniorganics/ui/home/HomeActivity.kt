@@ -46,6 +46,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
@@ -193,6 +194,9 @@ class HomeActivity :
 
     private fun clickListeners() {
         binding.apply {
+            ivNotification.setOnClickListener {
+                navigateToNotificationPage()
+            }
             svBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
                 when {
                     scrollY < oldScrollY && binding.fabCart.isGone -> {
@@ -257,6 +261,12 @@ class HomeActivity :
             ivLinkedIn.setOnClickListener {
                 openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
             }
+        }
+    }
+
+    private fun navigateToNotificationPage() {
+        Intent(this, NotificationsActivity::class.java).also {
+            startActivity(it)
         }
     }
 
@@ -662,7 +672,7 @@ class HomeActivity :
                     binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
                     showExitSheet(
                         this,
-                        "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus! Click Proceed to Continue"
+                        "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus after their first delivery! Click Proceed to Continue"
                     )
                 }
                 R.id.menuSubDetails -> {

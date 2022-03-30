@@ -237,9 +237,9 @@ class CheckoutViewModel(
                 cwmDish[position].quantity = updatedCount
             } else {
                 dbRepository.updateCartItem(id, updatedCount)
-                totalCartItems[position].quantity = updatedCount
             }
             withContext(Dispatchers.Main) {
+                totalCartItems[position].quantity = updatedCount
                 _uiUpdate.value = UiUpdate.UpdateCartData("update", position, updatedCount)
             }
         } catch (e: Exception) {
@@ -331,7 +331,7 @@ class CheckoutViewModel(
                     }
                     return@launch
                 }
-                if (cartPrice > coupon.purchaseLimit) {
+                if (cartPrice >= coupon.purchaseLimit) {
                     if (couponPrice == null) {
                         withContext(Dispatchers.Main) {
                             _uiUpdate.value = UiUpdate.CouponApplied(
@@ -339,11 +339,14 @@ class CheckoutViewModel(
                             )
                         }
                     }
-                    currentCoupon = coupon
-                    couponPrice = couponDiscount(coupon, cartPrice)
+                    withContext(Dispatchers.Main) {
+                        currentCoupon = coupon
+                        couponPrice = couponDiscount(coupon, cartPrice)
+                    }
 //                    couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
                 } else {
                     withContext(Dispatchers.Main) {
+                        _uiUpdate.value = UiUpdate.CouponApplied("")
                         _uiEvent.value = UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
                     }
                     return@launch
@@ -429,6 +432,7 @@ class CheckoutViewModel(
             }
             val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
             orderDetailsMap["orderID"] = generateOrderID()
+            orderDetailsMap["referral"] = addReferralBonusStatus()
             wallet?.let {
                 if (mrp > it.amount) {
                     _uiEvent.value =
@@ -477,6 +481,16 @@ class CheckoutViewModel(
 
     }
 
+    private fun addReferralBonusStatus(): String {
+        return userProfile?.let {
+            if (it.extras[0] == "yes") {
+                it.referralId.toString()
+            } else {
+                ""
+            }
+        } ?: ""
+    }
+
     fun placeCashOnDeliveryOrder(
         orderDetailsMap: HashMap<String, Any>
     ) {
@@ -488,6 +502,7 @@ class CheckoutViewModel(
             }
             val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
             orderDetailsMap["orderID"] = generateOrderID()
+            orderDetailsMap["referral"] = addReferralBonusStatus()
             quickOrderUseCase
                 .placeCashOnDeliveryOrder(
                     orderDetailsMap,
@@ -519,6 +534,8 @@ class CheckoutViewModel(
             totalCartItems
         }
         val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
+        orderDetailsMap["orderID"] = generateOrderID()
+        orderDetailsMap["referral"] = addReferralBonusStatus()
         quickOrderUseCase
             .placeOnlinePaymentOrder(
                 orderDetailsMap,
@@ -548,6 +565,15 @@ class CheckoutViewModel(
         return userProfile?.let {
             TimeUtil().getOrderIDFormat(it.phNumber.takeLast(4))
         } ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
+    }
+
+    fun updateReferralStatus() = viewModelScope.launch(Dispatchers.IO) {
+        userProfile?.let {
+            if (it.referralId != "" && it.extras[0] == "yes") {
+                it.extras[0] = "no"
+                dbRepository.upsertProfile(it)
+            }
+        }
     }
 
     sealed class UiUpdate {

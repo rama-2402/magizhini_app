@@ -56,15 +56,14 @@ class ContactUsActivity :
                 showListBottomSheet(this@ContactUsActivity, arrayListOf("Call", "WhatsApp", "E-Mail"))
             }
             ivBecomePartner.setOnClickListener {
-                showExitSheet(this@ContactUsActivity, "Become a Business Partner with Magihini Organics by sending a request to us with your contact details and a short description of your business. We will Contact you shortly once reviewing your profile. Please click PROCEED to continue", "business")
+                showExitSheet(this@ContactUsActivity, "Become a Business Partner with Magizhini Organics by providing your contact details and a short description of your business in the form next page. We will Contact you shortly once reviewing your profile. Please click PROCEED to continue", "business")
             }
             ivCareers.setOnClickListener {
                 if (!NetworkHelper.isOnline(this@ContactUsActivity)) {
                     showErrorSnackBar("Please check your Internet Connection", true)
                     return@setOnClickListener
                 }
-                showProgressDialog()
-                openInBrowser("")
+                openInBrowser("https://forms.gle/3EffsX681hftF3SR9")
             }
         }
     }

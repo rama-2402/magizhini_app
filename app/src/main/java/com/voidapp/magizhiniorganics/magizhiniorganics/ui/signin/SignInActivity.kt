@@ -257,6 +257,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
                 showErrorSnackBar("Server Error! Failed to connect to server. Try again Later", true)
             }
             else -> {
+                showToast(this, "Syncing your profile... Please wait... ")
                 mCurrentUserID = status
                 SharedPref(this).putData(USER_ID, STRING, mCurrentUserID)
                 SharedPref(this).putData(PHONE_NUMBER, STRING, mPhoneNumber)

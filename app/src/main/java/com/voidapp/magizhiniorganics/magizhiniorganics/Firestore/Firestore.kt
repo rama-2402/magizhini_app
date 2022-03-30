@@ -244,25 +244,36 @@ class Firestore(
             if (profileDoc.documents.isNullOrEmpty()) {
                 false
             } else {
-                val profile = profileDoc.documents[0].toObject(UserProfile::class.java)
+//                val profile = profileDoc.documents[0].toObject(UserProfile::class.java)
                 val addReferralNumberToProfile = async {
-                    mFireStore.collection(USERS).document(currentUserID).update("referrerNumber", code).await()
-                    val currentUserProfile = repository.getProfileData()!!
-                    currentUserProfile.referralId = code
-                    repository.upsertProfile(currentUserProfile)
-                    true
+                    val profile = mFireStore.collection(USERS).document(currentUserID).get().await().toObject(UserProfile::class.java)
+                    profile?.let {
+                        it.referrerNumber = code
+                        it.extras[0] = "yes"
+                        mFireStore.collection(USERS).document(currentUserID).set(it, SetOptions.merge()).await()
+                    }
                 }
-                val checkReferralLimit = async { checkReferralLimit(profile!!.id)  }
-                val addReferralBonusToReferrer = async { addReferralBonusToReferrer(profile!!) }
+//                val checkReferralLimit = async { checkReferralLimit(profile!!.id)  }
+//                val addReferralBonusToReferrer = async { addReferralBonusToReferrer(profile!!) }
                 val addReferralBonusToCurrentUser = async { addReferralBonusToCurrentUser(currentUserID) }
-
-                if (checkReferralLimit.await()) {
-                    addReferralBonusToReferrer.await() &&
-                    addReferralBonusToCurrentUser.await() &&
-                    addReferralNumberToProfile.await()
-                } else {
-                    addReferralBonusToCurrentUser.await()
+                val addReferralNumberToLocalDB = async {
+                    val profile = repository.getProfileData()
+                    profile?.let {
+                        it.referralId = code
+                        it.extras[0] = "yes"
+                        repository.upsertProfile(it)
+                    }
                 }
+
+//                if (checkReferralLimit.await()) {
+//                    addReferralBonusToReferrer.await() &&
+//                    addReferralBonusToCurrentUser.await() &&
+                    addReferralNumberToProfile.await()
+                    addReferralNumberToLocalDB.await()
+//                } else {
+                    addReferralBonusToCurrentUser.await()
+//                }
+                true
             }
         } catch (e: Exception) {
             e.message?.let {

@@ -311,8 +311,12 @@ class QuickOrderUseCase(
                 monthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}",
                 phoneNumber = orderDetailsMap["phoneNumber"].toString()
             ).let {
-                if (isQuickOrder) {
-                    it.extras = arrayListOf(QUICK_ORDER)
+                when {
+                    isQuickOrder -> it.extras.add(QUICK_ORDER)
+                    orderDetailsMap["referral"].toString() != "" -> {
+                        it.extras.add("")
+                        it.extras.add(orderDetailsMap["referral"].toString())
+                    }
                 }
                 when(fbRepository.placeOrder(it)) {
                     is NetworkResult.Success -> {

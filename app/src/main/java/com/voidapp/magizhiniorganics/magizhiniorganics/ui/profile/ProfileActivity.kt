@@ -240,7 +240,7 @@ class ProfileActivity :
                 }
             }
             tvReferral.setOnClickListener{
-                showExitSheet(this@ProfileActivity, "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus! Click Proceed to Continue", "referral")
+                showExitSheet(this@ProfileActivity, "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful referrals. Please enter your Referrer's Registered Mobile number with Magizhini to avail Referral Bonus! Click Proceed to Continue", "referral")
             }
             llGps.setOnClickListener{
                 //implements maps and gps location picker if needed
@@ -271,6 +271,11 @@ class ProfileActivity :
             profilePicUrl = profilePicUrl,
             referrerNumber = viewModel.referralCode ?: ""
         ).let { profile ->
+            profile.extras = if (profile.referrerNumber == "") {
+                 arrayListOf("no")
+            } else {
+                arrayListOf("yes")
+            }
             viewModel.uploadProfile(profile)
         }
     }

@@ -202,7 +202,7 @@ fun ShapeableImageView.loadSimple(url: Any) {
             .load(url) // URI of the image
 //            .centerCrop() // Scale type of the image.
             .placeholder(R.drawable.carousel_default_placeholder) // A default place holder if image is failed to load.
-            .transition(DrawableTransitionOptions.withCrossFade())
+//            .transition(DrawableTransitionOptions.withCrossFade())
             .into(this).apply {
                 RequestOptions().dontTransform()
             } // the view in which the image will be loaded.

@@ -168,7 +168,7 @@ class HomeViewModel (
         val referralStatus = fbRepository.applyReferralNumber(currentUserID, code, true)
         withContext(Dispatchers.Main) {
             _uiUpdate.value =
-                UiUpdate.ReferralStatus(referralStatus, null)
+                UiUpdate.ReferralStatus(referralStatus, code,  null)
         }
     }
 
@@ -221,7 +221,7 @@ class HomeViewModel (
         data class ShowBirthDayCard(val birthdayCard: BirthdayCard?): UiUpdate()
         //Referral
         data class AllowReferral(val status: Boolean, val message: String?): UiUpdate()
-        data class ReferralStatus(val status: Boolean, val message: String?): UiUpdate()
+        data class ReferralStatus(val status: Boolean, val referralCode: String, val message: String?): UiUpdate()
 
         object Empty : HomeViewModel.UiUpdate()
     }
