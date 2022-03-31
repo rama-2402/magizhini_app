@@ -118,6 +118,7 @@ class InvoiceActivity :
 
     private fun generateOrderDetailsMap(): HashMap<String, Any> {
         val orderDetailsMap = hashMapOf<String, Any>()
+        orderDetailsMap["mrp"] = binding.tvTotalAmt.text.toString().toFloat()
         orderDetailsMap["deliveryPreference"] = binding.spDeliveryPreference.selectedItem
         orderDetailsMap["deliveryNote"] = binding.etDeliveryNote.text.toString().trim()
         orderDetailsMap["appliedCoupon"] = if (viewModel.couponPrice != null) {
@@ -467,25 +468,29 @@ class InvoiceActivity :
                     }
                 }
                 "Cash On Delivery" -> {
-                    showSwipeConfirmationDialog(this@InvoiceActivity, "")
+                    showSwipeConfirmationDialog(this@InvoiceActivity, "Swipe Right to place order", "cod")
                 }
                 else -> {
-                    val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
-                    viewModel.proceedForWalletPayment(
-                        orderDetailsMap
-                    )
+                    showSwipeConfirmationDialog(this@InvoiceActivity, "Swipe Right to make payment", "wallet")
                 }
             }
         }
     }
 
-    fun approved() {
-        showLoadStatusDialog(
-            "",
-            "Validating your purchase...",
-            "purchaseValidation"
-        )
-        viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
+    fun approved(paymentMethod: String) {
+        if (paymentMethod == "cod") {
+            showLoadStatusDialog(
+                "",
+                "Validating your purchase...",
+                "purchaseValidation"
+            )
+            viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
+        } else {
+            val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
+            viewModel.proceedForWalletPayment(
+                orderDetailsMap
+            )
+        }
     }
 
     private fun setDataToViews() {
@@ -510,15 +515,21 @@ class InvoiceActivity :
     private fun populateInvoiceValues(cartItems: MutableList<CartEntity>) = lifecycleScope.launch {
         val cartPrice = viewModel.getCartPrice(cartItems)
         val cartOriginalPrice = viewModel.getCartOriginalPrice(cartItems)
+        val freeDeliveryLimit: Float = viewModel.getFreeDeliveryLimit()
         with(binding) {
             tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(cartItems).toString()
             cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
             tvMrpAmount.text = cartOriginalPrice.toString()
             tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
-            tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
-            val totalPrice = cartPrice + binding.tvDeliveryChargeAmt.text.toString().toFloat() - (viewModel.couponPrice ?: 0f)
-            tvTotalAmt.setTextAnimation(totalPrice.toString())
             tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0f}"
+            val totalPrice = cartPrice - (viewModel.couponPrice ?: 0f)
+            if (totalPrice >= freeDeliveryLimit) {
+                tvDeliveryChargeAmt.text = "0.00"
+                tvTotalAmt.setTextAnimation(totalPrice.toString())
+            } else {
+                tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
+                tvTotalAmt.setTextAnimation("${totalPrice + tvDeliveryChargeAmt.text.toString().toFloat()}")
+            }
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 checkoutText.setTextAnimation("Rs: $cartPrice")
             }
@@ -606,12 +617,17 @@ class InvoiceActivity :
         if (viewModel.clearedProductIDs.isNotEmpty()) {
             val productIDString = SharedPref(this).getData(PRODUCTS, Constants.STRING, "").toString()
             val productIDs: MutableList<String> = if (productIDString != "") {
-                productIDString.split(":") as MutableList<String>
+                productIDString.split(":").map { it } as MutableList<String>
             } else {
                 mutableListOf<String>()
             }
-
-            productIDs.addAll(viewModel.clearedProductIDs)
+            Log.e("qw1", "updatePreferenceData: $productIDs", )
+            viewModel.clearedProductIDs.forEach {
+                if (!productIDs.contains(it)) {
+                    productIDs.add(it)
+                }
+            }
+//            productIDs.addAll(viewModel.clearedProductIDs.distinct())
             viewModel.clearedProductIDs.clear()
             SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":")).toString()
         }

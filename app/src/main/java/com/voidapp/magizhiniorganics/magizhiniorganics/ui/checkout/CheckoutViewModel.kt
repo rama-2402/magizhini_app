@@ -36,6 +36,7 @@ class CheckoutViewModel(
     var couponPrice: Float? = null
     var checkedAddressPosition: Int = 0
     var addressPosition: Int = 0
+    var freeDeliveryLimit: Float = 0f
 
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
     val clearedProductIDs: MutableList<String> = mutableListOf()
@@ -87,6 +88,8 @@ class CheckoutViewModel(
             else -> Unit
         }
     }
+
+
 
     private suspend fun updateAddress(id: String, address: ArrayList<Address>, status: String) {
         if(status == "add") {
@@ -371,10 +374,17 @@ class CheckoutViewModel(
         return discountPrice
     }
 
+    suspend fun getFreeDeliveryLimit(): Float {
+        if (freeDeliveryLimit == 0f) {
+            freeDeliveryLimit = fbRepository.getFreeDeliveryLimit() ?: 10000f
+        }
+        return freeDeliveryLimit
+    }
+
     suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
         return@withContext userProfile?.let {
-            dbRepository.getDeliveryCharge(it.address[checkedAddressPosition].LocationCode).deliveryCharge.toFloat()
-        } ?: 30f
+                dbRepository.getDeliveryCharge(it.address[checkedAddressPosition].LocationCode).deliveryCharge.toFloat()
+            } ?: 30f
     }
 
 //    fun placeOrder(order: Order) = viewModelScope.launch(Dispatchers.IO) {
@@ -430,7 +440,7 @@ class CheckoutViewModel(
             } else {
                 totalCartItems
             }
-            val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
+            val mrp = orderDetailsMap["mrp"].toString().toFloat()
             orderDetailsMap["orderID"] = generateOrderID()
             orderDetailsMap["referral"] = addReferralBonusStatus()
             wallet?.let {
@@ -500,7 +510,7 @@ class CheckoutViewModel(
             } else {
                 totalCartItems
             }
-            val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
+            val mrp = orderDetailsMap["mrp"].toString().toFloat()
             orderDetailsMap["orderID"] = generateOrderID()
             orderDetailsMap["referral"] = addReferralBonusStatus()
             quickOrderUseCase
@@ -533,7 +543,7 @@ class CheckoutViewModel(
         } else {
             totalCartItems
         }
-        val mrp = getCartPrice(cartItems) + getDeliveryCharge() - (couponPrice ?: 0f)
+        val mrp = orderDetailsMap["mrp"].toString().toFloat()
         orderDetailsMap["orderID"] = generateOrderID()
         orderDetailsMap["referral"] = addReferralBonusStatus()
         quickOrderUseCase

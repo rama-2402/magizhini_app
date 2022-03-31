@@ -26,7 +26,6 @@ class ProductViewModel(
 ) : ViewModel() {
 
     var reviewAdapter: ReviewAdapter? = null
-    var navigateToPage: String = ""
 
     var userProfile: UserProfileEntity? = null
 
@@ -75,8 +74,8 @@ class ProductViewModel(
         }
     }
 
-    fun getProductByID(id: String) = viewModelScope.launch(Dispatchers.IO) {
-        dbRepository.getProductWithIdForUpdate(id)?.let {
+    fun getProductByID() = viewModelScope.launch(Dispatchers.IO) {
+        dbRepository.getProductWithIdForUpdate(productID)?.let {
             it.variants.forEach { variant ->
                 if (variant.status == LIMITED) {
                     setUpProductListener(it.id)
@@ -85,7 +84,6 @@ class ProductViewModel(
             }
             withContext(Dispatchers.Main) {
                 product = it
-                productID = id
                 _description.value = it.description
                 _uiUpdate.value = UiUpdate.PopulateProductData(null, it)
             }

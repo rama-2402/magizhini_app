@@ -519,7 +519,7 @@ open class BaseActivity : AppCompatActivity() {
         listBottomSheetDialog.dismiss()
     }
 
-    fun showSwipeConfirmationDialog(activity: Activity, content: String) {
+    fun showSwipeConfirmationDialog(activity: Activity, content: String, filter: String = "") {
         mSwipeConfirmationBottomSheet = BottomSheetDialog(this, R.style.BottomSheetDialog)
         val view: DialogSwipeConfirmationBinding =
             DataBindingUtil.inflate(
@@ -540,7 +540,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     is InvoiceActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()
-                        activity.approved()
+                        activity.approved(filter)
                     }
                     is SubscriptionHistoryActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()

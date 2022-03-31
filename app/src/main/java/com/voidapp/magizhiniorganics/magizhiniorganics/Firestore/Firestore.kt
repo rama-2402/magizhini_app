@@ -23,6 +23,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_DISHE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MONTHLY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NEW_PARTNERS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PARTNERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB
@@ -1745,6 +1746,23 @@ class Firestore(
             }
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: getting the careers doc", it) }
+            null
+        }
+    }
+
+    data class FreeDeliveryLimit (
+        val limit: Float = 0f
+            )
+
+    suspend fun getFreeDeliveryLimit(): Float? = withContext(Dispatchers.IO){
+        return@withContext try {
+            val doc = mFireStore
+                .collection(ORDER_HISTORY)
+                .document("FreeDeliveryLimit")
+                .get().await().toObject(FreeDeliveryLimit::class.java)
+            doc?.limit
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: getting free delivery limit from firestore", it) }
             null
         }
     }

@@ -89,17 +89,17 @@ class ProductActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_product)
         viewModel = ViewModelProvider(this, factory).get(ProductViewModel::class.java)
 
-        viewModel.navigateToPage = intent.getStringExtra(NAVIGATION).toString()
-
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         title = ""
         binding.tvProductName.text = intent.getStringExtra(PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
 
+        viewModel.productID = intent.getStringExtra(PRODUCTS).toString()
+
         postponeEnterTransition()
 
-        initData(intent.getStringExtra(PRODUCTS).toString())
+        initData()
         cartBottomSheet()
         initLiveData()
         initViewPager()
@@ -111,14 +111,19 @@ class ProductActivity :
         }
     }
 
-    private fun initData(productID: String) {
+    private fun initData() {
         viewModel.reviewAdapter = ReviewAdapter(
             this,
             arrayListOf(),
             this
         )
         viewModel.getProfileData()
-        viewModel.getProductByID(productID)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.cartItemsCount = 0
+        viewModel.getProductByID()
         viewModel.getAllCartItem()
     }
 
@@ -642,12 +647,17 @@ class ProductActivity :
     private fun updatePreferenceData() {
         val productIDString = SharedPref(this).getData(PRODUCTS, Constants.STRING, "").toString()
         val productIDs: MutableList<String> = if (productIDString != "") {
-            productIDString.split(":") as MutableList<String>
+            productIDString.split(":").map { it } as MutableList<String>
         } else {
             mutableListOf<String>()
         }
         if (viewModel.clearedIDsFromCart.isNotEmpty()) {
-            productIDs.addAll(viewModel.clearedIDsFromCart)
+            viewModel.clearedIDsFromCart.forEach {
+                if (!productIDs.contains(it)) {
+                    productIDs.add(it)
+                }
+            }
+//            productIDs.addAll(viewModel.clearedIDsFromCart.distinct())
             viewModel.clearedIDsFromCart.clear()
         }
         if (!productIDs.contains(viewModel.productID)) {
@@ -664,8 +674,12 @@ class ProductActivity :
     }
 
     override fun onBackPressed() {
-        updatePreferenceData()
-        super.onBackPressed()
+        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+        } else {
+            updatePreferenceData()
+            super.onBackPressed()
+        }
     }
 
     override fun onDestroy() {

@@ -116,5 +116,6 @@ class FirestoreRepository (
 
     suspend fun getAllPartners(): List<Partners>? = firestore.getAllPartners()
     suspend fun getCareersDocLink(): MutableList<Career>? = firestore.getCareersDocLink()
+    suspend fun getFreeDeliveryLimit(): Float? = firestore.getFreeDeliveryLimit()
 
 }
