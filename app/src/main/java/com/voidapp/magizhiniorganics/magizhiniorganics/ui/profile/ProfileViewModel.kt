@@ -134,6 +134,7 @@ class ProfileViewModel (
         if(fbRepository.checkForReferral(code)) {
             val referralStatus = userID?.let { fbRepository.applyReferralNumber(it, code) } ?: false
             delay(500)
+            referralCode = code
             _uiEvent.value = UIEvent.ProgressBar(false)
             _uiUpdate.value = UiUpdate.ReferralStatus(referralStatus, "Server Error! Failed to apply referral")
         } else {

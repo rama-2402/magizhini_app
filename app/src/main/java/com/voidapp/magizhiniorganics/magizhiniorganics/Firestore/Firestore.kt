@@ -260,7 +260,11 @@ class Firestore(
                     val profile = repository.getProfileData()
                     profile?.let {
                         it.referralId = code
-                        it.extras[0] = "yes"
+                        if (it.extras.isNullOrEmpty()) {
+                            it.extras = arrayListOf("yes")
+                        } else {
+                            it.extras[0] = "yes"
+                        }
                         repository.upsertProfile(it)
                     }
                 }
@@ -351,6 +355,7 @@ class Firestore(
                 clickType = WALLET,
                 clickContent = ""
             ).let {
+                repository.upsertNotification(it.toUserNotificationEntity())
                 createNewNotification(it)
             } }
 

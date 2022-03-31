@@ -27,12 +27,11 @@ class ShoppingMainViewModel(
     var categoryFilter: String = ALL_PRODUCTS
     var selectedProductID: String = ""
     var selectedProductPosition: Int? = null
-    var navigateToPage: String = ""
     var shoppingMainListener: ShoppingMainAdapter.ShoppingMainListener? = null
 
     var selectedChip: String = Constants.ALL
     var selectedCategory: String = ""
-    var profile = UserProfileEntity()
+    var profile: UserProfileEntity? = null
 
     var categoriesAdapter: ItemsBottomSheet? = null
 
@@ -51,7 +50,7 @@ class ShoppingMainViewModel(
     private var _position: MutableLiveData<Int> = MutableLiveData()
     val position: LiveData<Int> = _position
 
-    var productToRefresh = ProductEntity()
+    var productToRefresh: ProductEntity? = null
     private val currentProductsList: MutableList<ProductEntity> = mutableListOf()
     val removedProductIDsFromCart: MutableList<String> = mutableListOf()
 
@@ -69,8 +68,6 @@ class ShoppingMainViewModel(
     val allProducts: MutableList<ProductEntity> = mutableListOf()
     val discountProducts: MutableList<ProductEntity> = mutableListOf()
     val favoriteProducts: MutableList<ProductEntity> = mutableListOf()
-    val subscriptionProducts: MutableList<ProductEntity> = mutableListOf()
-    val limitedProducts: MutableList<ProductEntity> = mutableListOf()
 
     fun getAllProductsStatic() = viewModelScope.launch(Dispatchers.Default) {
         val productsJob = async { dbRepository.getAllProductsStatic() }
@@ -299,7 +296,6 @@ class ShoppingMainViewModel(
     val changedProducts = mutableListOf<ProductEntity>()
     private val _changedPositions: MutableLiveData<Int> = MutableLiveData()
     val changedPositions: LiveData<Int> = _changedPositions
-
 
     fun updateProducts(productIDs: List<String>) = viewModelScope.launch(Dispatchers.IO) {
         changedProducts.clear()

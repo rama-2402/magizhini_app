@@ -646,8 +646,13 @@ class ProductActivity :
         } else {
             mutableListOf<String>()
         }
-        productIDs.addAll(viewModel.clearedIDsFromCart)
-        viewModel.clearedIDsFromCart.clear()
+        if (viewModel.clearedIDsFromCart.isNotEmpty()) {
+            productIDs.addAll(viewModel.clearedIDsFromCart)
+            viewModel.clearedIDsFromCart.clear()
+        }
+        if (!productIDs.contains(viewModel.productID)) {
+            productIDs.add(viewModel.productID)
+        }
         SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":")).toString()
     }
 

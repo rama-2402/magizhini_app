@@ -85,7 +85,7 @@ class ProductViewModel(
             }
             withContext(Dispatchers.Main) {
                 product = it
-                productID = it.id
+                productID = id
                 _description.value = it.description
                 _uiUpdate.value = UiUpdate.PopulateProductData(null, it)
             }

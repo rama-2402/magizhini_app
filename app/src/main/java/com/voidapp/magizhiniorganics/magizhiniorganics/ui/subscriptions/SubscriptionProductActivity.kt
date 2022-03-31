@@ -459,7 +459,19 @@ class SubscriptionProductActivity :
     }
 
     override fun onBackPressed() {
+        updatePreferenceData()
         super.onBackPressed()
+    }
+
+    private fun updatePreferenceData() {
+        val productIDString = SharedPref(this).getData(PRODUCTS, Constants.STRING, "").toString()
+        val productIDs: MutableList<String> = if (productIDString != "") {
+            productIDString.split(":") as MutableList<String>
+        } else {
+            mutableListOf<String>()
+        }
+        viewModel.product?.let { productIDs.add(it.id) }
+        SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":")).toString()
     }
 
     fun navigateToOtherPage(content: String) {
@@ -468,7 +480,6 @@ class SubscriptionProductActivity :
                 Intent(this, SubscriptionHistoryActivity::class.java).also {
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                     startActivity(it)
-                    finish()
                 }
             }
         }

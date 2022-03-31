@@ -22,7 +22,7 @@ data class UserProfile(
     var subscriptions: ArrayList<String> = arrayListOf(),
     var member: Boolean = false,
     var membershipType: String = "",
-    var extras: ArrayList<String> = arrayListOf()
+    var extras: ArrayList<String> = arrayListOf("")
 ): Parcelable
 
 @Parcelize

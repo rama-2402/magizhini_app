@@ -14,6 +14,7 @@ import android.view.animation.AnimationUtils
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -88,13 +89,13 @@ class ConversationActivity :
     private fun internetConnectionChecked(){
         NetworkManagerUtil(this).observe(this) { isNetworkAvailable ->
             isNetworkAvailable?.let {
-                isOnline = it
-                if (it) {
+                if (it && !isOnline) {
                     showErrorSnackBar("Connection Established", false)
-                } else {
+                }
+                if (!it && isOnline) {
                     showErrorSnackBar("Please check your Network Connection", true)
                 }
-            }
+                isOnline = it            }
         }
     }
 
@@ -227,7 +228,12 @@ class ConversationActivity :
         }
     }
 
+    override fun finishAfterTransition() {
+        super.finish()
+    }
+
     override fun onBackPressed() {
+//        finishAfterTransition()
         viewModel.updateTypingStatus(false)
         super.onBackPressed()
     }
@@ -289,10 +295,13 @@ class ConversationActivity :
     private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val imageMessage = result.data?.data
         imageMessage?.let {
-            viewModel.updateProfileWithPic(
-                it,
-                imageExtension(this,  it)!!,
-            )}
+            compressImageToNewFile(this, it)?.let { file ->
+                viewModel.tempImageFile = file
+                viewModel.updateProfileWithPic(
+                    file.toUri(),
+                    ".jpg"
+                )}
+            }
     }
 
     override fun onRequestPermissionsResult(

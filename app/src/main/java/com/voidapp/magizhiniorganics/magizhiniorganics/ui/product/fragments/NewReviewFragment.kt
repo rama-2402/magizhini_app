@@ -9,6 +9,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -18,6 +19,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentNewRe
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.compressImageToNewFile
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.imageExtension
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import kotlinx.coroutines.delay
@@ -107,11 +109,21 @@ class NewReviewFragment : Fragment(), KodeinAware {
                         srSmileyRating.count,
                         getReviewContent()
                     ).also { review ->
-                        productViewModel.upsertProductReview(
-                            review,
-                            mRatingImageUri,
-                            mRatingImageUri?.let { imageExtension(requireActivity(),  mRatingImageUri)!! } ?: ""
-                        )
+                        mRatingImageUri?.let { uri ->
+                            compressImageToNewFile(requireContext(), uri)?.let { file ->
+                                productViewModel.upsertProductReview(
+                                    review,
+                                    file.toUri(),
+                                    ".jpg"
+                                )
+                            }
+                        }?:let {
+                            productViewModel.upsertProductReview(
+                                review,
+                                null,
+                                ""
+                            )
+                        }
                     }
                 }
             }

@@ -3,11 +3,15 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
 import android.os.PersistableBundle
+import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.animation.AnimationUtils
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -30,11 +34,16 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PROFILE_P
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
+import id.zelory.compressor.Compressor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+
 
 class ProfileActivity :
     BaseActivity(),
@@ -110,8 +119,8 @@ class ProfileActivity :
                     }
                 }
                 is ProfileViewModel.UiUpdate.ReferralStatus -> {
-                    binding.tvReferral.remove()
                     event.message?.let {
+                        binding.tvReferral.remove()
                         if (event.status) {
                             showErrorSnackBar(
                                 "Referral added Successfully. Your referral bonus will be added to your Wallet.",
@@ -184,7 +193,9 @@ class ProfileActivity :
 //            mLatitude = userProfile.address[0].gpsLatitude
 //            mLongitude = userProfile.address[0].gpsLongitude
 //            mAddress = userProfile.address[0].gpsAddress
-            tvReferral.remove()
+            if (userProfile.referralId != "") {
+                tvReferral.remove()
+            }
             //hiding the referral code area for existing user
             if (userProfile.profilePicUrl != "") {
                 ivProfilePic.loadImg(userProfile.profilePicUrl) {
@@ -340,11 +351,13 @@ class ProfileActivity :
                 }
                 else -> {
                     viewModel.profilePicUri?.let {
-                        viewModel.uploadProfilePic(
-                            PROFILE_PIC_PATH,
-                            it,
-                            imageExtension(this@ProfileActivity,  it)!!
-                        )
+                        compressImageToNewFile(this@ProfileActivity, it)?.let { file ->
+                            viewModel.uploadProfilePic(
+                                PROFILE_PIC_PATH,
+                                file.toUri(),
+                                ".jpg"
+                            )
+                        }
                     } ?: generateProfileModel("")
                 }
             }
@@ -462,4 +475,5 @@ class ProfileActivity :
             }
         }
     }
+
 }

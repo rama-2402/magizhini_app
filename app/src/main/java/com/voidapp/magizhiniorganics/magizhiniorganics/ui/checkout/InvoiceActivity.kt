@@ -603,15 +603,18 @@ class InvoiceActivity :
 //    }
 
     private fun updatePreferenceData() {
-        val productIDString = SharedPref(this).getData(PRODUCTS, Constants.STRING, "").toString()
-        val productIDs: MutableList<String> = if (productIDString != "") {
-            productIDString.split(":") as MutableList<String>
-        } else {
-            mutableListOf<String>()
+        if (viewModel.clearedProductIDs.isNotEmpty()) {
+            val productIDString = SharedPref(this).getData(PRODUCTS, Constants.STRING, "").toString()
+            val productIDs: MutableList<String> = if (productIDString != "") {
+                productIDString.split(":") as MutableList<String>
+            } else {
+                mutableListOf<String>()
+            }
+
+            productIDs.addAll(viewModel.clearedProductIDs)
+            viewModel.clearedProductIDs.clear()
+            SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":")).toString()
         }
-        productIDs.addAll(viewModel.clearedProductIDs)
-        viewModel.clearedProductIDs.clear()
-        SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":")).toString()
     }
 
     override fun onBackPressed() {

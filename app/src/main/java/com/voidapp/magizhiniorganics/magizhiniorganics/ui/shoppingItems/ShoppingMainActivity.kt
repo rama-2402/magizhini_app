@@ -132,11 +132,6 @@ class ShoppingMainActivity :
 //        }
 //    }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.refreshProduct()
-    }
-
     override fun onResume() {
         super.onResume()
         val productIDString = SharedPref(this).getData(PRODUCTS, STRING, "").toString()
@@ -145,7 +140,7 @@ class ShoppingMainActivity :
             viewModel.updateProducts(productIDs)
             SharedPref(this).putData(PRODUCTS, STRING, "").toString()
         }
-        viewModel.refreshProduct()
+//        viewModel.refreshProduct()
 //        when(viewModel.selectedChip) {
 //            CATEGORY -> selectedCategory(viewModel.selectedCategory)
 //            SUBSCRIPTION -> binding.cpSubscriptions.isChecked = true
@@ -156,9 +151,11 @@ class ShoppingMainActivity :
     }
 
     private fun observeLiveData() {
-        viewModel.position.observe(this) {
-            adapter.products[it] = viewModel.productToRefresh
-            adapter.notifyItemChanged(it)
+        viewModel.position.observe(this) { position ->
+            viewModel.productToRefresh?.let { product ->
+                adapter.products[position] = product
+                adapter.notifyItemChanged(position)
+            }
         }
 
         viewModel.changedPositions.observe(this) {
@@ -540,8 +537,6 @@ class ShoppingMainActivity :
                 Intent(this, InvoiceActivity::class.java).also {
                     it.putExtra(NAVIGATION, viewModel.selectedCategory)
                     startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    onPause()
                 }
             } else {
                 showErrorSnackBar("Please check network connection", true)
@@ -582,7 +577,6 @@ class ShoppingMainActivity :
                 Intent(this, SubscriptionProductActivity::class.java).also {
                     it.putExtra(Constants.PRODUCTS, product.id)
                     it.putExtra(Constants.PRODUCT_NAME, product.name)
-                    it.putExtra(NAVIGATION, SUBSCRIPTION)
                     val options: ActivityOptionsCompat =
                         ViewCompat.getTransitionName(thumbnail)?.let { it1 ->
                             ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail,
@@ -640,8 +634,8 @@ class ShoppingMainActivity :
     }
 
     override fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView, position: Int) {
-        viewModel.selectedProductPosition = position
-        viewModel.selectedProductID = product.id
+//        viewModel.selectedProductPosition = position
+//        viewModel.selectedProductID = product.id
         navigateToProductDetails(product, thumbnail)
     }
 
