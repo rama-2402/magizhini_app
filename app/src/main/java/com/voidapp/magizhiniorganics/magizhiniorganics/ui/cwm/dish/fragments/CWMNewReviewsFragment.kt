@@ -112,6 +112,7 @@ class CWMNewReviewsFragment: Fragment(), KodeinAware {
                     ).also { review ->
                         mRatingImageUri?.let { uri ->
                             compressImageToNewFile(requireContext(), uri)?.let { file ->
+                                dishViewModel.tempFile = file
                                 dishViewModel.upsertProductReview(
                                     review,
                                     file.toUri(),

@@ -1,13 +1,11 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
-import android.R.attr.path
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream

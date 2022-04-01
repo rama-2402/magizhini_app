@@ -8,7 +8,6 @@ import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_ESTIMATE_PATH
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PENDING
@@ -42,7 +41,6 @@ class QuickOrderUseCase(
 
     fun sendGetEstimateRequest (
         orderListUri: List<Uri>,
-        orderListExtension: List<String>,
         detailsMap: HashMap<String, String>
         ): Flow<NetworkResult> =
         flow {
@@ -52,10 +50,10 @@ class QuickOrderUseCase(
 
             try {
                 delay(1000)
-                for (i in orderListExtension.indices) {
+                for (i in orderListUri.indices) {
                     emit(NetworkResult.Success("uploading", i + 1))
                     val reference: StorageReference = firebaseStorage.child(
-                        "${ORDER_ESTIMATE_PATH}${detailsMap["id"]}/Page${i + 1}.${orderListExtension[i]}"
+                        "${ORDER_ESTIMATE_PATH}${detailsMap["id"]}/Page${i + 1}.jpg"
                     )
 
                     val url = reference.putFile(orderListUri[i])

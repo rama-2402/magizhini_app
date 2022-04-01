@@ -3,8 +3,8 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -44,7 +44,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
@@ -789,13 +788,16 @@ class QuickOrderActivity :
     }
 
     fun sendEstimateRequest() {
-        val imageExtensionList = mutableListOf<String>()
+        val tempFileUriList = mutableListOf<Uri>()
         for (uri in viewModel.orderListUri) {
-            imageExtensionList.add(imageExtension(this@QuickOrderActivity, uri)!!)
+            compressImageToNewFile(this, uri)?.let { file ->
+                viewModel.tempFilesList.add(file)
+                tempFileUriList.add(file.toUri())
+            }
         }
 
         viewModel.sendGetEstimateRequest (
-            imageExtensionList
+            tempFileUriList
         )
     }
 

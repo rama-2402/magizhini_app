@@ -1,13 +1,8 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation
 
-import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.ShapeDrawable
 import android.os.Bundle
-import android.service.controls.templates.ThumbnailTemplate
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -31,7 +26,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityConve
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.RetrofitInstance
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT

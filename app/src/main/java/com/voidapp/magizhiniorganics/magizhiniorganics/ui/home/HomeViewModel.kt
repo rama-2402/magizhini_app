@@ -1,18 +1,22 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
-import android.provider.Telephony
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toBannerEntity
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class HomeViewModel (
@@ -22,7 +26,8 @@ class HomeViewModel (
 
     val specialsTitles: MutableList<String> = mutableListOf()
     val bestSellersList: MutableList<List<ProductEntity>> = mutableListOf()
-    val bannersList: MutableList<List<BannerEntity>> = mutableListOf()
+    val bannersList: MutableList<BannerEntity> = mutableListOf()
+//    val bannersList: MutableList<List<BannerEntity>> = mutableListOf()
 
     val partners: MutableList<Partners> = mutableListOf()
     val testimonials: MutableList<TestimonialsEntity> = mutableListOf()
@@ -61,20 +66,25 @@ class HomeViewModel (
 
     }
 
-    private suspend fun getSpecialBanners() = withContext(Dispatchers.IO){
+    private suspend fun getSpecialBanners(): Boolean = withContext(Dispatchers.IO){
         try {
             dbRepository.getSpecialBanners().let { it ->
                 bannersList.clear()
-                for (i in it.indices step 3) {
-                    val list: MutableList<BannerEntity> = mutableListOf<BannerEntity>()
-                    list.add(it[i].toBannerEntity())
-                    list.add(it[i+1].toBannerEntity())
-                    list.add(it[i+2].toBannerEntity())
-                    bannersList.add(list)
+                for (i in it) {
+                    bannersList.add(i.toBannerEntity())
                 }
+//                for (i in it.indices step 3) {
+//                    val list: MutableList<BannerEntity> = mutableListOf<BannerEntity>()
+//                    list.add(it[i].toBannerEntity())
+//                    list.add(it[i+1].toBannerEntity())
+//                    list.add(it[i+2].toBannerEntity())
+//                    bannersList.add(list)
+//                }
             }
-        } catch (e: IOException) {
+            true
+        } catch (e: Exception) {
             e.message?.let { fbRepository.logCrash("Home: populating spl banners from db", it) }
+            false
         }
     }
 

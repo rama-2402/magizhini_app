@@ -5,10 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.firestore.ListenerRegistration
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.PushNotificationUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.SubscriptionUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
@@ -20,8 +18,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SINGLE_DAY_LONG
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
@@ -31,6 +27,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,6 +38,7 @@ class SubscriptionProductViewModel(
     private val subscriptionUseCase: SubscriptionUseCase
 ): ViewModel() {
 
+    var tempFile: File? = null
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
@@ -166,6 +164,8 @@ class SubscriptionProductViewModel(
             _uiEvent.value = UIEvent.ProgressBar(false)
             _uiEvent.value = UIEvent.Toast("Thanks for the Review :)")
             previewImage("added")
+            tempFile?.delete()
+            tempFile = null
         }
     }
 

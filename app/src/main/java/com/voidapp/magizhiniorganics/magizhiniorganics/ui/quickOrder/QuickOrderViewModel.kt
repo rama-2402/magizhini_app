@@ -27,6 +27,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.io.File
 import java.io.IOException
 
 //delete the quick order data when placing order after getting the estimate
@@ -38,6 +39,7 @@ class QuickOrderViewModel(
     private val quickOrderUseCase: QuickOrderUseCase
 ): ViewModel() {
 
+    val tempFilesList: MutableList<File> = mutableListOf()
     val orderListUri: MutableList<Uri> = mutableListOf()
     var userProfile: UserProfileEntity? = null
     var addressContainer: Address? = null
@@ -272,7 +274,7 @@ class QuickOrderViewModel(
         } ?: 30f
     }
 
-    fun sendGetEstimateRequest(imageExtensions: MutableList<String>) {
+    fun sendGetEstimateRequest(tempFileUriList: MutableList<Uri>) {
         viewModelScope.launch {
             orderID = generateOrderID()
             val detailsMap: HashMap<String, String> = hashMapOf()
@@ -284,8 +286,7 @@ class QuickOrderViewModel(
             }
             quickOrderUseCase
                 .sendGetEstimateRequest(
-                    orderListUri,
-                    imageExtensions,
+                    tempFileUriList,
                     detailsMap
                 )
                 .collect { result ->
@@ -303,6 +304,10 @@ class QuickOrderViewModel(
                                             UiUpdate.UploadingImage("Uploading Page ${result.data}...")
                                     }
                                     "complete" -> {
+                                        for (file in tempFilesList) {
+                                            file.delete()
+                                        }
+                                        tempFilesList.clear()
                                         _uiUpdate.value =
                                             UiUpdate.UploadComplete("Files Upload Complete!")
                                     }

@@ -111,6 +111,7 @@ class NewReviewFragment : Fragment(), KodeinAware {
                     ).also { review ->
                         mRatingImageUri?.let { uri ->
                             compressImageToNewFile(requireContext(), uri)?.let { file ->
+                                productViewModel.tempFile = file
                                 productViewModel.upsertProductReview(
                                     review,
                                     file.toUri(),

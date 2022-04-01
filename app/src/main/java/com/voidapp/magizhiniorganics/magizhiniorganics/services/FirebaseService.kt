@@ -22,10 +22,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ONLINE_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB_HISTORY_PAGE
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import kotlin.random.Random

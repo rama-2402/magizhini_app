@@ -7,9 +7,7 @@ import android.os.Bundle
 import android.transition.ChangeBounds
 import android.transition.ChangeImageTransform
 import android.transition.TransitionSet
-import android.util.Log
 import android.view.View
-import androidx.core.net.toUri
 import androidx.core.transition.doOnEnd
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope

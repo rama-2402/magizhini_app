@@ -3,14 +3,11 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Environment
 import android.os.PersistableBundle
-import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.animation.AnimationUtils
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
@@ -34,15 +31,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PROFILE_P
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import id.zelory.compressor.Compressor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 
 
 class ProfileActivity :
@@ -352,6 +345,7 @@ class ProfileActivity :
                 else -> {
                     viewModel.profilePicUri?.let {
                         compressImageToNewFile(this@ProfileActivity, it)?.let { file ->
+                            viewModel.tempFile = file
                             viewModel.uploadProfilePic(
                                 PROFILE_PIC_PATH,
                                 file.toUri(),
@@ -365,7 +359,7 @@ class ProfileActivity :
     }
 
     fun selectedCalendarDate(date: Long) {
-        // todo uploading dob should be in 00/00/0000 format
+        // uploading dob should be in 00/00/0000 format
         binding.tvDob.text = TimeUtil().getCustomDate(dateLong = date)
         viewModel.DobLong = date
         SharedPref(this).putData(Constants.DOB, Constants.STRING, TimeUtil().getCustomDate(dateLong = date).substring(0,5))

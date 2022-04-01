@@ -16,8 +16,8 @@ android {
         applicationId "com.voidapp.magizhiniorganics.magizhiniorganics"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 3
-        versionName "2.0"
+        versionCode 5
+        versionName "3.0.1"
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -54,6 +54,8 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.9'
     implementation 'com.google.firebase:firebase-analytics-ktx:20.1.2'
+
+    implementation 'androidx.work:work-runtime-ktx:2.7.1'
 
 //    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-beta01")
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
@@ -184,9 +186,5 @@ dependencies {
     //zoom image    https://github.com/MikeOrtiz/TouchImageView
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
 
-    implementation 'id.zelory:compressor:3.0.1'
-//
-//    implementation("io.coil-kt:coil:2.0.0-rc01")
-//    implementation("io.coil-kt:coil-gif:2.0.0-rc01")
 
 }

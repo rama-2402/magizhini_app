@@ -1,23 +1,13 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductCategoryEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeProductItemsBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadSimple
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.http.Url
-import java.io.InputStream
-import java.net.URL
 
 
 class CategoryHomeAdapter(

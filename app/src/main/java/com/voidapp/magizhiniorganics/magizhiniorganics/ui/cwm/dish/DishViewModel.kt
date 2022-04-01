@@ -20,12 +20,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class DishViewModel(
     private val dbRepository: DatabaseRepository,
     private val fbRepository: FirestoreRepository
 ): ViewModel() {
 
+    var tempFile: File? = null
     var dish: CWMFood? = null
     var userProfile: UserProfileEntity? = null
     var reviewAdapter: ReviewAdapter? = null
@@ -133,6 +135,8 @@ class DishViewModel(
 
     private suspend fun uploadReviewToFirebase(review: Review) = withContext(Dispatchers.IO) {
         fbRepository.addReview(dish!!.id, review)
+        tempFile?.delete()
+        tempFile = null
         withContext(Dispatchers.Main) {
             _status.value = NetworkResult.Success( "image", "Thanks for the Review :)")
             previewImage("added")

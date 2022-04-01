@@ -1,12 +1,10 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase
 
-import android.provider.SyncStateContract
 import android.util.Log
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.NotificationData
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.PushNotification
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.RetrofitInstance
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

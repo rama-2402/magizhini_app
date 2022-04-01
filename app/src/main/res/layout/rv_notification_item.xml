@@ -25,14 +25,14 @@
         android:layout_height="wrap_content"
         android:text="Title"
         android:textStyle="bold"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:textColor="@color/green_base" />
     <TextView
         android:id="@+id/tvMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="someghitn something"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:layout_marginTop="@dimen/material_size_4"
         android:textColor="@color/gray700"/>
 

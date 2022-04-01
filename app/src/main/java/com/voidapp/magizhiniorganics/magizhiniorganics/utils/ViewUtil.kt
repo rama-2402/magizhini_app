@@ -2,14 +2,10 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
-import androidx.core.app.ActivityCompat.startPostponedEnterTransition
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
@@ -20,7 +16,6 @@ import com.bumptech.glide.request.target.Target
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import java.io.IOException
-import javax.sql.DataSource
 
 
 /**

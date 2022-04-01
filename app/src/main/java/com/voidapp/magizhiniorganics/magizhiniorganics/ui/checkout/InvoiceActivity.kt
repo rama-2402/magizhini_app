@@ -33,7 +33,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatAc
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
@@ -526,7 +525,6 @@ class InvoiceActivity :
             val totalPrice = cartPrice - (viewModel.couponPrice ?: 0f)
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
-                tvFreeDelivery.text = "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
                 tvTotalAmt.setTextAnimation(totalPrice.toString())
             } else {
                 tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
@@ -535,6 +533,7 @@ class InvoiceActivity :
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 checkoutText.setTextAnimation("Rs: $cartPrice")
             }
+            tvFreeDelivery.text = "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
         }
     }
 

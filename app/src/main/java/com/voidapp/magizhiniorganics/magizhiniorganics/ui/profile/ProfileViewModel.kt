@@ -15,12 +15,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class ProfileViewModel (
     val dbRepository: DatabaseRepository,
     val fbRepository: FirestoreRepository
         ) : ViewModel() {
 
+    var tempFile: File? = null
     var userID: String? = null
     var phoneNumber: String? = null
     var DobLong: Long? = null
@@ -106,6 +108,8 @@ class ProfileViewModel (
         ) {
             _uiUpdate.value = UiUpdate.ProfilePicUrl(null, "Server Error! Failed to upload Profile Picture")
         } else {
+            tempFile?.delete()
+            tempFile = null
             _uiUpdate.value = UiUpdate.ProfilePicUrl(status, "Server Error! Failed to upload Profile Picture")
         }
     }

@@ -1,12 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.AbsListView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,17 +11,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvHomeSpecialsItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadSimple
-import kotlinx.coroutines.*
-import java.io.InputStream
-import java.net.URL
 
 class HomeSpecialsAdapter(
     val context: Context,
     var bestSellers: MutableList<List<ProductEntity>>,
     var titles: MutableList<String>,
-    var banners: MutableList<List<BannerEntity>>,
+    var banners: MutableList<BannerEntity>,
+//    var banners: MutableList<List<BannerEntity>>,
     val onItemClickListener: HomeSpecialsItemClickListener,
     private val bestSellerItemClickListener: BestSellersAdapter.BestSellerItemClickListener
 ): RecyclerView.Adapter<HomeSpecialsAdapter.HomeSpecialsViewHolder>() {
@@ -39,15 +33,20 @@ class HomeSpecialsAdapter(
     override fun onBindViewHolder(holder: HomeSpecialsViewHolder, position: Int) {
         val bestSellerList = bestSellers[position]
         val title = titles[position]
-        val banner = banners[position]
+//        val banner = banners[position]
         holder.binding.apply {
             tvBestSellers.text = title
 
             setBestSeller(rvTopPurchases, bestSellerList)
 
-            ivBannerOne.loadSimple(banner[0].url)
-            ivBannerTwo.loadSimple(banner[1].url)
-            ivBannerThree.loadSimple(banner[2].url)
+            ivBannerOne.loadSimple(banners[getBannerPosition(position, 0)].url)
+            ivBannerTwo.loadSimple(banners[getBannerPosition(position, 1)].url)
+            ivBannerThree.loadSimple(banners[getBannerPosition(position, 2)].url)
+
+
+//            ivBannerOne.loadSimple(banner[0].url)
+//            ivBannerTwo.loadSimple(banner[1].url)
+//            ivBannerThree.loadSimple(banner[2].url)
 
             cpBestSellers.setOnClickListener {
                 it.startAnimation(
@@ -60,14 +59,52 @@ class HomeSpecialsAdapter(
             }
 
             ivBannerOne.setOnClickListener {
-                onItemClickListener.selectedSpecialBanner(banner[0])
+                onItemClickListener.selectedSpecialBanner(banners[getBannerPosition(position, 0)])
             }
             ivBannerTwo.setOnClickListener {
-                onItemClickListener.selectedSpecialBanner(banner[1])
+                onItemClickListener.selectedSpecialBanner(banners[getBannerPosition(position, 1)])
             }
             ivBannerThree.setOnClickListener {
-                onItemClickListener.selectedSpecialBanner(banner[2])
+                onItemClickListener.selectedSpecialBanner(banners[getBannerPosition(position, 2)])
             }
+        }
+    }
+
+    private fun getBannerPosition(position: Int, bannerNumber: Int): Int {
+        return when (position) {
+            0 -> {
+                return when (bannerNumber) {
+                    0 -> 0
+                    1 -> 1
+                    2 -> 2
+                    else -> 0
+                }
+            }
+            1 -> {
+                return when (bannerNumber) {
+                    0 -> 3
+                    1 -> 4
+                    2 -> 5
+                    else -> 3
+                }
+            }
+            2 -> {
+                return when (bannerNumber) {
+                    0 -> 6
+                    1 -> 7
+                    2 -> 8
+                    else -> 6
+                }
+            }
+            3 -> {
+                return when (bannerNumber) {
+                    0 -> 9
+                    1 -> 10
+                    2 -> 11
+                    else -> 9
+                }
+            }
+            else -> 0
         }
     }
 
@@ -88,7 +125,8 @@ class HomeSpecialsAdapter(
     }
 
     fun setBestSellerData(
-        newBanners: MutableList<List<BannerEntity>>,
+        newBanners: MutableList<BannerEntity>,
+//        newBanners: MutableList<List<BannerEntity>>,
         newBestSellers: MutableList<List<ProductEntity>>,
         newList: List<String>
     ) {

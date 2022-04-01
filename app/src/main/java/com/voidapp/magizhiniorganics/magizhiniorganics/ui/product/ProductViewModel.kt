@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.IOException
 
 class ProductViewModel(
@@ -25,6 +26,7 @@ class ProductViewModel(
     private val fbRepository: FirestoreRepository
 ) : ViewModel() {
 
+    var tempFile: File? = null
     var reviewAdapter: ReviewAdapter? = null
 
     var userProfile: UserProfileEntity? = null
@@ -188,6 +190,8 @@ class ProductViewModel(
 
     private suspend fun uploadReviewToFirebase(review: Review) = withContext(Dispatchers.IO) {
         fbRepository.addReview(productID, review)
+        tempFile?.delete()
+        tempFile = null
         withContext(Dispatchers.Main) {
             _uiEvent.value = UIEvent.ProgressBar(false)
             _uiEvent.value = UIEvent.Toast("Thanks for the Review :)")
