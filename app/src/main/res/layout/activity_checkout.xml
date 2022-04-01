@@ -197,6 +197,29 @@
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <TextView
+                        android:id="@+id/tvFreeDelivery"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:text=""
+                        android:ellipsize="marquee"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true"
+                        android:textColor="@color/gray700"
+                        android:textStyle="normal"
+                        style="@style/TextAppearance.MaterialComponents.Body1"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        app:layout_constraintTop_toBottomOf="@id/tvMrpOfCartItems"
+                        app:layout_constraintStart_toEndOf="@id/tvDeliveryCharge"
+                        app:layout_constraintEnd_toStartOf="@id/tvDeliveryChargeAmt"/>
+
+
+
+                    <TextView
                         android:id="@+id/tvDeliveryChargeAmt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

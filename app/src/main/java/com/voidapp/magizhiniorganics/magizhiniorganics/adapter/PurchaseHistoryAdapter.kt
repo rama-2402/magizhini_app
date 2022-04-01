@@ -34,7 +34,7 @@ class PurchaseHistoryAdapter(
 
         with(holder.binding) {
             tvOrderId.text = order.orderId
-            tvOrderStatus.isActivated = true
+            tvOrderStatus.isSelected = true
             tvDate.text = "${order.purchaseDate} - ${order.paymentMethod} - Rs: ${order.price}"
             var itemCount = 0
             order.cart.forEach {

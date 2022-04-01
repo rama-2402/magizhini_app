@@ -171,5 +171,16 @@
             android:layout_height="wrap_content"
             android:visibility="invisible"/>
     </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:src="@drawable/ic_up_pointer"
+            app:backgroundTint="@color/green_base"
+            app:fabSize="mini"
+            android:layout_gravity="bottom"
+            app:tint="@color/white" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

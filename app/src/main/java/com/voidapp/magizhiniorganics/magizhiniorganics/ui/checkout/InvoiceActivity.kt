@@ -90,6 +90,7 @@ class InvoiceActivity :
         binding.apply {
             rvAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
             nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_up))
+            tvFreeDelivery.isSelected = true
         }
 
         Checkout.preload(applicationContext)
@@ -525,6 +526,7 @@ class InvoiceActivity :
             val totalPrice = cartPrice - (viewModel.couponPrice ?: 0f)
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
+                tvFreeDelivery.text = "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
                 tvTotalAmt.setTextAnimation(totalPrice.toString())
             } else {
                 tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()

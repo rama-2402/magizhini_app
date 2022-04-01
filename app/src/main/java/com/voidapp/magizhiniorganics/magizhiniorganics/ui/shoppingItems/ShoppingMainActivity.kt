@@ -290,11 +290,21 @@ class ShoppingMainActivity :
         binding.rvShoppingItems.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 when {
-                    dy > 0 -> cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
-                    dy < 0 -> cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                    dy > 0 -> {
+                        cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+                        binding.fabUp.visibility = View.VISIBLE
+                    }
+                    dy < 0 -> {
+                        binding.fabUp.visibility = View.INVISIBLE
+                        cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                    }
                 }
             }
         })
+
+        binding.fabUp.setOnClickListener {
+            binding.rvShoppingItems.smoothScrollToPosition(0)
+        }
 
         binding.ivBackBtn.setOnClickListener {
             onBackPressed()

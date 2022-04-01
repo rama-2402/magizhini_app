@@ -376,7 +376,7 @@ class CheckoutViewModel(
 
     suspend fun getFreeDeliveryLimit(): Float {
         if (freeDeliveryLimit == 0f) {
-            freeDeliveryLimit = fbRepository.getFreeDeliveryLimit() ?: 10000f
+            freeDeliveryLimit = fbRepository.getFreeDeliveryLimit() ?: 1000f
         }
         return freeDeliveryLimit
     }
