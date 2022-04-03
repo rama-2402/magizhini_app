@@ -27,5 +27,7 @@ data class ProductCategoryEntity(
     @ColumnInfo
     var activated: Boolean = true,
     @ColumnInfo
-    var extras: ArrayList<String> = arrayListOf()
+    var extras: ArrayList<String> = arrayListOf(),
+    @ColumnInfo
+    var status: String = "Available"
 )

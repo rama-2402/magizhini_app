@@ -9,6 +9,8 @@
     <color name="white">#FFFFFFFF</color>
 
     //app color themes
+<!--    <color name="green_base">#4e992e</color>-->
+<!--    <color name="green_base">#265E65</color>-->
     <color name="green_base">#86C232</color>
     <color name="green_base_transparent">#2386C232</color>
     <color name="green_light">#E9FAD0</color>

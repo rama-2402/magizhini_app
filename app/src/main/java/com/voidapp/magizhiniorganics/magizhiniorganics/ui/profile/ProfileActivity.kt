@@ -24,6 +24,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
@@ -186,9 +187,12 @@ class ProfileActivity :
 //            mLatitude = userProfile.address[0].gpsLatitude
 //            mLongitude = userProfile.address[0].gpsLongitude
 //            mAddress = userProfile.address[0].gpsAddress
-            if (userProfile.referralId != "") {
+//            if (
+//                userProfile.referralId != "" ||
+//                SharedPref(this@ProfileActivity).getData(LOGIN_STATUS, BOOLEAN, false)
+//            ) {
                 tvReferral.remove()
-            }
+//            }
             //hiding the referral code area for existing user
             if (userProfile.profilePicUrl != "") {
                 ivProfilePic.loadImg(userProfile.profilePicUrl) {

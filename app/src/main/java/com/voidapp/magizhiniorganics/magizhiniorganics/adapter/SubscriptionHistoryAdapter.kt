@@ -106,10 +106,6 @@ class SubscriptionHistoryAdapter(
                 }
             }
 
-            tvDate.setOnClickListener {
-                onItemClickListener.renewSub(position)
-            }
-
             lytSub.setOnClickListener {
                 if (tvSubID.isFocused) {
                     tvSubID.clearFocus()

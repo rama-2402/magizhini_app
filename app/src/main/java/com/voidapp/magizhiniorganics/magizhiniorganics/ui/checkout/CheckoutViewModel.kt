@@ -17,6 +17,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toUserProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
@@ -582,7 +583,7 @@ class CheckoutViewModel(
         userProfile?.let {
             if (it.referralId != "" && it.extras[0] == "yes") {
                 it.extras[0] = "no"
-                dbRepository.upsertProfile(it)
+                fbRepository.uploadProfile(it.toUserProfile())
             }
         }
     }

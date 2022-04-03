@@ -19,5 +19,6 @@ data class Coupon(
     val from: String = Constants.DATE_CODE,
     val expiryDate: String = Constants.DATE_CODE,
     val categories: ArrayList<String> = arrayListOf(),
-    val extras: ArrayList<String> = arrayListOf()
+    val extras: ArrayList<String> = arrayListOf(),
+    var thumbnailUrl: String = ""
 ): Parcelable

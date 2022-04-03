@@ -46,7 +46,8 @@ fun ProductCategory.toProductCategoryEntity() = ProductCategoryEntity(
     discountAmount = discountAmount,
     products = products,
     activated = activated,
-    extras = extras
+    extras = extras,
+    status = status
 )
 
 fun Product.toProductEntity() = ProductEntity(
@@ -92,7 +93,8 @@ fun Coupon.toCouponEntity() = CouponEntity(
     from = from,
     expiryDate = expiryDate,
     categories = categories,
-    extras = extras
+    extras = extras,
+    thumbnailUrl = thumbnailUrl
 )
 
 fun Banner.toBannerEntity() = BannerEntity(
@@ -241,7 +243,8 @@ fun ProductCategoryEntity.toProductCategory() = ProductCategory(
     discountAmount = discountAmount,
     products = products,
     activated = activated,
-    extras = extras
+    extras = extras,
+    status = status
 )
 
 fun ProductEntity.toProduct() = Product(
@@ -276,7 +279,8 @@ fun CouponEntity.toCoupon() = Coupon(
     from = from,
     expiryDate = expiryDate,
     categories = categories,
-    extras = extras
+    extras = extras,
+    thumbnailUrl = thumbnailUrl
 )
 
 fun BannerEntity.toBanner() = Banner(

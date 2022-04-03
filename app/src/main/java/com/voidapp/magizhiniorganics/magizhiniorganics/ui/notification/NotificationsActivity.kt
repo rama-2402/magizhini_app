@@ -22,6 +22,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
@@ -227,7 +228,7 @@ class NotificationsActivity :
                         }
                     }
                 }
-                PURCHASE -> {
+                ORDER_HISTORY_PAGE -> {
                     Intent(this@NotificationsActivity, PurchaseHistoryActivity::class.java).also {
                         startActivity(it)
                         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)

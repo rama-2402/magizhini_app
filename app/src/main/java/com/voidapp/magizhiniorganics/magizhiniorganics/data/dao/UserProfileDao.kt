@@ -91,11 +91,11 @@ interface UserProfileDao {
     @Query("SELECT * FROM CartEntity")
     fun getAllCartItem(): List<CartEntity>?
 
-    @Query("SELECT * FROM ProductEntity WHERE activated ORDER BY name")
-    fun getAllProducts(): LiveData<List<ProductEntity>>
+    @Query("SELECT * FROM ProductEntity WHERE activated AND status = :status ORDER BY name")
+    fun getAllProducts(status: String = "Available"): LiveData<List<ProductEntity>>
 
-    @Query("SELECT * FROM ProductEntity WHERE activated ORDER BY name")
-    fun getAllProductsStatic(): List<ProductEntity>
+    @Query("SELECT * FROM ProductEntity WHERE activated AND status = :status ORDER BY name")
+    fun getAllProductsStatic(status: String = "Available"): List<ProductEntity>
 
     @Query("SELECT * FROM ProductEntity")
     fun getAllProductsForCleaning(): List<ProductEntity>
@@ -106,8 +106,8 @@ interface UserProfileDao {
     @Query("SELECT * FROM productEntity WHERE id = :id")
     fun getProductWithId(id: String): LiveData<ProductEntity>
 
-    @Query("SELECT * FROM ProductCategoryEntity WHERE activated")
-    fun getAllProductCategories(): LiveData<List<ProductCategoryEntity>>
+    @Query("SELECT * FROM ProductCategoryEntity WHERE activated AND status = :status")
+    fun getAllProductCategories(status: String = "Available"): LiveData<List<ProductCategoryEntity>>
 
     @Query("SELECT * FROM CouponEntity")
     fun getAllCoupons(): LiveData<List<CouponEntity>>
@@ -115,13 +115,13 @@ interface UserProfileDao {
     @Query("SELECT * FROM BannerEntity")
     fun getAllBanners(): LiveData<List<BannerEntity>>
 
-    @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated")
-    fun getAllProductsInCategory(category: String): LiveData<List<ProductEntity>>
+    @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated AND status = :status")
+    fun getAllProductsInCategory(category: String, status: String = "Available"): LiveData<List<ProductEntity>>
 
-    @Query("SELECT * FROM ProductEntity WHERE discountAvailable AND activated ORDER BY name")
-    fun getAllDiscountProducts(): List<ProductEntity>
-    @Query("SELECT * FROM ProductEntity WHERE discountAvailable AND activated ORDER BY name")
-    fun getAllDiscounts(): LiveData<List<ProductEntity>>
+    @Query("SELECT * FROM ProductEntity WHERE discountAvailable AND activated AND status = :status ORDER BY name")
+    fun getAllDiscountProducts(status: String = "Available"): List<ProductEntity>
+    @Query("SELECT * FROM ProductEntity WHERE discountAvailable AND activated AND status = :status ORDER BY name")
+    fun getAllDiscounts(status: String = "Available"): LiveData<List<ProductEntity>>
 
     @Query("SELECT * FROM CouponEntity WHERE status = :status")
     fun getAllActiveCoupons(status: String): List<CouponEntity>
@@ -148,20 +148,20 @@ interface UserProfileDao {
     @Query("UPDATE ProductEntity SET favorite = :status WHERE id = :id")
     fun updateProductFavoriteStatus(id: String, status: Boolean)
 
-    @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated ORDER BY name")
-    fun getAllProductByCategoryStatic(category: String): List<ProductEntity>
+    @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated AND status = :status ORDER BY name")
+    fun getAllProductByCategoryStatic(category: String, status: String = "Available"): List<ProductEntity>
 
     @Query("SELECT name FROM ProductCategoryEntity WHERE id = :id")
     fun getCategoryByID(id: String): String?
 
-    @Query("SELECT * FROM ProductEntity WHERE favorite AND activated ORDER BY name")
-    fun getAllFavoritesStatic(): List<ProductEntity>
+    @Query("SELECT * FROM ProductEntity WHERE favorite AND activated AND status = :status ORDER BY name")
+    fun getAllFavoritesStatic(status: String = "Available"): List<ProductEntity>
 
-    @Query("SELECT * FROM ProductEntity WHERE favorite AND activated ORDER BY name")
-    fun getAllFavorites(): LiveData<List<ProductEntity>>
+    @Query("SELECT * FROM ProductEntity WHERE favorite AND activated AND status = :status ORDER BY name")
+    fun getAllFavorites(status: String = "Available"): LiveData<List<ProductEntity>>
 
-    @Query("SELECT name FROM ProductCategoryEntity WHERE activated ORDER BY name")
-    fun getAllCategoryNames(): List<String>
+    @Query("SELECT name FROM ProductCategoryEntity WHERE activated AND status = :status ORDER BY name")
+    fun getAllCategoryNames(status: String = "Available"): List<String>
 
     @Query("SELECT SUM(price * quantity) FROM CartEntity")
     fun getCartPrice(): LiveData<Float>

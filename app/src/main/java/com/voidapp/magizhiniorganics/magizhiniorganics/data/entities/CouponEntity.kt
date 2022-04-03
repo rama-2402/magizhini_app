@@ -35,5 +35,7 @@ data class CouponEntity(
     @ColumnInfo
     var categories: ArrayList<String> = arrayListOf(),
     @ColumnInfo
-    var extras: ArrayList<String> = arrayListOf()
+    var extras: ArrayList<String> = arrayListOf(),
+    @ColumnInfo
+    var thumbnailUrl: String = ""
 ): Parcelable

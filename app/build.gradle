@@ -16,8 +16,8 @@ android {
         applicationId "com.voidapp.magizhiniorganics.magizhiniorganics"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 5
-        versionName "3.0.1"
+        versionCode 7
+        versionName "3.0.3"
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -30,8 +30,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+//            shrinkResources true
             debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
