@@ -28,14 +28,14 @@
             android:layout_height="wrap_content"
             android:hint="Name"
             android:textColorHint="@color/grey"
-            app:boxStrokeColor="@color/green_base"
+            app:boxStrokeColor="@color/matteRed"
             app:endIconMode="clear_text"
-            app:endIconTint="@color/green_base"
+            app:endIconTint="@color/matteRed"
             app:flow_wrapMode="aligned"
-            app:hintTextColor="@color/green_base"
+            app:hintTextColor="@color/matteRed"
             app:layout_constraintEnd_toEndOf="parent"
             app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="@color/green_base">
+            app:startIconTint="@color/matteRed">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etProfileName"
@@ -45,7 +45,7 @@
                 android:backgroundTint="@color/white"
                 android:cursorVisible="true"
                 android:inputType="textShortMessage"
-                android:textColor="@color/black"
+                android:textColor="@color/gray700"
                 android:textColorHint="@color/green_base"
                 android:textCursorDrawable="@null" />
 
@@ -59,16 +59,16 @@
             android:layout_marginTop="@dimen/material_size_8"
             android:hint="Address Line 1"
             android:textColorHint="@color/grey"
-            app:boxStrokeColor="@color/green_base"
+            app:boxStrokeColor="@color/matteRed"
             app:endIconMode="clear_text"
             app:flow_wrapMode="aligned"
-            app:hintTextColor="@color/green_base"
+            app:hintTextColor="@color/matteRed"
             app:layout_constraintBottom_toTopOf="@id/etlAddressTwo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/etlEmailId"
             app:startIconDrawable="@drawable/ic_address"
-            app:startIconTint="@color/green_base">
+            app:startIconTint="@color/matteRed">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etAddressOne"
@@ -77,7 +77,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="@color/white"
                 android:inputType="textLongMessage"
-                android:textColor="@color/black"
+                android:textColor="@color/gray700"
                 android:textColorHint="@color/green_base"
                 android:textCursorDrawable="@null" />
 
@@ -91,15 +91,15 @@
             android:layout_marginTop="@dimen/material_size_8"
             android:hint="Address Line 2"
             android:textColorHint="@color/grey"
-            app:boxStrokeColor="@color/green_base"
+            app:boxStrokeColor="@color/matteRed"
             app:endIconMode="clear_text"
             app:flow_wrapMode="aligned"
-            app:hintTextColor="@color/green_base"
+            app:hintTextColor="@color/matteRed"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/etlAddressOne"
             app:startIconDrawable="@drawable/ic_address"
-            app:startIconTint="@color/green_base">
+            app:startIconTint="@color/matteRed">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etAddressTwo"
@@ -108,7 +108,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="@color/white"
                 android:inputType="textLongMessage"
-                android:textColor="@color/black"
+                android:textColor="@color/gray700"
                 android:textColorHint="@color/green_base"
                 android:textCursorDrawable="@null" />
 
@@ -150,17 +150,20 @@
                 android:theme="@style/mySpinnerItemStyle" />
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <TextView
             android:id="@+id/btnSaveAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/material_size_16"
             android:layout_marginBottom="16dp"
-            android:elevation="24dp"
-            android:text="SAVE Address"
+            android:text="Save Address"
+            android:textStyle="bold"
+            android:background="@drawable/shape_round_rectangle_8"
             android:textColor="@color/white"
-            app:backgroundTint="@color/green_base"
-            app:icon="@drawable/ic_save"
-            app:iconTint="@color/white" />
+            app:backgroundTint="@color/matteRed"
+            android:paddingStart="@dimen/material_size_24"
+            android:paddingEnd="@dimen/material_size_24"
+            android:paddingTop="@dimen/material_size_12"
+            android:paddingBottom="@dimen/material_size_12" />
     </LinearLayout>
 </layout>

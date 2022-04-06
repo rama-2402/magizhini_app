@@ -131,7 +131,7 @@ class HomeActivity :
 
         binding.dlDrawerLayout.addDrawerListener(menuToggle)
         menuToggle.syncState()
-        menuToggle.drawerArrowDrawable.color = ContextCompat.getColor(this, R.color.white)
+        menuToggle.drawerArrowDrawable.color = ContextCompat.getColor(this, R.color.matteRed)
 
         binding.nvNavigationView.setNavigationItemSelectedListener(this)
 
@@ -140,6 +140,7 @@ class HomeActivity :
         }
 
         showProgressDialog()
+        binding.flShimmerPlaceholder.startShimmer()
 
         FirebaseMessaging.getInstance().subscribeToTopic(Constants.BROADCAST)
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -215,6 +216,8 @@ class HomeActivity :
                         if (NetworkHelper.isOnline(this@HomeActivity)) {
                             if (viewModel.partners.isEmpty() || viewModel.testimonials.isEmpty()) {
                                 showProgressDialog()
+                                llSocials.visible()
+                                stickyFollowUs.visible()
                                 viewModel.getEndData()
                             }
                         } else {
@@ -312,6 +315,7 @@ class HomeActivity :
         viewModel.uiUpdate.observe(this) { event ->
             when (event) {
                 is HomeViewModel.UiUpdate.PopulateData -> {
+                    binding.flShimmerPlaceholder.remove()
                     homeSpecialsAdapter.setBestSellerData(
                         viewModel.bannersList,
                         viewModel.bestSellersList,

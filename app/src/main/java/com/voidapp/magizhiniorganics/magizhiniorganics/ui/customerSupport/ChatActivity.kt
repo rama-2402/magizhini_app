@@ -1,10 +1,12 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ContactsAdapter
@@ -44,8 +46,8 @@ class ChatActivity :
         }
 
         initData()
-        initViewPager()
         initObservers()
+        initViewPager()
         clickListeners()
     }
 
@@ -55,7 +57,9 @@ class ChatActivity :
         }
         viewModel.currentUserProfile.observe(this) {
             //setting the toolbar data - profile pic and user name
-            binding.ivProfileImage.loadImg(it.profilePicUrl) {}
+            if (!it.profilePicUrl.isNullOrEmpty()) {
+                binding.ivProfileImage.loadImg(it.profilePicUrl) {}
+            }
             binding.tvProfileName.text = it.name
         }
     }
@@ -67,12 +71,12 @@ class ChatActivity :
             when (position) {
                 0 -> {
                     tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_chat)
-                    tab.icon!!.setTint(ContextCompat.getColor(this, R.color.matteGreen))
-                    tab.text = "Messages"
+                    tab.icon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
+                     tab.text = "Messages"
                 }
                 1 -> {
                     tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_contacts)
-                    tab.icon!!.setTint(ContextCompat.getColor(this, R.color.matteGreen))
+//                    tab.icon!!.setTint(ContextCompat.getColor(this, R.color.white))
                     tab.text = "Support"
                 }
             }
@@ -85,6 +89,28 @@ class ChatActivity :
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
+            binding.tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    when(tab?.position) {
+                        0 -> {
+                            tab.icon?.setTint(ContextCompat.getColor(this@ChatActivity, R.color.matteRed))
+                            binding.tlTabLayout.getTabAt(1)?.icon?.setTint(Color.WHITE)
+                        }
+                        1 -> {
+                            tab.icon?.setTint(ContextCompat.getColor(this@ChatActivity, R.color.matteRed))
+                            binding.tlTabLayout.getTabAt(0)?.icon?.setTint(Color.WHITE)
+                        }
+                    }
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+
+                }
+            })
             //setting the filter action based on the data currently displayed.
             //if we are currently displaying messages then we get all contacts and accordingly
         }

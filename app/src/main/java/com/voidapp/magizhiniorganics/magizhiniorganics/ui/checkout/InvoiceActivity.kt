@@ -1,13 +1,18 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -622,7 +627,7 @@ class InvoiceActivity :
             } else {
                 mutableListOf<String>()
             }
-            Log.e("qw1", "updatePreferenceData: $productIDs", )
+            Log.e("qw1", "updatePreferenceData: $productIDs")
             viewModel.clearedProductIDs.forEach {
                 if (!productIDs.contains(it)) {
                     productIDs.add(it)
@@ -635,22 +640,32 @@ class InvoiceActivity :
     }
 
     override fun onBackPressed() {
-        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else {
-            updatePreferenceData()
-            super.onBackPressed()
-//            if (viewModel.navigateToPage == PRODUCTS) {
-//                finish()
-//            } else {
-//                Intent(this, ShoppingMainActivity::class.java).also {
-//                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
-//                    startActivity(it)
-//                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-//                    finish()
-//                }
-//            }
+        when {
+            cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED ->
+                cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+            binding.etCoupon.isFocused -> binding.etCoupon.clearFocus()
+            binding.etDeliveryNote.isFocused -> binding.etDeliveryNote.clearFocus()
+            else -> {
+                updatePreferenceData()
+                super.onBackPressed()
+            }
         }
+//        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+//            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
+//        } else {
+//            updatePreferenceData()
+//            super.onBackPressed()
+////            if (viewModel.navigateToPage == PRODUCTS) {
+////                finish()
+////            } else {
+////                Intent(this, ShoppingMainActivity::class.java).also {
+////                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
+////                    startActivity(it)
+////                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+////                    finish()
+////                }
+////            }
+//        }
     }
 
     override fun onDestroy() {
@@ -723,5 +738,23 @@ class InvoiceActivity :
                 viewModel.updateAddress(address)
             }
         }
+    }
+
+    //function to remove focus of edit text when clicked outside
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            val v = currentFocus
+            if (v is EditText) {
+                val outRect = Rect()
+                v.getGlobalVisibleRect(outRect)
+                if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                    v.clearFocus()
+                    val imm: InputMethodManager =
+                        getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event)
     }
 }

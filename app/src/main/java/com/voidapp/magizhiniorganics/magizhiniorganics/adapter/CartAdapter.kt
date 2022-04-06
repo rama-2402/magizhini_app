@@ -16,14 +16,19 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadOutAnimation
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
 
 class CartAdapter(
     val context: Context,
@@ -35,13 +40,13 @@ class CartAdapter(
         //small discount layout in the thumbnail
         val cart: ConstraintLayout = itemView.findViewById(R.id.clCart)
         val productThumbNail: ShapeableImageView = itemView.findViewById(R.id.ivProductThumbnail)
-        val discountType: TextView = itemView.findViewById<TextView>(R.id.tvDiscountType)
 
         //details views
         val productName: TextView = itemView.findViewById<TextView>(R.id.tvProductName)
         val price: TextView = itemView.findViewById<TextView>(R.id.tvDiscount)
         val discountedAmount: TextView = itemView.findViewById<TextView>(R.id.tvPrice)
-        val variants: Spinner = itemView.findViewById<Spinner>(R.id.spProductVariant)
+        val variantName: TextView = itemView.findViewById<TextView>(R.id.tvProductVariant)
+        val discountBanner: TextView = itemView.findViewById(R.id.tvDiscountAmt)
 
         //val addItem = itemView.findViewById<Chip>(R.id.cpAddItem)
         val add: ShapeableImageView = itemView.findViewById(R.id.ivAdd)
@@ -69,9 +74,10 @@ class CartAdapter(
 
         holder.productName.text = cartItem.productName
         holder.orderCount.text = cartItem.quantity.toString()
-
-        val variantArray = arrayListOf<String>()
-        var price = 0F
+        holder.variantName.text = "Quantity: ${getVariantType(cartItem.variant)}"
+        setDiscountedValues(holder, cartItem.price, cartItem.originalPrice)
+//        val variantArray = arrayListOf<String>()
+//        var price = 0F
 
         //we are picking only the variant added to cart by checking if the variant name is contained in
         //the variant array list in tha constructor and setting only that variant name for the adapter
@@ -83,15 +89,17 @@ class CartAdapter(
 //            }
 //        }
 
-        variantArray.add(cartItem.variant)
-        price = cartItem.price
-        val adapter =
-            ArrayAdapter(holder.variants.context, R.layout.support_simple_spinner_dropdown_item, variantArray)
-        holder.variants.adapter = adapter
+//        variantArray.add(cartItem.variant)
+//        price = cartItem.price
 
-        holder.discountedAmount.text = "Rs. $price"
-        holder.price.text = "Rs. ${cartItem.originalPrice}"
-        holder.price.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+//        holder.discountedAmount.text = "Rs. $price"
+//        if (cartItem.originalPrice != cartItem.price) {
+//            holder.price.visibility = View.VISIBLE
+//            holder.price.text = "Rs. ${cartItem.originalPrice}"
+//            holder.price.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+//        } else {
+//            holder.price.visibility = View.GONE
+//        }
 
         holder.productThumbNail.setOnClickListener {
             when(viewModel) {
@@ -147,6 +155,44 @@ class CartAdapter(
     override fun getItemCount(): Int {
         return cartItems.size
     }
+
+    private fun getVariantType(variantName: String): String {
+        val variantArray = variantName.split(" ")
+        return when(variantArray[1]) {
+            "Kilogram" -> "${variantArray[0]} Kg"
+            "Gram" -> "${variantArray[0]} g"
+            "Liter" -> "${variantArray[0]} l"
+            "Unit" -> "${variantArray[0]} Unit"
+            else -> "${variantArray[0]} ml"
+        }
+    }
+
+    private fun setDiscountedValues(
+        holder: CartViewHolder,
+        discountPrice: Float,
+        originalPrice: Float
+    ) {
+        holder.apply {
+            //setting up the product discount info
+            if (discountPrice != originalPrice) {
+                discountBanner.setTextAnimation(
+                    "${getDiscountPercent(originalPrice, discountPrice).toInt()}% Off",
+                    200
+                )
+                discountedAmount.text = "Rs. $discountPrice"
+                price.visibility = View.VISIBLE
+                price.text = "Rs. $originalPrice"
+                price.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+            } else {
+                discountBanner.fadOutAnimation()
+                discountedAmount.text = "Rs. $originalPrice"
+                price.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun getDiscountPercent(price: Float, discountPrice: Float): Float
+            = ((price-discountPrice)/price)*100
 
     fun deleteCartItem(position: Int) {
         val items = cartItems.map { it.copy() } as MutableList

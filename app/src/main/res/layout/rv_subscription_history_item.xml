@@ -21,7 +21,7 @@
         android:elevation="@dimen/material_size_2"
         android:padding="@dimen/material_size_4"
         android:text="Rs: 00.00 - Due On: 00/00/0000"
-        android:textColor="@color/green_olive"
+        android:textColor="@color/green_base"
         android:textSize="14sp"
         android:textStyle="bold"
         android:layout_marginTop="@dimen/material_size_8"

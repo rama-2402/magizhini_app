@@ -52,7 +52,7 @@
                         app:ibv_fixedBadgeRadius="8dp"
                         app:ibv_badgeTextStyle="bold"
                         app:ibv_badgeTextColor="#ffffff"
-                        app:ibv_badgeColor="@color/matteRed"
+                        app:ibv_badgeColor="@color/complementary_orange"
                         app:ibv_badgeLimitValue="false"
                         android:src="@drawable/ic_notify_off"
                         app:tint="@color/white"/>
@@ -101,6 +101,7 @@
                         app:imageScaleType="fitXY"
                         app:showNavigationButtons="false"
                         app:showTopShadow="false"/>
+
                     <LinearLayout
                         android:id="@+id/stickyCategory"
                         android:layout_width="match_parent"
@@ -129,12 +130,31 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/material_size_8"
-                            android:backgroundTint="@color/green_base"
+                            android:backgroundTint="@color/matteRed"
                             android:text="Show All"
                             android:textColor="@color/white"
                             app:chipCornerRadius="@dimen/material_size_8" />
                     </LinearLayout>
-
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/flShimmerPlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:shimmer_auto_start="true"
+                        >
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
+                            <include
+                                layout="@layout/shimmer_home_products"/>
+                            <include
+                                layout="@layout/shimmer_home_products"/>
+                            <include
+                                layout="@layout/shimmer_home_products"/>
+                            <include
+                                layout="@layout/shimmer_home_products"/>
+                        </LinearLayout>
+                    </com.facebook.shimmer.ShimmerFrameLayout>
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvHomeItems"
                         android:layout_width="match_parent"
@@ -177,8 +197,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/material_size_8"
-                            app:rippleColor="@color/green_base"
-                            android:backgroundTint="@color/green_base"
+                            app:rippleColor="@color/matteRed"
+                            android:backgroundTint="@color/matteRed"
                             android:text="Go Shopping"
                             android:textColor="@color/white"
                             app:chipCornerRadius="@dimen/material_size_8"
@@ -237,6 +257,7 @@
                         android:background="@color/white"
                         android:orientation="horizontal"
                         android:tag="sticky"
+                        android:visibility="invisible"
                         android:weightSum="4">
                         <TextView
                             android:id="@+id/tvFollowUs"
@@ -252,7 +273,9 @@
                             android:textStyle="italic" />
                     </LinearLayout>
                     <HorizontalScrollView
+                        android:id="@+id/llSocials"
                         android:layout_width="wrap_content"
+                        android:visibility="invisible"
                         android:layout_height="wrap_content"
                         >
                         <LinearLayout
@@ -301,7 +324,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="24dp"
                 android:src="@drawable/ic_cart"
-                app:backgroundTint="@color/green_base"
+                app:backgroundTint="@color/matteRed"
                 app:fabSize="normal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -320,7 +343,7 @@
             app:menu="@menu/nav_menu"
             android:backgroundTint="@color/white"
             app:itemTextColor="@color/gray700"
-            app:itemIconTint="@color/green_base"
+            app:itemIconTint="@color/matteRed"
             />
 
     </androidx.drawerlayout.widget.DrawerLayout>

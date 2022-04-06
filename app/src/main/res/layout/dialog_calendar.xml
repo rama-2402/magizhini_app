@@ -153,7 +153,7 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:background="@drawable/shape_round_rectangle_16"
-                android:backgroundTint="@color/matteRed"
+                android:backgroundTint="@color/red900"
                 android:layout_marginEnd="@dimen/material_size_4"
                 app:layout_constraintEnd_toStartOf="@id/tvCancelled"
                 app:layout_constraintTop_toTopOf="@id/tvCancelled"

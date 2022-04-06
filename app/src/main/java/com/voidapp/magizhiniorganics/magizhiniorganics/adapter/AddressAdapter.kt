@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +44,7 @@ class AddressAdapter(
             val address = addressList[position]
             if (position == checkedAddressPosition) {
                 holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
+                holder.uncheck.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(holder.uncheck.context, R.color.matteRed))
             } else {
                 holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_uncheck))
             }
@@ -76,6 +78,7 @@ class AddressAdapter(
 
         holder.uncheck.setOnClickListener {
             holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
+            holder.uncheck.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(holder.uncheck.context, R.color.matteRed))
             holder.uncheck.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
             onItemClickListener.selectedAddress(position)
         }

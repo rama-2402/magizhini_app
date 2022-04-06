@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
@@ -132,6 +133,35 @@ class DishActivity :
                     binding.youtubePlayerView.visible()
                 }
             }
+            tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    when(tab?.position) {
+                        0 -> {
+                            tab.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.matteRed))
+                            binding.tlTabLayout.getTabAt(1)?.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.green_base))
+                            binding.tlTabLayout.getTabAt(2)?.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.green_base))
+                        }
+                        1 -> {
+                            tab.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.matteRed))
+                            binding.tlTabLayout.getTabAt(0)?.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.green_base))
+                            binding.tlTabLayout.getTabAt(2)?.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.green_base))
+                        }
+                        2 -> {
+                            tab.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.matteRed))
+                            binding.tlTabLayout.getTabAt(0)?.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.green_base))
+                            binding.tlTabLayout.getTabAt(1)?.icon?.setTint(ContextCompat.getColor(this@DishActivity, R.color.green_base))
+                        }
+                    }
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+
+                }
+            })
         }
     }
 
@@ -254,7 +284,10 @@ class DishActivity :
         binding.vpFragmentContent.adapter = adapter
         TabLayoutMediator(binding.tlTabLayout, binding.vpFragmentContent) { tab, position ->
             when(position) {
-                0 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_reviews)
+                0 -> {
+                    tab.icon = ContextCompat.getDrawable(this, R.drawable.ic_reviews)
+                    tab.icon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
+                }
                 1 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_write_review)
             }
         }.attach()

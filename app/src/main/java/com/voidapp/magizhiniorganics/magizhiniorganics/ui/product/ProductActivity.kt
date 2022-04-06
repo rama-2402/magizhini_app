@@ -27,6 +27,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
@@ -84,10 +85,11 @@ class ProductActivity :
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_product)
-        viewModel = ViewModelProvider(this, factory).get(ProductViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory)[ProductViewModel::class.java]
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding.tbCollapsedToolbar.navigationIcon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
         title = ""
         binding.tvProductName.text = intent.getStringExtra(PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
@@ -464,6 +466,35 @@ class ProductActivity :
                 ""
             }
         })
+        binding.tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                when(tab?.position) {
+                    0 -> {
+                        tab.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.matteRed))
+                        binding.tlTabLayout.getTabAt(1)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                        binding.tlTabLayout.getTabAt(2)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                    }
+                    1 -> {
+                        tab.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.matteRed))
+                        binding.tlTabLayout.getTabAt(0)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                        binding.tlTabLayout.getTabAt(2)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                    }
+                    2 -> {
+                        tab.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.matteRed))
+                        binding.tlTabLayout.getTabAt(0)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                        binding.tlTabLayout.getTabAt(1)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                    }
+                }
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+
+            }
+        })
     }
 
     private fun populateProductData(isFirstCall: Boolean = false) {
@@ -499,8 +530,10 @@ class ProductActivity :
         //setting the favorties icon for the products
         if (isFavorite) {
             binding.ivFavourite.setImageResource(R.drawable.ic_favorite_filled)
+            binding.ivFavourite.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
         } else {
             binding.ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
+            binding.ivFavourite.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
         }
     }
 
@@ -605,16 +638,14 @@ class ProductActivity :
     private fun setRemoveButton() {
         with(binding.btnAdd) {
             text = "Remove"
-            setIconResource(R.drawable.ic_delete)
-            setBackgroundColor(ContextCompat.getColor(baseContext, R.color.matteRed))
+            backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(baseContext, R.color.matteRed))
         }
     }
 
     private fun setAddButton() {
         with(binding.btnAdd) {
             text = "Add"
-            setIconResource(R.drawable.ic_add)
-            setBackgroundColor(ContextCompat.getColor(baseContext, R.color.green_base))
+            backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(baseContext, R.color.green_base))
         }
     }
 
@@ -623,9 +654,18 @@ class ProductActivity :
         binding.vpFragmentContent.adapter = adapter
         TabLayoutMediator(binding.tlTabLayout, binding.vpFragmentContent) { tab, position ->
             when(position) {
-                0 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_about_us)
-                1 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_reviews)
-                2 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_write_review)
+                0 -> {
+                    tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_about_us)
+                    tab.icon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
+                }
+                1 -> {
+                    tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_reviews)
+//                    tab.icon?.setTint(ContextCompat.getColor(this, R.color.green_base))
+                }
+                2 -> {
+                    tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_write_review)
+//                    tab.icon?.setTint(ContextCompat.getColor(this, R.color.green_base))
+                }
             }
         }.attach()
     }

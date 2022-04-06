@@ -11,5 +11,9 @@ data class PinCodesEntity (
     @ColumnInfo
     var areaCode: String = "",
     @ColumnInfo
-    var deliveryCharge: Int = 0
+    var deliveryCharge: Int = 0,
+    @ColumnInfo
+    var deliveryAvailable: Boolean = true,
+    @ColumnInfo
+    var extras: ArrayList<String> = arrayListOf()
 )

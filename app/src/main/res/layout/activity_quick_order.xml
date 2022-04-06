@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/green100"
+        android:background="@color/green_light"
         tools:context=".ui.quickOrder.QuickOrderActivity">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -42,7 +42,7 @@
                     android:src="@drawable/ic_back"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                    app:tint="@color/white"
+                    app:tint="@color/matteRed"
                     android:layout_marginEnd="@dimen/material_size_16"/>
                 <TextView
                     android:id="@+id/tvToolbarTitle"

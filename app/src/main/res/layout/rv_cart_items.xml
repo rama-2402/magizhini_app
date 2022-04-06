@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="155dp"
     android:id="@+id/clCart"
+    android:foreground="?android:selectableItemBackgroundBorderless"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white">
@@ -27,6 +28,7 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_app_placeholder"
             android:background="?android:attr/selectableItemBackground"
+            android:foreground="?android:attr/selectableItemBackground"
             app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
             />
         <View
@@ -56,73 +58,22 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/clDiscountLayout"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:visibility="gone"
-            android:layout_margin="@dimen/material_size_4"
-            android:background="@drawable/shape_round_rectangle_6"
-            android:backgroundTint="@color/green_base"
-            android:elevation="@dimen/material_size_4"
+        <TextView
+            android:id="@+id/tvDiscountAmt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#2E85B6"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:elevation="@dimen/material_size_2"
+            android:padding="@dimen/material_size_4"
+            android:paddingStart="@dimen/material_size_8"
+            android:paddingEnd="@dimen/material_size_8"
+            android:background="@drawable/bg_discount"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/tvUpto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/material_size_4"
-                android:text="UPTO"
-                android:textColor="@color/white"
-                android:textSize="6sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="SmallSp" />
-
-            <TextView
-                android:id="@+id/tvDiscountAmt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="50"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tvDiscountType"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.523"
-                tools:ignore="SmallSp" />
-
-            <TextView
-                android:id="@+id/tvDiscountType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/material_size_2"
-                android:text="%"
-                android:textColor="@color/white"
-                android:textSize="7sp"
-                app:layout_constraintBottom_toBottomOf="@id/tvDiscountAmt"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/tvDiscountAmt"
-                tools:ignore="SmallSp" />
-
-            <TextView
-                android:id="@+id/tvOff"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/material_size_4"
-                android:text="Off"
-                android:textColor="@color/white"
-                android:textSize="6sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:ignore="SmallSp" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="SmallSp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
@@ -130,11 +81,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="somename"
-        android:textColor="@color/black"
+        android:textColor="@color/gray700"
         android:fontFamily="@font/roboto"
+        android:textStyle="bold"
         android:textSize="16sp"
-        android:singleLine="true"
-        android:ellipsize="end"
+        android:singleLine="false"
+        android:maxLines="2"
         android:layout_marginStart="@dimen/material_size_16"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/clProductItem"
@@ -150,26 +102,27 @@
         android:ellipsize="end"
         android:fontFamily="@font/roboto"
         android:singleLine="true"
-        android:text="Rs: 500"
-        android:textColor="@color/green_base"
+        android:text="Rs: 0.00"
+        android:textColor="@color/matteRed"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/clProductItem"
-        app:layout_constraintTop_toBottomOf="@id/tvProductName" />
+        app:layout_constraintTop_toBottomOf="@id/tvProductName"
+        app:layout_constraintBottom_toTopOf="@id/tvDiscount"/>
 
     <TextView
         android:id="@+id/tvDiscount"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:fontFamily="@font/roboto"
         android:singleLine="true"
-        android:text="Rs: 500"
-        android:textColor="@color/grey"
+        android:text=""
+        android:textColor="@color/green_base"
         android:textSize="14sp"
         android:textStyle="italic"
-        app:layout_constraintBottom_toTopOf="@+id/spProductVariant"
-        app:layout_constraintEnd_toEndOf="@+id/tvPrice"
+        app:layout_constraintBottom_toTopOf="@+id/tvProductVariant"
+        app:layout_constraintEnd_toStartOf="@+id/ivRemove"
         app:layout_constraintStart_toStartOf="@+id/tvPrice"
         app:layout_constraintTop_toBottomOf="@+id/tvPrice" />
 
@@ -182,7 +135,7 @@
         app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
         app:tint="@color/green_base"
         android:layout_marginEnd="@dimen/material_size_8"
-        app:layout_constraintBottom_toTopOf="@+id/spProductVariant"
+        app:layout_constraintBottom_toTopOf="@+id/tvProductVariant"
         app:layout_constraintEnd_toStartOf="@id/tvOrderCount"
         app:layout_constraintTop_toBottomOf="@+id/tvProductName"/>
 
@@ -198,7 +151,7 @@
         android:layout_marginStart="@dimen/material_size_8"
         android:layout_marginEnd="@dimen/material_size_8"
         app:layout_constraintEnd_toStartOf="@id/ivAdd"
-        app:layout_constraintBottom_toTopOf="@id/spProductVariant"
+        app:layout_constraintBottom_toTopOf="@id/tvProductVariant"
         app:layout_constraintTop_toBottomOf="@id/tvProductName"
 />
 
@@ -211,18 +164,18 @@
             app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:layout_marginEnd="@dimen/material_size_16"
-            app:layout_constraintBottom_toTopOf="@+id/spProductVariant"
+            app:layout_constraintBottom_toTopOf="@+id/tvProductVariant"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvProductName"/>
 
-    <Spinner
-        android:id="@+id/spProductVariant"
+    <TextView
+        android:id="@+id/tvProductVariant"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/material_size_8"
+        android:layout_marginStart="@dimen/material_size_16"
         android:layout_marginEnd="@dimen/material_size_8"
-        android:theme="@style/mySpinnerItemStyle"
-        android:popupBackground="@drawable/shape_round_rectangle_8"
+        android:textSize="16sp"
+        android:textColor="@color/green_base"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/ivDelete"
         app:layout_constraintStart_toEndOf="@id/clProductItem"
@@ -234,10 +187,10 @@
         android:layout_height="25dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-        app:layout_constraintTop_toTopOf="@id/spProductVariant"
-        app:layout_constraintBottom_toBottomOf="@id/spProductVariant"
+        app:layout_constraintTop_toTopOf="@id/tvProductVariant"
+        app:layout_constraintBottom_toBottomOf="@id/tvProductVariant"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/spProductVariant"
+        app:layout_constraintStart_toEndOf="@id/tvProductVariant"
         android:src="@drawable/ic_delete"
         android:layout_marginStart="@dimen/material_size_8"
         android:layout_marginEnd="@dimen/material_size_16"

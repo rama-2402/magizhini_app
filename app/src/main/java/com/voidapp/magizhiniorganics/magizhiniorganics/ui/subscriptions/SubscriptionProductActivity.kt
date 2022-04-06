@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
@@ -36,6 +37,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomSubDaysDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.DatePickerDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
@@ -75,6 +77,7 @@ class SubscriptionProductActivity :
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding.tbCollapsedToolbar.navigationIcon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
         title = ""
         binding.tvProductName.text = intent.getStringExtra(Constants.PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
@@ -125,7 +128,10 @@ class SubscriptionProductActivity :
         binding.vpFragmentContent.adapter = adapter
         TabLayoutMediator(binding.tlTabLayout, binding.vpFragmentContent) { tab, position ->
             when(position) {
-                0 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_about_us)
+                0 -> {
+                    tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_about_us)
+                    tab.icon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
+                }
                 1 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_reviews)
                 2 -> tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_write_review)
             }
@@ -229,6 +235,35 @@ class SubscriptionProductActivity :
             ivInfo.setOnClickListener {
                 showDescriptionBs(resources.getString(R.string.subscription_info))
             }
+            tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    when(tab?.position) {
+                        0 -> {
+                            tab.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.matteRed))
+                            binding.tlTabLayout.getTabAt(1)?.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.green_base))
+                            binding.tlTabLayout.getTabAt(2)?.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.green_base))
+                        }
+                        1 -> {
+                            tab.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.matteRed))
+                            binding.tlTabLayout.getTabAt(0)?.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.green_base))
+                            binding.tlTabLayout.getTabAt(2)?.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.green_base))
+                        }
+                        2 -> {
+                            tab.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.matteRed))
+                            binding.tlTabLayout.getTabAt(0)?.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.green_base))
+                            binding.tlTabLayout.getTabAt(1)?.icon?.setTint(ContextCompat.getColor(this@SubscriptionProductActivity, R.color.green_base))
+                        }
+                    }
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+
+                }
+            })
         }
     }
 

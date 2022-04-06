@@ -37,11 +37,11 @@
             android:layout_margin="@dimen/material_size_4"
             android:foreground="?android:attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_play"
-            android:background="@color/transparent_bg"
+            android:background="@color/green_base"
             app:layout_constraintBottom_toBottomOf="@id/ivThumbnail"
             app:layout_constraintEnd_toEndOf="@id/ivThumbnail"
             app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-            app:tint="@color/green_base" />
+            app:tint="@color/matteRed" />
 
         <TextView
             android:id="@+id/tvMessage"

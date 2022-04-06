@@ -158,22 +158,6 @@
                         app:layout_constraintTop_toBottomOf="@id/spVariants" />
 
                     <TextView
-                        android:id="@+id/tvOriginalPrice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/material_size_8"
-                        android:ellipsize="end"
-                        android:fontFamily="@font/roboto"
-                        android:singleLine="true"
-                        android:text="(incl GST)"
-                        android:textColor="@color/grey"
-                        android:textSize="14sp"
-                        android:textStyle="italic"
-                        app:layout_constraintBottom_toBottomOf="@id/tvDiscountedPrice"
-                        app:layout_constraintStart_toEndOf="@id/tvDiscountedPrice"
-                        app:layout_constraintTop_toTopOf="@id/tvDiscountedPrice" />
-
-                    <TextView
                         android:id="@+id/tvDiscountedPrice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -181,7 +165,7 @@
                         android:ellipsize="end"
                         android:fontFamily="@font/roboto"
                         android:singleLine="true"
-                        android:text="Rs.5000"
+                        android:text="Rs.0"
                         android:textColor="@color/gray700"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -307,7 +291,7 @@
                         android:fontFamily="@font/roboto"
                         android:singleLine="true"
                         android:text="Rs: 0.00"
-                        android:textColor="@color/gray700"
+                        android:textColor="@color/matteRed"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="@id/spSubscriptionType"
@@ -613,8 +597,9 @@
                     app:tabGravity="fill"
                     app:tabInlineLabel="true"
                     app:tabMode="fixed"
+                    app:tabRippleColor="@color/matteRed"
                     android:background="@drawable/shape_round_rectangle_8"
-                    app:tabIndicatorColor="@color/green_base"
+                    app:tabIndicatorColor="@color/matteRed"
                     app:tabIconTint="@color/green_base" />
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/vpFragmentContent"

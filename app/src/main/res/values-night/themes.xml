@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.MagizhiniOrganics" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.MagizhiniOrganics" parent="Theme.MaterialComponents.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/green_base</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
@@ -27,7 +27,7 @@
     </style>
 
     <!--    No ActionBar theme-->
-    <style name="Theme.MagizhiniOrganics.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.MagizhiniOrganics.NoActionBar" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <item name="android:windowBackground">@color/grey</item>
         <item name="android:statusBarColor">@color/green_base</item>
@@ -46,13 +46,22 @@
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <item name="bottomSheetStyle">@style/bottomSheetStyleWrapper</item>
         <item name="android:textColor">@color/gray700</item>
-
     </style>
 
     <style name="bottomSheetStyleWrapper" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:textColor">@color/gray700</item>
+    </style>
+
+    <!--    Date picker-->
+    <style name="pickerDialogDark" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@drawable/shape_round_rectangle_16</item>
+        <item name="android:background">@color/green_base</item>
+        <item name="android:dialogCornerRadius" tools:targetApi="q">@dimen/material_size_16</item>
+        <item name="colorAccent">@color/matteRed</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="colorPrimary">@color/matteRed</item>
     </style>
 
     <!--    Theme for custom action bar-->

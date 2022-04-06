@@ -23,6 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             android:padding="@dimen/material_size_8"
+            android:background="@color/green_base"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
@@ -38,6 +39,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_marginStart="@dimen/material_size_8"
+                app:tint="@color/matteRed"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
 
@@ -63,7 +65,7 @@
                 android:lines="1"
                 android:singleLine="true"
                 android:text="Jane Doe"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textStyle="normal"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toTopOf="@+id/tvStatus"
@@ -80,7 +82,7 @@
                 android:fontFamily="@font/roboto"
                 android:text="Online"
                 android:textSize="14sp"
-                android:textColor="@color/grey"
+                android:textColor="@color/matteRed"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/ivProfileImage"
                 app:layout_constraintTop_toBottomOf="@+id/tvProfileName"
@@ -94,7 +96,7 @@
                 android:scaleType="center"
                 android:layout_marginEnd="@dimen/material_size_4"
                 android:src="@drawable/ic_phone_msg"
-                app:tint="@color/green_base"
+                app:tint="@color/white"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -133,6 +135,7 @@
                 style="@style/roundedImageViewRounded"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                app:tint="@color/green_base"
                 android:src="@drawable/ic_attach_picture" />
 
             <EditText
@@ -156,7 +159,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@drawable/ic_send"
-                app:tint="@color/matteGreen" />
+                app:tint="@color/matteRed" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

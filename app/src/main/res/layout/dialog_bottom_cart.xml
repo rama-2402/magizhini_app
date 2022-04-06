@@ -31,7 +31,7 @@
         android:orientation="vertical"
         android:background="@drawable/shape_round_rectangle_16"
         android:backgroundTint="@color/gray50"
-        android:layout_marginTop="@dimen/material_size_8"
+        android:layout_marginTop="@dimen/material_size_12"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -68,7 +68,7 @@
                         app:ibv_fixedBadgeRadius="8dp"
                         app:ibv_badgeTextStyle="bold"
                         app:ibv_badgeTextColor="#ffffff"
-                        app:ibv_badgeColor="@color/matteRed"
+                        app:ibv_badgeColor="@color/complementary_orange"
                         app:ibv_badgeLimitValue="false"
                         android:src="@drawable/ic_cart"
                         app:tint="@color/green_base"/>
@@ -105,9 +105,9 @@
                         <ImageView
                             android:id="@+id/ivCheckOut"
                             android:layout_width="45dp"
-                            android:layout_height="45dp"
+                            android:layout_height="wrap_content"
                             android:background="@drawable/shape_round_rectangle_8"
-                            android:backgroundTint="@color/green_base"
+                            android:backgroundTint="@color/transparent"
                             android:scaleType="centerInside"
                             android:src="@drawable/ic_order"
                             app:tint="@color/white" />

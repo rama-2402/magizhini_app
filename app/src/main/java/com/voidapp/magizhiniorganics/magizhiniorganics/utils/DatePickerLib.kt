@@ -3,6 +3,9 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.res.ColorStateList
+import androidx.core.content.ContextCompat
+import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import java.util.*
@@ -12,7 +15,7 @@ object DatePickerLib {
 
     fun showCalendar(context: Context, activity: Activity, minDate: Long?, maxDate: Long?, selectedDate: HashMap<String, Long>?) {
         val calendar = Calendar.getInstance()
-        val dialog = DatePickerDialog(context, { _, year, month, day_of_month ->
+        val dialog = DatePickerDialog(context, R.style.pickerDialogDark, { _, year, month, day_of_month ->
             calendar[Calendar.YEAR] = year
             calendar[Calendar.MONTH] = month
             calendar[Calendar.DAY_OF_MONTH] = day_of_month
@@ -32,7 +35,9 @@ object DatePickerLib {
         maxDate?.let {
             dialog.datePicker.maxDate = it
         }
+//        dialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(negativeColor);
         dialog.show()
+        dialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.matteRed)))
     }
 
     private fun selectedCalendarDate(activity: Activity, date: Long) {

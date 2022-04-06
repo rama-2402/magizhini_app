@@ -35,7 +35,7 @@ import org.kodein.di.Volatile
         TestimonialsEntity::class
                ],
 
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

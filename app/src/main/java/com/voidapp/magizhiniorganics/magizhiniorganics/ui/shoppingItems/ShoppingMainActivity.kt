@@ -13,10 +13,12 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.MenuItemCompat
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -56,6 +58,7 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
 import java.util.*
+
 
 class ShoppingMainActivity :
     BaseActivity(),
@@ -266,7 +269,7 @@ class ShoppingMainActivity :
     private fun hideShimmer() {
         with(binding) {
             flShimmerPlaceholder.remove()
-            binding.flShimmerPlaceholder.stopShimmer()
+//            binding.flShimmerPlaceholder.stopShimmer()
             rvShoppingItems.visible()
         }
     }
@@ -412,7 +415,10 @@ class ShoppingMainActivity :
         menuInflater.inflate(R.menu.search, menu)
         item = menu?.findItem(R.id.btnSearch)
         item?.icon?.setTint(ContextCompat.getColor(this, R.color.white))
+
         val searchView = item?.actionView as androidx.appcompat.widget.SearchView
+
+        searchView.findViewById<ImageView>(R.id.search_close_btn).setColorFilter(ContextCompat.getColor(this, R.color.matteRed))
 
         searchView.setOnQueryTextListener(object :
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
@@ -483,7 +489,8 @@ class ShoppingMainActivity :
             false,
             this
         )
-        binding.rvShoppingItems.layoutManager = LinearLayoutManager(this)
+//        binding.rvShoppingItems.layoutManager = LinearLayoutManager(this)
+        binding.rvShoppingItems.layoutManager = GridLayoutManager(this, 2)
         binding.rvShoppingItems.adapter = adapter
         binding.rvShoppingItems.setHasFixedSize(true)
     }

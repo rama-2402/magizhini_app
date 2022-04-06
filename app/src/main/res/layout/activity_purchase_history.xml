@@ -48,7 +48,7 @@
                         android:padding="@dimen/material_size_4"
                         android:src="@drawable/ic_back"
                         app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                        app:tint="@color/white" />
+                        app:tint="@color/matteRed" />
 
                     <TextView
                         android:id="@+id/tvToolbarTitle"

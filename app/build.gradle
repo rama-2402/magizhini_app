@@ -186,5 +186,5 @@ dependencies {
     //zoom image    https://github.com/MikeOrtiz/TouchImageView
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
 
-
+//    implementation 'androidx.palette:palette-ktx:1.0.0'
 }

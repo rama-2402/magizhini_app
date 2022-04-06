@@ -56,11 +56,6 @@ class PurchaseHistoryActivity :
 
     private lateinit var ordersAdapter: PurchaseHistoryAdapter
     private lateinit var orderItemsAdapter: OrderItemsAdapter
-    private var mOrderHistory: MutableList<OrderEntity> = mutableListOf()
-
-//    private var mCancelOrder = OrderEntity()
-//    private var mCancelOrderPosition = 0
-//    private var mInvoiceOrder = OrderEntity()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,7 +114,7 @@ class PurchaseHistoryActivity :
         viewModel.uiUpdate.observe(this) { event ->
             when(event) {
                 is PurchaseHistoryViewModel.UiUpdate.PopulatePurchaseHistory -> {
-                    binding.tvToolbarTitle.text = "${viewModel.filterMonth}${viewModel.filterYear}"
+                    binding.tvToolbarTitle.text = "${viewModel.filterMonth} ${viewModel.filterYear}"
                     /*
                     * If purchase history is null and message is null -> no history available
                     * if purchase history null and message non null -> some error occurred

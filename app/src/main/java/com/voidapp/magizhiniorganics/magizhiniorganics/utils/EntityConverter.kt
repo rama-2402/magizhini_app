@@ -148,7 +148,9 @@ fun Cart.toCartEntity() = CartEntity(
 fun PinCodes.toPinCodesEntity() = PinCodesEntity(
     id = id,
     areaCode = areaCode,
-    deliveryCharge = deliveryCharge
+    deliveryCharge = deliveryCharge,
+    deliveryAvailable = deliveryAvailable,
+    extras = extras
 )
 
 fun Subscription.toSubscriptionEntity() = SubscriptionEntity(

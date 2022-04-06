@@ -28,17 +28,17 @@
         android:layout_marginBottom="@dimen/material_size_16"
         android:layout_weight="1"
         android:hint="Referrer Phone Number"
-        app:boxStrokeColor="@color/green_base"
+        app:boxStrokeColor="@color/matteRed"
         app:flow_wrapMode="aligned"
         app:endIconMode="clear_text"
         android:textColorHint="@color/grey"
-        app:hintTextColor="@color/green_base"
+        app:hintTextColor="@color/matteRed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivBottomSheetIndicator"
         app:layout_constraintEnd_toStartOf="@id/btnApply"
         app:startIconDrawable="@drawable/ic_phone_msg"
-        app:startIconTint="@color/green_base">
+        app:startIconTint="@color/matteRed">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etReferralNumber"
@@ -53,13 +53,20 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.button.MaterialButton
+    <TextView
         android:id="@+id/btnApply"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="apply"
+        android:text="Apply"
         app:backgroundTint="@color/green_base"
+        android:background="@drawable/shape_round_rectangle_8"
         android:layout_marginEnd="@dimen/material_size_8"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:paddingStart="@dimen/material_size_24"
+        android:paddingEnd="@dimen/material_size_24"
+        android:paddingTop="@dimen/material_size_12"
+        android:paddingBottom="@dimen/material_size_12"
         app:layout_constraintTop_toTopOf="@id/etlReferralNumber"
         app:layout_constraintBottom_toBottomOf="@id/etlReferralNumber"
         app:layout_constraintStart_toEndOf="@id/etlReferralNumber"

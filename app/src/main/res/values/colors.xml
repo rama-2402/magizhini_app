@@ -10,12 +10,18 @@
 
     //app color themes
 <!--    <color name="green_base">#4e992e</color>-->
-<!--    <color name="green_base">#265E65</color>-->
-    <color name="green_base">#86C232</color>
+<!--    <color name="green_base">#0b5350</color>-->
+<!--    265E65-->
+    <color name="green_base">#2B6A71</color>
+    <color name="complementary_orange">#fd7c05</color>
+<!--    <color name="green_base">#86C232</color>-->
     <color name="green_base_transparent">#2386C232</color>
-    <color name="green_light">#E9FAD0</color>
+<!--    <color name="green_light">#E9FAD0</color>-->
+    <color name="green_light">#D3F6FB</color>
     <color name="green_base_dark">#254000</color>
-    <color name="matteRed">#FF5B5B</color>
+<!--    <color name="matteRed">#FF5B5B</color>-->
+<!--    <color name="matteRed">#fd7c05</color>-->
+    <color name="matteRed">#FFA450</color>
     <color name="matteGreen">#AED48B</color>
     <color name="green_olive">#556B2F</color>
 

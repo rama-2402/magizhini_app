@@ -147,7 +147,7 @@
         android:scrollHorizontally="true"
         android:singleLine="true"
         android:text="1 Kg - Rs: 1000.0"
-        android:textColor="@color/gray700"
+        android:textColor="@color/green_base"
         android:gravity="center"
         android:textSize="16sp"
         android:textStyle="bold"

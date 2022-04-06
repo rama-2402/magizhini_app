@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogDataPickerBinding
@@ -17,16 +18,16 @@ class DatePickerDialog: DialogFragment() {
     private var _binding: DialogDataPickerBinding? = null
     private val binding get() = _binding!!
 
-    private var calendar: Calendar? = null
-    private var year: Int = 0
-    private var month: Int = 0
-    private var day: Int = 0
+//    private var calendar: Calendar? = null
+//    private var year: Int = 0
+//    private var month: Int = 0
+//    private var day: Int = 0
 
     companion object {
         fun newInstance(startDateLong: Long?, endDateLong: Long?): DatePickerDialog {
             val args = Bundle()
             startDateLong?.let {
-                args.putLong("start", startDateLong)
+                args.putLong("start", it)
             }
             endDateLong?.let {
                 args.putLong("end", it)
@@ -54,10 +55,10 @@ class DatePickerDialog: DialogFragment() {
         val startDate = arguments?.getLong("start")
         val endDate = arguments?.getLong("end")
 
-        calendar = Calendar.getInstance()
-        year = calendar?.get(Calendar.YEAR)!!
-        month = calendar?.get(Calendar.MONTH)!!
-        day = calendar?.get(Calendar.DAY_OF_MONTH)!!
+//        calendar = Calendar.getInstance()
+//        year = calendar?.get(Calendar.YEAR)!!
+//        month = calendar?.get(Calendar.MONTH)!!
+//        day = calendar?.get(Calendar.DAY_OF_MONTH)!!
 
         populateDatePicker(startDate, endDate)
 
@@ -65,17 +66,27 @@ class DatePickerDialog: DialogFragment() {
     }
 
     private fun populateDatePicker(startDate: Long?, endDate: Long?) {
+        val today = Calendar.getInstance()
         binding.apply {
-            endDate?.let {
-                datePicker.maxDate = it
+            datePicker.init(today.get(Calendar.YEAR), today.get(Calendar.MONTH),
+                today.get(Calendar.DAY_OF_MONTH)
+
+            ) { view, year, month, day ->
+                val month = month + 1
+                val msg = "You Selected: $day/$month/$year"
+                tvSelect.text = msg
+//                Toast.makeText(, msg, Toast.LENGTH_SHORT).show()
             }
-            startDate?.let {
-                datePicker.minDate = it
-            }
+//            endDate?.let {
+//                datePicker.maxDate = it
+//            }
+//            startDate?.let {
+//                datePicker.minDate = it
+//            }
 //            calendar?.set(datePicker.year, datePicker.month, datePicker.dayOfMonth)
 
             tvSelect.setOnClickListener {
-                Log.e("qw", "populateDatePicker: ${TimeUtil().getCustomDate(dateLong = calendar!!.timeInMillis)}", )
+//                Log.e("qw", "populateDatePicker: ${TimeUtil().getCustomDate(dateLong = calendar!!.timeInMillis)}", )
             }
         }
     }

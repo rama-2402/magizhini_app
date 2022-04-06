@@ -278,7 +278,7 @@ class SubscriptionHistoryActivity :
         view.tvMonth.text = month.format(System.currentTimeMillis())
 
         for (date in sub.cancelledDates) {
-            val event = Event(resources.getColor(R.color.matteRed, theme), date, "Cancelled")
+            val event = Event(resources.getColor(R.color.red900, theme), date, "Cancelled")
             cancelDates.add(TimeUtil().getCustomDate(dateLong = date))      //we are creating list of date strings to check
             view.calendarView.addEvent(event)
         }

@@ -39,7 +39,7 @@
                         android:src="@drawable/ic_back"
                         android:background="?android:attr/selectableItemBackgroundBorderless"
                         app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                        app:tint="@color/white"
+                        app:tint="@color/matteRed"
                         android:layout_marginEnd="@dimen/material_size_16"/>
                     <TextView
                         android:id="@+id/tvToolbarTitle"
@@ -77,9 +77,13 @@
                     app:tabGravity="fill"
                     app:tabInlineLabel="true"
                     app:tabMode="fixed"
+                    app:tabIndicatorColor="@color/matteRed"
+                    app:tabRippleColor="@color/matteRed"
+                    app:tabTextColor="@color/green_base"
+                    app:tabIconTint="@color/green_base"
+                    app:tabSelectedTextColor="@color/matteRed"
                     android:background="@drawable/shape_round_rectangle_8"
-                    app:tabIndicatorColor="@color/green_base"
-                    app:tabIconTint="@color/green_base" />
+                    />
                 <ScrollView
                     android:id="@+id/svReviews"
                     android:layout_width="match_parent"

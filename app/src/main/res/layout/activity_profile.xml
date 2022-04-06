@@ -83,14 +83,14 @@
                     android:layout_height="wrap_content"
                     android:hint="Name"
                     android:paddingRight="8dp"
-                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeColor="@color/matteRed"
                     app:flow_wrapMode="aligned"
                     app:endIconMode="clear_text"
                     app:endIconTint="@color/white"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:startIconDrawable="@drawable/ic_person"
-                    app:hintTextColor="@color/white"
-                    app:startIconTint="@color/white">
+                    app:hintTextColor="@color/matteRed"
+                    app:startIconTint="@color/matteRed">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etProfileName"

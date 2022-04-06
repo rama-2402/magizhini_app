@@ -1,1 +1,1 @@
-package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsdata class PinCodes (    var id: String = "",    var areaCode: String = "",    var deliveryCharge: Int = 0)
+package com.voidapp.magizhiniorganics.magizhiniorganics.data.modelsimport androidx.room.ColumnInfodata class PinCodes (    var id: String = "",    var areaCode: String = "",    var deliveryCharge: Int = 0,    var deliveryAvailable: Boolean = true,    var extras: ArrayList<String> = arrayListOf())

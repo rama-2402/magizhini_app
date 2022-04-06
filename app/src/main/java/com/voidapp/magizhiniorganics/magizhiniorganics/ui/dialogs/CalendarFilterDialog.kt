@@ -10,7 +10,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCalendarFilterBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.CalendarFilerDialogClickListener
 
-class CalendarFilterDialog: DialogFragment(){
+class CalendarFilterDialog: DialogFragment() {
 
     companion object {
         private const val MAX_YEAR = 2050

@@ -345,7 +345,7 @@ class Firestore(
                 }
             } }
             val createNotification = async { UserNotification(
-                id = "",
+                id = currentUserID,
                 userID = currentUserID,
                 timestamp =  TimeUtil().getCurrentYearMonthDate().toString().toLong(),
                 title = "Referral Bonus",
@@ -1465,7 +1465,7 @@ class Firestore(
             mFireStore.collection(USER_NOTIFICATIONS)
                 .document(USER_NOTIFICATIONS)
                 .collection(notification.userID)
-                .document()
+                .document(notification.id)
                 .set(notification, SetOptions.merge())
                 .await()
             true

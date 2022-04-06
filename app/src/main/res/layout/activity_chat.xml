@@ -36,7 +36,7 @@
                 android:layout_width="@dimen/material_size_32"
                 android:layout_height="@dimen/material_size_32"
                 android:src="@drawable/ic_back"
-                app:tint="@color/white"
+                app:tint="@color/matteRed"
                 android:layout_marginStart="@dimen/material_size_12"
                 android:layout_marginEnd="@dimen/material_size_12"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
@@ -83,10 +83,11 @@
                 app:tabInlineLabel="true"
                 app:tabMode="fixed"
                 android:background="@color/green_base"
-                app:tabIndicatorColor="@color/white"
-                app:tabIconTint="@color/white"
-                app:tabSelectedTextColor="@color/white"
+                app:tabIndicatorColor="@color/matteRed"
+                app:tabRippleColor="@color/matteRed"
                 app:tabTextColor="@color/white"
+                app:tabIconTint="@color/white"
+                app:tabSelectedTextColor="@color/matteRed"
                 />
         </LinearLayout>
         <androidx.viewpager2.widget.ViewPager2

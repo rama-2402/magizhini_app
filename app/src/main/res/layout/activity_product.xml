@@ -164,21 +164,21 @@
                         app:layout_constraintTop_toTopOf="@id/tvDiscountedPrice"
                         app:layout_constraintStart_toEndOf="@id/tvDiscountedPrice"
                         app:layout_constraintBottom_toBottomOf="@id/tvDiscountedPrice"/>
-                    <TextView
-                        android:id="@+id/tvGST"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/material_size_8"
-                        android:ellipsize="end"
-                        android:fontFamily="@font/roboto"
-                        android:singleLine="true"
-                        android:text="(incl GST)"
-                        android:textStyle="italic"
-                        android:textColor="@color/grey"
-                        android:textSize="14sp"
-                        app:layout_constraintTop_toTopOf="@id/tvOriginalPrice"
-                        app:layout_constraintStart_toEndOf="@id/tvOriginalPrice"
-                        app:layout_constraintBottom_toBottomOf="@id/tvOriginalPrice"/>
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvGST"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginStart="@dimen/material_size_8"-->
+<!--                        android:ellipsize="end"-->
+<!--                        android:fontFamily="@font/roboto"-->
+<!--                        android:singleLine="true"-->
+<!--                        android:text="(incl GST)"-->
+<!--                        android:textStyle="italic"-->
+<!--                        android:textColor="@color/grey"-->
+<!--                        android:textSize="14sp"-->
+<!--                        app:layout_constraintTop_toTopOf="@id/tvOriginalPrice"-->
+<!--                        app:layout_constraintStart_toEndOf="@id/tvOriginalPrice"-->
+<!--                        app:layout_constraintBottom_toBottomOf="@id/tvOriginalPrice"/>-->
                     <TextView
                         android:id="@+id/tvDiscount"
                         android:layout_width="wrap_content"
@@ -188,7 +188,7 @@
                         android:fontFamily="@font/roboto"
                         android:singleLine="true"
                         android:text="Discount : "
-                        android:textColor="@color/green_base"
+                        android:textColor="@color/matteRed"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         app:layout_constraintTop_toBottomOf="@id/tvPrice"
@@ -201,8 +201,8 @@
                         android:ellipsize="end"
                         android:fontFamily="@font/roboto"
                         android:singleLine="true"
-                        android:text="22% Off"
-                        android:textColor="@color/green_base"
+                        android:text="0% Off"
+                        android:textColor="@color/matteRed"
                         android:textSize="14sp"
                         app:layout_constraintTop_toTopOf="@id/tvDiscount"
                         app:layout_constraintStart_toEndOf="@id/tvDiscount"
@@ -224,16 +224,21 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/ivFavourite" />
 
-                    <com.google.android.material.button.MaterialButton
+                    <TextView
                         android:id="@+id/btnAdd"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Add"
-                        app:icon="@drawable/ic_add_cart"
-                        android:backgroundTint="@color/green_base"
                         android:textColor="@color/white"
-                        app:iconTint="@color/white"
                         android:layout_marginEnd="@dimen/material_size_8"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:backgroundTint="@color/green_base"
+                        android:paddingStart="@dimen/material_size_32"
+                        android:paddingEnd="@dimen/material_size_32"
+                        android:paddingTop="@dimen/material_size_12"
+                        android:paddingBottom="@dimen/material_size_12"
                         app:layout_constraintStart_toEndOf="@id/spProductVariant"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/spProductVariant"
@@ -290,8 +295,11 @@
                         app:tabInlineLabel="true"
                         app:tabMode="fixed"
                         android:background="@drawable/shape_round_rectangle_8"
-                        app:tabIndicatorColor="@color/green_base"
-                        app:tabIconTint="@color/green_base" />
+                        app:tabIndicatorColor="@color/matteRed"
+                        app:tabRippleColor="@color/matteRed"
+                        app:tabTextColor="@color/green_base"
+                        app:tabIconTint="@color/green_base"
+                        app:tabSelectedTextColor="@color/matteRed"/>
                     <androidx.viewpager2.widget.ViewPager2
                         android:id="@+id/vpFragmentContent"
                         android:layout_width="match_parent"
