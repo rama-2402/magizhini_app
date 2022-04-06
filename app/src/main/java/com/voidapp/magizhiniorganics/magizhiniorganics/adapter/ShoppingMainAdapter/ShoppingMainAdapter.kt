@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -17,11 +18,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEnti
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVariant
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvShoppingMainItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OUT_OF_STOCK
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.DiffUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.imaginativeworld.whynotimagecarousel.utils.setImage
 
 
 open class ShoppingMainAdapter(
@@ -90,6 +94,11 @@ open class ShoppingMainAdapter(
                 setDiscountedValues(holder, product, 0)
             }
 
+            if (product.productType == SUBSCRIPTION) {
+                ivCart.setImageDrawable(ContextCompat.getDrawable(ivCart.context, R.drawable.ic_visible))
+                ivCart.imageTintList =  ColorStateList.valueOf(Color.WHITE)
+//                ivCart.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(ivCart.context, R.color.green_base))
+            }
 
 //            CoroutineScope(Dispatchers.IO).launch {
 //                val bitmap = Glide
@@ -234,24 +243,32 @@ open class ShoppingMainAdapter(
 
                 val maxOrderQuantity = product.variants[selectedVariant].inventory
 
-                if (productInCart) {
-                    onItemClickListener.deleteCartItemFromShoppingMain(product, variantName, position)
-                } else {
-                    val discountedPrice = if (product.variants[0].discountPrice == 0.0) {
-                        product.variants[0].variantPrice.toFloat()
-                    } else {
-                        product.variants[0].discountPrice.toFloat()
+                when {
+                    productInCart -> onItemClickListener.deleteCartItemFromShoppingMain(product, variantName, position)
+                    product.productType == SUBSCRIPTION -> onItemClickListener.navigateToProduct(product, ivProductThumbnail, position)
+                    else -> {
+                        if (product.variants[0].status == OUT_OF_STOCK) {
+                            Toast.makeText(context, "Product Out of Stock", Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+
+                        val discountedPrice = if (product.variants[0].discountPrice == 0.0) {
+                            product.variants[0].variantPrice.toFloat()
+                        } else {
+                            product.variants[0].discountPrice.toFloat()
+                        }
+                        onItemClickListener.upsertCartItem(
+                            product,
+                            position,
+                            variantName,
+                            1,
+                            discountedPrice,
+                            product.variants[0].variantPrice.toFloat(),
+                            selectedVariant,
+                            maxOrderQuantity
+                        )
                     }
-                    onItemClickListener.upsertCartItem(
-                                    product,
-                                    position,
-                                    variantName,
-                                    1,
-                                    discountedPrice,
-                                    product.variants[0].variantPrice.toFloat(),
-                                    selectedVariant,
-                                    maxOrderQuantity
-                                )
+
                 }
             }
 

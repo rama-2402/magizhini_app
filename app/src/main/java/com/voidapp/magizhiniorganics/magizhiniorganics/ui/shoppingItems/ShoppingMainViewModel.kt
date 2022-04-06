@@ -30,6 +30,8 @@ class ShoppingMainViewModel(
     var selectedProductPosition: Int? = null
     var shoppingMainListener: ShoppingMainAdapter.ShoppingMainListener? = null
 
+    val filteredItems: MutableList<ProductEntity> = mutableListOf()
+
     var selectedChip: String = Constants.ALL
     var selectedCategory: String = ""
     var profile: UserProfileEntity? = null
@@ -52,7 +54,7 @@ class ShoppingMainViewModel(
     val position: LiveData<Int> = _position
 
     var productToRefresh: ProductEntity? = null
-    private val currentProductsList: MutableList<ProductEntity> = mutableListOf()
+    val currentProductsList: MutableList<ProductEntity> = mutableListOf()
     val removedProductIDsFromCart: MutableList<String> = mutableListOf()
 
     fun getProfile() {

@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -13,7 +14,6 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.MenuItemCompat
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
@@ -85,7 +85,6 @@ class ShoppingMainActivity :
     private var isFiltered: Boolean = false
 
     private var mItems: MutableList<ProductEntity> = mutableListOf()
-    private val mFilteredItems: MutableList<ProductEntity> = mutableListOf()
     private val mLimitedItems: MutableList<ProductEntity> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,25 +109,11 @@ class ShoppingMainActivity :
         }
 
         initRecyclerView()
-//        observers()
         observeLiveData()
         clickListeners()
         setCartBottom()
-//        initData(viewModel.categoryFilter)
         checkProductsToDisplay()
     }
-
-//    private fun initData(categoryFilter: String) {
-//        showShimmer()
-//        when(categoryFilter) {
-//            ALL -> binding.cpAll.isSelected = true
-//            SUBSCRIPTION -> binding.cpSubscriptions.isChecked = true
-//            FAVORITES -> binding.cpFavorites.isChecked = true
-//            DISCOUNT -> binding.cpDiscounts.isChecked = true
-//            LIMITED -> binding.cpLimitedItems.isChecked = true
-//            else -> binding.cpCategoryFilter.isChecked = true
-//        }
-//    }
 
     override fun onResume() {
         super.onResume()
@@ -138,14 +123,6 @@ class ShoppingMainActivity :
             viewModel.updateProducts(productIDs)
             SharedPref(this).putData(PRODUCTS, STRING, "").toString()
         }
-//        viewModel.refreshProduct()
-//        when(viewModel.selectedChip) {
-//            CATEGORY -> selectedCategory(viewModel.selectedCategory)
-//            SUBSCRIPTION -> binding.cpSubscriptions.isChecked = true
-//            FAVORITES -> binding.cpFavorites.isChecked = true
-//            DISCOUNT -> binding.cpDiscounts.isChecked = true
-//            else -> binding.cpAll.isChecked = true
-//        }
     }
 
     private fun observeLiveData() {
@@ -251,11 +228,6 @@ class ShoppingMainActivity :
             LIMITED -> binding.cpLimitedItems.isChecked = true
             else -> selectedCategory(viewModel.categoryFilter)
         }
-//        if (viewModel.categoryFilter == ALL_PRODUCTS) {
-//            viewModel.getAllProductsStatic()
-//        } else {
-//            setFilteredProducts()
-//        }
     }
 
     private fun showShimmer() {
@@ -269,7 +241,6 @@ class ShoppingMainActivity :
     private fun hideShimmer() {
         with(binding) {
             flShimmerPlaceholder.remove()
-//            binding.flShimmerPlaceholder.stopShimmer()
             rvShoppingItems.visible()
         }
     }
@@ -319,11 +290,8 @@ class ShoppingMainActivity :
                     showShimmer()
                     isFiltered = false
                     binding.svHorizontalChipScroll.fullScroll(View.FOCUS_LEFT)
-//                    binding.flShimmerPlaceholder.startShimmer()
-                    binding.tvToolbarTitle.text = "Product Store"
+                    binding.tvToolbarTitle.text = "Magizhini Store"
                     viewModel.getAllProductsStatic()
-//                    adapter.setData(viewModel.allProducts)
-//                    hideShimmer()
                 }
                 R.id.cpSubscriptions -> {
                     binding.cpSubscriptions.also {
@@ -333,8 +301,6 @@ class ShoppingMainActivity :
                     isFiltered = false
                     binding.tvToolbarTitle.text = "Subscriptions"
                     viewModel.getAllSubscriptions()
-//                    adapter.setData(viewModel.subscriptionProducts)
-//                    hideShimmer()
                 }
                 R.id.cpCategoryFilter -> {
                     //kept this chip as the default check in xml so that the bottom sheet wont be
@@ -347,7 +313,6 @@ class ShoppingMainActivity :
                         openCategoryFilterDialog()
                     }
                     binding.svHorizontalChipScroll.fullScroll(View.FOCUS_RIGHT)
-//                    hideShimmer()
                 }
                 R.id.cpFavorites -> {
                     binding.cpFavorites.also {
@@ -355,11 +320,8 @@ class ShoppingMainActivity :
                     }
                     showShimmer()
                     isFiltered = false
-//                    binding.flShimmerPlaceholder.startShimmer()
                     binding.tvToolbarTitle.text = "Favorites"
                     viewModel.getAllFavoritesStatic()
-//                    adapter.setData(viewModel.favoriteProducts)
-//                    hideShimmer()
                 }
                 R.id.cpDiscounts -> {
                     binding.cpDiscounts.also {
@@ -367,12 +329,9 @@ class ShoppingMainActivity :
                     }
                     showShimmer()
                     isFiltered = false
-//                    binding.flShimmerPlaceholder.startShimmer()
                     binding.tvToolbarTitle.text = "Discounts"
                     //Querying the discount items straight from the room database and setting it in the adapter
                     viewModel.getAllDiscountProducts()
-//                    adapter.setData(viewModel.discountProducts)
-//                    hideShimmer()
                 }
                 R.id.cpLimitedItems -> {
                     binding.cpLimitedItems.also {
@@ -381,7 +340,6 @@ class ShoppingMainActivity :
                     binding.tvToolbarTitle.text = "Limited Items"
                     if(mLimitedItems.isEmpty()) {
                         showShimmer()
-//                        binding.flShimmerPlaceholder.startShimmer()
                         viewModel.limitedItemsFilter()
                     } else {
                         displayLimitedItems(mLimitedItems)
@@ -402,7 +360,6 @@ class ShoppingMainActivity :
         viewModel.categoriesAdapter?.let {
             it.show()
         }
-//        viewModel.getAllCategoryNames()
     }
 
     private fun collapseSearchBar() {
@@ -419,6 +376,7 @@ class ShoppingMainActivity :
         val searchView = item?.actionView as androidx.appcompat.widget.SearchView
 
         searchView.findViewById<ImageView>(R.id.search_close_btn).setColorFilter(ContextCompat.getColor(this, R.color.matteRed))
+        searchView.findViewById<TextView>(R.id.search_src_text).setTextColor(ContextCompat.getColor(this, R.color.matteRed))
 
         searchView.setOnQueryTextListener(object :
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
@@ -431,28 +389,26 @@ class ShoppingMainActivity :
                     searchJob?.cancel()
                     searchJob = lifecycleScope.launch {
                         delay(500)
-                        mFilteredItems.clear()
+                        viewModel.currentProductsList.clear()
                         val searchText = newText!!.lowercase(Locale.getDefault())
                         if (searchText.isNotEmpty()) {
                             mItems.forEach loop@ { it ->
                                 if (it.name.lowercase().contains(searchText) || it.description.lowercase().contains(searchText)) {
-                                    mFilteredItems.add(it)
+                                    viewModel.currentProductsList.add(it)
                                 } else {
                                     for (label in it.labels) {
                                         if (label.lowercase().contains(searchText)) {
-                                            mFilteredItems.add(it)
+                                            viewModel.currentProductsList.add(it)
                                             return@loop
                                         }
                                     }
                                 }
                             }
-                            adapter.products = mFilteredItems
-                            adapter.notifyDataSetChanged()
+                            adapter.setData(viewModel.currentProductsList.map { it.copy() } as MutableList<ProductEntity>)
                         } else {
-                            mFilteredItems.clear()
+                            viewModel.currentProductsList.clear()
                             binding.cpAll.isChecked = true
-                            adapter.products = mItems
-                            adapter.notifyDataSetChanged()
+                            adapter.setData(mItems.map { it.copy() } as MutableList<ProductEntity>)
                         }
                     }
                 searchJob = null
@@ -460,20 +416,6 @@ class ShoppingMainActivity :
             }
         })
         return super.onCreateOptionsMenu(menu)
-    }
-
-    private fun setFilteredProducts() {
-        showShimmer()
-        binding.flShimmerPlaceholder.startShimmer()
-        binding.tvToolbarTitle.text = viewModel.categoryFilter
-        isFiltered = true
-        binding.cpCategoryFilter.isChecked = true
-//        hideListBottomSheet()
-        viewModel.getAllProductByCategoryStatic(viewModel.categoryFilter)
-        if (viewModel.categoryFilter == SUBSCRIPTION) {
-            binding.cpSubscriptions.isChecked = true
-//            viewModel.getAllSubscriptions()
-        }
     }
 
     private fun initRecyclerView() {
@@ -489,7 +431,6 @@ class ShoppingMainActivity :
             false,
             this
         )
-//        binding.rvShoppingItems.layoutManager = LinearLayoutManager(this)
         binding.rvShoppingItems.layoutManager = GridLayoutManager(this, 2)
         binding.rvShoppingItems.adapter = adapter
         binding.rvShoppingItems.setHasFixedSize(true)
@@ -646,8 +587,6 @@ class ShoppingMainActivity :
     }
 
     override fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView, position: Int) {
-//        viewModel.selectedProductPosition = position
-//        viewModel.selectedProductID = product.id
         navigateToProductDetails(product, thumbnail)
     }
 
@@ -681,7 +620,6 @@ class ShoppingMainActivity :
         }
         viewModel.categoryFilter = categoryName
         binding.tvToolbarTitle.text = categoryName
-//        setFilteredProducts()
         isFiltered = true
         binding.cpCategoryFilter.isChecked = true
         viewModel.getAllProductByCategoryStatic(categoryName)
