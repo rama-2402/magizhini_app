@@ -162,7 +162,9 @@ class QuickOrderUseCase(
                                 transactionMap["paymentMode"] = "Wallet"
                                 transactionMap["paymentDone"] = true
                                 if (placeOrder(transactionMap, orderDetailsMap, cart, isQuickOrder)) {
-                                    updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
+                                    if (isQuickOrder) {
+                                        updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
+                                    }
                                     delay(1000)
                                     emit(NetworkResult.Success("success", "Order Placed Successfully..."))
                                 } else {
@@ -234,7 +236,9 @@ class QuickOrderUseCase(
                                 cart,
                                 isQuickOrder
                         )) {
-                            updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
+                            if (isQuickOrder) {
+                                updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
+                            }
                             delay(1000)
                             emit(NetworkResult.Success("placed", null))
                         } else {
@@ -276,7 +280,9 @@ class QuickOrderUseCase(
                 isQuickOrder
             )
         ) {
-            updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
+            if (isQuickOrder) {
+                updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
+            }
             delay(1000)
             emit(NetworkResult.Success("placed", null))
         } else {

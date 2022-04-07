@@ -139,8 +139,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                         }
                     } ?: showErrorSnackBar("Failed to fetch your profile data. Try later", true)
                 }
-                is WalletViewModel.UiUpdate.UpdateLoadStatusDialog ->
-                    updateLoadStatusDialog(event.message!!, event.data!!)
                 is WalletViewModel.UiUpdate.TransactionStatus -> {
                     if (event.status) {
                         updateLoadStatusDialog("Wallet Recharged Successfully!", event.data!!)
@@ -153,6 +151,13 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                         )
                     }
                 }
+                is WalletViewModel.UiUpdate.ShowLoadStatusDialog -> {
+                    LoadStatusDialog.newInstance("", event.message!!,event.data!!).show(supportFragmentManager,
+                        Constants.LOAD_DIALOG
+                    )
+                }
+                is WalletViewModel.UiUpdate.UpdateLoadStatusDialog ->
+                    updateLoadStatusDialog(event.message!!, event.data!!)
                 is WalletViewModel.UiUpdate.DismissDialog -> {
                     dismissLoadStatusDialog()
                     showProgressDialog()
@@ -271,9 +276,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
     }
 
     override fun onPaymentSuccess(orderID: String?) {
-        LoadStatusDialog.newInstance("", "Adding Money to the Wallet...", "transaction").show(supportFragmentManager,
-            Constants.LOAD_DIALOG
-        )
         viewModel.moneyToAddInWallet?.let {
             viewModel.makeTransactionFromWallet(
                 it,

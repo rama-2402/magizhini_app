@@ -446,28 +446,29 @@ class InvoiceActivity :
         binding.apply {
             if (isCouponApplied) {
                 etCoupon.disable()
-                ivCouponInfo.visible()
+                ivCouponInfo.fadInAnimation()
                 btnApplyCoupon.text = "Remove"
-                btnApplyCoupon.setBackgroundColor(
-                    ContextCompat.getColor(
-                        baseContext,
-                        R.color.matteRed
-                    )
-                )
+//                btnApplyCoupon.setBackgroundColor(
+//                    ContextCompat.getColor(
+//                        baseContext,
+//                        R.color.matteRed
+//                    )
+//                )
             } else {
                 viewModel.couponPrice = null
                 viewModel.currentCoupon = null
                 setDataToViews()
                 etCoupon.setText("")
                 etCoupon.enable()
+                ivCouponInfo.fadOutAnimation()
                 ivCouponInfo.remove()
                 btnApplyCoupon.text = "Apply"
-                btnApplyCoupon.setBackgroundColor(
-                    ContextCompat.getColor(
-                        baseContext,
-                        R.color.green_base
-                    )
-                )
+//                btnApplyCoupon.setBackgroundColor(
+//                    ContextCompat.getColor(
+//                        baseContext,
+//                        R.color.green_base
+//                    )
+//                )
             }
         }
     }
