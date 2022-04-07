@@ -321,7 +321,7 @@ class QuickOrderUseCase(
                         PushNotificationUseCase(fbRepository).sendPushNotification(
                             it.customerId,
                             "Order Placed",
-                            "Thanks for purchasing in Magizhini Organics. Your Order (ID: ${it.orderId} is received. We will notify during every step till delivery. You can check you order progress in Order History page.)",
+                            "Thanks for purchasing in Magizhini Organics. Your Order (ID: ${it.orderId}) is received. We will notify during every step till delivery. You can check you order progress in Order History page.",
                             ORDER_HISTORY_PAGE
                         )
                         if (!cart.isNullOrEmpty() && isQuickOrder) {

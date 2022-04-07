@@ -24,7 +24,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.workDataOf
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -32,7 +38,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
@@ -43,6 +52,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -316,6 +326,7 @@ class InvoiceActivity :
                         viewModel.totalCartItems
                     }
                     lifecycleScope.launch {
+                        startTotalOrderWorker(cartItems)
                         viewModel.clearCart(cartItems)
                         delay(1800)
                         dismissLoadStatusDialog()
@@ -396,6 +407,24 @@ class InvoiceActivity :
             }
             viewModel.setEmptyStatus()
         }
+    }
+
+    private fun startTotalOrderWorker(cartItems: MutableList<CartEntity>) {
+        val workRequest: WorkRequest =
+            OneTimeWorkRequestBuilder<UpdateTotalOrderItemService>()
+                .setInputData(
+                    workDataOf(
+                        "cart" to cartToStringConverter(cartItems),
+                        STATUS to true
+                    )
+                )
+                .build()
+
+        WorkManager.getInstance(this).enqueue(workRequest)
+    }
+
+    private fun cartToStringConverter(value: MutableList<CartEntity>): String {
+        return Gson().toJson(value)
     }
 
     private fun showLoadStatusDialog(title: String, body: String, content: String) {

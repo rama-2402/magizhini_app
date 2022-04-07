@@ -150,11 +150,11 @@ class ShoppingMainActivity :
             adapter.limited = false
             hideShimmer()
             adapter.setData(it)
-//            binding.cpAll.isChecked = true
         }
         viewModel.subscriptions.observe(this) {
             viewModel.selectedChip = Constants.SUBSCRIPTION
             viewModel.selectedCategory = ALL_PRODUCTS
+            mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
@@ -162,6 +162,7 @@ class ShoppingMainActivity :
         viewModel.allProductsInCategory.observe(this) {
             viewModel.selectedChip = CATEGORY
             viewModel.selectedCategory = viewModel.categoryFilter
+            mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
@@ -169,6 +170,7 @@ class ShoppingMainActivity :
         viewModel.allFavorites.observe(this) {
             viewModel.selectedChip = Constants.FAVORITES
             viewModel.selectedCategory = ALL_PRODUCTS
+            mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
@@ -176,6 +178,7 @@ class ShoppingMainActivity :
         viewModel.discountAvailableProducts.observe(this) {
             viewModel.selectedChip = Constants.DISCOUNT
             viewModel.selectedCategory = ALL_PRODUCTS
+            mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
             adapter.setData(it as MutableList<ProductEntity>)
@@ -407,7 +410,6 @@ class ShoppingMainActivity :
                             adapter.setData(viewModel.currentProductsList.map { it.copy() } as MutableList<ProductEntity>)
                         } else {
                             viewModel.currentProductsList.clear()
-                            binding.cpAll.isChecked = true
                             adapter.setData(mItems.map { it.copy() } as MutableList<ProductEntity>)
                         }
                     }

@@ -24,8 +24,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.workDataOf
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.gson.Gson
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -39,6 +44,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityQuickOrderBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
@@ -48,6 +54,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.Purcha
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOAD_DIALOG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -242,6 +249,7 @@ class QuickOrderActivity :
                     lifecycleScope.launch {
                         delay(1800)
                         dismissLoadStatusDialog()
+                        viewModel.quickOrder?.let { startTotalOrderWorker(it.cart as MutableList<CartEntity>) }
                         if (viewModel.placeOrderByCOD) {
                             showExitSheet(
                                 this@QuickOrderActivity,
@@ -404,6 +412,24 @@ class QuickOrderActivity :
             }
             viewModel.setEmptyStatus()
         }
+    }
+
+    private fun startTotalOrderWorker(cartItems: MutableList<CartEntity>) {
+        val workRequest: WorkRequest =
+            OneTimeWorkRequestBuilder<UpdateTotalOrderItemService>()
+                .setInputData(
+                    workDataOf(
+                        "cart" to cartToStringConverter(cartItems),
+                        STATUS to true
+                    )
+                )
+                .build()
+
+        WorkManager.getInstance(this).enqueue(workRequest)
+    }
+
+    private fun cartToStringConverter(value: MutableList<CartEntity>): String {
+        return Gson().toJson(value)
     }
 
     private fun resetQuickOrderUI() {

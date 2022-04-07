@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TotalOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
@@ -19,9 +20,9 @@ class UpdateTotalOrderItemService(
 ): CoroutineWorker(context, workerParameters) {
 
     override suspend fun doWork(): Result {
-        val stringConvertedOrder = inputData.getString("order")
+        val stringConvertedCart = inputData.getString("cart")
         val status = inputData.getBoolean(Constants.STATUS, true)
-        val cartItems = toOrderConverter(stringConvertedOrder!!).cart
+        val cartItems = stringToCartConverter(stringConvertedCart!!)
         val date = TimeUtil().getCurrentDateNumber()
         val docID = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
 
@@ -65,8 +66,8 @@ class UpdateTotalOrderItemService(
         }
     }
 
-    private fun toOrderConverter(value: String): Order {
-        val listType = object : TypeToken<Order>() {}.type
+    private fun stringToCartConverter(value: String): MutableList<CartEntity> {
+        val listType = object : TypeToken<MutableList<CartEntity>>() {}.type
         return Gson().fromJson(value, listType)
     }
 }

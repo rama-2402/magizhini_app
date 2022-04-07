@@ -15,12 +15,18 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.workDataOf
+import com.google.gson.Gson
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.OrderItemsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.PurchaseHistoryAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityPurchaseHistoryBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
@@ -144,6 +150,7 @@ class PurchaseHistoryActivity :
                                 )
                             } else {
                                 hideProgressDialog()
+                                startTotalOrderWorker(order.cart as MutableList<CartEntity>)
                                 showToast(this, "Order Cancelled", Constants.SHORT)
                             }
                         }
@@ -157,6 +164,7 @@ class PurchaseHistoryActivity :
                     viewModel.order?.let { order ->
                         if (event.status) {
                             showExitSheet(this, "Order cancelled successfully. Your Total Order Amount Rs:${order.price} for the Order ID: ${order.orderId} has been Refunded to your Wallet.", "close")
+                            startTotalOrderWorker(order.cart as MutableList<CartEntity>)
                         } else {
                             showExitSheet(this, event.message!!, "cs")
                         }
@@ -171,6 +179,24 @@ class PurchaseHistoryActivity :
         viewModel.moveToProductReview.observe(this) {
             moveToProductDetails(viewModel.productId, viewModel.productName)
         }
+    }
+
+    private fun startTotalOrderWorker(cartItems: MutableList<CartEntity>) {
+        val workRequest: WorkRequest =
+            OneTimeWorkRequestBuilder<UpdateTotalOrderItemService>()
+                .setInputData(
+                    workDataOf(
+                        "cart" to cartToStringConverter(cartItems),
+                        Constants.STATUS to false
+                    )
+                )
+                .build()
+
+        WorkManager.getInstance(this).enqueue(workRequest)
+    }
+
+    private fun cartToStringConverter(value: MutableList<CartEntity>): String {
+        return Gson().toJson(value)
     }
 
     private fun populatePurchaseHistory(orders: MutableList<OrderEntity>) {
