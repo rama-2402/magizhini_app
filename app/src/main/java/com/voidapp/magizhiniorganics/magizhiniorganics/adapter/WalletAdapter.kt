@@ -14,7 +14,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 class WalletAdapter (
     val context: Context,
     var transactions: List<TransactionHistory>
-        ) : RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
+) : RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
 
     inner class WalletViewHolder(val binding: RvTransactionItemBinding): RecyclerView.ViewHolder(binding.root)
 

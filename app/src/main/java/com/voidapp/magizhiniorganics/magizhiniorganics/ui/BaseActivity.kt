@@ -36,6 +36,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
@@ -342,6 +343,11 @@ open class BaseActivity : AppCompatActivity() {
                         "price" -> activity.showPaymentMethod()
                         "close" -> hideExitSheet()
                         "" -> activity.confirmCancellation()
+                    }
+                }
+                is WalletActivity -> {
+                    when(data) {
+                        "cs" -> activity.moveToCustomerSupport()
                     }
                 }
                 is HomeActivity -> activity.showReferralOptions()

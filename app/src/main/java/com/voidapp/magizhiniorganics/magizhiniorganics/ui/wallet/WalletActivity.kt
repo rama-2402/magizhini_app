@@ -27,8 +27,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityWalle
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.CalendarFilerDialogClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
@@ -47,14 +50,6 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
     private val factory: WalletViewModelFactory by instance()
 
     private lateinit var transactionAdapter: WalletAdapter
-    private var mWallet: Wallet = Wallet()
-    private val mTransactions = mutableListOf<TransactionHistory>()
-    private var mCurrentTransaction = TransactionHistory()
-    private var mProfile = UserProfile()
-    private var mMoneyToAddInWallet: Float = 0f
-
-    private var mFilterMonth: String =  TimeUtil().getMonth(dateLong = System.currentTimeMillis())
-    private var mFilterYear: String = TimeUtil().getYear(dateLong = System.currentTimeMillis())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,79 +75,110 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
 
         Checkout.preload(applicationContext)
 
-
         lifecycleScope.launch {
-            delay(1000)
-            showShimmer()
+            delay(1250)
             initRecyclerView()
-            initLiveData()
+            initData()
             liveDataObservers()
             clickListeners()
         }
     }
 
+    private fun initData() {
+        showProgressDialog()
+        showShimmer()
+        viewModel.userID = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
+        viewModel.getWallet()
+    }
+
     private fun liveDataObservers() {
-        viewModel.transactions.observe(this) {
-            if (it.isNullOrEmpty()) {
-                hideShimmer()
-                binding.llEmptyLayout.visible()
-            } else {
-                binding.llEmptyLayout.remove()
-                mTransactions.clear()
-                mTransactions.addAll(it)
-                val history = it.filter { transactions ->
-                    transactions.month == TimeUtil().getMonth()
+        viewModel.uiUpdate.observe(this) { event ->
+            when(event) {
+                is WalletViewModel.UiUpdate.PopulateWalletData -> {
+                    hideProgressDialog()
+
+                    event.wallet?.let {
+                        displayWalletDataToScreen(it)
+                    } ?: showErrorSnackBar(event.message.toString(), true)
+
+                    viewModel.getTransactions()
                 }
-                transactionAdapter.transactions = history.sortedByDescending { trans ->
-                    trans.timestamp
-                }
-                transactionAdapter.notifyDataSetChanged()
-                hideShimmer()
-            }
-        }
-        viewModel.profile.observe(this) {
-            mProfile = it
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.status.collect { result ->
-                when(result) {
-                    is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
-                    is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
-                    is NetworkResult.Loading -> {
-                        if (result.message == "") {
-                            showProgressDialog()
-                        } else {
-                            showSuccessDialog("", result.message, result.data)
-                        }
+                is WalletViewModel.UiUpdate.PopulateTransactions -> {
+                    if (event.transactions.isNullOrEmpty()) {
+                        hideShimmer()
+                        binding.llEmptyLayout.visible()
+                    } else {
+                        binding.llEmptyLayout.remove()
+                        transactionAdapter.transactions = event.transactions
+                        transactionAdapter.notifyDataSetChanged()
+                        hideShimmer()
                     }
-                    else -> Unit
                 }
+                is WalletViewModel.UiUpdate.UpdateUserProfileData -> {
+                    hideProgressDialog()
+                    event.profile?.let {
+                        with(it) {
+                            viewModel.moneyToAddInWallet?.let { amount ->
+                                startPayment(
+                                    this@WalletActivity,
+                                    mailId,
+                                    amount * 100,
+                                    name,
+                                    id,
+                                    phNumber
+                                ).also { status ->
+                                    if (!status) {
+                                        Toast.makeText(
+                                            this@WalletActivity,
+                                            "Error in processing payment. Try Later ",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            } ?: showErrorSnackBar("Failed to add money to wallet. Please contact customer support for further assistance", true)
+                        }
+                    } ?: showErrorSnackBar("Failed to fetch your profile data. Try later", true)
+                }
+                is WalletViewModel.UiUpdate.UpdateLoadStatusDialog ->
+                    updateLoadStatusDialog(event.message!!, event.data!!)
+                is WalletViewModel.UiUpdate.TransactionStatus -> {
+                    if (event.status) {
+                        updateLoadStatusDialog("Wallet Recharged Successfully!", event.data!!)
+                    } else {
+                        updateLoadStatusDialog(event.message.toString(), "fail")
+                        showExitSheet(
+                            this,
+                            "Server Error! Could not record wallet transaction. \n \n If Money is already debited from account, Please contact customer support and the transaction will be reverted in 24 Hours",
+                            "cs"
+                        )
+                    }
+                }
+                is WalletViewModel.UiUpdate.DismissDialog -> {
+                    dismissLoadStatusDialog()
+                    showProgressDialog()
+                    viewModel.getWallet()
+                    showShimmer()
+                }
+                is WalletViewModel.UiUpdate.EmptyUI -> return@observe
+                else -> viewModel.setEmptyStatus()
             }
         }
     }
 
-    private fun displayWalletDataToScreen() {
+    private fun displayWalletDataToScreen(wallet: Wallet) {
         with(binding) {
-            tvWalletTotal.text = mWallet.amount.toString()
-            if (mWallet.lastRecharge == 0L) {
+            tvWalletTotal.text = wallet.amount.toString()
+            if (wallet.lastRecharge == 0L) {
                 tvLastRechargeDate.text = "-"
             } else {
-                tvLastRechargeDate.text = TimeUtil().getCustomDate(dateLong = mWallet.lastRecharge)
+                tvLastRechargeDate.text = TimeUtil().getCustomDate(dateLong = wallet.lastRecharge)
             }
-            if (mWallet.lastTransaction == 0L) {
+            if (wallet.lastTransaction == 0L) {
                 tvTransactionDate.text = "-"
             } else {
-                tvTransactionDate.text = TimeUtil().getCustomDate(dateLong = mWallet.lastTransaction)
+                tvTransactionDate.text = TimeUtil().getCustomDate(dateLong = wallet.lastTransaction)
             }
-
         }
-    }
-
-    private fun initLiveData() {
-        val id = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
-        viewModel.getTransactions(id)
-        viewModel.getWallet(id)
-        viewModel.getUserProfileData()
     }
 
     private fun initRecyclerView() {
@@ -184,8 +210,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
 
         binding.ivWalletFilter.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            showCalendarFilterDialog(mFilterMonth, mFilterYear)
-//            CalendarFilterDialog(this, this, mFilterMonth, mFilterYear).show()
+            showCalendarFilterDialog(viewModel.filteredMonth, viewModel.filteredYear)
         }
 
         binding.ivInfo.setOnClickListener {
@@ -220,9 +245,9 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
             dialogBsAddReferral.dismissWithAnimation = true
 
             view.etlReferralNumber.hint = "Amount"
-            view.etlReferralNumber.setStartIconDrawable(ContextCompat.getDrawable(view.etlReferralNumber.context, R.drawable.ic_wallet))
-//            view.etlReferralNumber.setStartIconTintList(ColorStateList.valueOf(ContextCompat.getColor(view.etlReferralNumber.context, R.color.green_base)))
-            view.btnApply.text = "PROCEED"
+            view.etlReferralNumber.startIconDrawable =
+                ContextCompat.getDrawable(view.etlReferralNumber.context, R.drawable.ic_wallet)
+            view.btnApply.text = "RECHARGE"
 
             //verifying if the amount number is empty and sending for payment
             view.btnApply.setOnClickListener {
@@ -231,48 +256,58 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                     view.etlReferralNumber.error = "* Enter valid Amount"
                     return@setOnClickListener
                 } else {
-                    mMoneyToAddInWallet = view.etReferralNumber.text.toString().toFloat()
-                    dialogBsAddReferral.dismiss()
-                    with(mProfile) {
-                        startPayment(
-                            this@WalletActivity,
-                            mailId,
-                            mMoneyToAddInWallet * 100,
-                            name,
-                            id,
-                            phNumber
-                        ).also { status ->
-                            if (!status) {
-                                Toast.makeText(
-                                    this@WalletActivity,
-                                    "Error in processing payment. Try Later ",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
+                    if (!NetworkHelper.isOnline(this)) {
+                        showToast(this, "Please check your Internet Connection")
+                        return@setOnClickListener
                     }
-                }
+                    showProgressDialog()
+                    viewModel.moneyToAddInWallet = view.etReferralNumber.text.toString().toFloat()
+                    dialogBsAddReferral.dismiss()
+                    viewModel.getUserProfileData()
+                    }
             }
             dialogBsAddReferral.show()
         }
     }
 
     override fun onPaymentSuccess(orderID: String?) {
-        showSuccessDialog("","Adding Money to the Wallet...", "wallet")
-        showShimmer()
-        viewModel.makeTransactionFromWallet(
-            mMoneyToAddInWallet,
-            mProfile.id,
-            orderID!!,
-            "Add"
+        LoadStatusDialog.newInstance("", "Adding Money to the Wallet...", "transaction").show(supportFragmentManager,
+            Constants.LOAD_DIALOG
         )
+        viewModel.moneyToAddInWallet?.let {
+            viewModel.makeTransactionFromWallet(
+                it,
+                viewModel.userID,
+                orderID!!,
+                "Add"
+            )
+        } ?: showExitSheet(this, "Transaction Complete. If the amount is not reflecting in your wallet, Please contact customer support for further assistance", "cs")
     }
 
     override fun onPaymentError(p0: Int, p1: String?) {
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
 
-    private fun showCalendarFilterDialog(month: String, year: String) {
+    private fun updateLoadStatusDialog(message: String, data: String) {
+        LoadStatusDialog.statusContent = message
+        LoadStatusDialog.statusText.value = data
+    }
+
+    private fun dismissLoadStatusDialog() {
+        (supportFragmentManager.findFragmentByTag(Constants.LOAD_DIALOG) as? DialogFragment)?.dismiss()
+    }
+
+    fun moveToCustomerSupport() {
+        if (!NetworkHelper.isOnline(this)) {
+            showErrorSnackBar("Please check your Internet Connection", true)
+            return
+        }
+        Intent(this, ChatActivity::class.java).also {
+            startActivity(it)
+        }
+    }
+
+    private fun showCalendarFilterDialog(month: String, year: Long) {
         CalendarFilterDialog.newInstance(month, year.toInt()).show(supportFragmentManager,
             "calendar"
         )
@@ -282,54 +317,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
         (supportFragmentManager.findFragmentByTag("calendar") as? DialogFragment)?.dismiss()
     }
 
-    private suspend fun onSuccessCallback(message: String, data: Any?) {
-        when(message) {
-            "wallet" -> {
-                mWallet = data as Wallet
-                displayWalletDataToScreen()
-            }
-            "transaction" -> {
-                delay(1500)
-                hideSuccessDialog()
-                showSuccessDialog("", "Wallet Updated successfully!", "complete")
-                mCurrentTransaction = data as TransactionHistory
-                viewModel.updateTransaction(data)
-            }
-            "transactionID" -> {
-                mCurrentTransaction.id = data as String
-                mTransactions.add(mCurrentTransaction)
-                hideShimmer()
-                viewModel.getWallet(mProfile.id)
-                delay(1500)
-                hideSuccessDialog()
-            }
-        }
-
-        viewModel.emptyResult()
-    }
-
-    private suspend fun onFailedCallback(message: String, data: Any?) {
-        when(message) {
-            "wallet" -> {
-                showErrorSnackBar(data as String, true)
-            }
-            "transaction" -> {
-                delay(1000)
-                hideSuccessDialog()
-                showErrorSnackBar(data!! as String, true)
-            }
-            "transactionID" -> {
-                delay(1000)
-                hideSuccessDialog()
-                showExitSheet(this, "Server Error! Could not record wallet transaction. \n \n If Money is already debited from Wallet, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
-            }
-        }
-        viewModel.emptyResult()
-    }
-
     private fun showShimmer() {
         with(binding) {
             flShimmerPlaceholder.visible()
+            flShimmerPlaceholder.startShimmer()
             rvTransactionHistory.hide()
         }
     }
@@ -337,6 +328,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
     private fun hideShimmer() {
         with(binding) {
             flShimmerPlaceholder.remove()
+            flShimmerPlaceholder.stopShimmer()
             rvTransactionHistory.visible()
         }
     }
@@ -348,25 +340,9 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
         }
         dismissCalendarFilterDialog()
         showShimmer()
-        mFilterMonth = month
-        mFilterYear = year
-        val filteredTransactions = mutableListOf<TransactionHistory>()
-        for (transaction in mTransactions) {
-            if (transaction.month == mFilterMonth && transaction.year == mFilterYear.toLong()) {
-                filteredTransactions.add(transaction)
-            }
-        }
-        if (filteredTransactions.isNullOrEmpty()) {
-            binding.llEmptyLayout.visible()
-        } else {
-            binding.llEmptyLayout.remove()
-            filteredTransactions.sortBy {
-                it.timestamp
-            }
-        }
-        transactionAdapter.transactions = filteredTransactions
-        transactionAdapter.notifyDataSetChanged()
-        hideShimmer()
+        viewModel.filteredMonth = month
+        viewModel.filteredYear = year.toLong()
+        viewModel.filterTransactions()
     }
 
     override fun cancelDialog() {
