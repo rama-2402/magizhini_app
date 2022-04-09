@@ -1,14 +1,26 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.view.Window
+import android.view.WindowManager
+import android.view.animation.AnimationUtils
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.viewPagerAdapter.ViewPagerAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.viewPagerAdapter.ViewPagerListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityOnBoardingBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadOutAnimation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 class OnBoardingActivity: BaseActivity() {
 
@@ -23,9 +35,82 @@ class OnBoardingActivity: BaseActivity() {
                 this@OnBoardingActivity,
                 R.layout.activity_on_boarding
             )
-            postToList()
-            activityInit()
 
+            val window: Window = this.window
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = Color.WHITE
+
+            binding.ivBackground.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_top_bounce))
+
+            lifecycleScope.launch {
+                delay(900)
+                binding.apply {
+                    imageView.visible()
+                    ivBottomCircle.visible()
+//                    ivGradientCircle.visible()
+                    btnNext.fadInAnimation()
+                    viewPager.visible()
+                }
+                postToList()
+                activityInit()
+                listeners()
+            }
+    }
+
+    private fun listeners() {
+        binding.btnNext.setOnClickListener {
+            lifecycleScope.launch {
+                binding.apply {
+                    btnNext.fadOutAnimation()
+                    imageView.hide()
+                    ivBottomCircle.hide()
+                    ivGradientCircle.hide()
+                    viewPager.hide()
+                    ciPageIndicator.hide()
+                    ivBackground.startAnimation(AnimationUtils.loadAnimation(this@OnBoardingActivity, R.anim.slide_out_top))
+                    delay(810)
+                    ivBackground.hide()
+                }
+                Intent(this@OnBoardingActivity, SignInActivity::class.java).also {
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                    finish()
+                    finishAffinity()
+                }
+            }
+        }
+
+        binding.viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+                if (position == 2) {
+                    binding.nextScreen.fadOutAnimation()
+                    binding.nextScreen.remove()
+                    binding.tvSignIn.fadInAnimation()
+                }
+            }
+
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+//                Log.e("Selected_Page", position.toString())
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {
+                super.onPageScrollStateChanged(state)
+            }
+        })
+//
+//        binding.tvSignIn.setOnClickListener {
+//            Intent(this@OnBoardingActivity, SignInActivity::class.java).also {
+//                startActivity(it)
+//                finish()
+//                finishAffinity()
+//            }
+//        }
     }
 
     private fun activityInit() {
@@ -43,7 +128,10 @@ class OnBoardingActivity: BaseActivity() {
                 }
 
                 override fun nextPage(position: Int) {
-                    binding.viewPager.currentItem = position + 1
+                    binding.nextScreen.fadOutAnimation()
+                    binding.nextScreen.remove()
+                    binding.tvSignIn.fadInAnimation()
+//                    binding.viewPager.currentItem = position + 1
                 }
             }
         )

@@ -1,10 +1,16 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -14,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.utils.FadeViewHelper.Companion.DEFAULT_ANIMATION_DURATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySignInBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
@@ -21,15 +28,13 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataServic
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -42,7 +47,8 @@ import ticker.views.com.ticker.widgets.circular.timer.callbacks.CircularViewCall
 import ticker.views.com.ticker.widgets.circular.timer.view.CircularView
 import java.util.concurrent.TimeUnit
 
-class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
+
+class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
 
     override val kodein by kodein()
 
@@ -64,6 +70,73 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         viewModel = ViewModelProvider(this, factory)[SignInViewModel::class.java]
         binding.viewmodel = viewModel
 
+
+        lifecycleScope.launch {
+            binding.apply {
+                delay(400)
+                ivLogo.fadInAnimation()
+                clBody.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_up))
+                ivLogo.visible()
+                clBody.visible()
+                delay(100)
+                    ivBagOne.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_in_left))
+                ivBagOne.visible()
+                delay(64)
+                    ivBagThree.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_in_right))
+                ivBagThree.visible()
+                delay(90)
+                    ivBagTwo.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_in_left))
+                ivBagTwo.visible()
+                delay(34)
+                    ivBagFour.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_in_right))
+                ivBagFour.visible()
+                    playFruitsFallingAnimation(ivApple)
+                    delay(100)
+                    playFruitsFallingAnimation(ivMilk)
+                    delay(50)
+                    playFruitsFallingAnimation(ivBroccoli)
+                    delay(80)
+                    playFruitsFallingAnimation(ivTomato)
+                    delay(100)
+                    playFruitsFallingAnimation(ivPotato)
+                    delay(40)
+                    playFruitsFallingAnimation(ivBanana)
+                    delay(90)
+                    playFruitsFallingAnimation(ivPear)
+                    delay(50)
+                    playFruitsFallingAnimation(ivBeet)
+                    delay(80)
+                    playFruitsFallingAnimation(ivChili)
+                    delay(120)
+                    playFruitsFallingAnimation(ivLemon)
+                    delay(30)
+                    playFruitsFallingAnimation(ivCarrot)
+                delay(382)
+                    playFruitsFallingAnimation(ivAppleOne)
+                    delay(100)
+                    playFruitsFallingAnimation(ivMilkOne)
+                    delay(50)
+                    playFruitsFallingAnimation(ivBroccoliOne)
+                    delay(80)
+                    playFruitsFallingAnimation(ivTomatoOne)
+                    delay(20)
+                    playFruitsFallingAnimation(ivPotatoOne)
+                    delay(40)
+                    playFruitsFallingAnimation(ivBananaOne)
+                    delay(90)
+                    playFruitsFallingAnimation(ivPearOne)
+                    delay(50)
+                    playFruitsFallingAnimation(ivBeetOne)
+                    delay(80)
+                    playFruitsFallingAnimation(ivChiliOne)
+                    delay(120)
+                    playFruitsFallingAnimation(ivLemonOne)
+                    delay(30)
+                    playFruitsFallingAnimation(ivCarrotOne)
+            }
+        }
+
+
         layoutVisibility("pre")
 
         // Verifying the mobile number and sending the OTP
@@ -71,6 +144,26 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
         initFlow()
         clickListeners()
+    }
+
+    private fun playFruitsFallingAnimation(view: View) {
+        lifecycleScope.launch {
+            view.visible()
+            while (true) {
+                val screenHeight: Int = resources.displayMetrics.heightPixels
+                val positionAnimator = ValueAnimator.ofFloat(-100f, screenHeight.toFloat())
+                positionAnimator.addUpdateListener {
+                    val value = it.animatedValue as Float
+                    view.translationY = value
+                }
+                val rotationAnimator = ObjectAnimator.ofFloat(view, "rotation", 0f, 180f)
+                val animatorSet = AnimatorSet()
+                animatorSet.play(positionAnimator).with(rotationAnimator)
+                animatorSet.duration = 2969
+                animatorSet.start()
+                delay(2542)
+            }
+        }
     }
 
 
@@ -218,8 +311,9 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
 
 
     private fun resendVerificationCode() {
-        binding.btnResend.disable()
-        binding.btnResend.setBackgroundColor(Color.LTGRAY)
+        binding.btnResend.remove()
+//        binding.btnResend.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.green_light, null))
+//        binding.btnResend.setTextColor(resources.getColor(R.color.green_base))
         startTimer()
         startPhoneNumberVerification(mPhoneNumber)
     }
@@ -243,6 +337,7 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     }
 
     private suspend fun newUserVerification() {
+        binding.cvTimer.fadOutAnimation()
         when (val status = viewModel.checkUserProfileDetails()) {
             "" -> {
                 mCurrentUserID = viewModel.getCurrentUserId()!!
@@ -349,16 +444,19 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
         with(binding) {
             when (visibility) {
                 "pre" -> {
+                    tvHeader.setTextAnimation("ENTER YOUR MOBILE NUMBER")
                     llPreOTP.visible()
                     llPostOTP.remove()
                     cvTimer.hide()
                     ivLogo.disable()
                 }
                 "post" -> {
+                    tvHeader.setTextAnimation("ENTER OTP")
                     llPreOTP.remove()
                     llPostOTP.visible()
                     cvTimer.visible()
-                    btnResend.setBackgroundColor(Color.LTGRAY)
+                    btnResend.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.green_light, null))
+                    btnResend.setTextColor(resources.getColor(R.color.green_base, null))
                     btnResend.disable()
                     ivLogo.disable()
                 }
@@ -369,7 +467,8 @@ class SignInActivity : BaseActivity(), View.OnClickListener, KodeinAware {
     //Called by countdown timer class on OTP Timeout after 60 seconds
     fun onOtpTimeOut() {
         binding.btnResend.enable()
-        binding.btnResend.setBackgroundColor(Color.WHITE)
+        binding.btnResend.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.green_base, null))
+        binding.btnResend.setTextColor(Color.WHITE)
         binding.cvTimer.hide()
     }
 

@@ -22,8 +22,6 @@ class ViewPagerAdapter(
     inner class Pager2ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val title = itemView.findViewById<TextView>(R.id.tvTitle)
         val bodyOne = itemView.findViewById<TextView>(R.id.tvBody)
-        val btnSignIn = itemView.findViewById<MaterialButton>(R.id.btnSignIn)
-        val nextLottie = itemView.findViewById<LottieAnimationView>(R.id.next_screen)
         val imageItem = itemView.findViewById<ImageView>(R.id.ivImage)
     }
 
@@ -47,21 +45,21 @@ class ViewPagerAdapter(
             2 -> holder.imageItem.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.page_three))
         }
 
-        if (position == title.size-1) {
-            holder.nextLottie.visibility = View.GONE
-            holder.btnSignIn.visibility = View.VISIBLE
-        } else {
-            holder.nextLottie.visibility = View.VISIBLE
-            holder.btnSignIn.visibility = View.GONE
-        }
+//        if (position == title.size-1) {
+//            holder.nextLottie.visibility = View.GONE
+//            holder.btnSignIn.visibility = View.VISIBLE
+//        } else {
+//            holder.nextLottie.visibility = View.VISIBLE
+//            holder.btnSignIn.visibility = View.GONE
+//        }
 
-        holder.btnSignIn.setOnClickListener {
-            viewPagerListener.signIn()
-        }
-
-        holder.nextLottie.setOnClickListener {
-            viewPagerListener.nextPage(position)
-        }
+//        holder.btnSignIn.setOnClickListener {
+//            viewPagerListener.signIn()
+//        }
+//
+//        holder.nextLottie.setOnClickListener {
+//            viewPagerListener.nextPage(position)
+//        }
     }
 
     override fun getItemCount(): Int {

@@ -6,48 +6,295 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.SplashActivity"
-        android:background="@drawable/bg_onboarding"
+        android:background="@color/green_base"
         >
 
         <ImageView
-            android:id="@+id/ivAppIcon"
+            android:id="@+id/ivApple"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_apple"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivBanana"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivBanana"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:background="@drawable/ic_banana"
+            app:layout_constraintStart_toEndOf="@id/ivApple"
+            app:layout_constraintEnd_toStartOf="@id/ivBeet"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivBeet"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:background="@drawable/ic_beet"
+            app:layout_constraintStart_toEndOf="@id/ivBanana"
+            app:layout_constraintEnd_toStartOf="@id/ivBroccoli"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivBroccoli"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_broccoli"
+            app:layout_constraintStart_toEndOf="@id/ivBeet"
+            app:layout_constraintEnd_toStartOf="@id/ivCarrot"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivCarrot"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_carrot"
+            app:layout_constraintStart_toEndOf="@id/ivBroccoli"
+            app:layout_constraintEnd_toStartOf="@id/ivChili"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivChili"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_chili"
+            app:layout_constraintStart_toEndOf="@id/ivCarrot"
+            app:layout_constraintEnd_toStartOf="@id/ivLemon"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivLemon"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_lemon"
+            app:layout_constraintStart_toEndOf="@id/ivChili"
+            app:layout_constraintEnd_toStartOf="@id/ivMilk"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivMilk"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_milk"
+            app:layout_constraintStart_toEndOf="@id/ivLemon"
+            app:layout_constraintEnd_toStartOf="@id/ivPear"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivPear"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_pear"
+            app:layout_constraintStart_toEndOf="@id/ivMilk"
+            app:layout_constraintEnd_toStartOf="@id/ivPotato"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivPotato"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:background="@drawable/ic_potato"
+            app:layout_constraintStart_toEndOf="@id/ivPear"
+            app:layout_constraintEnd_toStartOf="@id/ivTomato"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivTomato"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_tomato"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@id/ivPotato"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivAppleOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_apple"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivBananaOne"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivBananaOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:background="@drawable/ic_banana"
+            app:layout_constraintStart_toEndOf="@id/ivAppleOne"
+            app:layout_constraintEnd_toStartOf="@id/ivBeetOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivBeetOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:background="@drawable/ic_beet"
+            app:layout_constraintStart_toEndOf="@id/ivBananaOne"
+            app:layout_constraintEnd_toStartOf="@id/ivBroccoliOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivBroccoliOne"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_broccoli"
+            app:layout_constraintStart_toEndOf="@id/ivBeetOne"
+            app:layout_constraintEnd_toStartOf="@id/ivCarrotOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivCarrotOne"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_carrot"
+            app:layout_constraintStart_toEndOf="@id/ivBroccoliOne"
+            app:layout_constraintEnd_toStartOf="@id/ivChiliOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivChiliOne"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_chili"
+            app:layout_constraintStart_toEndOf="@id/ivCarrotOne"
+            app:layout_constraintEnd_toStartOf="@id/ivLemonOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivLemonOne"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_lemon"
+            app:layout_constraintStart_toEndOf="@id/ivChiliOne"
+            app:layout_constraintEnd_toStartOf="@id/ivMilkOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivMilkOne"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_milk"
+            app:layout_constraintStart_toEndOf="@id/ivLemonOne"
+            app:layout_constraintEnd_toStartOf="@id/ivPearOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivPearOne"
+            android:layout_width="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_pear"
+            app:layout_constraintStart_toEndOf="@id/ivMilkOne"
+            app:layout_constraintEnd_toStartOf="@id/ivPotatoOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivPotatoOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:visibility="invisible"
+            android:background="@drawable/ic_potato"
+            app:layout_constraintStart_toEndOf="@id/ivPearOne"
+            app:layout_constraintEnd_toStartOf="@id/ivTomatoOne"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivTomatoOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_tomato"
+            android:visibility="invisible"
+            app:layout_constraintStart_toEndOf="@id/ivPotatoOne"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/ivBagOne"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/ic_app_shadow"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent=".6"
+            app:layout_constraintWidth_percent=".45"
+            app:layout_constraintHeight_percent=".25"
+            android:background="@drawable/ic_bag_six"
+            android:layout_marginStart="-36dp"
+            android:layout_marginBottom="-32dp"
+            android:visibility="invisible"
+            android:elevation="@dimen/material_size_2"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.243"
-            app:layout_constraintWidth_percent=".6" />
+            app:layout_constraintBottom_toBottomOf="parent"/>
+        <ImageView
+            android:id="@+id/ivBagTwo"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintWidth_percent=".45"
+            app:layout_constraintHeight_percent=".25"
+            android:background="@drawable/ic_bag_three"
+            android:visibility="invisible"
+            android:layout_marginStart="-54dp"
+            android:layout_marginBottom="-18dp"
+            app:layout_constraintStart_toEndOf="@id/ivBagOne"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+        <ImageView
+            android:id="@+id/ivBagThree"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintWidth_percent=".45"
+            app:layout_constraintHeight_percent=".25"
+            android:background="@drawable/ic_bag_five"
+            android:layout_marginStart="-72dp"
+            android:visibility="invisible"
+            android:layout_marginBottom="-16dp"
+            app:layout_constraintStart_toEndOf="@id/ivBagTwo"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+        <ImageView
+            android:id="@+id/ivBagFour"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintWidth_percent=".45"
+            app:layout_constraintHeight_percent=".25"
+            android:background="@drawable/ic_bag_four"
+            android:layout_marginStart="-58dp"
+            android:visibility="invisible"
+            android:layout_marginBottom="-16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivBagTwo"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <ProgressBar
-            android:id="@+id/progress_circular"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:progressTint="@color/white"
-            android:indeterminate="true"
-            android:indeterminateTintMode="src_atop"
-            android:indeterminateTint="@color/green_light"
-            app:layout_constraintTop_toBottomOf="@id/ivAppIcon"
-            app:layout_constraintStart_toStartOf="@id/ivAppIcon"
-            app:layout_constraintEnd_toEndOf="@id/ivAppIcon"
-            app:layout_constraintBottom_toTopOf="@id/tvStatus" />
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="250dp"
+            android:layout_height="200dp"
+            android:visibility="invisible"
+            android:elevation="@dimen/material_size_16"
+            android:background="@drawable/ic_app_shadow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="@dimen/material_size_64" />
+
+<!--        <ProgressBar-->
+<!--            android:id="@+id/progress_circular"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:progressTint="@color/white"-->
+<!--            android:indeterminate="true"-->
+<!--            android:visibility="invisible"-->
+<!--            android:indeterminateTintMode="src_atop"-->
+<!--            android:indeterminateTint="@color/green_light"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/ivLogo"-->
+<!--            app:layout_constraintStart_toStartOf="@id/ivLogo"-->
+<!--            app:layout_constraintEnd_toEndOf="@id/ivLogo"-->
+<!--            app:layout_constraintBottom_toTopOf="@id/tvStatus" />-->
 
         <TextView
             android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Retry"
-            android:background="@drawable/shape_round_rectangle_8"
-            android:padding="@dimen/material_size_8"
-            android:paddingStart="@dimen/material_size_16"
-            android:paddingEnd="@dimen/material_size_16"
+            android:text="Please Turn on your Internet Connection to Continue..."
             android:textColor="@color/matteRed"
             android:textSize="16sp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/progress_circular"
+            android:visibility="invisible"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/material_size_16"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>

@@ -4,8 +4,23 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white">
+        android:layout_height="match_parent">
+
+<!--        <include-->
+<!--            layout="@layout/rv_shopping_items"/>-->
+
+
+        <ImageView
+            android:id="@+id/ivBackground"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintHeight_percent=".9"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:rotation="180"
+            android:backgroundTint="@color/transparent"
+            android:background="@drawable/bg_top_rounded_32"/>
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -13,10 +28,11 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/baloo"
                 android:text="ORGANIC PRODUCTS"
-                android:textColor="@color/matteGreen"
+                android:textColor="@color/green_base"
                 android:textSize="32sp"
                 android:textAllCaps="true"
                 android:layout_marginTop="@dimen/material_size_64"
+                android:elevation="@dimen/material_size_16"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -30,6 +46,7 @@
             android:src="@drawable/page_one"
             android:layout_marginTop="@dimen/material_size_16"
             app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            android:elevation="@dimen/material_size_16"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@id/tvBody"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -38,45 +55,29 @@
                 android:id="@+id/tvBody"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/andika"
-                android:text="Get a wide variety of
-                Farm Fresh Organic Products
-                in a single click"
-                android:textColor="@color/green_base"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:fontFamily="@font/baloo"
+                android:text="Get a wide variety of Farm Fresh Organic Products in a single click"
+                android:textColor="@color/matteRed"
+                app:layout_constraintBottom_toBottomOf="@id/ivBackground"
                 android:textSize="22sp"
+                android:maxLines="3"
+                android:justificationMode="none"
                 android:layout_marginStart="@dimen/material_size_32"
+                android:elevation="@dimen/material_size_16"
                 android:layout_marginEnd="@dimen/material_size_32"
                 android:layout_marginTop="@dimen/material_size_32"
                 android:gravity="center"
-                android:textAlignment="center"
+                android:textAlignment="gravity"
                 app:layout_constraintTop_toBottomOf="@id/ivImage"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/next_screen"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="@dimen/material_size_32"
-            android:layout_marginBottom="@dimen/material_size_32"
-            android:clickable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/next_arrow" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSignIn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:elevation="20dp"
+            android:elevation="@dimen/material_size_16"
             android:visibility="gone"
             android:text="@string/common_signin_button_text"
             android:layout_marginRight="@dimen/material_size_32"

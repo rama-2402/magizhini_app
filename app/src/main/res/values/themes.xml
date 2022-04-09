@@ -25,7 +25,7 @@
 <!--    splash screen theme-->
     <style name="splashScreenTheme" parent="Theme.MagizhiniOrganics.NoActionBar" >
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
-        <item name="android:windowBackground">@drawable/spalsh_screen</item>
+        <item name="android:windowBackground">@color/green_base</item>
     </style>
 
 <!--    No ActionBar theme-->
