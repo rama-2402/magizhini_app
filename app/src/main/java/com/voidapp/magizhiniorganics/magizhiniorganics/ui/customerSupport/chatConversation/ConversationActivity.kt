@@ -73,7 +73,7 @@ class ConversationActivity :
     }
 
     private fun initData() {
-        showProgressDialog()
+        showProgressDialog(true)
         viewModel.getToken()
         viewModel.getProfileData()
         viewModel.supportStatusListener()
@@ -110,7 +110,7 @@ class ConversationActivity :
                 when(result) {
                     is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
                     is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
-                    is NetworkResult.Loading -> showProgressDialog()
+                    is NetworkResult.Loading -> showProgressDialog(true)
                     else -> Unit
                 }
             }

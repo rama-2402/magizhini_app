@@ -9,25 +9,25 @@
             android:id="@+id/clProfile"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"
+            android:background="@color/green_base"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/ivHeader"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:background="@drawable/bg_bottom_rouded"
-                android:elevation="@dimen/material_size_16"
-                android:nestedScrollingEnabled="true"
-                app:layout_constraintBottom_toTopOf="@id/svProfileBody"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent=".28"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0"
-                />
+<!--            <ImageView-->
+<!--                android:id="@+id/ivHeader"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="0dp"-->
+<!--                android:background="@drawable/bg_bottom_rouded"-->
+<!--                android:elevation="@dimen/material_size_16"-->
+<!--                android:nestedScrollingEnabled="true"-->
+<!--                app:layout_constraintBottom_toTopOf="@id/svProfileBody"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHeight_percent=".28"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintVertical_bias="1.0"-->
+<!--                />-->
 
             <TextView
                 android:id="@+id/tvProfile"
@@ -50,13 +50,11 @@
                 android:id="@+id/ivProfilePic"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_margin="2dp"
                 android:background="@drawable/bg_transparent"
                 android:elevation="20dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_person"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="@id/ivHeader"
+                android:layout_marginTop="@dimen/material_size_16"
                 app:layout_constraintEnd_toStartOf="@id/llProfileName"
                 app:layout_constraintHeight_percent=".15"
                 app:layout_constraintStart_toStartOf="parent"
@@ -73,7 +71,7 @@
                 app:layout_constraintBottom_toBottomOf="@id/ivProfilePic"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/ivProfilePic"
-                app:layout_constraintTop_toBottomOf="@id/tvProfile"
+                app:layout_constraintTop_toTopOf="@+id/ivProfilePic"
                 app:layout_constraintWidth_percent="0.6">
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -84,12 +82,12 @@
                     android:hint="Name"
                     android:paddingRight="8dp"
                     app:boxStrokeColor="@color/matteRed"
-                    app:flow_wrapMode="aligned"
                     app:endIconMode="clear_text"
                     app:endIconTint="@color/white"
+                    app:flow_wrapMode="aligned"
+                    app:hintTextColor="@color/matteRed"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:startIconDrawable="@drawable/ic_person"
-                    app:hintTextColor="@color/matteRed"
                     app:startIconTint="@color/matteRed">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -97,12 +95,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
+                        android:backgroundTint="@color/white"
                         android:cursorVisible="true"
                         android:inputType="textShortMessage"
-                        android:textColorHint="@color/white"
                         android:textColor="@color/white"
-                        android:backgroundTint="@color/white"
-                        android:textCursorDrawable="@null"/>
+                        android:textColorHint="@color/white"
+                        android:textCursorDrawable="@null" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -111,13 +109,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:elevation="20dp"
                     android:fontFamily="@font/roboto"
                     android:text=""
-                    android:textColor="@color/white"
+                    android:textColor="@color/matteRed"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintWidth_percent="0.6"
-                    tools:text="9486598819" />
+                    tools:text="0000000000" />
 
             </LinearLayout>
 
@@ -145,12 +143,13 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivHeader">
+                app:layout_constraintTop_toBottomOf="@id/ivProfilePic">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:background="@drawable/shape_round_rectangle_16"
                     android:layout_marginTop="@dimen/material_size_16">
 
                     <LinearLayout
@@ -175,7 +174,7 @@
                             android:text="Date Of Birth:"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/gray700"/>
+                            android:textColor="@color/green_base"/>
 
                         <TextView
                             android:id="@+id/tvDob"
@@ -183,7 +182,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
                             android:text=" DD / MM / YYYY "
-                            android:textColor="@color/gray700"/>
+                            android:textColor="@color/matteRed"/>
                     </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -195,18 +194,19 @@
                         android:layout_marginRight="8dp"
                         android:layout_weight="1"
                         android:hint="Alternate Phone"
-                        app:boxStrokeColor="@color/green_base"
+                        app:boxStrokeColor="@color/matteRed"
                         app:flow_wrapMode="aligned"
-                        android:textColorHint="@color/green_base"
+                        android:textColorHint="@color/matteRed"
                         app:endIconMode="clear_text"
-                        app:hintTextColor="@color/green_base"
+                        app:hintTextColor="@color/matteRed"
                         app:layout_constraintBottom_toTopOf="@id/etlEmailId"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/llDob"
                         app:prefixText="+91"
+                        app:prefixTextColor="@color/green_base"
                         app:startIconDrawable="@drawable/ic_phone_msg"
-                        app:startIconTint="@color/green_base">
+                        app:startIconTint="@color/matteRed">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etAlternateNumber"
@@ -216,8 +216,8 @@
                             android:cursorVisible="true"
                             android:inputType="number"
                             android:maxLength="10"
-                            android:textColorHint="@color/green_base"
-                            android:textColor="@color/gray700"
+                            android:textColorHint="@color/matteRed"
+                            android:textColor="@color/green_base"
                             android:textCursorDrawable="@null"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -232,21 +232,21 @@
                         android:layout_marginRight="8dp"
                         android:layout_weight="1"
                         app:flow_wrapMode="aligned"
-                        android:textColorHint="@color/green_base"
+                        android:textColorHint="@color/matteRed"
                         android:hint="Email ID"
-                        app:boxStrokeColor="@color/green_base"
+                        app:boxStrokeColor="@color/matteRed"
                         app:endIconMode="clear_text"
-                        app:hintTextColor="@color/green_base"
+                        app:hintTextColor="@color/matteRed"
                         app:layout_constraintBottom_toTopOf="@id/etlAddressOne"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/etlAlternateNumber"
                         app:startIconDrawable="@drawable/ic_email"
-                        app:startIconTint="@color/green_base">
+                        app:startIconTint="@color/matteRed">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etEmailId"
-                            android:textColor="@color/gray700"
+                            android:textColor="@color/green_base"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -264,28 +264,28 @@
                         android:layout_marginLeft="8dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginRight="8dp"
-                        android:textColorHint="@color/green_base"
+                        android:textColorHint="@color/matteRed"
                         android:layout_weight="1"
                         android:hint="Address Line 1"
-                        app:boxStrokeColor="@color/green_base"
+                        app:boxStrokeColor="@color/matteRed"
                         app:flow_wrapMode="aligned"
                         app:endIconMode="clear_text"
-                        app:hintTextColor="@color/green_base"
+                        app:hintTextColor="@color/matteRed"
                         app:layout_constraintBottom_toTopOf="@id/etlAddressTwo"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/etlEmailId"
                         app:startIconDrawable="@drawable/ic_address"
-                        app:startIconTint="@color/green_base">
+                        app:startIconTint="@color/matteRed">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etAddressOne"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:textColor="@color/gray700"
+                            android:textColor="@color/green_base"
                             android:inputType="textLongMessage"
-                            android:textColorHint="@color/green_base"
+                            android:textColorHint="@color/matteRed"
                             android:textCursorDrawable="@null" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -300,16 +300,16 @@
                         android:layout_marginRight="8dp"
                         android:layout_weight="1"
                         android:hint="Address Line 2"
-                        app:boxStrokeColor="@color/green_base"
-                        android:textColorHint="@color/green_base"
+                        app:boxStrokeColor="@color/matteRed"
+                        android:textColorHint="@color/matteRed"
                         app:flow_wrapMode="aligned"
                         app:endIconMode="clear_text"
-                        app:hintTextColor="@color/green_base"
+                        app:hintTextColor="@color/matteRed"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/etlAddressOne"
                         app:startIconDrawable="@drawable/ic_address"
-                        app:startIconTint="@color/green_base">
+                        app:startIconTint="@color/matteRed">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etAddressTwo"
@@ -317,8 +317,8 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:inputType="textLongMessage"
-                            android:textColor="@color/gray700"
-                            android:textColorHint="@color/green_base"
+                            android:textColor="@color/green_base"
+                            android:textColorHint="@color/matteRed"
                             android:textCursorDrawable="@null" />
 
                     </com.google.android.material.textfield.TextInputLayout>
@@ -337,46 +337,46 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/etlAddressTwo">
 
-                        <Spinner
-                            android:id="@+id/spArea"
-                            android:layout_width="0dp"
-                            android:layout_height="56dp"
-                            android:layout_weight="1"
-                            android:spinnerMode="dropdown"
-                            android:popupBackground="@drawable/shape_round_rectangle_8"
-                            android:theme="@style/mySpinnerItemStyle"
-                            android:entries="@array/chennai_codes"
-                            android:background="@drawable/bg_material_box"
-                            android:layout_marginEnd="@dimen/material_size_8"
-                            android:paddingStart="@dimen/material_size_8"
-                            android:paddingEnd="@dimen/material_size_8"
-                            />
-                        <Spinner
-                            android:id="@+id/spCity"
-                            android:layout_width="0dp"
-                            android:layout_height="56dp"
-                            android:layout_weight="1"
-                            android:popupBackground="@drawable/shape_round_rectangle_8"
-                            android:theme="@style/mySpinnerItemStyle"
-                            android:entries="@array/city_names"
-                            android:spinnerMode="dropdown"
-                            android:background="@drawable/bg_material_box"
-                            android:paddingStart="@dimen/material_size_8"
-                            android:paddingEnd="@dimen/material_size_8"
-                            />
+<!--                        <Spinner-->
+<!--                            android:id="@+id/spArea"-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="56dp"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:spinnerMode="dropdown"-->
+<!--                            android:popupBackground="@drawable/shape_round_rectangle_8"-->
+<!--                            android:theme="@style/mySpinnerItemStyle"-->
+<!--                            android:entries="@array/chennai_codes"-->
+<!--                            android:background="@drawable/bg_material_box"-->
+<!--                            android:layout_marginEnd="@dimen/material_size_8"-->
+<!--                            android:paddingStart="@dimen/material_size_8"-->
+<!--                            android:paddingEnd="@dimen/material_size_8"-->
+<!--                            />-->
+<!--                        <Spinner-->
+<!--                            android:id="@+id/spCity"-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="56dp"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:popupBackground="@drawable/shape_round_rectangle_8"-->
+<!--                            android:theme="@style/mySpinnerItemStyle"-->
+<!--                            android:entries="@array/city_names"-->
+<!--                            android:spinnerMode="dropdown"-->
+<!--                            android:background="@drawable/bg_material_box"-->
+<!--                            android:paddingStart="@dimen/material_size_8"-->
+<!--                            android:paddingEnd="@dimen/material_size_8"-->
+<!--                            />-->
 
                     </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/llGps"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="@dimen/material_size_64"
                         android:layout_marginStart="@dimen/material_size_8"
                         android:layout_marginEnd="@dimen/material_size_8"
                         android:layout_marginTop="@dimen/material_size_8"
-                        android:visibility="gone"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
+                        android:clickable="true"
                         android:background="@drawable/bg_material_box"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -387,26 +387,23 @@
                             android:layout_height="wrap_content"
                             android:padding="@dimen/material_size_8"
                             android:src="@drawable/ic_location"
-                            app:tint="@color/green_base" />
+                            app:tint="@color/matteRed" />
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/material_size_8"
-                            android:fontFamily="@font/roboto"
-                            android:text="GPS"
-                            android:textColor="@color/green_base"
-                            android:textSize="20sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvGps"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:id="@+id/tvGpsAddress"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center_vertical"
                             android:layout_marginLeft="@dimen/material_size_16"
                             android:fontFamily="@font/roboto"
+                            android:ellipsize="marquee"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:scrollHorizontally="true"
+                            android:singleLine="true"
                             android:text="(Help us locate you better)"
-                            android:textColor="@color/gray600"
+                            android:textColor="@color/green_base"
                             android:textSize="16sp"
                             android:textStyle="italic" />
 
@@ -433,11 +430,11 @@
                             android:layout_marginTop="@dimen/material_size_16"
                             android:layout_marginBottom="16dp"
                             android:elevation="24dp"
+                            android:background="@drawable/shape_round_rectangle_8"
                             android:text="SAVE PROFILE"
-                            app:icon="@drawable/ic_save"
+                            android:textStyle="bold"
                             android:textColor="@color/white"
-                            app:iconTint="@color/white"
-                            app:backgroundTint="@color/green_base"/>
+                            app:backgroundTint="@color/matteRed"/>
 
                         <View
                             android:layout_width="match_parent"

@@ -71,7 +71,7 @@ class AllCWMActivity :
                     is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
                     is NetworkResult.Loading -> {
                         if (result.message == "") {
-                            showProgressDialog()
+                            showProgressDialog(true)
                         } else {
                             showSuccessDialog("", result.message, result.data)
                         }

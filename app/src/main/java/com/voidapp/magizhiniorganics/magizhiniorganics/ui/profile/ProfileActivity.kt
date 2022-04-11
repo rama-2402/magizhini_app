@@ -1,13 +1,21 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile
 
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.provider.Settings
+import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.animation.AnimationUtils
+import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
@@ -21,10 +29,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfileBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.MapsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ACCESS_LOCATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
@@ -41,14 +50,15 @@ import org.kodein.di.generic.instance
 
 class ProfileActivity :
     BaseActivity(),
-    KodeinAware
-{
+    KodeinAware {
 
     lateinit var binding: ActivityProfileBinding
     override val kodein by kodein()
 
     private lateinit var viewModel: ProfileViewModel
     private val factory: ProfileViewModelFactory by instance()
+
+    private var permissionType: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,10 +69,13 @@ class ProfileActivity :
         viewModel = ViewModelProvider(this, factory).get(ProfileViewModel::class.java)
 
         with(binding) {
-//            ivHeader.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
-//            tvProfile.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
-//            llProfileName.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_in_top_bounce))
-            svProfileBody.startAnimation(AnimationUtils.loadAnimation(this@ProfileActivity, R.anim.slide_up))
+            svProfileBody.startAnimation(
+                AnimationUtils.loadAnimation(
+                    this@ProfileActivity,
+                    R.anim.slide_up
+                )
+            )
+            tvGpsAddress.isSelected = true
         }
 
         viewModel.phoneNumber = intent.getStringExtra(PHONE_NUMBER).toString()
@@ -85,12 +98,12 @@ class ProfileActivity :
     private fun observers() {
 
         viewModel.uiEvent.observe(this) { event ->
-            when(event) {
+            when (event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)
                 is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
                 is UIEvent.ProgressBar -> {
                     if (event.visibility) {
-                        showProgressDialog()
+                        showProgressDialog(true)
                     } else {
                         hideProgressDialog()
                     }
@@ -102,11 +115,11 @@ class ProfileActivity :
         }
 
         viewModel.uiUpdate.observe(this) { event ->
-            when(event) {
+            when (event) {
                 is ProfileViewModel.UiUpdate.PopulateProfileData -> {
                     event.profile?.let {    //profile data will be populated if user data exists
                         populateProfileDetails(it)
-                    } ?:let {   //new wallet will be created since this is a new user
+                    } ?: let {   //new wallet will be created since this is a new user
                         viewModel.userID?.let {
                             viewModel.createNewUserWallet(it)
                         }
@@ -130,8 +143,8 @@ class ProfileActivity :
                             )
                         }
                     }
-               }
-                is ProfileViewModel.UiUpdate.ProfilePicUrl-> {
+                }
+                is ProfileViewModel.UiUpdate.ProfilePicUrl -> {
                     event.imageUrl?.let {
                         //uploaded pic url
                         generateProfileModel(it)
@@ -143,14 +156,25 @@ class ProfileActivity :
                 is ProfileViewModel.UiUpdate.ProfileUploadStatus -> {
                     dismissLoadStatusDialog()
                     if (event.status) {
-                        SharedPref(this).putData(LOGIN_STATUS, Constants.BOOLEAN, false)   //stating it is not new user
+                        SharedPref(this).putData(
+                            LOGIN_STATUS,
+                            Constants.BOOLEAN,
+                            false
+                        )   //stating it is not new user
                         newUserTransitionFromProfile()
                     } else {
                         showErrorSnackBar(event.message!!, true)
                     }
                 }
-                is ProfileViewModel.UiUpdate.ShowLoadStatusDialog -> showLoadStatusDialog("", event.message!!, event.data!!)
-                is ProfileViewModel.UiUpdate.UpdateLoadStatusDialog -> updateLoadStatusDialogText(event.data!!, event.message!!)
+                is ProfileViewModel.UiUpdate.ShowLoadStatusDialog -> showLoadStatusDialog(
+                    "",
+                    event.message!!,
+                    event.data!!
+                )
+                is ProfileViewModel.UiUpdate.UpdateLoadStatusDialog -> updateLoadStatusDialogText(
+                    event.data!!,
+                    event.message!!
+                )
                 is ProfileViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
             }
@@ -159,7 +183,8 @@ class ProfileActivity :
     }
 
     private fun showLoadStatusDialog(title: String, body: String, content: String) {
-        LoadStatusDialog.newInstance(title, body, content).show(supportFragmentManager,
+        LoadStatusDialog.newInstance(title, body, content).show(
+            supportFragmentManager,
             Constants.LOAD_DIALOG
         )
     }
@@ -178,12 +203,14 @@ class ProfileActivity :
             etProfileName.setText(userProfile.name)
             tvDob.text = userProfile.dob
             tvPhoneNumber.text = userProfile.phNumber
-            etAlternateNumber.setText(userProfile.alternatePhNumber)
+            if (userProfile.alternatePhNumber.isNotEmpty()) {
+                etAlternateNumber.setText(userProfile.alternatePhNumber)
+            }
             etEmailId.setText(userProfile.mailId)
             etAddressOne.setText(userProfile.address[0].addressLineOne)
             etAddressTwo.setText(userProfile.address[0].addressLineTwo)
-            spArea.setSelection(userProfile.address[0].LocationCodePosition)
-            tvGps.text = userProfile.address[0].gpsAddress
+//            spArea.setSelection(userProfile.address[0].LocationCodePosition)
+            tvGpsAddress.text = userProfile.address[0].gpsAddress
 //            mLatitude = userProfile.address[0].gpsLatitude
 //            mLongitude = userProfile.address[0].gpsLongitude
 //            mAddress = userProfile.address[0].gpsAddress
@@ -191,7 +218,7 @@ class ProfileActivity :
 //                userProfile.referralId != "" ||
 //                SharedPref(this@ProfileActivity).getData(LOGIN_STATUS, BOOLEAN, false)
 //            ) {
-                tvReferral.remove()
+            tvReferral.remove()
 //            }
             //hiding the referral code area for existing user
             if (userProfile.profilePicUrl != "") {
@@ -226,7 +253,28 @@ class ProfileActivity :
                 if (PermissionsUtil.hasStoragePermission(this@ProfileActivity)) {
                     getAction.launch(pickImageIntent)
                 } else {
-                    showExitSheet(this@ProfileActivity, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                    permissionType = STORAGE_SERVICE
+                    showExitSheet(
+                        this@ProfileActivity,
+                        "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions",
+                        "permission"
+                    )
+                }
+            }
+            tvGpsAddress.setOnClickListener {
+                if (PermissionsUtil.hasLocationPermission(this@ProfileActivity)) {
+                    if (gpsStatusCheck()) {
+                        openMaps()
+                    } else {
+                        buildAlertMessageNoGps()
+                    }
+                } else {
+                    permissionType = LOCATION_SERVICE
+                    showExitSheet(
+                        this@ProfileActivity,
+                        "The App Needs Location Permission to find your location in Maps. \n\n Please provide ALLOW in the following Location Permissions",
+                        "location"
+                    )
                 }
             }
             btnSaveProfile.setOnClickListener {
@@ -236,24 +284,45 @@ class ProfileActivity :
                 }
                 profileDataValidation()
             }
-            llDob.setOnClickListener{
+            llDob.setOnClickListener {
                 viewModel.DobLong?.let {
                     val selectedDateMap = HashMap<String, Long>()
                     selectedDateMap["date"] = it
                     selectedDateMap["month"] = it
                     selectedDateMap["year"] = it
-                    DatePickerLib.showCalendar(this@ProfileActivity, this@ProfileActivity, null, System.currentTimeMillis(), selectedDateMap)
-                } ?:let {
-                    DatePickerLib.showCalendar(this@ProfileActivity, this@ProfileActivity, null, System.currentTimeMillis(), null)
+                    DatePickerLib.showCalendar(
+                        this@ProfileActivity,
+                        this@ProfileActivity,
+                        null,
+                        System.currentTimeMillis(),
+                        selectedDateMap
+                    )
+                } ?: let {
+                    DatePickerLib.showCalendar(
+                        this@ProfileActivity,
+                        this@ProfileActivity,
+                        null,
+                        System.currentTimeMillis(),
+                        null
+                    )
                 }
             }
-            tvReferral.setOnClickListener{
-                showExitSheet(this@ProfileActivity, "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful referrals. Please enter your Referrer's Registered Mobile number with Magizhini to avail Referral Bonus! Click Proceed to Continue", "referral")
+            tvReferral.setOnClickListener {
+                showExitSheet(
+                    this@ProfileActivity,
+                    "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful referrals. Please enter your Referrer's Registered Mobile number with Magizhini to avail Referral Bonus! Click Proceed to Continue",
+                    "referral"
+                )
             }
-            llGps.setOnClickListener{
+            llGps.setOnClickListener {
                 //implements maps and gps location picker if needed
             }
         }
+    }
+
+    private fun gpsStatusCheck(): Boolean {
+        val manager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 
     //generating the profile model for uploading to firestore
@@ -280,7 +349,7 @@ class ProfileActivity :
             referrerNumber = viewModel.referralCode ?: ""
         ).let { profile ->
             profile.extras = if (profile.referrerNumber == "") {
-                 arrayListOf("no")
+                arrayListOf("no")
             } else {
                 arrayListOf("yes")
             }
@@ -305,16 +374,16 @@ class ProfileActivity :
     }
 
     private fun generateAddressObject(): Address {
-        return Address (
+        return Address(
             userId = binding.etProfileName.text.toString().trim(),
             addressLineOne = binding.etAddressOne.text.toString().trim(),
             addressLineTwo = binding.etAddressTwo.text.toString().trim(),
-            city = binding.spCity.selectedItem.toString(),
-            LocationCode = binding.spArea.selectedItem.toString(),
-            LocationCodePosition = binding.spArea.selectedItemPosition,
-//            gpsLatitude = mLatitude,
-//            gpsLongitude = mLongitude,
-//            gpsAddress = mAddress
+            city = "Chennai",
+//            LocationCode = binding.spArea.selectedItem.toString(),
+//            LocationCodePosition = binding.spArea.selectedItemPosition,
+            gpsLatitude = viewModel.latitude,
+            gpsLongitude = viewModel.longitude,
+            gpsAddress = viewModel.gpsAddress
         )
     }
 
@@ -346,6 +415,9 @@ class ProfileActivity :
                     showErrorSnackBar("Date of Birth required", true)
                     return@apply
                 }
+                viewModel.gpsAddress == "" -> {
+                    showErrorSnackBar("Pick your GPS Location to save profile", true)
+                }
                 else -> {
                     viewModel.profilePicUri?.let {
                         compressImageToNewFile(this@ProfileActivity, it)?.let { file ->
@@ -366,7 +438,11 @@ class ProfileActivity :
         // uploading dob should be in 00/00/0000 format
         binding.tvDob.text = TimeUtil().getCustomDate(dateLong = date)
         viewModel.DobLong = date
-        SharedPref(this).putData(Constants.DOB, Constants.STRING, TimeUtil().getCustomDate(dateLong = date).substring(0,5))
+        SharedPref(this).putData(
+            Constants.DOB,
+            Constants.STRING,
+            TimeUtil().getCustomDate(dateLong = date).substring(0, 5)
+        )
     }
 
     fun openReferral() {
@@ -377,7 +453,12 @@ class ProfileActivity :
         //BS to add referral number
         val dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
 
-        val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(LayoutInflater.from(applicationContext),R.layout.dialog_bottom_add_referral,null,false)
+        val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(
+            LayoutInflater.from(applicationContext),
+            R.layout.dialog_bottom_add_referral,
+            null,
+            false
+        )
         dialogBsAddReferral.setCancelable(true)
         dialogBsAddReferral.setContentView(view.root)
         dialogBsAddReferral.dismissWithAnimation = true
@@ -387,7 +468,7 @@ class ProfileActivity :
             val code = view.etReferralNumber.text.toString().trim()
             if (code.isEmpty()) {
                 view.etlReferralNumber.error = "* Enter a valid code"
-            return@setOnClickListener
+                return@setOnClickListener
             } else {
                 dialogBsAddReferral.dismiss()
                 viewModel.applyReferralNumber(code)
@@ -401,7 +482,7 @@ class ProfileActivity :
         //on back pressed if it is new user the app is closed if not it means the user is already logged in so it will move to home activity
         viewModel.userProfile?.let {
             transitionFromProfile()
-        } ?:let {
+        } ?: let {
             finish()
             finishAffinity()
         }
@@ -433,7 +514,7 @@ class ProfileActivity :
 
     override fun onBackPressed() {
         viewModel.userProfile?.let {
-            showExitSheet(this, "Exit Profile Update","close")
+            showExitSheet(this, "Exit Profile Update", "close")
         } ?: showExitSheet(this, "Cancel Registration", "close")
     }
 
@@ -444,15 +525,19 @@ class ProfileActivity :
 
     fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
 
+    fun proceedToRequestLocationPermission() = PermissionsUtil.requestLocationPermission(this)
+
     fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
 
-    private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        viewModel.profilePicUri = result.data?.data
-        viewModel.profilePicUri?.let { uri -> binding.ivProfilePic.loadImg(uri) {
-            supportStartPostponedEnterTransition()
+    private val getAction =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            viewModel.profilePicUri = result.data?.data
+            viewModel.profilePicUri?.let { uri ->
+                binding.ivProfilePic.loadImg(uri) {
+                    supportStartPostponedEnterTransition()
+                }
+            }
         }
-        }
-    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -461,17 +546,101 @@ class ProfileActivity :
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
-            if(
+        if (requestCode == 1) {
+            if (
                 grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
-                showToast(this, "Storage Permission Granted")
-                getAction.launch(pickImageIntent)
+                when (permissionType) {
+                    LOCATION_SERVICE -> {
+                        showToast(this, "Location Permission Granted")
+                        if (PermissionsUtil.isGpsEnabled(this@ProfileActivity)) {
+                            openMaps()
+                        } else {
+                            buildAlertMessageNoGps()
+                        }
+                    }
+                    STORAGE_SERVICE -> {
+                        showToast(this, "Storage Permission Granted")
+                        getAction.launch(pickImageIntent)
+                    }
+                }
             } else {
-                showToast(this, "Storage Permission Denied")
-                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
+                showToast(this, "Location Permission Denied")
+                showExitSheet(
+                    this,
+                    "Some or All of the requested Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [App Permission] to manually provide permission",
+                    "setting"
+                )
             }
         }
+
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
+            if (
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                when (permissionType) {
+                    LOCATION_SERVICE -> {
+                        showToast(this, "Location Permission Granted")
+                        if (PermissionsUtil.isGpsEnabled(this@ProfileActivity)) {
+                            openMaps()
+                        } else {
+                            buildAlertMessageNoGps()
+                        }
+                    }
+                    STORAGE_SERVICE -> {
+                        showToast(this, "Storage Permission Granted")
+                        getAction.launch(pickImageIntent)
+                    }
+                }
+            } else {
+                showToast(this, "Permission Denied")
+                showExitSheet(
+                    this,
+                    "Some or All of the requested Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [App Permission] to manually provide permission",
+                    "setting"
+                )
+            }
+        }
+    }
+
+    private fun openMaps() {
+        Intent(this, MapsActivity::class.java).also {
+            activityResultLaunch.launch(it)
+        }
+    }
+
+    var activityResultLaunch = registerForActivityResult(
+        StartActivityForResult(),
+        ActivityResultCallback { result ->
+            if (result.resultCode == 123) {
+                val data: Intent? = result.data
+                viewModel.latitude = data?.getStringExtra("latitude").toString()
+                viewModel.longitude = data?.getStringExtra("longitude").toString()
+                viewModel.gpsAddress = data?.getStringExtra("gpsAddress").toString()
+                if (!viewModel.gpsAddress.isNullOrEmpty()) {
+                    binding.tvGpsAddress.text = viewModel.gpsAddress
+                }
+            }
+        })
+
+
+    fun buildAlertMessageNoGps() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setMessage("The App needs GPS to find location. Click YES to Enable GPS")
+            .setCancelable(false)
+            .setPositiveButton("Yes",
+                DialogInterface.OnClickListener { dialog, id -> startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) })
+            .setNegativeButton("No",
+                DialogInterface.OnClickListener { dialog, id ->
+                    showExitSheet(
+                        this,
+                        "The App Needs GPS to find your location in Maps. \n\n Please provide ALLOW to Turn On GPS Permissions",
+                        "gps"
+                    )
+                    dialog.cancel()
+                })
+        val alert: AlertDialog = builder.create()
+        alert.show()
     }
 
 }

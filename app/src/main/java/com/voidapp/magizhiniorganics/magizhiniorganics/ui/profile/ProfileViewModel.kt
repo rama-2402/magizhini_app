@@ -28,6 +28,9 @@ class ProfileViewModel (
     var DobLong: Long? = null
     var referralCode: String? = null
     var profilePicUri: Uri? = null
+    var latitude: String = ""
+    var longitude: String = ""
+    var gpsAddress: String = ""
 
     val purchaseHistory: MutableList<String> = mutableListOf()
     val subscriptions:  MutableList<String> = mutableListOf()

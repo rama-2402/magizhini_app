@@ -76,7 +76,7 @@ class DishActivity :
         viewModel.dish = intent.getParcelableExtra<CWMFood>("dish")!!
         checkoutText = findViewById<TextView>(R.id.tvCheckOut)
 
-        showProgressDialog()
+        showProgressDialog(true)
 
         initData()
         initRecyclerView()
@@ -93,7 +93,7 @@ class DishActivity :
                     is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
                     is NetworkResult.Loading -> {
                         if (result.message == "") {
-                            showProgressDialog()
+                            showProgressDialog(true)
                         } else {
                             showSuccessDialog("", result.message, result.data)
                         }

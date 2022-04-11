@@ -171,7 +171,7 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
         lifecycleScope.launch {
             viewModel.loginStatus.collect { status ->
                 when(status) {
-                    "" -> {}
+                    "" -> Unit
                     "failed" -> {
                         hideProgressDialog()
                         showErrorSnackBar("Login Failed! Recheck OTP or Try again later", true)
@@ -195,6 +195,7 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
                         newUserVerification()
                     }
                 }
+                viewModel.setEmptyStatus()
             }
         }
     }
@@ -276,7 +277,7 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
                 .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
                         try {
-                            showProgressDialog()
+                            showProgressDialog(false)
                             viewModel.signIn(phoneAuthCredential)
                         } catch (e: Exception) {
                             showErrorSnackBar("Server error! Please Try Later", true)
@@ -326,7 +327,7 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
             showErrorSnackBar("Enter a valid OTP", true)
         } else {
             this.hideKeyboard()
-            showProgressDialog()
+            showProgressDialog(false)
             verifyPhoneNumberWithCode(mVerificationId, otp)
         }
     }

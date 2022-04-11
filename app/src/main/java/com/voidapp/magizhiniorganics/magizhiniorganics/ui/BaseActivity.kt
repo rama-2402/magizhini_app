@@ -146,7 +146,7 @@ open class BaseActivity : AppCompatActivity() {
             snackBarView.setBackgroundColor(
                 ContextCompat.getColor(
                     this,
-                    R.color.matteRed
+                    R.color.errorRed
                 )
             )
         } else {
@@ -163,7 +163,7 @@ open class BaseActivity : AppCompatActivity() {
     /**
      * This function is used to show the progress dialog with the title and message to user.
      */
-    open fun showProgressDialog() {
+    open fun showProgressDialog(isCancellable: Boolean) {
 
         mProgressDialog = Dialog(this)
 
@@ -174,7 +174,7 @@ open class BaseActivity : AppCompatActivity() {
 //        val lottie = mProgressDialog.findViewById<LottieAnimationView>(R.id.lottie_progress)
 //        lottie.animate()
 
-        mProgressDialog.setCancelable(true)
+        mProgressDialog.setCancelable(isCancellable)
         mProgressDialog.setCanceledOnTouchOutside(false)
         mProgressDialog.window?.setDimAmount(0f)
         mProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -277,7 +277,11 @@ open class BaseActivity : AppCompatActivity() {
         view.tvConfirmationText.setOnClickListener {
             hideExitSheet()
             when (activity) {
-                is ProfileActivity -> activity.exitProfileWithoutChange()
+                is ProfileActivity -> {
+                    when(data) {
+                        "close" -> activity.exitProfileWithoutChange()
+                    }
+                }
                 is QuickOrderActivity -> activity.onBackPressed()
             }
         }
@@ -288,6 +292,8 @@ open class BaseActivity : AppCompatActivity() {
                 is ProfileActivity -> {
                     when (data) {
                         "permission" -> activity.proceedToRequestPermission()
+                        "location" -> activity.proceedToRequestLocationPermission()
+                        "gps" -> activity.buildAlertMessageNoGps()
                         "setting" -> activity.proceedToRequestManualPermission()
                         "referral" -> activity.openReferral()
                     }

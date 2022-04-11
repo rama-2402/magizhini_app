@@ -67,7 +67,7 @@ class NotificationsActivity :
                 finish()
             }
             tvClearAll.setOnClickListener {
-                showProgressDialog()
+                showProgressDialog(true)
                 viewModel.clearAllNotifications()
             }
         }
@@ -102,7 +102,7 @@ class NotificationsActivity :
     }
 
     private fun deleteNotification() {
-        showProgressDialog()
+        showProgressDialog(true)
         viewModel.deleteNotification()
     }
 
@@ -139,7 +139,7 @@ class NotificationsActivity :
                     is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
                     is NetworkResult.Loading -> {
                         if (result.message == "") {
-                            showProgressDialog()
+                            showProgressDialog(true)
                         } else {
                             showSuccessDialog("", result.message, result.data)
                         }

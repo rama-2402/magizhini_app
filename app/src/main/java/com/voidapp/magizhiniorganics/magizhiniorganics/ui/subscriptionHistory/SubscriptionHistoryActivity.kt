@@ -205,7 +205,7 @@ class SubscriptionHistoryActivity :
                 is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
                 is UIEvent.ProgressBar -> {
                     if (event.visibility) {
-                        showProgressDialog()
+                        showProgressDialog(true)
                     } else {
                         hideProgressDialog()
                     }
@@ -500,7 +500,7 @@ class SubscriptionHistoryActivity :
             return
         }
         lifecycleScope.launch {
-            showProgressDialog()
+            showProgressDialog(false)
             viewModel.subPosition = position
             viewModel.subscription = viewModel.subscriptionsList[position]
             viewModel.subscription?.let {
@@ -544,7 +544,7 @@ class SubscriptionHistoryActivity :
     }
 
     override fun showCalendar(position: Int) {
-        showProgressDialog()
+        showProgressDialog(false)
         viewModel.subPosition = position
         viewModel.subscription = viewModel.subscriptionsList[position]
         showCalendarDialog(viewModel.subscription!!)

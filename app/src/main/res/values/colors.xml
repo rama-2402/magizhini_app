@@ -19,7 +19,7 @@
 <!--    <color name="green_light">#E9FAD0</color>-->
     <color name="green_light">#D3F6FB</color>
     <color name="green_base_dark">#254000</color>
-<!--    <color name="matteRed">#FF5B5B</color>-->
+    <color name="errorRed">#FF5B5B</color>
 <!--    <color name="matteRed">#fd7c05</color>-->
     <color name="matteRed">#FFA450</color>
     <color name="matteGreen">#AED48B</color>

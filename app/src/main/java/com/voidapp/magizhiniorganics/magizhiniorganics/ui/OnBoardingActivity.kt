@@ -58,7 +58,7 @@ class OnBoardingActivity: BaseActivity() {
     }
 
     private fun listeners() {
-        binding.btnNext.setOnClickListener {
+        binding.tvSignIn.setOnClickListener {
             lifecycleScope.launch {
                 binding.apply {
                     btnNext.fadOutAnimation()

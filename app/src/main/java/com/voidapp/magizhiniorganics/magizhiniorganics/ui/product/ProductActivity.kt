@@ -375,7 +375,7 @@ class ProductActivity :
                 is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
                 is UIEvent.ProgressBar -> {
                     if (event.visibility) {
-                        showProgressDialog()
+                        showProgressDialog(true)
                     } else {
                         hideProgressDialog()
                     }

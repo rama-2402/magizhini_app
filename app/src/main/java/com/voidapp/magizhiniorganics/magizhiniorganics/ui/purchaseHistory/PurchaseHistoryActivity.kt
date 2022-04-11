@@ -107,7 +107,7 @@ class PurchaseHistoryActivity :
                 is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
                 is UIEvent.ProgressBar -> {
                     if (event.visibility) {
-                        showProgressDialog()
+                        showProgressDialog(true)
                     } else {
                         hideProgressDialog()
                     }
@@ -236,7 +236,7 @@ class PurchaseHistoryActivity :
             showErrorSnackBar("Please check your Internet Connection", true)
             return
         }
-        showProgressDialog()
+        showProgressDialog(false)
         viewModel.confirmCancellation()
     }
 
@@ -320,8 +320,8 @@ class PurchaseHistoryActivity :
                 grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
                 showToast(this, "Storage Permission Granted")
-                showProgressDialog()
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                viewModel.order?.let { createPDF(it) }
+                showProgressDialog(false)
+                viewModel.order?.let { createPDF(it) }
             } else {
                 showToast(this, "Storage Permission Denied")
                 showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
@@ -369,7 +369,7 @@ class PurchaseHistoryActivity :
         viewModel.orderPosition = position
         viewModel.order = viewModel.purchaseHistory[position]
         if (PermissionsUtil.hasStoragePermission(this)) {
-            showProgressDialog()
+            showProgressDialog(false)
             createPDF(viewModel.order!!)
         } else {
             showExitSheet(this, "The App Needs Storage Permission to save PDF invoice. \n\n Please provide ALLOW in the following Storage Permissions", "permission")

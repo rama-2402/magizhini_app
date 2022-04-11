@@ -139,7 +139,7 @@ class HomeActivity :
             binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
         }
 
-        showProgressDialog()
+//        showProgressDialog(true)
         binding.flShimmerPlaceholder.startShimmer()
 
         FirebaseMessaging.getInstance().subscribeToTopic(Constants.BROADCAST)
@@ -168,7 +168,7 @@ class HomeActivity :
                 TimeUtil().getCurrentDate()
             )
         }
-        hideProgressDialog()
+//        hideProgressDialog()
 
     }
 
@@ -215,7 +215,7 @@ class HomeActivity :
                     scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight -> {
                         if (NetworkHelper.isOnline(this@HomeActivity)) {
                             if (viewModel.partners.isEmpty() || viewModel.testimonials.isEmpty()) {
-                                showProgressDialog()
+                                showProgressDialog(true)
                                 llSocials.visible()
                                 stickyFollowUs.visible()
                                 viewModel.getEndData()
@@ -477,7 +477,7 @@ class HomeActivity :
                 view.etlReferralNumber.error = "* Enter a valid code"
                 return@setOnClickListener
             } else {
-                showProgressDialog()
+                showProgressDialog(false)
                 viewModel.applyReferralNumber(currentUserID, code)
             }
         }

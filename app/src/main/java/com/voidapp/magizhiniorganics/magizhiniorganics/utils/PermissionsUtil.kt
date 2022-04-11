@@ -2,11 +2,19 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.provider.Settings
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ACCESS_LOCATION
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOCATION_CODE
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STORAGE_PERMISSION_CODE
 
 object PermissionsUtil {
 
@@ -41,6 +49,34 @@ object PermissionsUtil {
     fun isGpsEnabled(context: Context): Boolean {
         val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
+    fun hasLocationPermission(context: Context): Boolean {
+        val storagePermissions = mutableListOf<String>(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+
+        for (permission in storagePermissions) {
+            if (
+                ContextCompat.checkSelfPermission(context, permission)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                return false
+            }
+        }
+        return true
+    }
+
+    fun requestLocationPermission(activity: Activity) {
+        ActivityCompat.requestPermissions(
+            activity,
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+            1
+        )
     }
 
 }

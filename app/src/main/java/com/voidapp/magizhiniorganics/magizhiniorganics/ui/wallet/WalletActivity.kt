@@ -85,7 +85,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
     }
 
     private fun initData() {
-        showProgressDialog()
+        showProgressDialog(true)
         showShimmer()
         viewModel.userID = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
         viewModel.getWallet()
@@ -160,7 +160,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                     updateLoadStatusDialog(event.message!!, event.data!!)
                 is WalletViewModel.UiUpdate.DismissDialog -> {
                     dismissLoadStatusDialog()
-                    showProgressDialog()
+                    showProgressDialog(false)
                     viewModel.getWallet()
                     showShimmer()
                 }
@@ -265,7 +265,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                         showToast(this, "Please check your Internet Connection")
                         return@setOnClickListener
                     }
-                    showProgressDialog()
+                    showProgressDialog(false)
                     viewModel.moneyToAddInWallet = view.etReferralNumber.text.toString().toFloat()
                     dialogBsAddReferral.dismiss()
                     viewModel.getUserProfileData()

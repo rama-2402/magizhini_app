@@ -21,6 +21,10 @@ class SignInViewModel(
     fun getPhoneNumber(): String? = fbRepository.getPhoneNumber()
     fun getCurrentUserId(): String? = fbRepository.getCurrentUserId()
 
+    fun setEmptyStatus() {
+        _loginStatus.value = ""
+    }
+
     fun signIn(phoneAuthCredential: PhoneAuthCredential) = viewModelScope.launch (Dispatchers.IO) {
         if (
             fbRepository.signInWithPhoneAuthCredential(phoneAuthCredential)

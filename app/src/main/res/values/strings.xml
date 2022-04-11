@@ -17,7 +17,7 @@
     <string name="msg_profile_activated">Profile Activated</string>
     <string name="msg_welcome">Welcome!</string>
     <string name="submit">SUBMIT</string>
-    <string name="locating_first_time_might_take_some_time_please_wait">Locating first time might take some time. Please Wait</string>
+    <string name="locating_first_time_might_take_some_time_please_wait">If the marker is not showing, Please click FIND ME. Your Location will be picked based on your connectivity speed.</string>
     <string name="msg_long_press_and_drag">Long press and drag the marker to change location</string>
     <string name="err_longer_to_locate">Something went wrong. Please try later</string>
     <string name="err_location_access_denied">Location Access Denied!</string>
@@ -331,5 +331,6 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="title_activity_maps2">MapsActivity2</string>
 
 </resources>
