@@ -1,16 +1,21 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.PinCodesEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.PinCodes
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
@@ -22,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
@@ -43,6 +49,8 @@ class CheckoutViewModel(
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
     val clearedProductIDs: MutableList<String> = mutableListOf()
 
+    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
+    val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
@@ -90,8 +98,6 @@ class CheckoutViewModel(
             else -> Unit
         }
     }
-
-
 
     private suspend fun updateAddress(id: String, address: ArrayList<Address>, status: String) {
         if(status == "add") {
@@ -385,8 +391,27 @@ class CheckoutViewModel(
 
     suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
         return@withContext userProfile?.let {
-                dbRepository.getDeliveryCharge(it.address[checkedAddressPosition].LocationCode).deliveryCharge.toFloat()
+                dbRepository.getDeliveryCharge(it.address[checkedAddressPosition].LocationCode)?.let { pinCodes ->
+                    if (pinCodes.isNullOrEmpty()) {
+                        deliveryAvailability(null)
+                        30f
+                    } else {
+                        deliveryAvailability(pinCodes[0])
+                        pinCodes[0].deliveryCharge.toFloat()
+                    }
+                } ?:let {
+                    deliveryAvailability(null)
+                    30f
+                }
             } ?: 30f
+    }
+
+    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) = withContext(Dispatchers.Main){
+        pinCodesEntity?.let {
+            if(!pinCodesEntity.deliveryAvailable) {
+                _deliveryNotAvailableDialog.value = System.currentTimeMillis()
+            }
+        } ?:let { _deliveryNotAvailableDialog.value = System.currentTimeMillis() }
     }
 
 //    fun placeOrder(order: Order) = viewModelScope.launch(Dispatchers.IO) {

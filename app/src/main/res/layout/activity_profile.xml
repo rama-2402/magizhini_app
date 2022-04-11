@@ -337,6 +337,20 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/etlAddressTwo">
 
+                        <Spinner
+                            android:id="@+id/spCity"
+                            android:layout_width="0dp"
+                            android:layout_height="56dp"
+                            android:layout_weight="1"
+                            android:layout_marginTop="3dp"
+                            android:popupBackground="@drawable/shape_round_rectangle_8"
+                            android:theme="@style/mySpinnerItemStyle"
+                            android:entries="@array/city_names"
+                            android:spinnerMode="dropdown"
+                            android:background="@drawable/bg_material_box"
+                            android:paddingStart="@dimen/material_size_8"
+                            android:paddingEnd="@dimen/material_size_8"
+                            />
 <!--                        <Spinner-->
 <!--                            android:id="@+id/spArea"-->
 <!--                            android:layout_width="0dp"-->
@@ -351,63 +365,82 @@
 <!--                            android:paddingStart="@dimen/material_size_8"-->
 <!--                            android:paddingEnd="@dimen/material_size_8"-->
 <!--                            />-->
-<!--                        <Spinner-->
-<!--                            android:id="@+id/spCity"-->
-<!--                            android:layout_width="0dp"-->
-<!--                            android:layout_height="56dp"-->
-<!--                            android:layout_weight="1"-->
-<!--                            android:popupBackground="@drawable/shape_round_rectangle_8"-->
-<!--                            android:theme="@style/mySpinnerItemStyle"-->
-<!--                            android:entries="@array/city_names"-->
-<!--                            android:spinnerMode="dropdown"-->
-<!--                            android:background="@drawable/bg_material_box"-->
-<!--                            android:paddingStart="@dimen/material_size_8"-->
-<!--                            android:paddingEnd="@dimen/material_size_8"-->
-<!--                            />-->
 
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/llGps"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/material_size_64"
-                        android:layout_marginStart="@dimen/material_size_8"
-                        android:layout_marginEnd="@dimen/material_size_8"
-                        android:layout_marginTop="@dimen/material_size_8"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:clickable="true"
-                        android:background="@drawable/bg_material_box"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/llLocation">
-
-                        <ImageView
-                            android:layout_width="wrap_content"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/etlArea"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:padding="@dimen/material_size_8"
-                            android:src="@drawable/ic_location"
-                            app:tint="@color/matteRed" />
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginRight="8dp"
+                            android:layout_weight="1"
+                            android:hint="Pin code"
+                            app:boxStrokeColor="@color/matteRed"
+                            android:textColorHint="@color/matteRed"
+                            app:flow_wrapMode="aligned"
+                            app:endIconMode="clear_text"
+                            app:hintTextColor="@color/matteRed"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/etlAddressOne"
+                            app:startIconDrawable="@drawable/ic_location"
+                            app:startIconTint="@color/matteRed">
 
-                        <TextView
-                            android:id="@+id/tvGpsAddress"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center_vertical"
-                            android:layout_marginLeft="@dimen/material_size_16"
-                            android:fontFamily="@font/roboto"
-                            android:ellipsize="marquee"
-                            android:focusable="true"
-                            android:focusableInTouchMode="true"
-                            android:marqueeRepeatLimit="marquee_forever"
-                            android:scrollHorizontally="true"
-                            android:singleLine="true"
-                            android:text="(Help us locate you better)"
-                            android:textColor="@color/green_base"
-                            android:textSize="16sp"
-                            android:textStyle="italic" />
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etArea"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:inputType="number"
+                                android:maxLength="6"
+                                android:textColor="@color/green_base"
+                                android:textColorHint="@color/matteRed"
+                                android:textCursorDrawable="@null" />
 
+                        </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
+
+<!--                    <LinearLayout-->
+<!--                        android:id="@+id/llGps"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="@dimen/material_size_64"-->
+<!--                        android:layout_marginStart="@dimen/material_size_8"-->
+<!--                        android:layout_marginEnd="@dimen/material_size_8"-->
+<!--                        android:layout_marginTop="@dimen/material_size_8"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:clickable="true"-->
+<!--                        android:background="@drawable/bg_material_box"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent"-->
+<!--                        app:layout_constraintStart_toStartOf="parent"-->
+<!--                        app:layout_constraintTop_toBottomOf="@id/llLocation">-->
+
+<!--                        <ImageView-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:padding="@dimen/material_size_8"-->
+<!--                            android:src="@drawable/ic_location"-->
+<!--                            app:tint="@color/matteRed" />-->
+
+<!--                        <TextView-->
+<!--                            android:id="@+id/tvGpsAddress"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="match_parent"-->
+<!--                            android:gravity="center_vertical"-->
+<!--                            android:layout_marginLeft="@dimen/material_size_16"-->
+<!--                            android:fontFamily="@font/roboto"-->
+<!--                            android:ellipsize="marquee"-->
+<!--                            android:focusable="true"-->
+<!--                            android:focusableInTouchMode="true"-->
+<!--                            android:marqueeRepeatLimit="marquee_forever"-->
+<!--                            android:scrollHorizontally="true"-->
+<!--                            android:singleLine="true"-->
+<!--                            android:text="(Help us locate you better)"-->
+<!--                            android:textColor="@color/green_base"-->
+<!--                            android:textSize="16sp"-->
+<!--                            android:textStyle="italic" />-->
+
+<!--                    </LinearLayout>-->
 
                     <LinearLayout
                         android:id="@+id/llSaveProfile"
@@ -417,7 +450,7 @@
                         android:orientation="vertical"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/llGps">
+                        app:layout_constraintTop_toBottomOf="@id/llLocation">
 
                         <View
                             android:layout_width="match_parent"

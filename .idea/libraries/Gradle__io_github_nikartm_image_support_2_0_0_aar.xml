@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: io.github.nikartm:image-support:2.0.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/43316d076dd5f2961b3d194044930eec/transformed/jetified-image-support-2.0.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/43316d076dd5f2961b3d194044930eec/transformed/jetified-image-support-2.0.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/43316d076dd5f2961b3d194044930eec/transformed/jetified-image-support-2.0.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/38b76c0a3c98f0555a5f2079f346d6aa/transformed/jetified-image-support-2.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/38b76c0a3c98f0555a5f2079f346d6aa/transformed/jetified-image-support-2.0.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/38b76c0a3c98f0555a5f2079f346d6aa/transformed/jetified-image-support-2.0.0/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

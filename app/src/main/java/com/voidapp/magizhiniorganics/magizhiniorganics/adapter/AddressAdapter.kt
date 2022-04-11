@@ -28,10 +28,10 @@ class AddressAdapter(
         val userName: TextView = itemView.findViewById(R.id.tvUserName)
         val addressOne: TextView = itemView.findViewById(R.id.tvAddressOne)
         val addressTwo: TextView = itemView.findViewById(R.id.tvAddressTwo)
-        val area: TextView = itemView.findViewById(R.id.tvAddressArea)
-        val add: RelativeLayout = itemView.findViewById(R.id.rlAddAddress)
-        val delete: RelativeLayout = itemView.findViewById(R.id.rlDeleteAddress)
-        val uncheck: ImageView = itemView.findViewById(R.id.ivUncheck)
+        val area: TextView = itemView.findViewById(R.id.tvAddressCity)
+//        val add: RelativeLayout = itemView.findViewById(R.id.rlAddAddress)
+//        val delete: RelativeLayout = itemView.findViewById(R.id.rlDeleteAddress)
+//        val uncheck: ImageView = itemView.findViewById(R.id.ivUncheck)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddressViewHolder {
@@ -42,46 +42,46 @@ class AddressAdapter(
     override fun onBindViewHolder(holder: AddressViewHolder, position: Int) {
 
             val address = addressList[position]
-            if (position == checkedAddressPosition) {
-                holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
-                holder.uncheck.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(holder.uncheck.context, R.color.matteRed))
-            } else {
-                holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_uncheck))
-            }
+//            if (position == checkedAddressPosition) {
+//                holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
+//                holder.uncheck.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(holder.uncheck.context, R.color.matteRed))
+//            } else {
+//                holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_uncheck))
+//            }
 
         with(holder) {
-            if (addressList.size == 1) {
-                delete.visibility = View.GONE
-            } else {
-                delete.visibility = View.VISIBLE
-            }
+//            if (addressList.size == 1) {
+//                delete.visibility = View.GONE
+//            } else {
+//                delete.visibility = View.VISIBLE
+//            }
 
             userName.text = address.userId
             addressOne.text = address.addressLineOne
             addressTwo.text = address.addressLineTwo
-            area.text = address.LocationCode
-
-            add.setOnClickListener {
-                add.startAnimation(AnimationUtils.loadAnimation(add.context, R.anim.bounce))
-                onItemClickListener.addAddress(position)
-            }
+            area.text = "${address.city} - ${address.LocationCode}"
+//
+//            add.setOnClickListener {
+//                add.startAnimation(AnimationUtils.loadAnimation(add.context, R.anim.bounce))
+//                onItemClickListener.addAddress(position)
+//            }
 
             card.setOnClickListener {
                 onItemClickListener.updateAddress(position)
             }
 
-            delete.setOnClickListener {
-                delete.startAnimation(AnimationUtils.loadAnimation(delete.context, R.anim.bounce))
-                onItemClickListener.deleteAddress(position)
-            }
+//            delete.setOnClickListener {
+//                delete.startAnimation(AnimationUtils.loadAnimation(delete.context, R.anim.bounce))
+//                onItemClickListener.deleteAddress(position)
+//            }
         }
 
-        holder.uncheck.setOnClickListener {
-            holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
-            holder.uncheck.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(holder.uncheck.context, R.color.matteRed))
-            holder.uncheck.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
-            onItemClickListener.selectedAddress(position)
-        }
+//        holder.uncheck.setOnClickListener {
+//            holder.uncheck.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check))
+//            holder.uncheck.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(holder.uncheck.context, R.color.matteRed))
+//            holder.uncheck.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
+//            onItemClickListener.selectedAddress(position)
+//        }
     }
 
     override fun getItemCount(): Int {

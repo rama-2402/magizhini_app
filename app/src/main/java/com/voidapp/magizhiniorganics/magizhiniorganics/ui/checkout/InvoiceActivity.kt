@@ -45,6 +45,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
@@ -278,6 +279,9 @@ class InvoiceActivity :
 
     @SuppressLint("NotifyDataSetChanged")
     private fun initLiveData() {
+        viewModel.deliveryNotAvailableDialog.observe(this) {
+            CustomAlertDialog(this).show()
+        }
         viewModel.uiEvent.observe(this) { event ->
             when(event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)
@@ -371,15 +375,17 @@ class InvoiceActivity :
                             "update" -> {
                                 showToast(this@InvoiceActivity, "Address Updated")
                                 addressAdapter.updateAddress(event.position, event.address!!)
+                                setDataToViews()
                             }
-                            "add" -> {
-                                showToast(this@InvoiceActivity, "Address added")
-                                addressAdapter.addAddress(event.position, event.address!!)
-                            }
-                            "delete" -> {
-                                showToast(this@InvoiceActivity, "Address Updated")
-                                addressAdapter.deleteAddress(event.position)
-                            }
+//                            "add" -> {
+//                                showToast(this@InvoiceActivity, "Address added")
+//                                addressAdapter.addAddress(event.position, event.address!!)
+//                            }
+//                            "delete" -> {
+//                                showToast(this@InvoiceActivity, "Address Updated")
+//                                addressAdapter.deleteAddress(event.position)
+//                                setDataToViews()
+//                            }
                         }
                     } else {
                         showErrorSnackBar(event.message, true)

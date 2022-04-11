@@ -11,6 +11,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TestimonialsEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadSimple
 
 
 class TestimonialsAdapter(
@@ -46,7 +47,7 @@ class TestimonialsAdapter(
     override fun onBindViewHolder(holder: TestimonialsViewHolder, position: Int) {
         val testimonial = testimonials[position]
         holder.apply {
-            thumbnail.loadImg(testimonial.thumbnailUrl) {}
+            thumbnail.loadSimple(testimonial.thumbnailUrl)
             message.text = testimonial.message
             name.text = "- ${testimonial.title}"
 

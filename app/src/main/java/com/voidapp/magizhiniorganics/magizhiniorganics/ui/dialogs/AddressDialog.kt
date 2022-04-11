@@ -49,6 +49,8 @@ class AddressDialog: BottomSheetDialogFragment() {
                     "*required"
                 validateAddress(binding.etAddressTwo.text.toString()) -> binding.etAddressTwo.error =
                     "*required"
+                validateAddress(binding.etArea.text.toString()) -> binding.etArea.error =
+                    "*required"
                 else -> sendUpdatedAddress()
             }
         }
@@ -71,7 +73,8 @@ class AddressDialog: BottomSheetDialogFragment() {
             binding.etProfileName.setText(it.userId)
             binding.etAddressOne.setText(it.addressLineOne)
             binding.etAddressTwo.setText(it.addressLineTwo)
-            binding.spArea.setSelection(it.LocationCodePosition)
+            binding.etArea.setText(it.LocationCode)
+//            binding.spArea.setSelection(it.LocationCodePosition)
         }
     }
 
@@ -80,8 +83,9 @@ class AddressDialog: BottomSheetDialogFragment() {
         addressMap["userId"] = binding.etProfileName.text.toString().trim()
         addressMap["addressLineOne"] = binding.etAddressOne.text.toString().trim()
         addressMap["addressLineTwo"] = binding.etAddressTwo.text.toString().trim()
-        addressMap["LocationCode"] = binding.spArea.selectedItem.toString()
-        addressMap["LocationCodePosition"] = binding.spArea.selectedItemPosition
+        addressMap["LocationCode"] = binding.etArea.text.toString().trim()
+//        addressMap["LocationCodePosition"] = binding.spArea.selectedItemPosition
+        addressMap["LocationCodePosition"] = 0
         addressMap["city"] = binding.spCity.selectedItem.toString()
 
         onItemClickListener?.let {

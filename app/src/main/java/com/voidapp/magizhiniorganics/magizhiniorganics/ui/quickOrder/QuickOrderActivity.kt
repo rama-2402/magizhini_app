@@ -48,6 +48,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
@@ -216,6 +217,9 @@ class QuickOrderActivity :
     }
 
     private fun initObservers() {
+        viewModel.deliveryNotAvailableDialog.observe(this) {
+            CustomAlertDialog(this).show()
+        }
         viewModel.uiEvent.observe(this) { event ->
             when(event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)

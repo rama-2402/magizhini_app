@@ -292,8 +292,6 @@ open class BaseActivity : AppCompatActivity() {
                 is ProfileActivity -> {
                     when (data) {
                         "permission" -> activity.proceedToRequestPermission()
-                        "location" -> activity.proceedToRequestLocationPermission()
-                        "gps" -> activity.buildAlertMessageNoGps()
                         "setting" -> activity.proceedToRequestManualPermission()
                         "referral" -> activity.openReferral()
                     }

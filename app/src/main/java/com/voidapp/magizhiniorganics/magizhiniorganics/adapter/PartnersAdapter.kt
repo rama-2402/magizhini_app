@@ -8,6 +8,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvPartnerItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadSimple
 
 class PartnersAdapter(
     var partners: List<Partners>,
@@ -24,7 +25,7 @@ class PartnersAdapter(
     override fun onBindViewHolder(holder: PartnersViewHolder, position: Int) {
         val partner = partners[position]
         holder.binding.apply {
-            ivThumbnail.loadImg(partner.imageUrl) {}
+            ivThumbnail.loadSimple(partner.imageUrl)
             tvName.text = partner.partnerName
 
             clPartnerItem.setOnClickListener {

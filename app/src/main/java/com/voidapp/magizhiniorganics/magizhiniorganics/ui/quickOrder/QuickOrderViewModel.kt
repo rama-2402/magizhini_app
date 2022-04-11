@@ -8,10 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
@@ -55,6 +52,9 @@ class QuickOrderViewModel(
     var mCheckedAddressPosition: Int = 0
     var addressPosition: Int = 0
 
+
+    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
+    val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
@@ -270,8 +270,22 @@ class QuickOrderViewModel(
 
     suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
         return@withContext userProfile?.let {
-            dbRepository.getDeliveryCharge(it.address[mCheckedAddressPosition].LocationCode).deliveryCharge.toFloat()
+            dbRepository.getDeliveryCharge(it.address[mCheckedAddressPosition].LocationCode)?.let { pinCodesEntity ->
+                deliveryAvailability(pinCodesEntity[0])
+                pinCodesEntity[0].deliveryCharge.toFloat()
+            } ?:let {
+                deliveryAvailability(null)
+                30f
+            }
         } ?: 30f
+    }
+
+    private fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) {
+        pinCodesEntity?.let {
+            if(!pinCodesEntity.deliveryAvailable) {
+                _deliveryNotAvailableDialog.value = System.currentTimeMillis()
+            }
+        } ?:let { _deliveryNotAvailableDialog.value = System.currentTimeMillis() }
     }
 
     fun sendGetEstimateRequest(tempFileUriList: MutableList<Uri>) {

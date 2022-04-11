@@ -120,36 +120,73 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/material_size_8"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <Spinner
-                android:id="@+id/spArea"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginEnd="@dimen/material_size_8"
-                android:layout_weight="1"
-                android:background="@drawable/bg_material_box"
-                android:entries="@array/chennai_codes"
-                android:paddingStart="@dimen/material_size_8"
-                android:paddingEnd="@dimen/material_size_8"
-                android:popupBackground="@drawable/shape_round_rectangle_8"
-                android:spinnerMode="dropdown"
-                android:theme="@style/mySpinnerItemStyle" />
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etlAddressTwo">
 
             <Spinner
                 android:id="@+id/spCity"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_material_box"
+                android:layout_marginTop="3dp"
+                android:popupBackground="@drawable/shape_round_rectangle_8"
+                android:theme="@style/mySpinnerItemStyle"
                 android:entries="@array/city_names"
+                android:spinnerMode="dropdown"
+                android:background="@drawable/bg_material_box"
                 android:paddingStart="@dimen/material_size_8"
                 android:paddingEnd="@dimen/material_size_8"
-                android:popupBackground="@drawable/shape_round_rectangle_8"
-                android:spinnerMode="dropdown"
-                android:theme="@style/mySpinnerItemStyle" />
-        </LinearLayout>
+                />
+            <!--                        <Spinner-->
+            <!--                            android:id="@+id/spArea"-->
+            <!--                            android:layout_width="0dp"-->
+            <!--                            android:layout_height="56dp"-->
+            <!--                            android:layout_weight="1"-->
+            <!--                            android:spinnerMode="dropdown"-->
+            <!--                            android:popupBackground="@drawable/shape_round_rectangle_8"-->
+            <!--                            android:theme="@style/mySpinnerItemStyle"-->
+            <!--                            android:entries="@array/chennai_codes"-->
+            <!--                            android:background="@drawable/bg_material_box"-->
+            <!--                            android:layout_marginEnd="@dimen/material_size_8"-->
+            <!--                            android:paddingStart="@dimen/material_size_8"-->
+            <!--                            android:paddingEnd="@dimen/material_size_8"-->
+            <!--                            />-->
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/etlArea"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_weight="1"
+                android:hint="Pin code"
+                app:boxStrokeColor="@color/matteRed"
+                android:textColorHint="@color/matteRed"
+                app:flow_wrapMode="aligned"
+                app:endIconMode="clear_text"
+                app:hintTextColor="@color/matteRed"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etlAddressOne"
+                app:startIconDrawable="@drawable/ic_location"
+                app:startIconTint="@color/matteRed">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etArea"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="number"
+                    android:maxLength="6"
+                    android:textColor="@color/green_base"
+                    android:textColorHint="@color/matteRed"
+                    android:textCursorDrawable="@null" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
         <TextView
             android:id="@+id/btnSaveAddress"
             android:layout_width="wrap_content"

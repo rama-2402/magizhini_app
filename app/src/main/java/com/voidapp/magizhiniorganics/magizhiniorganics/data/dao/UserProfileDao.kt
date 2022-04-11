@@ -174,8 +174,8 @@ interface UserProfileDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertPinCodes(PinCodes: PinCodesEntity)
 
-    @Query("SELECT * FROM PinCodesEntity WHERE areaCode = :areaCode")
-    fun getDeliveryCharge(areaCode: String): PinCodesEntity
+    @Query("SELECT * FROM PinCodesEntity WHERE areaCode LIKE :areaCode")
+    fun getDeliveryCharge(areaCode: String): List<PinCodesEntity>?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertFavorite(id: Favorites)

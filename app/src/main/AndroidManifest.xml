@@ -3,13 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.voidapp.magizhiniorganics.magizhiniorganics">
 
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the "MyLocation" functionality.
-    -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -26,26 +19,6 @@
         android:roundIcon="@mipmap/magizhini_round"
         android:supportsRtl="true"
         android:theme="@style/splashScreenTheme">
-
-        <!--
-             TODO: Before you run your application, you need a Google Maps API key.
-
-             To get one, follow the directions here:
-
-                https://developers.google.com/maps/documentation/android-sdk/get-api-key
-
-             Once you have your API key (it starts with "AIza"), define a new property in your
-             project's local.properties file (e.g. MAPS_API_KEY=Aiza...), and replace the
-             "YOUR_API_KEY" string in this file with "${MAPS_API_KEY}".
-        -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAkWge1LcxsnD4nNCypEII99E0RIGCPvPw" />
-
-        <activity
-            android:name=".ui.MapsActivity2"
-            android:exported="false"
-            android:label="@string/title_activity_maps2" />
         <activity
             android:name=".ui.business.contacts.NewPartnerActivity"
             android:exported="false" />
@@ -156,13 +129,6 @@
         <activity
             android:name=".ui.profile.ProfileActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"
-            tools:ignore="LockedOrientationActivity" />
-        <activity
-            android:name=".ui.MapsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_maps"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateHidden"
             tools:ignore="LockedOrientationActivity" />

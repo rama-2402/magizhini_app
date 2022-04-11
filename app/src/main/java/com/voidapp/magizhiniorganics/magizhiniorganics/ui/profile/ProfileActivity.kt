@@ -1,21 +1,13 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile
 
-import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.LocationManager
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.provider.Settings
-import android.util.Log
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.animation.AnimationUtils
-import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
@@ -29,11 +21,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfileBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.MapsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ACCESS_LOCATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
@@ -75,7 +65,6 @@ class ProfileActivity :
                     R.anim.slide_up
                 )
             )
-            tvGpsAddress.isSelected = true
         }
 
         viewModel.phoneNumber = intent.getStringExtra(PHONE_NUMBER).toString()
@@ -209,8 +198,9 @@ class ProfileActivity :
             etEmailId.setText(userProfile.mailId)
             etAddressOne.setText(userProfile.address[0].addressLineOne)
             etAddressTwo.setText(userProfile.address[0].addressLineTwo)
+            etArea.setText(userProfile.address[0].LocationCode)
 //            spArea.setSelection(userProfile.address[0].LocationCodePosition)
-            tvGpsAddress.text = userProfile.address[0].gpsAddress
+//            tvGpsAddress.text = userProfile.address[0].gpsAddress
 //            mLatitude = userProfile.address[0].gpsLatitude
 //            mLongitude = userProfile.address[0].gpsLongitude
 //            mAddress = userProfile.address[0].gpsAddress
@@ -261,22 +251,6 @@ class ProfileActivity :
                     )
                 }
             }
-            tvGpsAddress.setOnClickListener {
-                if (PermissionsUtil.hasLocationPermission(this@ProfileActivity)) {
-                    if (gpsStatusCheck()) {
-                        openMaps()
-                    } else {
-                        buildAlertMessageNoGps()
-                    }
-                } else {
-                    permissionType = LOCATION_SERVICE
-                    showExitSheet(
-                        this@ProfileActivity,
-                        "The App Needs Location Permission to find your location in Maps. \n\n Please provide ALLOW in the following Location Permissions",
-                        "location"
-                    )
-                }
-            }
             btnSaveProfile.setOnClickListener {
                 if (!NetworkHelper.isOnline(this@ProfileActivity)) {
                     showErrorSnackBar("Please check your Internet Connection", true)
@@ -314,15 +288,7 @@ class ProfileActivity :
                     "referral"
                 )
             }
-            llGps.setOnClickListener {
-                //implements maps and gps location picker if needed
-            }
         }
-    }
-
-    private fun gpsStatusCheck(): Boolean {
-        val manager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 
     //generating the profile model for uploading to firestore
@@ -379,11 +345,8 @@ class ProfileActivity :
             addressLineOne = binding.etAddressOne.text.toString().trim(),
             addressLineTwo = binding.etAddressTwo.text.toString().trim(),
             city = "Chennai",
-//            LocationCode = binding.spArea.selectedItem.toString(),
+            LocationCode = binding.etArea.text.toString().trim(),
 //            LocationCodePosition = binding.spArea.selectedItemPosition,
-            gpsLatitude = viewModel.latitude,
-            gpsLongitude = viewModel.longitude,
-            gpsAddress = viewModel.gpsAddress
         )
     }
 
@@ -411,12 +374,13 @@ class ProfileActivity :
                     etlAddressTwo.error = "* required"
                     return@apply
                 }
+                etArea.text.isNullOrEmpty() -> {
+                    etlArea.error = "* required"
+                    return@apply
+                }
                 tvDob.text.toString() == " DD / MM / YYYY " -> {
                     showErrorSnackBar("Date of Birth required", true)
                     return@apply
-                }
-                viewModel.gpsAddress == "" -> {
-                    showErrorSnackBar("Pick your GPS Location to save profile", true)
                 }
                 else -> {
                     viewModel.profilePicUri?.let {
@@ -525,8 +489,6 @@ class ProfileActivity :
 
     fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
 
-    fun proceedToRequestLocationPermission() = PermissionsUtil.requestLocationPermission(this)
-
     fun proceedToRequestManualPermission() = this.openAppSettingsIntent()
 
     private val getAction =
@@ -546,52 +508,12 @@ class ProfileActivity :
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == 1) {
-            if (
-                grantResults[0] == PackageManager.PERMISSION_GRANTED
-            ) {
-                when (permissionType) {
-                    LOCATION_SERVICE -> {
-                        showToast(this, "Location Permission Granted")
-                        if (PermissionsUtil.isGpsEnabled(this@ProfileActivity)) {
-                            openMaps()
-                        } else {
-                            buildAlertMessageNoGps()
-                        }
-                    }
-                    STORAGE_SERVICE -> {
-                        showToast(this, "Storage Permission Granted")
-                        getAction.launch(pickImageIntent)
-                    }
-                }
-            } else {
-                showToast(this, "Location Permission Denied")
-                showExitSheet(
-                    this,
-                    "Some or All of the requested Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [App Permission] to manually provide permission",
-                    "setting"
-                )
-            }
-        }
-
         if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
             if (
                 grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
-                when (permissionType) {
-                    LOCATION_SERVICE -> {
-                        showToast(this, "Location Permission Granted")
-                        if (PermissionsUtil.isGpsEnabled(this@ProfileActivity)) {
-                            openMaps()
-                        } else {
-                            buildAlertMessageNoGps()
-                        }
-                    }
-                    STORAGE_SERVICE -> {
-                        showToast(this, "Storage Permission Granted")
-                        getAction.launch(pickImageIntent)
-                    }
-                }
+                showToast(this, "Storage Permission Granted")
+                getAction.launch(pickImageIntent)
             } else {
                 showToast(this, "Permission Denied")
                 showExitSheet(
@@ -602,45 +524,45 @@ class ProfileActivity :
             }
         }
     }
+//
+//    private fun openMaps() {
+//        Intent(this, MapsActivity::class.java).also {
+//            activityResultLaunch.launch(it)
+//        }
+//    }
 
-    private fun openMaps() {
-        Intent(this, MapsActivity::class.java).also {
-            activityResultLaunch.launch(it)
-        }
-    }
+//    var activityResultLaunch = registerForActivityResult(
+//        StartActivityForResult(),
+//        ActivityResultCallback { result ->
+//            if (result.resultCode == 123) {
+//                val data: Intent? = result.data
+//                viewModel.latitude = data?.getStringExtra("latitude").toString()
+//                viewModel.longitude = data?.getStringExtra("longitude").toString()
+//                viewModel.gpsAddress = data?.getStringExtra("gpsAddress").toString()
+//                if (!viewModel.gpsAddress.isNullOrEmpty()) {
+//                    binding.tvGpsAddress.text = viewModel.gpsAddress
+//                }
+//            }
+//        })
 
-    var activityResultLaunch = registerForActivityResult(
-        StartActivityForResult(),
-        ActivityResultCallback { result ->
-            if (result.resultCode == 123) {
-                val data: Intent? = result.data
-                viewModel.latitude = data?.getStringExtra("latitude").toString()
-                viewModel.longitude = data?.getStringExtra("longitude").toString()
-                viewModel.gpsAddress = data?.getStringExtra("gpsAddress").toString()
-                if (!viewModel.gpsAddress.isNullOrEmpty()) {
-                    binding.tvGpsAddress.text = viewModel.gpsAddress
-                }
-            }
-        })
-
-
-    fun buildAlertMessageNoGps() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setMessage("The App needs GPS to find location. Click YES to Enable GPS")
-            .setCancelable(false)
-            .setPositiveButton("Yes",
-                DialogInterface.OnClickListener { dialog, id -> startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) })
-            .setNegativeButton("No",
-                DialogInterface.OnClickListener { dialog, id ->
-                    showExitSheet(
-                        this,
-                        "The App Needs GPS to find your location in Maps. \n\n Please provide ALLOW to Turn On GPS Permissions",
-                        "gps"
-                    )
-                    dialog.cancel()
-                })
-        val alert: AlertDialog = builder.create()
-        alert.show()
-    }
+//
+//    fun buildAlertMessageNoGps() {
+//        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+//        builder.setMessage("The App needs GPS to find location. Click YES to Enable GPS")
+//            .setCancelable(false)
+//            .setPositiveButton("Yes",
+//                DialogInterface.OnClickListener { dialog, id -> startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) })
+//            .setNegativeButton("No",
+//                DialogInterface.OnClickListener { dialog, id ->
+//                    showExitSheet(
+//                        this,
+//                        "The App Needs GPS to find your location in Maps. \n\n Please provide ALLOW to Turn On GPS Permissions",
+//                        "gps"
+//                    )
+//                    dialog.cancel()
+//                })
+//        val alert: AlertDialog = builder.create()
+//        alert.show()
+//    }
 
 }

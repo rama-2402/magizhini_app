@@ -35,10 +35,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubscriptionProductBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomSubDaysDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.DatePickerDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
@@ -233,7 +230,9 @@ class SubscriptionProductActivity :
                 }
             })
             ivInfo.setOnClickListener {
-                showDescriptionBs(resources.getString(R.string.subscription_info))
+                showProgressDialog(false)
+                viewModel.cha()
+//                showDescriptionBs(resources.getString(R.string.subscription_info))
             }
             tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -568,11 +567,18 @@ class SubscriptionProductActivity :
             city = addressMap["city"].toString()
         ).also { address ->
             viewModel.address = address
-            viewModel.wallet?.let {
-                showListBottomSheet(this, arrayListOf("Online", "Wallet - Rs: ${it.amount}"))
-            } ?:let {
-                showToast(this, "Wallet Data not available")
-                selectedPaymentMode("Online")
+            lifecycleScope.launch {
+                viewModel.wallet?.let {
+                    if (viewModel.isDeliveryAvailable(address.LocationCode)) {
+                        showListBottomSheet(this@SubscriptionProductActivity, arrayListOf("Online", "Wallet - Rs: ${it.amount}"))
+                    } else {
+                        CustomAlertDialog(this@SubscriptionProductActivity).show()
+                        return@launch
+                    }
+                } ?:let {
+                    showToast(this@SubscriptionProductActivity, "Wallet Data not available")
+                    selectedPaymentMode("Online")
+                }
             }
         }
     }

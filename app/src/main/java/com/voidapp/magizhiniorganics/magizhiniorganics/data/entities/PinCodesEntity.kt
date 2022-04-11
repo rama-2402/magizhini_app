@@ -13,7 +13,7 @@ data class PinCodesEntity (
     @ColumnInfo
     var deliveryCharge: Int = 0,
     @ColumnInfo
-    var deliveryAvailable: Boolean = true,
+    var deliveryAvailable: Boolean = false,
     @ColumnInfo
     var extras: ArrayList<String> = arrayListOf()
 )

@@ -61,20 +61,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvAddressOne" />
 
-        <TextView
-            android:id="@+id/tvAddressArea"
-            android:layout_marginStart="@dimen/material_size_16"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_size_8"
-            android:textColor="@color/gray700"
-            android:text="Pin Code"
-            android:textSize="16sp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:textStyle="normal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvAddressTwo" />
+<!--        <TextView-->
+<!--            android:id="@+id/tvAddressArea"-->
+<!--            android:layout_marginStart="@dimen/material_size_16"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="@dimen/material_size_8"-->
+<!--            android:textColor="@color/gray700"-->
+<!--            android:text="Pin Code"-->
+<!--            android:textSize="16sp"-->
+<!--            android:singleLine="true"-->
+<!--            android:ellipsize="end"-->
+<!--            android:textStyle="normal"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/tvAddressTwo" />-->
 
         <TextView
             android:id="@+id/tvAddressCity"
@@ -86,70 +86,70 @@
             android:textStyle="normal"
             android:layout_marginTop="@dimen/material_size_8"
             android:layout_marginBottom="@dimen/material_size_16"
-            app:layout_constraintTop_toBottomOf="@id/tvAddressArea"
-            app:layout_constraintStart_toStartOf="@id/tvAddressArea"
+            app:layout_constraintTop_toBottomOf="@id/tvAddressTwo"
+            app:layout_constraintStart_toStartOf="@id/tvAddressTwo"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-    <ImageView
-        android:id="@+id/ivUncheck"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/ic_uncheck"
-        app:tint="@color/green_base"
-        android:layout_marginTop="@dimen/material_size_8"
-        android:layout_marginEnd="@dimen/material_size_8"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+<!--    <ImageView-->
+<!--        android:id="@+id/ivUncheck"-->
+<!--        android:layout_width="40dp"-->
+<!--        android:layout_height="40dp"-->
+<!--        android:src="@drawable/ic_uncheck"-->
+<!--        app:tint="@color/green_base"-->
+<!--        android:layout_marginTop="@dimen/material_size_8"-->
+<!--        android:layout_marginEnd="@dimen/material_size_8"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"/>-->
 
-    <RelativeLayout
-        android:id="@+id/rlAddAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:foreground="?android:attr/selectableItemBackgroundBorderless"
-        android:background="@drawable/shape_round_rectangle_8"
-        android:layout_marginBottom="@dimen/material_size_8"
-        android:layout_marginEnd="@dimen/material_size_8"
-        android:backgroundTint="@color/green_base"
-        android:elevation="@dimen/material_size_8"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" >
-        <TextView
-            android:id="@+id/tvAddAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ADD"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:layout_marginTop="@dimen/material_size_8"
-            android:layout_marginBottom="@dimen/material_size_8"
-            android:layout_marginStart="@dimen/material_size_16"
-            android:layout_marginEnd="@dimen/material_size_16"/>
-    </RelativeLayout>
-    <RelativeLayout
-        android:id="@+id/rlDeleteAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/material_size_8"
-        android:background="@drawable/shape_round_rectangle_8"
-        android:backgroundTint="@color/matteRed"
-        android:layout_margin="@dimen/material_size_8"
-        android:elevation="@dimen/material_size_8"
-        android:foreground="?android:attr/selectableItemBackgroundBorderless"
-        app:layout_constraintTop_toTopOf="@id/rlAddAddress"
-        app:layout_constraintBottom_toBottomOf="@id/rlAddAddress"
-        app:layout_constraintEnd_toStartOf="@id/rlAddAddress" >
+<!--    <RelativeLayout-->
+<!--        android:id="@+id/rlAddAddress"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:foreground="?android:attr/selectableItemBackgroundBorderless"-->
+<!--        android:background="@drawable/shape_round_rectangle_8"-->
+<!--        android:layout_marginBottom="@dimen/material_size_8"-->
+<!--        android:layout_marginEnd="@dimen/material_size_8"-->
+<!--        android:backgroundTint="@color/green_base"-->
+<!--        android:elevation="@dimen/material_size_8"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent" >-->
+<!--        <TextView-->
+<!--            android:id="@+id/tvAddAddress"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="ADD"-->
+<!--            android:textStyle="bold"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:layout_marginTop="@dimen/material_size_8"-->
+<!--            android:layout_marginBottom="@dimen/material_size_8"-->
+<!--            android:layout_marginStart="@dimen/material_size_16"-->
+<!--            android:layout_marginEnd="@dimen/material_size_16"/>-->
+<!--    </RelativeLayout>-->
+<!--    <RelativeLayout-->
+<!--        android:id="@+id/rlDeleteAddress"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginBottom="@dimen/material_size_8"-->
+<!--        android:background="@drawable/shape_round_rectangle_8"-->
+<!--        android:backgroundTint="@color/matteRed"-->
+<!--        android:layout_margin="@dimen/material_size_8"-->
+<!--        android:elevation="@dimen/material_size_8"-->
+<!--        android:foreground="?android:attr/selectableItemBackgroundBorderless"-->
+<!--        app:layout_constraintTop_toTopOf="@id/rlAddAddress"-->
+<!--        app:layout_constraintBottom_toBottomOf="@id/rlAddAddress"-->
+<!--        app:layout_constraintEnd_toStartOf="@id/rlAddAddress" >-->
 
-        <TextView
-            android:id="@+id/tvDeleteAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/material_size_16"
-            android:layout_marginTop="@dimen/material_size_8"
-            android:layout_marginEnd="@dimen/material_size_16"
-            android:layout_marginBottom="@dimen/material_size_8"
-            android:text="DELETE"
-            android:textColor="@color/white"
-            android:textStyle="bold" />
-    </RelativeLayout>
+<!--        <TextView-->
+<!--            android:id="@+id/tvDeleteAddress"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="@dimen/material_size_16"-->
+<!--            android:layout_marginTop="@dimen/material_size_8"-->
+<!--            android:layout_marginEnd="@dimen/material_size_16"-->
+<!--            android:layout_marginBottom="@dimen/material_size_8"-->
+<!--            android:text="DELETE"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:textStyle="bold" />-->
+<!--    </RelativeLayout>-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
