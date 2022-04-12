@@ -7,10 +7,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
-import androidx.activity.contextaware.withContextAvailable
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
@@ -27,10 +25,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STA
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein

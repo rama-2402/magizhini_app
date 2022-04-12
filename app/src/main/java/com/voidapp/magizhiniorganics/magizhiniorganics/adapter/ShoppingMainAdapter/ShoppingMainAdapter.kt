@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
@@ -21,11 +20,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.OUT_OF_STOCK
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.DiffUtils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.imaginativeworld.whynotimagecarousel.utils.setImage
 
 
 open class ShoppingMainAdapter(

@@ -9,9 +9,4 @@ class ProfileUseCase(
     val dbRepository: DatabaseRepository,
     val profile: UserProfileEntity? = null,
     val update: String? = null,
-) {
-
-
-
-
-}
+)

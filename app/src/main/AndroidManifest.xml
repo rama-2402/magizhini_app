@@ -20,12 +20,6 @@
         android:supportsRtl="true"
         android:theme="@style/splashScreenTheme">
         <activity
-            android:name=".ui.business.contacts.NewPartnerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.business.ContactUsActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.quickOrder.QuickOrderActivity"
             android:exported="false"
             android:screenOrientation="portrait"

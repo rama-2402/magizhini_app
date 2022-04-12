@@ -35,3 +35,5 @@
 -keepclasseswithmembers class * {
   public void onPayment*(...);
 }
+
+-keep class com.voidapp.magizhiniorganics.magizhiniorganics.data.** { *; }

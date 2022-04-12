@@ -9,7 +9,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddressBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 
 class AddressDialog: BottomSheetDialogFragment() {
 
@@ -90,9 +89,9 @@ class AddressDialog: BottomSheetDialogFragment() {
 
         onItemClickListener?.let {
             if (addressData == null) {
-                it.savedAddress(addressMap, true)
+                it.savedAddress(addressMap)
             } else {
-                it.savedAddress(addressMap, false)
+                it.savedAddress(addressMap)
             }
         }
         dismiss()
@@ -108,4 +107,9 @@ class AddressDialog: BottomSheetDialogFragment() {
     private fun validateAddress(text: String?): Boolean {
         return text.isNullOrBlank()
     }
+
+}
+
+interface AddressDialogClickListener {
+    fun savedAddress(addressMap: HashMap<String, Any>)
 }

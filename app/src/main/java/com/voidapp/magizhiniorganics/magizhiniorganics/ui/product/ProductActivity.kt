@@ -597,7 +597,7 @@ class ProductActivity :
                         ANIMATION_DURATION
                     )
                     tvDiscountPercent.setTextAnimation(
-                        "${viewModel.getDiscountPercent(variant.variantPrice.toFloat(), variant.discountPrice.toFloat())}% Off",
+                        "${viewModel.getDiscountPercent(variant.variantPrice.toFloat(), variant.discountPrice.toFloat()).toInt()}% Off",
                         ANIMATION_DURATION
                     )
                 }

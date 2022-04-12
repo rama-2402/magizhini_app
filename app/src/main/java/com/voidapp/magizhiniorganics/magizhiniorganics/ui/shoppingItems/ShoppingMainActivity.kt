@@ -2,7 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -157,7 +156,7 @@ class ShoppingMainActivity :
             mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
-            adapter.setData(it as MutableList<ProductEntity>)
+            adapter.setData(it)
         }
         viewModel.allProductsInCategory.observe(this) {
             viewModel.selectedChip = CATEGORY
@@ -165,7 +164,7 @@ class ShoppingMainActivity :
             mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
-            adapter.setData(it as MutableList<ProductEntity>)
+            adapter.setData(it)
         }
         viewModel.allFavorites.observe(this) {
             viewModel.selectedChip = Constants.FAVORITES
@@ -173,7 +172,7 @@ class ShoppingMainActivity :
             mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
-            adapter.setData(it as MutableList<ProductEntity>)
+            adapter.setData(it)
         }
         viewModel.discountAvailableProducts.observe(this) {
             viewModel.selectedChip = Constants.DISCOUNT
@@ -181,7 +180,7 @@ class ShoppingMainActivity :
             mItems = it as MutableList<ProductEntity>
             adapter.limited = false
             hideShimmer()
-            adapter.setData(it as MutableList<ProductEntity>)
+            adapter.setData(it)
         }
         viewModel.getAllCartItems().observe(this) {
             if (it.isEmpty()) {

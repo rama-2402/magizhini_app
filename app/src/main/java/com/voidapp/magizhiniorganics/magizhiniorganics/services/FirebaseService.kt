@@ -33,11 +33,6 @@ private const val CHANNEL_ID = "my_channel"
 
 class FirebaseService : FirebaseMessagingService() {
 
-    override fun onNewToken(newToken: String) {
-        super.onNewToken(newToken)
-    }
-
-
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)

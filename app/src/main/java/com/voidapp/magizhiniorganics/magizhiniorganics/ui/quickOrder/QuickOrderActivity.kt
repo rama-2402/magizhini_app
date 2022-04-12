@@ -34,7 +34,6 @@ import com.google.gson.Gson
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderListAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
@@ -48,9 +47,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
@@ -70,7 +69,6 @@ class QuickOrderActivity :
     BaseActivity(),
     KodeinAware,
     PaymentResultListener,
-    AddressAdapter.OnAddressClickListener,
     QuickOrderListAdapter.QuickOrderClickListener,
     AddressDialogClickListener
 {
@@ -87,7 +85,6 @@ class QuickOrderActivity :
     private lateinit var filterBtn: ImageView
 
     private lateinit var cartAdapter: CartAdapter
-    private lateinit var addressAdapter: AddressAdapter
     private lateinit var quickOrderListAdapter: QuickOrderListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,7 +143,7 @@ class QuickOrderActivity :
                 * checking if cart is empty so that we can determine if estimate is received
                 * since estimate data is posted with cart items filled
                 * */
-                if (viewModel.quickOrder?.cart?.isEmpty() ?: true) {
+                if (viewModel.quickOrder?.cart?.isEmpty() != false) {
                     etCoupon.setText("")
                     if (KeyboardVisibilityEvent.isKeyboardVisible(this@QuickOrderActivity)) {
                         this@QuickOrderActivity.hideKeyboard()
@@ -184,6 +181,9 @@ class QuickOrderActivity :
                     }
                 }
             })
+            clAddress.setOnClickListener {
+                updateAddress()
+            }
             btnGetEstimate.setOnClickListener {
                 if (!NetworkHelper.isOnline(this@QuickOrderActivity)) {
                     showErrorSnackBar("Please check your Internet Connection", true)
@@ -366,7 +366,7 @@ class QuickOrderActivity :
                         if (event.message == "update") {
                             showToast(this@QuickOrderActivity, "Address Updated")
                         }
-                        populateAddressDetails(event.data as List<Address>)
+                        event.address?.let { populateAddressDetails(it) }
                     } else {
                         showErrorSnackBar(event.message, true)
                     }
@@ -384,13 +384,13 @@ class QuickOrderActivity :
                             */
                             binding.clBody.visible()
                             binding.clBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
-                            binding.rvAddress.visible()
-                            binding.rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
+                            binding.clAddress.visible()
+                            binding.clAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
                             setCartBottom(null)
                             cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
                         }
                     } else {
-                        showErrorSnackBar(event.message as String, true)
+                        showErrorSnackBar(event.message, true)
                     }
                 }
                 is QuickOrderViewModel.UiUpdate.PopulateOrderDetails -> {
@@ -461,16 +461,6 @@ class QuickOrderActivity :
     }
 
     private fun initRecyclerView() {
-        addressAdapter = AddressAdapter(
-            this,
-            viewModel.mCheckedAddressPosition,
-            arrayListOf(),
-            this
-            )
-        binding.rvAddress.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvAddress.adapter = addressAdapter
-
         quickOrderListAdapter = QuickOrderListAdapter(
             this,
             listOf(),
@@ -590,7 +580,7 @@ class QuickOrderActivity :
     private fun updateCheckoutText() {
         when(cartBottomSheet.state) {
             BottomSheetBehavior.STATE_COLLAPSED -> {
-                if (viewModel.quickOrder?.orderPlaced ?: false) {
+                if (viewModel.quickOrder?.orderPlaced == true) {
                     checkoutText.text = "PURCHASE HISTORY"
                 } else {
                     checkoutText.setTextAnimation("CHECKOUT", 200)
@@ -599,14 +589,14 @@ class QuickOrderActivity :
             }
             BottomSheetBehavior.STATE_EXPANDED -> {
                 lifecycleScope.launch {
-                    if (viewModel.quickOrder?.orderPlaced ?: false) {
+                    if (viewModel.quickOrder?.orderPlaced == true) {
                         checkoutText.text = "PURCHASE HISTORY"
                     } else {
                         checkoutText.setTextAnimation(
                             "Rs: ${viewModel.couponAppliedPrice ?: viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
                             200
                         )
-                        if (viewModel.quickOrder?.cart?.isNotEmpty() ?: false) {
+                        if (viewModel.quickOrder?.cart?.isNotEmpty() == true) {
                             setBottomSheetIcon("delete")
                         }
                     }
@@ -634,8 +624,13 @@ class QuickOrderActivity :
         LoadStatusDialog.statusText.value = filter
     }
 
-    private fun populateAddressDetails(addresses: List<Address>) {
-        addressAdapter.setAddressData(addresses)
+    private fun populateAddressDetails(address: Address) {
+        binding.apply {
+            tvUserName.setTextAnimation(address.userId)
+            tvAddressOne.setTextAnimation(address.addressLineOne)
+            tvAddressTwo.setTextAnimation(address.addressLineTwo)
+            tvAddressCity.setTextAnimation("${address.city} - ${address.LocationCode}")
+        }
     }
 
     private fun populateEstimateDetails(quickOrder: QuickOrder) {
@@ -650,8 +645,8 @@ class QuickOrderActivity :
             updateCartBadge()
             clBody.visible()
             clBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
-            rvAddress.visible()
-            rvAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
+            clAddress.visible()
+            clAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
             btnGetEstimate.remove()
             btnPlaceOrder.remove()
         }
@@ -659,7 +654,7 @@ class QuickOrderActivity :
 
     private fun populateOrderDetails(order: OrderEntity) {
         binding.apply {
-            populateAddressDetails(arrayListOf(order.address))
+            populateAddressDetails(order.address)
             etDeliveryNote.setText(order.deliveryNote)
             etCoupon.setText(order.appliedCoupon)
             if (order.appliedCoupon.isNotEmpty()) {
@@ -805,7 +800,7 @@ class QuickOrderActivity :
             orderDetailsMap["userID"] = profile.id
             orderDetailsMap["name"] = profile.name
             orderDetailsMap["phoneNumber"] = profile.phNumber
-            orderDetailsMap["address"] = profile.address[viewModel.mCheckedAddressPosition]
+            orderDetailsMap["address"] = profile.address[0]
         }
 
         orderDetailsMap["orderID"] = viewModel.orderID ?: viewModel.quickOrder!!.orderID
@@ -885,51 +880,19 @@ class QuickOrderActivity :
         }
     }
 
-    //from address adapter
-    override fun selectedAddress(position: Int) {
-        viewModel.mCheckedAddressPosition = position
-        addressAdapter.checkedAddressPosition = position
-        addressAdapter.notifyDataSetChanged()
-//        updatePriceButton()
-    }
-
-    override fun addAddress(position: Int) {
-        if (viewModel.quickOrder?.orderPlaced ?: false) {
-            showErrorSnackBar("Can't edit Address. Order placed already", true)
-            return
-        }
-        AddressDialog().show(supportFragmentManager, "addressDialog")
-    }
-
-    override fun deleteAddress(position: Int) {
+    fun updateAddress() {
         if (!NetworkHelper.isOnline(this)) {
             showErrorSnackBar("Please check your Internet Connection", true)
             return
         }
-        if (viewModel.quickOrder?.orderPlaced ?: false) {
+        if (viewModel.quickOrder?.orderPlaced == true) {
             showErrorSnackBar("Can't edit Address. Order placed already", true)
             return
         }
-        viewModel.deleteAddress(position)
-        viewModel.mCheckedAddressPosition = 0
-        addressAdapter.checkedAddressPosition = 0
-        addressAdapter.notifyDataSetChanged()
-    }
-
-    override fun updateAddress(position: Int) {
-        if (!NetworkHelper.isOnline(this)) {
-            showErrorSnackBar("Please check your Internet Connection", true)
-            return
-        }
-        if (viewModel.quickOrder?.orderPlaced ?: false) {
-            showErrorSnackBar("Can't edit Address. Order placed already", true)
-            return
-        }
-        viewModel.addressPosition = position
         viewModel.userProfile?.let {
             val dialog = AddressDialog()
             val bundle = Bundle()
-            bundle.putParcelable("address", it.address[position])
+            bundle.putParcelable("address", it.address[0])
             dialog.arguments = bundle
             dialog.show(supportFragmentManager, "addressDialog")
         }
@@ -964,7 +927,7 @@ class QuickOrderActivity :
     }
 
     //from address dialog
-    override fun savedAddress(addressMap: HashMap<String, Any>, isNew: Boolean) {
+    override fun savedAddress(addressMap: HashMap<String, Any>) {
         if (!NetworkHelper.isOnline(this)) {
             showErrorSnackBar("Please check your Internet Connection", true)
             return
@@ -976,11 +939,8 @@ class QuickOrderActivity :
             address.LocationCode = addressMap["LocationCode"].toString()
             address.LocationCodePosition = addressMap["LocationCodePosition"].toString().toInt()
             address.city = addressMap["city"].toString()
-            if (isNew) {
-                viewModel.addAddress(address)
-            } else {
-                viewModel.updateAddress(address)
-            }
+
+            viewModel.updateAddress(address)
         }
     }
 }

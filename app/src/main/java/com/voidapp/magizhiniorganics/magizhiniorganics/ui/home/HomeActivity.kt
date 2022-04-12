@@ -41,7 +41,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityHomeB
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.business.ContactUsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
@@ -708,9 +707,7 @@ class HomeActivity :
                     }
                 }
                 R.id.menuContactUs -> {
-                    Intent(this, ContactUsActivity::class.java).also {
-                        startActivity(it)
-                    }
+                    showListBottomSheet(this, arrayListOf("Call", "WhatsApp", "E-Mail"), "contact")
                 }
                 R.id.menuContactDeveloper -> {
                     showListBottomSheet(this, arrayListOf("WhatsApp", "E-Mail"), "developer")
@@ -727,6 +724,12 @@ class HomeActivity :
                                 "\n" +
                                 "Taking all the above into account, we, Magizhini Organics, have started this initiative to supply organic food and food products in Chennai with a single click of button from your mobile in the comfort of your home. This is an attempt to link growers and processors with buyers to ensure a fair price for growers and easier availability of a wide variety of organic food at reasonable prices for buyers."
                     )
+                }
+                R.id.menuBecomePartner -> {
+                    showExitSheet(this, "Become a Business Partner with Magizhini Organics by providing your contact details and a short description of your business in the form next page. We will Contact you shortly once reviewing your profile. Please click PROCEED to continue", "business")
+                }
+                R.id.menuCareers -> {
+                    openInBrowser("https://forms.gle/3EffsX681hftF3SR9")
                 }
             }
             return true
@@ -757,6 +760,32 @@ class HomeActivity :
                 shareToGMail(arrayOf("rama_void@zohomail.in"), "", "")
             }
         }
+    }
+
+    fun selectedContactMethod(selectedItem: String) {
+        when(selectedItem) {
+            "Call" -> {
+                this.callNumberIntent("7299827393")
+            }
+            "WhatsApp" -> {
+                val message = ""
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(
+                            "https://api.whatsapp.com/send?phone=+917299827393&text=$message"
+                        )
+                    )
+                )
+            }
+            "E-Mail" -> {
+                shareToGMail(arrayOf("magizhiniOrganics2018@gmail.com"), "", "")
+            }
+        }
+    }
+
+    fun addNewPartnerAccount() {
+        openInBrowser("https://forms.gle/eaCWzYVCetunTigd9")
     }
 
     private fun shareToGMail(email: Array<String?>?, subject: String?, content: String?) {

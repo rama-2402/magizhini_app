@@ -1,12 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
@@ -15,7 +12,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntit
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.PinCodesEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.PinCodes
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
@@ -27,7 +23,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
@@ -42,8 +37,6 @@ class CheckoutViewModel(
 
     var currentCoupon: CouponEntity? = null
     var couponPrice: Float? = null
-    var checkedAddressPosition: Int = 0
-    var addressPosition: Int = 0
     var freeDeliveryLimit: Float = 0f
 
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
@@ -75,7 +68,6 @@ class CheckoutViewModel(
             dbRepository.getProfileData()?.let { profile ->
                 withContext(Dispatchers.Main) {
                     userProfile = profile
-                    _uiEvent.value = UIEvent.ProgressBar(true)
                     _uiUpdate.value = UiUpdate.PopulateAddressData(profile.address.map { it.copy() } as MutableList<Address>)
                 }
                 getWallet(profile.id)
@@ -99,65 +91,27 @@ class CheckoutViewModel(
         }
     }
 
-    private suspend fun updateAddress(id: String, address: ArrayList<Address>, status: String) {
-        if(status == "add") {
-            fbRepository.addAddress(id, address[0])
-        } else {
-            fbRepository.updateAddress(id, address)
-        }
-    }
-
-    fun addAddress(newAddress: Address) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            val list = arrayListOf<Address>(newAddress)
-
-            val localUpdate = async {
-                userProfile?.let {
-                    it.address.add(newAddress)
-                    dbRepository.upsertProfile(it)
-                }
-            }
-
-            val cloudUpdate = async {
-                userProfile?.let {
-                    updateAddress(it.id, list, "add")
-                }
-            }
-
-            localUpdate.await()
-            cloudUpdate.await()
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate("add", 0, newAddress, true)
-            }
-        } catch (e: IOException) {
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), 0, null, false)
-            }
-            e.message?.let { fbRepository.logCrash("checkout: add address to profile from db", it) }
-        }
-    }
-
     fun updateAddress(address: Address) = viewModelScope.launch(Dispatchers.IO) {
         try {
             userProfile?.let { profile ->
-                profile.address[addressPosition].apply {
+                profile.address[0].apply {
                     userId = address.userId
                     addressLineOne = address.addressLineOne
                     addressLineTwo = address.addressLineTwo
                     LocationCode = address.LocationCode
                     LocationCodePosition = address.LocationCodePosition
-                }.run {
+                }.let { address ->
                     val localUpdate = async {
                         dbRepository.upsertProfile(profile)
                     }
                     val cloudUpdate = async {
-                        updateAddress(profile.id, profile.address, "update")
+                        fbRepository.updateAddress(profile.id, arrayListOf(address))
                     }
 
                     localUpdate.await()
                     cloudUpdate.await()
                     withContext(Dispatchers.Main) {
-                        _uiUpdate.value = UiUpdate.AddressUpdate("update", addressPosition, address, true)
+                        _uiUpdate.value = UiUpdate.AddressUpdate("update", 0, address, true)
                     }
                 }
             }
@@ -171,33 +125,6 @@ class CheckoutViewModel(
                     it
                 )
             }
-        }
-    }
-
-    fun deleteAddress(position: Int) = viewModelScope.launch (Dispatchers.IO){
-        try {
-            val localUpdate = async {
-                userProfile?.let {
-                    it.address.removeAt(position)
-                    dbRepository.upsertProfile(it)
-                }
-            }
-            val cloudUpdate = async {
-                userProfile?.let {
-                    updateAddress(it.id, it.address, "update")
-                }
-            }
-
-            localUpdate.await()
-            cloudUpdate.await()
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate("delete", position,userProfile!!.address[position], true)
-            }
-        } catch (e: IOException) {
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), 0, null, false)
-            }
-            e.message?.let { fbRepository.logCrash("checkout: update address to profile from db", it) }
         }
     }
 
@@ -391,7 +318,7 @@ class CheckoutViewModel(
 
     suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
         return@withContext userProfile?.let {
-                dbRepository.getDeliveryCharge(it.address[checkedAddressPosition].LocationCode)?.let { pinCodes ->
+                dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
                     if (pinCodes.isNullOrEmpty()) {
                         deliveryAvailability(null)
                         30f

@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvPartnerItemBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadSimple
 
 class PartnersAdapter(

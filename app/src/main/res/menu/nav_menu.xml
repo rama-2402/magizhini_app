@@ -75,6 +75,14 @@
             android:title="CONTACT US"
             android:icon="@drawable/ic_contact" />
         <item
+            android:id="@+id/menuBecomePartner"
+            android:title="BECOME PARTNER"
+            android:icon="@drawable/ic_partner" />
+        <item
+            android:id="@+id/menuCareers"
+            android:title="CAREERS"
+            android:icon="@drawable/ic_careers" />
+        <item
             android:id="@+id/menuContactDeveloper"
             android:title="CONTACT DEVELOPER"
             android:icon="@drawable/ic_android" />

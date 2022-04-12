@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -94,14 +93,6 @@ class OnBoardingActivity: BaseActivity() {
                 }
             }
 
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-//                Log.e("Selected_Page", position.toString())
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {
-                super.onPageScrollStateChanged(state)
-            }
         })
 //
 //        binding.tvSignIn.setOnClickListener {

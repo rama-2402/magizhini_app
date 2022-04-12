@@ -7,8 +7,6 @@ import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.ViewModel
@@ -16,16 +14,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ShoppingMainAdapter.ShoppingMainAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder.QuickOrderViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.ShoppingMainViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.diffUtils.CartDiffUtil
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadOutAnimation
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation

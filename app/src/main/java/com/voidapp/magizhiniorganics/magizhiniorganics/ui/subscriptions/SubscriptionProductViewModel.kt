@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions
 
 import android.net.Uri
-import android.widget.ProgressBar
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

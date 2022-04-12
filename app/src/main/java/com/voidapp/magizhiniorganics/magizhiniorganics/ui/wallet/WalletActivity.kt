@@ -20,8 +20,6 @@ import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.WalletAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityWalletBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
@@ -31,11 +29,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatAc
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.CalendarFilerDialogClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware

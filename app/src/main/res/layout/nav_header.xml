@@ -4,17 +4,20 @@
     android:layout_height="250dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_header"
-    android:background="@drawable/bg_bottom_rouded"
+    android:background="@drawable/shape_round_rectangle_top_16"
+    android:rotation="180"
     android:elevation="8dp"
+    android:backgroundTint="@color/green_base"
     android:gravity="center_vertical"
     android:orientation="vertical"
     android:paddingTop="@dimen/material_size_8"
-    android:layout_marginBottom="@dimen/material_size_16">
+    android:layout_marginTop="@dimen/material_size_16">
 
     <ImageView
         android:id="@+id/ivLogo"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:rotation="180"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

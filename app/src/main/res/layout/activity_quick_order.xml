@@ -27,7 +27,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/rvAddress">
+            app:layout_constraintBottom_toTopOf="@id/clAddress">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/tbToolbar"
@@ -85,15 +85,83 @@
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvAddress"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="@dimen/material_size_12"
+            android:layout_marginTop="@dimen/material_size_12"
+            android:layout_marginEnd="@dimen/material_size_12"
+            android:background="@drawable/shape_round_rectangle_8"
+            android:elevation="@dimen/material_size_8"
+            android:layout_marginBottom="8dp"
             android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@id/clBody"
             app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/clBody"/>
+            app:layout_constraintEnd_toEndOf="parent" >
+
+            <TextView
+                android:id="@+id/tvUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Void"
+                android:layout_marginTop="@dimen/material_size_16"
+                android:layout_marginStart="@dimen/material_size_16"
+                android:textSize="24sp"
+                android:textColor="@color/gray700"
+                android:textStyle="normal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvAddressOne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_16"
+                android:textColor="@color/gray700"
+                android:layout_marginStart="@dimen/material_size_16"
+                android:text="something something street name"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:singleLine="true"
+                android:ellipsize="end"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvUserName" />
+
+            <TextView
+                android:id="@+id/tvAddressTwo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:layout_marginStart="@dimen/material_size_16"
+                android:textColor="@color/gray700"
+                android:text="something something street or area"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:singleLine="true"
+                android:ellipsize="end"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvAddressOne" />
+
+            <TextView
+                android:id="@+id/tvAddressCity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray700"
+                android:text="Chennai"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:layout_marginBottom="@dimen/material_size_16"
+                app:layout_constraintTop_toBottomOf="@id/tvAddressTwo"
+                app:layout_constraintStart_toStartOf="@id/tvAddressTwo"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clBody"
@@ -104,7 +172,7 @@
             android:layout_marginTop="4dp"
             android:visibility="invisible"
             android:background="@drawable/shape_round_rectangle_16"
-            app:layout_constraintTop_toBottomOf="@id/rvAddress"
+            app:layout_constraintTop_toBottomOf="@id/clAddress"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -197,9 +265,10 @@
                             android:layout_marginStart="@dimen/material_size_8"
                             android:layout_marginEnd="@dimen/material_size_8"
                             android:text="Apply"
-                            android:textSize="14sp"
+                            android:background="@drawable/shape_round_rectangle_8"
+                            android:textSize="16sp"
                             android:textColor="@color/white"
-                            app:backgroundTint="@color/green_base"
+                            app:backgroundTint="@color/matteRed"
                             app:layout_constraintEnd_toStartOf="@id/ivCouponInfo"
                             app:layout_constraintStart_toEndOf="@id/etlCoupon"
                             app:layout_constraintTop_toTopOf="@id/etlCoupon"

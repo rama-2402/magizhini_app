@@ -37,7 +37,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/rvAddress">
+            app:layout_constraintBottom_toTopOf="@id/clAddress">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/tbToolbar"
@@ -96,53 +96,97 @@
                 android:textColor="@color/matteRed"
                 android:textStyle="normal"
                 style="@style/TextAppearance.MaterialComponents.Body1"
-                app:layout_constraintBottom_toTopOf="@id/rvAddress"
+                app:layout_constraintBottom_toTopOf="@id/clAddress"
                 app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
         </com.google.android.material.appbar.AppBarLayout>
 
-<!--        <TextView-->
-<!--            android:id="@+id/tvFreeDelivery"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:paddingStart="@dimen/material_size_8"-->
-<!--            android:paddingEnd="@dimen/material_size_8"-->
-<!--            android:paddingTop="@dimen/material_size_4"-->
-<!--            android:paddingBottom="@dimen/material_size_4"-->
-<!--            android:background="@color/green_base"-->
-<!--            android:text=""-->
-<!--            android:ellipsize="marquee"-->
-<!--            android:focusable="true"-->
-<!--            android:focusableInTouchMode="true"-->
-<!--            android:marqueeRepeatLimit="marquee_forever"-->
-<!--            android:scrollHorizontally="true"-->
-<!--            android:singleLine="true"-->
-<!--            android:textColor="@color/matteRed"-->
-<!--            android:textStyle="normal"-->
-<!--            style="@style/TextAppearance.MaterialComponents.Body1"-->
-<!--            app:layout_constraintBottom_toTopOf="@id/rvAddress"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"/>-->
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvAddress"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clAddress"
+            android:visibility="invisible"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_marginStart="@dimen/material_size_12"
+            android:layout_marginTop="@dimen/material_size_12"
+            android:layout_marginEnd="@dimen/material_size_12"
+            android:background="@drawable/shape_round_rectangle_8"
+            android:elevation="@dimen/material_size_8"
+            android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@id/nsvScrollBody"
             app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" >
 
+            <TextView
+                android:id="@+id/tvUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Void"
+                android:layout_marginTop="@dimen/material_size_16"
+                android:layout_marginStart="@dimen/material_size_16"
+                android:textSize="24sp"
+                android:textColor="@color/gray700"
+                android:textStyle="normal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvAddressOne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_16"
+                android:textColor="@color/gray700"
+                android:layout_marginStart="@dimen/material_size_16"
+                android:text="something something street name"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:singleLine="true"
+                android:ellipsize="end"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvUserName" />
+
+            <TextView
+                android:id="@+id/tvAddressTwo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:layout_marginStart="@dimen/material_size_16"
+                android:textColor="@color/gray700"
+                android:text="something something street or area"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:singleLine="true"
+                android:ellipsize="end"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvAddressOne" />
+
+            <TextView
+                android:id="@+id/tvAddressCity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray700"
+                android:text="Chennai"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:layout_marginBottom="@dimen/material_size_16"
+                app:layout_constraintTop_toBottomOf="@id/tvAddressTwo"
+                app:layout_constraintStart_toStartOf="@id/tvAddressTwo"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nsvScrollBody"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:visibility="invisible"
             android:elevation="@dimen/material_size_8"
             android:layout_marginTop="@dimen/material_size_4"
-            app:layout_constraintTop_toBottomOf="@id/rvAddress"
+            app:layout_constraintTop_toBottomOf="@id/clAddress"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

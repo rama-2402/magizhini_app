@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -141,11 +140,6 @@ class LoadStatusDialog: DialogFragment() {
 
             else -> binding.tvBody.text = content
         }
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        //attach the item click listener if needed
     }
 
     override fun onDetach() {

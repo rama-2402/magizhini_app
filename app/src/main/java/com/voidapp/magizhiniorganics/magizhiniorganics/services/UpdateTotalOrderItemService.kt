@@ -8,7 +8,6 @@ import com.google.firebase.firestore.SetOptions
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TotalOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil

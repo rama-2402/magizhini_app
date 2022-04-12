@@ -1,7 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Rect
@@ -30,24 +29,20 @@ import androidx.work.WorkRequest
 import androidx.work.workDataOf
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AddressAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Order
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheckoutBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
@@ -70,7 +65,6 @@ class InvoiceActivity :
     BaseActivity(),
     KodeinAware,
     PaymentResultListener,
-    AddressAdapter.OnAddressClickListener,
     AddressDialogClickListener
 {
     override val kodein: Kodein by kodein()
@@ -83,7 +77,6 @@ class InvoiceActivity :
     private lateinit var cartBtn: ImageBadgeView
     private lateinit var filterBtn: ImageView
 
-    private lateinit var addressAdapter: AddressAdapter
     private lateinit var cartAdapter: CartAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,14 +92,10 @@ class InvoiceActivity :
             onBackPressed()
         }
 
+        showProgressDialog(true)
+
         val cartItems = intent.getParcelableArrayListExtra<CartEntity>("dish") ?: mutableListOf()
         viewModel.isCWMCart = intent.getBooleanExtra("cwm", false)
-
-        binding.apply {
-            rvAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
-            nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_up))
-            tvFreeDelivery.isSelected = true
-        }
 
         Checkout.preload(applicationContext)
 
@@ -115,6 +104,17 @@ class InvoiceActivity :
         setCartBottom()
         initLiveData()
         listeners()
+
+        lifecycleScope.launch {
+            delay(500)
+            binding.apply {
+                clAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
+                nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_up))
+                clAddress.visible()
+                nsvScrollBody.visible()
+                tvFreeDelivery.isSelected = true
+            }
+        }
     }
 
     private fun initData(cartItems: MutableList<CartEntity>) {
@@ -146,23 +146,13 @@ class InvoiceActivity :
             orderDetailsMap["userID"] = profile.id
             orderDetailsMap["name"] = profile.name
             orderDetailsMap["phoneNumber"] = profile.phNumber
-            orderDetailsMap["address"] = profile.address[viewModel.checkedAddressPosition]
+            orderDetailsMap["address"] = profile.address[0]
         }
         return orderDetailsMap
     }
 
     private fun initRecyclerView(cartItems: MutableList<CartEntity>) {
         val cartRecycler = findViewById<RecyclerView>(R.id.rvCart)
-
-        addressAdapter = AddressAdapter(
-            this,
-            viewModel.checkedAddressPosition,
-            arrayListOf(),
-            this
-        )
-        binding.rvAddress.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvAddress.adapter = addressAdapter
 
         cartAdapter = CartAdapter(
             this,
@@ -366,27 +356,14 @@ class InvoiceActivity :
                     )
                 }
                 is CheckoutViewModel.UiUpdate.PopulateAddressData -> {
-                    addressAdapter.setAddressData(event.addressList)
+                    updateAddressInView(event.addressList[0])
                     setDataToViews()
                 }
                 is CheckoutViewModel.UiUpdate.AddressUpdate -> {
                     if (event.isSuccess) {
-                        when (event.message) {
-                            "update" -> {
-                                showToast(this@InvoiceActivity, "Address Updated")
-                                addressAdapter.updateAddress(event.position, event.address!!)
-                                setDataToViews()
-                            }
-//                            "add" -> {
-//                                showToast(this@InvoiceActivity, "Address added")
-//                                addressAdapter.addAddress(event.position, event.address!!)
-//                            }
-//                            "delete" -> {
-//                                showToast(this@InvoiceActivity, "Address Updated")
-//                                addressAdapter.deleteAddress(event.position)
-//                                setDataToViews()
-//                            }
-                        }
+                        showToast(this@InvoiceActivity, "Address Updated")
+                        updateAddressInView(event.address!!)
+                        setDataToViews()
                     } else {
                         showErrorSnackBar(event.message, true)
                     }
@@ -412,6 +389,15 @@ class InvoiceActivity :
                 else -> Unit
             }
             viewModel.setEmptyStatus()
+        }
+    }
+
+    private fun updateAddressInView(address: Address) {
+        binding.apply {
+            tvUserName.setTextAnimation(address.userId)
+            tvAddressOne.setTextAnimation(address.addressLineOne)
+            tvAddressTwo.setTextAnimation(address.addressLineTwo)
+            tvAddressCity.setTextAnimation("${address.city} - ${address.LocationCode}")
         }
     }
 
@@ -593,6 +579,9 @@ class InvoiceActivity :
                     cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
                 }
             }
+            clAddress.setOnClickListener {
+                updateAddress()
+            }
             btnApplyCoupon.setOnClickListener {
                 val couponCode: String = binding.etCoupon.text.toString().trim()
                 if (couponCode.isNullOrEmpty()) {
@@ -663,7 +652,6 @@ class InvoiceActivity :
             } else {
                 mutableListOf<String>()
             }
-            Log.e("qw1", "updatePreferenceData: $productIDs")
             viewModel.clearedProductIDs.forEach {
                 if (!productIDs.contains(it)) {
                     productIDs.add(it)
@@ -686,22 +674,6 @@ class InvoiceActivity :
                 super.onBackPressed()
             }
         }
-//        if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-//            cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-//        } else {
-//            updatePreferenceData()
-//            super.onBackPressed()
-////            if (viewModel.navigateToPage == PRODUCTS) {
-////                finish()
-////            } else {
-////                Intent(this, ShoppingMainActivity::class.java).also {
-////                    it.putExtra(Constants.CATEGORY, viewModel.navigateToPage)
-////                    startActivity(it)
-////                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-////                    finish()
-////                }
-////            }
-//        }
     }
 
     override fun onDestroy() {
@@ -713,49 +685,22 @@ class InvoiceActivity :
         super.onDestroy()
     }
 
-    //from address adapter
-    override fun selectedAddress(position: Int) {
-        viewModel.checkedAddressPosition = position
-        addressAdapter.checkedAddressPosition = position
-        addressAdapter.notifyDataSetChanged()
-        setDataToViews()
-    }
-
-    override fun addAddress(position: Int) {
+    fun updateAddress() {
         if (!NetworkHelper.isOnline(this)) {
             showErrorSnackBar("Please check your Internet Connection", true)
             return
         }
-        AddressDialog().show(supportFragmentManager, "addressDialog")
-    }
-
-    override fun deleteAddress(position: Int) {
-        if (!NetworkHelper.isOnline(this)) {
-            showErrorSnackBar("Please check your Internet Connection", true)
-            return
-        }
-        viewModel.deleteAddress(position)
-        viewModel.checkedAddressPosition = 0
-        addressAdapter.checkedAddressPosition = 0
-    }
-
-    override fun updateAddress(position: Int) {
-        if (!NetworkHelper.isOnline(this)) {
-            showErrorSnackBar("Please check your Internet Connection", true)
-            return
-        }
-        viewModel.addressPosition = position
         viewModel.userProfile?.let {
             val dialog = AddressDialog()
             val bundle = Bundle()
-            bundle.putParcelable("address", it.address[position])
+            bundle.putParcelable("address", it.address[0])
             dialog.arguments = bundle
             dialog.show(supportFragmentManager, "addressDialog")
         }
     }
 
     //from address dialog
-    override fun savedAddress(addressMap: HashMap<String, Any>, isNew: Boolean) {
+    override fun savedAddress(addressMap: HashMap<String, Any>) {
         if (!NetworkHelper.isOnline(this)) {
             showErrorSnackBar("Please check your Internet Connection", true)
             return
@@ -768,11 +713,7 @@ class InvoiceActivity :
             LocationCodePosition = addressMap["LocationCodePosition"].toString().toInt(),
             city = addressMap["city"].toString()
         ).also { address ->
-            if (isNew) {
-                viewModel.addAddress(address)
-            } else {
-                viewModel.updateAddress(address)
-            }
+            viewModel.updateAddress(address)
         }
     }
 

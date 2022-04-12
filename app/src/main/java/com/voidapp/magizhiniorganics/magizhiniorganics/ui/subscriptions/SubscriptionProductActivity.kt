@@ -36,7 +36,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySubsc
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.AddressDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
@@ -230,9 +229,7 @@ class SubscriptionProductActivity :
                 }
             })
             ivInfo.setOnClickListener {
-                showProgressDialog(false)
-                viewModel.cha()
-//                showDescriptionBs(resources.getString(R.string.subscription_info))
+                showDescriptionBs(resources.getString(R.string.subscription_info))
             }
             tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -557,7 +554,7 @@ class SubscriptionProductActivity :
     }
 
     //from address dialog
-    override fun savedAddress(addressMap: HashMap<String, Any>, isNew: Boolean) {
+    override fun savedAddress(addressMap: HashMap<String, Any>) {
         Address(
             userId = addressMap["userId"].toString(),
             addressLineOne = addressMap["addressLineOne"].toString(),

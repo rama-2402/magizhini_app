@@ -1,15 +1,11 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs
 
-import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogCustomSubDaysBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogDeliveryOutOfServiceBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 
 class CustomAlertDialog(
     private val context: Context,

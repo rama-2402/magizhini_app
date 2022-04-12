@@ -18,7 +18,7 @@ class SubscriptionHistoryAdapter(
     private val onItemClickListener: SubscriptionHistoryListener
 ): RecyclerView.Adapter<SubscriptionHistoryAdapter.SubscriptionHistoryViewHolder>() {
 
-    inner class SubscriptionHistoryViewHolder(val binding: RvSubscriptionHistoryItemBinding) : RecyclerView.ViewHolder(binding.root) {    }
+    inner class SubscriptionHistoryViewHolder(val binding: RvSubscriptionHistoryItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(
         parent: ViewGroup,

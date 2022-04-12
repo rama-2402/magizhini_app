@@ -2,19 +2,11 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.provider.Settings
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ACCESS_LOCATION
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOCATION_CODE
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STORAGE_PERMISSION_CODE
 
 object PermissionsUtil {
 

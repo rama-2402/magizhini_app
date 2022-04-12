@@ -24,7 +24,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_NOTIFICATIONS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET

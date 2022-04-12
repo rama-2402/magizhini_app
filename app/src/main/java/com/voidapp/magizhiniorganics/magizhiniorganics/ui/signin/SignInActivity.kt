@@ -8,7 +8,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.databinding.DataBindingUtil
@@ -20,7 +19,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.utils.FadeViewHelper.Companion.DEFAULT_ANIMATION_DURATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySignInBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
@@ -215,7 +213,7 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
                 delay(200)
                 try {
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.addCategory(Intent.CATEGORY_BROWSABLE);
+                    intent.addCategory(Intent.CATEGORY_BROWSABLE)
                     intent.data = Uri.parse("https://rama-2402.github.io/privacy-policy/")
                     startActivity(Intent.createChooser(intent, "Open link with"))
                 } catch (e: Exception) {

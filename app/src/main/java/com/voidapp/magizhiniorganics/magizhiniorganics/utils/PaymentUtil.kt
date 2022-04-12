@@ -24,8 +24,8 @@ fun startPayment(
         options.put("description","Purchasing from store for $userID")
         //You can omit the image option to fetch the image from dashboard
         options.put("image","https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/icon_sh_4.png?alt=media&token=71cf0e67-2f00-4a0f-8950-15459ee02137")
-        options.put("theme.color", "#86C232");
-        options.put("currency","INR");
+        options.put("theme.color", "#86C232")
+        options.put("currency","INR")
 //            options.put("order_id", "orderIDkjhasgdfkjahsdf");
         options.put("amount",price)//pass amount in currency subunits
 

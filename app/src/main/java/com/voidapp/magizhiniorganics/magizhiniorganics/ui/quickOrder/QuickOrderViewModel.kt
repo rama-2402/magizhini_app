@@ -49,10 +49,6 @@ class QuickOrderViewModel(
     var couponAppliedPrice: Float? = null
     var deliveryCharge: Float = 0f
 
-    var mCheckedAddressPosition: Int = 0
-    var addressPosition: Int = 0
-
-
     private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
     val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
@@ -79,7 +75,7 @@ class QuickOrderViewModel(
                 userProfile = it
                 withContext(Dispatchers.Main) {
                     _uiEvent.value = UIEvent.ProgressBar(true)
-                    _uiUpdate.value = UiUpdate.AddressUpdate("address", it.address, true)
+                    _uiUpdate.value = UiUpdate.AddressUpdate("address", it.address[0], true)
                 }
             }
             // while getting the address data we also check for previous estimate request and get the user wallet
@@ -90,98 +86,29 @@ class QuickOrderViewModel(
         }
     }
 
-    fun deleteAddress(position: Int) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            val localUpdate = async {
-                userProfile?.let {
-                    it.address.removeAt(position)
-                    dbRepository.upsertProfile(it)
-                }
-            }
-            val cloudUpdate = async {
-                userProfile?.let {
-                    updateAddress(it.id, it.address, "update")
-                }
-            }
-
-            localUpdate.await()
-            cloudUpdate.await()
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address, true)
-            }
-        } catch (e: IOException) {
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
-            }
-            e.message?.let {
-                fbRepository.logCrash(
-                    "checkout: update address to profile from db",
-                    it
-                )
-            }
-        }
-    }
-
     //this func is to update the address change to the firestore
-    private suspend fun updateAddress(id: String, address: ArrayList<Address>, status: String) {
-        if (status == "add") {
-            fbRepository.addAddress(id, address[0])
-        } else {
-            fbRepository.updateAddress(id, address)
-        }
-    }
-
-    fun addAddress(newAddress: Address) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            val list = arrayListOf<Address>(newAddress)
-
-            val localUpdate = async {
-                userProfile?.let {
-                    it.address.add(newAddress)
-                    dbRepository.upsertProfile(it)
-                }
-            }
-
-            val cloudUpdate = async {
-                userProfile?.let {
-                    updateAddress(it.id, list, "add")
-                }
-            }
-
-            localUpdate.await()
-            cloudUpdate.await()
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address, true)
-            }
-        } catch (e: IOException) {
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
-            }
-            e.message?.let { fbRepository.logCrash("checkout: add address to profile from db", it) }
-        }
-    }
 
     fun updateAddress(address: Address) = viewModelScope.launch(Dispatchers.IO) {
         try {
             userProfile?.let { profile ->
-                profile.address[addressPosition].apply {
+                profile.address[0].apply {
                     userId = address.userId
                     addressLineOne = address.addressLineOne
                     addressLineTwo = address.addressLineTwo
                     LocationCode = address.LocationCode
                     LocationCodePosition = address.LocationCodePosition
-                }.run {
+                }.let { address ->
                     val localUpdate = async {
                         dbRepository.upsertProfile(profile)
                     }
                     val cloudUpdate = async {
-                        updateAddress(profile.id, profile.address, "update")
+                        fbRepository.updateAddress(profile.id, arrayListOf(address))
                     }
 
                     localUpdate.await()
                     cloudUpdate.await()
                     withContext(Dispatchers.Main) {
-                        _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address, true)
+                        _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address[0], true)
                     }
                 }
             }
@@ -270,7 +197,7 @@ class QuickOrderViewModel(
 
     suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
         return@withContext userProfile?.let {
-            dbRepository.getDeliveryCharge(it.address[mCheckedAddressPosition].LocationCode)?.let { pinCodesEntity ->
+            dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodesEntity ->
                 deliveryAvailability(pinCodesEntity[0])
                 pinCodesEntity[0].deliveryCharge.toFloat()
             } ?:let {
@@ -531,7 +458,7 @@ class QuickOrderViewModel(
     }
 
     fun updateCartItem(position: Int, count: Int) {
-        if (quickOrder?.orderPlaced ?: false) {
+        if (quickOrder?.orderPlaced == true) {
             _uiEvent.value = UIEvent.Toast("Can't change cart. Order placed already")
         } else {
             quickOrder?.let {
@@ -558,7 +485,7 @@ class QuickOrderViewModel(
     }
 
     fun deleteItemFromCart(position: Int) {
-        if (quickOrder?.orderPlaced ?: false) {
+        if (quickOrder?.orderPlaced == true) {
             _uiEvent.value = UIEvent.Toast("Can't change cart. Order placed already")
         } else {
             quickOrder?.let {
@@ -589,7 +516,7 @@ class QuickOrderViewModel(
         data class UploadFailed(val message: String): UiUpdate()
 
         //address
-        data class AddressUpdate(val message: String, val data: ArrayList<Address>?, val isSuccess: Boolean): UiUpdate()
+        data class AddressUpdate(val message: String, val address: Address?, val isSuccess: Boolean): UiUpdate()
 
         //estimateData
         data class EstimateData(val message: String, val data: QuickOrder?, val isSuccess: Boolean): UiUpdate()

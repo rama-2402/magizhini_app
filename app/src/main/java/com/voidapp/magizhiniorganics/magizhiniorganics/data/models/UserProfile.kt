@@ -37,7 +37,10 @@ data class BirthdayCard(
     var seen: Boolean = false
 ): Parcelable
 
-
+data class Referral (
+    var referralAmount: Float = 0f,
+    var referrerAmount: Float = 0f
+)
 /*
 * Extras
 *

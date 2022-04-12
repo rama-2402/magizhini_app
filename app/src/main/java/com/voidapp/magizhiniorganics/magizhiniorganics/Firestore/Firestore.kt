@@ -286,40 +286,6 @@ class Firestore(
         }
     }
 
-    private suspend fun checkReferralLimit(referrerID: String): Boolean = withContext(Dispatchers.IO) {
-        data class Referral(
-            var totalReferrals: Int = 0
-        )
-        return@withContext try {
-            val referralLimit = mFireStore.collection(REFERRAL).document(referrerID).get().await()
-            if (referralLimit != null) {
-                val referral = referralLimit.toObject(Referral::class.java)!!
-                if (referral.totalReferrals <= 10) {
-                    referral.totalReferrals = referral.totalReferrals + 1
-                    mFireStore.collection(REFERRAL).document(referrerID).update("totalReferrals", referral.totalReferrals).await()
-                    true
-                } else {
-                    false
-                }
-            } else {
-                Referral(
-                    1
-                ).let {
-                    mFireStore.collection(REFERRAL).document(referrerID).set(it, SetOptions.merge()).await()
-                    true
-                }
-            }
-        } catch (e: Exception) {
-          e.message?.let { logCrash("firestore: verifying referral limit", it) }
-          false
-        }
-    }
-
-    data class Referral (
-        var referralAmount: Float = 0f,
-        var referrerAmount: Float = 0f
-    )
-
     private suspend fun addReferralBonusToCurrentUser(currentUserID: String): Boolean = withContext(Dispatchers.IO){
         return@withContext try {
             if (currentUserID.isNullOrEmpty()) {
@@ -1747,10 +1713,6 @@ class Firestore(
             null
         }
     }
-
-    data class FreeDeliveryLimit (
-        val limit: Float = 0f
-            )
 
     suspend fun getFreeDeliveryLimit(): Float? = withContext(Dispatchers.IO){
         return@withContext try {

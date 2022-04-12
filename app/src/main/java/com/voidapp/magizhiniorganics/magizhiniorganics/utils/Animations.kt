@@ -1,16 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
-import android.R
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.content.Context
-import android.os.Build
 import android.view.View
-import android.view.ViewAnimationUtils
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 
 
 //object Animations {
