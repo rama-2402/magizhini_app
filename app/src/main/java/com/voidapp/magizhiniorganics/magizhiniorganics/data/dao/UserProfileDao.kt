@@ -148,8 +148,8 @@ interface UserProfileDao {
     @Query("UPDATE ProductEntity SET favorite = :status WHERE id = :id")
     fun updateProductFavoriteStatus(id: String, status: Boolean)
 
-    @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated AND status = :status ORDER BY name")
-    fun getAllProductByCategoryStatic(category: String, status: String = "Available"): List<ProductEntity>
+    @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated = :activated AND status = :status ORDER BY name")
+    fun getAllProductByCategoryStatic(category: String, status: String = "Available", activated: Boolean = true): List<ProductEntity>
 
     @Query("SELECT name FROM ProductCategoryEntity WHERE id = :id")
     fun getCategoryByID(id: String): String?

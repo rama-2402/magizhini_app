@@ -335,7 +335,6 @@ class HomeActivity :
                     }
                 }
                 is HomeViewModel.UiUpdate.AllowReferral -> {
-                    hideProgressDialog()
                     if (event.status) {
                         showReferralBs(event.message!!)
                     } else {

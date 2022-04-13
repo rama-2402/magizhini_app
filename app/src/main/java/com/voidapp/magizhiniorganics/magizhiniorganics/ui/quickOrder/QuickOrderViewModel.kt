@@ -81,6 +81,7 @@ class QuickOrderViewModel(
             // while getting the address data we also check for previous estimate request and get the user wallet
             checkForPreviousEstimate()
             getWallet(userProfile!!.id)
+            getDeliveryCharge()
         } catch (e: IOException) {
             _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
         }
@@ -110,6 +111,7 @@ class QuickOrderViewModel(
                     withContext(Dispatchers.Main) {
                         _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address[0], true)
                     }
+                    getDeliveryCharge()
                 }
             }
         } catch (e: IOException) {
@@ -197,9 +199,14 @@ class QuickOrderViewModel(
 
     suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
         return@withContext userProfile?.let {
-            dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodesEntity ->
-                deliveryAvailability(pinCodesEntity[0])
-                pinCodesEntity[0].deliveryCharge.toFloat()
+            dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
+                if (pinCodes.isNullOrEmpty()) {
+                    deliveryAvailability(null)
+                    30f
+                } else {
+                    deliveryAvailability(pinCodes[0])
+                    pinCodes[0].deliveryCharge.toFloat()
+                }
             } ?:let {
                 deliveryAvailability(null)
                 30f
@@ -207,7 +214,7 @@ class QuickOrderViewModel(
         } ?: 30f
     }
 
-    private fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) {
+    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) = withContext(Dispatchers.Main){
         pinCodesEntity?.let {
             if(!pinCodesEntity.deliveryAvailable) {
                 _deliveryNotAvailableDialog.value = System.currentTimeMillis()

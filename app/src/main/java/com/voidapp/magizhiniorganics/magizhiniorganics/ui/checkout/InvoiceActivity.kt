@@ -595,9 +595,9 @@ class InvoiceActivity :
             ivCouponInfo.setOnClickListener {
                 ivCouponInfo.startAnimation(AnimationUtils.loadAnimation(ivCouponInfo.context, R.anim.bounce))
                 viewModel.currentCoupon?.let { coupon ->
-                    val content = "Using ${coupon.name} Coupon with coupon code ${coupon.code} you can avail ${coupon.amount} ${coupon.type} discount on your total purchase. \n \n \n The Coupon can be used only for the following criteria: \n \n Minimum Purchase Amount: ${coupon.purchaseLimit} \n " +
+                    val content = "This Coupon can be used only for the following criteria: \n \n Minimum Purchase Amount: ${coupon.purchaseLimit} \n " +
                             "Maximum Discount Amount: ${coupon.maxDiscount}\n" +
-                            "${coupon.description}"
+                            "\n \n \n ${coupon.description}"
                     showDescriptionBs(content)
                 }
             }

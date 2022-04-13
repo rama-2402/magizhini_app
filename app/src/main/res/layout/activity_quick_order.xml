@@ -224,7 +224,10 @@
                         android:id="@+id/llCoupons"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/material_size_8"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:layout_marginBottom="88dp"
                         android:background="@drawable/shape_round_rectangle_8"
                         android:paddingBottom="@dimen/material_size_8"
                         android:elevation="@dimen/material_size_4">

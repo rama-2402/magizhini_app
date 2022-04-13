@@ -502,6 +502,7 @@ class QuickOrderActivity :
 
         updateCheckoutText()
         cartBottomSheet.isDraggable = true
+        cartBottomSheet.isHideable = false
 
         cartEntity?.let { cart ->
             cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
