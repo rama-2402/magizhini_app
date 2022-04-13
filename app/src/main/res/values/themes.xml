@@ -14,7 +14,7 @@
         <item name="android:statusBarColor" tools:targetApi="l">@color/green_base</item>
         <item name="colorAccent">@color/matteRed</item>
         <item name="android:listDivider">@color/grey</item>
-<!--        <item name="android:textColorPrimary">@color/white</item>-->
+        <item name="android:textColorPrimary">@color/gray700</item>
         <!-- Customize your theme here. -->
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowSharedElementEnterTransition">@transition/enter</item>
@@ -39,7 +39,7 @@
         <item name="colorAccent">@color/green_base</item>
         <item name="android:colorEdgeEffect">@color/green_base</item>
         <!--        <item name="android:colorControlHighlight">@color/green_base</item>-->
-        <item name="android:textColorPrimary">@color/matteRed</item>
+        <item name="android:textColorPrimary">@color/gray700</item>
         <item name="android:windowContentTransitions">true</item>
     </style>
 

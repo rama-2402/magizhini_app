@@ -14,7 +14,7 @@
         <item name="android:statusBarColor" tools:targetApi="l">@color/green_base</item>
         <item name="titleTextColor">@color/white</item>
         <item name="colorAccent">@color/green_base</item>
-        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorPrimary">@color/gray700</item>
         <item name="android:listDivider">@color/grey</item>
         <!-- Customize your theme here. -->
         <item name="android:windowContentTransitions">true</item>

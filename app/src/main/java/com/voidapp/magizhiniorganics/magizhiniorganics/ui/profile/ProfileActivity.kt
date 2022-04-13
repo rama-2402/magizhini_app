@@ -69,6 +69,7 @@ class ProfileActivity :
 
         viewModel.phoneNumber = intent.getStringExtra(PHONE_NUMBER).toString()
         viewModel.userID = intent.getStringExtra(USER_ID).toString()
+        binding.tvReferral.remove()
 
         lifecycleScope.launch {
             delay(1010)
@@ -199,6 +200,10 @@ class ProfileActivity :
             etAddressOne.setText(userProfile.address[0].addressLineOne)
             etAddressTwo.setText(userProfile.address[0].addressLineTwo)
             etArea.setText(userProfile.address[0].LocationCode)
+//            tvReferral.remove()
+
+
+
 //            spArea.setSelection(userProfile.address[0].LocationCodePosition)
 //            tvGpsAddress.text = userProfile.address[0].gpsAddress
 //            mLatitude = userProfile.address[0].gpsLatitude
@@ -208,7 +213,6 @@ class ProfileActivity :
 //                userProfile.referralId != "" ||
 //                SharedPref(this@ProfileActivity).getData(LOGIN_STATUS, BOOLEAN, false)
 //            ) {
-            tvReferral.remove()
 //            }
             //hiding the referral code area for existing user
             if (userProfile.profilePicUrl != "") {
