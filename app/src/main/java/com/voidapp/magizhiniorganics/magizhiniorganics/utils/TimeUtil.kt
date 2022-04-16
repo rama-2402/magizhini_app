@@ -22,6 +22,16 @@ class TimeUtil {
         return getCustomDate(dateLong = timeLong)
     }
 
+    fun getQuarterOfTheDay(time: Long = System.currentTimeMillis()): Int {
+        val hourFormat = SimpleDateFormat("HH")
+        return when {
+            hourFormat.format(time).toInt() < 6 -> 1
+            hourFormat.format(time).toInt() < 12 -> 2
+            hourFormat.format(time).toInt() < 18 -> 3
+            else -> 4
+        }
+    }
+
     fun timeStamp(timeLong: Long): String {
         val simpleDateFormat = SimpleDateFormat("HH:mm:ss")
         return simpleDateFormat.format(timeLong)

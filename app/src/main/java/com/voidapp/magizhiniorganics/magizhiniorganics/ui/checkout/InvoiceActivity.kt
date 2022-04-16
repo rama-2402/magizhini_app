@@ -478,7 +478,7 @@ class InvoiceActivity :
             }
             when(paymentMethod) {
                 "Online" -> {
-                    val mrp = (viewModel.couponPrice ?: viewModel.getCartPrice(cartItems)) + viewModel.getDeliveryCharge()
+                    val mrp = binding.tvTotalAmt.text.toString().toFloat()
                     viewModel.userProfile?.let {
                         startPayment(
                             this@InvoiceActivity,
@@ -511,11 +511,12 @@ class InvoiceActivity :
                 "Validating your purchase...",
                 "purchaseValidation"
             )
-            viewModel.placeCashOnDeliveryOrder(generateOrderDetailsMap())
+            viewModel.placeCashOnDeliveryOrder(
+                generateOrderDetailsMap()
+            )
         } else {
-            val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
             viewModel.proceedForWalletPayment(
-                orderDetailsMap
+                generateOrderDetailsMap()
             )
         }
     }

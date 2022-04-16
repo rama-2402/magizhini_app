@@ -49,6 +49,7 @@ class BestSellersAdapter(
             "Kilogram" -> "${product.variants[variantInCartPosition].variantName}Kg"
             "Gram" -> "${product.variants[variantInCartPosition].variantName}g"
             "Liter" -> "${product.variants[variantInCartPosition].variantName}l"
+            "Unit" -> "${product.variants[variantInCartPosition].variantName} Unit"
             else -> "${product.variants[variantInCartPosition].variantName}ml"
         }
 

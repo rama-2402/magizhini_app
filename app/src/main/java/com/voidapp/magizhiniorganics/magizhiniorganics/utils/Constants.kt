@@ -24,6 +24,7 @@ object Constants {
     const val INT: String = "int"
     const val DATE: String = "01/01/2020"
     const val CURRENT_COUPON: String = "currentCoupon"
+    const val QUARTER: String = "quarter"
 
     //intents
     const val MAIN_PAGE_STATE: String = "mainPageState"

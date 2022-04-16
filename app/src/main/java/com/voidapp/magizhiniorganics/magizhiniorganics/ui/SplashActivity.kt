@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.databinding.DataBindingUtil
@@ -23,6 +24,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUARTER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import kotlinx.coroutines.delay
@@ -221,7 +223,11 @@ class SplashActivity : BaseActivity(), KodeinAware {
     }
 
     private fun updateDatabaseWorkRequest(wipe: Boolean, isNewDay: String, navigation: String?) {
-        if (isNewDay != TimeUtil().getCurrentDate()) {
+        if (
+            isNewDay != TimeUtil().getCurrentDate() ||
+            TimeUtil().getQuarterOfTheDay() != SharedPref(this).getData(QUARTER, STRING, "1").toString().toInt()
+        ) {
+            SharedPref(this).putData(QUARTER, STRING, TimeUtil().getQuarterOfTheDay().toString())
             if (wipe) {
                 SharedPref(this).putData("month", INT, TimeUtil().getMonthNumber())
                 startWork("wipe", navigation)
@@ -277,7 +283,6 @@ class SplashActivity : BaseActivity(), KodeinAware {
     }
 
     private fun navigateToHomeScreen(newDayCheck: Boolean, navigation: String?) = lifecycleScope.launch {
-
         if (fbRepository.updateNotifications(SharedPref(this@SplashActivity).getData(USER_ID, STRING, "").toString())) {
 //            binding.progressCircular.remove()
             delay(3000)
