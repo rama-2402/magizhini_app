@@ -678,7 +678,7 @@ class QuickOrderActivity :
             if (isCouponApplied) {
                 etCoupon.disable()
                 btnApplyCoupon.text = "Remove"
-                btnApplyCoupon.setBackgroundColor(
+                btnApplyCoupon.backgroundTintList = ColorStateList.valueOf(
                     ContextCompat.getColor(
                         baseContext,
                         R.color.matteRed
@@ -690,7 +690,7 @@ class QuickOrderActivity :
                 etCoupon.enable()
                 etCoupon.setText("")
                 btnApplyCoupon.text = "Apply"
-                btnApplyCoupon.setBackgroundColor(
+                btnApplyCoupon.backgroundTintList = ColorStateList.valueOf(
                     ContextCompat.getColor(
                         baseContext,
                         R.color.green_base
