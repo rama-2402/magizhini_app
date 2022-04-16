@@ -28,6 +28,10 @@ class TimeUtil {
             hourFormat.format(time).toInt() < 6 -> 1
             hourFormat.format(time).toInt() < 12 -> 2
             hourFormat.format(time).toInt() < 18 -> 3
+//            hourFormat.format(time).toInt() < 12 -> 4
+//            hourFormat.format(time).toInt() < 15 -> 5
+//            hourFormat.format(time).toInt() < 18 -> 6
+//            hourFormat.format(time).toInt() < 21 -> 7
             else -> 4
         }
     }

@@ -852,7 +852,7 @@ class HomeActivity :
     //from partners adapter
     override fun selectedPartner(partner: Partners, thumbnail: ShapeableImageView) {
         when (partner.clickAction) {
-            "Open" -> navigateToPreview(partner.imageUrl, thumbnail, null, "image")
+         "Open" -> openInBrowser("https://www.instagram.com/eyalvathu_karavel/?hl=en")
         }
     }
 

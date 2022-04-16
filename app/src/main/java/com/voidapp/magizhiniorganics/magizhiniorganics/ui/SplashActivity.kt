@@ -252,6 +252,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
                 .build()
 
         WorkManager.getInstance(this).enqueue(workRequest)
+
         WorkManager.getInstance(this)
             .getWorkInfoByIdLiveData(workRequest.id)
             .observe(this) {
