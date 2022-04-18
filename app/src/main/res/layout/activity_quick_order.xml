@@ -54,22 +54,41 @@
                     android:textColor="@color/white"
                     android:fontFamily="@font/roboto"/>
 
-                <ru.nikartm.support.ImageBadgeView
-                    android:id="@+id/ivNotification"
-                    android:layout_width="@dimen/material_size_32"
-                    android:layout_height="@dimen/material_size_32"
-                    android:layout_marginEnd="@dimen/material_size_8"
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivImage"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
                     android:layout_gravity="end"
-                    android:padding="2dp"
-                    app:ibv_badgeValue="0"
-                    app:ibv_badgeTextSize="12sp"
-                    app:ibv_fixedBadgeRadius="8dp"
-                    app:ibv_badgeTextStyle="bold"
-                    app:ibv_badgeTextColor="#ffffff"
-                    app:ibv_badgeColor="@color/matteRed"
-                    app:ibv_badgeLimitValue="false"
-                    android:src="@drawable/ic_notify_off"
-                    app:tint="@color/white"/>
+                    android:src="@drawable/ic_attach_picture"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:contentDescription="@string/favorites_icon"
+                    app:tint="@color/white"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivVoice"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
+                    android:layout_gravity="end"
+                    android:src="@drawable/ic_voice"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:contentDescription="@string/favorites_icon"
+                    app:tint="@color/white"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivText"
+                    android:layout_width="@dimen/material_size_24"
+                    android:layout_height="@dimen/material_size_24"
+                    android:layout_gravity="end"
+                    android:src="@drawable/ic_write_review"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:contentDescription="@string/favorites_icon"
+                    app:tint="@color/white"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivHelp"
@@ -386,7 +405,7 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginStart="@dimen/material_size_4"
-                android:text="Add List"
+                android:text="Place Order"
                 android:textColor="@color/white"
                 app:backgroundTint="@color/matteRed"
                 android:background="@drawable/shape_round_rectangle_8"

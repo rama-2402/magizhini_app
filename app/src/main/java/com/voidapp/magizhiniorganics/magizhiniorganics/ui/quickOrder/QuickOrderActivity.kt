@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -35,7 +36,9 @@ import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderListAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.QuickOrderTextAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
@@ -69,7 +72,7 @@ class QuickOrderActivity :
     BaseActivity(),
     KodeinAware,
     PaymentResultListener,
-    QuickOrderListAdapter.QuickOrderClickListener,
+    QuickOrderClickListener,
     AddressDialogClickListener
 {
     override val kodein: Kodein by kodein()
@@ -101,12 +104,12 @@ class QuickOrderActivity :
 
         initRecyclerView()
         initData()
-
         initObservers()
         initListeners()
     }
 
     private fun initData() {
+        binding.ivImage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
         lifecycleScope.launchWhenCreated {
             viewModel.userProfile = UserProfileEntity()
             viewModel.addressContainer = Address()
@@ -161,16 +164,79 @@ class QuickOrderActivity :
             ivHelp.setOnClickListener {
                 showDescriptionBs(getString(R.string.quick_order_description))
             }
-            ivNotification.setOnClickListener {
-                viewModel.quickOrder?.let {
-                    if (it.note.isNotEmpty()) {
-                        showDescriptionBs(it.note)
-                        binding.ivNotification.badgeValue = 0
-                    } else {
-                        showToast(this@QuickOrderActivity, "No New Notification")
-                    }
+            ivText.setOnClickListener {
+                if (viewModel.currentQuickOrderMode == "text") {
+                    showToast(this@QuickOrderActivity, "Already in Text Mode")
+                }
+                ivText.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                ivImage.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                ivVoice.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                viewModel.currentQuickOrderMode = "text"
+                viewModel.orderListUri.clear()
+                viewModel.orderListUri.add(Uri.EMPTY)
+                QuickOrderTextAdapter(
+                    this@QuickOrderActivity,
+                    listOf(),
+                    this@QuickOrderActivity
+                ).let {
+                    rvOrderList.layoutManager = LinearLayoutManager(this@QuickOrderActivity)
+                    rvOrderList.adapter = it
                 }
             }
+            ivImage.setOnClickListener {
+                if (viewModel.currentQuickOrderMode == "image") {
+                    showToast(this@QuickOrderActivity, "Already in Image Mode")
+                }
+                ivImage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                ivText.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                ivVoice.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                viewModel.currentQuickOrderMode = "image"
+                viewModel.textOrderItemList.clear()
+                //TODO remove the recorded audio from storage
+                viewModel.audioFileUri = null
+                QuickOrderListAdapter(
+                    this@QuickOrderActivity,
+                    viewModel.orderListUri,
+                    listOf(),
+                    true,
+                    this@QuickOrderActivity
+                ).let {
+                    quickOrderListAdapter = it
+                    rvOrderList.layoutManager =
+                        GridLayoutManager(this@QuickOrderActivity, 3)
+                    rvOrderList.adapter = quickOrderListAdapter
+                }
+            }
+            ivVoice.setOnClickListener {
+                if (viewModel.currentQuickOrderMode == "voice") {
+                    showToast(this@QuickOrderActivity, "Already in Voice Mode")
+                }
+                ivVoice.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                ivImage.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                ivText.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                viewModel.currentQuickOrderMode = "voice"
+                viewModel.textOrderItemList.clear()
+                viewModel.orderListUri.clear()
+                viewModel.orderListUri.add(Uri.EMPTY)
+                QuickOrderTextAdapter(
+                    this@QuickOrderActivity,
+                    listOf(),
+                    this@QuickOrderActivity
+                ).let {
+                    rvOrderList.layoutManager = LinearLayoutManager(this@QuickOrderActivity)
+                    rvOrderList.adapter = it
+                }
+            }
+//            ivNotification.setOnClickListener {
+//                viewModel.quickOrder?.let {
+//                    if (it.note.isNotEmpty()) {
+//                        showDescriptionBs(it.note)
+//                        binding.ivNotification.badgeValue = 0
+//                    } else {
+//                        showToast(this@QuickOrderActivity, "No New Notification")
+//                    }
+//                }
+//            }
             nsvScrollBody.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
                 viewModel.quickOrder?.let {
                     when {
@@ -192,26 +258,26 @@ class QuickOrderActivity :
                 /*
                 * If there is no quick order and the uri is empty then nothing is selected
                 * */
-                if (viewModel.quickOrder == null && viewModel.orderListUri.isNullOrEmpty()) {
-                    showErrorSnackBar("Please add your purchase list image to get Estimate", true)
-                    return@setOnClickListener
-                }
-                showExitSheet(this@QuickOrderActivity, "To get Estimate price, Your List will be sent for validation and we will contact you with the price breakdown for each product and Total Order. Please click PROCEED below to start uploading order list.", "estimate")
+               if (validateEntry()) {
+                   showExitSheet(this@QuickOrderActivity, "To get Estimate price, Your List will be sent for validation and we will contact you with the price breakdown for each product and Total Order. Please click PROCEED below to start uploading order list.", "estimate")
+               }
             }
             btnPlaceOrder.setOnClickListener {
                 /*
                 * So if quick order is null and there is no uri means no pic is added yet. Hence for first pic to be uploaded
                 * we click from place order button
                 * */
-                if (viewModel.quickOrder == null && viewModel.orderListUri.isNullOrEmpty()) {
-                    if (PermissionsUtil.hasStoragePermission(this@QuickOrderActivity)) {
-                        getAction.launch(pickImageIntent)
-                    } else {
-                        showExitSheet(this@QuickOrderActivity, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
-                    }
-                    return@setOnClickListener
-                }
-                showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
+//                if (viewModel.quickOrder == null && viewModel.orderListUri.isNullOrEmpty()) {
+//                    if (PermissionsUtil.hasStoragePermission(this@QuickOrderActivity)) {
+//                        getAction.launch(pickImageIntent)
+//                    } else {
+//                        showExitSheet(this@QuickOrderActivity, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+//                    }
+//                    return@setOnClickListener
+//                }
+                 if (validateEntry()) {
+                     showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
+                 }
             }
         }
     }
@@ -387,6 +453,7 @@ class QuickOrderActivity :
                             binding.clAddress.visible()
                             binding.clAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
                             setCartBottom(null)
+                            cartBottomSheet.isHideable = true
                             cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
                         }
                     } else {
@@ -436,12 +503,51 @@ class QuickOrderActivity :
         return Gson().toJson(value)
     }
 
+    private fun validateEntry(): Boolean {
+        return when(viewModel.currentQuickOrderMode) {
+            "image" -> {
+                if (viewModel.orderListUri.isNotEmpty() && viewModel.orderListUri[0] == Uri.EMPTY) {
+                    showErrorSnackBar(
+                        "Add your purchase list image to proceed",
+                        true
+                    )
+                    false
+                } else {
+                    true
+                }
+            }
+            "text" -> {
+                if (viewModel.textOrderItemList.isEmpty()) {
+                    showErrorSnackBar(
+                        "Enter your purchase list data to proceed",
+                        true
+                    )
+                    false
+                } else {
+                    true
+                }
+            }
+            else -> {
+                if (viewModel.audioFileUri == null) {
+                    showErrorSnackBar(
+                        "Please record an audio containing your purchase list to proceed",
+                        true
+                    )
+                    false
+                } else {
+                    true
+                }
+            }
+        }
+    }
+
     private fun resetQuickOrderUI() {
         binding.apply {
             applyUiChangesWithCoupon(false)
             etDeliveryNote.setText("")
             btnGetEstimate.visible()
             btnPlaceOrder.visible()
+            ivImage.performClick()
             quickOrderListAdapter.quickOrderList = listOf()
             quickOrderListAdapter.quickOrderListUrl = listOf()
             quickOrderListAdapter.notifyDataSetChanged()
@@ -456,15 +562,16 @@ class QuickOrderActivity :
             couponAppliedPrice = null
             appliedCoupon = null
         }
-        updatePlaceOrderButton()
+//        updatePlaceOrderButton()
         cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     private fun initRecyclerView() {
         quickOrderListAdapter = QuickOrderListAdapter(
             this,
+            listOf(Uri.EMPTY),
             listOf(),
-            listOf(),
+            true,
             this
         )
         binding.rvOrderList.layoutManager =
@@ -637,11 +744,9 @@ class QuickOrderActivity :
     private fun populateEstimateDetails(quickOrder: QuickOrder) {
         viewModel.quickOrder = quickOrder
         binding.apply {
+            quickOrderListAdapter.addImage = false
             quickOrderListAdapter.quickOrderListUrl = quickOrder.imageUrl
             quickOrderListAdapter.notifyDataSetChanged()
-            if (quickOrder.note.isNotEmpty()) {
-                ivNotification.badgeValue = 1
-            }
             setCartBottom(quickOrder.cart)
             updateCartBadge()
             clBody.visible()
@@ -700,21 +805,24 @@ class QuickOrderActivity :
         }
     }
 
-    private fun updatePlaceOrderButton() {
-        if(
-            viewModel.quickOrder == null &&
-            viewModel.orderListUri.isNullOrEmpty()
-        ) {
-            binding.btnPlaceOrder.text = "Add List"
-        } else {
-            binding.btnPlaceOrder.text = "Place Order"
-        }
-    }
+//    private fun updatePlaceOrderButton() {
+//        if(
+//            viewModel.quickOrder == null &&
+//            viewModel.orderListUri.isNullOrEmpty()
+//        ) {
+//            binding.btnPlaceOrder.text = "Add List"
+//        } else {
+//            binding.btnPlaceOrder.text = "Place Order"
+//        }
+//    }
 
     private fun loadNewImage() {
+        if (viewModel.orderListUri.isEmpty()) {
+            viewModel.orderListUri.add(Uri.EMPTY)
+        }
         quickOrderListAdapter.quickOrderList = viewModel.orderListUri
         quickOrderListAdapter.notifyDataSetChanged()
-        updatePlaceOrderButton()
+//        updatePlaceOrderButton()
     }
 
     fun selectedPaymentMode(paymentMethod: String) {
@@ -925,6 +1033,30 @@ class QuickOrderActivity :
         } else {
             showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
         }
+    }
+
+    override fun addTextItem(productName: String, variantName: String, quantity: Int) {
+
+    }
+
+    override fun removeTextItem(productName: String, variantName: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateTextItem(productName: String, variantName: String, quantity: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun startRecording() {
+        TODO("Not yet implemented")
+    }
+
+    override fun stopRecording() {
+        TODO("Not yet implemented")
+    }
+
+    override fun pauseRecording() {
+        TODO("Not yet implemented")
     }
 
     //from address dialog

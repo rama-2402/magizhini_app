@@ -372,7 +372,7 @@
                             android:layout_marginLeft="8dp"
                             android:layout_marginRight="8dp"
                             android:layout_weight="1"
-                            android:hint="Pin code"
+                            android:hint="Pincode (600001)"
                             app:boxStrokeColor="@color/matteRed"
                             android:textColorHint="@color/matteRed"
                             app:flow_wrapMode="aligned"

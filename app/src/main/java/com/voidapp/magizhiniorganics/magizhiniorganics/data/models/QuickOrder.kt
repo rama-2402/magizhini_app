@@ -10,10 +10,25 @@ data class QuickOrder(
     var phoneNumber: String = "",
     var orderID: String = "",
     var mailID: String = "",
+    var orderType: String = "image",
     var timeStamp: Long = 0,
     var imageUrl: ArrayList<String> = arrayListOf(),
+    val textItemsList: ArrayList<QuickOrderTextItem > = arrayListOf(),
+    val audioFileUrl: String = "",
     var cart: ArrayList<Cart> = arrayListOf(),
     var note: String = "",
     var orderPlaced: Boolean = false,
     var extras: ArrayList<String> = arrayListOf()
+): Parcelable
+
+@Parcelize
+class QuickOrderTextItem (
+    var productName: String = "",
+    var variantName: String = "",
+    var quantity: Int = 1
+): Parcelable
+
+@Parcelize
+class QuickOrderAudioItem (
+    var audioUrl: String = ""
 ): Parcelable

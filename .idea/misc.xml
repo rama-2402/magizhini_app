@@ -170,6 +170,8 @@
         <entry key="app/src/main/res/layout/rv_order_item.xml" value="0.5401041666666667" />
         <entry key="app/src/main/res/layout/rv_order_items.xml" value="0.5" />
         <entry key="app/src/main/res/layout/rv_partner_item.xml" value="0.5401041666666667" />
+        <entry key="app/src/main/res/layout/rv_quick_order_audio_item.xml" value="0.5260416666666666" />
+        <entry key="app/src/main/res/layout/rv_quick_order_text.xml" value="0.534375" />
         <entry key="app/src/main/res/layout/rv_quickorder_list_item.xml" value="0.2629179331306991" />
         <entry key="app/src/main/res/layout/rv_review_items.xml" value="0.5" />
         <entry key="app/src/main/res/layout/rv_reviews.xml" value="0.375" />

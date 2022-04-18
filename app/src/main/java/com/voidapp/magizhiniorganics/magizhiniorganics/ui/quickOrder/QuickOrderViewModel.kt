@@ -9,10 +9,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
@@ -36,8 +33,13 @@ class QuickOrderViewModel(
     private val quickOrderUseCase: QuickOrderUseCase
 ): ViewModel() {
 
+    var currentQuickOrderMode = "image"
+
     val tempFilesList: MutableList<File> = mutableListOf()
-    val orderListUri: MutableList<Uri> = mutableListOf()
+    val orderListUri: MutableList<Uri> = mutableListOf(Uri.EMPTY)
+    val textOrderItemList: MutableList<QuickOrderTextItem> = mutableListOf()
+    var audioFileUri: Uri? = null
+
     var userProfile: UserProfileEntity? = null
     var addressContainer: Address? = null
     var quickOrder: QuickOrder? = null
@@ -65,6 +67,9 @@ class QuickOrderViewModel(
     }
 
     fun addNewImageUri(data: Uri) {
+      if (orderListUri[0] == Uri.EMPTY) {
+          orderListUri.removeAt(0)
+      }
         orderListUri.add(data)
     }
 
