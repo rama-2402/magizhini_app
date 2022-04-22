@@ -5,6 +5,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clTextItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/material_size_8"
@@ -13,129 +14,57 @@
         android:layout_marginBottom="@dimen/material_size_4"
         android:backgroundTint="@color/white"
         android:background="@color/white">
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/etlProductName"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:hint="Brief Description of product name"
-            app:boxStrokeColor="@color/matteRed"
-            app:flow_wrapMode="aligned"
-            app:endIconMode="clear_text"
-            android:textColorHint="@color/grey"
-            android:isScrollContainer="true"
-            app:hintTextColor="@color/matteRed"
-            android:scrollbarStyle="insideInset"
-            android:scrollbars="vertical"
-            android:overScrollMode="always"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etproductName"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:cursorVisible="true"
-                android:inputType="textMultiLine"
-                android:gravity="top"
-                android:maxLength="300"
-                android:isScrollContainer="true"
-                android:overScrollMode="always"
-                android:scrollbars="vertical"
-                android:textColorHint="@color/green_base"
-                android:textColor="@color/green_base"
-                android:textCursorDrawable="@null" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/etlVariantName"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toStartOf="@id/etlQuantity"
-            android:hint="Type (Eg: 1kg)"
-            app:boxStrokeColor="@color/matteRed"
-            app:flow_wrapMode="aligned"
-            app:endIconMode="clear_text"
-            android:textColorHint="@color/grey"
-            android:layout_marginTop="@dimen/material_size_8"
-            android:isScrollContainer="true"
-            app:hintTextColor="@color/matteRed"
-            android:scrollbarStyle="insideInset"
-            android:scrollbars="vertical"
-            android:overScrollMode="always"
-            app:layout_constraintTop_toBottomOf="@id/etlProductName"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etVariantName"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:cursorVisible="true"
-                android:inputType="textMultiLine"
-                android:gravity="top"
-                android:maxLength="300"
-                android:isScrollContainer="true"
-                android:overScrollMode="always"
-                android:scrollbars="vertical"
-                android:textColorHint="@color/green_base"
-                android:textColor="@color/green_base"
-                android:textCursorDrawable="@null" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/etlQuantity"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
-            app:layout_constraintWidth_percent=".3"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:hint="Qty (Eg: 2)"
-            app:boxStrokeColor="@color/matteRed"
-            app:flow_wrapMode="aligned"
-            app:endIconMode="clear_text"
-            android:textColorHint="@color/grey"
-            android:layout_marginTop="@dimen/material_size_8"
-            android:isScrollContainer="true"
-            app:hintTextColor="@color/matteRed"
-            android:scrollbarStyle="insideInset"
-            android:scrollbars="vertical"
-            android:overScrollMode="always"
-            app:layout_constraintTop_toBottomOf="@id/etlProductName"
-            app:layout_constraintStart_toEndOf="@id/etlVariantName">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etQuantity"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:cursorVisible="true"
-                android:inputType="number"
-                android:gravity="top"
-                android:maxLength="2"
-                android:isScrollContainer="true"
-                android:overScrollMode="always"
-                android:scrollbars="vertical"
-                android:textColorHint="@color/green_base"
-                android:textColor="@color/green_base"
-                android:textCursorDrawable="@null" />
-        </com.google.android.material.textfield.TextInputLayout>
         <TextView
-            android:id="@+id/btnAddProduct"
-            android:layout_width="match_parent"
+            android:id="@+id/tvProductName"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="ADD ITEM"
-            android:textStyle="bold"
+            android:textColor="@color/gray700"
             android:textSize="16sp"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:paddingTop="@dimen/material_size_8"
-            android:paddingBottom="@dimen/material_size_8"
-            app:layout_constraintTop_toBottomOf="@id/etlVariantName"
-            android:layout_marginTop="@dimen/material_size_12"
-            android:backgroundTint="@color/matteRed"
-            android:background="@drawable/shape_round_rectangle_8"/>
+            tools:text="Thuvaram Paruppu/thovaram paruppu "
+            android:maxLines="2"
+            app:layout_constraintTop_toTopOf="@id/btnDelete"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnDelete"/>
+
+        <ImageView
+            android:id="@+id/btnDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_delete"
+            android:padding="@dimen/material_size_8"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="@dimen/material_size_2"
+            android:backgroundTint="@color/errorRed"
+            android:background="@drawable/shape_round_rectangle_8"
+            />
+        <TextView
+            android:id="@+id/tvVariantName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintWidth_percent=".6"
+            android:textColor="@color/gray700"
+            android:textSize="16sp"
+            tools:text="Type: 1 Kilogram"
+            android:maxLines="2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvProductName"
+            app:layout_constraintStart_toStartOf="parent"
+/>
+        <TextView
+            android:id="@+id/tvQuantity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintWidth_percent=".3"
+            android:textColor="@color/gray700"
+            android:textSize="16sp"
+            tools:text="Qty: 3"
+            android:maxLines="2"
+            app:layout_constraintBottom_toBottomOf="@id/tvVariantName"
+            android:layout_marginEnd="@dimen/material_size_8"
+            app:layout_constraintTop_toTopOf="@id/tvVariantName"
+            app:layout_constraintEnd_toStartOf="@+id/btnDelete"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

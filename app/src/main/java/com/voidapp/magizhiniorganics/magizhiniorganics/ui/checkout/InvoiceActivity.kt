@@ -553,6 +553,7 @@ class InvoiceActivity :
             val totalPrice = cartPrice - (viewModel.couponPrice ?: 0f)
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
+                viewModel.getDeliveryCharge()
                 tvTotalAmt.setTextAnimation(totalPrice.toString())
             } else {
                 tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
@@ -714,6 +715,7 @@ class InvoiceActivity :
             LocationCodePosition = addressMap["LocationCodePosition"].toString().toInt(),
             city = addressMap["city"].toString()
         ).also { address ->
+            viewModel.deliveryAvailable = true
             viewModel.updateAddress(address)
         }
     }

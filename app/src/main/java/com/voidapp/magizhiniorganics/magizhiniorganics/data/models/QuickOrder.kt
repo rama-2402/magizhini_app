@@ -22,7 +22,7 @@ data class QuickOrder(
 ): Parcelable
 
 @Parcelize
-class QuickOrderTextItem (
+data class QuickOrderTextItem (
     var productName: String = "",
     var variantName: String = "",
     var quantity: Int = 1

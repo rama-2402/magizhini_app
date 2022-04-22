@@ -3,7 +3,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.adapter
 import android.content.Context
 import android.content.res.ColorStateList
 import android.net.Uri
-import android.opengl.Visibility
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,24 +23,6 @@ class QuickOrderListAdapter(
     var addImage: Boolean,
     private val onItemClickListener: QuickOrderClickListener
 ): RecyclerView.Adapter<QuickOrderListAdapter.QuickOrderViewHolder>() {
-
-//    private val diff = object: DiffUtil.ItemCallback<Uri>() {
-//        override fun areItemsTheSame(
-//            oldItem: Uri,
-//            newItem: Uri
-//        ): Boolean {
-//            return oldItem == newItem
-//        }
-//
-//        override fun areContentsTheSame(
-//            oldItem: Uri,
-//            newItem: Uri
-//        ): Boolean {
-//            return oldItem == newItem
-//        }
-//    }
-//
-//    val calcDiff = AsyncListDiffer(this, diff)
 
     inner class QuickOrderViewHolder(val binding: RvQuickorderListItemBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -132,57 +113,18 @@ interface QuickOrderClickListener {
     fun addImage()
 
     //quick order text item
-    fun addTextItem(productName: String, variantName: String, quantity: Int)
-    fun removeTextItem(productName: String, variantName: String)
-    fun updateTextItem(productName: String, variantName: String, quantity: Int)
-
-    //quick order audio recorder
-    fun startRecording()
-    fun stopRecording()
-    fun pauseRecording()
+    fun removeTextItem(position: Int)
+    fun updateTextItem(position: Int)
 }
 
 class QuickOrderTextAdapter(
     private val context: Context,
-    var quickOrderTextItems: List<QuickOrderTextItem>,
+    var quickOrderTextItems: MutableList<QuickOrderTextItem>,
     val onItemClickListener: QuickOrderClickListener
 ): RecyclerView.Adapter<QuickOrderTextAdapter.QuickOrderTextItemViewHolder>() {
 
     inner class QuickOrderTextItemViewHolder(val binding: RvQuickOrderTextBinding) :
         RecyclerView.ViewHolder(binding.root)
-
-    fun setQuickOrderData(newList: List<QuickOrderTextItem>) {
-        val diffUtil = QuickOrderTextItemDiffUtil(quickOrderTextItems, newList)
-        val diffResult = DiffUtil.calculateDiff(diffUtil)
-        quickOrderTextItems = newList as ArrayList<QuickOrderTextItem>
-        diffResult.dispatchUpdatesTo(this)
-    }
-
-    class QuickOrderTextItemDiffUtil(
-        private val oldList: List<QuickOrderTextItem>,
-        private val newList: List<QuickOrderTextItem>
-    ): DiffUtil.Callback() {
-        override fun getOldListSize(): Int {
-            return oldList.size
-        }
-
-        override fun getNewListSize(): Int {
-            return newList.size
-        }
-
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return oldList[oldItemPosition].productName == newList[newItemPosition].productName
-        }
-
-        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return when {
-                oldList[oldItemPosition].productName != newList[newItemPosition].productName -> false
-                oldList[oldItemPosition].variantName != newList[newItemPosition].variantName -> false
-                oldList[oldItemPosition].quantity != newList[newItemPosition].quantity -> false
-                else -> true
-            }
-        }
-    }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -195,27 +137,93 @@ class QuickOrderTextAdapter(
 
     override fun onBindViewHolder(holder: QuickOrderTextItemViewHolder, position: Int) {
         holder.binding.apply {
-            if (quickOrderTextItems.isEmpty()) {
-                etproductName.setText("")
-                etVariantName.setText("")
-                etQuantity.setText("1")
-            } else {
-                val textItem = quickOrderTextItems[position]
-                etproductName.setText(textItem.productName)
-                etVariantName.setText(textItem.variantName)
-                etQuantity.setText(textItem.quantity)
-                etproductName.isEnabled = false
-                etVariantName.isEnabled = false
-                etQuantity.isEnabled = false
+            val textItem = quickOrderTextItems[position]
+            tvProductName.text = textItem.productName
+            tvVariantName.text = "Type: ${textItem.variantName}"
+            tvQuantity.text = "Qty: X${textItem.quantity}"
+
+            btnDelete.setOnClickListener {
+                onItemClickListener.removeTextItem(
+                    position
+                )
+            }
+
+            clTextItem.setOnClickListener {
+                onItemClickListener.updateTextItem(
+                    position
+                )
             }
         }
     }
 
     override fun getItemCount(): Int {
-        return if (quickOrderTextItems.isEmpty()) {
-            1
-        } else {
-            quickOrderTextItems.size
+        return quickOrderTextItems.size
+    }
+
+    fun deleteTextItem(position: Int) {
+        var items: MutableList<QuickOrderTextItem>? =
+            quickOrderTextItems.map { it.copy() } as ArrayList<QuickOrderTextItem>
+        items?.let {
+            it.removeAt(position)
+            setQuickOrderData(it)
+//            this.notifyItemRemoved(position)
+            this.notifyDataSetChanged()
+        }
+        items = null
+    }
+
+    fun addTextItem(newTextItem: QuickOrderTextItem) {
+        var items: MutableList<QuickOrderTextItem>? =
+            quickOrderTextItems.map { it.copy() } as MutableList<QuickOrderTextItem>
+        items?.let {
+            it.add(newTextItem)
+            setQuickOrderData(it)
+        }
+        items = null
+    }
+
+    fun updateTextItem(position: Int, updatedItem: QuickOrderTextItem) {
+        var items: MutableList<QuickOrderTextItem>? =
+            quickOrderTextItems.map { it.copy() } as MutableList<QuickOrderTextItem>
+        items?.let {
+            it[position] = updatedItem
+            setQuickOrderData(it)
+            this.notifyItemChanged(position)
+        }
+        items = null
+    }
+
+    fun setQuickOrderData(newList: MutableList<QuickOrderTextItem>) {
+        val diffUtil = QuickOrderTextItemDiffUtil(quickOrderTextItems, newList)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
+        quickOrderTextItems = newList as ArrayList<QuickOrderTextItem>
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    class QuickOrderTextItemDiffUtil(
+        private val oldList: List<QuickOrderTextItem>,
+        private val newList: List<QuickOrderTextItem>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return when {
+                oldList[oldItemPosition].productName != newList[newItemPosition].productName -> false
+                oldList[oldItemPosition].variantName != newList[newItemPosition].variantName -> false
+                oldList[oldItemPosition].quantity != newList[newItemPosition].quantity -> false
+                else -> true
+            }
         }
     }
 }
+

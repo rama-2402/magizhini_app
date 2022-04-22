@@ -45,6 +45,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Cart
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrder
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.QuickOrderTextItem
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityQuickOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
@@ -89,6 +90,7 @@ class QuickOrderActivity :
 
     private lateinit var cartAdapter: CartAdapter
     private lateinit var quickOrderListAdapter: QuickOrderListAdapter
+    private var quickOrderTextAdapter: QuickOrderTextAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -167,64 +169,30 @@ class QuickOrderActivity :
             ivText.setOnClickListener {
                 if (viewModel.currentQuickOrderMode == "text") {
                     showToast(this@QuickOrderActivity, "Already in Text Mode")
+                    return@setOnClickListener
                 }
-                ivText.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
-                ivImage.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                ivVoice.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                viewModel.currentQuickOrderMode = "text"
-                viewModel.orderListUri.clear()
-                viewModel.orderListUri.add(Uri.EMPTY)
-                QuickOrderTextAdapter(
-                    this@QuickOrderActivity,
-                    listOf(),
-                    this@QuickOrderActivity
-                ).let {
-                    rvOrderList.layoutManager = LinearLayoutManager(this@QuickOrderActivity)
-                    rvOrderList.adapter = it
-                }
+                setCurrentQuickOrderTypeSelection("text")
             }
             ivImage.setOnClickListener {
                 if (viewModel.currentQuickOrderMode == "image") {
                     showToast(this@QuickOrderActivity, "Already in Image Mode")
+                    return@setOnClickListener
                 }
-                ivImage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
-                ivText.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                ivVoice.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                viewModel.currentQuickOrderMode = "image"
-                viewModel.textOrderItemList.clear()
-                //TODO remove the recorded audio from storage
-                viewModel.audioFileUri = null
-                QuickOrderListAdapter(
-                    this@QuickOrderActivity,
-                    viewModel.orderListUri,
-                    listOf(),
-                    true,
-                    this@QuickOrderActivity
-                ).let {
-                    quickOrderListAdapter = it
-                    rvOrderList.layoutManager =
-                        GridLayoutManager(this@QuickOrderActivity, 3)
-                    rvOrderList.adapter = quickOrderListAdapter
-                }
-            }
+                setCurrentQuickOrderTypeSelection("image")
+           }
             ivVoice.setOnClickListener {
-                if (viewModel.currentQuickOrderMode == "voice") {
+                if (viewModel.currentQuickOrderMode == "audio") {
                     showToast(this@QuickOrderActivity, "Already in Voice Mode")
+                    return@setOnClickListener
                 }
-                ivVoice.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
-                ivImage.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                ivText.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                viewModel.currentQuickOrderMode = "voice"
-                viewModel.textOrderItemList.clear()
-                viewModel.orderListUri.clear()
-                viewModel.orderListUri.add(Uri.EMPTY)
-                QuickOrderTextAdapter(
-                    this@QuickOrderActivity,
-                    listOf(),
-                    this@QuickOrderActivity
-                ).let {
-                    rvOrderList.layoutManager = LinearLayoutManager(this@QuickOrderActivity)
-                    rvOrderList.adapter = it
+                setCurrentQuickOrderTypeSelection("audio")
+           }
+            btnAddProduct.setOnClickListener {
+                when {
+                    etproductName.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide a brief description of product name")
+                    etVariantName.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide the product type (Eg: 1Kg)")
+                    etQuantity.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide the quantity")
+                    else -> addProductToQuickOrderTextList()
                 }
             }
 //            ivNotification.setOnClickListener {
@@ -278,6 +246,116 @@ class QuickOrderActivity :
                  if (validateEntry()) {
                      showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
                  }
+            }
+        }
+    }
+
+    private fun addProductToQuickOrderTextList() {
+        viewModel.selectedTextItemPosition?.let {
+            binding.apply {
+                when {
+                    etproductName.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide a brief description of product name")
+                    etVariantName.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide the product type (Eg: 1Kg)")
+                    etQuantity.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide the quantity")
+                    else -> {
+                        viewModel.textOrderItemList[it].let { textItem ->
+                            textItem.productName = etproductName.text.toString().trim()
+                            textItem.variantName = etVariantName.text.toString().trim()
+                            textItem.quantity = etQuantity.text.toString().trim().toInt()
+
+                            quickOrderTextAdapter?.updateTextItem(it, textItem)
+
+                            viewModel.selectedTextItemPosition = null
+                            btnAddProduct.text = "Add Product"
+                        }
+                    }
+                }
+            }
+       } ?:let {
+            binding.apply {
+                QuickOrderTextItem(
+                    etproductName.text.toString().trim(),
+                    etVariantName.text.toString().trim(),
+                    etQuantity.text.toString().trim().toInt()
+                ).let { textItem ->
+                    viewModel.textOrderItemList.add(textItem)
+                    quickOrderTextAdapter?.addTextItem(textItem)
+                }
+            }
+        }
+
+        binding.apply {
+            etproductName.setText("")
+            etVariantName.setText("")
+            etQuantity.setText("")
+            etproductName.requestFocus()
+        }
+    }
+
+    private fun setCurrentQuickOrderTypeSelection(selection: String) {
+        binding.apply {
+            when(selection) {
+                "text" -> {
+                    ivText.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                    ivImage.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                    ivVoice.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                    clTextTemplate.fadInAnimation()
+                    clTextTemplate.visible()
+                    clAudioTemplate.fadOutAnimation()
+                    clAudioTemplate.remove()
+                    viewModel.currentQuickOrderMode = "text"
+                    viewModel.orderListUri.clear()
+                    viewModel.orderListUri.add(Uri.EMPTY)
+                    viewModel.audioFileUri = null
+                    QuickOrderTextAdapter(
+                       this@QuickOrderActivity,
+                        mutableListOf(),
+                        this@QuickOrderActivity
+                    ).let { adapter ->
+                        quickOrderTextAdapter = adapter
+                        rvOrderList.adapter = adapter
+                        rvOrderList.layoutManager = LinearLayoutManager(this@QuickOrderActivity)
+                    }
+                }
+                "image" -> {
+                    ivImage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                    ivText.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                    ivVoice.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                    viewModel.currentQuickOrderMode = "image"
+                    viewModel.textOrderItemList.clear()
+                    viewModel.audioFileUri = null
+                    clTextTemplate.fadOutAnimation()
+                    clTextTemplate.remove()
+                    clAudioTemplate.fadOutAnimation()
+                    clAudioTemplate.remove()
+                    QuickOrderListAdapter(
+                        this@QuickOrderActivity,
+                        viewModel.orderListUri,
+                        listOf(),
+                        true,
+                        this@QuickOrderActivity
+                    ).let {
+                        quickOrderListAdapter = it
+                        rvOrderList.layoutManager =
+                            GridLayoutManager(this@QuickOrderActivity, 3)
+                        rvOrderList.adapter = quickOrderListAdapter
+                    }
+                }
+                else -> {
+                    ivVoice.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                    ivImage.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                    ivText.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                    viewModel.currentQuickOrderMode = "audio"
+                    viewModel.textOrderItemList.clear()
+                    viewModel.orderListUri.clear()
+                    viewModel.orderListUri.add(Uri.EMPTY)
+                    clTextTemplate.fadOutAnimation()
+                    clTextTemplate.remove()
+                    rvOrderList.fadOutAnimation()
+                    rvOrderList.remove()
+                    clAudioTemplate.fadInAnimation()
+                    clAudioTemplate.visible()
+                }
             }
         }
     }
@@ -1035,28 +1113,19 @@ class QuickOrderActivity :
         }
     }
 
-    override fun addTextItem(productName: String, variantName: String, quantity: Int) {
-
+   override fun removeTextItem(position: Int) {
+       viewModel.textOrderItemList.removeAt(position)
+       quickOrderTextAdapter?.deleteTextItem(position)
     }
 
-    override fun removeTextItem(productName: String, variantName: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun updateTextItem(productName: String, variantName: String, quantity: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override fun startRecording() {
-        TODO("Not yet implemented")
-    }
-
-    override fun stopRecording() {
-        TODO("Not yet implemented")
-    }
-
-    override fun pauseRecording() {
-        TODO("Not yet implemented")
+    override fun updateTextItem(position: Int) {
+        viewModel.selectedTextItemPosition = position
+        binding.apply {
+            etproductName.setText(viewModel.textOrderItemList[position].productName)
+            etVariantName.setText(viewModel.textOrderItemList[position].variantName)
+            etQuantity.setText(viewModel.textOrderItemList[position].quantity.toString())
+            btnAddProduct.text = "Update Product"
+        }
     }
 
     //from address dialog

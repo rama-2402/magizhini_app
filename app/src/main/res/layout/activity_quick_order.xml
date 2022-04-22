@@ -104,7 +104,6 @@
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clAddress"
             android:layout_width="match_parent"
@@ -116,8 +115,8 @@
             android:background="@drawable/shape_round_rectangle_8"
             android:elevation="@dimen/material_size_8"
             android:layout_marginBottom="8dp"
-            android:visibility="invisible"
             app:layout_constraintBottom_toTopOf="@id/clBody"
+            android:visibility="invisible"
             app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" >
@@ -189,7 +188,6 @@
             android:paddingTop="@dimen/material_size_8"
             android:elevation="8dp"
             android:layout_marginTop="4dp"
-            android:visibility="invisible"
             android:background="@drawable/shape_round_rectangle_16"
             app:layout_constraintTop_toBottomOf="@id/clAddress"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -210,6 +208,149 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/clTextTemplate"
+                        android:layout_width="match_parent"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/material_size_8"
+                        >
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/etlProductName"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            android:hint="Brief Description of product name"
+                            app:boxStrokeColor="@color/matteRed"
+                            app:flow_wrapMode="aligned"
+                            app:endIconMode="clear_text"
+                            android:textColorHint="@color/grey"
+                            android:isScrollContainer="true"
+                            app:hintTextColor="@color/matteRed"
+                            android:scrollbarStyle="insideInset"
+                            android:scrollbars="vertical"
+                            android:overScrollMode="always"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etproductName"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:cursorVisible="true"
+                                android:inputType="textMultiLine"
+                                android:gravity="top"
+                                android:maxLength="300"
+                                android:isScrollContainer="true"
+                                android:overScrollMode="always"
+                                android:scrollbars="vertical"
+                                android:textColorHint="@color/green_base"
+                                android:textColor="@color/green_base"
+                                android:textCursorDrawable="@null" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/etlVariantName"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintEnd_toStartOf="@id/etlQuantity"
+                            android:hint="Type (Eg: 1kg)"
+                            app:boxStrokeColor="@color/matteRed"
+                            app:flow_wrapMode="aligned"
+                            app:endIconMode="clear_text"
+                            android:textColorHint="@color/grey"
+                            android:layout_marginTop="@dimen/material_size_8"
+                            android:isScrollContainer="true"
+                            app:hintTextColor="@color/matteRed"
+                            android:scrollbarStyle="insideInset"
+                            android:scrollbars="vertical"
+                            android:overScrollMode="always"
+                            app:layout_constraintTop_toBottomOf="@id/etlProductName"
+                            app:layout_constraintStart_toStartOf="parent">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etVariantName"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:cursorVisible="true"
+                                android:inputType="textMultiLine"
+                                android:gravity="top"
+                                android:maxLength="300"
+                                android:isScrollContainer="true"
+                                android:overScrollMode="always"
+                                android:scrollbars="vertical"
+                                android:textColorHint="@color/green_base"
+                                android:textColor="@color/green_base"
+                                android:textCursorDrawable="@null" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/etlQuantity"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
+                            app:layout_constraintWidth_percent=".3"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            android:hint="Qty (Eg: 2)"
+                            app:boxStrokeColor="@color/matteRed"
+                            app:flow_wrapMode="aligned"
+                            app:endIconMode="clear_text"
+                            android:textColorHint="@color/grey"
+                            android:layout_marginTop="@dimen/material_size_8"
+                            android:isScrollContainer="true"
+                            app:hintTextColor="@color/matteRed"
+                            android:scrollbarStyle="insideInset"
+                            android:scrollbars="vertical"
+                            android:overScrollMode="always"
+                            app:layout_constraintTop_toBottomOf="@id/etlProductName"
+                            app:layout_constraintStart_toEndOf="@id/etlVariantName">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etQuantity"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:cursorVisible="true"
+                                android:inputType="number"
+                                android:gravity="top"
+                                android:maxLength="2"
+                                android:isScrollContainer="true"
+                                android:overScrollMode="always"
+                                android:scrollbars="vertical"
+                                android:textColorHint="@color/green_base"
+                                android:textColor="@color/green_base"
+                                android:textCursorDrawable="@null" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <TextView
+                            android:id="@+id/btnAddProduct"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="ADD ITEM"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="@color/white"
+                            android:gravity="center"
+                            android:paddingTop="@dimen/material_size_8"
+                            android:paddingBottom="@dimen/material_size_8"
+                            app:layout_constraintTop_toBottomOf="@id/etlVariantName"
+                            android:layout_marginTop="@dimen/material_size_12"
+                            android:backgroundTint="@color/matteRed"
+                            android:background="@drawable/shape_round_rectangle_8"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/clAudioTemplate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        >
+
+                        
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvOrderList"

@@ -37,7 +37,8 @@ class CheckoutViewModel(
 
     var currentCoupon: CouponEntity? = null
     var couponPrice: Float? = null
-    var freeDeliveryLimit: Float = 0f
+    private var freeDeliveryLimit: Float = 0f
+    var deliveryAvailable: Boolean = true
 
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
     val clearedProductIDs: MutableList<String> = mutableListOf()
@@ -336,9 +337,19 @@ class CheckoutViewModel(
     private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) = withContext(Dispatchers.Main){
         pinCodesEntity?.let {
             if(!pinCodesEntity.deliveryAvailable) {
+                if (deliveryAvailable) {
+                    _deliveryNotAvailableDialog.value = System.currentTimeMillis()
+                }
+                deliveryAvailable = false
+            } else {
+                deliveryAvailable = true
+            }
+        } ?:let {
+            if (deliveryAvailable) {
                 _deliveryNotAvailableDialog.value = System.currentTimeMillis()
             }
-        } ?:let { _deliveryNotAvailableDialog.value = System.currentTimeMillis() }
+            deliveryAvailable = false
+        }
     }
 
 //    fun placeOrder(order: Order) = viewModelScope.launch(Dispatchers.IO) {
@@ -361,29 +372,29 @@ class CheckoutViewModel(
 //        _status.value = fbRepository.placeOrder(order)
 //    }
 
-    fun limitedItemsUpdater(cartEntity: List<CartEntity>) = viewModelScope.launch {
-        try {
-            val limitedCartItems = mutableListOf<CartEntity>()
-            for (cartItem in cartEntity) {
-                withContext(Dispatchers.IO) {
-                    val entity = dbRepository.getProductWithIdForUpdate(cartItem.productId)
-                    entity?.let { product ->
-                        if (product.variants[cartItem.variantIndex].status == Constants.LIMITED) {
-                            limitedCartItems.add(cartItem)
-                        }
-                    }
-                }
-            }
-            _status.value = fbRepository.limitedItemsUpdater(limitedCartItems)
-        } catch (e: Exception) {
-            e.message?.let {
-                fbRepository.logCrash("checkout: getting Items from db for limited item validation",
-                    it
-                )
-            }
-            NetworkResult.Failed("ootItems", "Failed to validated Purchases. Please try again later")
-        }
-    }
+//    fun limitedItemsUpdater(cartEntity: List<CartEntity>) = viewModelScope.launch {
+//        try {
+//            val limitedCartItems = mutableListOf<CartEntity>()
+//            for (cartItem in cartEntity) {
+//                withContext(Dispatchers.IO) {
+//                    val entity = dbRepository.getProductWithIdForUpdate(cartItem.productId)
+//                    entity?.let { product ->
+//                        if (product.variants[cartItem.variantIndex].status == Constants.LIMITED) {
+//                            limitedCartItems.add(cartItem)
+//                        }
+//                    }
+//                }
+//            }
+//            _status.value = fbRepository.limitedItemsUpdater(limitedCartItems)
+//        } catch (e: Exception) {
+//            e.message?.let {
+//                fbRepository.logCrash("checkout: getting Items from db for limited item validation",
+//                    it
+//                )
+//            }
+//            NetworkResult.Failed("ootItems", "Failed to validated Purchases. Please try again later")
+//        }
+//    }
 
     fun proceedForWalletPayment(
         orderDetailsMap: HashMap<String, Any>

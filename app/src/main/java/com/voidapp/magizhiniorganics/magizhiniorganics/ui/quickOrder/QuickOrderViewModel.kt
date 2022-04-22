@@ -40,6 +40,8 @@ class QuickOrderViewModel(
     val textOrderItemList: MutableList<QuickOrderTextItem> = mutableListOf()
     var audioFileUri: Uri? = null
 
+    var selectedTextItemPosition: Int? = null
+
     var userProfile: UserProfileEntity? = null
     var addressContainer: Address? = null
     var quickOrder: QuickOrder? = null
