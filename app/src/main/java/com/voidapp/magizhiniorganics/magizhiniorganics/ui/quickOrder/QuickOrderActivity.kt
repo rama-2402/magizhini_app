@@ -4,12 +4,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.media.MediaPlayer
+import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -68,14 +72,15 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
+import java.io.File
+
 
 class QuickOrderActivity :
     BaseActivity(),
     KodeinAware,
     PaymentResultListener,
     QuickOrderClickListener,
-    AddressDialogClickListener
-{
+    AddressDialogClickListener {
     override val kodein: Kodein by kodein()
 
     private lateinit var binding: ActivityQuickOrderBinding
@@ -111,7 +116,8 @@ class QuickOrderActivity :
     }
 
     private fun initData() {
-        binding.ivImage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
+        binding.ivImage.imageTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
         lifecycleScope.launchWhenCreated {
             viewModel.userProfile = UserProfileEntity()
             viewModel.addressContainer = Address()
@@ -124,10 +130,11 @@ class QuickOrderActivity :
             /*
             * This is a keyboard listener that changes visibility of buttons when typing for coupon or description
             * */
-            KeyboardVisibilityEvent.setEventListener(this@QuickOrderActivity
+            KeyboardVisibilityEvent.setEventListener(
+                this@QuickOrderActivity
             ) { isOpen ->
                 if (!isOpen) {
-                    viewModel.quickOrder?:let {
+                    viewModel.quickOrder ?: let {
                         binding.btnGetEstimate.visible()
                         binding.btnPlaceOrder.visible()
                     }
@@ -153,7 +160,10 @@ class QuickOrderActivity :
                     if (KeyboardVisibilityEvent.isKeyboardVisible(this@QuickOrderActivity)) {
                         this@QuickOrderActivity.hideKeyboard()
                     }
-                    showErrorSnackBar("Coupon can be applied only after receiving Estimate Data", true)
+                    showErrorSnackBar(
+                        "Coupon can be applied only after receiving Estimate Data",
+                        true
+                    )
                 } else {
                     /*
                     * if couponAppliedPrice is not null that mean coupon is already applied. So it has to be removed
@@ -170,31 +180,110 @@ class QuickOrderActivity :
                 if (viewModel.currentQuickOrderMode == "text") {
                     showToast(this@QuickOrderActivity, "Already in Text Mode")
                     return@setOnClickListener
+                } else {
+                    showExitSheet(this@QuickOrderActivity, "Quick Order Text Mode will be activated and all current changes will be discarded. Click PROCEED to continue", "text")
                 }
-                setCurrentQuickOrderTypeSelection("text")
+//                setCurrentQuickOrderTypeSelection("text")
             }
             ivImage.setOnClickListener {
                 if (viewModel.currentQuickOrderMode == "image") {
                     showToast(this@QuickOrderActivity, "Already in Image Mode")
                     return@setOnClickListener
+                } else {
+                    showExitSheet(this@QuickOrderActivity, "Quick Order Image Mode will be activated and all current changes will be discarded. Click PROCEED to continue", "image")
                 }
-                setCurrentQuickOrderTypeSelection("image")
-           }
+//                setCurrentQuickOrderTypeSelection("image")
+            }
             ivVoice.setOnClickListener {
                 if (viewModel.currentQuickOrderMode == "audio") {
                     showToast(this@QuickOrderActivity, "Already in Voice Mode")
                     return@setOnClickListener
+                } else {
+                    showExitSheet(this@QuickOrderActivity, "Quick Order Voice Mode will be activated and all current changes will be discarded. Click PROCEED to continue", "audio")
                 }
-                setCurrentQuickOrderTypeSelection("audio")
-           }
+//                setCurrentQuickOrderTypeSelection("audio")
+            }
             btnAddProduct.setOnClickListener {
                 when {
-                    etproductName.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide a brief description of product name")
-                    etVariantName.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide the product type (Eg: 1Kg)")
-                    etQuantity.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide the quantity")
+                    etproductName.text.toString().isNullOrEmpty() -> showToast(
+                        this@QuickOrderActivity,
+                        "Please provide a brief description of product name"
+                    )
+                    etVariantName.text.toString().isNullOrEmpty() -> showToast(
+                        this@QuickOrderActivity,
+                        "Please provide the product type (Eg: 1Kg)"
+                    )
+                    etQuantity.text.toString().isNullOrEmpty() -> showToast(
+                        this@QuickOrderActivity,
+                        "Please provide the quantity"
+                    )
                     else -> addProductToQuickOrderTextList()
                 }
             }
+            ivRecord.setOnClickListener {
+                if (viewModel.isPlaying) {
+                    stopRecording()
+                } else {
+                    PermissionsUtil.checkAudioPermission(this@QuickOrderActivity)
+                }
+            }
+            ivDeleteRecording.setOnClickListener {
+                viewModel.apply {
+                    player?.stop()
+                    recorder = null
+                    player = null
+                    isPlaying = false
+                    lastProgress = 0
+                    tvRecordTime.base = SystemClock.elapsedRealtime()
+                    tvRecordTime.stop()
+                    fileName?.let { path ->
+                        File(path).let { file ->
+                            if (file.exists()) {
+                                file.delete()
+                                fileName = ""
+                            }
+                        }
+                    }
+                    updateAudioLayout(true)
+                }
+            }
+            ivPlayPause.setOnClickListener {
+                when {
+                    (!viewModel.isPlaying && viewModel.pausedTime == 0L) -> {
+                        MediaPlayer().let { player ->
+                            viewModel.player = player
+                            viewModel.player?.setDataSource(viewModel.fileName)
+                            viewModel.player?.prepare()
+                            viewModel.player?.start()
+                        }
+                        updatePlayerLayout("play")
+                    }
+                    (viewModel.isPlaying) -> {
+                        updatePlayerLayout("pause")
+                    }
+                    (!viewModel.isPlaying && viewModel.pausedTime != 0L) -> {
+                        updatePlayerLayout("resume")
+                    }
+                }
+            }
+            seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    viewModel.player?.let {
+                        if (fromUser) {
+                            it.seekTo(progress)
+                            tvRecordTime.base = SystemClock.elapsedRealtime() - it.currentPosition
+                            viewModel.lastProgress = progress
+                        }
+                    }
+                }
+
+                override fun onStartTrackingTouch(p0: SeekBar?) {}
+                override fun onStopTrackingTouch(p0: SeekBar?) {}
+            })
 //            ivNotification.setOnClickListener {
 //                viewModel.quickOrder?.let {
 //                    if (it.note.isNotEmpty()) {
@@ -226,9 +315,13 @@ class QuickOrderActivity :
                 /*
                 * If there is no quick order and the uri is empty then nothing is selected
                 * */
-               if (validateEntry()) {
-                   showExitSheet(this@QuickOrderActivity, "To get Estimate price, Your List will be sent for validation and we will contact you with the price breakdown for each product and Total Order. Please click PROCEED below to start uploading order list.", "estimate")
-               }
+                if (validateEntry()) {
+                    showExitSheet(
+                        this@QuickOrderActivity,
+                        "To get Estimate price, Your List will be sent for validation and we will contact you with the price breakdown for each product and Total Order. Please click PROCEED below to start uploading order list.",
+                        "estimate"
+                    )
+                }
             }
             btnPlaceOrder.setOnClickListener {
                 /*
@@ -243,9 +336,16 @@ class QuickOrderActivity :
 //                    }
 //                    return@setOnClickListener
 //                }
-                 if (validateEntry()) {
-                     showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
-                 }
+                if (validateEntry()) {
+                    showListBottomSheet(
+                        this@QuickOrderActivity,
+                        arrayListOf<String>(
+                            "Online",
+                            "Wallet (Rs: ${viewModel.wallet?.amount})",
+                            "Cash On Delivery"
+                        )
+                    )
+                }
             }
         }
     }
@@ -254,9 +354,18 @@ class QuickOrderActivity :
         viewModel.selectedTextItemPosition?.let {
             binding.apply {
                 when {
-                    etproductName.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide a brief description of product name")
-                    etVariantName.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide the product type (Eg: 1Kg)")
-                    etQuantity.text.toString().isNullOrEmpty() -> showToast(this@QuickOrderActivity, "Please provide the quantity")
+                    etproductName.text.toString().isNullOrEmpty() -> showToast(
+                        this@QuickOrderActivity,
+                        "Please provide a brief description of product name"
+                    )
+                    etVariantName.text.toString().isNullOrEmpty() -> showToast(
+                        this@QuickOrderActivity,
+                        "Please provide the product type (Eg: 1Kg)"
+                    )
+                    etQuantity.text.toString().isNullOrEmpty() -> showToast(
+                        this@QuickOrderActivity,
+                        "Please provide the quantity"
+                    )
                     else -> {
                         viewModel.textOrderItemList[it].let { textItem ->
                             textItem.productName = etproductName.text.toString().trim()
@@ -271,7 +380,7 @@ class QuickOrderActivity :
                     }
                 }
             }
-       } ?:let {
+        } ?: let {
             binding.apply {
                 QuickOrderTextItem(
                     etproductName.text.toString().trim(),
@@ -292,13 +401,20 @@ class QuickOrderActivity :
         }
     }
 
-    private fun setCurrentQuickOrderTypeSelection(selection: String) {
+    fun setCurrentQuickOrderTypeSelection(selection: String) {
         binding.apply {
-            when(selection) {
+            when (selection) {
                 "text" -> {
-                    ivText.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                    ivText.imageTintList = ColorStateList.valueOf(
+                        ContextCompat.getColor(
+                            this@QuickOrderActivity,
+                            R.color.matteRed
+                        )
+                    )
                     ivImage.imageTintList = ColorStateList.valueOf(Color.WHITE)
                     ivVoice.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                    rvOrderList.fadInAnimation()
+                    rvOrderList.visible()
                     clTextTemplate.fadInAnimation()
                     clTextTemplate.visible()
                     clAudioTemplate.fadOutAnimation()
@@ -308,7 +424,7 @@ class QuickOrderActivity :
                     viewModel.orderListUri.add(Uri.EMPTY)
                     viewModel.audioFileUri = null
                     QuickOrderTextAdapter(
-                       this@QuickOrderActivity,
+                        this@QuickOrderActivity,
                         mutableListOf(),
                         this@QuickOrderActivity
                     ).let { adapter ->
@@ -316,14 +432,22 @@ class QuickOrderActivity :
                         rvOrderList.adapter = adapter
                         rvOrderList.layoutManager = LinearLayoutManager(this@QuickOrderActivity)
                     }
+                    ivDeleteRecording.performClick()
                 }
                 "image" -> {
-                    ivImage.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                    ivImage.imageTintList = ColorStateList.valueOf(
+                        ContextCompat.getColor(
+                            this@QuickOrderActivity,
+                            R.color.matteRed
+                        )
+                    )
                     ivText.imageTintList = ColorStateList.valueOf(Color.WHITE)
                     ivVoice.imageTintList = ColorStateList.valueOf(Color.WHITE)
                     viewModel.currentQuickOrderMode = "image"
                     viewModel.textOrderItemList.clear()
                     viewModel.audioFileUri = null
+                    rvOrderList.fadInAnimation()
+                    rvOrderList.visible()
                     clTextTemplate.fadOutAnimation()
                     clTextTemplate.remove()
                     clAudioTemplate.fadOutAnimation()
@@ -340,9 +464,15 @@ class QuickOrderActivity :
                             GridLayoutManager(this@QuickOrderActivity, 3)
                         rvOrderList.adapter = quickOrderListAdapter
                     }
+                    ivDeleteRecording.performClick()
                 }
                 else -> {
-                    ivVoice.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@QuickOrderActivity, R.color.matteRed))
+                    ivVoice.imageTintList = ColorStateList.valueOf(
+                        ContextCompat.getColor(
+                            this@QuickOrderActivity,
+                            R.color.matteRed
+                        )
+                    )
                     ivImage.imageTintList = ColorStateList.valueOf(Color.WHITE)
                     ivText.imageTintList = ColorStateList.valueOf(Color.WHITE)
                     viewModel.currentQuickOrderMode = "audio"
@@ -355,6 +485,7 @@ class QuickOrderActivity :
                     rvOrderList.remove()
                     clAudioTemplate.fadInAnimation()
                     clAudioTemplate.visible()
+                    updateAudioLayout(true)
                 }
             }
         }
@@ -365,7 +496,7 @@ class QuickOrderActivity :
             CustomAlertDialog(this).show()
         }
         viewModel.uiEvent.observe(this) { event ->
-            when(event) {
+            when (event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)
                 is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
                 is UIEvent.ProgressBar -> {
@@ -380,6 +511,7 @@ class QuickOrderActivity :
             }
             viewModel.setEmptyUiEvent()
         }
+
         viewModel.uiUpdate.observe(this@QuickOrderActivity) { event ->
             when (event) {
                 is QuickOrderViewModel.UiUpdate.WalletData -> {
@@ -402,7 +534,7 @@ class QuickOrderActivity :
                             showExitSheet(
                                 this@QuickOrderActivity,
                                 "We have received your order. Once we verify all the product in the list, We will add all the products to your cart. You can track the progress from Purchase History",
-                            "close"
+                                "close"
                             )
                         }
                     }
@@ -425,7 +557,7 @@ class QuickOrderActivity :
                         this,
                         "Server Error! Failed to place order. If you have already paid or money is deducted from wallet, Please contact customer support we will verify the transaction and refund the amount. Click CUSTOMER SUPPORT to open customer support",
                         "cs"
-                        )
+                    )
                 }
                 is QuickOrderViewModel.UiUpdate.BeginningUpload -> {
                     showLoadStatusDialog(
@@ -476,9 +608,9 @@ class QuickOrderActivity :
                     * by using the delete icon in the expanded cart bottomsheet
                     * */
                     event.data?.let {
-                        when(event.data) {
+                        when (event.data) {
                             "order" -> updateLoadStatusDialogText("placingOrder", event.message)
-                            "success" -> lifecycleScope.launch{
+                            "success" -> lifecycleScope.launch {
                                 updateLoadStatusDialogText(
                                     "success",
                                     event.message
@@ -502,7 +634,7 @@ class QuickOrderActivity :
                     showLoadStatusDialog(
                         "",
                         "Validating Transaction...",
-                    "purchaseValidation"
+                        "purchaseValidation"
                     )
                 }
                 is QuickOrderViewModel.UiUpdate.AddressUpdate -> {
@@ -521,15 +653,25 @@ class QuickOrderActivity :
                         event.data?.let {
                             //if data is not null there is estimate request available to be displayed
                             populateEstimateDetails(it)
-                        } ?:let {
+                        } ?: let {
                             /*
                             * since null no previous request is available and we do the empty page animation
                             * we hide the cart bottom sheet
                             */
                             binding.clBody.visible()
-                            binding.clBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
+                            binding.clBody.startAnimation(
+                                AnimationUtils.loadAnimation(
+                                    this@QuickOrderActivity,
+                                    R.anim.slide_up
+                                )
+                            )
                             binding.clAddress.visible()
-                            binding.clAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
+                            binding.clAddress.startAnimation(
+                                AnimationUtils.loadAnimation(
+                                    this@QuickOrderActivity,
+                                    R.anim.slide_in_right_bounce
+                                )
+                            )
                             setCartBottom(null)
                             cartBottomSheet.isHideable = true
                             cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
@@ -582,7 +724,7 @@ class QuickOrderActivity :
     }
 
     private fun validateEntry(): Boolean {
-        return when(viewModel.currentQuickOrderMode) {
+        return when (viewModel.currentQuickOrderMode) {
             "image" -> {
                 if (viewModel.orderListUri.isNotEmpty() && viewModel.orderListUri[0] == Uri.EMPTY) {
                     showErrorSnackBar(
@@ -690,10 +832,12 @@ class QuickOrderActivity :
         cartBottomSheet.isHideable = false
 
         cartEntity?.let { cart ->
-            cartBottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            cartBottomSheet.addBottomSheetCallback(object :
+                BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     updateCheckoutText()
                 }
+
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {
                 }
             })
@@ -708,7 +852,11 @@ class QuickOrderActivity :
                 if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                     cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
                     if (cart.isNotEmpty() && checkoutText.text != "PURCHASE HISTORY") {
-                        showExitSheet(this, "Do you wish to delete and Create a New Order", "delete")
+                        showExitSheet(
+                            this,
+                            "Do you wish to delete and Create a New Order",
+                            "delete"
+                        )
                     }
                 } else {
                     if (!NetworkHelper.isOnline(this@QuickOrderActivity)) {
@@ -735,7 +883,14 @@ class QuickOrderActivity :
                             showErrorSnackBar("Estimate not yet available. Please wait", true)
                             return@setOnClickListener
                         }
-                        else -> showListBottomSheet(this@QuickOrderActivity, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
+                        else -> showListBottomSheet(
+                            this@QuickOrderActivity,
+                            arrayListOf<String>(
+                                "Online",
+                                "Wallet (Rs: ${viewModel.wallet?.amount})",
+                                "Cash On Delivery"
+                            )
+                        )
 
                     }
                 } else {
@@ -746,7 +901,7 @@ class QuickOrderActivity :
     }
 
     private fun setBottomSheetIcon(content: String) {
-        val icon =  when(content) {
+        val icon = when (content) {
             "coupon" -> R.drawable.ic_coupon
             "delete" -> R.drawable.ic_delete
             "wallet" -> R.drawable.ic_wallet
@@ -764,7 +919,7 @@ class QuickOrderActivity :
     }
 
     private fun updateCheckoutText() {
-        when(cartBottomSheet.state) {
+        when (cartBottomSheet.state) {
             BottomSheetBehavior.STATE_COLLAPSED -> {
                 if (viewModel.quickOrder?.orderPlaced == true) {
                     checkoutText.text = "PURCHASE HISTORY"
@@ -794,6 +949,147 @@ class QuickOrderActivity :
     private fun updateCartBadge() {
         viewModel.quickOrder?.let {
             cartBtn.badgeValue = viewModel.getCartItemsQuantity(it.cart)
+        }
+    }
+
+    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
+        binding.apply {
+            if (isCouponApplied) {
+                etCoupon.disable()
+                btnApplyCoupon.text = "Remove"
+                btnApplyCoupon.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        baseContext,
+                        R.color.matteRed
+                    )
+                )
+            } else {
+                viewModel.couponAppliedPrice = null
+                viewModel.appliedCoupon = null
+                etCoupon.enable()
+                etCoupon.setText("")
+                btnApplyCoupon.text = "Apply"
+                btnApplyCoupon.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        baseContext,
+                        R.color.green_base
+                    )
+                )
+            }
+        }
+    }
+
+    private fun updateAudioLayout(newRecord: Boolean) {
+        binding.apply {
+            if (newRecord) {
+                ivRecord.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this@QuickOrderActivity,
+                        R.drawable.ic_voice
+                    )
+                )
+                ivPlayPause.fadOutAnimation(200)
+                ivPlayPause.remove()
+                seekBar.fadOutAnimation(200)
+                seekBar.remove()
+                ivRecord.fadInAnimation(300)
+                ivRecord.visible()
+                ivDeleteRecording.fadOutAnimation(300)
+                ivDeleteRecording.remove()
+            } else {
+                ivPlayPause.fadInAnimation(300)
+                ivPlayPause.visible()
+                seekBar.fadInAnimation(300)
+                seekBar.visible()
+                ivRecord.fadOutAnimation(200)
+                ivRecord.remove()
+                ivDeleteRecording.fadInAnimation(300)
+                ivDeleteRecording.visible()
+            }
+        }
+    }
+
+    private fun updatePlayerLayout(playerState: String) {
+        binding.apply {
+            when (playerState) {
+                "play" -> {
+                    viewModel.player?.let {
+                        it.seekTo(viewModel.lastProgress)
+                        ivPlayPause.setImageDrawable(
+                            ContextCompat.getDrawable(
+                                this@QuickOrderActivity,
+                                R.drawable.ic_pause
+                            )
+                        )
+                        seekBar.progress = viewModel.lastProgress
+                        seekBar.max = it.duration
+                        tvRecordTime.base = SystemClock.elapsedRealtime()
+                        tvRecordTime.start()
+                        viewModel.isPlaying = true
+                        it.setOnCompletionListener {
+                            updatePlayerLayout("stop")
+                        }
+                        seekBarUpdate()
+                    }
+                }
+                "resume" -> {
+                    viewModel.player?.let {
+                        it.start()
+                        it.seekTo(viewModel.lastProgress)
+                        ivPlayPause.setImageDrawable(
+                            ContextCompat.getDrawable(
+                                this@QuickOrderActivity,
+                                R.drawable.ic_pause
+                            )
+                        )
+                        seekBar.progress = viewModel.lastProgress
+                        tvRecordTime.base = SystemClock.elapsedRealtime() + viewModel.pausedTime
+                        tvRecordTime.start()
+                        viewModel.pausedTime = 0
+                        viewModel.isPlaying = true
+                        seekBarUpdate().start()
+                    }
+                }
+                "pause" -> {
+                    viewModel.player?.pause()
+                    ivPlayPause.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            this@QuickOrderActivity,
+                            R.drawable.ic_play
+                        )
+                    )
+                    viewModel.isPlaying = false
+                    viewModel.pausedTime = tvRecordTime.base - SystemClock.elapsedRealtime()
+                    tvRecordTime.stop()
+                    seekBarUpdate().cancel()
+                }
+                "stop" -> {
+                    ivPlayPause.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            this@QuickOrderActivity,
+                            R.drawable.ic_play
+                        )
+                    )
+                    viewModel.isPlaying = false
+                    tvRecordTime.stop()
+                    tvRecordTime.base = SystemClock.elapsedRealtime()
+                    viewModel.lastProgress = 0
+                    seekBar.progress = viewModel.lastProgress
+                    viewModel.player?.seekTo(viewModel.lastProgress)
+                    seekBarUpdate().cancel()
+                }
+            }
+        }
+    }
+
+    private fun seekBarUpdate() = lifecycleScope.launch {
+        while (true) {
+            viewModel.player?.let {
+                val currentPosition = it.currentPosition
+                viewModel.lastProgress = currentPosition
+                binding.seekBar.progress = currentPosition
+            }
+            delay(1000)
         }
     }
 
@@ -828,9 +1124,19 @@ class QuickOrderActivity :
             setCartBottom(quickOrder.cart)
             updateCartBadge()
             clBody.visible()
-            clBody.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_up))
+            clBody.startAnimation(
+                AnimationUtils.loadAnimation(
+                    this@QuickOrderActivity,
+                    R.anim.slide_up
+                )
+            )
             clAddress.visible()
-            clAddress.startAnimation(AnimationUtils.loadAnimation(this@QuickOrderActivity, R.anim.slide_in_right_bounce))
+            clAddress.startAnimation(
+                AnimationUtils.loadAnimation(
+                    this@QuickOrderActivity,
+                    R.anim.slide_in_right_bounce
+                )
+            )
             btnGetEstimate.remove()
             btnPlaceOrder.remove()
         }
@@ -852,33 +1158,6 @@ class QuickOrderActivity :
                     spDeliveryPreference.setSelection(i)
                     return
                 }
-            }
-        }
-    }
-
-    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
-        binding.apply {
-            if (isCouponApplied) {
-                etCoupon.disable()
-                btnApplyCoupon.text = "Remove"
-                btnApplyCoupon.backgroundTintList = ColorStateList.valueOf(
-                    ContextCompat.getColor(
-                        baseContext,
-                        R.color.matteRed
-                    )
-                )
-            } else {
-                viewModel.couponAppliedPrice = null
-                viewModel.appliedCoupon = null
-                etCoupon.enable()
-                etCoupon.setText("")
-                btnApplyCoupon.text = "Apply"
-                btnApplyCoupon.backgroundTintList = ColorStateList.valueOf(
-                    ContextCompat.getColor(
-                        baseContext,
-                        R.color.green_base
-                    )
-                )
             }
         }
     }
@@ -909,7 +1188,7 @@ class QuickOrderActivity :
             return
         }
         lifecycleScope.launch {
-            when(paymentMethod) {
+            when (paymentMethod) {
                 "Online" -> {
                     if (viewModel.quickOrder == null) {
                         showExitSheet(
@@ -919,12 +1198,13 @@ class QuickOrderActivity :
                         )
                         return@launch
                     }
-                    val mrp = (viewModel.couponAppliedPrice ?: viewModel.getTotalCartPrice()) + viewModel.getDeliveryCharge()
+                    val mrp = (viewModel.couponAppliedPrice
+                        ?: viewModel.getTotalCartPrice()) + viewModel.getDeliveryCharge()
                     viewModel.userProfile?.let {
                         startPayment(
                             this@QuickOrderActivity,
                             mailID = it.mailId,
-                            mrp  * 100f,
+                            mrp * 100f,
                             name = it.name,
                             userID = it.id,
                             phoneNumber = it.phNumber
@@ -996,7 +1276,7 @@ class QuickOrderActivity :
     }
 
     fun deleteQuickOrder() {
-         viewModel.deleteQuickOrder()
+        viewModel.deleteQuickOrder()
     }
 
     fun sendEstimateRequest() {
@@ -1008,9 +1288,48 @@ class QuickOrderActivity :
             }
         }
 
-        viewModel.sendGetEstimateRequest (
+        viewModel.sendGetEstimateRequest(
             tempFileUriList
         )
+    }
+
+    private fun startRecording() {
+        viewModel.fileName = "${getExternalFilesDir("/")?.absolutePath}/voice.3gp"
+        viewModel.recorder = MediaRecorder()
+        viewModel.recorder?.let {
+            it.setAudioSource(MediaRecorder.AudioSource.MIC)
+            it.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            it.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            it.setOutputFile(viewModel.fileName)
+            it.setAudioChannels(1)
+            it.prepare()
+            it.start()
+        }
+        showToast(this, "started")
+        viewModel.lastProgress = 0
+        binding.seekBar.progress = 0
+        viewModel.isPlaying = true
+        // making the imageView a stop button starting the chronometer
+        binding.tvRecordTime.base = SystemClock.elapsedRealtime()
+        binding.tvRecordTime.start()
+        binding.ivRecord.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_stop))
+    }
+
+    private fun stopRecording() {
+        try {
+            viewModel.recorder!!.stop()
+            viewModel.recorder!!.release()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        showToast(this, "stopped")
+        viewModel.recorder = null
+        viewModel.isPlaying = false
+        //showing the play button
+//        imgViewPlay.setImageResource(R.drawable.ic_play_circle)
+        binding.tvRecordTime.base = SystemClock.elapsedRealtime()
+        binding.tvRecordTime.stop()
+        updateAudioLayout(false)
     }
 
     fun moveToCustomerSupport() {
@@ -1019,13 +1338,14 @@ class QuickOrderActivity :
         }
     }
 
-    private val getAction = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val newOrderImage = result.data?.data
-        newOrderImage?.let {
-            viewModel.addNewImageUri(newOrderImage)
-            loadNewImage()
+    private val getAction =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val newOrderImage = result.data?.data
+            newOrderImage?.let {
+                viewModel.addNewImageUri(newOrderImage)
+                loadNewImage()
+            }
         }
-    }
 
     fun proceedToRequestPermission() = PermissionsUtil.requestStoragePermissions(this)
 
@@ -1053,16 +1373,35 @@ class QuickOrderActivity :
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
-            if(
-                grantResults[0] == PackageManager.PERMISSION_GRANTED
-            ) {
-                showToast(this, "Storage Permission Granted")
-                getAction.launch(pickImageIntent)
-            } else {
-                showToast(this, "Storage Permission Denied")
-                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
+        when (requestCode) {
+            Constants.STORAGE_PERMISSION_CODE -> {
+                if (
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    showToast(this, "Storage Permission Granted")
+                    getAction.launch(pickImageIntent)
+                } else {
+                    showToast(this, "Storage Permission Denied")
+                    showExitSheet(
+                        this,
+                        "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]",
+                        "setting"
+                    )
+                }
+            }
+            Constants.AUDIO_PERMISSION_CODE -> {
+                if (
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    startRecording()
+                } else {
+                    showToast(this, "Storage Permission Denied")
+                    showExitSheet(
+                        this,
+                        "Permission Denied to record audio. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Audio]",
+                        "setting"
+                    )
+                }
             }
         }
     }
@@ -1088,14 +1427,17 @@ class QuickOrderActivity :
     //from order list adapter
     override fun selectedListImage(position: Int, imageUri: Any, thumbnail: ShapeableImageView) {
         Intent(this, PreviewActivity::class.java).also { intent ->
-            viewModel.quickOrder?.let {
-                intent.putExtra("url", imageUri.toString())
-            }?:let {
-                intent.setData(imageUri.toString().toUri())
-            }
+            intent.putExtra("url", imageUri.toString())
+// }?:let {
+//                intent.setData(imageUri.toString().toUri())
+//            }
             intent.putExtra("contentType", "image")
             val options: ActivityOptionsCompat =
-                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, ViewCompat.getTransitionName(thumbnail)!!)
+                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    this,
+                    thumbnail,
+                    ViewCompat.getTransitionName(thumbnail)!!
+                )
             startActivity(intent, options.toBundle())
         }
     }
@@ -1109,13 +1451,17 @@ class QuickOrderActivity :
         if (PermissionsUtil.hasStoragePermission(this)) {
             getAction.launch(pickImageIntent)
         } else {
-            showExitSheet(this, "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+            showExitSheet(
+                this,
+                "The App Needs Storage Permission to access profile picture from Gallery. \n\n Please provide ALLOW in the following Storage Permissions",
+                "permission"
+            )
         }
     }
 
-   override fun removeTextItem(position: Int) {
-       viewModel.textOrderItemList.removeAt(position)
-       quickOrderTextAdapter?.deleteTextItem(position)
+    override fun removeTextItem(position: Int) {
+        viewModel.textOrderItemList.removeAt(position)
+        quickOrderTextAdapter?.deleteTextItem(position)
     }
 
     override fun updateTextItem(position: Int) {

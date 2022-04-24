@@ -71,4 +71,14 @@ object PermissionsUtil {
         )
     }
 
+    fun checkAudioPermission(activity: Activity) {
+        ActivityCompat.requestPermissions(
+            activity,
+            arrayOf(
+                Manifest.permission.RECORD_AUDIO
+            ),
+            Constants.AUDIO_PERMISSION_CODE
+        )
+    }
+
 }

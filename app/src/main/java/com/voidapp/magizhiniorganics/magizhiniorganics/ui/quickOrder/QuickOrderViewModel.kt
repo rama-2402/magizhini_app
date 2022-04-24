@@ -1,5 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.quickOrder
 
+import android.media.MediaPlayer
+import android.media.MediaRecorder
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -31,7 +33,7 @@ class QuickOrderViewModel(
     private val fbRepository: FirestoreRepository,
     private val dbRepository: DatabaseRepository,
     private val quickOrderUseCase: QuickOrderUseCase
-): ViewModel() {
+) : ViewModel() {
 
     var currentQuickOrderMode = "image"
 
@@ -41,6 +43,16 @@ class QuickOrderViewModel(
     var audioFileUri: Uri? = null
 
     var selectedTextItemPosition: Int? = null
+
+    var recorder: MediaRecorder? = null
+    var player: MediaPlayer? = null
+    var fileName: String? = null
+    var lastProgress = 0
+    var pausedTime: Long = 0
+
+    //    val mHandler = Handler()
+    val RECORD_AUDIO_REQUEST_CODE = 101
+    var isPlaying = false
 
     var userProfile: UserProfileEntity? = null
     var addressContainer: Address? = null
@@ -69,9 +81,9 @@ class QuickOrderViewModel(
     }
 
     fun addNewImageUri(data: Uri) {
-      if (orderListUri[0] == Uri.EMPTY) {
-          orderListUri.removeAt(0)
-      }
+        if (orderListUri[0] == Uri.EMPTY) {
+            orderListUri.removeAt(0)
+        }
         orderListUri.add(data)
     }
 
@@ -116,7 +128,8 @@ class QuickOrderViewModel(
                     localUpdate.await()
                     cloudUpdate.await()
                     withContext(Dispatchers.Main) {
-                        _uiUpdate.value = UiUpdate.AddressUpdate("update", userProfile!!.address[0], true)
+                        _uiUpdate.value =
+                            UiUpdate.AddressUpdate("update", userProfile!!.address[0], true)
                     }
                     getDeliveryCharge()
                 }
@@ -137,7 +150,7 @@ class QuickOrderViewModel(
     private fun checkForPreviousEstimate() = viewModelScope.launch {
         val result = QuickOrderUseCase(fbRepository)
             .checkForPreviousEstimate(userID = userProfile!!.id)
-        when(result) {
+        when (result) {
             is NetworkResult.Success -> {
                 /*
                 * If there is quick order data available then we pass it to populate it's data
@@ -156,7 +169,7 @@ class QuickOrderViewModel(
                         //if no order placed then we hide the progressbar immediately
                         _uiEvent.value = UIEvent.ProgressBar(false)
                     }
-                } ?:let {
+                } ?: let {
                     _uiUpdate.value =
                         UiUpdate.EstimateData("", null, true)
                 }
@@ -171,17 +184,18 @@ class QuickOrderViewModel(
         }
     }
 
-    private fun updateAddressToOrderAddress(orderID: String) = viewModelScope.launch(Dispatchers.IO) {
-        dbRepository.getOrderByID(orderID)?.let { order ->
-            withContext(Dispatchers.Main) {
-                _uiUpdate.value =
-                    UiUpdate.PopulateOrderDetails(order)
+    private fun updateAddressToOrderAddress(orderID: String) =
+        viewModelScope.launch(Dispatchers.IO) {
+            dbRepository.getOrderByID(orderID)?.let { order ->
+                withContext(Dispatchers.Main) {
+                    _uiUpdate.value =
+                        UiUpdate.PopulateOrderDetails(order)
+                }
             }
         }
-    }
 
     private fun getWallet(userID: String) = viewModelScope.launch {
-        when(val result = fbRepository.getWallet(userID)) {
+        when (val result = fbRepository.getWallet(userID)) {
             is NetworkResult.Success -> {
                 _uiEvent.value = UIEvent.ProgressBar(false)
                 wallet = result.data as Wallet
@@ -195,39 +209,48 @@ class QuickOrderViewModel(
     }
 
     fun getTotalCartPrice(): Float {
-            var cartPrice: Float = 0f
-            quickOrder?.let {
-                for (item in it.cart) {
-                    cartPrice += (item.price * item.quantity)
-                }
+        var cartPrice: Float = 0f
+        quickOrder?.let {
+            for (item in it.cart) {
+                cartPrice += (item.price * item.quantity)
             }
-            return cartPrice
         }
+        return cartPrice
+    }
 
-    suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
-        return@withContext userProfile?.let {
-            dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
-                if (pinCodes.isNullOrEmpty()) {
-                    deliveryAvailability(null)
-                    30f
+    suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO) {
+        try {
+            return@withContext userProfile?.let {
+                if (it.address.isNotEmpty()) {
+                    dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
+                        if (pinCodes.isNullOrEmpty()) {
+                            deliveryAvailability(null)
+                            30f
+                        } else {
+                            deliveryAvailability(pinCodes[0])
+                            pinCodes[0].deliveryCharge.toFloat()
+                        }
+                    } ?: let {
+                        deliveryAvailability(null)
+                        30f
+                    }
                 } else {
-                    deliveryAvailability(pinCodes[0])
-                    pinCodes[0].deliveryCharge.toFloat()
+                    30f
                 }
-            } ?:let {
-                deliveryAvailability(null)
-                30f
-            }
-        } ?: 30f
+            } ?: 30f
+        } catch (e: IOException) {
+            return@withContext 30f
+        }
     }
 
-    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) = withContext(Dispatchers.Main){
-        pinCodesEntity?.let {
-            if(!pinCodesEntity.deliveryAvailable) {
-                _deliveryNotAvailableDialog.value = System.currentTimeMillis()
-            }
-        } ?:let { _deliveryNotAvailableDialog.value = System.currentTimeMillis() }
-    }
+    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) =
+        withContext(Dispatchers.Main) {
+            pinCodesEntity?.let {
+                if (!pinCodesEntity.deliveryAvailable) {
+                    _deliveryNotAvailableDialog.value = System.currentTimeMillis()
+                }
+            } ?: let { _deliveryNotAvailableDialog.value = System.currentTimeMillis() }
+        }
 
     fun sendGetEstimateRequest(tempFileUriList: MutableList<Uri>) {
         viewModelScope.launch {
@@ -281,7 +304,13 @@ class QuickOrderViewModel(
     private fun generateOrderID(): String {
         return userProfile?.let {
             TimeUtil().getOrderIDFormat(it.phNumber.takeLast(4))
-        } ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
+        } ?: TimeUtil().getOrderIDFormat(
+            "${TimeUtil().getMonthNumber()}${
+                TimeUtil().getDateNumber(
+                    0L
+                )
+            }"
+        )
     }
 
     fun proceedForWalletPayment(
@@ -293,7 +322,10 @@ class QuickOrderViewModel(
             wallet?.let {
                 if (mrp > it.amount) {
                     _uiEvent.value =
-                        UIEvent.SnackBar("Insufficient Wallet Balance. Please choose any other payment method", true)
+                        UIEvent.SnackBar(
+                            "Insufficient Wallet Balance. Please choose any other payment method",
+                            true
+                        )
                     return@launch
                 } else {
                     quickOrderUseCase
@@ -303,7 +335,7 @@ class QuickOrderViewModel(
                             PURCHASE,
                             cart = cartEntity as ArrayList<CartEntity>,
                             true
-                            )
+                        )
                         .collect { result ->
                             withContext(Dispatchers.Main) {
                                 when (result) {
@@ -314,16 +346,20 @@ class QuickOrderViewModel(
                                                 UiUpdate.StartingTransaction(
                                                     result.data.toString()
                                                 )
-                                            "order" -> _uiUpdate.value = UiUpdate.PlacingOrder("Placing your Order...")
-                                            "success" -> _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
+                                            "order" -> _uiUpdate.value =
+                                                UiUpdate.PlacingOrder("Placing your Order...")
+                                            "success" -> _uiUpdate.value =
+                                                UiUpdate.OrderPlaced("Order Placed Successfully...!")
                                         }
                                     }
                                     is NetworkResult.Failed -> {
                                         when (result.message) {
-                                            "wallet" -> _uiUpdate.value = UiUpdate.WalletTransactionFailed(
+                                            "wallet" -> _uiUpdate.value =
+                                                UiUpdate.WalletTransactionFailed(
                                                     result.data.toString()
                                                 )
-                                            "order" -> _uiUpdate.value = UiUpdate.OrderPlacementFailed(
+                                            "order" -> _uiUpdate.value =
+                                                UiUpdate.OrderPlacementFailed(
                                                     result.data.toString()
                                                 )
                                         }
@@ -351,16 +387,18 @@ class QuickOrderViewModel(
                     mrp,
                     true
                 ).onEach { result ->
-                    when(result) {
+                    when (result) {
                         is NetworkResult.Success -> {
                             if (result.message == "placing") {
                                 _uiUpdate.value = UiUpdate.PlacingOrder("Placing your Order...")
                             } else {
-                                _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
+                                _uiUpdate.value =
+                                    UiUpdate.OrderPlaced("Order Placed Successfully...!")
                             }
                         }
                         is NetworkResult.Failed -> {
-                            _uiUpdate.value = UiUpdate.OrderPlacementFailed("Server Error! failed to place order. Try again")
+                            _uiUpdate.value =
+                                UiUpdate.OrderPlacementFailed("Server Error! failed to place order. Try again")
                         }
                         else -> Unit
                     }
@@ -380,12 +418,13 @@ class QuickOrderViewModel(
                 cartEntity as ArrayList<CartEntity>,
                 true
             ).collect { result ->
-                when(result) {
+                when (result) {
                     is NetworkResult.Success -> {
                         when (result.message) {
                             "validation" -> _uiUpdate.value = UiUpdate.ValidatingPurchase("")
                             "placing" -> _uiUpdate.value = UiUpdate.PlacingOrder("Placing Order...")
-                            "placed" -> _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
+                            "placed" -> _uiUpdate.value =
+                                UiUpdate.OrderPlaced("Order Placed Successfully...!")
                         }
                     }
                     is NetworkResult.Failed -> {
@@ -418,7 +457,8 @@ class QuickOrderViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    _uiEvent.value = UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
+                    _uiEvent.value =
+                        UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
                 }
                 return@launch
             }
@@ -429,14 +469,14 @@ class QuickOrderViewModel(
 
     private fun couponDiscount(coupon: CouponEntity, cartPrice: Float): Float {
         var discountPrice = when (coupon.type) {
-                "percent" -> (cartPrice * coupon.amount / 100)
-                "rupees" -> coupon.amount
-                else -> 0f
-            }
+            "percent" -> (cartPrice * coupon.amount / 100)
+            "rupees" -> coupon.amount
+            else -> 0f
+        }
 
-            if (discountPrice > coupon.maxDiscount) {
-                discountPrice = coupon.maxDiscount
-            }
+        if (discountPrice > coupon.maxDiscount) {
+            discountPrice = coupon.maxDiscount
+        }
         return discountPrice
     }
 
@@ -453,18 +493,24 @@ class QuickOrderViewModel(
             quickOrderUseCase
                 .deleteQuickOrder(it)
                 .collect { result ->
-                    when(result) {
+                    when (result) {
                         is NetworkResult.Success -> {
-                           when(result.data) {
-                               "image" -> _uiUpdate.value = UiUpdate.DeletingImages(result.message, result.data.toString())
-                               else -> _uiUpdate.value = UiUpdate.DeletingQuickOrder(result.message, result.data.toString())
-                           }
+                            when (result.data) {
+                                "image" -> _uiUpdate.value =
+                                    UiUpdate.DeletingImages(result.message, result.data.toString())
+                                else -> _uiUpdate.value = UiUpdate.DeletingQuickOrder(
+                                    result.message,
+                                    result.data.toString()
+                                )
+                            }
                         }
                         is NetworkResult.Failed -> {
-                           when(result.data) {
-                               "image" -> _uiUpdate.value = UiUpdate.DeletingImages(result.message, "failed")
-                               else -> _uiUpdate.value = UiUpdate.DeletingQuickOrder(result.message, "failed")
-                           }
+                            when (result.data) {
+                                "image" -> _uiUpdate.value =
+                                    UiUpdate.DeletingImages(result.message, "failed")
+                                else -> _uiUpdate.value =
+                                    UiUpdate.DeletingQuickOrder(result.message, "failed")
+                            }
                         }
                     }
                 }
@@ -490,7 +536,10 @@ class QuickOrderViewModel(
                         _uiUpdate.value =
                             UiUpdate.CouponApplied(null)
                         _uiEvent.value =
-                            UIEvent.Toast("Coupon Discount Removed. Total Cart Price is less than Coupon limit.", LONG)
+                            UIEvent.Toast(
+                                "Coupon Discount Removed. Total Cart Price is less than Coupon limit.",
+                                LONG
+                            )
                     }
                 }
                 _uiUpdate.value = UiUpdate.UpdateCartData(position, count)
@@ -512,7 +561,10 @@ class QuickOrderViewModel(
                         _uiUpdate.value =
                             UiUpdate.CouponApplied(null)
                         _uiEvent.value =
-                            UIEvent.Toast("Coupon Discount Removed. Total Cart Price is less than Coupon limit.", LONG)
+                            UIEvent.Toast(
+                                "Coupon Discount Removed. Total Cart Price is less than Coupon limit.",
+                                LONG
+                            )
                     }
                 }
                 _uiUpdate.value = UiUpdate.UpdateCartData(position, null)
@@ -521,39 +573,48 @@ class QuickOrderViewModel(
     }
 
     sealed class UiUpdate {
-        data class WalletData(val wallet: Wallet): UiUpdate()
+        data class WalletData(val wallet: Wallet) : UiUpdate()
 
         //uploading List
-        data class BeginningUpload(val message: String): UiUpdate()
-        data class UploadingImage(val message: String): UiUpdate()
-        data class UploadComplete(val message: String): UiUpdate()
-        data class UploadFailed(val message: String): UiUpdate()
+        data class BeginningUpload(val message: String) : UiUpdate()
+        data class UploadingImage(val message: String) : UiUpdate()
+        data class UploadComplete(val message: String) : UiUpdate()
+        data class UploadFailed(val message: String) : UiUpdate()
 
         //address
-        data class AddressUpdate(val message: String, val address: Address?, val isSuccess: Boolean): UiUpdate()
+        data class AddressUpdate(
+            val message: String,
+            val address: Address?,
+            val isSuccess: Boolean
+        ) : UiUpdate()
 
         //estimateData
-        data class EstimateData(val message: String, val data: QuickOrder?, val isSuccess: Boolean): UiUpdate()
-        data class PopulateOrderDetails(val order: OrderEntity): UiUpdate()
+        data class EstimateData(
+            val message: String,
+            val data: QuickOrder?,
+            val isSuccess: Boolean
+        ) : UiUpdate()
+
+        data class PopulateOrderDetails(val order: OrderEntity) : UiUpdate()
 
         //coupon
-        data class CouponApplied(val message: String?): UiUpdate()
+        data class CouponApplied(val message: String?) : UiUpdate()
 
         //order
-        data class ValidatingPurchase(val message: String): UiUpdate()
-        data class StartingTransaction(val message: String): UiUpdate()
-        data class PlacingOrder(val message: String): UiUpdate()
-        data class OrderPlaced(val message: String): UiUpdate()
-        data class WalletTransactionFailed(val message: String): UiUpdate()
-        data class OrderPlacementFailed(val message: String): UiUpdate()
+        data class ValidatingPurchase(val message: String) : UiUpdate()
+        data class StartingTransaction(val message: String) : UiUpdate()
+        data class PlacingOrder(val message: String) : UiUpdate()
+        data class OrderPlaced(val message: String) : UiUpdate()
+        data class WalletTransactionFailed(val message: String) : UiUpdate()
+        data class OrderPlacementFailed(val message: String) : UiUpdate()
 
         //update cart
-        data class UpdateCartData(val position: Int, val count: Int?): UiUpdate()
+        data class UpdateCartData(val position: Int, val count: Int?) : UiUpdate()
 
         //deleting quick order
-        data class DeletingImages(val message: String, val data: String?): UiUpdate()
-        data class DeletingQuickOrder(val message: String, val data: String?): UiUpdate()
+        data class DeletingImages(val message: String, val data: String?) : UiUpdate()
+        data class DeletingQuickOrder(val message: String, val data: String?) : UiUpdate()
 
-        object Empty: UiUpdate()
+        object Empty : UiUpdate()
     }
 }

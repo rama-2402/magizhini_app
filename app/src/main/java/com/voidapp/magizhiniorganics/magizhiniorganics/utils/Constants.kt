@@ -10,7 +10,7 @@ object Constants {
 
     //permission request codes
     const val PICK_IMAGE_REQUEST_CODE: Int = 1
-    const val READ_STORAGE_PERMISSION_CODE = 2
+    const val AUDIO_PERMISSION_CODE = 2
     const val STORAGE_PERMISSION_CODE = 3
     const val ACCESS_LOCATION = 4
 

@@ -247,7 +247,7 @@ open class BaseActivity : AppCompatActivity() {
                         R.color.gray700
                     )
                 )
-                view.tvCancelText.text = "Proceed"
+                view.tvCancelText.text = "Close"
                 view.tvCancelText.setTextColor(
                     ContextCompat.getColor(
                         view.tvConfirmationText.context,
@@ -337,7 +337,8 @@ open class BaseActivity : AppCompatActivity() {
                         "cs" -> activity.moveToCustomerSupport()
                         "delete" -> activity.deleteQuickOrder()
                         "close" -> activity.onBackPressed()
-                        else -> hideExitSheet()
+                        "okay" -> hideExitSheet()
+                        else -> activity.setCurrentQuickOrderTypeSelection(data as String)
                     }
                 }
                 is SubscriptionHistoryActivity -> {
