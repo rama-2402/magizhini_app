@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.PhoneAuthCredential
@@ -16,7 +17,7 @@ class FirestoreRepository (
     private val firestore: Firestore
 ) {
 
-    fun signOut() = firestore.signOut()
+    suspend fun signOut(context: Context) = firestore.signOut(context)
 
     suspend fun logCrash(location: String, message: String) = firestore.logCrash(location, message)
 
@@ -28,8 +29,6 @@ class FirestoreRepository (
     suspend fun uploadImage(path: String, uri: Uri, extension: String, data: String = ""): String = firestore.uploadImage(path, uri, extension, data)
 
     //sign in check
-    suspend fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential): Boolean = firestore.signInWithPhoneAuthCredential(credential)
-
     suspend fun checkUserProfileDetails(): String = firestore.checkUserProfileDetails()
 
     //profile

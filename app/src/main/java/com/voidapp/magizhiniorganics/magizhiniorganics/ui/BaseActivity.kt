@@ -184,7 +184,7 @@ open class BaseActivity : AppCompatActivity() {
 //        lottie.animate()
 
         mProgressDialog.setCancelable(isCancellable)
-        mProgressDialog.setCanceledOnTouchOutside(false)
+        mProgressDialog.setCanceledOnTouchOutside(isCancellable)
         mProgressDialog.window?.setDimAmount(0f)
         mProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         //Start the dialog and display it on screen.

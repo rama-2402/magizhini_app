@@ -5,15 +5,12 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -22,11 +19,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.FirebaseException
-import com.google.firebase.auth.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySignInBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
+import com.voidapp.magizhiniorganics.magizhiniorganics.services.PortPhoneAuthToGmailAuth
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
@@ -38,19 +36,14 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import ticker.views.com.ticker.widgets.circular.timer.callbacks.CircularViewCallback
-import ticker.views.com.ticker.widgets.circular.timer.view.CircularView
-import java.util.concurrent.TimeUnit
 
-class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
+class SignInActivity : BaseActivity(), KodeinAware {
 
     override val kodein by kodein()
 
@@ -58,13 +51,8 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
     private lateinit var viewModel: SignInViewModel
     private val factory: SignInViewModelFactory by instance()
 
-    private var forceResendingToken: PhoneAuthProvider.ForceResendingToken? = null
-
     private lateinit var auth: FirebaseAuth
     private lateinit var signInClient: GoogleSignInClient
-
-    //    private var mCallBacks: PhoneAuthProvider.OnVerificationStateChangedCallbacks? = null
-    private var mVerificationId: String? = null
 
     private var mPhoneNumber: String = ""
     private var mCurrentUserID: String = ""
@@ -165,10 +153,6 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
             }
         }
 
-        layoutVisibility("pre")
-
-        // Verifying the mobile number and sending the OTP
-//        mCallBacks =
         googleSignInVerification()
         initFlow()
         clickListeners()
@@ -199,9 +183,43 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
             viewModel.loginStatus.collect { status ->
                 when (status) {
                     "" -> Unit
-                    "failed" -> {
+                    "new" -> newUserVerification()
+                    "old" -> newUserVerification()
+                    "mismatch" -> {
                         hideProgressDialog()
-                        showErrorSnackBar("Login Failed! Recheck OTP or Try again later", true)
+                        this@SignInActivity.hideKeyboard()
+                        showErrorSnackBar("This Login ID is associated with another Number", true)
+                        auth.signOut()
+                        GoogleSignIn.getClient(
+                            this@SignInActivity,
+                            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                        )
+                            .signOut()
+                    }
+                    "port" -> {
+                        val workRequest: WorkRequest =
+                            OneTimeWorkRequestBuilder<PortPhoneAuthToGmailAuth>()
+                                .setInputData(
+                                    workDataOf(
+                                        "userID" to viewModel.getCurrentUserId()!!,
+                                        "phoneID" to viewModel.phoneAuthID
+                                    )
+                                )
+                                .build()
+
+                        WorkManager.getInstance(this@SignInActivity).enqueue(workRequest)
+
+                        WorkManager.getInstance(this@SignInActivity)
+                            .getWorkInfoByIdLiveData(workRequest.id)
+                            .observe(this@SignInActivity) {
+                                when (it.state) {
+                                    WorkInfo.State.SUCCEEDED -> {
+                                        lifecycleScope.launch {
+                                            newUserVerification()
+                                        }
+                                    }
+                                }
+                            }
                     }
                     "imageFailed" -> {
                         hideProgressDialog()
@@ -219,12 +237,11 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
                     }
                     "success" -> {
                         hideProgressDialog()
-                        stopTimer()
+//                        stopTimer()
                         showErrorSnackBar("Profile Created Successfully", false)
                         navigateToHomePage()
                     }
                     else -> {
-                        stopTimer()
                         newUserVerification()
                     }
                 }
@@ -234,13 +251,7 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
     }
 
     private fun clickListeners() {
-        binding.btnSendOTP.setOnClickListener(this)
-        binding.btnResend.setOnClickListener(this)
-        binding.btnVerify.setOnClickListener(this)
         binding.llPreOTP.setOnClickListener {
-            this.hideKeyboard()
-        }
-        binding.llPostOTP.setOnClickListener {
             this.hideKeyboard()
         }
         binding.tvTerms.setOnClickListener {
@@ -256,26 +267,15 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
                 }
             }
         }
-        binding.etPhoneNumberPostOTP.doOnTextChanged { text, start, before, count ->
-            text?.let {
-                if (it.isNotEmpty()) {
-                    binding.btnVerify.text = "VERIFY"
-                } else {
-                    binding.btnVerify.text = "BACK"
-                }
-//                binding.btnVerify.text = "VERIFY"
-            } ?: let {
-                binding.btnVerify.text = "BACK"
-            }
-
-        }
         binding.btnGoogleLogIn.setOnClickListener {
-            if (binding.etPhoneNumberPreOTP.text.toString().isNullOrEmpty()) {
+            if (binding.etPhoneNumber.text.toString().isNullOrEmpty()) {
                 showToast(this, "Enter Phone Number to continue")
-            } else {
-
-                googleSignIn()
-//               viewModel.googleSignInVerification(binding.etPhoneNumberPreOTP.text.toString().trim())
+                return@setOnClickListener
+            }
+            if (isOnline()) {
+                mPhoneNumber = "+91${binding.etPhoneNumber.text.toString().trim()}"
+                val signInIntent = signInClient.signInIntent
+                activityForResult.launch(signInIntent)
             }
         }
     }
@@ -297,34 +297,19 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    val phoneCredential = GoogleAuthProvider.getCredential("+91${binding.etPhoneNumberPreOTP.text.toString().trim()}", null)
-                    auth.currentUser!!.linkWithCredential(phoneCredential)
-                        .addOnCompleteListener { linkTask ->
-                            if(linkTask.isSuccessful) {
-                                 Log.e("qw", "firebaseAuthWithGoogle: ${auth.currentUser?.uid}")
-                                Log.e("qw", "link acc: ${linkTask.result.user?.uid}")
-                            } else {
-                                Log.e("qw", "firebaseAuthWithGoogle: ${linkTask.exception}")
-                            }
-                        }
+                    showProgressDialog(false)
+                    viewModel.checkForPreviousProfiles(
+                        "+91${
+                            binding.etPhoneNumber.text.toString().trim()
+                        }"
+                    )
                 } else {
                     Log.e(TAG, "firebaseAuthWithGoogle: ${task.exception}")
                 }
             }
     }
 
-    private fun googleSignIn() {
-        GoogleSignIn.getLastSignedInAccount(this)?.let {
-
-        } ?: let {
-            val signInIntent = signInClient.signInIntent
-            activityForResult.launch(signInIntent)
-
-//             startActivityForResult(signInIntent, 5)
-        }
-    }
-
-    val activityForResult =
+    private val activityForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -338,120 +323,7 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
             }
         }
 
-    //validating the phone number before seding the OTP request
-    private fun phoneNumberValidation() {
-        val phNumber = binding.etPhoneNumberPreOTP.text.toString().trim()
-        this.hideKeyboard()
-
-        if (phNumber.isEmpty() || phNumber.length < 10) {
-            showErrorSnackBar("Enter a valid phone number", true)
-            return
-        } else {
-            val prefix = "+91"
-            mPhoneNumber = "$prefix$phNumber"
-
-            layoutVisibility("post")
-            startTimer()
-            startPhoneNumberVerification(mPhoneNumber)
-        }
-    }
-
-    private fun startTimer() {
-        val builderWithTimer = CircularView.OptionsBuilder()
-            .shouldDisplayText(true)
-            .setCounterInSeconds(60)
-            .setCircularViewCallback(object : CircularViewCallback {
-                override fun onTimerFinish() {
-                    // Will be called if times up of countdown timer
-                    onOtpTimeOut()
-                }
-
-                override fun onTimerCancelled() {
-
-                }
-            })
-        binding.cvTimer.setOptions(builderWithTimer)
-        binding.cvTimer.startTimer()
-    }
-
-    private fun stopTimer() = binding.cvTimer.stopTimer()
-
-    //setting the otp timeout and sending the OTP
-    private fun startPhoneNumberVerification(phone: String) =
-        lifecycleScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
-                showToast(this@SignInActivity, "Please wait for Auto-Verification", LONG)
-            }
-            try {
-                val mFirebaseAuth = FirebaseAuth.getInstance()
-                val options = PhoneAuthOptions.newBuilder(mFirebaseAuth)
-                    .setPhoneNumber(phone)
-                    .setTimeout(120L, TimeUnit.NANOSECONDS)
-                    .setActivity(this@SignInActivity)
-                    .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                        override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
-                            try {
-                                showProgressDialog(false)
-                                viewModel.signIn(phoneAuthCredential)
-                            } catch (e: Exception) {
-                                showErrorSnackBar("Server error! Please Try Later", true)
-                            }
-                        }
-
-                        override fun onVerificationFailed(error: FirebaseException) {
-//                        showErrorSnackBar("Server error! Please Try Later", true)
-                        }
-
-                        override fun onCodeSent(
-                            verificationId: String,
-                            token: PhoneAuthProvider.ForceResendingToken
-                        ) {
-                            mVerificationId = verificationId
-                            forceResendingToken = token
-                            layoutVisibility("post")
-                            showToast(this@SignInActivity, "OTP Sent", LONG)
-                        }
-                    })
-                    .build()
-
-                withContext(Dispatchers.Main) {
-                    this@SignInActivity.hideKeyboard()
-                }
-                PhoneAuthProvider.verifyPhoneNumber(options)
-            } catch (e: Exception) {
-                // Failed
-                showErrorSnackBar("Server error! Please Try Later", true)
-            }
-        }
-
-    private fun resendVerificationCode() {
-        binding.btnResend.remove()
-//        binding.btnResend.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.green_light, null))
-//        binding.btnResend.setTextColor(resources.getColor(R.color.green_base))
-        startTimer()
-        startPhoneNumberVerification(mPhoneNumber)
-    }
-
-    //validating otp to verify
-    private fun otpValidation() {
-        val otp = binding.etPhoneNumberPostOTP.text.toString()
-        if (otp.isEmpty()) {
-            this.hideKeyboard()
-            showErrorSnackBar("Enter a valid OTP", true)
-        } else {
-            this.hideKeyboard()
-            showProgressDialog(false)
-            verifyPhoneNumberWithCode(mVerificationId, otp)
-        }
-    }
-
-    private fun verifyPhoneNumberWithCode(verificationId: String?, code: String) {
-        val credential = PhoneAuthProvider.getCredential(verificationId.toString(), code)
-        viewModel.signIn(credential)
-    }
-
     private suspend fun newUserVerification() {
-        binding.cvTimer.fadOutAnimation()
         when (val status = viewModel.checkUserProfileDetails()) {
             "" -> {
                 mCurrentUserID = viewModel.getCurrentUserId()!!
@@ -480,19 +352,21 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
     }
 
     private fun navigateToProfilePage() {
+        hideProgressDialog()
         Intent(this@SignInActivity, ProfileActivity::class.java).also {
             it.putExtra(PHONE_NUMBER, mPhoneNumber)
             it.putExtra(USER_ID, mCurrentUserID)
-//            it.putExtra(STATUS, true)
             startActivity(it)
             finish()
         }
     }
 
     private fun navigateToHomePage() {
+        hideProgressDialog()
         SharedPref(this).putData(LOGIN_STATUS, BOOLEAN, false)
         Intent(this, HomeActivity::class.java).also {
             startActivity(it)
+            finish()
         }
     }
 
@@ -556,40 +430,6 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
             }
     }
 
-    private fun layoutVisibility(visibility: String) {
-        with(binding) {
-            when (visibility) {
-                "pre" -> {
-                    tvHeader.setTextAnimation("ENTER YOUR MOBILE NUMBER")
-                    llPreOTP.visible()
-                    llPostOTP.remove()
-                    cvTimer.hide()
-                    ivLogo.disable()
-                }
-                "post" -> {
-                    tvHeader.setTextAnimation("ENTER OTP")
-                    llPreOTP.remove()
-                    llPostOTP.visible()
-                    cvTimer.visible()
-                    btnResend.backgroundTintList =
-                        ColorStateList.valueOf(resources.getColor(R.color.green_light, null))
-                    btnResend.setTextColor(resources.getColor(R.color.green_base, null))
-                    btnResend.disable()
-                    ivLogo.disable()
-                }
-            }
-        }
-    }
-
-    //Called by countdown timer class on OTP Timeout after 60 seconds
-    fun onOtpTimeOut() {
-        binding.btnResend.enable()
-        binding.btnResend.backgroundTintList =
-            ColorStateList.valueOf(resources.getColor(R.color.green_base, null))
-        binding.btnResend.setTextColor(Color.WHITE)
-        binding.cvTimer.hide()
-    }
-
     //checking the network connection before proceeding
     private fun isOnline(): Boolean {
         return if (NetworkHelper.isNetworkConnected(baseContext)) {
@@ -597,22 +437,6 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
         } else {
             showErrorSnackBar("Please check network connection", true)
             false
-        }
-    }
-
-    override fun onClick(v: View?) {
-        if (v != null && isOnline()) {
-            when (v) {
-                binding.btnSendOTP -> phoneNumberValidation()
-                binding.btnResend -> resendVerificationCode()
-                binding.btnVerify -> {
-                    if (binding.btnVerify.text == "BACK") {
-                        layoutVisibility("pre")
-                    } else {
-                        otpValidation()
-                    }
-                }
-            }
         }
     }
 }

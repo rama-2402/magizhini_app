@@ -354,6 +354,10 @@ class HomeActivity :
                         showToast(this, "No account with the given number. Please check again")
                     }
                 }
+                is HomeViewModel.UiUpdate.SignOut -> {
+                    finishAffinity()
+                    finish()
+                }
                 else -> HomeViewModel.UiUpdate.Empty
             }
         }
@@ -620,9 +624,8 @@ class HomeActivity :
                 R.id.menuLogOut -> {
                     if (NetworkHelper.isOnline(this@HomeActivity)) {
                         SharedPref(this).clearAllData()
-                        viewModel.signOut()
-                        finishAffinity()
-                        finish()
+                        viewModel.signOut(this)
+
                     } else {
                         showErrorSnackBar("Please check your Network Connection", true)
                     }
@@ -725,7 +728,11 @@ class HomeActivity :
                     )
                 }
                 R.id.menuBecomePartner -> {
-                    showExitSheet(this, "Become a Business Partner with Magizhini Organics by providing your contact details and a short description of your business in the form next page. We will Contact you shortly once reviewing your profile. Please click PROCEED to continue", "business")
+                    showExitSheet(
+                        this,
+                        "Become a Business Partner with Magizhini Organics by providing your contact details and a short description of your business in the form next page. We will Contact you shortly once reviewing your profile. Please click PROCEED to continue",
+                        "business"
+                    )
                 }
                 R.id.menuCareers -> {
                     openInBrowser("https://forms.gle/3EffsX681hftF3SR9")
@@ -762,7 +769,7 @@ class HomeActivity :
     }
 
     fun selectedContactMethod(selectedItem: String) {
-        when(selectedItem) {
+        when (selectedItem) {
             "Call" -> {
                 this.callNumberIntent("7299827393")
             }
@@ -852,7 +859,7 @@ class HomeActivity :
     //from partners adapter
     override fun selectedPartner(partner: Partners, thumbnail: ShapeableImageView) {
         when (partner.clickAction) {
-         "Open" -> openInBrowser("https://www.instagram.com/eyalvathu_karavel/?hl=en")
+            "Open" -> openInBrowser("https://www.instagram.com/eyalvathu_karavel/?hl=en")
         }
     }
 

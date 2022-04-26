@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.home
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -42,8 +43,10 @@ class HomeViewModel (
 
     fun getALlCategories() = dbRepository.getAllProductCategories()
 
-    fun signOut() {
-        fbRepository.signOut()
+    fun signOut(context: Context) = viewModelScope.launch {
+        fbRepository.signOut(context).let {
+            _uiUpdate.value = UiUpdate.SignOut
+        }
     }
 
     fun getDataToPopulate() = viewModelScope.launch(Dispatchers.IO) {
@@ -231,8 +234,10 @@ class HomeViewModel (
         //Referral
         data class AllowReferral(val status: Boolean, val message: String?): UiUpdate()
         data class ReferralStatus(val status: Boolean, val referralCode: String, val message: String?): UiUpdate()
+        //signout
+        object SignOut: UiUpdate()
 
-        object Empty : HomeViewModel.UiUpdate()
+        object Empty : UiUpdate()
     }
 }
 

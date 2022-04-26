@@ -1,11 +1,13 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.firestore.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -48,10 +50,15 @@ class Firestore(
     private val mFireStore = FirebaseFirestore.getInstance()
     private val mFireStoreStorage = FirebaseStorage.getInstance().reference
 
-    fun signOut() = CoroutineScope(Dispatchers.IO).launch {
+    suspend fun signOut(context: Context) = withContext(Dispatchers.IO) {
         val deleteLocalDB = async { deleteLocalDB() }
         deleteLocalDB.await()
         mFirebaseAuth.signOut()
+        GoogleSignIn.getClient(
+            context,
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+        )
+            .signOut()
     }
 
     private suspend fun deleteLocalDB() {
@@ -62,21 +69,6 @@ class Firestore(
         repository.deleteSubscriptionsTable()
         repository.deleteAllNotifications()
         repository.deleteAllFavorites()
-    }
-
-    suspend fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential): Boolean {
-        return try {
-            var status: Boolean = false
-            mFirebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener { task ->
-                     status = task.isSuccessful
-                }.await()
-//                .addOnSuccessListener { status = true }
-//                .addOnCanceledListener { status = false }.await()
-            status
-        } catch (e: Exception) {
-            false
-        }
     }
 
     // Checks if the current entered phone number is already present in DB before sending the OTP
@@ -116,8 +108,6 @@ class Firestore(
             return@withContext "failed"
         }
     }
-
-
 
     //check if the user profile exists and getting the data from store
     suspend fun checkUserProfileDetails(): String = withContext(Dispatchers.IO) {
@@ -206,7 +196,8 @@ class Firestore(
             try {
                 val uploadProfileToCloud = async { uploadProfileToCloud(profile) }
                 val uploadProfileToLocal = async { uploadProfileToLocal(profile) }
-                val upsertCustomerProfile = async { fbRepository.uploadUserProfile(profile.toCustomerProfile()) }
+                val upsertCustomerProfile =
+                    async { fbRepository.uploadUserProfile(profile.toCustomerProfile()) }
                 return@withContext uploadProfileToCloud.await() &&
                         uploadProfileToLocal.await() &&
                         upsertCustomerProfile.await()
@@ -237,24 +228,32 @@ class Firestore(
         }
     }
 
-    suspend fun applyReferralNumber(currentUserID: String, code: String, fromHomeMenu: Boolean = false): Boolean = withContext(Dispatchers.IO) {
+    suspend fun applyReferralNumber(
+        currentUserID: String,
+        code: String,
+        fromHomeMenu: Boolean = false
+    ): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
-            val profileDoc = mFireStore.collection(USERS).whereEqualTo("phNumber", "+91$code").get().await()
+            val profileDoc =
+                mFireStore.collection(USERS).whereEqualTo("phNumber", "+91$code").get().await()
             if (profileDoc.documents.isNullOrEmpty()) {
                 false
             } else {
 //                val profile = profileDoc.documents[0].toObject(UserProfile::class.java)
                 val addReferralNumberToProfile = async {
-                    val profile = mFireStore.collection(USERS).document(currentUserID).get().await().toObject(UserProfile::class.java)
+                    val profile = mFireStore.collection(USERS).document(currentUserID).get().await()
+                        .toObject(UserProfile::class.java)
                     profile?.let {
                         it.referrerNumber = code
                         it.extras[0] = "yes"
-                        mFireStore.collection(USERS).document(currentUserID).set(it, SetOptions.merge()).await()
+                        mFireStore.collection(USERS).document(currentUserID)
+                            .set(it, SetOptions.merge()).await()
                     }
                 }
 //                val checkReferralLimit = async { checkReferralLimit(profile!!.id)  }
 //                val addReferralBonusToReferrer = async { addReferralBonusToReferrer(profile!!) }
-                val addReferralBonusToCurrentUser = async { addReferralBonusToCurrentUser(currentUserID) }
+                val addReferralBonusToCurrentUser =
+                    async { addReferralBonusToCurrentUser(currentUserID) }
                 val addReferralNumberToLocalDB = async {
                     val profile = repository.getProfileData()
                     profile?.let {
@@ -271,10 +270,10 @@ class Firestore(
 //                if (checkReferralLimit.await()) {
 //                    addReferralBonusToReferrer.await() &&
 //                    addReferralBonusToCurrentUser.await() &&
-                    addReferralNumberToProfile.await()
-                    addReferralNumberToLocalDB.await()
+                addReferralNumberToProfile.await()
+                addReferralNumberToLocalDB.await()
 //                } else {
-                    addReferralBonusToCurrentUser.await()
+                addReferralBonusToCurrentUser.await()
 //                }
                 true
             }
@@ -286,96 +285,115 @@ class Firestore(
         }
     }
 
-    private suspend fun addReferralBonusToCurrentUser(currentUserID: String): Boolean = withContext(Dispatchers.IO){
-        return@withContext try {
-            if (currentUserID.isNullOrEmpty()) {
-                return@withContext false
+    private suspend fun addReferralBonusToCurrentUser(currentUserID: String): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                if (currentUserID.isNullOrEmpty()) {
+                    return@withContext false
+                }
+                val amount = mFireStore.collection(REFERRAL).document(REFERRAL).get().await()
+                    .toObject(Referral::class.java)!!.referralAmount
+                val addReferralMoneyToWallet =
+                    async { makeTransactionFromWallet(amount, currentUserID, "Add") }
+                val createTransactionEntry = async {
+                    TransactionHistory(
+                        id = "",
+                        timestamp = System.currentTimeMillis(),
+                        month = TimeUtil().getMonth(),
+                        year = TimeUtil().getYear().toLong(),
+                        amount = amount,
+                        fromID = currentUserID,
+                        fromUPI = "Magizhini Referral Program",
+                        status = SUCCESS,
+                        purpose = ADD_MONEY,
+                        transactionFor = "Magizhini Referral Bonus"
+                    ).let {
+                        when (updateTransaction(it, "Magizhini Referral Bonus")) {
+                            is NetworkResult.Failed -> false
+                            else -> true
+                        }
+                    }
+                }
+                val createNotification = async {
+                    UserNotification(
+                        id = currentUserID,
+                        userID = currentUserID,
+                        timestamp = TimeUtil().getCurrentYearMonthDate().toString().toLong(),
+                        title = "Referral Bonus",
+                        message = "You have received a referral Bonus of Rs: $amount to your Wallet as a part of Magizhini Referral Program.",
+                        imageUrl = "",
+                        clickType = WALLET,
+                        clickContent = ""
+                    ).let {
+                        repository.upsertNotification(it.toUserNotificationEntity())
+                        createNewNotification(it)
+                    }
+                }
+
+                addReferralMoneyToWallet.await() &&
+                        createTransactionEntry.await() &&
+                        createNotification.await()
+
+            } catch (e: Exception) {
+                e.message?.let {
+                    logCrash(
+                        "firestore: adding referral money to the new member",
+                        it
+                    )
+                }
+                false
             }
-            val amount = mFireStore.collection(REFERRAL).document(REFERRAL).get().await().toObject(Referral::class.java)!!.referralAmount
-            val addReferralMoneyToWallet = async { makeTransactionFromWallet(amount, currentUserID, "Add") }
-            val createTransactionEntry = async { TransactionHistory(
-                id = "",
-                timestamp = System.currentTimeMillis(),
-                month = TimeUtil().getMonth(),
-                year = TimeUtil().getYear().toLong(),
-                amount = amount,
-                fromID = currentUserID,
-                fromUPI = "Magizhini Referral Program",
-                status = SUCCESS,
-                purpose = ADD_MONEY,
-                transactionFor = "Magizhini Referral Bonus"
-            ).let {
-                when(updateTransaction(it, "Magizhini Referral Bonus")) {
-                    is NetworkResult.Failed -> false
-                    else -> true
-                }
-            } }
-            val createNotification = async { UserNotification(
-                id = currentUserID,
-                userID = currentUserID,
-                timestamp =  TimeUtil().getCurrentYearMonthDate().toString().toLong(),
-                title = "Referral Bonus",
-                message = "You have received a referral Bonus of Rs: $amount to your Wallet as a part of Magizhini Referral Program.",
-                imageUrl = "",
-                clickType = WALLET,
-                clickContent = ""
-            ).let {
-                repository.upsertNotification(it.toUserNotificationEntity())
-                createNewNotification(it)
-            } }
-
-            addReferralMoneyToWallet.await() &&
-            createTransactionEntry.await() &&
-            createNotification.await()
-
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: adding referral money to the new member", it) }
-            false
         }
-    }
 
-    private suspend fun addReferralBonusToReferrer(profile: UserProfile): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
-            val amount = mFireStore.collection(REFERRAL).document(REFERRAL).get().await().toObject(Referral::class.java)!!.referrerAmount
-            val addReferralMoneyToWallet = async { makeTransactionFromWallet(amount, profile.id, "Add") }
-            val createTransactionEntry = async { TransactionHistory(
-                id = "",
-                timestamp = System.currentTimeMillis(),
-                month = TimeUtil().getMonth(),
-                year = TimeUtil().getYear().toLong(),
-                amount = amount,
-                fromID = profile.id,
-                fromUPI = "Magizhini Referral Program",
-                status = SUCCESS,
-                purpose = ADD_MONEY
-            ).let {
-                when(updateTransaction(it, "Magizhini Referral Bonus")) {
-                    is NetworkResult.Success -> true
-                    else -> false
+    private suspend fun addReferralBonusToReferrer(profile: UserProfile): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val amount = mFireStore.collection(REFERRAL).document(REFERRAL).get().await()
+                    .toObject(Referral::class.java)!!.referrerAmount
+                val addReferralMoneyToWallet =
+                    async { makeTransactionFromWallet(amount, profile.id, "Add") }
+                val createTransactionEntry = async {
+                    TransactionHistory(
+                        id = "",
+                        timestamp = System.currentTimeMillis(),
+                        month = TimeUtil().getMonth(),
+                        year = TimeUtil().getYear().toLong(),
+                        amount = amount,
+                        fromID = profile.id,
+                        fromUPI = "Magizhini Referral Program",
+                        status = SUCCESS,
+                        purpose = ADD_MONEY
+                    ).let {
+                        when (updateTransaction(it, "Magizhini Referral Bonus")) {
+                            is NetworkResult.Success -> true
+                            else -> false
+                        }
+                    }
                 }
-            } }
-            val createNotification = async { UserNotification(
-                id = "",
-                userID = profile.id,
-                timestamp =  TimeUtil().getCurrentYearMonthDate().toString().toLong(),
-                title = "Referral Bonus",
-                message = "You have received a referral Bonus of Rs: $amount to your Wallet as a part of Magizhini Referral Program.",
-                imageUrl = "",
-                clickType = WALLET,
-                clickContent = ""
-            ).let {
-                createNewNotification(it)
-            } }
+                val createNotification = async {
+                    UserNotification(
+                        id = "",
+                        userID = profile.id,
+                        timestamp = TimeUtil().getCurrentYearMonthDate().toString().toLong(),
+                        title = "Referral Bonus",
+                        message = "You have received a referral Bonus of Rs: $amount to your Wallet as a part of Magizhini Referral Program.",
+                        imageUrl = "",
+                        clickType = WALLET,
+                        clickContent = ""
+                    ).let {
+                        createNewNotification(it)
+                    }
+                }
 
-            addReferralMoneyToWallet.await() &&
-            createTransactionEntry.await() &&
-            createNotification.await()
+                addReferralMoneyToWallet.await() &&
+                        createTransactionEntry.await() &&
+                        createNotification.await()
 
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: applying referral", it) }
-            false
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: applying referral", it) }
+                false
+            }
         }
-    }
 
     suspend fun checkForReferral(userID: String): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -405,7 +423,7 @@ class Firestore(
         }
     }
 
-        //wallet
+    //wallet
     suspend fun createWallet(wallet: Wallet) = withContext(Dispatchers.IO) {
         try {
             mFireStore.collection(WALLET)
@@ -462,18 +480,18 @@ class Firestore(
         }
     }
 
-    private fun filterProducts(snapshot: QuerySnapshot, viewModel: ShoppingMainViewModel)
-    = CoroutineScope(Dispatchers.Default).launch {
-        val favorites = mutableListOf<String>()
-        val cartItems = repository.getAllCartItemsForEntityUpdate()
+    private fun filterProducts(snapshot: QuerySnapshot, viewModel: ShoppingMainViewModel) =
+        CoroutineScope(Dispatchers.Default).launch {
+            val favorites = mutableListOf<String>()
+            val cartItems = repository.getAllCartItemsForEntityUpdate()
 
-        repository.getFavorites()?.let {
-            it.forEach { fav ->
-                favorites.add(fav.id)
+            repository.getFavorites()?.let {
+                it.forEach { fav ->
+                    favorites.add(fav.id)
+                }
             }
-        }
 
-        val mutableLimitedItems: MutableList<ProductEntity> = mutableListOf()
+            val mutableLimitedItems: MutableList<ProductEntity> = mutableListOf()
             for (d in snapshot.documents) {
 //                            val prod = it.documents.map { doc -> doc.toObject(ProductEntity::class.java) }
                 //we take each product object
@@ -501,8 +519,8 @@ class Firestore(
                     }
                 }
             }
-        viewModel.limitedProducts(mutableLimitedItems)
-    }
+            viewModel.limitedProducts(mutableLimitedItems)
+        }
 
 //    //Function to update the products entity with user preferences like favorites, cart items and coupons added
 //    private suspend fun updateEntityData(viewModel: ShoppingMainViewModel, products: MutableList<ProductEntity>) = withContext(Dispatchers.IO) {
@@ -524,27 +542,28 @@ class Firestore(
 //        }
 //    }
 
-    suspend fun productListener(id: String, viewModel: ProductViewModel) = withContext(Dispatchers.IO) {
-        try {
-            mFireStore.collection(Constants.PRODUCTS)
-                .document(id)
-                .addSnapshotListener { snapshot, fireSnapshotFailure ->
-                    //error handling
-                    fireSnapshotFailure?.let { error ->
-                        throw (error)
-                    }
-                    snapshot?.let {
-                        it.toObject(Product::class.java)?.variants?.let { variants ->
-                            viewModel.updateLimitedVariant(
-                                variants
-                            )
+    suspend fun productListener(id: String, viewModel: ProductViewModel) =
+        withContext(Dispatchers.IO) {
+            try {
+                mFireStore.collection(Constants.PRODUCTS)
+                    .document(id)
+                    .addSnapshotListener { snapshot, fireSnapshotFailure ->
+                        //error handling
+                        fireSnapshotFailure?.let { error ->
+                            throw (error)
+                        }
+                        snapshot?.let {
+                            it.toObject(Product::class.java)?.variants?.let { variants ->
+                                viewModel.updateLimitedVariant(
+                                    variants
+                                )
+                            }
                         }
                     }
-                }
-        } catch (e: Exception) {
-            e.message?.let { logCrash("setting limited Item listener for the product", it) }
+            } catch (e: Exception) {
+                e.message?.let { logCrash("setting limited Item listener for the product", it) }
+            }
         }
-    }
 
     //invoice - checking if all the products are available
     suspend fun validateItemAvailability(cartItems: List<CartEntity>): NetworkResult =
@@ -828,7 +847,6 @@ class Firestore(
     }
 
 
-
     //favorites
     suspend fun addFavorites(id: String, item: String): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -839,11 +857,13 @@ class Firestore(
             }
             //This function will add a new data if it is not present in the array
             mFireStore.collection(Constants.USERS)
-                .document(currentUserID).update(Constants.FAVORITES, FieldValue.arrayUnion(item)).await()
+                .document(currentUserID).update(Constants.FAVORITES, FieldValue.arrayUnion(item))
+                .await()
             true
-        }catch (e: IOException) {
+        } catch (e: IOException) {
             e.message?.let {
-                logCrash("firestore: adding fav to store",
+                logCrash(
+                    "firestore: adding fav to store",
                     it
                 )
             }
@@ -860,11 +880,13 @@ class Firestore(
                 id
             }
             mFireStore.collection(Constants.USERS)
-                .document(currentUserID).update(Constants.FAVORITES, FieldValue.arrayRemove(item)).await()
+                .document(currentUserID).update(Constants.FAVORITES, FieldValue.arrayRemove(item))
+                .await()
             true
-        }catch (e: IOException) {
+        } catch (e: IOException) {
             e.message?.let {
-                logCrash("firestore: removing fav to store",
+                logCrash(
+                    "firestore: removing fav to store",
                     it
                 )
             }
@@ -873,42 +895,45 @@ class Firestore(
     }
 
     //reviews
-    suspend fun productReviewsListener(id: String, viewModel: ViewModel) = withContext(Dispatchers.IO) {
-        try {
-            val listenerRegistration =
-                mFireStore
-                .collection("Reviews")
-                .document("Products")
-                .collection(id)
-                .addSnapshotListener { snapshot, fireSnapshotFailure ->
-                    //error handling
-                    fireSnapshotFailure?.let { e ->
-                        throw e
-                    }
-                    snapshot?.let {
-                        val reviews = arrayListOf<Review>()
-                        reviews.clear()
-                        for (doc in it) {
-                            val review = doc.toObject(Review::class.java)
-                            review.id = doc.id
-                            reviews.add(review)
+    suspend fun productReviewsListener(id: String, viewModel: ViewModel) =
+        withContext(Dispatchers.IO) {
+            try {
+                val listenerRegistration =
+                    mFireStore
+                        .collection("Reviews")
+                        .document("Products")
+                        .collection(id)
+                        .addSnapshotListener { snapshot, fireSnapshotFailure ->
+                            //error handling
+                            fireSnapshotFailure?.let { e ->
+                                throw e
+                            }
+                            snapshot?.let {
+                                val reviews = arrayListOf<Review>()
+                                reviews.clear()
+                                for (doc in it) {
+                                    val review = doc.toObject(Review::class.java)
+                                    review.id = doc.id
+                                    reviews.add(review)
+                                }
+                                when (viewModel) {
+                                    is SubscriptionProductViewModel -> viewModel.reviewListener(
+                                        reviews
+                                    )
+                                    is ProductViewModel -> viewModel.reviewListener(reviews)
+                                    is DishViewModel -> viewModel.reviewListener(reviews)
+                                }
+                            }
                         }
-                        when(viewModel) {
-                            is SubscriptionProductViewModel -> viewModel.reviewListener(reviews)
-                            is ProductViewModel -> viewModel.reviewListener(reviews)
-                            is DishViewModel -> viewModel.reviewListener(reviews)
-                        }
-                    }
-                }
-            when(viewModel) {
-                is SubscriptionProductViewModel -> viewModel.listener(listenerRegistration)
+                when (viewModel) {
+                    is SubscriptionProductViewModel -> viewModel.listener(listenerRegistration)
 //                is ProductViewModel -> viewModel.reviewListener(reviews)
-                else -> Unit
+                    else -> Unit
+                }
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: getting product reviews", it) }
             }
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: getting product reviews", it) }
         }
-    }
 
     suspend fun addReview(id: String, review: Review): NetworkResult = withContext(Dispatchers.IO) {
         try {
@@ -918,12 +943,11 @@ class Firestore(
                 .document()
                 .set(review, SetOptions.merge()).await()
             NetworkResult.Success("review", "Thanks for the review :)")
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             e.message?.let { logCrash("firestore: add product review", it) }
             NetworkResult.Failed("review", "Server Error! Please try again later")
         }
     }
-
 
 
     //address
@@ -956,46 +980,51 @@ class Firestore(
     }
 
 
-
     //cancelling dates in subscription
-    suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean
-    = withContext(Dispatchers.IO) {
-        return@withContext try {
-            val addSubCancelledDate = async { addSubCancelledDate(sub, date) }
-            val addSubIDToCancelledDate = async { addSubIDToCancelledDate(sub.id, date) }
+    suspend fun addCancellationDates(sub: SubscriptionEntity, date: Long): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val addSubCancelledDate = async { addSubCancelledDate(sub, date) }
+                val addSubIDToCancelledDate = async { addSubIDToCancelledDate(sub.id, date) }
 
-            addSubCancelledDate.await() &&
-            addSubIDToCancelledDate.await()
-        } catch (e: Exception) {
-            e.message?.let { logCrash("Firestore: cancelling date for sub parent job", it) }
-            false
-        }
-    }
-
-    private suspend fun addSubIDToCancelledDate(id: String, date: Long): Boolean
-            = withContext(Dispatchers.IO) {
-        return@withContext try {
-            val dateDocID = SimpleDateFormat("dd")
-            val docID = "${TimeUtil().getMonth(date)}${TimeUtil().getYear(date)}"
-
-            val path = mFireStore.collection(SUBSCRIPTION)
-                .document(Constants.CANCELLED).collection(docID).document(dateDocID.format(date))
-
-            if (!path.get().await().exists()) {
-                val cancelledIDs: MutableMap<String, ArrayList<String>> = mutableMapOf()
-                cancelledIDs["cancelledIDs"] = arrayListOf()
-                path.set(cancelledIDs, SetOptions.merge()).await()
+                addSubCancelledDate.await() &&
+                        addSubIDToCancelledDate.await()
+            } catch (e: Exception) {
+                e.message?.let { logCrash("Firestore: cancelling date for sub parent job", it) }
+                false
             }
-            path.update("cancelledIDs", FieldValue.arrayUnion(id)).await()
-            true
-        }catch (e: Exception) {
-            e.message?.let { logCrash("Firestore: adding sub ID to date list in firestore", it) }
-            false
         }
-    }
 
-    private suspend fun addSubCancelledDate(sub: SubscriptionEntity, date: Long): Boolean
-        = withContext(Dispatchers.IO) {
+    private suspend fun addSubIDToCancelledDate(id: String, date: Long): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val dateDocID = SimpleDateFormat("dd")
+                val docID = "${TimeUtil().getMonth(date)}${TimeUtil().getYear(date)}"
+
+                val path = mFireStore.collection(SUBSCRIPTION)
+                    .document(Constants.CANCELLED).collection(docID)
+                    .document(dateDocID.format(date))
+
+                if (!path.get().await().exists()) {
+                    val cancelledIDs: MutableMap<String, ArrayList<String>> = mutableMapOf()
+                    cancelledIDs["cancelledIDs"] = arrayListOf()
+                    path.set(cancelledIDs, SetOptions.merge()).await()
+                }
+                path.update("cancelledIDs", FieldValue.arrayUnion(id)).await()
+                true
+            } catch (e: Exception) {
+                e.message?.let {
+                    logCrash(
+                        "Firestore: adding sub ID to date list in firestore",
+                        it
+                    )
+                }
+                false
+            }
+        }
+
+    private suspend fun addSubCancelledDate(sub: SubscriptionEntity, date: Long): Boolean =
+        withContext(Dispatchers.IO) {
             return@withContext try {
                 mFireStore.collection(SUBSCRIPTION).document(SUB_ACTIVE)
                     .collection(SUB).document(sub.id)
@@ -1005,48 +1034,49 @@ class Firestore(
                 e.message?.let { logCrash("Firestore: adding cancel date to sub in firestore", it) }
                 false
             }
-    }
-
+        }
 
 
     //cancel Subscription
-    suspend fun cancelSubscription(sub: SubscriptionEntity): NetworkResult = withContext(Dispatchers.IO) {
-        try {
-            val createCancellationSub = async { createCancellationSub(sub) }
-            val removeActiveSubFromProfile = async { removeActiveSubFromProfile(sub) }
-            val removeActiveSubFromLocalDB = async {
-                try {
-                    repository.cancelActiveSubscription(sub.id)
-                    repository.upsertSubscription(sub)
-                    true
-                } catch (e: IOException) {
-                    e.message?.let {
-                        logCrash(
-                            "firestore: updating the cancel status for sub in firestore",
-                            it
-                        )
+    suspend fun cancelSubscription(sub: SubscriptionEntity): NetworkResult =
+        withContext(Dispatchers.IO) {
+            try {
+                val createCancellationSub = async { createCancellationSub(sub) }
+                val removeActiveSubFromProfile = async { removeActiveSubFromProfile(sub) }
+                val removeActiveSubFromLocalDB = async {
+                    try {
+                        repository.cancelActiveSubscription(sub.id)
+                        repository.upsertSubscription(sub)
+                        true
+                    } catch (e: IOException) {
+                        e.message?.let {
+                            logCrash(
+                                "firestore: updating the cancel status for sub in firestore",
+                                it
+                            )
+                        }
+                        false
                     }
-                    false
                 }
-            }
-            if (
-                createCancellationSub.await() &&
-                removeActiveSubFromProfile.await() &&
-                removeActiveSubFromLocalDB.await()
-            ) {
-                NetworkResult.Success("cancelled", null)
-            } else {
+                if (
+                    createCancellationSub.await() &&
+                    removeActiveSubFromProfile.await() &&
+                    removeActiveSubFromLocalDB.await()
+                ) {
+                    NetworkResult.Success("cancelled", null)
+                } else {
+                    NetworkResult.Failed("cancelled", null)
+                }
+            } catch (e: Exception) {
+                e.message?.let {
+                    logCrash(
+                        "firestore: cancelling subscription parent job",
+                        it
+                    )
+                }
                 NetworkResult.Failed("cancelled", null)
             }
-        } catch (e: Exception) {
-            e.message?.let {
-                logCrash("firestore: cancelling subscription parent job",
-                    it
-                )
-            }
-            NetworkResult.Failed("cancelled", null)
         }
-    }
 
     private suspend fun createCancellationSub(sub: SubscriptionEntity) =
         withContext(Dispatchers.IO) {
@@ -1096,33 +1126,40 @@ class Firestore(
         subscription: Subscription,
         userName: String? = null,
         transactionID: String? = null
-    ):NetworkResult = withContext(Dispatchers.IO) {
+    ): NetworkResult = withContext(Dispatchers.IO) {
         val sub = subscription.toSubscriptionEntity()
         try {
             val updateLocal = async { updateLocalSubscription(sub) }
             val updateStore = async { updateStoreSubscription(sub) }
             val updateCloud = async { updateCloudProfileSubscription(sub) }
-            val createSubInDB = async { try {
-                repository.upsertSubscription(sub)
-                true
-            } catch (e: IOException) {
-                e.message?.let { logCrash("firestore: uploading the generated sub to local Db", it) }
-                false
-            } }
+            val createSubInDB = async {
+                try {
+                    repository.upsertSubscription(sub)
+                    true
+                } catch (e: IOException) {
+                    e.message?.let {
+                        logCrash(
+                            "firestore: uploading the generated sub to local Db",
+                            it
+                        )
+                    }
+                    false
+                }
+            }
             val createGlobalTransaction = async {
                 if (subscription.paymentMode != WALLET) {
                     GlobalTransaction(
-                            id = "",
-                            userID =  subscription.customerID,
-                            userName = userName!!,
-                            userMobileNumber = subscription.phoneNumber,
-                            transactionID = transactionID!!,
-                            transactionType = subscription.paymentMode,
-                            transactionAmount = subscription.estimateAmount,
-                            transactionDirection = SUBSCRIPTION,
-                            timestamp = System.currentTimeMillis(),
-                            transactionReason = "${subscription.productName} ${subscription.variantName} New Subscription"
-                        ).let { return@async createGlobalTransactionEntry(it) }
+                        id = "",
+                        userID = subscription.customerID,
+                        userName = userName!!,
+                        userMobileNumber = subscription.phoneNumber,
+                        transactionID = transactionID!!,
+                        transactionType = subscription.paymentMode,
+                        transactionAmount = subscription.estimateAmount,
+                        transactionDirection = SUBSCRIPTION,
+                        timestamp = System.currentTimeMillis(),
+                        transactionReason = "${subscription.productName} ${subscription.variantName} New Subscription"
+                    ).let { return@async createGlobalTransactionEntry(it) }
                 } else {
                     return@async true
                 }
@@ -1145,7 +1182,10 @@ class Firestore(
                 }
                 NetworkResult.Success("sub", "Subscription Created Successfully")
             } else {
-                NetworkResult.Failed("sub", "Server Error! Failed to create Subscription. Try Later")
+                NetworkResult.Failed(
+                    "sub",
+                    "Server Error! Failed to create Subscription. Try Later"
+                )
             }
         } catch (e: Exception) {
             e.message?.let { logCrash("firestore: Creating subscription parent job", it) }
@@ -1153,59 +1193,70 @@ class Firestore(
         }
     }
 
-    private suspend fun updateLocalSubscription(sub: SubscriptionEntity): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
-            ActiveSubscriptions(sub.id).also {
-                repository.upsertActiveSubscription(it)
+    private suspend fun updateLocalSubscription(sub: SubscriptionEntity): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                ActiveSubscriptions(sub.id).also {
+                    repository.upsertActiveSubscription(it)
+                }
+                val profile = repository.getProfileData()!!
+                if (!profile.subscribedMonths.contains(sub.monthYear)) {
+                    profile.subscribedMonths.add(sub.monthYear)
+                }
+                repository.upsertProfile(profile)
+                true
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: uploading subscription in local db", it) }
+                false
             }
-            val profile = repository.getProfileData()!!
-            if (!profile.subscribedMonths.contains(sub.monthYear)) {
-                profile.subscribedMonths.add(sub.monthYear)
+        }
+
+    private suspend fun updateStoreSubscription(sub: SubscriptionEntity): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                mFireStore.collection(SUBSCRIPTION).document(SUB_ACTIVE)
+                    .collection(SUB)
+                    .document(sub.id)
+                    .set(sub, SetOptions.merge())
+                    .await()
+                true
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: uploading subscription to store", it) }
+                false
             }
-            repository.upsertProfile(profile)
-            true
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: uploading subscription in local db", it) }
-            false
         }
-    }
 
-    private suspend fun updateStoreSubscription(sub: SubscriptionEntity): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
-            mFireStore.collection(SUBSCRIPTION).document(SUB_ACTIVE)
-                .collection(SUB)
-                .document(sub.id)
-                .set(sub, SetOptions.merge())
-                .await()
-            true
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: uploading subscription to store", it) }
-            false
+    private suspend fun updateCloudProfileSubscription(sub: SubscriptionEntity): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                mFireStore.collection(Constants.USERS)
+                    .document(sub.customerID)
+                    .update("subscribedMonths", FieldValue.arrayUnion(sub.monthYear)).await()
+                mFireStore.collection(Constants.USERS)
+                    .document(sub.customerID).update("subscriptions", FieldValue.arrayUnion(sub.id))
+                    .await()
+                true
+            } catch (e: Exception) {
+                e.message?.let {
+                    logCrash(
+                        "firestore: uploading subscription numbers in store profile",
+                        it
+                    )
+                }
+                false
+            }
         }
-    }
-
-    private suspend fun updateCloudProfileSubscription(sub: SubscriptionEntity): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
-            mFireStore.collection(Constants.USERS)
-                .document(sub.customerID)
-                .update("subscribedMonths", FieldValue.arrayUnion(sub.monthYear)).await()
-            mFireStore.collection(Constants.USERS)
-                .document(sub.customerID).update("subscriptions", FieldValue.arrayUnion(sub.id))
-                .await()
-            true
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: uploading subscription numbers in store profile", it) }
-            false
-        }
-    }
-
 
 
     //Renew subscription
-    suspend fun renewSubscription(sub: SubscriptionEntity, updatedCancelledDates: ArrayList<Long>): NetworkResult =
+    suspend fun renewSubscription(
+        sub: SubscriptionEntity,
+        updatedCancelledDates: ArrayList<Long>
+    ): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                val renewSubInFirestore = async { renewSubInFirestore(sub.id, sub.monthYear, sub.endDate) }
+                val renewSubInFirestore =
+                    async { renewSubInFirestore(sub.id, sub.monthYear, sub.endDate) }
                 val renewSubInLocalDB = async {
                     try {
                         repository.upsertSubscription(sub)
@@ -1263,7 +1314,6 @@ class Firestore(
                 false
             }
         }
-
 
 
     //wallet
@@ -1325,52 +1375,57 @@ class Firestore(
             }
         }
 
-    suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val currentUserID = if (id.isNullOrEmpty()) {
-                getCurrentUserId()!!
-            } else {
-                id
-            }
+    suspend fun makeTransactionFromWallet(amount: Float, id: String, status: String): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                val currentUserID = if (id.isNullOrEmpty()) {
+                    getCurrentUserId()!!
+                } else {
+                    id
+                }
                 val path = mFireStore.collection(WALLET)
                     .document(WALLET)
                     .collection("Users")
 
-                    mFireStore.runTransaction { transaction ->
-                        val wallet = transaction.get(path.document(currentUserID)).toObject(Wallet::class.java)
-                        if (status == "Add") {
-                            wallet!!.amount = wallet.amount + amount
-                            wallet.lastRecharge = System.currentTimeMillis()
-                            transaction.update(
-                                path.document(currentUserID),
-                                "amount",
-                                wallet.amount,
-                                "lastRecharge",
-                                wallet.lastRecharge
-                            )
-                            null
-                        } else {
-                            wallet!!.amount = wallet.amount - amount
-                            wallet.lastTransaction = System.currentTimeMillis()
-                            transaction.update(
-                                path.document(currentUserID),
-                                "amount",
-                                wallet.amount,
-                                "lastTransaction",
-                                wallet.lastTransaction
-                            )
-                            null
-                        }
+                mFireStore.runTransaction { transaction ->
+                    val wallet =
+                        transaction.get(path.document(currentUserID)).toObject(Wallet::class.java)
+                    if (status == "Add") {
+                        wallet!!.amount = wallet.amount + amount
+                        wallet.lastRecharge = System.currentTimeMillis()
+                        transaction.update(
+                            path.document(currentUserID),
+                            "amount",
+                            wallet.amount,
+                            "lastRecharge",
+                            wallet.lastRecharge
+                        )
+                        null
+                    } else {
+                        wallet!!.amount = wallet.amount - amount
+                        wallet.lastTransaction = System.currentTimeMillis()
+                        transaction.update(
+                            path.document(currentUserID),
+                            "amount",
+                            wallet.amount,
+                            "lastTransaction",
+                            wallet.lastTransaction
+                        )
+                        null
                     }
+                }
 
                 return@withContext true
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: Making transaction for purchase", it) }
-            return@withContext false
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: Making transaction for purchase", it) }
+                return@withContext false
+            }
         }
-    }
 
-    suspend fun updateTransaction(transaction: TransactionHistory, comments: String): NetworkResult =
+    suspend fun updateTransaction(
+        transaction: TransactionHistory,
+        comments: String
+    ): NetworkResult =
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val path = mFireStore.collection(WALLET)
@@ -1384,25 +1439,27 @@ class Firestore(
                     true
                 }
                 val makeGlobalTransactionEntry = async {
-                        val profile = mFireStore.collection(USERS).document(transaction.fromID).get().await().toObject(UserProfile::class.java)!!
-                        GlobalTransaction(
-                            id = "",
-                            userID = transaction.fromID,
-                            userName = profile.name,
-                            userMobileNumber = profile.phNumber,
-                            transactionID = transaction.id,
-                            transactionType = WALLET,
-                            transactionAmount = transaction.amount,
-                            transactionDirection = "Added Money to User Wallet",
-                            timestamp = transaction.timestamp,
-                            transactionReason = comments
-                        ).let {
+                    val profile =
+                        mFireStore.collection(USERS).document(transaction.fromID).get().await()
+                            .toObject(UserProfile::class.java)!!
+                    GlobalTransaction(
+                        id = "",
+                        userID = transaction.fromID,
+                        userName = profile.name,
+                        userMobileNumber = profile.phNumber,
+                        transactionID = transaction.id,
+                        transactionType = WALLET,
+                        transactionAmount = transaction.amount,
+                        transactionDirection = "Added Money to User Wallet",
+                        timestamp = transaction.timestamp,
+                        transactionReason = comments
+                    ).let {
 //                            if (transaction.purpose == ADD_MONEY) {
 //                                it.transactionReason = "This transaction may be Adding extra Money to Wallet or REFUND"
 //                            }
-                            createGlobalTransactionEntry(it)
-                        }
-                     }
+                        createGlobalTransactionEntry(it)
+                    }
+                }
                 if (
                     makeTransactionEntry.await() &&
                     makeGlobalTransactionEntry.await()
@@ -1424,79 +1481,85 @@ class Firestore(
             .document().id
 
 
-
     //notifications
-    private suspend fun createNewNotification(notification: UserNotification): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
-            mFireStore.collection(USER_NOTIFICATIONS)
-                .document(USER_NOTIFICATIONS)
-                .collection(notification.userID)
-                .document(notification.id)
-                .set(notification, SetOptions.merge())
-                .await()
-            true
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: deleteing user notification", it) }
-                false
-        }
-    }
-
-    suspend fun deleteNotification(notification: UserNotificationEntity): NetworkResult = withContext(Dispatchers.IO) {
-        return@withContext try {
-            val deleteNotificationByIDInStore = async {
+    private suspend fun createNewNotification(notification: UserNotification): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
                 mFireStore.collection(USER_NOTIFICATIONS)
                     .document(USER_NOTIFICATIONS)
                     .collection(notification.userID)
                     .document(notification.id)
-                    .delete().await()
+                    .set(notification, SetOptions.merge())
+                    .await()
+                true
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: deleteing user notification", it) }
+                false
             }
-            val deleteNotificationByIDInDB = async { repository.deleteNotificationsByID(notification.id) }
-            deleteNotificationByIDInStore.await()
-            deleteNotificationByIDInDB.await()
-            NetworkResult.Success("delete", "Notification removed")
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: deleteing user notification", it) }
-            NetworkResult.Failed("delete", "Server Error. Try again later")
         }
-    }
 
-    suspend fun clearAllNotifications(allNotifications:MutableList<UserNotificationEntity>): NetworkResult = withContext(Dispatchers.IO) {
-        return@withContext try {
-            val deleteAllNotificationInStore = async { val path =
-                mFireStore.collection(USER_NOTIFICATIONS)
-                    .document(USER_NOTIFICATIONS)
-                    .collection(allNotifications[0].userID)
-                for (notification in allNotifications) {
-                    path
+    suspend fun deleteNotification(notification: UserNotificationEntity): NetworkResult =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val deleteNotificationByIDInStore = async {
+                    mFireStore.collection(USER_NOTIFICATIONS)
+                        .document(USER_NOTIFICATIONS)
+                        .collection(notification.userID)
                         .document(notification.id)
-                        .delete()
+                        .delete().await()
                 }
+                val deleteNotificationByIDInDB =
+                    async { repository.deleteNotificationsByID(notification.id) }
+                deleteNotificationByIDInStore.await()
+                deleteNotificationByIDInDB.await()
+                NetworkResult.Success("delete", "Notification removed")
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: deleteing user notification", it) }
+                NetworkResult.Failed("delete", "Server Error. Try again later")
             }
-            val deleteAllNotificationInDB = async { repository.deleteAllNotifications() }
-
-            deleteAllNotificationInStore.await()
-            deleteAllNotificationInDB.await()
-
-            NetworkResult.Success("deleteAll", "Notifications cleared")
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: deleteing all user notification", it) }
-            NetworkResult.Failed("deleteAll", "Server Error. Try again later")
         }
-    }
 
-    suspend fun updateNotifications(userID: String): Boolean = withContext(Dispatchers.IO){
+    suspend fun clearAllNotifications(allNotifications: MutableList<UserNotificationEntity>): NetworkResult =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val deleteAllNotificationInStore = async {
+                    val path =
+                        mFireStore.collection(USER_NOTIFICATIONS)
+                            .document(USER_NOTIFICATIONS)
+                            .collection(allNotifications[0].userID)
+                    for (notification in allNotifications) {
+                        path
+                            .document(notification.id)
+                            .delete()
+                    }
+                }
+                val deleteAllNotificationInDB = async { repository.deleteAllNotifications() }
+
+                deleteAllNotificationInStore.await()
+                deleteAllNotificationInDB.await()
+
+                NetworkResult.Success("deleteAll", "Notifications cleared")
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: deleteing all user notification", it) }
+                NetworkResult.Failed("deleteAll", "Server Error. Try again later")
+            }
+        }
+
+    suspend fun updateNotifications(userID: String): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
             val notificationsDoc = mFireStore.collection(USER_NOTIFICATIONS)
                 .document(USER_NOTIFICATIONS)
                 .collection(userID)
-                .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get().await()
+                .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get()
+                .await()
 
             repository.deleteAllNotifications()
 
             for (doc in notificationsDoc.documents) {
                 val notification = doc.toObject(UserNotification::class.java)
                 notification!!.id = doc.id
-                val notificationEntity: UserNotificationEntity = notification.toUserNotificationEntity()
+                val notificationEntity: UserNotificationEntity =
+                    notification.toUserNotificationEntity()
                 repository.upsertNotification(notificationEntity)
             }
             true
@@ -1578,23 +1641,26 @@ class Firestore(
         }
     }
 
-    suspend fun createGlobalTransactionEntry(globalTransaction: GlobalTransaction): Boolean = withContext(Dispatchers.IO) {
-        return@withContext try {
-            val docID = "${TimeUtil().getMonth(globalTransaction.timestamp)}${TimeUtil().getYear(globalTransaction.timestamp)}"
-            val dateFormat = SimpleDateFormat("dd")
-            val collectionID = "${dateFormat.format(globalTransaction.timestamp)}"
-            mFireStore.collection("GlobalTransaction")
-                .document(docID)
-                .collection(collectionID)
-                .document()
-                .set(globalTransaction, SetOptions.merge())
-                .await()
-            true
-        } catch (e: Exception) {
-            e.message?.let { logCrash("firestore: adding a global transaction entry", it) }
-            false
+    suspend fun createGlobalTransactionEntry(globalTransaction: GlobalTransaction): Boolean =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val docID = "${TimeUtil().getMonth(globalTransaction.timestamp)}${
+                    TimeUtil().getYear(globalTransaction.timestamp)
+                }"
+                val dateFormat = SimpleDateFormat("dd")
+                val collectionID = "${dateFormat.format(globalTransaction.timestamp)}"
+                mFireStore.collection("GlobalTransaction")
+                    .document(docID)
+                    .collection(collectionID)
+                    .document()
+                    .set(globalTransaction, SetOptions.merge())
+                    .await()
+                true
+            } catch (e: Exception) {
+                e.message?.let { logCrash("firestore: adding a global transaction entry", it) }
+                false
+            }
         }
-    }
 
 
     suspend fun getAllCWMDishes(): NetworkResult = withContext(Dispatchers.IO) {
@@ -1635,13 +1701,13 @@ class Firestore(
                 NetworkResult.Failed("dish", "Dish Details not available")
             }
 
-        } catch (e: Exception){
+        } catch (e: Exception) {
             e.message?.let { logCrash("firestore: getting the dish details from store", it) }
             NetworkResult.Failed("dish", "Server Error! Failed to get Details")
         }
     }
 
-    suspend fun updateBirthdayCard(customerID: String) = withContext(Dispatchers.IO){
+    suspend fun updateBirthdayCard(customerID: String) = withContext(Dispatchers.IO) {
         try {
             mFireStore
                 .collection(USERS)
@@ -1714,7 +1780,7 @@ class Firestore(
         }
     }
 
-    suspend fun getFreeDeliveryLimit(): Float? = withContext(Dispatchers.IO){
+    suspend fun getFreeDeliveryLimit(): Float? = withContext(Dispatchers.IO) {
         return@withContext try {
             val doc = mFireStore
                 .collection(ORDER_HISTORY)

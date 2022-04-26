@@ -1,312 +1,335 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    >
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.signin.SignInActivity"
-    android:background="@color/green_base">
-
-    <ImageView
-        android:id="@+id/ivApple"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_apple"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@id/ivBanana"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivBanana"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:background="@drawable/ic_banana"
-        app:layout_constraintStart_toEndOf="@id/ivApple"
-        app:layout_constraintEnd_toStartOf="@id/ivBeet"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivBeet"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:background="@drawable/ic_beet"
-        app:layout_constraintStart_toEndOf="@id/ivBanana"
-        app:layout_constraintEnd_toStartOf="@id/ivBroccoli"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivBroccoli"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_broccoli"
-        app:layout_constraintStart_toEndOf="@id/ivBeet"
-        app:layout_constraintEnd_toStartOf="@id/ivCarrot"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivCarrot"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_carrot"
-        app:layout_constraintStart_toEndOf="@id/ivBroccoli"
-        app:layout_constraintEnd_toStartOf="@id/ivChili"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivChili"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_chili"
-        app:layout_constraintStart_toEndOf="@id/ivCarrot"
-        app:layout_constraintEnd_toStartOf="@id/ivLemon"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivLemon"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_lemon"
-        app:layout_constraintStart_toEndOf="@id/ivChili"
-        app:layout_constraintEnd_toStartOf="@id/ivMilk"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivMilk"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_milk"
-        app:layout_constraintStart_toEndOf="@id/ivLemon"
-        app:layout_constraintEnd_toStartOf="@id/ivPear"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivPear"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_pear"
-        app:layout_constraintStart_toEndOf="@id/ivMilk"
-        app:layout_constraintEnd_toStartOf="@id/ivPotato"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivPotato"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:background="@drawable/ic_potato"
-        app:layout_constraintStart_toEndOf="@id/ivPear"
-        app:layout_constraintEnd_toStartOf="@id/ivTomato"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivTomato"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_tomato"
-        android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@id/ivPotato"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivAppleOne"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_apple"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@id/ivBananaOne"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivBananaOne"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:background="@drawable/ic_banana"
-        app:layout_constraintStart_toEndOf="@id/ivAppleOne"
-        app:layout_constraintEnd_toStartOf="@id/ivBeetOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivBeetOne"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:background="@drawable/ic_beet"
-        app:layout_constraintStart_toEndOf="@id/ivBananaOne"
-        app:layout_constraintEnd_toStartOf="@id/ivBroccoliOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivBroccoliOne"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_broccoli"
-        app:layout_constraintStart_toEndOf="@id/ivBeetOne"
-        app:layout_constraintEnd_toStartOf="@id/ivCarrotOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivCarrotOne"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_carrot"
-        app:layout_constraintStart_toEndOf="@id/ivBroccoliOne"
-        app:layout_constraintEnd_toStartOf="@id/ivChiliOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivChiliOne"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_chili"
-        app:layout_constraintStart_toEndOf="@id/ivCarrotOne"
-        app:layout_constraintEnd_toStartOf="@id/ivLemonOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivLemonOne"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_lemon"
-        app:layout_constraintStart_toEndOf="@id/ivChiliOne"
-        app:layout_constraintEnd_toStartOf="@id/ivMilkOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivMilkOne"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_milk"
-        app:layout_constraintStart_toEndOf="@id/ivLemonOne"
-        app:layout_constraintEnd_toStartOf="@id/ivPearOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivPearOne"
-        android:layout_width="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_pear"
-        app:layout_constraintStart_toEndOf="@id/ivMilkOne"
-        app:layout_constraintEnd_toStartOf="@id/ivPotatoOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivPotatoOne"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:visibility="invisible"
-        android:background="@drawable/ic_potato"
-        app:layout_constraintStart_toEndOf="@id/ivPearOne"
-        app:layout_constraintEnd_toStartOf="@id/ivTomatoOne"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivTomatoOne"
-        android:layout_width="@dimen/material_size_24"
-        android:layout_height="@dimen/material_size_24"
-        android:background="@drawable/ic_tomato"
-        android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@id/ivPotatoOne"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <ImageView
-        android:id="@+id/ivBagOne"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_percent=".45"
-        app:layout_constraintHeight_percent=".25"
-        android:background="@drawable/ic_bag_six"
-        android:layout_marginStart="-36dp"
-        android:layout_marginBottom="-32dp"
-        android:visibility="invisible"
-        android:elevation="@dimen/material_size_2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-    <ImageView
-        android:id="@+id/ivBagTwo"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_percent=".45"
-        app:layout_constraintHeight_percent=".25"
-        android:background="@drawable/ic_bag_three"
-        android:visibility="invisible"
-        android:layout_marginStart="-54dp"
-        android:layout_marginBottom="-18dp"
-        app:layout_constraintStart_toEndOf="@id/ivBagOne"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-    <ImageView
-        android:id="@+id/ivBagThree"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_percent=".45"
-        app:layout_constraintHeight_percent=".25"
-        android:background="@drawable/ic_bag_five"
-        android:layout_marginStart="-72dp"
-        android:visibility="invisible"
-        android:layout_marginBottom="-16dp"
-        app:layout_constraintStart_toEndOf="@id/ivBagTwo"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-    <ImageView
-        android:id="@+id/ivBagFour"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_percent=".45"
-        app:layout_constraintHeight_percent=".25"
-        android:background="@drawable/ic_bag_four"
-        android:layout_marginStart="-58dp"
-        android:visibility="invisible"
-        android:layout_marginBottom="-16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ivBagTwo"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <ImageView
-        android:id="@+id/ivLogo"
-        android:layout_width="250dp"
-        android:layout_height="200dp"
-        android:visibility="invisible"
-        android:elevation="@dimen/material_size_16"
-        android:background="@drawable/ic_app_shadow"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="@dimen/material_size_64" />
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clBody"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:elevation="@dimen/material_size_16"
-        android:layout_marginStart="@dimen/material_size_16"
-        android:layout_marginEnd="@dimen/material_size_16"
-        app:layout_constraintBottom_toTopOf="@id/ivBagTwo"
-        android:background="@drawable/shape_round_rectangle_16"
-        android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@id/ivLogo"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/green_base"
+        tools:context=".ui.signin.SignInActivity">
 
-        <TextView
-            android:id="@+id/tvHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:text="ENTER YOUR MOBILE NUMBER"
-            android:fontFamily="@font/baloo"
-            android:textColor="@color/matteRed"
-            android:layout_marginTop="@dimen/material_size_32"
-            app:layout_constraintTop_toTopOf="parent"
+        <ImageView
+            android:id="@+id/ivApple"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_apple"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivBanana"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivBanana"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_banana"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivBeet"
+            app:layout_constraintStart_toEndOf="@id/ivApple"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivBeet"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_beet"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivBroccoli"
+            app:layout_constraintStart_toEndOf="@id/ivBanana"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivBroccoli"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_broccoli"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivCarrot"
+            app:layout_constraintStart_toEndOf="@id/ivBeet"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivCarrot"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_carrot"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivChili"
+            app:layout_constraintStart_toEndOf="@id/ivBroccoli"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivChili"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_chili"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivLemon"
+            app:layout_constraintStart_toEndOf="@id/ivCarrot"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivLemon"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_lemon"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivMilk"
+            app:layout_constraintStart_toEndOf="@id/ivChili"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivMilk"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_milk"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivPear"
+            app:layout_constraintStart_toEndOf="@id/ivLemon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivPear"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_pear"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivPotato"
+            app:layout_constraintStart_toEndOf="@id/ivMilk"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivPotato"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_potato"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivTomato"
+            app:layout_constraintStart_toEndOf="@id/ivPear"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivTomato"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_tomato"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivPotato"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivAppleOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_apple"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivBananaOne"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivBananaOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_banana"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivBeetOne"
+            app:layout_constraintStart_toEndOf="@id/ivAppleOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivBeetOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_beet"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivBroccoliOne"
+            app:layout_constraintStart_toEndOf="@id/ivBananaOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivBroccoliOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_broccoli"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivCarrotOne"
+            app:layout_constraintStart_toEndOf="@id/ivBeetOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivCarrotOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_carrot"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivChiliOne"
+            app:layout_constraintStart_toEndOf="@id/ivBroccoliOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivChiliOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_chili"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivLemonOne"
+            app:layout_constraintStart_toEndOf="@id/ivCarrotOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivLemonOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_lemon"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivMilkOne"
+            app:layout_constraintStart_toEndOf="@id/ivChiliOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivMilkOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_milk"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivPearOne"
+            app:layout_constraintStart_toEndOf="@id/ivLemonOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivPearOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_pear"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivPotatoOne"
+            app:layout_constraintStart_toEndOf="@id/ivMilkOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivPotatoOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_potato"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toStartOf="@id/ivTomatoOne"
+            app:layout_constraintStart_toEndOf="@id/ivPearOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivTomatoOne"
+            android:layout_width="@dimen/material_size_24"
+            android:layout_height="@dimen/material_size_24"
+            android:background="@drawable/ic_tomato"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivPotatoOne"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivBagOne"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="-36dp"
+            android:layout_marginBottom="-32dp"
+            android:background="@drawable/ic_bag_six"
+            android:elevation="@dimen/material_size_2"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent=".25"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent=".45" />
+
+        <ImageView
+            android:id="@+id/ivBagTwo"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="-54dp"
+            android:layout_marginBottom="-18dp"
+            android:background="@drawable/ic_bag_three"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent=".25"
+            app:layout_constraintStart_toEndOf="@id/ivBagOne"
+            app:layout_constraintWidth_percent=".45" />
+
+        <ImageView
+            android:id="@+id/ivBagThree"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="-72dp"
+            android:layout_marginBottom="-16dp"
+            android:background="@drawable/ic_bag_five"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHeight_percent=".25"
+            app:layout_constraintStart_toEndOf="@id/ivBagTwo"
+            app:layout_constraintWidth_percent=".45" />
+
+        <ImageView
+            android:id="@+id/ivBagFour"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="-58dp"
+            android:layout_marginBottom="-16dp"
+            android:background="@drawable/ic_bag_four"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent=".25"
+            app:layout_constraintStart_toEndOf="@id/ivBagTwo"
+            app:layout_constraintWidth_percent=".45" />
+
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="250dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="@dimen/material_size_64"
+            android:background="@drawable/ic_app_shadow"
+            android:elevation="@dimen/material_size_16"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clBody"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/material_size_16"
+            android:layout_marginEnd="@dimen/material_size_16"
+            android:background="@drawable/shape_round_rectangle_16"
+            android:elevation="@dimen/material_size_16"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@id/ivBagTwo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivLogo">
+
+            <TextView
+                android:id="@+id/tvHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_32"
+                android:fontFamily="@font/baloo"
+                android:text="ENTER YOUR MOBILE NUMBER"
+                android:textColor="@color/matteRed"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
                 android:id="@+id/llPreOTP"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginTop="@dimen/material_size_16"
-                android:visibility="invisible"
+                android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHeight_percent="0.7"
@@ -320,35 +343,33 @@
                     android:orientation="vertical">
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/eltPhoneNumberPreOTP"
+                        android:id="@+id/etlPhoneNumber"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="32dp"
                         android:layout_marginRight="32dp"
                         android:hint="Number"
+                        app:boxStrokeColor="@color/matteRed"
                         app:counterEnabled="true"
-                        app:prefixText="+91"
-                        app:prefixTextColor="@color/green_base"
                         app:counterMaxLength="10"
                         app:endIconMode="clear_text"
-                        app:startIconTint="@color/matteRed"
-                        app:startIconDrawable="@drawable/ic_phone_msg"
-                        app:boxStrokeColor="@color/matteRed"
                         app:hintTextColor="@color/matteRed"
-                        >
+                        app:prefixText="+91"
+                        app:prefixTextColor="@color/green_base"
+                        app:startIconDrawable="@drawable/ic_phone_msg"
+                        app:startIconTint="@color/matteRed">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etPhoneNumberPreOTP"
+                            android:id="@+id/etPhoneNumber"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:maxLength="10"
-                            android:inputType="number"
                             android:cursorVisible="true"
-                            android:textCursorDrawable="@null"
-                            android:textColorHint="@color/gray700"
+                            android:inputType="number"
+                            android:maxLength="10"
                             android:textColor="@color/green_base"
-                            />
+                            android:textColorHint="@color/gray700"
+                            android:textCursorDrawable="@null" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -356,150 +377,128 @@
                         android:id="@+id/tvTerms"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/by_signing_in_you_indicate_that_you_have_read_and_agreed_to_our_terms_of_service_and_privacy_policy"
-                        android:gravity="center"
-                        android:textSize="10sp"
-                        android:textColor="@color/green_base"
                         android:layout_marginTop="16dp"
-                        android:paddingRight="@dimen/material_size_24"
+                        android:gravity="center"
                         android:paddingLeft="@dimen/material_size_24"
-                        />
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:weightSum="4"
-                        android:gravity="center"
-                        >
+                        android:paddingRight="@dimen/material_size_24"
+                        android:text="@string/by_signing_in_you_indicate_that_you_have_read_and_agreed_to_our_terms_of_service_and_privacy_policy"
+                        android:textColor="@color/green_base"
+                        android:textSize="10sp" />
+
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSendOTP"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/send_otp"
-                        android:background="@drawable/shape_round_rectangle_8"
-                        android:layout_marginTop="16dp"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="@dimen/material_size_16"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="@dimen/material_size_16"
-                        android:textColor="@color/white"
-                        app:backgroundTint="@color/matteRed"/>
-                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnGoogleLogIn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                         android:layout_weight="1"
-                         android:text="Google"
-                         android:layout_marginStart="@dimen/material_size_16"
-                         android:background="@drawable/shape_round_rectangle_8"
                         android:layout_marginTop="16dp"
-                         app:backgroundTint="@color/matteRed"
-                        android:textStyle="bold"
                         android:layout_marginBottom="@dimen/material_size_16"
+                        android:layout_weight="1"
+                        android:background="@drawable/shape_round_rectangle_8"
+                        android:text="Google Sign IN"
                         android:textColor="@color/white"
-                        />
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/matteRed" />
 
-                    </LinearLayout>
+                    <!--                    </LinearLayout>-->
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/llPostOTP"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="@dimen/material_size_16"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:visibility="invisible"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvHeader">
+            <!--            <LinearLayout-->
+            <!--                android:id="@+id/llPostOTP"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:orientation="vertical"-->
+            <!--                android:layout_marginTop="@dimen/material_size_16"-->
+            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                android:visibility="invisible"-->
+            <!--                app:layout_constraintEnd_toEndOf="parent"-->
+            <!--                app:layout_constraintStart_toStartOf="parent"-->
+            <!--                app:layout_constraintTop_toBottomOf="@id/tvHeader">-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    >
+            <!--                <LinearLayout-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:gravity="center"-->
+            <!--                    android:orientation="vertical"-->
+            <!--                    >-->
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/eltPhoneNumberPostOTP"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="250dp"
-                        android:layout_height="wrap_content"
-                        android:hint="OTP"
-                        app:endIconMode="password_toggle"
-                        app:startIconDrawable="@drawable/ic_phone_msg"
-                        app:startIconTint="@color/matteRed"
-                        app:passwordToggleTint="@color/matteRed"
-                        app:boxStrokeColor="@color/matteRed"
-                        app:hintTextColor="@color/matteRed"
-                        >
+            <!--                    <com.google.android.material.textfield.TextInputLayout-->
+            <!--                        android:id="@+id/eltPhoneNumberPostOTP"-->
+            <!--                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
+            <!--                        android:layout_width="250dp"-->
+            <!--                        android:layout_height="wrap_content"-->
+            <!--                        android:hint="OTP"-->
+            <!--                        app:endIconMode="password_toggle"-->
+            <!--                        app:startIconDrawable="@drawable/ic_phone_msg"-->
+            <!--                        app:startIconTint="@color/matteRed"-->
+            <!--                        app:passwordToggleTint="@color/matteRed"-->
+            <!--                        app:boxStrokeColor="@color/matteRed"-->
+            <!--                        app:hintTextColor="@color/matteRed"-->
+            <!--                        >-->
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etPhoneNumberPostOTP"
-                            android:layout_width="250dp"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:maxLength="10"
-                            android:cursorVisible="true"
-                            android:textCursorDrawable="@null"
-                            android:textColorHint="@color/green_base"
-                            android:textColor="@color/green_base"/>
+            <!--                        <com.google.android.material.textfield.TextInputEditText-->
+            <!--                            android:id="@+id/etPhoneNumberPostOTP"-->
+            <!--                            android:layout_width="250dp"-->
+            <!--                            android:layout_height="wrap_content"-->
+            <!--                            android:inputType="number"-->
+            <!--                            android:maxLength="10"-->
+            <!--                            android:cursorVisible="true"-->
+            <!--                            android:textCursorDrawable="@null"-->
+            <!--                            android:textColorHint="@color/green_base"-->
+            <!--                            android:textColor="@color/green_base"/>-->
 
-                    </com.google.android.material.textfield.TextInputLayout>
+            <!--                    </com.google.android.material.textfield.TextInputLayout>-->
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:padding="8dp"
-                        android:paddingBottom="40dp">
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnResend"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:elevation="20dp"
-                            android:layout_marginRight="8dp"
-                            android:layout_marginTop="8dp"
-                            android:text="@string/resend_otp"
-                            android:background="@drawable/shape_round_rectangle_8"
-                            android:textStyle="bold"
-                            android:textColor="@color/white"
-                            app:backgroundTint="@color/green_base" />
+            <!--                    <LinearLayout-->
+            <!--                        android:layout_width="wrap_content"-->
+            <!--                        android:layout_height="match_parent"-->
+            <!--                        android:orientation="horizontal"-->
+            <!--                        android:padding="8dp"-->
+            <!--                        android:paddingBottom="40dp">-->
+            <!--                        <com.google.android.material.button.MaterialButton-->
+            <!--                            android:id="@+id/btnResend"-->
+            <!--                            android:layout_width="wrap_content"-->
+            <!--                            android:layout_height="wrap_content"-->
+            <!--                            android:elevation="20dp"-->
+            <!--                            android:layout_marginRight="8dp"-->
+            <!--                            android:layout_marginTop="8dp"-->
+            <!--                            android:text="@string/resend_otp"-->
+            <!--                            android:background="@drawable/shape_round_rectangle_8"-->
+            <!--                            android:textStyle="bold"-->
+            <!--                            android:textColor="@color/white"-->
+            <!--                            app:backgroundTint="@color/green_base" />-->
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnVerify"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:elevation="20dp"
-                            android:layout_marginLeft="8dp"
-                            android:layout_marginTop="8dp"
-                            android:text="BACK"
-                            android:background="@drawable/shape_round_rectangle_8"
-                            android:textStyle="bold"
-                            android:textColor="@color/white"
-                            app:backgroundTint="@color/matteRed"
-                            />
-                    </LinearLayout>
+            <!--                        <com.google.android.material.button.MaterialButton-->
+            <!--                            android:id="@+id/btnVerify"-->
+            <!--                            android:layout_width="wrap_content"-->
+            <!--                            android:layout_height="wrap_content"-->
+            <!--                            android:elevation="20dp"-->
+            <!--                            android:layout_marginLeft="8dp"-->
+            <!--                            android:layout_marginTop="8dp"-->
+            <!--                            android:text="BACK"-->
+            <!--                            android:background="@drawable/shape_round_rectangle_8"-->
+            <!--                            android:textStyle="bold"-->
+            <!--                            android:textColor="@color/white"-->
+            <!--                            app:backgroundTint="@color/matteRed"-->
+            <!--                            />-->
+            <!--                    </LinearLayout>-->
 
-                    <ticker.views.com.ticker.widgets.circular.timer.view.CircularView
-                        android:visibility="invisible"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/cvTimer"
-                        app:m_circle_radius="25"
-                        app:m_cicle_stroke_width="14"
-                        android:layout_marginBottom="@dimen/material_size_16"
-                        app:m_arc_stroke_color="@color/matteRed"
-                        android:textColor="@color/green_base"
-                        />
-                </LinearLayout>
+            <!--                    <ticker.views.com.ticker.widgets.circular.timer.view.CircularView-->
+            <!--                        android:visibility="invisible"-->
+            <!--                        android:layout_width="wrap_content"-->
+            <!--                        android:layout_height="wrap_content"-->
+            <!--                        android:id="@+id/cvTimer"-->
+            <!--                        app:m_circle_radius="25"-->
+            <!--                        app:m_cicle_stroke_width="14"-->
+            <!--                        android:layout_marginBottom="@dimen/material_size_16"-->
+            <!--                        app:m_arc_stroke_color="@color/matteRed"-->
+            <!--                        android:textColor="@color/green_base"-->
+            <!--                        />-->
+            <!--                </LinearLayout>-->
 
-            </LinearLayout>
+            <!--            </LinearLayout>-->
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
