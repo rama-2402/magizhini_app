@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class QuickOrderUseCase(
     private val fbRepository: FirestoreRepository
@@ -39,27 +40,49 @@ class QuickOrderUseCase(
 
     private var quickOrder: QuickOrder? = null
 
-    fun sendGetEstimateRequest (
+    fun sendGetEstimateRequest(
         orderListUri: List<Uri>,
+        textItemsList: List<QuickOrderTextItem>,
+        audioUri: String?,
         detailsMap: HashMap<String, String>
-        ): Flow<NetworkResult> =
+    ): Flow<NetworkResult> =
         flow {
             emit(NetworkResult.Success("starting", null))
 
             val imageUrl = arrayListOf<String>()
-
+            var audioUrl: String = ""
             try {
                 delay(1000)
-                for (i in orderListUri.indices) {
-                    emit(NetworkResult.Success("uploading", i + 1))
-                    val reference: StorageReference = firebaseStorage.child(
-                        "${ORDER_ESTIMATE_PATH}${detailsMap["id"]}/Page${i + 1}.jpg"
-                    )
+                when (detailsMap["quickOrderType"]) {
+                    "image" -> {
+                        for (i in orderListUri.indices) {
+                            emit(NetworkResult.Success("uploading", "Uploading Page ${i + 1}..."))
+                            val reference: StorageReference = firebaseStorage.child(
+                                "${ORDER_ESTIMATE_PATH}${detailsMap["id"]}/Page${i + 1}.jpg"
+                            )
 
-                    val url = reference.putFile(orderListUri[i])
-                        .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
+                            val url = reference.putFile(orderListUri[i])
+                                .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
 
-                    imageUrl.add(url.toString())
+                            imageUrl.add(url.toString())
+                        }
+                    }
+                    "voice" -> {
+                        audioUrl = audioUri?.let {
+                            //upload the audio in storage and put the url
+                            emit(NetworkResult.Success("uploading", "Uploading Audio..."))
+                            val reference: StorageReference = firebaseStorage.child(
+                                "${ORDER_ESTIMATE_PATH}${detailsMap["id"]}/quickOrder.m4a"
+                            )
+
+                            val uri: Uri = Uri.fromFile(File(it))
+
+                            val url = reference.putFile(uri)
+                                .await().task.snapshot.metadata!!.reference!!.downloadUrl.await()
+
+                            url.toString()
+                        } ?: ""
+                    }
                 }
 
                 quickOrder = QuickOrder(
@@ -71,6 +94,9 @@ class QuickOrderUseCase(
                     timeStamp = System.currentTimeMillis(),
                     cart = arrayListOf(),
                     imageUrl = imageUrl,
+                    textItemsList = textItemsList as ArrayList<QuickOrderTextItem>,
+                    audioFileUrl = audioUrl,
+                    orderType = detailsMap["quickOrderType"].toString(),
                     note = "",
                     orderPlaced = false
                 )
@@ -97,8 +123,9 @@ class QuickOrderUseCase(
             }
         }.flowOn(Dispatchers.IO)
 
-    suspend fun checkForPreviousEstimate(userID: String): NetworkResult = withContext(Dispatchers.IO) {
-        return@withContext try {
+    suspend fun checkForPreviousEstimate(userID: String): NetworkResult =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
                 val quickOrderDoc = fireStore
                     .collection(QUICK_ORDER)
                     .document(userID)
@@ -122,73 +149,92 @@ class QuickOrderUseCase(
         purpose: String,
         cart: ArrayList<CartEntity>,
         isQuickOrder: Boolean
-        ): Flow<NetworkResult> =
-            flow<NetworkResult> {
-                try {
+    ): Flow<NetworkResult> =
+        flow<NetworkResult> {
+            try {
 
-                    emit(NetworkResult.Success("transaction", "Making payment from wallet... "))
+                emit(NetworkResult.Success("transaction", "Making payment from wallet... "))
 
-                    if (
-                        fbRepository.makeTransactionFromWallet(amount, orderDetailsMap["userID"].toString(), "Remove")
-                    ) {
-                        TransactionHistory(
-                            id = orderDetailsMap["orderID"].toString(),
-                            timestamp = System.currentTimeMillis(),
-                            month = TimeUtil().getMonth(),
-                            year = TimeUtil().getYear().toLong(),
-                            amount = amount,
-                            fromID = orderDetailsMap["userID"].toString(),
-                            fromUPI = orderDetailsMap["userID"].toString(),
-                            status = SUCCESS,
-                            purpose = purpose,
-                            transactionFor = orderDetailsMap["orderID"].toString(),
-                        ).let {
-                            val transactionID = makeTransactionEntry(it)
-                            if (transactionID == "failed") {
-                                emit(NetworkResult.Failed("wallet", "Server Error! Failed to make transaction"))
-                                return@flow
-                            } else {
-                                PushNotificationUseCase(fbRepository).sendPushNotification(
-                                    orderDetailsMap["userID"].toString(),
-                                    "New Payment from Magizhini Wallet",
-                                    "You have paid Rs: ${amount} for your recent Magizhini purchase with Order ID: ${orderDetailsMap["orderID"].toString()}",
-                                    WALLET_PAGE
+                if (
+                    fbRepository.makeTransactionFromWallet(
+                        amount,
+                        orderDetailsMap["userID"].toString(),
+                        "Remove"
+                    )
+                ) {
+                    TransactionHistory(
+                        id = orderDetailsMap["orderID"].toString(),
+                        timestamp = System.currentTimeMillis(),
+                        month = TimeUtil().getMonth(),
+                        year = TimeUtil().getYear().toLong(),
+                        amount = amount,
+                        fromID = orderDetailsMap["userID"].toString(),
+                        fromUPI = orderDetailsMap["userID"].toString(),
+                        status = SUCCESS,
+                        purpose = purpose,
+                        transactionFor = orderDetailsMap["orderID"].toString(),
+                    ).let {
+                        val transactionID = makeTransactionEntry(it)
+                        if (transactionID == "failed") {
+                            emit(
+                                NetworkResult.Failed(
+                                    "wallet",
+                                    "Server Error! Failed to make transaction"
                                 )
-                                delay(1000)
-                                emit(NetworkResult.Success("order", "Placing order..."))
-                                val transactionMap: HashMap<String, Any> = hashMapOf()
-                                transactionMap["transactionID"] = transactionID
-                                transactionMap["amount"] = amount
-                                transactionMap["paymentMode"] = "Wallet"
-                                transactionMap["paymentDone"] = true
-                                if (placeOrder(transactionMap, orderDetailsMap, cart, isQuickOrder)) {
-                                    if (isQuickOrder) {
-                                        updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
-                                    }
-                                    delay(1000)
-                                    emit(NetworkResult.Success("success", "Order Placed Successfully..."))
-                                } else {
-                                    delay(1000)
-                                    emit(NetworkResult.Failed("order", "Server Error! Failed to place order"))
-                                    return@flow
+                            )
+                            return@flow
+                        } else {
+                            PushNotificationUseCase(fbRepository).sendPushNotification(
+                                orderDetailsMap["userID"].toString(),
+                                "New Payment from Magizhini Wallet",
+                                "You have paid Rs: ${amount} for your recent Magizhini purchase with Order ID: ${orderDetailsMap["orderID"].toString()}",
+                                WALLET_PAGE
+                            )
+                            delay(1000)
+                            emit(NetworkResult.Success("order", "Placing order..."))
+                            val transactionMap: HashMap<String, Any> = hashMapOf()
+                            transactionMap["transactionID"] = transactionID
+                            transactionMap["amount"] = amount
+                            transactionMap["paymentMode"] = "Wallet"
+                            transactionMap["paymentDone"] = true
+                            if (placeOrder(transactionMap, orderDetailsMap, cart, isQuickOrder)) {
+                                if (isQuickOrder) {
+                                    updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
                                 }
+                                delay(1000)
+                                emit(
+                                    NetworkResult.Success(
+                                        "success",
+                                        "Order Placed Successfully..."
+                                    )
+                                )
+                            } else {
+                                delay(1000)
+                                emit(
+                                    NetworkResult.Failed(
+                                        "order",
+                                        "Server Error! Failed to place order"
+                                    )
+                                )
+                                return@flow
                             }
                         }
-                    } else {
-                        delay(1000)
-                        emit(NetworkResult.Failed("wallet", "Server Error! Failed to make transaction"))
-                        return@flow
                     }
-                } catch (e: Exception) {
+                } else {
                     delay(1000)
-                    emit(NetworkResult.Failed("wallet", e.message.toString()))
+                    emit(NetworkResult.Failed("wallet", "Server Error! Failed to make transaction"))
+                    return@flow
                 }
-            }.flowOn(Dispatchers.IO)
-
+            } catch (e: Exception) {
+                delay(1000)
+                emit(NetworkResult.Failed("wallet", e.message.toString()))
+            }
+        }.flowOn(Dispatchers.IO)
 
     private suspend fun makeTransactionEntry(transactionHistory: TransactionHistory): String {
         return try {
-            when(val result = fbRepository.updateTransaction(transactionHistory, "Quick Order Purchase")) {
+            when (val result =
+                fbRepository.updateTransaction(transactionHistory, "Quick Order Purchase")) {
                 is NetworkResult.Success -> result.data.toString()
                 is NetworkResult.Failed -> "failed"
                 else -> "failed"
@@ -221,11 +267,12 @@ class QuickOrderUseCase(
                     timestamp = System.currentTimeMillis(),
                     transactionReason = reason
                 ).let {
-                    if(fbRepository.createGlobalTransactionEntry(it)) {
+                    if (fbRepository.createGlobalTransactionEntry(it)) {
                         emit(NetworkResult.Success("placing", null))
 
                         val transactionMap: HashMap<String, Any> = hashMapOf()
-                        transactionMap["transactionID"] = orderDetailsMap["transactionID"].toString()
+                        transactionMap["transactionID"] =
+                            orderDetailsMap["transactionID"].toString()
                         transactionMap["paymentMode"] = "Online"
                         transactionMap["paymentDone"] = true
                         transactionMap["amount"] = amount
@@ -235,7 +282,8 @@ class QuickOrderUseCase(
                                 orderDetailsMap,
                                 cart,
                                 isQuickOrder
-                        )) {
+                            )
+                        ) {
                             if (isQuickOrder) {
                                 updateOrderPlacedInQuickOrder(orderDetailsMap["userID"].toString())
                             }
@@ -254,7 +302,6 @@ class QuickOrderUseCase(
                 emit(NetworkResult.Failed("transaction", null))
             }
         }.flowOn(Dispatchers.IO)
-
 
     suspend fun placeCashOnDeliveryOrder(
         orderDetailsMap: HashMap<String, Any>,
@@ -322,7 +369,7 @@ class QuickOrderUseCase(
                         it.extras.add(orderDetailsMap["referral"].toString())
                     }
                 }
-                when(fbRepository.placeOrder(it)) {
+                when (fbRepository.placeOrder(it)) {
                     is NetworkResult.Success -> {
                         PushNotificationUseCase(fbRepository).sendPushNotification(
                             it.customerId,
@@ -348,7 +395,7 @@ class QuickOrderUseCase(
     private suspend fun updateQuickOrderCart(
         cart: ArrayList<CartEntity>,
         customerID: String
-    ): Boolean = withContext(Dispatchers.IO){
+    ): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
             fireStore
                 .collection(QUICK_ORDER)
@@ -372,11 +419,12 @@ class QuickOrderUseCase(
         }
     }
 
-    private suspend fun deleteQuickOrder(userID: String) = withContext(Dispatchers.IO){
+    private suspend fun deleteQuickOrder(userID: String) = withContext(Dispatchers.IO) {
         try {
             val mFireStoreStorage = FirebaseStorage.getInstance().reference
             val quickOrderToDelete =
-                fireStore.collection(QUICK_ORDER).document(userID).get().await().toObject(QuickOrder::class.java)
+                fireStore.collection(QUICK_ORDER).document(userID).get().await()
+                    .toObject(QuickOrder::class.java)
 
             quickOrderToDelete?.let {
                 val storeUpdate = async {
@@ -414,15 +462,27 @@ class QuickOrderUseCase(
         try {
             val storage = FirebaseStorage.getInstance()
             val storageReference = FirebaseStorage.getInstance().reference
-            for (i in quickOrder.imageUrl.indices) {
-                val url = quickOrder.imageUrl[i]
-                val imageName = storage.getReferenceFromUrl(url).name
-                storageReference.child(
-                    "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/$imageName"
-                ).delete().await()
+            when (quickOrder.orderType) {
+                "image" -> {
+                    for (i in quickOrder.imageUrl.indices) {
+                        val url = quickOrder.imageUrl[i]
+                        val imageName = storage.getReferenceFromUrl(url).name
+                        storageReference.child(
+                            "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/$imageName"
+                        ).delete().await()
+                    }
+                    delay(1000)
+                    emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
+                }
+                "voice" -> {
+                    storageReference.child(
+                        "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/quickOrder.m4a"
+                    ).delete().await()
+                    delay(1000)
+                    emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
+                }
             }
-            delay(1000)
-            emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
+
         } catch (e: Exception) {
             fbRepository.logCrash("quickOrder", e.message.toString())
             delay(1000)
@@ -439,7 +499,12 @@ class QuickOrderUseCase(
         } catch (e: Exception) {
             fbRepository.logCrash("quickOrder", e.message.toString())
             delay(1000)
-            emit(NetworkResult.Failed("Failed to remove your order request. Please try again later", "failed"))
+            emit(
+                NetworkResult.Failed(
+                    "Failed to remove your order request. Please try again later",
+                    "failed"
+                )
+            )
         }
     }.flowOn(Dispatchers.IO)
 }

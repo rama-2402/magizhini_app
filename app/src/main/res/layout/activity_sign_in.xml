@@ -5,11 +5,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     >
-    <data>
-        <variable
-            name="viewmodel"
-            type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInViewModel" />
-    </data>
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -284,9 +279,9 @@
         android:elevation="@dimen/material_size_16"
         android:layout_marginStart="@dimen/material_size_16"
         android:layout_marginEnd="@dimen/material_size_16"
-        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@id/ivBagTwo"
         android:background="@drawable/shape_round_rectangle_16"
+        android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@id/ivLogo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -310,8 +305,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="invisible"
                 android:layout_marginTop="@dimen/material_size_16"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHeight_percent="0.7"
@@ -369,7 +364,13 @@
                         android:paddingRight="@dimen/material_size_24"
                         android:paddingLeft="@dimen/material_size_24"
                         />
-
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="4"
+                        android:gravity="center"
+                        >
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSendOTP"
                         android:layout_width="wrap_content"
@@ -377,10 +378,28 @@
                         android:text="@string/send_otp"
                         android:background="@drawable/shape_round_rectangle_8"
                         android:layout_marginTop="16dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="@dimen/material_size_16"
                         android:textStyle="bold"
                         android:layout_marginBottom="@dimen/material_size_16"
                         android:textColor="@color/white"
                         app:backgroundTint="@color/matteRed"/>
+                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGoogleLogIn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="Google"
+                         android:layout_marginStart="@dimen/material_size_16"
+                         android:background="@drawable/shape_round_rectangle_8"
+                        android:layout_marginTop="16dp"
+                         app:backgroundTint="@color/matteRed"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="@dimen/material_size_16"
+                        android:textColor="@color/white"
+                        />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -393,6 +412,7 @@
                 android:orientation="vertical"
                 android:layout_marginTop="@dimen/material_size_16"
                 app:layout_constraintBottom_toBottomOf="parent"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvHeader">
@@ -457,7 +477,7 @@
                             android:elevation="20dp"
                             android:layout_marginLeft="8dp"
                             android:layout_marginTop="8dp"
-                            android:text="@string/verify"
+                            android:text="BACK"
                             android:background="@drawable/shape_round_rectangle_8"
                             android:textStyle="bold"
                             android:textColor="@color/white"
@@ -480,7 +500,6 @@
 
             </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

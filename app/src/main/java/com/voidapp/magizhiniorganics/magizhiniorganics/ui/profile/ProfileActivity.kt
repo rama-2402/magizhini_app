@@ -360,26 +360,37 @@ class ProfileActivity :
             when {
                 etProfileName.text.isNullOrEmpty() -> {
                     etProfileName.error = "*required"
+                    etProfileName.requestFocus()
                     return@apply
                 }
                 etEmailId.text.isNullOrEmpty() -> {
                     etEmailId.error = "*required"
+                    etEmailId.requestFocus()
                     return@apply
                 }
                 !Patterns.EMAIL_ADDRESS.matcher(etEmailId.text.toString().trim()).matches() -> {
                     binding.etlEmailId.error = "*Enter a valid Email ID"
+                    etEmailId.requestFocus()
                     return@apply
                 }
                 etAddressOne.text.isNullOrEmpty() -> {
                     etlAddressOne.error = "* required"
+                    etAddressOne.requestFocus()
                     return@apply
                 }
                 etAddressTwo.text.isNullOrEmpty() -> {
                     etlAddressTwo.error = "* required"
+                    etAddressTwo.requestFocus()
                     return@apply
                 }
                 etArea.text.isNullOrEmpty() -> {
                     etlArea.error = "* required"
+                    etArea.requestFocus()
+                    return@apply
+                }
+                etArea.text.toString().length < 6 -> {
+                    etlArea.error = "*6 digit code"
+                    etArea.requestFocus()
                     return@apply
                 }
                 tvDob.text.toString() == " DD / MM / YYYY " -> {

@@ -28,7 +28,3 @@ data class QuickOrderTextItem (
     var quantity: Int = 1
 ): Parcelable
 
-@Parcelize
-class QuickOrderAudioItem (
-    var audioUrl: String = ""
-): Parcelable

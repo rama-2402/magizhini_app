@@ -3,22 +3,27 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.FirebaseException
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.PhoneAuthCredential
-import com.google.firebase.auth.PhoneAuthOptions
-import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivitySignInBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryService
@@ -45,7 +50,6 @@ import ticker.views.com.ticker.widgets.circular.timer.callbacks.CircularViewCall
 import ticker.views.com.ticker.widgets.circular.timer.view.CircularView
 import java.util.concurrent.TimeUnit
 
-
 class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
 
     override val kodein by kodein()
@@ -55,7 +59,11 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
     private val factory: SignInViewModelFactory by instance()
 
     private var forceResendingToken: PhoneAuthProvider.ForceResendingToken? = null
-    private var mCallBacks: PhoneAuthProvider.OnVerificationStateChangedCallbacks? = null
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var signInClient: GoogleSignInClient
+
+    //    private var mCallBacks: PhoneAuthProvider.OnVerificationStateChangedCallbacks? = null
     private var mVerificationId: String? = null
 
     private var mPhoneNumber: String = ""
@@ -66,80 +74,102 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_sign_in)
         viewModel = ViewModelProvider(this, factory)[SignInViewModel::class.java]
-        binding.viewmodel = viewModel
-
 
         lifecycleScope.launch {
             binding.apply {
                 delay(400)
                 ivLogo.fadInAnimation()
-                clBody.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_up))
+                clBody.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SignInActivity,
+                        R.anim.slide_up
+                    )
+                )
                 ivLogo.visible()
                 clBody.visible()
                 delay(100)
-                    ivBagOne.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_in_left))
+                ivBagOne.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SignInActivity,
+                        R.anim.slide_in_left
+                    )
+                )
                 ivBagOne.visible()
                 delay(64)
-                    ivBagThree.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_in_right))
+                ivBagThree.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SignInActivity,
+                        R.anim.slide_in_right
+                    )
+                )
                 ivBagThree.visible()
                 delay(90)
-                    ivBagTwo.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_in_left))
+                ivBagTwo.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SignInActivity,
+                        R.anim.slide_in_left
+                    )
+                )
                 ivBagTwo.visible()
                 delay(34)
-                    ivBagFour.startAnimation(AnimationUtils.loadAnimation(this@SignInActivity, R.anim.slide_in_right))
+                ivBagFour.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SignInActivity,
+                        R.anim.slide_in_right
+                    )
+                )
                 ivBagFour.visible()
-                    playFruitsFallingAnimation(ivApple)
-                    delay(100)
-                    playFruitsFallingAnimation(ivMilk)
-                    delay(50)
-                    playFruitsFallingAnimation(ivBroccoli)
-                    delay(80)
-                    playFruitsFallingAnimation(ivTomato)
-                    delay(100)
-                    playFruitsFallingAnimation(ivPotato)
-                    delay(40)
-                    playFruitsFallingAnimation(ivBanana)
-                    delay(90)
-                    playFruitsFallingAnimation(ivPear)
-                    delay(50)
-                    playFruitsFallingAnimation(ivBeet)
-                    delay(80)
-                    playFruitsFallingAnimation(ivChili)
-                    delay(120)
-                    playFruitsFallingAnimation(ivLemon)
-                    delay(30)
-                    playFruitsFallingAnimation(ivCarrot)
+                playFruitsFallingAnimation(ivApple)
+                delay(100)
+                playFruitsFallingAnimation(ivMilk)
+                delay(50)
+                playFruitsFallingAnimation(ivBroccoli)
+                delay(80)
+                playFruitsFallingAnimation(ivTomato)
+                delay(100)
+                playFruitsFallingAnimation(ivPotato)
+                delay(40)
+                playFruitsFallingAnimation(ivBanana)
+                delay(90)
+                playFruitsFallingAnimation(ivPear)
+                delay(50)
+                playFruitsFallingAnimation(ivBeet)
+                delay(80)
+                playFruitsFallingAnimation(ivChili)
+                delay(120)
+                playFruitsFallingAnimation(ivLemon)
+                delay(30)
+                playFruitsFallingAnimation(ivCarrot)
                 delay(382)
-                    playFruitsFallingAnimation(ivAppleOne)
-                    delay(100)
-                    playFruitsFallingAnimation(ivMilkOne)
-                    delay(50)
-                    playFruitsFallingAnimation(ivBroccoliOne)
-                    delay(80)
-                    playFruitsFallingAnimation(ivTomatoOne)
-                    delay(20)
-                    playFruitsFallingAnimation(ivPotatoOne)
-                    delay(40)
-                    playFruitsFallingAnimation(ivBananaOne)
-                    delay(90)
-                    playFruitsFallingAnimation(ivPearOne)
-                    delay(50)
-                    playFruitsFallingAnimation(ivBeetOne)
-                    delay(80)
-                    playFruitsFallingAnimation(ivChiliOne)
-                    delay(120)
-                    playFruitsFallingAnimation(ivLemonOne)
-                    delay(30)
-                    playFruitsFallingAnimation(ivCarrotOne)
+                playFruitsFallingAnimation(ivAppleOne)
+                delay(100)
+                playFruitsFallingAnimation(ivMilkOne)
+                delay(50)
+                playFruitsFallingAnimation(ivBroccoliOne)
+                delay(80)
+                playFruitsFallingAnimation(ivTomatoOne)
+                delay(20)
+                playFruitsFallingAnimation(ivPotatoOne)
+                delay(40)
+                playFruitsFallingAnimation(ivBananaOne)
+                delay(90)
+                playFruitsFallingAnimation(ivPearOne)
+                delay(50)
+                playFruitsFallingAnimation(ivBeetOne)
+                delay(80)
+                playFruitsFallingAnimation(ivChiliOne)
+                delay(120)
+                playFruitsFallingAnimation(ivLemonOne)
+                delay(30)
+                playFruitsFallingAnimation(ivCarrotOne)
             }
         }
-
 
         layoutVisibility("pre")
 
         // Verifying the mobile number and sending the OTP
 //        mCallBacks =
-
+        googleSignInVerification()
         initFlow()
         clickListeners()
     }
@@ -164,11 +194,10 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
         }
     }
 
-
     private fun initFlow() {
         lifecycleScope.launch {
             viewModel.loginStatus.collect { status ->
-                when(status) {
+                when (status) {
                     "" -> Unit
                     "failed" -> {
                         hideProgressDialog()
@@ -176,11 +205,17 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
                     }
                     "imageFailed" -> {
                         hideProgressDialog()
-                        showErrorSnackBar("Server Error! Profile Picture upload Failed. Try again later", true)
+                        showErrorSnackBar(
+                            "Server Error! Profile Picture upload Failed. Try again later",
+                            true
+                        )
                     }
                     "profileFailed" -> {
                         hideProgressDialog()
-                        showErrorSnackBar("Server Error! Profile creation failed. Try again Later", true)
+                        showErrorSnackBar(
+                            "Server Error! Profile creation failed. Try again Later",
+                            true
+                        )
                     }
                     "success" -> {
                         hideProgressDialog()
@@ -202,10 +237,10 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
         binding.btnSendOTP.setOnClickListener(this)
         binding.btnResend.setOnClickListener(this)
         binding.btnVerify.setOnClickListener(this)
-        binding.llPreOTP.setOnClickListener{
+        binding.llPreOTP.setOnClickListener {
             this.hideKeyboard()
         }
-        binding.llPostOTP.setOnClickListener{
+        binding.llPostOTP.setOnClickListener {
             this.hideKeyboard()
         }
         binding.tvTerms.setOnClickListener {
@@ -221,14 +256,94 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
                 }
             }
         }
+        binding.etPhoneNumberPostOTP.doOnTextChanged { text, start, before, count ->
+            text?.let {
+                if (it.isNotEmpty()) {
+                    binding.btnVerify.text = "VERIFY"
+                } else {
+                    binding.btnVerify.text = "BACK"
+                }
+//                binding.btnVerify.text = "VERIFY"
+            } ?: let {
+                binding.btnVerify.text = "BACK"
+            }
+
+        }
+        binding.btnGoogleLogIn.setOnClickListener {
+            if (binding.etPhoneNumberPreOTP.text.toString().isNullOrEmpty()) {
+                showToast(this, "Enter Phone Number to continue")
+            } else {
+
+                googleSignIn()
+//               viewModel.googleSignInVerification(binding.etPhoneNumberPreOTP.text.toString().trim())
+            }
+        }
     }
+
+    private fun googleSignInVerification() {
+        auth = FirebaseAuth.getInstance()
+
+        val signInRequest = GoogleSignInOptions
+            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(resources.getString(R.string.google_token_id))
+            .requestEmail()
+            .build()
+
+        signInClient = GoogleSignIn.getClient(this, signInRequest)
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val phoneCredential = GoogleAuthProvider.getCredential("+91${binding.etPhoneNumberPreOTP.text.toString().trim()}", null)
+                    auth.currentUser!!.linkWithCredential(phoneCredential)
+                        .addOnCompleteListener { linkTask ->
+                            if(linkTask.isSuccessful) {
+                                 Log.e("qw", "firebaseAuthWithGoogle: ${auth.currentUser?.uid}")
+                                Log.e("qw", "link acc: ${linkTask.result.user?.uid}")
+                            } else {
+                                Log.e("qw", "firebaseAuthWithGoogle: ${linkTask.exception}")
+                            }
+                        }
+                } else {
+                    Log.e(TAG, "firebaseAuthWithGoogle: ${task.exception}")
+                }
+            }
+    }
+
+    private fun googleSignIn() {
+        GoogleSignIn.getLastSignedInAccount(this)?.let {
+
+        } ?: let {
+            val signInIntent = signInClient.signInIntent
+            activityForResult.launch(signInIntent)
+
+//             startActivityForResult(signInIntent, 5)
+        }
+    }
+
+    val activityForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                try {
+                    val account = task.getResult(ApiException::class.java)
+                    account.idToken?.let { firebaseAuthWithGoogle(it) }
+                    Log.e("qw", "token ${account.idToken}")
+                } catch (e: Exception) {
+                    Log.e("qw", "activity result${e.message}: ")
+                }
+            }
+        }
 
     //validating the phone number before seding the OTP request
     private fun phoneNumberValidation() {
         val phNumber = binding.etPhoneNumberPreOTP.text.toString().trim()
         this.hideKeyboard()
 
-        if(phNumber.isEmpty() || phNumber.length < 10) {
+        if (phNumber.isEmpty() || phNumber.length < 10) {
             showErrorSnackBar("Enter a valid phone number", true)
             return
         } else {
@@ -262,52 +377,52 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
     private fun stopTimer() = binding.cvTimer.stopTimer()
 
     //setting the otp timeout and sending the OTP
-    private fun startPhoneNumberVerification(phone: String) = lifecycleScope.launch(Dispatchers.IO) {
-        withContext(Dispatchers.Main){
-            showToast(this@SignInActivity,"Please wait for Auto-Verification", LONG)
-        }
-        try {
-            val mFirebaseAuth = FirebaseAuth.getInstance()
-            val options = PhoneAuthOptions.newBuilder(mFirebaseAuth)
-                .setPhoneNumber(phone)
-                .setTimeout(120L, TimeUnit.NANOSECONDS)
-                .setActivity(this@SignInActivity)
-                .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                    override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
-                        try {
-                            showProgressDialog(false)
-                            viewModel.signIn(phoneAuthCredential)
-                        } catch (e: Exception) {
-                            showErrorSnackBar("Server error! Please Try Later", true)
-                        }
-                    }
-
-                    override fun onVerificationFailed(error: FirebaseException) {
-//                        showErrorSnackBar("Server error! Please Try Later", true)
-                    }
-
-                    override fun onCodeSent(
-                        verificationId: String,
-                        token: PhoneAuthProvider.ForceResendingToken
-                    ) {
-                        mVerificationId = verificationId
-                        forceResendingToken = token
-                        layoutVisibility("post")
-                        showToast(this@SignInActivity, "OTP Sent", LONG)
-                    }
-                })
-                .build()
-
+    private fun startPhoneNumberVerification(phone: String) =
+        lifecycleScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
-                this@SignInActivity.hideKeyboard()
+                showToast(this@SignInActivity, "Please wait for Auto-Verification", LONG)
             }
-            PhoneAuthProvider.verifyPhoneNumber(options)
-        } catch (e: Exception) {
-            // Failed
-            showErrorSnackBar("Server error! Please Try Later", true)
-        }
-    }
+            try {
+                val mFirebaseAuth = FirebaseAuth.getInstance()
+                val options = PhoneAuthOptions.newBuilder(mFirebaseAuth)
+                    .setPhoneNumber(phone)
+                    .setTimeout(120L, TimeUnit.NANOSECONDS)
+                    .setActivity(this@SignInActivity)
+                    .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                        override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
+                            try {
+                                showProgressDialog(false)
+                                viewModel.signIn(phoneAuthCredential)
+                            } catch (e: Exception) {
+                                showErrorSnackBar("Server error! Please Try Later", true)
+                            }
+                        }
 
+                        override fun onVerificationFailed(error: FirebaseException) {
+//                        showErrorSnackBar("Server error! Please Try Later", true)
+                        }
+
+                        override fun onCodeSent(
+                            verificationId: String,
+                            token: PhoneAuthProvider.ForceResendingToken
+                        ) {
+                            mVerificationId = verificationId
+                            forceResendingToken = token
+                            layoutVisibility("post")
+                            showToast(this@SignInActivity, "OTP Sent", LONG)
+                        }
+                    })
+                    .build()
+
+                withContext(Dispatchers.Main) {
+                    this@SignInActivity.hideKeyboard()
+                }
+                PhoneAuthProvider.verifyPhoneNumber(options)
+            } catch (e: Exception) {
+                // Failed
+                showErrorSnackBar("Server error! Please Try Later", true)
+            }
+        }
 
     private fun resendVerificationCode() {
         binding.btnResend.remove()
@@ -348,7 +463,10 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
             }
             "failed" -> {
                 hideProgressDialog()
-                showErrorSnackBar("Server Error! Failed to connect to server. Try again Later", true)
+                showErrorSnackBar(
+                    "Server Error! Failed to connect to server. Try again Later",
+                    true
+                )
             }
             else -> {
                 showToast(this, "Syncing your profile... Please wait... ")
@@ -438,7 +556,6 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
             }
     }
 
-
     private fun layoutVisibility(visibility: String) {
         with(binding) {
             when (visibility) {
@@ -454,7 +571,8 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
                     llPreOTP.remove()
                     llPostOTP.visible()
                     cvTimer.visible()
-                    btnResend.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.green_light, null))
+                    btnResend.backgroundTintList =
+                        ColorStateList.valueOf(resources.getColor(R.color.green_light, null))
                     btnResend.setTextColor(resources.getColor(R.color.green_base, null))
                     btnResend.disable()
                     ivLogo.disable()
@@ -466,7 +584,8 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
     //Called by countdown timer class on OTP Timeout after 60 seconds
     fun onOtpTimeOut() {
         binding.btnResend.enable()
-        binding.btnResend.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.green_base, null))
+        binding.btnResend.backgroundTintList =
+            ColorStateList.valueOf(resources.getColor(R.color.green_base, null))
         binding.btnResend.setTextColor(Color.WHITE)
         binding.cvTimer.hide()
     }
@@ -486,7 +605,13 @@ class SignInActivity : BaseActivity(), KodeinAware, View.OnClickListener {
             when (v) {
                 binding.btnSendOTP -> phoneNumberValidation()
                 binding.btnResend -> resendVerificationCode()
-                binding.btnVerify -> otpValidation()
+                binding.btnVerify -> {
+                    if (binding.btnVerify.text == "BACK") {
+                        layoutVisibility("pre")
+                    } else {
+                        otpValidation()
+                    }
+                }
             }
         }
     }

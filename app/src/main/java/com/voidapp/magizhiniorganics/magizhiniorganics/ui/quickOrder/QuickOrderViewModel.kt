@@ -35,12 +35,9 @@ class QuickOrderViewModel(
     private val quickOrderUseCase: QuickOrderUseCase
 ) : ViewModel() {
 
-    var currentQuickOrderMode = "image"
-
     val tempFilesList: MutableList<File> = mutableListOf()
     val orderListUri: MutableList<Uri> = mutableListOf(Uri.EMPTY)
     val textOrderItemList: MutableList<QuickOrderTextItem> = mutableListOf()
-    var audioFileUri: Uri? = null
 
     var selectedTextItemPosition: Int? = null
 
@@ -49,10 +46,8 @@ class QuickOrderViewModel(
     var fileName: String? = null
     var lastProgress = 0
     var pausedTime: Long = 0
-
-    //    val mHandler = Handler()
-    val RECORD_AUDIO_REQUEST_CODE = 101
     var isPlaying = false
+    var currentQuickOrderMode = "image"
 
     var userProfile: UserProfileEntity? = null
     var addressContainer: Address? = null
@@ -256,6 +251,7 @@ class QuickOrderViewModel(
         viewModelScope.launch {
             orderID = generateOrderID()
             val detailsMap: HashMap<String, String> = hashMapOf()
+            detailsMap["quickOrderType"] = currentQuickOrderMode
             userProfile?.let {
                 detailsMap["id"] = it.id
                 detailsMap["name"] = it.name
@@ -265,6 +261,8 @@ class QuickOrderViewModel(
             quickOrderUseCase
                 .sendGetEstimateRequest(
                     tempFileUriList,
+                    textOrderItemList,
+                    fileName,
                     detailsMap
                 )
                 .collect { result ->
@@ -279,7 +277,7 @@ class QuickOrderViewModel(
                                     }
                                     "uploading" -> {
                                         _uiUpdate.value =
-                                            UiUpdate.UploadingImage("Uploading Page ${result.data}...")
+                                            UiUpdate.UploadingImage("${result.data}")
                                     }
                                     "complete" -> {
                                         for (file in tempFilesList) {

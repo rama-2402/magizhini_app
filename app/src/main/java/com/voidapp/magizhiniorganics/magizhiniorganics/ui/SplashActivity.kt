@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.databinding.DataBindingUtil
@@ -155,7 +154,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
                     binding.ivLogo.visible()
                     showToast(this, "Please check your Internet connection")
                 }
-            } ?:let {
+            } ?: let {
                 binding.ivLogo.fadInAnimation()
                 binding.ivLogo.visible()
                 showToast(this, "Please check your Internet connection")
@@ -167,23 +166,30 @@ class SplashActivity : BaseActivity(), KodeinAware {
     private fun playFruitsFallingAnimation(view: View) {
         lifecycleScope.launch {
             view.visible()
-                val screenHeight: Int = resources.displayMetrics.heightPixels
-                val positionAnimator = ValueAnimator.ofFloat(-100f, screenHeight.toFloat())
-                positionAnimator.addUpdateListener {
-                    val value = it.animatedValue as Float
-                    view.translationY = value
-                }
-                val rotationAnimator = ObjectAnimator.ofFloat(view, "rotation", 0f, 180f)
-                val animatorSet = AnimatorSet()
-                animatorSet.play(positionAnimator).with(rotationAnimator)
-                animatorSet.duration = 2969
-                animatorSet.start()
-                delay(1750)
-                view.fadOutAnimation()
+            val screenHeight: Int = resources.displayMetrics.heightPixels
+            val positionAnimator = ValueAnimator.ofFloat(-100f, screenHeight.toFloat())
+            positionAnimator.addUpdateListener {
+                val value = it.animatedValue as Float
+                view.translationY = value
+            }
+            val rotationAnimator = ObjectAnimator.ofFloat(view, "rotation", 0f, 180f)
+            val animatorSet = AnimatorSet()
+            animatorSet.play(positionAnimator).with(rotationAnimator)
+            animatorSet.duration = 2969
+            animatorSet.start()
+            delay(1750)
+            view.fadOutAnimation()
+            binding.progressCircular.visible()
+            binding.progressCircular.animate()
         }
     }
 
-    private fun backgroundCheck(isNewDay: String, isNewUser: Boolean, month: Int, navigation: String?) {
+    private fun backgroundCheck(
+        isNewDay: String,
+        isNewUser: Boolean,
+        month: Int,
+        navigation: String?
+    ) {
         if (isNewUser) {
             lifecycleScope.launch {
                 delay(3000)
@@ -206,7 +212,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
                         val cleanDatabaseWorkRequest: WorkRequest =
                             OneTimeWorkRequestBuilder<CleanDatabaseService>().build()
 
-                        WorkManager.getInstance(this@SplashActivity).enqueue(cleanDatabaseWorkRequest)
+                        WorkManager.getInstance(this@SplashActivity)
+                            .enqueue(cleanDatabaseWorkRequest)
                         updateDatabaseWorkRequest(false, isNewDay, navigation)
                     }
                     abs(month - TimeUtil().getMonthNumber()) > 1 -> {
@@ -225,13 +232,14 @@ class SplashActivity : BaseActivity(), KodeinAware {
     private fun updateDatabaseWorkRequest(wipe: Boolean, isNewDay: String, navigation: String?) {
         if (
             isNewDay != TimeUtil().getCurrentDate() ||
-            TimeUtil().getQuarterOfTheDay() != SharedPref(this).getData(QUARTER, STRING, "1").toString().toInt()
+            TimeUtil().getQuarterOfTheDay() != SharedPref(this).getData(QUARTER, STRING, "1")
+                .toString().toInt()
         ) {
             SharedPref(this).putData(QUARTER, STRING, TimeUtil().getQuarterOfTheDay().toString())
             if (wipe) {
                 SharedPref(this).putData("month", INT, TimeUtil().getMonthNumber())
                 startWork("wipe", navigation)
-            }else {
+            } else {
                 startWork("", navigation)
             }
         } else {
@@ -283,64 +291,92 @@ class SplashActivity : BaseActivity(), KodeinAware {
             }
     }
 
-    private fun navigateToHomeScreen(newDayCheck: Boolean, navigation: String?) = lifecycleScope.launch {
-        if (fbRepository.updateNotifications(SharedPref(this@SplashActivity).getData(USER_ID, STRING, "").toString())) {
+    private fun navigateToHomeScreen(newDayCheck: Boolean, navigation: String?) =
+        lifecycleScope.launch {
+            if (fbRepository.updateNotifications(
+                    SharedPref(this@SplashActivity).getData(
+                        USER_ID,
+                        STRING,
+                        ""
+                    ).toString()
+                )
+            ) {
 //            binding.progressCircular.remove()
-            delay(3000)
-            hideAnimation()
-            delay(800)
-            Intent(this@SplashActivity, HomeActivity::class.java).also {
+                delay(3000)
+                hideAnimation()
+                delay(800)
+                Intent(this@SplashActivity, HomeActivity::class.java).also {
 //                if (
 //                    SharedPref(this@SplashActivity).getData(DOB, STRING, "").toString() == "${TimeUtil().getCurrentDateNumber()}/${TimeUtil().getMonthNumber()}"
 //                ) {
 //                    it.putExtra("day", newDayCheck)
 //                } else {
-                navigation?.let { nav ->
-                    it.putExtra("navigate", nav)
-                }
-                it.putExtra("day", newDayCheck)
-//                }
-                startActivity(it)
-                finish()
-                finishAffinity()
-            }
-        } else {
-            delay(3000)
-            hideAnimation()
-            delay(800)
-//            binding.progressCircular.remove()
-            Intent(this@SplashActivity, HomeActivity::class.java).also {
-//                if (
-//                    SharedPref(this@SplashActivity).getData(DOB, STRING, "").toString() == "${TimeUtil().getCurrentDateNumber()}/${TimeUtil().getMonthNumber()}"
-//                ) {
-//                    it.putExtra("day", newDayCheck)
-//                } else {
-                navigation?.let { nav ->
-                    it.putExtra("navigate", nav)
-                }
+                    navigation?.let { nav ->
+                        it.putExtra("navigate", nav)
+                    }
                     it.putExtra("day", newDayCheck)
 //                }
-                startActivity(it)
-                finish()
-                finishAffinity()
+                    startActivity(it)
+                    finish()
+                    finishAffinity()
+                }
+            } else {
+                delay(3000)
+                hideAnimation()
+                delay(800)
+//            binding.progressCircular.remove()
+                Intent(this@SplashActivity, HomeActivity::class.java).also {
+//                if (
+//                    SharedPref(this@SplashActivity).getData(DOB, STRING, "").toString() == "${TimeUtil().getCurrentDateNumber()}/${TimeUtil().getMonthNumber()}"
+//                ) {
+//                    it.putExtra("day", newDayCheck)
+//                } else {
+                    navigation?.let { nav ->
+                        it.putExtra("navigate", nav)
+                    }
+                    it.putExtra("day", newDayCheck)
+//                }
+                    startActivity(it)
+                    finish()
+                    finishAffinity()
+                }
             }
         }
-    }
 
     private suspend fun hideAnimation() {
         lifecycleScope.launch {
             binding.apply {
                 binding.tvStatus.remove()
-                ivBagOne.startAnimation(AnimationUtils.loadAnimation(this@SplashActivity, R.anim.slide_out_left))
+                ivBagOne.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SplashActivity,
+                        R.anim.slide_out_left
+                    )
+                )
                 ivBagOne.hide()
                 delay(64)
-                ivBagThree.startAnimation(AnimationUtils.loadAnimation(this@SplashActivity, R.anim.slide_out_right))
+                ivBagThree.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SplashActivity,
+                        R.anim.slide_out_right
+                    )
+                )
                 ivBagThree.hide()
                 delay(90)
-                ivBagTwo.startAnimation(AnimationUtils.loadAnimation(this@SplashActivity, R.anim.slide_out_left))
+                ivBagTwo.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SplashActivity,
+                        R.anim.slide_out_left
+                    )
+                )
                 ivBagTwo.hide()
                 delay(34)
-                ivBagFour.startAnimation(AnimationUtils.loadAnimation(this@SplashActivity, R.anim.slide_out_right))
+                ivBagFour.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@SplashActivity,
+                        R.anim.slide_out_right
+                    )
+                )
                 ivBagFour.hide()
             }
         }

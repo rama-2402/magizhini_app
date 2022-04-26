@@ -43,4 +43,8 @@ class SignInViewModel(
 
     suspend fun createNewCustomerProfile() = firebaseRepository.createNewCustomerProfile()
 
+    fun googleSignInVerification(phoneNumber: String) = viewModelScope.launch {
+
+    }
+
 }

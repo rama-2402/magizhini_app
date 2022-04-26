@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.MediaStore
 import android.provider.Settings
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.snackbar.Snackbar
 import com.ncorti.slidetoact.SlideToActView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -73,6 +75,14 @@ open class BaseActivity : AppCompatActivity() {
 
     fun View.disable() {
         this.isEnabled = false
+    }
+
+    fun ShapeableImageView.setColor(color: Int) {
+        this.imageTintList = ContextCompat.getColorStateList(this.context, color)
+    }
+
+    fun ShapeableImageView.setImage(drawable: Int) {
+        this.setImageDrawable(ContextCompat.getDrawable(this.context, drawable))
     }
 
     val pickImageIntent = Intent(
