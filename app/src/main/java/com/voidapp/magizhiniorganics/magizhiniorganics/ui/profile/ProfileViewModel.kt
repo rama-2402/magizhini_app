@@ -5,15 +5,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -25,6 +28,7 @@ class ProfileViewModel (
     var tempFile: File? = null
     var userID: String? = null
     var phoneNumber: String? = null
+    var mailID: String = ""
     var DobLong: Long? = null
     var referralCode: String? = null
     var profilePicUri: Uri? = null
@@ -149,7 +153,26 @@ class ProfileViewModel (
     }
 
     fun getAllActiveOrders() = dbRepository.getAllActiveOrders()
+
     fun getAllActiveSubscriptions() = dbRepository.getAllActiveSubscriptions()
+
+    suspend fun checkPhoneNumberProfile(phoneNumber: String): Boolean = withContext(Dispatchers.IO) {
+        val docs = FirebaseFirestore.getInstance()
+            .collection(USERS)
+            .whereEqualTo("phNumber", "+91$phoneNumber")
+            .get().await()
+
+        if (docs.isEmpty || docs.documents.isNullOrEmpty()) {
+            return@withContext false
+        } else {
+            for (doc in docs.documents) {
+                if (doc.toObject(UserProfile::class.java)?.id != userID) {
+                    return@withContext true
+                }
+            }
+            return@withContext false
+        }
+    }
 
 
     sealed class UiUpdate {

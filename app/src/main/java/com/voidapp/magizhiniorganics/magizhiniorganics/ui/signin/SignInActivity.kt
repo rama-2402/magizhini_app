@@ -33,6 +33,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MAIL_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
@@ -54,6 +55,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
     private lateinit var auth: FirebaseAuth
     private lateinit var signInClient: GoogleSignInClient
 
+    private var mMailID: String = ""
     private var mPhoneNumber: String = ""
     private var mCurrentUserID: String = ""
 
@@ -297,6 +299,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    mMailID = task.result.user?.email ?: ""
                     showProgressDialog(false)
                     viewModel.checkForPreviousProfiles(
                         "+91${
@@ -356,6 +359,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
         Intent(this@SignInActivity, ProfileActivity::class.java).also {
             it.putExtra(PHONE_NUMBER, mPhoneNumber)
             it.putExtra(USER_ID, mCurrentUserID)
+            it.putExtra(MAIL_ID, mMailID)
             startActivity(it)
             finish()
         }

@@ -26,6 +26,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.MAIL_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PROFILE_PIC_PATH
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
@@ -69,6 +70,7 @@ class ProfileActivity :
 
         viewModel.phoneNumber = intent.getStringExtra(PHONE_NUMBER).toString()
         viewModel.userID = intent.getStringExtra(USER_ID).toString()
+        viewModel.mailID = intent.getStringExtra(MAIL_ID).toString()
         binding.tvReferral.remove()
 
         lifecycleScope.launch {
@@ -111,6 +113,7 @@ class ProfileActivity :
                         populateProfileDetails(it)
                     } ?: let {   //new wallet will be created since this is a new user
                         viewModel.userID?.let {
+                            binding.etPhoneNumber.isEnabled = false //disabling the phone number so that the user can't change it after logging in for the first time
                             viewModel.createNewUserWallet(it)
                         }
                     }
@@ -190,9 +193,10 @@ class ProfileActivity :
 
     private fun populateProfileDetails(userProfile: UserProfileEntity) {
         binding.apply {
+            viewModel.phoneNumber = userProfile.phNumber
             etProfileName.setText(userProfile.name)
             tvDob.text = userProfile.dob
-            tvPhoneNumber.text = userProfile.phNumber
+            etPhoneNumber.setText(userProfile.phNumber.takeLast(10))
             if (userProfile.alternatePhNumber.isNotEmpty()) {
                 etAlternateNumber.setText(userProfile.alternatePhNumber)
             }
@@ -200,6 +204,7 @@ class ProfileActivity :
             etAddressOne.setText(userProfile.address[0].addressLineOne)
             etAddressTwo.setText(userProfile.address[0].addressLineTwo)
             etArea.setText(userProfile.address[0].LocationCode)
+            etCity.setText(userProfile.address[0].city)
 //            tvReferral.remove()
 
 
@@ -237,7 +242,11 @@ class ProfileActivity :
     }
 
     private fun activityInit() {
-        binding.ivProfilePic.clipToOutline = true
+        binding.apply {
+            ivProfilePic.clipToOutline = true
+            etPhoneNumber.setText(viewModel.phoneNumber?.takeLast(10))
+            etEmailId.setText(viewModel.mailID)
+        }
         viewModel.getUserProfile()
     }
 
@@ -310,7 +319,7 @@ class ProfileActivity :
         UserProfile(
             id = viewModel.userID!!,
             name = binding.etProfileName.text.toString().trim(),
-            phNumber = binding.tvPhoneNumber.text.toString().trim(),
+            phNumber = binding.etPhoneNumber.text.toString().trim(),
             alternatePhNumber = binding.etAlternateNumber.text.toString().trim(),
             dob = binding.tvDob.text.toString(),
             address = address,
@@ -331,7 +340,7 @@ class ProfileActivity :
         viewModel.userProfile?.let { profile ->
             profile.id = viewModel.userID!!
             profile.name = binding.etProfileName.text.toString().trim()
-            profile.phNumber = binding.tvPhoneNumber.text.toString().trim()
+            profile.phNumber = binding.etPhoneNumber.text.toString().trim()
             profile.alternatePhNumber = binding.etAlternateNumber.text.toString().trim()
             profile.dob = binding.tvDob.text.toString()
             profile.address[0] = generateAddressObject()
@@ -348,56 +357,98 @@ class ProfileActivity :
             userId = binding.etProfileName.text.toString().trim(),
             addressLineOne = binding.etAddressOne.text.toString().trim(),
             addressLineTwo = binding.etAddressTwo.text.toString().trim(),
-            city = "Chennai",
+            city = binding.etCity.text.toString().trim(),
             LocationCode = binding.etArea.text.toString().trim(),
 //            LocationCodePosition = binding.spArea.selectedItemPosition,
         )
     }
 
     //validating the data entered before uploading
-    private fun profileDataValidation() {
+    private fun profileDataValidation() = lifecycleScope.launch {
         binding.apply {
+            showProgressDialog(false)
+            val isPhoneNumberAvailable = viewModel.phoneNumber?.let {
+                if (it != "+91${etPhoneNumber.text.toString().trim()}") {
+                    viewModel.checkPhoneNumberProfile(etPhoneNumber.text.toString().trim())
+                } else {
+                   false
+                }
+            } ?: false
+
             when {
                 etProfileName.text.isNullOrEmpty() -> {
                     etProfileName.error = "*required"
                     etProfileName.requestFocus()
+                    hideProgressDialog()
                     return@apply
                 }
                 etEmailId.text.isNullOrEmpty() -> {
                     etEmailId.error = "*required"
                     etEmailId.requestFocus()
+                    hideProgressDialog()
+                    return@apply
+                }
+                etPhoneNumber.text.isNullOrEmpty() -> {
+                   etPhoneNumber.error = "*required"
+                   etPhoneNumber.requestFocus()
+                    hideProgressDialog()
+                   return@apply
+                }
+                etPhoneNumber.text!!.length < 10 -> {
+                    etPhoneNumber.error = "* Enter a valid phone number"
+                    hideProgressDialog()
+                    etPhoneNumber.requestFocus()
                     return@apply
                 }
                 !Patterns.EMAIL_ADDRESS.matcher(etEmailId.text.toString().trim()).matches() -> {
                     binding.etlEmailId.error = "*Enter a valid Email ID"
                     etEmailId.requestFocus()
+                    hideProgressDialog()
                     return@apply
                 }
                 etAddressOne.text.isNullOrEmpty() -> {
                     etlAddressOne.error = "* required"
                     etAddressOne.requestFocus()
+                    hideProgressDialog()
                     return@apply
                 }
                 etAddressTwo.text.isNullOrEmpty() -> {
                     etlAddressTwo.error = "* required"
                     etAddressTwo.requestFocus()
+                    hideProgressDialog()
                     return@apply
                 }
                 etArea.text.isNullOrEmpty() -> {
                     etlArea.error = "* required"
                     etArea.requestFocus()
+                    hideProgressDialog()
                     return@apply
                 }
                 etArea.text.toString().length < 6 -> {
                     etlArea.error = "*6 digit code"
                     etArea.requestFocus()
+                    hideProgressDialog()
                     return@apply
                 }
                 tvDob.text.toString() == " DD / MM / YYYY " -> {
                     showErrorSnackBar("Date of Birth required", true)
+                    hideProgressDialog()
+                    return@apply
+                }
+                etCity.text.isNullOrEmpty() -> {
+                    etCity.error = "*required"
+                    etCity.requestFocus()
+                    hideProgressDialog()
+                    return@apply
+                }
+                isPhoneNumberAvailable -> {
+                    etPhoneNumber.error = "*Phone Number already used"
+                    etPhoneNumber.requestFocus()
+                    hideProgressDialog()
                     return@apply
                 }
                 else -> {
+                    hideProgressDialog()
                     viewModel.profilePicUri?.let {
                         compressImageToNewFile(this@ProfileActivity, it)?.let { file ->
                             viewModel.tempFile = file
@@ -483,13 +534,13 @@ class ProfileActivity :
             finish()
         }
     }
-
-    override fun onResume() {
-        viewModel.userID = SharedPref(this).getData(USER_ID, STRING, "").toString()
-        viewModel.phoneNumber = SharedPref(this).getData(PHONE_NUMBER, STRING, "").toString()
-        binding.tvPhoneNumber.text = viewModel.phoneNumber
-        super.onResume()
-    }
+//
+//    override fun onResume() {
+//        viewModel.userID = SharedPref(this).getData(USER_ID, STRING, "").toString()
+//        viewModel.phoneNumber = SharedPref(this).getData(PHONE_NUMBER, STRING, "").toString()
+//        binding.etPhoneNumber.setText(viewModel.phoneNumber)
+//        super.onResume()
+//    }
 
     override fun onBackPressed() {
         viewModel.userProfile?.let {
