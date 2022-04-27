@@ -63,8 +63,7 @@ class ShoppingMainActivity :
     BaseActivity(),
     KodeinAware,
     ShoppingMainAdapter.ShoppingMainListener,
-    CategoryHomeAdapter.CategoryItemClickListener
-{
+    CategoryHomeAdapter.CategoryItemClickListener {
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityShoppingMainBinding
@@ -79,7 +78,8 @@ class ShoppingMainActivity :
 
     private lateinit var cartAdapter: CartAdapter
     private lateinit var adapter: ShoppingMainAdapter
-//    var categoryFilter: String = ALL_PRODUCTS
+
+    //    var categoryFilter: String = ALL_PRODUCTS
     private var mCartPrice: Float? = 0f
     private var isFiltered: Boolean = false
 
@@ -134,7 +134,8 @@ class ShoppingMainActivity :
 
         viewModel.changedPositions.observe(this) {
             for (i in viewModel.changedProductsPositions.indices) {
-                adapter.products[viewModel.changedProductsPositions[i]] = viewModel.changedProducts[i]
+                adapter.products[viewModel.changedProductsPositions[i]] =
+                    viewModel.changedProducts[i]
                 adapter.notifyItemChanged(viewModel.changedProductsPositions[i])
             }
         }
@@ -222,7 +223,7 @@ class ShoppingMainActivity :
 
     private fun checkProductsToDisplay() {
         //live data of the products and items in the list
-        when(viewModel.categoryFilter) {
+        when (viewModel.categoryFilter) {
             ALL_PRODUCTS -> binding.cpAll.isChecked = true
             SUBSCRIPTION -> binding.cpSubscriptions.isChecked = true
             FAVORITES -> binding.cpFavorites.isChecked = true
@@ -249,7 +250,8 @@ class ShoppingMainActivity :
 
     private fun clickListeners() {
 
-        KeyboardVisibilityEvent.setEventListener(this
+        KeyboardVisibilityEvent.setEventListener(
+            this
         ) { isOpen ->
             if (isOpen) {
                 cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
@@ -269,6 +271,14 @@ class ShoppingMainActivity :
                         binding.fabUp.visibility = View.INVISIBLE
                         cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
                     }
+                }
+            }
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(1)) {
+                    binding.fabUp.visibility = View.INVISIBLE
+                    cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
                 }
             }
         })
@@ -340,7 +350,7 @@ class ShoppingMainActivity :
                         it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
                     }
                     binding.tvToolbarTitle.text = "Limited Items"
-                    if(mLimitedItems.isEmpty()) {
+                    if (mLimitedItems.isEmpty()) {
                         showShimmer()
                         viewModel.limitedItemsFilter()
                     } else {
@@ -377,8 +387,10 @@ class ShoppingMainActivity :
 
         val searchView = item?.actionView as androidx.appcompat.widget.SearchView
 
-        searchView.findViewById<ImageView>(R.id.search_close_btn).setColorFilter(ContextCompat.getColor(this, R.color.matteRed))
-        searchView.findViewById<TextView>(R.id.search_src_text).setTextColor(ContextCompat.getColor(this, R.color.matteRed))
+        searchView.findViewById<ImageView>(R.id.search_close_btn)
+            .setColorFilter(ContextCompat.getColor(this, R.color.matteRed))
+        searchView.findViewById<TextView>(R.id.search_src_text)
+            .setTextColor(ContextCompat.getColor(this, R.color.matteRed))
 
         searchView.setOnQueryTextListener(object :
             androidx.appcompat.widget.SearchView.OnQueryTextListener {
@@ -387,31 +399,34 @@ class ShoppingMainActivity :
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                    var searchJob: Job? = Job()
-                    searchJob?.cancel()
-                    searchJob = lifecycleScope.launch {
-                        delay(500)
-                        viewModel.currentProductsList.clear()
-                        val searchText = newText!!.lowercase(Locale.getDefault())
-                        if (searchText.isNotEmpty()) {
-                            mItems.forEach loop@ { it ->
-                                if (it.name.lowercase().contains(searchText) || it.description.lowercase().contains(searchText)) {
-                                    viewModel.currentProductsList.add(it)
-                                } else {
-                                    for (label in it.labels) {
-                                        if (label.lowercase().contains(searchText)) {
-                                            viewModel.currentProductsList.add(it)
-                                            return@loop
-                                        }
+                var searchJob: Job? = Job()
+                searchJob?.cancel()
+                searchJob = lifecycleScope.launch {
+                    delay(500)
+                    viewModel.currentProductsList.clear()
+                    val searchText = newText!!.lowercase(Locale.getDefault())
+                    if (searchText.isNotEmpty()) {
+                        mItems.forEach loop@{ it ->
+                            if (it.name.lowercase()
+                                    .contains(searchText) || it.description.lowercase()
+                                    .contains(searchText)
+                            ) {
+                                viewModel.currentProductsList.add(it)
+                            } else {
+                                for (label in it.labels) {
+                                    if (label.lowercase().contains(searchText)) {
+                                        viewModel.currentProductsList.add(it)
+                                        return@loop
                                     }
                                 }
                             }
-                            adapter.setData(viewModel.currentProductsList.map { it.copy() } as MutableList<ProductEntity>)
-                        } else {
-                            viewModel.currentProductsList.clear()
-                            adapter.setData(mItems.map { it.copy() } as MutableList<ProductEntity>)
                         }
+                        adapter.setData(viewModel.currentProductsList.map { it.copy() } as MutableList<ProductEntity>)
+                    } else {
+                        viewModel.currentProductsList.clear()
+                        adapter.setData(mItems.map { it.copy() } as MutableList<ProductEntity>)
                     }
+                }
                 searchJob = null
                 return false
             }
@@ -499,7 +514,7 @@ class ShoppingMainActivity :
     }
 
     private fun setBottomSheetIcon(content: String) {
-        val icon =  when(content) {
+        val icon = when (content) {
             "filter" -> R.drawable.ic_filter
             "delete" -> R.drawable.ic_delete
             else -> R.drawable.ic_filter
@@ -533,7 +548,8 @@ class ShoppingMainActivity :
                     it.putExtra(Constants.PRODUCT_NAME, product.name)
                     val options: ActivityOptionsCompat =
                         ViewCompat.getTransitionName(thumbnail)?.let { it1 ->
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail,
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this, thumbnail,
                                 it1
                             )
                         }!!
@@ -546,7 +562,8 @@ class ShoppingMainActivity :
                     it.putExtra(NAVIGATION, viewModel.selectedCategory)
                     val options: ActivityOptionsCompat =
                         ViewCompat.getTransitionName(thumbnail)?.let { it1 ->
-                            ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail,
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this, thumbnail,
                                 it1
                             )
                         }!!
@@ -587,7 +604,11 @@ class ShoppingMainActivity :
         viewModel.updateFavorites(id, product, position)
     }
 
-    override fun navigateToProduct(product: ProductEntity, thumbnail: ShapeableImageView, position: Int) {
+    override fun navigateToProduct(
+        product: ProductEntity,
+        thumbnail: ShapeableImageView,
+        position: Int
+    ) {
         navigateToProductDetails(product, thumbnail)
     }
 
@@ -601,10 +622,23 @@ class ShoppingMainActivity :
         variantIndex: Int,
         maxOrderQuantity: Int
     ) {
-        viewModel.upsertCartItem(product, position, variant, count, price, originalPrice, variantIndex, maxOrderQuantity)
+        viewModel.upsertCartItem(
+            product,
+            position,
+            variant,
+            count,
+            price,
+            originalPrice,
+            variantIndex,
+            maxOrderQuantity
+        )
     }
 
-    override fun deleteCartItemFromShoppingMain(product: ProductEntity, variantName: String, position: Int) {
+    override fun deleteCartItemFromShoppingMain(
+        product: ProductEntity,
+        variantName: String,
+        position: Int
+    ) {
         viewModel.deleteCartItemFromShoppingMain(product, variantName, position)
     }
 

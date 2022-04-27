@@ -318,7 +318,7 @@ class Firestore(
                     UserNotification(
                         id = currentUserID,
                         userID = currentUserID,
-                        timestamp = TimeUtil().getCurrentYearMonthDate().toString().toLong(),
+                        timestamp = System.currentTimeMillis(),
                         title = "Referral Bonus",
                         message = "You have received a referral Bonus of Rs: $amount to your Wallet as a part of Magizhini Referral Program.",
                         imageUrl = "",
@@ -374,7 +374,7 @@ class Firestore(
                     UserNotification(
                         id = "",
                         userID = profile.id,
-                        timestamp = TimeUtil().getCurrentYearMonthDate().toString().toLong(),
+                        timestamp = System.currentTimeMillis(),
                         title = "Referral Bonus",
                         message = "You have received a referral Bonus of Rs: $amount to your Wallet as a part of Magizhini Referral Program.",
                         imageUrl = "",
@@ -1550,7 +1550,7 @@ class Firestore(
             val notificationsDoc = mFireStore.collection(USER_NOTIFICATIONS)
                 .document(USER_NOTIFICATIONS)
                 .collection(userID)
-                .whereLessThanOrEqualTo("timestamp", TimeUtil().getCurrentYearMonthDate()).get()
+                .whereLessThanOrEqualTo("timestamp", System.currentTimeMillis()).get()
                 .await()
 
             repository.deleteAllNotifications()

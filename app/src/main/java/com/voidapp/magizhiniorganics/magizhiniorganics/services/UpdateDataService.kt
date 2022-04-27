@@ -16,9 +16,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BEST_SELLERS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCT_SPECIALS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUARTER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_ONE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_THREE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SPECIALS_TWO
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.TESTIMONIALS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -30,7 +32,7 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
 class UpdateDataService (
-    context: Context,
+     val context: Context,
     workerParameters: WorkerParameters
         ) : CoroutineWorker(context, workerParameters), KodeinAware {
 
@@ -47,7 +49,6 @@ class UpdateDataService (
     private val userID = inputData.getString("id")!!
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-
         if (wipe == "wipe") {
             repository.deleteAllProducts()
             repository.deleteAllCategories()
@@ -109,6 +110,7 @@ class UpdateDataService (
             e.message?.let { fbRepository.logCrash("update data service parent job", it) }
             return@withContext Result.failure()
         }
+        SharedPref(context).putData(QUARTER, STRING, TimeUtil().getQuarterOfTheDay().toString())
         return@withContext Result.success()
     }
 

@@ -138,7 +138,6 @@ class HomeActivity :
             binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
         }
 
-//        showProgressDialog(true)
         binding.flShimmerPlaceholder.startShimmer()
 
         FirebaseMessaging.getInstance().subscribeToTopic(Constants.BROADCAST)
@@ -154,7 +153,6 @@ class HomeActivity :
         }
         generateRecyclerView()
         initData()
-        //getting all the data from room database
         observers()
         clickListeners()
 
@@ -167,8 +165,6 @@ class HomeActivity :
                 TimeUtil().getCurrentDate()
             )
         }
-//        hideProgressDialog()
-
     }
 
     private fun initData() {

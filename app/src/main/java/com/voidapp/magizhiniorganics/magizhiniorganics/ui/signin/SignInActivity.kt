@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import java.util.concurrent.TimeUnit
 
 class SignInActivity : BaseActivity(), KodeinAware {
 
@@ -390,6 +391,18 @@ class SignInActivity : BaseActivity(), KodeinAware {
     }
 
     private fun startGetAllDataService(navigateTo: String) {
+         val periodicWorkRequest: WorkRequest =
+            PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                .setInputData(
+                    workDataOf(
+                        "wipe" to "",
+                        "id" to mCurrentUserID
+                    )
+                )
+                .build()
+
+        WorkManager.getInstance(this).enqueue(periodicWorkRequest)
+
         val workRequest: WorkRequest =
             OneTimeWorkRequestBuilder<UpdateDataService>()
                 .setInputData(
@@ -429,6 +442,9 @@ class SignInActivity : BaseActivity(), KodeinAware {
                             navigateToProfilePage()
                         }
                     }
+                    WorkInfo.State.BLOCKED -> Log.e("qw", "blocked", )
+                    WorkInfo.State.ENQUEUED -> Log.e("qw", "enqueue", )
+                    WorkInfo.State.RUNNING -> Log.e("qw", "running", )
                     else -> Unit
                 }
             }

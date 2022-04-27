@@ -242,10 +242,10 @@
                                     android:layout_height="match_parent"
                                     android:cursorVisible="true"
                                     android:gravity="top"
-                                    android:inputType="textMultiLine"
+                                    android:inputType="textShortMessage"
                                     android:isScrollContainer="true"
-                                    android:maxLength="300"
                                     android:overScrollMode="always"
+                                    android:singleLine="true"
                                     android:scrollbars="vertical"
                                     android:textColor="@color/green_base"
                                     android:textColorHint="@color/green_base"
@@ -278,10 +278,10 @@
                                     android:layout_height="match_parent"
                                     android:cursorVisible="true"
                                     android:gravity="top"
-                                    android:inputType="textMultiLine"
+                                    android:inputType="textShortMessage"
                                     android:isScrollContainer="true"
-                                    android:maxLength="300"
                                     android:overScrollMode="always"
+                                    android:singleLine="true"
                                     android:scrollbars="vertical"
                                     android:textColor="@color/green_base"
                                     android:textColorHint="@color/green_base"
@@ -385,6 +385,22 @@
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toBottomOf="@id/tvRecordTime"
                                 app:tint="@color/matteRed" />
+
+                            <ProgressBar
+                                android:id="@+id/progress_circular"
+                                android:layout_width="@dimen/material_size_64"
+                                android:layout_height="@dimen/material_size_64"
+                                android:progressTint="@color/matteRed"
+                                android:indeterminate="true"
+                                android:padding="@dimen/material_size_2"
+                                android:indeterminateTintMode="src_atop"
+                                android:layout_marginTop="@dimen/material_size_32"
+                                android:indeterminateTint="@color/matteRed"
+                                android:visibility="gone"
+                                app:layout_constraintEnd_toStartOf="@id/seekBar"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/tvRecordTime"
+                                />
 
                             <com.google.android.material.imageview.ShapeableImageView
                                 android:id="@+id/ivPlayPause"

@@ -319,7 +319,7 @@ class ProfileActivity :
         UserProfile(
             id = viewModel.userID!!,
             name = binding.etProfileName.text.toString().trim(),
-            phNumber = binding.etPhoneNumber.text.toString().trim(),
+            phNumber = "+91${binding.etPhoneNumber.text.toString().trim()}",
             alternatePhNumber = binding.etAlternateNumber.text.toString().trim(),
             dob = binding.tvDob.text.toString(),
             address = address,
@@ -340,7 +340,7 @@ class ProfileActivity :
         viewModel.userProfile?.let { profile ->
             profile.id = viewModel.userID!!
             profile.name = binding.etProfileName.text.toString().trim()
-            profile.phNumber = binding.etPhoneNumber.text.toString().trim()
+            profile.phNumber = "+91${binding.etPhoneNumber.text.toString().trim()}"
             profile.alternatePhNumber = binding.etAlternateNumber.text.toString().trim()
             profile.dob = binding.tvDob.text.toString()
             profile.address[0] = generateAddressObject()

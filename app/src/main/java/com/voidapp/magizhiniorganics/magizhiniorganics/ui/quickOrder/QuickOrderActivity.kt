@@ -267,9 +267,23 @@ class QuickOrderActivity :
             ivPlayPause.setOnClickListener {
                 when {
                     (!viewModel.isPlaying && viewModel.pausedTime == 0L) -> {
-                        viewModel.quickOrder?.let {
-                            showToast(this@QuickOrderActivity, "Loading Audio...")
+                        viewModel.quickOrder ?: let {
+                            MediaPlayer().let { player ->
+                                viewModel.player = player
+                                viewModel.player?.setOnBufferingUpdateListener { mediaPlayer, buffer ->
+                                    val ratio = buffer / 100.0
+                                    val bufferingLevel = (mediaPlayer.duration * ratio).toInt()
+                                    seekBar.secondaryProgress = bufferingLevel
+                                }
+                                viewModel.player?.setDataSource(viewModel.fileName)
+                                viewModel.player?.prepare()
+                            }
                         }
+                        ivPlayPause.fadOutAnimation()
+                        ivPlayPause.hide()
+                        progressCircular.fadInAnimation()
+                        progressCircular.visible()
+                        showToast(this@QuickOrderActivity, "Loading Audio...")
                         MediaPlayer().let { player ->
                             viewModel.player = player
                             viewModel.player?.setOnBufferingUpdateListener { mediaPlayer, buffer ->
@@ -279,14 +293,19 @@ class QuickOrderActivity :
                             }
                             viewModel.quickOrder?.let {
                                 viewModel.player?.setDataSource(it.audioFileUrl)
-                            } ?: let {
-                                viewModel.player?.setDataSource(viewModel.fileName)
                             }
-                            viewModel.player?.prepare()
-                            viewModel.player?.start()
-
+                            viewModel.player?.prepareAsync()
+                            viewModel.player?.setOnPreparedListener {
+                                progressCircular.fadOutAnimation()
+                                progressCircular.remove()
+                                progressCircular.clearAnimation()
+                                ivPlayPause.fadInAnimation()
+                                ivPlayPause.visible()
+                                showToast(this@QuickOrderActivity, "Ready to play.!")
+                                viewModel.player?.start()
+                                updatePlayerLayout("play")
+                            }
                         }
-                        updatePlayerLayout("play")
                     }
                     (viewModel.isPlaying) -> {
                         updatePlayerLayout("pause")
@@ -606,6 +625,12 @@ class QuickOrderActivity :
             GridLayoutManager(this, 3)
         binding.rvOrderList.adapter = quickOrderListAdapter
 
+        quickOrderTextAdapter = QuickOrderTextAdapter(
+            true,
+            mutableListOf<QuickOrderTextItem>(),
+            this
+        )
+
         cartAdapter = CartAdapter(
             this,
             mutableListOf(),
@@ -794,7 +819,7 @@ class QuickOrderActivity :
                     viewModel.orderListUri.clear()
                     viewModel.orderListUri.add(Uri.EMPTY)
                     QuickOrderTextAdapter(
-                        this@QuickOrderActivity,
+                        true,
                         mutableListOf(),
                         this@QuickOrderActivity
                     ).let { adapter ->
@@ -1063,6 +1088,7 @@ class QuickOrderActivity :
                 }
                 "quickOrder" -> {
                     ivPlayPause.setImage(R.drawable.ic_play)
+//                    ivPlayPause.disable()
                     viewModel.isPlaying = false
                     tvRecordTime.stop()
                     ivDeleteRecording.remove()
@@ -1187,15 +1213,19 @@ class QuickOrderActivity :
         binding.apply {
             when (quickOrder.orderType) {
                 "text" -> {
+                    if (quickOrder.orderPlaced || quickOrder.cart.isNullOrEmpty()) {
+                        quickOrderTextAdapter?.isEditable = false
+                    }
                     quickOrderTextAdapter?.setQuickOrderData(quickOrder.textItemsList)
                     rvOrderList.adapter = quickOrderTextAdapter
+                    rvOrderList.layoutManager = LinearLayoutManager(this@QuickOrderActivity)
                     ivImage.remove()
                     ivVoice.remove()
                     ivText.setColor(R.color.matteRed)
                     rvOrderList.fadInAnimation()
                     rvOrderList.visible()
-                    clTextTemplate.fadInAnimation()
-                    clTextTemplate.visible()
+                    clTextTemplate.fadOutAnimation()
+                    clTextTemplate.remove()
                     clAudioTemplate.fadOutAnimation()
                     clAudioTemplate.remove()
                     viewModel.currentQuickOrderMode = "text"
@@ -1448,7 +1478,9 @@ class QuickOrderActivity :
                     grantResults[0] == PackageManager.PERMISSION_GRANTED
                 ) {
                     showToast(this, "Storage Permission Granted")
-                    getAction.launch(pickImageIntent)
+                    if (viewModel.currentQuickOrderMode == "image") {
+                        getAction.launch(pickImageIntent)
+                    }
                 } else {
                     showToast(this, "Storage Permission Denied")
                     showExitSheet(

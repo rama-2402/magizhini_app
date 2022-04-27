@@ -92,30 +92,28 @@ class PreviewActivity : BaseActivity() {
                 binding.videoView.remove()
             }
         }
-}
-
-private fun progressGone() {
-    binding.apply {
-        progressCircular.visibility = View.GONE
     }
-}
 
-private fun progressVisible() {
-    binding.apply {
-        progressCircular.visibility = View.VISIBLE
+    private fun progressGone() {
+        binding.apply {
+            progressCircular.visibility = View.GONE
+        }
     }
-}
 
-override fun onBackPressed() {
-    if (contentType == "video") {
-        player.stop()
+    private fun progressVisible() {
+        binding.apply {
+            progressCircular.visibility = View.VISIBLE
+        }
     }
-//        finish()
-    super.onBackPressed()
-}
+
+    override fun onBackPressed() {
+        if (contentType == "video") {
+            player.stop()
+        }
+        super.onBackPressed()
+    }
 
     override fun onStop() {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !isFinishing) {
             Instrumentation().callActivityOnSaveInstanceState(this, Bundle())
         }

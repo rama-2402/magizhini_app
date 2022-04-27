@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserNotificationEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvNotificationItemBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils.addCharAtIndex
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
@@ -26,10 +27,10 @@ class NotificationsAdapter(
     override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
         val notification = notifications[position]
         holder.binding.apply {
-            val date = notification.timestamp.toString()
-            val firstChange = date.addCharAtIndex('/', 4)
-            val secondChange = firstChange.addCharAtIndex('/', 7)
-            tvDate.text = secondChange
+//            val date = notification.timestamp.toString()
+//            val firstChange = date.addCharAtIndex('/', 4)
+//            val secondChange = firstChange.addCharAtIndex('/', 7)
+            tvDate.text = TimeUtil().getCustomDate(dateLong = notification.timestamp)
             tvTitle.text = notification.title
             if (notification.message != "") {
                 tvMessage.text = notification.message

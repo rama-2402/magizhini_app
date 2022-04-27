@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
@@ -118,7 +119,7 @@ interface QuickOrderClickListener {
 }
 
 class QuickOrderTextAdapter(
-    private val context: Context,
+    var isEditable: Boolean,
     var quickOrderTextItems: MutableList<QuickOrderTextItem>,
     val onItemClickListener: QuickOrderClickListener
 ): RecyclerView.Adapter<QuickOrderTextAdapter.QuickOrderTextItemViewHolder>() {
@@ -141,6 +142,8 @@ class QuickOrderTextAdapter(
             tvProductName.text = textItem.productName
             tvVariantName.text = "Type: ${textItem.variantName}"
             tvQuantity.text = "Qty: X${textItem.quantity}"
+
+           btnDelete.isVisible = isEditable
 
             btnDelete.setOnClickListener {
                 onItemClickListener.removeTextItem(

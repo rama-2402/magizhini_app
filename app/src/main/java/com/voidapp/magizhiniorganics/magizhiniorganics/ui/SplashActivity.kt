@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.databinding.DataBindingUtil
@@ -32,6 +33,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 @SuppressLint("CustomSplashScreen")
@@ -52,12 +54,6 @@ class SplashActivity : BaseActivity(), KodeinAware {
         val month = sRef.getInt("month", TimeUtil().getMonthNumber())
         val navigation = intent.getStringExtra("navigate")
 
-//        binding.tvStatus.setOnClickListener {
-//            checkNetwork(isNewDay!!, isNewUser, month, navigation)
-//        }
-//
-//        checkNetwork(isNewDay!!, isNewUser, month, navigation)
-//
         NetworkManagerUtil(this).observe(this) {
             it?.let {
                 if (it) {
@@ -235,7 +231,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
             TimeUtil().getQuarterOfTheDay() != SharedPref(this).getData(QUARTER, STRING, "1")
                 .toString().toInt()
         ) {
-            SharedPref(this).putData(QUARTER, STRING, TimeUtil().getQuarterOfTheDay().toString())
+//            SharedPref(this).putData(QUARTER, STRING, TimeUtil().getQuarterOfTheDay().toString())
             if (wipe) {
                 SharedPref(this).putData("month", INT, TimeUtil().getMonthNumber())
                 startWork("wipe", navigation)
@@ -243,21 +239,54 @@ class SplashActivity : BaseActivity(), KodeinAware {
                 startWork("", navigation)
             }
         } else {
-            navigateToHomeScreen(true, navigation)
+            navigateToHomeScreen(false, navigation)
         }
     }
 
     private fun startWork(wipe: String, navigation: String?) {
         val userID = SharedPref(this).getData(USER_ID, STRING, "")
-        val workRequest: WorkRequest =
-            OneTimeWorkRequestBuilder<UpdateDataService>()
-                .setInputData(
-                    workDataOf(
-                        "wipe" to wipe,
-                        "id" to userID
+
+        val periodicWorker: WorkRequest =
+            if (wipe == "") {
+                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                    .setInputData(
+                        workDataOf(
+                            "wipe" to wipe,
+                            "id" to userID
+                        )
                     )
-                )
-                .build()
+                    .build()
+            } else {
+                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                    .setInputData(
+                        workDataOf(
+                            "id" to userID
+                        )
+                    )
+                    .build()
+            }
+
+        WorkManager.getInstance(this).enqueue(periodicWorker)
+
+        val workRequest: WorkRequest =
+            if (wipe == "") {
+                OneTimeWorkRequestBuilder<UpdateDataService>()
+                    .setInputData(
+                        workDataOf(
+                            "wipe" to wipe,
+                            "id" to userID
+                        )
+                    )
+                    .build()
+            } else {
+                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                    .setInputData(
+                        workDataOf(
+                            "id" to userID
+                        )
+                    )
+                    .build()
+            }
 
         WorkManager.getInstance(this).enqueue(workRequest)
 
