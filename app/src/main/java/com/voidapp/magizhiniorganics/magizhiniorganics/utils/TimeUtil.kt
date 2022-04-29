@@ -25,9 +25,9 @@ class TimeUtil {
     fun getQuarterOfTheDay(time: Long = System.currentTimeMillis()): Int {
         val hourFormat = SimpleDateFormat("HH")
         return when {
-            hourFormat.format(time).toInt() < 6 -> 1
-            hourFormat.format(time).toInt() < 12 -> 2
-            hourFormat.format(time).toInt() < 18 -> 3
+            hourFormat.format(time).toInt() < 8 -> 1
+            hourFormat.format(time).toInt() < 16 -> 2
+            hourFormat.format(time).toInt() < 23 -> 3
 //            hourFormat.format(time).toInt() < 12 -> 4
 //            hourFormat.format(time).toInt() < 15 -> 5
 //            hourFormat.format(time).toInt() < 18 -> 6
@@ -173,5 +173,11 @@ class TimeUtil {
             "12" -> "December"
             else -> "Month"
         }
+    }
+
+    fun getHoursBeforeMidNight(): Long {
+        val hourFormat = SimpleDateFormat("HH")
+        val currentHour = hourFormat.format(System.currentTimeMillis()).toLong()
+        return (24 - currentHour)
     }
 }

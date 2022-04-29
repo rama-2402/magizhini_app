@@ -244,29 +244,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
     }
 
     private fun startWork(wipe: String, navigation: String?) {
+        Log.e("qw", "startWork: worker", )
         val userID = SharedPref(this).getData(USER_ID, STRING, "")
-
-        val periodicWorker: WorkRequest =
-            if (wipe == "") {
-                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
-                    .setInputData(
-                        workDataOf(
-                            "wipe" to wipe,
-                            "id" to userID
-                        )
-                    )
-                    .build()
-            } else {
-                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
-                    .setInputData(
-                        workDataOf(
-                            "id" to userID
-                        )
-                    )
-                    .build()
-            }
-
-        WorkManager.getInstance(this).enqueue(periodicWorker)
 
         val workRequest: WorkRequest =
             if (wipe == "") {
@@ -311,6 +290,28 @@ class SplashActivity : BaseActivity(), KodeinAware {
                         )
                     }
                     WorkInfo.State.SUCCEEDED -> {
+                        val periodicWorker: WorkRequest =
+                            if (wipe == "") {
+                                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                                    .setInitialDelay(TimeUtil().getHoursBeforeMidNight(), TimeUnit.HOURS)
+                                    .setInputData(
+                                        workDataOf(
+                                            "wipe" to wipe,
+                                            "id" to userID
+                                        )
+                                    )
+                                    .build()
+                            } else {
+                                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                                    .setInputData(
+                                        workDataOf(
+                                            "id" to userID
+                                        )
+                                    )
+                                    .build()
+                            }
+
+                        WorkManager.getInstance(this).enqueue(periodicWorker)
                         navigateToHomeScreen(true, navigation)
                     }
                     else -> {

@@ -267,7 +267,35 @@ class QuickOrderActivity :
             ivPlayPause.setOnClickListener {
                 when {
                     (!viewModel.isPlaying && viewModel.pausedTime == 0L) -> {
-                        viewModel.quickOrder ?: let {
+                        viewModel.quickOrder  ?.let {
+                            ivPlayPause.fadOutAnimation()
+                            ivPlayPause.hide()
+                            progressCircular.fadInAnimation()
+                            progressCircular.visible()
+                            showToast(this@QuickOrderActivity, "Loading Audio...")
+                            MediaPlayer().let { player ->
+                                viewModel.player = player
+                                viewModel.player?.setOnBufferingUpdateListener { mediaPlayer, buffer ->
+                                    val ratio = buffer / 100.0
+                                    val bufferingLevel = (mediaPlayer.duration * ratio).toInt()
+                                    seekBar.secondaryProgress = bufferingLevel
+                                }
+                                viewModel.quickOrder?.let {
+                                    viewModel.player?.setDataSource(it.audioFileUrl)
+                                }
+                                viewModel.player?.prepareAsync()
+                                viewModel.player?.setOnPreparedListener {
+                                    progressCircular.fadOutAnimation()
+                                    progressCircular.remove()
+                                    progressCircular.clearAnimation()
+                                    ivPlayPause.fadInAnimation()
+                                    ivPlayPause.visible()
+                                    showToast(this@QuickOrderActivity, "Ready to play.!")
+                                    viewModel.player?.start()
+                                    updatePlayerLayout("play")
+                                }
+                            }
+                        } ?: let {
                             MediaPlayer().let { player ->
                                 viewModel.player = player
                                 viewModel.player?.setOnBufferingUpdateListener { mediaPlayer, buffer ->
@@ -277,31 +305,6 @@ class QuickOrderActivity :
                                 }
                                 viewModel.player?.setDataSource(viewModel.fileName)
                                 viewModel.player?.prepare()
-                            }
-                        }
-                        ivPlayPause.fadOutAnimation()
-                        ivPlayPause.hide()
-                        progressCircular.fadInAnimation()
-                        progressCircular.visible()
-                        showToast(this@QuickOrderActivity, "Loading Audio...")
-                        MediaPlayer().let { player ->
-                            viewModel.player = player
-                            viewModel.player?.setOnBufferingUpdateListener { mediaPlayer, buffer ->
-                                val ratio = buffer / 100.0
-                                val bufferingLevel = (mediaPlayer.duration * ratio).toInt()
-                                seekBar.secondaryProgress = bufferingLevel
-                            }
-                            viewModel.quickOrder?.let {
-                                viewModel.player?.setDataSource(it.audioFileUrl)
-                            }
-                            viewModel.player?.prepareAsync()
-                            viewModel.player?.setOnPreparedListener {
-                                progressCircular.fadOutAnimation()
-                                progressCircular.remove()
-                                progressCircular.clearAnimation()
-                                ivPlayPause.fadInAnimation()
-                                ivPlayPause.visible()
-                                showToast(this@QuickOrderActivity, "Ready to play.!")
                                 viewModel.player?.start()
                                 updatePlayerLayout("play")
                             }

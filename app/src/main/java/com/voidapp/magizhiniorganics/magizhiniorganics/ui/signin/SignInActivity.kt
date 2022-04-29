@@ -391,17 +391,6 @@ class SignInActivity : BaseActivity(), KodeinAware {
     }
 
     private fun startGetAllDataService(navigateTo: String) {
-         val periodicWorkRequest: WorkRequest =
-            PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
-                .setInputData(
-                    workDataOf(
-                        "wipe" to "",
-                        "id" to mCurrentUserID
-                    )
-                )
-                .build()
-
-        WorkManager.getInstance(this).enqueue(periodicWorkRequest)
 
         val workRequest: WorkRequest =
             OneTimeWorkRequestBuilder<UpdateDataService>()
@@ -436,15 +425,29 @@ class SignInActivity : BaseActivity(), KodeinAware {
                     }
                     WorkInfo.State.SUCCEEDED -> {
                         hideProgressDialog()
+
+                        val periodicWorkRequest: WorkRequest =
+                            PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                                .setInitialDelay(TimeUtil().getHoursBeforeMidNight(), TimeUnit.HOURS)
+                                .setInputData(
+                                    workDataOf(
+                                        "wipe" to "",
+                                        "id" to mCurrentUserID
+                                    )
+                                )
+                                .build()
+
+                        WorkManager.getInstance(this).enqueue(periodicWorkRequest)
+
                         if (navigateTo == "home") {
                             navigateToHomePage()
                         } else {
                             navigateToProfilePage()
                         }
                     }
-                    WorkInfo.State.BLOCKED -> Log.e("qw", "blocked", )
-                    WorkInfo.State.ENQUEUED -> Log.e("qw", "enqueue", )
-                    WorkInfo.State.RUNNING -> Log.e("qw", "running", )
+                    WorkInfo.State.BLOCKED -> Log.e("qw", "blocked")
+                    WorkInfo.State.ENQUEUED -> Log.e("qw", "enqueue")
+                    WorkInfo.State.RUNNING -> Log.e("qw", "running")
                     else -> Unit
                 }
             }

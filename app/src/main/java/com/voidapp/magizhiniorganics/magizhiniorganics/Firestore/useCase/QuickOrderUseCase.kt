@@ -454,48 +454,97 @@ class QuickOrderUseCase(
     }
 
     suspend fun deleteQuickOrder(
-        quickOrder: QuickOrder
+        quickOrder: QuickOrder?,
+        customerID: String? = null
     ): Flow<NetworkResult> = flow<NetworkResult> {
 
         emit(NetworkResult.Success("Deleting Your Order List Image...", "image"))
 
+        val order = quickOrder ?: let {
+            fireStore
+                .collection(QUICK_ORDER)
+                .document(customerID!!)
+                .get().await().toObject(QuickOrder::class.java)
+        }
         try {
             val storage = FirebaseStorage.getInstance()
             val storageReference = FirebaseStorage.getInstance().reference
-            when (quickOrder.orderType) {
-                "image" -> {
-                    for (i in quickOrder.imageUrl.indices) {
-                        val url = quickOrder.imageUrl[i]
-                        val imageName = storage.getReferenceFromUrl(url).name
-                        storageReference.child(
-                            "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/$imageName"
-                        ).delete().await()
+            quickOrder?.let {
+                when (it.orderType) {
+                    "image" -> {
+                        for (i in quickOrder.imageUrl.indices) {
+                            val url = quickOrder.imageUrl[i]
+                            val imageName = storage.getReferenceFromUrl(url).name
+                            storageReference.child(
+                                "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/$imageName"
+                            ).delete().await()
+                        }
+                        delay(1000)
+                        emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
                     }
-                    delay(1000)
-                    emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
-                }
-                "voice" -> {
-                    storageReference.child(
-                        "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/quickOrder.m4a"
-                    ).delete().await()
-                    delay(1000)
-                    emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
+                    "voice" -> {
+                        storageReference.child(
+                            "$ORDER_ESTIMATE_PATH${quickOrder.customerID}/quickOrder.m4a"
+                        ).delete().await()
+                        delay(1000)
+                        emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
+                    }
                 }
             }
-
+            order?.let {
+                when (it.orderType) {
+                    "image" -> {
+                        for (i in it.imageUrl.indices) {
+                            val url = it.imageUrl[i]
+                            val imageName = storage.getReferenceFromUrl(url).name
+                            storageReference.child(
+                                "$ORDER_ESTIMATE_PATH${it.customerID}/$imageName"
+                            ).delete().await()
+                        }
+                        delay(1000)
+                        emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
+                    }
+                    "voice" -> {
+                        storageReference.child(
+                            "$ORDER_ESTIMATE_PATH${it.customerID}/quickOrder.m4a"
+                        ).delete().await()
+                        delay(1000)
+                        emit(NetworkResult.Success("Removing your Quick Order Request...", "order"))
+                    }
+                }
+            }
         } catch (e: Exception) {
             fbRepository.logCrash("quickOrder", e.message.toString())
             delay(1000)
-            emit(NetworkResult.Failed("Failed to delete Images. Please try again later", "order"))
+            emit(
+                NetworkResult.Failed(
+                    "Failed to delete Images. Please try again later",
+                    "order"
+                )
+            )
         }
 
         try {
-            fireStore
-                .collection(QUICK_ORDER)
-                .document(quickOrder.customerID)
-                .delete().await()
+            quickOrder?.let {
+                fireStore
+                    .collection(QUICK_ORDER)
+                    .document(it.customerID)
+                    .delete().await()
+            }
+            order?.let {
+                fireStore
+                    .collection(QUICK_ORDER)
+                    .document(it.customerID)
+                    .delete().await()
+            }
+
             delay(1000)
-            emit(NetworkResult.Success("Quick Order Request is removed successfully...", "success"))
+            emit(
+                NetworkResult.Success(
+                    "Quick Order Request is removed successfully...",
+                    "success"
+                )
+            )
         } catch (e: Exception) {
             fbRepository.logCrash("quickOrder", e.message.toString())
             delay(1000)
