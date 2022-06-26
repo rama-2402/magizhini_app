@@ -94,6 +94,21 @@
                         app:tint="@color/white"
                         android:background="?android:attr/selectableItemBackgroundBorderless"
                         app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivHowTo"
+                android:layout_width="@dimen/material_size_24"
+                android:layout_height="@dimen/material_size_24"
+                android:layout_gravity="end"
+                android:src="@drawable/ic_help"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/favorites_icon"
+                app:tint="@color/white"
+                android:layout_marginTop="@dimen/material_size_8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
                 </androidx.appcompat.widget.Toolbar>
             </com.google.android.material.appbar.CollapsingToolbarLayout>
         </com.google.android.material.appbar.AppBarLayout>
@@ -143,7 +158,7 @@
                         android:ellipsize="end"
                         android:fontFamily="@font/roboto"
                         android:singleLine="true"
-                        android:text="Rs.5000"
+                        android:text="Rs.00"
                         android:textColor="@color/black"
                         android:textSize="14sp"
                         app:layout_constraintTop_toTopOf="@id/tvPrice"
@@ -157,7 +172,7 @@
                         android:ellipsize="end"
                         android:fontFamily="@font/roboto"
                         android:singleLine="true"
-                        android:text="(Rs.5000)"
+                        android:text="(Rs.00)"
                         android:textStyle="italic"
                         android:textColor="@color/grey"
                         android:textSize="14sp"
@@ -239,10 +254,11 @@
                         android:paddingEnd="@dimen/material_size_32"
                         android:paddingTop="@dimen/material_size_12"
                         android:paddingBottom="@dimen/material_size_12"
-                        app:layout_constraintStart_toEndOf="@id/spProductVariant"
+                        app:layout_constraintStart_toEndOf="@id/spProductQuantity"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/spProductVariant"
                         app:layout_constraintBottom_toBottomOf="@id/spProductVariant" />
+
 
                     <Spinner
                         android:id="@+id/spProductVariant"
@@ -254,10 +270,28 @@
                         android:layout_width="0dp"
                         android:layout_height="44dp"
                         android:layout_marginTop="@dimen/material_size_16"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/spProductQuantity"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvDiscount"
+                        />
+                    <Spinner
+                        android:id="@+id/spProductQuantity"
+                        android:gravity="end"
+                        android:paddingStart="@dimen/material_size_8"
+                        android:background="@drawable/bg_material_box"
+                        style="@style/mySpinnerItemStyle"
+                        android:spinnerMode="dialog"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:entries="@array/order_count"
+                        android:layout_marginTop="@dimen/material_size_16"
+                        android:layout_marginStart="@dimen/material_size_8"
                         android:layout_marginEnd="@dimen/material_size_16"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/btnAdd"
-                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/spProductVariant"
                         app:layout_constraintTop_toBottomOf="@id/tvDiscount"
                         />
 

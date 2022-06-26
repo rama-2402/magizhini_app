@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems
 
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -140,6 +141,18 @@ class ShoppingMainActivity :
             }
         }
 
+        viewModel.howToVideo.observe(this) { url ->
+            url?.let {
+                hideProgressDialog()
+                if (it == "") {
+                    showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                } else {
+                    openInBrowser(it)
+                    viewModel.setNullHowTo()
+                }
+            }
+
+        }
         lifecycleScope.launch(Dispatchers.IO) {
             viewModel.getProfile()
         }
@@ -221,6 +234,17 @@ class ShoppingMainActivity :
         }
     }
 
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
+        }
+    }
+
     private fun checkProductsToDisplay() {
         //live data of the products and items in the list
         when (viewModel.categoryFilter) {
@@ -258,6 +282,11 @@ class ShoppingMainActivity :
             } else {
                 cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
             }
+        }
+
+        binding.ivHowTo.setOnClickListener {
+            showProgressDialog(true)
+            viewModel.howToVideo("Main")
         }
 
         binding.rvShoppingItems.addOnScrollListener(object : RecyclerView.OnScrollListener() {

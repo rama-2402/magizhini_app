@@ -104,9 +104,13 @@
 
     <!--    spinner style for maintaining the same theme in both themes-->
     <style name="mySpinnerItemStyle" parent="Widget.AppCompat.Light.DropDownItem.Spinner">
-        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <item name="android:textColor">@color/gray700</item>
+        <item name="android:popupBackground">@color/white</item>
+        <!--        <item name="android:windowBackground">@drawable/popup_background</item>-->
+        <item name="android:dialogTheme">@style/CustomAlertDialog</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <item name="fontFamily">@font/roboto</item>
+
     </style>
 
     <style name="NavigationView" >

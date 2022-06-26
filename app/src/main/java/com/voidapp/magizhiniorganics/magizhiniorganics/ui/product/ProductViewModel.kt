@@ -13,6 +13,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVarian
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -302,14 +303,14 @@ class ProductViewModel(
         }
     }
 
-    fun upsertCartItem() = viewModelScope.launch(Dispatchers.IO) {
+    fun upsertCartItem(productQuantity: Int) = viewModelScope.launch(Dispatchers.IO) {
         try {
             CartEntity(
                 productId = product!!.id,
                 productName = product!!.name,
                 thumbnailUrl = product!!.thumbnailUrl,
                 variant = selectedVariantName,
-                quantity = 1,
+                quantity = productQuantity,
                 maxOrderQuantity = getMaxOrderQuantity(),
                 price = getSelectedItemPrice(),  //todo
                 originalPrice = getVariantOriginalPrice(selectedVariantPosition),
@@ -558,6 +559,11 @@ class ProductViewModel(
         }
     }
 
+    fun getHowToVideo(where: String) = viewModelScope.launch {
+        val url = fbRepository.getHowToVideo(where)
+        _uiUpdate.value = UiUpdate.HowToVideo(url)
+    }
+
     sealed class UiUpdate {
         data class PopulateProductData(val message: String?, val product: ProductEntity?) :
             UiUpdate()
@@ -581,6 +587,9 @@ class ProductViewModel(
         data class CheckStoragePermission(val message: String?) : UiUpdate()
         //preview
 //        data class OpenPreviewImage(val message: String?, val imageUrl: String?, val imageUri: Uri?, val thumbnail: ShapeableImageView): UiUpdate()
+
+        //howto
+        data class HowToVideo(val url: String): UiUpdate()
 
         object Empty : UiUpdate()
     }

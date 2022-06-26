@@ -43,6 +43,8 @@ class ProfileViewModel (
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
     val uiEvent: LiveData<UIEvent> = _uiEvent
 
+    fun getCurrentUserID() = fbRepository.getCurrentUserId()!!
+
     fun setEmptyUiEvent() {
         _uiEvent.value = UIEvent.EmptyUIEvent
     }

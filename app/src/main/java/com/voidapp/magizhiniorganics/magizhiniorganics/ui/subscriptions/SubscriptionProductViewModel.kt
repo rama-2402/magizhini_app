@@ -30,6 +30,7 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 class SubscriptionProductViewModel(
     private val dbRepository: DatabaseRepository,
@@ -353,22 +354,27 @@ class SubscriptionProductViewModel(
         }
     }
 
-    fun cha() = viewModelScope.launch {
-        val fs = FirebaseFirestore.getInstance()
-        val codes = mutableListOf<String>()
-        val docs = fs.collection("pincode").get().await()
-        for (doc in docs.documents) {
-            doc.toObject(PinCodes::class.java)!!.let {
-                it.areaCode = it.areaCode.takeLast(6)
-                if (codes.contains(it.areaCode)) {
-                    fs.collection("pincode").document(it.id).delete()
-                } else {
-                    codes.add(it.areaCode)
-                    fs.collection("pincode").document(it.id).update("areaCode", it.areaCode)
-                }
-            }
-        }
-        _uiEvent.value = UIEvent.ProgressBar(false)
+//    suspend fun cha() = viewModelScope.launch(Dispatchers.IO) {
+//        val map = generateHash()
+//        val fs = FirebaseFirestore.getInstance()
+//        val codes = mutableListOf<String>()
+//        val docs = fs.collection("pincode").get().await()
+//        for (doc in docs.documents) {
+//            doc.toObject(PinCodes::class.java)!!.let {
+//
+////                fs.collection("pincode").document(it.id).update("areaCode", it.areaCode)
+//            }
+//        }
+//        _uiEvent.value = UIEvent.ProgressBar(false)
+//    }
+//
+//    private suspend fun generateHash(): HashMap<String, Int> {
+//        val map = HashMap<String ,Int>()
+//    }
+
+    fun getHowToVideo(where: String) = viewModelScope.launch {
+        val url = fbRepository.getHowToVideo(where)
+        _uiUpdate.value = UiUpdate.HowToVideo(url)
     }
 
     sealed class UiUpdate {
@@ -383,6 +389,9 @@ class SubscriptionProductViewModel(
         data class PlacedSubscription(val message: String?, val data: String?): UiUpdate()
         data class UpdateStatusDialog(val message: String?, val data: String?): UiUpdate()
         data class DismissStatusDialog(val status: Boolean): UiUpdate()
+
+        //howto
+        data class HowToVideo(val url: String): UiUpdate()
 
         object Empty: UiUpdate()
     }

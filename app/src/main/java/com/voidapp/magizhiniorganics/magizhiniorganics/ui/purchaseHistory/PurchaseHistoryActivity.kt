@@ -89,7 +89,10 @@ class PurchaseHistoryActivity :
         binding.ivBackBtn.setOnClickListener {
             onBackPressed()
         }
-
+        binding.ivHowTo.setOnClickListener {
+            showProgressDialog(true)
+            viewModel.getHowToVideo("PurchaseHistory")
+        }
         binding.ivFilter.setOnClickListener {
             showCalendarFilterDialog(viewModel.filterMonth, viewModel.filterYear)
         }
@@ -171,6 +174,14 @@ class PurchaseHistoryActivity :
                     }
                 }
                 is PurchaseHistoryViewModel.UiUpdate.Empty -> return@observe
+                is PurchaseHistoryViewModel.UiUpdate.HowToVideo -> {
+                    hideProgressDialog()
+                    if (event.url == "") {
+                        showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                    } else {
+                        openInBrowser(event.url)
+                    }
+                }
                 else -> Unit
             }
             viewModel.setEmptyStatus()
@@ -178,6 +189,17 @@ class PurchaseHistoryActivity :
 
         viewModel.moveToProductReview.observe(this) {
             moveToProductDetails(viewModel.productId, viewModel.productName)
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 

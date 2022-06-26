@@ -64,6 +64,21 @@
                     android:textColor="@color/white"
                     android:fontFamily="@font/roboto"/>
 
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivHowTo"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="end"
+                android:src="@drawable/ic_help"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/favorites_icon"
+                app:tint="@color/white"
+                android:layout_marginTop="@dimen/material_size_8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivCustomerSupport"
                     android:layout_width="@dimen/material_size_24"
@@ -126,7 +141,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:text="Void"
+                android:text="name"
                 android:layout_marginTop="@dimen/material_size_16"
                 android:layout_marginStart="@dimen/material_size_16"
                 android:textSize="24sp"
@@ -142,7 +157,7 @@
                 android:layout_marginTop="@dimen/material_size_16"
                 android:textColor="@color/gray700"
                 android:layout_marginStart="@dimen/material_size_16"
-                android:text="something something street name"
+                android:text="street_name"
                 android:textSize="16sp"
                 android:textStyle="normal"
                 android:singleLine="true"
@@ -157,7 +172,7 @@
                 android:layout_marginTop="@dimen/material_size_8"
                 android:layout_marginStart="@dimen/material_size_16"
                 android:textColor="@color/gray700"
-                android:text="something something street or area"
+                android:text="street_name_two"
                 android:textSize="16sp"
                 android:textStyle="normal"
                 android:singleLine="true"
@@ -170,7 +185,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/gray700"
-                android:text="Chennai"
+                android:text="city_name"
                 android:textSize="16sp"
                 android:textStyle="normal"
                 android:layout_marginTop="@dimen/material_size_8"
@@ -183,7 +198,6 @@
             android:id="@+id/nsvScrollBody"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:visibility="invisible"
             android:elevation="@dimen/material_size_8"
             android:layout_marginTop="@dimen/material_size_4"
             app:layout_constraintTop_toBottomOf="@id/clAddress"
@@ -281,7 +295,7 @@
                         android:id="@+id/tvDeliveryCharge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Delivery Charge"
+                        android:text="Packaging and Delivery"
                         android:textColor="@color/gray700"
                         android:textStyle="normal"
                         style="@style/TextAppearance.MaterialComponents.Body1"
@@ -302,6 +316,28 @@
                         app:layout_constraintEnd_toEndOf="parent" />
 
                     <TextView
+                        android:id="@+id/tvFreeDeliveryNotif"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:paddingEnd="@dimen/material_size_8"
+                        android:paddingTop="@dimen/material_size_4"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:paddingBottom="@dimen/material_size_4"
+                        android:text=""
+                        android:ellipsize="marquee"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true"
+                        android:textColor="@color/gray700"
+                        android:textStyle="normal"
+                        style="@style/TextAppearance.MaterialComponents.Body1"
+                        app:layout_constraintTop_toBottomOf="@id/tvDeliveryCharge"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/tvDeliveryChargeAmt" />
+
+                    <TextView
                         android:id="@+id/tvSavingsInDiscount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -310,7 +346,7 @@
                         style="@style/TextAppearance.MaterialComponents.Body1"
                         android:layout_marginTop="@dimen/material_size_8"
                         android:textColor="@color/gray700"
-                        app:layout_constraintTop_toBottomOf="@id/tvDeliveryCharge"
+                        app:layout_constraintTop_toBottomOf="@id/tvFreeDeliveryNotif"
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <TextView

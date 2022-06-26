@@ -1792,4 +1792,23 @@ class Firestore(
             null
         }
     }
+
+suspend fun getHowToVideo(where: String): String = withContext(Dispatchers.IO) {
+        try {
+            val url = mFireStore
+                .collection("HowTo")
+                .document(where)
+                .get().await().toObject(HowToVideo::class.java)?.url
+
+            Log.e("aaa", "getHowToVideo: $url", )
+
+            if (url.isNullOrEmpty()) {
+                return@withContext ""
+            } else {
+                return@withContext url
+            }
+        } catch (e: Exception) {
+            return@withContext ""
+        }
+    }
 }

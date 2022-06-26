@@ -116,4 +116,7 @@ class FirestoreRepository (
     suspend fun getCareersDocLink(): MutableList<Career>? = firestore.getCareersDocLink()
     suspend fun getFreeDeliveryLimit(): Float? = firestore.getFreeDeliveryLimit()
 
+    //howtovideos
+    suspend fun getHowToVideo(where: String): String = firestore.getHowToVideo(where)
+
 }

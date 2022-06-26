@@ -26,4 +26,10 @@ class CWMViewModel(
         _status.value = NetworkResult.Loading("")
         _status.value = fbRepository.getAllCWMDishes()
     }
+
+    fun getHowToVideo(where: String) = viewModelScope.launch {
+        _status.value = NetworkResult.Loading("")
+        val url = fbRepository.getHowToVideo(where)
+        _status.value = NetworkResult.Success("how", url)
+    }
 }

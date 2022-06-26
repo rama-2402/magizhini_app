@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Paint
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -363,6 +364,14 @@ class ProductActivity :
                     populateProductData()
                     refreshLimitedItemCount()
                 }
+                is ProductViewModel.UiUpdate.HowToVideo -> {
+                    hideProgressDialog()
+                    if (event.url == "") {
+                        showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                    } else {
+                        openInBrowser(event.url)
+                    }
+                }
                 is ProductViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
             }
@@ -384,6 +393,17 @@ class ProductActivity :
                 else -> Unit
             }
             viewModel.setEmptyUiEvent()
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 
@@ -411,6 +431,12 @@ class ProductActivity :
                 cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
+
+        binding.ivHowTo.setOnClickListener {
+            showProgressDialog(true)
+            viewModel.getHowToVideo("Product")
+        }
+
         binding.spProductVariant.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -425,12 +451,18 @@ class ProductActivity :
                 setAddButtonContent(
                     viewModel.selectedVariantName
                 )
+                viewModel.product?.let {
+                    updateNumberOfItemsFromCart(it.name, "${it.variants[variantposition].variantName} ${it.variants[variantposition].variantType}")
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 setAddButtonContent(
                     viewModel.selectedVariantName
                 )
+                viewModel.product?.let {
+                    updateNumberOfItemsFromCart(it.name, "${it.variants[0].variantName} ${it.variants[0].variantType}")
+                }
             }
         }
 
@@ -495,6 +527,20 @@ class ProductActivity :
 
             }
         })
+    }
+
+    private fun updateNumberOfItemsFromCart(productName: String, variantName: String) {
+        binding.apply {
+            viewModel.cartItems.isNotEmpty().let {
+                for(cart in viewModel.cartItems) {
+                    if (cart.productName == productName && variantName == cart.variant) {
+                        spProductQuantity.setSelection(cart.quantity - 1)
+                        return
+                    }
+                }
+                spProductQuantity.setSelection(0)
+            }
+        }
     }
 
     private fun populateProductData(isFirstCall: Boolean = false) {
@@ -623,7 +669,7 @@ class ProductActivity :
 
     private fun addToCart() {
         if(viewModel.isProductAvailable()) {
-            viewModel.upsertCartItem()
+            viewModel.upsertCartItem(binding.spProductQuantity.selectedItem.toString().toInt())
             setRemoveButton()
         } else {
             showErrorSnackBar("Product Out of Stock", true)

@@ -1,9 +1,12 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -14,6 +17,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AllCWMAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityAllCwmBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
@@ -87,6 +91,9 @@ class AllCWMActivity :
             ivBackBtn.setOnClickListener {
                 collapseSearchBar()
                 onBackPressed()
+            }
+            ivHowTo.setOnClickListener {
+                viewModel.getHowToVideo("AllCwm")
             }
         }
     }
@@ -173,9 +180,29 @@ class AllCWMActivity :
                     populateRecyclerView(data)
                 }
             }
+            "how" -> {
+                hideProgressDialog()
+                data as String
+                if (data.isNullOrEmpty()) {
+                    showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                } else {
+                    openInBrowser(data)
+                }
+            }
         }
 
         viewModel.setEmptyStatus()
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
+        }
     }
 
     private suspend fun onFailedCallback(message: String, data: Any?) {
@@ -184,6 +211,10 @@ class AllCWMActivity :
                 delay(1000)
                 hideSuccessDialog()
                 showErrorSnackBar(data!! as String, true)
+            }
+            "how" -> {
+                hideProgressDialog()
+                showToast(this, "Demo Video will be available soon. Sorry for the inconvenience.")
             }
         }
         viewModel.setEmptyStatus()

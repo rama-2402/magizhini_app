@@ -30,8 +30,6 @@ class ShoppingMainViewModel(
     var selectedProductPosition: Int? = null
     var shoppingMainListener: ShoppingMainAdapter.ShoppingMainListener? = null
 
-    val filteredItems: MutableList<ProductEntity> = mutableListOf()
-
     var selectedChip: String = Constants.ALL
     var selectedCategory: String = ""
     var profile: UserProfileEntity? = null
@@ -52,6 +50,8 @@ class ShoppingMainViewModel(
     val subscriptions: LiveData<List<ProductEntity>> = _subscriptions
     private var _position: MutableLiveData<Int> = MutableLiveData()
     val position: LiveData<Int> = _position
+    private var _howToVideo: MutableLiveData<String?> = MutableLiveData()
+    val howToVideo: LiveData<String?> = _howToVideo
 
     var productToRefresh: ProductEntity? = null
     val currentProductsList: MutableList<ProductEntity> = mutableListOf()
@@ -337,6 +337,14 @@ class ShoppingMainViewModel(
         } catch (e: Exception) {
             e.message?.let { fbRepository.logCrash("checkout: clearing cart from db", it) }
         }
+    }
+
+    fun howToVideo(where: String) = viewModelScope.launch {
+        _howToVideo.value = fbRepository.getHowToVideo(where)
+    }
+
+    fun setNullHowTo() {
+        _howToVideo.value = null
     }
 }
 

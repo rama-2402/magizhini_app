@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -82,7 +83,10 @@ class SubscriptionHistoryActivity :
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
-
+            ivHowTo.setOnClickListener {
+                showProgressDialog(true)
+                viewModel.getHowToVideo("SubHistory")
+            }
             binding.ivFilter.setOnClickListener {
                 showListBottomSheet(
                     this@SubscriptionHistoryActivity,
@@ -193,6 +197,14 @@ class SubscriptionHistoryActivity :
                         )
                     }
                 }
+                is SubscriptionHistoryViewModel.UiUpdate.HowToVideo -> {
+                    hideProgressDialog()
+                    if (event.url == "") {
+                        showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                    } else {
+                        openInBrowser(event.url)
+                    }
+                }
                 is SubscriptionHistoryViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
             }
@@ -214,6 +226,17 @@ class SubscriptionHistoryActivity :
                 else -> Unit
             }
             viewModel.setEmptyUiEvent()
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 

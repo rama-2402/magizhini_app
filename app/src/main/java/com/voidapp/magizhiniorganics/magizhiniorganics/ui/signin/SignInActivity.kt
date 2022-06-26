@@ -301,6 +301,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     mMailID = task.result.user?.email ?: ""
+                    mCurrentUserID = task.result.user?.uid ?: ""
                     showProgressDialog(false)
                     viewModel.checkForPreviousProfiles(
                         "+91${
@@ -427,7 +428,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
                         hideProgressDialog()
 
                         val periodicWorkRequest: WorkRequest =
-                            PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                            PeriodicWorkRequestBuilder<UpdateDataService>(8, TimeUnit.HOURS)
                                 .setInitialDelay(TimeUtil().getHoursBeforeMidNight(), TimeUnit.HOURS)
                                 .setInputData(
                                     workDataOf(

@@ -43,8 +43,8 @@ class CheckoutViewModel(
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
     val clearedProductIDs: MutableList<String> = mutableListOf()
 
-    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
-    val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
+//    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
+//    val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
@@ -321,36 +321,36 @@ class CheckoutViewModel(
         return@withContext userProfile?.let {
                 dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
                     if (pinCodes.isNullOrEmpty()) {
-                        deliveryAvailability(null)
+//                        deliveryAvailability(null)
                         30f
                     } else {
-                        deliveryAvailability(pinCodes[0])
+//                        deliveryAvailability(pinCodes[0])
                         pinCodes[0].deliveryCharge.toFloat()
                     }
                 } ?:let {
-                    deliveryAvailability(null)
+//                    deliveryAvailability(null)
                     30f
                 }
             } ?: 30f
     }
 
-    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) = withContext(Dispatchers.Main){
-        pinCodesEntity?.let {
-            if(!pinCodesEntity.deliveryAvailable) {
-                if (deliveryAvailable) {
-                    _deliveryNotAvailableDialog.value = System.currentTimeMillis()
-                }
-                deliveryAvailable = false
-            } else {
-                deliveryAvailable = true
-            }
-        } ?:let {
-            if (deliveryAvailable) {
-                _deliveryNotAvailableDialog.value = System.currentTimeMillis()
-            }
-            deliveryAvailable = false
-        }
-    }
+//    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) = withContext(Dispatchers.Main){
+//        pinCodesEntity?.let {
+//            if(!pinCodesEntity.deliveryAvailable) {
+//                if (deliveryAvailable) {
+//                    _deliveryNotAvailableDialog.value = System.currentTimeMillis()
+//                }
+//                deliveryAvailable = false
+//            } else {
+//                deliveryAvailable = true
+//            }
+//        } ?:let {
+//            if (deliveryAvailable) {
+//                _deliveryNotAvailableDialog.value = System.currentTimeMillis()
+//            }
+//            deliveryAvailable = false
+//        }
+//    }
 
 //    fun placeOrder(order: Order) = viewModelScope.launch(Dispatchers.IO) {
 //        if (order.paymentMethod == "Online") {
@@ -551,6 +551,11 @@ class CheckoutViewModel(
         }
     }
 
+    fun getHowToVideo(where: String) = viewModelScope.launch {
+        val url = fbRepository.getHowToVideo(where)
+        _uiUpdate.value = UiUpdate.HowToVideo(url)
+    }
+
     sealed class UiUpdate {
         //address
         data class PopulateAddressData(val addressList: MutableList<Address>): UiUpdate()
@@ -571,6 +576,10 @@ class CheckoutViewModel(
         data class OrderPlaced(val message: String): UiUpdate()
         data class WalletTransactionFailed(val message: String): UiUpdate()
         data class OrderPlacementFailed(val message: String): UiUpdate()
+        //how to
+        data class HowToVideo(val url: String): UiUpdate()
+
         object Empty: UiUpdate()
     }
+
 }

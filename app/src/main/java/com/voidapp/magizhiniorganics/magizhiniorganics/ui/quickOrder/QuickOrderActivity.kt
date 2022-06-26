@@ -174,7 +174,9 @@ class QuickOrderActivity :
                 }
             }
             ivHelp.setOnClickListener {
-                showDescriptionBs(getString(R.string.quick_order_description))
+//                showDescriptionBs(getString(R.string.quick_order_description))
+                showProgressDialog(true)
+                viewModel.getHowToVideo("QuickOrder")
             }
             ivText.setOnClickListener {
                 if (viewModel.currentQuickOrderMode == "text") {
@@ -403,9 +405,9 @@ class QuickOrderActivity :
     }
 
     private fun initObservers() {
-        viewModel.deliveryNotAvailableDialog.observe(this) {
-            CustomAlertDialog(this).show()
-        }
+//        viewModel.deliveryNotAvailableDialog.observe(this) {
+//            CustomAlertDialog(this).show()
+//        }
         viewModel.uiEvent.observe(this) { event ->
             when (event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)
@@ -609,10 +611,29 @@ class QuickOrderActivity :
                         cartAdapter.updateItemsCount(event.position, it)
                     } ?: cartAdapter.deleteCartItem(event.position)
                 }
+                is QuickOrderViewModel.UiUpdate.HowToVideo -> {
+                    hideProgressDialog()
+                    if (event.url == "") {
+                        showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                    } else {
+                        openInBrowser(event.url)
+                    }
+                }
                 is QuickOrderViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
             }
             viewModel.setEmptyStatus()
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 

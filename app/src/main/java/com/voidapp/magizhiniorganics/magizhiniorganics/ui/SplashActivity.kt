@@ -292,7 +292,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
                     WorkInfo.State.SUCCEEDED -> {
                         val periodicWorker: WorkRequest =
                             if (wipe == "") {
-                                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+                                PeriodicWorkRequestBuilder<UpdateDataService>(8, TimeUnit.HOURS)
                                     .setInitialDelay(TimeUtil().getHoursBeforeMidNight(), TimeUnit.HOURS)
                                     .setInputData(
                                         workDataOf(

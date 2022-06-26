@@ -69,7 +69,7 @@ class ProfileActivity :
         }
 
         viewModel.phoneNumber = intent.getStringExtra(PHONE_NUMBER).toString()
-        viewModel.userID = intent.getStringExtra(USER_ID).toString()
+        viewModel.userID = intent.getStringExtra(USER_ID) ?: viewModel.getCurrentUserID()
         viewModel.mailID = intent.getStringExtra(MAIL_ID).toString()
         binding.tvReferral.remove()
 

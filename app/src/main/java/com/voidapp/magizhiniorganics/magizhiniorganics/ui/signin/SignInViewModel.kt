@@ -24,7 +24,6 @@ class SignInViewModel(
     private val _loginStatus = MutableStateFlow("")
     val loginStatus = _loginStatus.asStateFlow()
 
-    fun getPhoneNumber(): String? = fbRepository.getPhoneNumber()
     fun getCurrentUserId(): String? = fbRepository.getCurrentUserId()
 
     fun setEmptyStatus() {
@@ -36,14 +35,11 @@ class SignInViewModel(
     suspend fun createNewCustomerProfile() = firebaseRepository.createNewCustomerProfile()
 
     fun checkForPreviousProfiles(phoneNumber: String) = viewModelScope.launch(Dispatchers.IO) {
-
         FirebaseFirestore.getInstance()
             .collection(USERS)
             .document(getCurrentUserId()!!)
-            .get().await()?.let {
-                if (
-                    it.toObject(UserProfile::class.java)?.phNumber == phoneNumber
-                ) {
+            .get().await().toObject(UserProfile::class.java)?.let {
+                if (it.phNumber == phoneNumber) {
                     withContext(Dispatchers.Main) {
                         _loginStatus.value = "old"
                         return@withContext
@@ -55,7 +51,6 @@ class SignInViewModel(
                     }
                 }
             } ?: let {
-
             val docs = FirebaseFirestore.getInstance()
                 .collection(USERS)
                 .whereEqualTo("phNumber", phoneNumber)
@@ -90,7 +85,5 @@ class SignInViewModel(
                 }
             }
         }
-
     }
-
 }

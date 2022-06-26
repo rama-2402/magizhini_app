@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -113,6 +114,7 @@ class InvoiceActivity :
                 clAddress.visible()
                 nsvScrollBody.visible()
                 tvFreeDelivery.isSelected = true
+                tvFreeDeliveryNotif.isSelected = true
             }
         }
     }
@@ -267,11 +269,10 @@ class InvoiceActivity :
             }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun initLiveData() {
-        viewModel.deliveryNotAvailableDialog.observe(this) {
-            CustomAlertDialog(this).show()
-        }
+//        viewModel.deliveryNotAvailableDialog.observe(this) {
+//            CustomAlertDialog(this).show()
+//        }
         viewModel.uiEvent.observe(this) { event ->
             when(event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)
@@ -385,10 +386,29 @@ class InvoiceActivity :
                     setDataToViews()
                     applyUiChangesWithCoupon(false)
                 }
+                is CheckoutViewModel.UiUpdate.HowToVideo -> {
+                    hideProgressDialog()
+                    if (event.url == "") {
+                        showToast(this, "Demo Video will be available soon. Sorry for the inconvenience.")
+                    } else {
+                        openInBrowser(event.url)
+                    }
+                }
                 is CheckoutViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
             }
             viewModel.setEmptyStatus()
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 
@@ -563,10 +583,10 @@ class InvoiceActivity :
                 checkoutText.setTextAnimation("Rs: $cartPrice")
             }
             tvFreeDelivery.text = "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
+            tvFreeDeliveryNotif.text = "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private fun listeners() {
         binding.apply {
 //            etDeliveryNote.setOnTouchListener { _, _ ->
@@ -620,6 +640,11 @@ class InvoiceActivity :
                 startActivity(it)
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             }
+        }
+
+        binding.ivHowTo.setOnClickListener {
+            showProgressDialog(true)
+            viewModel.getHowToVideo("CheckOut")
         }
     }
 

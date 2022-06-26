@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -114,7 +115,6 @@ class SubscriptionProductActivity :
         viewModel.generateSubscription(subscriptionsMap, response)
     }
 
-
     override fun onPaymentError(p0: Int, p1: String?) {
         showErrorSnackBar("Payment Failed! Choose different payment method", true)
     }
@@ -134,7 +134,6 @@ class SubscriptionProductActivity :
         }.attach()
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private fun initListeners() {
         with(binding) {
             ivCalendar.setOnClickListener {
@@ -230,6 +229,10 @@ class SubscriptionProductActivity :
             })
             ivInfo.setOnClickListener {
                 showDescriptionBs(resources.getString(R.string.subscription_info))
+            }
+            ivHowTo.setOnClickListener {
+                showProgressDialog(true)
+                viewModel.getHowToVideo("SubProduct")
             }
             tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -404,6 +407,15 @@ class SubscriptionProductActivity :
                         showExitSheet(this, "Server Error! Something went wrong while creating your subscription. \n \n If Money is already debited, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
                     }
                 }
+                is SubscriptionProductViewModel.UiUpdate.HowToVideo -> {
+                    hideProgressDialog()
+                    if (event.url == "") {
+                        showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                    } else {
+                        openInBrowser(event.url)
+                    }
+
+                }
                 is SubscriptionProductViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
             }
@@ -425,6 +437,17 @@ class SubscriptionProductActivity :
                 else -> Unit
             }
             viewModel.setEmptyUiEvent()
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 

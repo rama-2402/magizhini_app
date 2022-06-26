@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.ncorti:slidetoact:0.9.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/afe9610e2682d01a24d133eff9e7683f/transformed/jetified-slidetoact-0.9.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/afe9610e2682d01a24d133eff9e7683f/transformed/jetified-slidetoact-0.9.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/afe9610e2682d01a24d133eff9e7683f/transformed/jetified-slidetoact-0.9.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/057d355e19a5b88a9520737798a18b30/transformed/jetified-slidetoact-0.9.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/057d355e19a5b88a9520737798a18b30/transformed/jetified-slidetoact-0.9.0/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/057d355e19a5b88a9520737798a18b30/transformed/jetified-slidetoact-0.9.0/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

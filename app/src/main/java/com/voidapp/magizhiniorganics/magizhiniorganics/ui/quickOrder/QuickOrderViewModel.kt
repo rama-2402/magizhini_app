@@ -60,8 +60,8 @@ class QuickOrderViewModel(
     var couponAppliedPrice: Float? = null
     var deliveryCharge: Float = 0f
 
-    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
-    val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
+//    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
+//    val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
@@ -219,14 +219,14 @@ class QuickOrderViewModel(
                 if (it.address.isNotEmpty()) {
                     dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
                         if (pinCodes.isNullOrEmpty()) {
-                            deliveryAvailability(null)
+//                            deliveryAvailability(null)
                             30f
                         } else {
-                            deliveryAvailability(pinCodes[0])
+//                            deliveryAvailability(pinCodes[0])
                             pinCodes[0].deliveryCharge.toFloat()
                         }
                     } ?: let {
-                        deliveryAvailability(null)
+//                        deliveryAvailability(null)
                         30f
                     }
                 } else {
@@ -238,14 +238,14 @@ class QuickOrderViewModel(
         }
     }
 
-    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) =
-        withContext(Dispatchers.Main) {
-            pinCodesEntity?.let {
-                if (!pinCodesEntity.deliveryAvailable) {
-                    _deliveryNotAvailableDialog.value = System.currentTimeMillis()
-                }
-            } ?: let { _deliveryNotAvailableDialog.value = System.currentTimeMillis() }
-        }
+//    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) =
+//        withContext(Dispatchers.Main) {
+//            pinCodesEntity?.let {
+//                if (!pinCodesEntity.deliveryAvailable) {
+//                    _deliveryNotAvailableDialog.value = System.currentTimeMillis()
+//                }
+//            } ?: let { _deliveryNotAvailableDialog.value = System.currentTimeMillis() }
+//        }
 
     fun sendGetEstimateRequest(tempFileUriList: MutableList<Uri>) {
         viewModelScope.launch {
@@ -570,6 +570,11 @@ class QuickOrderViewModel(
         }
     }
 
+    fun getHowToVideo(where: String) = viewModelScope.launch {
+        val url = fbRepository.getHowToVideo(where)
+        _uiUpdate.value = UiUpdate.HowToVideo(url)
+    }
+
     sealed class UiUpdate {
         data class WalletData(val wallet: Wallet) : UiUpdate()
 
@@ -612,6 +617,9 @@ class QuickOrderViewModel(
         //deleting quick order
         data class DeletingImages(val message: String, val data: String?) : UiUpdate()
         data class DeletingQuickOrder(val message: String, val data: String?) : UiUpdate()
+
+        //howto
+        data class HowToVideo(val url: String): UiUpdate()
 
         object Empty : UiUpdate()
     }

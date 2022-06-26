@@ -102,7 +102,7 @@
         <entry key="app/src/main/res/drawable/spalsh_screen.xml" value="0.559375" />
         <entry key="app/src/main/res/drawable/unselected_indicator.xml" value="0.559375" />
         <entry key="app/src/main/res/layout/activity_all_cwm.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/activity_chat.xml" value="0.42592592592592593" />
+        <entry key="app/src/main/res/layout/activity_chat.xml" value="0.30217391304347824" />
         <entry key="app/src/main/res/layout/activity_checkout.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_contact_us.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_conversation.xml" value="0.25" />
@@ -113,15 +113,15 @@
         <entry key="app/src/main/res/layout/activity_notifications.xml" value="0.3115942028985507" />
         <entry key="app/src/main/res/layout/activity_on_boarding.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_preview.xml" value="0.31929347826086957" />
-        <entry key="app/src/main/res/layout/activity_product.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/activity_product.xml" value="0.4185185185185185" />
         <entry key="app/src/main/res/layout/activity_profile.xml" value="0.5" />
-        <entry key="app/src/main/res/layout/activity_purchase_history.xml" value="0.48703703703703705" />
+        <entry key="app/src/main/res/layout/activity_purchase_history.xml" value="0.4296577946768061" />
         <entry key="app/src/main/res/layout/activity_quick_order.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_shopping_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_subscription_history.xml" value="0.44880546075085326" />
-        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.4847328244274809" />
+        <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.4321223709369025" />
         <entry key="app/src/main/res/layout/activity_video_player.xml" value="0.5421875" />
         <entry key="app/src/main/res/layout/activity_wallet.xml" value="0.33" />
         <entry key="app/src/main/res/layout/content_subscription_product.xml" value="0.5432291666666667" />

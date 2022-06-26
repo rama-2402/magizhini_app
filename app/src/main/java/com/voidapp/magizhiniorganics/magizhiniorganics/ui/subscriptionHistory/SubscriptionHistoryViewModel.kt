@@ -354,6 +354,11 @@ class SubscriptionHistoryViewModel(
         } ?: return@withContext 0f
     }
 
+    fun getHowToVideo(where: String) = viewModelScope.launch {
+        val url = fbRepository.getHowToVideo(where)
+        _uiUpdate.value = UiUpdate.HowToVideo(url)
+    }
+
     sealed class UiUpdate {
         //sub
         data class PopulateSubscriptions(val subscriptions: MutableList<SubscriptionEntity>?, val message: String?): UiUpdate()
@@ -368,7 +373,8 @@ class SubscriptionHistoryViewModel(
         data class SubCancelStatus(val status: Boolean, val message: String?): UiUpdate()
         //wallet
         data class TransactionStatus(val status: Boolean, val message: String?, val data: String?): UiUpdate()
-
+        //howto
+        data class HowToVideo(val url: String): UiUpdate()
 
         object Empty : UiUpdate()
     }

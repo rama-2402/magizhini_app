@@ -39,8 +39,10 @@ class DishViewModel(
     val reviews: LiveData<ArrayList<Review>?> = _reviews
     private var _description: MutableLiveData<String> = MutableLiveData()
     val description: LiveData<String> = _description
-    private var _previewImage: MutableLiveData<String> = MutableLiveData()
+     private var _previewImage: MutableLiveData<String> = MutableLiveData()
     val previewImage: LiveData<String> = _previewImage
+    private var _howToVideo: MutableLiveData<String?> = MutableLiveData()
+    val howToVideo: LiveData<String?> = _howToVideo
 
     private val _storagePermissionCheck: MutableLiveData<Boolean?> = MutableLiveData()
     val storagePermissionCheck: LiveData<Boolean?> = _storagePermissionCheck
@@ -155,5 +157,13 @@ class DishViewModel(
         dbRepository.getProfileData()?.let {
             userProfile = it
         }
+    }
+
+    fun getHowToVideo(where: String) = viewModelScope.launch {
+        _howToVideo.value = fbRepository.getHowToVideo(where)
+    }
+
+    fun setNullHowTo() {
+        _howToVideo.value = null
     }
 }

@@ -64,7 +64,9 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:lines="1" />
+
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/llViewPager"
             android:layout_width="match_parent"

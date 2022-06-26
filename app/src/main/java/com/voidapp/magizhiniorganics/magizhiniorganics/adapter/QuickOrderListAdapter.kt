@@ -139,7 +139,7 @@ class QuickOrderTextAdapter(
     override fun onBindViewHolder(holder: QuickOrderTextItemViewHolder, position: Int) {
         holder.binding.apply {
             val textItem = quickOrderTextItems[position]
-            tvProductName.text = textItem.productName
+            tvProductName.text = "${position+1}. ${textItem.productName}"
             tvVariantName.text = "Type: ${textItem.variantName}"
             tvQuantity.text = "Qty: X${textItem.quantity}"
 

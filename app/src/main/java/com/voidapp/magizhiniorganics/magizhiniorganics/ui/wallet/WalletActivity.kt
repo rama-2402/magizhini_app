@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -159,9 +160,29 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                     viewModel.getWallet()
                     showShimmer()
                 }
+                is WalletViewModel.UiUpdate.HowToVideo -> {
+                    hideProgressDialog()
+                    if (event.url == "") {
+                        showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                    } else {
+                        openInBrowser(event.url)
+                    }
+
+                }
                 is WalletViewModel.UiUpdate.EmptyUI -> return@observe
                 else -> viewModel.setEmptyStatus()
             }
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 
@@ -267,6 +288,11 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                     }
             }
             dialogBsAddReferral.show()
+        }
+
+        binding.ivHowTo.setOnClickListener {
+            showProgressDialog(true)
+            viewModel.getHowToVideo("Wallet")
         }
     }
 

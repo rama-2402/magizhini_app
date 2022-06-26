@@ -3,6 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish
 import android.app.Instrumentation
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -103,6 +104,18 @@ class DishActivity :
             }
         }
 
+        viewModel.howToVideo.observe(this) { url ->
+            url?.let {
+                hideProgressDialog()
+                if (it == "") {
+                    showToast(this, "Demo Video will be available soon. Sorry for the inconvenience.")
+                } else {
+                    openInBrowser(it)
+                    viewModel.setNullHowTo()
+                }
+            }
+        }
+
         viewModel.storagePermissionCheck.observe(this) { check ->
             check?.let {
                 if (PermissionsUtil.hasStoragePermission(this)) {
@@ -113,6 +126,17 @@ class DishActivity :
                 }
                 viewModel.setStoragePermission(null)
             }
+        }
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse(url)
+            startActivity(Intent.createChooser(intent, "Open link with"))
+        } catch (e: Exception) {
+            println("The current phone does not have a browser installed")
         }
     }
 
@@ -132,6 +156,10 @@ class DishActivity :
                     player?.play()
                     binding.youtubePlayerView.visible()
                 }
+            }
+            ivHowTo.setOnClickListener {
+                showProgressDialog(true)
+                viewModel.getHowToVideo("Dish")
             }
             tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
