@@ -35,9 +35,13 @@
     <group
         android:id="@+id/agreement" >
         <item
-            android:id="@+id/menuContact"
+            android:id="@+id/menucontact"
             android:title="CUSTOMER SUPPORT"
             android:icon="@drawable/ic_upport_agent"/>
+        <item
+            android:id="@+id/menuHowTo"
+            android:title="HOW TO USE"
+            android:icon="@drawable/ic_help"/>
         <item
             android:id="@+id/menuReferral"
             android:title="REFER AND EARN"

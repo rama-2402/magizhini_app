@@ -45,6 +45,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.howTo.HowToActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
@@ -646,11 +647,23 @@ class HomeActivity :
                         }
                     }
                 }
-                R.id.menuContact -> {
+                R.id.menucontact -> {
                     if (NetworkHelper.isOnline(this@HomeActivity)) {
                         lifecycleScope.launch {
                             delay(200)
                             Intent(this@HomeActivity, ChatActivity::class.java).also {
+                                startActivity(it)
+                            }
+                        }
+                    } else {
+                        showErrorSnackBar("Please check your Network Connection", true)
+                    }
+                }
+                R.id.menuHowTo -> {
+                    if (NetworkHelper.isOnline(this@HomeActivity)) {
+                        lifecycleScope.launch {
+                            delay(200)
+                            Intent(this@HomeActivity, HowToActivity::class.java).also {
                                 startActivity(it)
                             }
                         }

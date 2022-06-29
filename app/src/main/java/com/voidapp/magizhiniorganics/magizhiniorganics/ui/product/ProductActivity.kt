@@ -432,10 +432,10 @@ class ProductActivity :
             }
         }
 
-        binding.ivHowTo.setOnClickListener {
-            showProgressDialog(true)
-            viewModel.getHowToVideo("Product")
-        }
+//        binding.ivHowTo.setOnClickListener {
+//            showProgressDialog(true)
+//            viewModel.getHowToVideo("Product")
+//        }
 
         binding.spProductVariant.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(

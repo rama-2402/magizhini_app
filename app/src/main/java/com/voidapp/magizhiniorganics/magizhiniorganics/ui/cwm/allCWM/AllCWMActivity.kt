@@ -92,9 +92,9 @@ class AllCWMActivity :
                 collapseSearchBar()
                 onBackPressed()
             }
-            ivHowTo.setOnClickListener {
-                viewModel.getHowToVideo("AllCwm")
-            }
+//            ivHowTo.setOnClickListener {
+//                viewModel.getHowToVideo("AllCwm")
+//            }
         }
     }
 

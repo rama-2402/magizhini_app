@@ -1,16 +1,12 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.whinc:ratingbar:1.1.1@aar">
     <ANNOTATIONS>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9ba2651b4d58ff1f3dac77234eb3bcaa/transformed/jetified-ratingbar-1.1.1/annotations.zip!/" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9e39b17eb46d2f2eb8c99114d48bcc7a/transformed/jetified-ratingbar-1.1.1/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9a48b90b1674fe8ba52635320c9a0676/transformed/jetified-ratingbar-1.1.1/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9ba2651b4d58ff1f3dac77234eb3bcaa/transformed/jetified-ratingbar-1.1.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9ba2651b4d58ff1f3dac77234eb3bcaa/transformed/jetified-ratingbar-1.1.1/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9ba2651b4d58ff1f3dac77234eb3bcaa/transformed/jetified-ratingbar-1.1.1/AndroidManifest.xml" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9e39b17eb46d2f2eb8c99114d48bcc7a/transformed/jetified-ratingbar-1.1.1/AndroidManifest.xml" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9e39b17eb46d2f2eb8c99114d48bcc7a/transformed/jetified-ratingbar-1.1.1/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9e39b17eb46d2f2eb8c99114d48bcc7a/transformed/jetified-ratingbar-1.1.1/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/9a48b90b1674fe8ba52635320c9a0676/transformed/jetified-ratingbar-1.1.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9a48b90b1674fe8ba52635320c9a0676/transformed/jetified-ratingbar-1.1.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/9a48b90b1674fe8ba52635320c9a0676/transformed/jetified-ratingbar-1.1.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

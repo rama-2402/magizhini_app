@@ -139,8 +139,8 @@ interface UserProfileDao {
     @Query("SELECT * FROM CartEntity")
     fun getAllCartItemsForEntityUpdate() : List<CartEntity>
 
-    @Query("SELECT * FROM productEntity WHERE id = :id")
-    fun getProductWithIdForUpdate(id: String) : ProductEntity?
+    @Query("SELECT * FROM productEntity WHERE id = :id AND activated = :activated AND status = :status")
+    fun getProductWithIdForUpdate(id: String, status: String = "Available", activated: Boolean = true) : ProductEntity?
 
     @Query("SELECT * FROM ProductEntity WHERE productType = :filter AND activated")
     fun getAllSubscriptions(filter: String): List<ProductEntity>

@@ -284,10 +284,10 @@ class ShoppingMainActivity :
             }
         }
 
-        binding.ivHowTo.setOnClickListener {
-            showProgressDialog(true)
-            viewModel.howToVideo("Main")
-        }
+//        binding.ivHowTo.setOnClickListener {
+//            showProgressDialog(true)
+//            viewModel.howToVideo("Main")
+//        }
 
         binding.rvShoppingItems.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

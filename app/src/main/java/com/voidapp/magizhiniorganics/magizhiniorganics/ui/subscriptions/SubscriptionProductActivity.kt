@@ -230,10 +230,10 @@ class SubscriptionProductActivity :
             ivInfo.setOnClickListener {
                 showDescriptionBs(resources.getString(R.string.subscription_info))
             }
-            ivHowTo.setOnClickListener {
-                showProgressDialog(true)
-                viewModel.getHowToVideo("SubProduct")
-            }
+//            ivHowTo.setOnClickListener {
+//                showProgressDialog(true)
+//                viewModel.getHowToVideo("SubProduct")
+//            }
             tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     when(tab?.position) {

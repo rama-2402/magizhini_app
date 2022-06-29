@@ -642,10 +642,10 @@ class InvoiceActivity :
             }
         }
 
-        binding.ivHowTo.setOnClickListener {
-            showProgressDialog(true)
-            viewModel.getHowToVideo("CheckOut")
-        }
+//        binding.ivHowTo.setOnClickListener {
+//            showProgressDialog(true)
+//            viewModel.getHowToVideo("CheckOut")
+//        }
     }
 
     //Title bar back button press function

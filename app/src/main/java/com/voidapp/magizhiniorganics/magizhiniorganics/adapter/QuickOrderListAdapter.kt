@@ -146,15 +146,19 @@ class QuickOrderTextAdapter(
            btnDelete.isVisible = isEditable
 
             btnDelete.setOnClickListener {
-                onItemClickListener.removeTextItem(
-                    position
-                )
+               if(isEditable) {
+                   onItemClickListener.removeTextItem(
+                        position
+                   )
+               }
             }
 
             clTextItem.setOnClickListener {
-                onItemClickListener.updateTextItem(
-                    position
-                )
+                if (isEditable) {
+                    onItemClickListener.updateTextItem(
+                        position
+                    )
+                }
             }
         }
     }

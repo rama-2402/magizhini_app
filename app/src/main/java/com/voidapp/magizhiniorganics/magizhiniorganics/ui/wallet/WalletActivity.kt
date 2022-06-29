@@ -290,10 +290,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
             dialogBsAddReferral.show()
         }
 
-        binding.ivHowTo.setOnClickListener {
-            showProgressDialog(true)
-            viewModel.getHowToVideo("Wallet")
-        }
+//        binding.ivHowTo.setOnClickListener {
+//            showProgressDialog(true)
+//            viewModel.getHowToVideo("Wallet")
+//        }
     }
 
     override fun onPaymentSuccess(orderID: String?) {

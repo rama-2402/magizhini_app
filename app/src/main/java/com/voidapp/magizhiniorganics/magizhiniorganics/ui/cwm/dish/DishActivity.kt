@@ -157,10 +157,10 @@ class DishActivity :
                     binding.youtubePlayerView.visible()
                 }
             }
-            ivHowTo.setOnClickListener {
-                showProgressDialog(true)
-                viewModel.getHowToVideo("Dish")
-            }
+//            ivHowTo.setOnClickListener {
+//                showProgressDialog(true)
+//                viewModel.getHowToVideo("Dish")
+//            }
             tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {
                     when(tab?.position) {

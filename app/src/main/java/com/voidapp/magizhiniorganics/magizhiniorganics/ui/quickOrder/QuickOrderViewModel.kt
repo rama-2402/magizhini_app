@@ -510,6 +510,7 @@ class QuickOrderViewModel(
                                     UiUpdate.DeletingQuickOrder(result.message, "failed")
                             }
                         }
+                        else -> {}
                     }
                 }
         }

@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        tools:context=".ui.cwm.allCWM.AllCWMActivity">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/apbAppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/material_size_8"
+            android:background="@color/green_base"
+            android:gravity="center"
+            app:iconTint="@color/white">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/tbToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivBackBtn"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="@dimen/material_size_4"
+                    android:src="@drawable/ic_back"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/matteRed" />
+
+                <TextView
+                    android:id="@+id/tvToolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/roboto"
+                    android:singleLine="true"
+                    android:text="How To Use App"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_large" />
+
+                <!--                <com.google.android.material.imageview.ShapeableImageView-->
+                <!--                    android:id="@+id/ivHowTo"-->
+                <!--                    android:layout_width="@dimen/material_size_24"-->
+                <!--                    android:layout_height="@dimen/material_size_24"-->
+                <!--                    android:layout_gravity="end"-->
+                <!--                    android:src="@drawable/ic_help"-->
+                <!--                    android:layout_marginEnd="@dimen/material_size_16"-->
+                <!--                    android:contentDescription="@string/favorites_icon"-->
+                <!--                    app:tint="@color/white"-->
+                <!--                    android:background="?android:attr/selectableItemBackgroundBorderless"-->
+                <!--                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>-->
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clInstall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_8"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivInstallThumbnail"
+                        android:layout_width="match_parent"
+                        android:layout_height="175dp"
+                        android:layout_gravity="end"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_app_shadow"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
+                    <View
+                        android:id="@+id/view"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_gradient_transparent_rounded"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_percent=".5"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvInstallName"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="@dimen/material_size_2"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|bottom"
+                        android:maxLines="2"
+                        android:text="How To Create Account"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="@id/view"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/view" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clShopping"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_8"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivShoppingThumbnail"
+                        android:layout_width="match_parent"
+                        android:layout_height="175dp"
+                        android:layout_gravity="end"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_app_shadow"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
+                    <View
+                        android:id="@+id/shoppingView"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_gradient_transparent_rounded"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_percent=".5"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvShoppingName"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="@dimen/material_size_2"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|bottom"
+                        android:maxLines="2"
+                        android:text="Exploring Magizhini Organics"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="@id/shoppingView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/shoppingView" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clProduct"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_8"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivProductThumbnail"
+                        android:layout_width="match_parent"
+                        android:layout_height="175dp"
+                        android:layout_gravity="end"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_app_shadow"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
+                    <View
+                        android:id="@+id/ProductView"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_gradient_transparent_rounded"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_percent=".5"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvProductName"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="@dimen/material_size_2"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|bottom"
+                        android:maxLines="2"
+                        android:text="Product Details"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="@id/ProductView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/ProductView" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clCheckout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_8"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivCheckoutThumbnail"
+                        android:layout_width="match_parent"
+                        android:layout_height="175dp"
+                        android:layout_gravity="end"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_app_shadow"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
+                    <View
+                        android:id="@+id/CheckoutView"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_gradient_transparent_rounded"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_percent=".5"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvCheckoutName"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="@dimen/material_size_2"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|bottom"
+                        android:maxLines="2"
+                        android:text="Product Checkout"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="@id/CheckoutView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/CheckoutView" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clquickorder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_8"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivquickorder"
+                        android:layout_width="match_parent"
+                        android:layout_height="175dp"
+                        android:layout_gravity="end"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_app_shadow"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
+                    <View
+                        android:id="@+id/quickorderView"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_gradient_transparent_rounded"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_percent=".5"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvquickorder"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="@dimen/material_size_2"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|bottom"
+                        android:maxLines="2"
+                        android:text="Magizhini Quick Order"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="@id/quickorderView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/quickorderView" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clWallet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_8"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivWalletThumbnail"
+                        android:layout_width="match_parent"
+                        android:layout_height="175dp"
+                        android:layout_gravity="end"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_app_shadow"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
+                    <View
+                        android:id="@+id/WalletView"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_gradient_transparent_rounded"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_percent=".5"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvWalletName"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="@dimen/material_size_2"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|bottom"
+                        android:maxLines="2"
+                        android:text="Magizhini Wallet"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="@id/WalletView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/WalletView" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clCWM"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_8"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivCWMThumbnail"
+                        android:layout_width="match_parent"
+                        android:layout_height="175dp"
+                        android:layout_gravity="end"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_app_shadow"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
+                    <View
+                        android:id="@+id/CWMView"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_gradient_transparent_rounded"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_percent=".5"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvCWMName"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="@dimen/material_size_2"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|bottom"
+                        android:maxLines="2"
+                        android:text="Cook With Magizhini"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="@id/CWMView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/CWMView" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clSub"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:layout_marginBottom="@dimen/material_size_8"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:elevation="@dimen/material_size_4">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivSubThumbnail"
+                        android:layout_width="match_parent"
+                        android:layout_height="175dp"
+                        android:layout_gravity="end"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_app_shadow"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+
+                    <View
+                        android:id="@+id/SubView"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@drawable/bg_gradient_transparent_rounded"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHeight_percent=".5"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvSubName"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="@dimen/material_size_2"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:gravity="center|bottom"
+                        android:maxLines="2"
+                        android:text="Magizhini Subscription"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="@id/SubView"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/SubView" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</layout>

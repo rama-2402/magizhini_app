@@ -174,9 +174,9 @@ class QuickOrderActivity :
                 }
             }
             ivHelp.setOnClickListener {
-//                showDescriptionBs(getString(R.string.quick_order_description))
-                showProgressDialog(true)
-                viewModel.getHowToVideo("QuickOrder")
+                showDescriptionBs(getString(R.string.quick_order_description))
+//                showProgressDialog(true)
+//                viewModel.getHowToVideo("QuickOrder")
             }
             ivText.setOnClickListener {
                 if (viewModel.currentQuickOrderMode == "text") {
@@ -1240,7 +1240,10 @@ class QuickOrderActivity :
                     if (quickOrder.orderPlaced || quickOrder.cart.isNullOrEmpty()) {
                         quickOrderTextAdapter?.isEditable = false
                     }
-                    quickOrderTextAdapter?.setQuickOrderData(quickOrder.textItemsList)
+                    quickOrderTextAdapter?.let {
+                        it.isEditable = false
+                        it.setQuickOrderData(quickOrder.textItemsList)
+                    }
                     rvOrderList.adapter = quickOrderTextAdapter
                     rvOrderList.layoutManager = LinearLayoutManager(this@QuickOrderActivity)
                     ivImage.remove()

@@ -221,6 +221,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
                                             newUserVerification()
                                         }
                                     }
+                                    else -> {}
                                 }
                             }
                     }

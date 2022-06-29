@@ -83,10 +83,10 @@ class SubscriptionHistoryActivity :
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
-            ivHowTo.setOnClickListener {
-                showProgressDialog(true)
-                viewModel.getHowToVideo("SubHistory")
-            }
+//            ivHowTo.setOnClickListener {
+//                showProgressDialog(true)
+//                viewModel.getHowToVideo("SubHistory")
+//            }
             binding.ivFilter.setOnClickListener {
                 showListBottomSheet(
                     this@SubscriptionHistoryActivity,
