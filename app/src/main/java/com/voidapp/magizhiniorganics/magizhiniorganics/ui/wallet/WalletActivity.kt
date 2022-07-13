@@ -31,6 +31,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilter
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.CalendarFilerDialogClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
@@ -38,7 +40,8 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
-class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, CalendarFilerDialogClickListener {
+class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener,
+    CalendarFilerDialogClickListener {
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityWalletBinding
@@ -58,7 +61,12 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
         setSupportActionBar(binding.tbToolbar)
 
         with(binding) {
-            cvWalletCard.startAnimation(AnimationUtils.loadAnimation(cvWalletCard.context, R.anim.slide_in_right_bounce))
+            cvWalletCard.startAnimation(
+                AnimationUtils.loadAnimation(
+                    cvWalletCard.context,
+                    R.anim.slide_in_right_bounce
+                )
+            )
             clBody.startAnimation(AnimationUtils.loadAnimation(clBody.context, R.anim.slide_up))
             tvTransactionDate.isSelected = true
             tvLastRechargeDate.isSelected = true
@@ -74,7 +82,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
         lifecycleScope.launch {
             delay(1250)
             initRecyclerView()
-            initData()
+            updateChip(WALLET)
             liveDataObservers()
             clickListeners()
         }
@@ -83,17 +91,24 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
     private fun initData() {
         showProgressDialog(true)
         showShimmer()
-        viewModel.userID = SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
+        viewModel.userID =
+            SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
         viewModel.getWallet()
+    }
+
+    private fun initReferral() {
+        showProgressDialog(true)
+        showShimmer()
+        viewModel.getReferralTransactions()
     }
 
     private fun liveDataObservers() {
         viewModel.uiUpdate.observe(this) { event ->
-            when(event) {
+            when (event) {
                 is WalletViewModel.UiUpdate.PopulateWalletData -> {
                     hideProgressDialog()
-
                     event.wallet?.let {
+                        viewModel.userWallet = it
                         displayWalletDataToScreen(it)
                     } ?: showErrorSnackBar(event.message.toString(), true)
 
@@ -131,7 +146,10 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                                         ).show()
                                     }
                                 }
-                            } ?: showErrorSnackBar("Failed to add money to wallet. Please contact customer support for further assistance", true)
+                            } ?: showErrorSnackBar(
+                                "Failed to add money to wallet. Please contact customer support for further assistance",
+                                true
+                            )
                         }
                     } ?: showErrorSnackBar("Failed to fetch your profile data. Try later", true)
                 }
@@ -148,7 +166,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                     }
                 }
                 is WalletViewModel.UiUpdate.ShowLoadStatusDialog -> {
-                    LoadStatusDialog.newInstance("", event.message!!,event.data!!).show(supportFragmentManager,
+                    LoadStatusDialog.newInstance("", event.message!!, event.data!!).show(
+                        supportFragmentManager,
                         Constants.LOAD_DIALOG
                     )
                 }
@@ -160,10 +179,27 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                     viewModel.getWallet()
                     showShimmer()
                 }
+                is WalletViewModel.UiUpdate.PopulateReferralBonusDetails -> {
+                    hideProgressDialog()
+                    binding.apply {
+                        tvTransactionText.text = "Referral Earnings: "
+                        tvLastRecharge.text = "Total Referrals: "
+                        event.data?.let {
+                            tvTransactionDate.text = "Rs: ${it.totalBonus}"
+                            tvLastRechargeDate.text = it.referrals.toString()
+                        } ?: let {
+                            tvTransactionDate.text = "Rs: 0.00"
+                            tvLastRechargeDate.text = "0"
+                        }
+                    }
+                }
                 is WalletViewModel.UiUpdate.HowToVideo -> {
                     hideProgressDialog()
                     if (event.url == "") {
-                        showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                        showToast(
+                            this,
+                            "demo video will be available soon. sorry for the inconvenience."
+                        )
                     } else {
                         openInBrowser(event.url)
                     }
@@ -189,6 +225,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
     private fun displayWalletDataToScreen(wallet: Wallet) {
         with(binding) {
             tvWalletTotal.text = wallet.amount.toString()
+            tvTransactionText.text = "Last Transaction: "
+            tvLastRecharge.text = "Last Recharge: "
             if (wallet.lastRecharge == 0L) {
                 tvLastRechargeDate.text = "-"
             } else {
@@ -236,7 +274,11 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
 
         binding.ivInfo.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            showDescriptionBs("ABOUT MAGIZHINI WALLET \n \n \n Magizhini Wallet provides you a safe way of transaction for Purchases and Subscriptions. All your promotional cashback and refunds will be transferred to wallet and can be used for purchasing any item in Magizhini Store.")
+            if (binding.tvTransactionText.text == "Referral Earnings: ") {
+                showDescriptionBs("ABOUT MAGIZHINI REFERRAL REWARDS \n \n \n With Magizhini Referral Rewards Program you will be rewarded every time any one of your referrals makes a Purchases in Magizhini Organics. This is a smart way of having a PASSIVE INCOME by referring Magizhini Organics to new customers using your mobile number as a referral ID. \n \n \n Referral Rewards will be added to your Magizhini Wallet which can be later used for your future purchases. For more Information please contact Magizhini Customer Support.")
+            } else {
+                showDescriptionBs("ABOUT MAGIZHINI WALLET \n \n \n Magizhini Wallet provides you a safe way of transaction for Purchases and Subscriptions. All your promotional cashback and refunds will be transferred to wallet and can be used for purchasing any item in Magizhini Store.")
+            }
         }
 
         binding.rvTransactionHistory.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -260,7 +302,12 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
             //BS to add Amount number
             val dialogBsAddReferral = BottomSheetDialog(this, R.style.BottomSheetDialog)
 
-            val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(LayoutInflater.from(applicationContext),R.layout.dialog_bottom_add_referral,null,false)
+            val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(
+                LayoutInflater.from(applicationContext),
+                R.layout.dialog_bottom_add_referral,
+                null,
+                false
+            )
             dialogBsAddReferral.setCancelable(true)
             dialogBsAddReferral.setContentView(view.root)
             dialogBsAddReferral.dismissWithAnimation = true
@@ -285,9 +332,17 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                     viewModel.moneyToAddInWallet = view.etReferralNumber.text.toString().toFloat()
                     dialogBsAddReferral.dismiss()
                     viewModel.getUserProfileData()
-                    }
+                }
             }
             dialogBsAddReferral.show()
+        }
+
+        binding.cpReferral.setOnClickListener {
+            updateChip(REFERRAL)
+        }
+
+        binding.cpWallet.setOnClickListener {
+            updateChip(WALLET)
         }
 
 //        binding.ivHowTo.setOnClickListener {
@@ -304,7 +359,11 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
                 orderID!!,
                 "Add"
             )
-        } ?: showExitSheet(this, "Transaction Complete. If the amount is not reflecting in your wallet, Please contact customer support for further assistance", "cs")
+        } ?: showExitSheet(
+            this,
+            "Transaction Complete. If the amount is not reflecting in your wallet, Please contact customer support for further assistance",
+            "cs"
+        )
     }
 
     override fun onPaymentError(p0: Int, p1: String?) {
@@ -331,7 +390,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
     }
 
     private fun showCalendarFilterDialog(month: String, year: Long) {
-        CalendarFilterDialog.newInstance(month, year.toInt()).show(supportFragmentManager,
+        CalendarFilterDialog.newInstance(month, year.toInt()).show(
+            supportFragmentManager,
             "calendar"
         )
     }
@@ -356,6 +416,53 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
         }
     }
 
+    private fun updateChip(chip: String) {
+        binding.apply {
+            when (chip) {
+                WALLET -> {
+                    cpWallet.chipBackgroundColor =
+                        resources.getColorStateList(R.color.matteRed, null)
+                    cpWallet.setTextColor(
+                        ContextCompat.getColor(
+                            this@WalletActivity,
+                            R.color.white
+                        )
+                    )
+                    cpReferral.chipBackgroundColor =
+                        resources.getColorStateList(R.color.green_light, null)
+                    cpReferral.setTextColor(
+                        ContextCompat.getColor(
+                            this@WalletActivity,
+                            R.color.green_base
+                        )
+                    )
+                    fabAddMoney.show()
+                    initData()
+                }
+                REFERRAL -> {
+                    cpReferral.chipBackgroundColor =
+                        resources.getColorStateList(R.color.matteRed, null)
+                    cpReferral.setTextColor(
+                        ContextCompat.getColor(
+                            this@WalletActivity,
+                            R.color.white
+                        )
+                    )
+                    cpWallet.chipBackgroundColor =
+                        resources.getColorStateList(R.color.green_light, null)
+                    cpWallet.setTextColor(
+                        ContextCompat.getColor(
+                            this@WalletActivity,
+                            R.color.green_base
+                        )
+                    )
+                    fabAddMoney.hide()
+                    initReferral()
+                }
+            }
+        }
+    }
+
     override fun selectedFilter(month: String, year: String) {
         if (!NetworkHelper.isOnline(this)) {
             showErrorSnackBar("Please check your Internet Connection", true)
@@ -365,7 +472,11 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener, Calen
         showShimmer()
         viewModel.filteredMonth = month
         viewModel.filteredYear = year.toLong()
-        viewModel.filterTransactions()
+        if (binding.tvTransactionText.text == "Referral Earnings: ") {
+            viewModel.filterTransactions(REFERRAL)
+        } else {
+            viewModel.filterTransactions()
+        }
     }
 
     override fun cancelDialog() {

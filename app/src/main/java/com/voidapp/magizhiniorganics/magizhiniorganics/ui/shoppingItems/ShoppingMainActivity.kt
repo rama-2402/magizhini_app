@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.databinding.DataBindingUtil.bind
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -253,6 +255,10 @@ class ShoppingMainActivity :
             FAVORITES -> binding.cpFavorites.isChecked = true
             DISCOUNT -> binding.cpDiscounts.isChecked = true
             LIMITED -> binding.cpLimitedItems.isChecked = true
+            "search" -> {
+                item?.expandActionView()
+                binding.cpAll.isChecked = true
+            }
             else -> selectedCategory(viewModel.categoryFilter)
         }
     }
@@ -460,6 +466,11 @@ class ShoppingMainActivity :
                 return false
             }
         })
+
+        if (viewModel.categoryFilter == "search") {
+            checkProductsToDisplay()
+        }
+
         return super.onCreateOptionsMenu(menu)
     }
 

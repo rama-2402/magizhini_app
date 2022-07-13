@@ -423,6 +423,15 @@ class Firestore(
         }
     }
 
+    suspend fun getReferralDetails(userID: String): ReferralBonus? = withContext(Dispatchers.IO) {
+        return@withContext try {
+            mFireStore.collection(REFERRAL).document(userID).get().await().toObject(ReferralBonus::class.java)
+        }  catch (e: Exception) {
+              e.message?.let { logCrash("firestore: checking for existing referral", it) }
+              return@withContext null
+        }
+    }
+
     //wallet
     suspend fun createWallet(wallet: Wallet) = withContext(Dispatchers.IO) {
         try {
@@ -1811,4 +1820,5 @@ suspend fun getHowToVideo(where: String): String = withContext(Dispatchers.IO) {
             return@withContext ""
         }
     }
+
 }

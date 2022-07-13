@@ -44,10 +44,10 @@ class HowToActivity : BaseActivity() {
 //                getHowToVideo("Main")
                 openInBrowser(urlMap["Main"].toString())
             }
-            clProduct.setOnClickListener {
-//                getHowToVideo("Product")
-                openInBrowser(urlMap["Product"].toString())
-            }
+//            clProduct.setOnClickListener {
+////                getHowToVideo("Product")
+//                openInBrowser(urlMap["Product"].toString())
+//            }
             clCheckout.setOnClickListener {
 //                getHowToVideo("CheckOut")
                 openInBrowser(urlMap["CheckOut"].toString())
@@ -105,10 +105,10 @@ class HowToActivity : BaseActivity() {
                     binding.ivShoppingThumbnail.loadImg(item.value) {}
                     binding.tvShoppingName.setTextAnimation("Exploring Magizhini Organics")
                 }
-                "tbProduct" -> {
-                    binding.ivProductThumbnail.loadImg(item.value) {}
-                    binding.tvProductName.setTextAnimation("Product Details")
-                }
+//                "tbProduct" -> {
+//                    binding.ivProductThumbnail.loadImg(item.value) {}
+//                    binding.tvProductName.setTextAnimation("Product Details")
+//                }
                 "tbCheckOut" -> {
                     binding.ivCheckoutThumbnail.loadImg(item.value) {}
                     binding.tvCheckoutName.setTextAnimation("How To Place Order?")
@@ -122,8 +122,12 @@ class HowToActivity : BaseActivity() {
                     binding.tvWalletName.setTextAnimation("How To Use Magizhini Wallet?")
                 }
                 "tbAllCwm" -> {
-                    binding.ivCWMThumbnail.loadImg(item.value) {}
-                    binding.tvCWMName.setTextAnimation("What is Cook With Magizhini?")
+                    if (item.value.isNullOrEmpty()) {
+                        binding.clCWM.remove()
+                    } else {
+                        binding.ivCWMThumbnail.loadImg(item.value) {}
+                        binding.tvCWMName.setTextAnimation("What is Cook With Magizhini?")
+                    }
                 }
                 "tbSubProduct" -> {
                     if (item.value.isNullOrEmpty()) {

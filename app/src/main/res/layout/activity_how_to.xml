@@ -175,57 +175,57 @@
                         app:layout_constraintTop_toTopOf="@id/shoppingView" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/clProduct"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/material_size_8"
-                    android:layout_marginEnd="@dimen/material_size_8"
-                    android:layout_marginBottom="@dimen/material_size_8"
-                    android:background="@drawable/shape_round_rectangle_8"
-                    android:elevation="@dimen/material_size_4">
+<!--                <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--                    android:id="@+id/clProduct"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="@dimen/material_size_8"-->
+<!--                    android:layout_marginEnd="@dimen/material_size_8"-->
+<!--                    android:layout_marginBottom="@dimen/material_size_8"-->
+<!--                    android:background="@drawable/shape_round_rectangle_8"-->
+<!--                    android:elevation="@dimen/material_size_4">-->
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/ivProductThumbnail"
-                        android:layout_width="match_parent"
-                        android:layout_height="175dp"
-                        android:layout_gravity="end"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_app_shadow"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />
+<!--                    <com.google.android.material.imageview.ShapeableImageView-->
+<!--                        android:id="@+id/ivProductThumbnail"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="175dp"-->
+<!--                        android:layout_gravity="end"-->
+<!--                        android:background="?android:attr/selectableItemBackgroundBorderless"-->
+<!--                        android:src="@drawable/ic_app_shadow"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent"-->
+<!--                        app:layout_constraintStart_toStartOf="parent"-->
+<!--                        app:layout_constraintTop_toTopOf="parent"-->
+<!--                        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle" />-->
 
-                    <View
-                        android:id="@+id/ProductView"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:background="@drawable/bg_gradient_transparent_rounded"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHeight_percent=".5"
-                        app:layout_constraintStart_toStartOf="parent" />
+<!--                    <View-->
+<!--                        android:id="@+id/ProductView"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="0dp"-->
+<!--                        android:background="@drawable/bg_gradient_transparent_rounded"-->
+<!--                        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent"-->
+<!--                        app:layout_constraintHeight_percent=".5"-->
+<!--                        app:layout_constraintStart_toStartOf="parent" />-->
 
-                    <TextView
-                        android:id="@+id/tvProductName"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginStart="2dp"
-                        android:layout_marginEnd="2dp"
-                        android:layout_marginBottom="@dimen/material_size_2"
-                        android:ellipsize="end"
-                        android:fontFamily="@font/roboto"
-                        android:gravity="center|bottom"
-                        android:maxLines="2"
-                        android:text="Product Details"
-                        android:textColor="@color/white"
-                        android:textSize="20sp"
-                        app:layout_constraintBottom_toBottomOf="@id/ProductView"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/ProductView" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvProductName"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="0dp"-->
+<!--                        android:layout_marginStart="2dp"-->
+<!--                        android:layout_marginEnd="2dp"-->
+<!--                        android:layout_marginBottom="@dimen/material_size_2"-->
+<!--                        android:ellipsize="end"-->
+<!--                        android:fontFamily="@font/roboto"-->
+<!--                        android:gravity="center|bottom"-->
+<!--                        android:maxLines="2"-->
+<!--                        android:text="Product Details"-->
+<!--                        android:textColor="@color/white"-->
+<!--                        android:textSize="20sp"-->
+<!--                        app:layout_constraintBottom_toBottomOf="@id/ProductView"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent"-->
+<!--                        app:layout_constraintStart_toStartOf="parent"-->
+<!--                        app:layout_constraintTop_toTopOf="@id/ProductView" />-->
+<!--                </androidx.constraintlayout.widget.ConstraintLayout>-->
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clCheckout"

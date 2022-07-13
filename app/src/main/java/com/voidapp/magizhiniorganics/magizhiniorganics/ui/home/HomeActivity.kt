@@ -223,7 +223,7 @@ class HomeActivity :
                     }
                 }
             })
-            binding.cpShowAll.setOnClickListener {
+            cpShowAll.setOnClickListener {
                 cpShowAll.startAnimation(
                     AnimationUtils.loadAnimation(
                         binding.cpShowAll.context,
@@ -256,10 +256,15 @@ class HomeActivity :
             ivFacebook.setOnClickListener {
                 openInBrowser("https://www.facebook.com/organicshopping/")
             }
-//          binding.ivTelegram -> openInBrowser("https://t.me/coder_lane")
-            ivLinkedIn.setOnClickListener {
-                openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
+            ivYoutube.setOnClickListener {
+                openInBrowser("https://www.youtube.com/channel/UCIKWr3_lJVlc5ICj-_JND1Q/featured")
             }
+            ivSearch.setOnClickListener {
+                navigateToSelectedCategory("search")
+            }
+//            ivLinkedIn.setOnClickListener {
+//                openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
+//            }
         }
     }
 
@@ -841,7 +846,7 @@ class HomeActivity :
                     "\nHey I'm using Magizhini Organics for my Organic Food Purchases. Check it out! You can use my number $phoneNumber as Referral Number to get Exciting Referral Bonus!\n\n"
                 shareMessage =
                     """
-                    ${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
+                      ${shareMessage}https://play.google.com/store/apps/details?id=com.voidapp.magizhiniorganics.magizhiniorganics
                     """.trimIndent()
                 shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage)
                 startActivity(Intent.createChooser(shareIntent, "choose one"))
@@ -853,6 +858,7 @@ class HomeActivity :
         }
     }
 
+    //                    ${shareMessage}https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}
     fun showReferralOptions() {
         showListBottomSheet(
             this,

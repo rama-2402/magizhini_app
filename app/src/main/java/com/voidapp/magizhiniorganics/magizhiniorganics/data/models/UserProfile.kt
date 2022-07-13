@@ -41,6 +41,20 @@ data class Referral (
     var referralAmount: Float = 0f,
     var referrerAmount: Float = 0f
 )
+
+data class ReferralBonus(
+    var customerID: String = "",
+    var referrerID: String = "",
+    var totalBonus: Double = 0.0,
+    var referrals: ArrayList<String> = arrayListOf(),
+    var referralBonusTransaction: ArrayList<ReferralBonusTransaction> = arrayListOf()
+)
+
+data class ReferralBonusTransaction(
+    var date: Long = 0,
+    var amount: Double = 0.0
+)
+
 /*
 * Extras
 *

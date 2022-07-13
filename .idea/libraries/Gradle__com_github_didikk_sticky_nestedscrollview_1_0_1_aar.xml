@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.didikk:sticky-nestedscrollview:1.0.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/06594a92561a18bc270be95275590d1b/transformed/jetified-sticky-nestedscrollview-1.0.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/06594a92561a18bc270be95275590d1b/transformed/jetified-sticky-nestedscrollview-1.0.1/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/06594a92561a18bc270be95275590d1b/transformed/jetified-sticky-nestedscrollview-1.0.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/c4ba7566107c52bff0dd9833533eda3d/transformed/jetified-sticky-nestedscrollview-1.0.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/c4ba7566107c52bff0dd9833533eda3d/transformed/jetified-sticky-nestedscrollview-1.0.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/c4ba7566107c52bff0dd9833533eda3d/transformed/jetified-sticky-nestedscrollview-1.0.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

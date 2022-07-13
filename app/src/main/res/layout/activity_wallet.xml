@@ -65,20 +65,20 @@
                     app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
                     app:tint="@color/white" />
 
-<!--                <com.google.android.material.imageview.ShapeableImageView-->
-<!--                android:id="@+id/ivHowTo"-->
-<!--                android:layout_width="24dp"-->
-<!--                android:layout_height="24dp"-->
-<!--                android:layout_gravity="end"-->
-<!--                android:src="@drawable/ic_help"-->
-<!--                android:layout_marginEnd="8dp"-->
-<!--                android:contentDescription="@string/favorites_icon"-->
-<!--                app:tint="@color/white"-->
-<!--                android:layout_marginTop="@dimen/material_size_8"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent"-->
-<!--                android:background="?android:attr/selectableItemBackgroundBorderless"-->
-<!--                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>-->
+                <!--                <com.google.android.material.imageview.ShapeableImageView-->
+                <!--                android:id="@+id/ivHowTo"-->
+                <!--                android:layout_width="24dp"-->
+                <!--                android:layout_height="24dp"-->
+                <!--                android:layout_gravity="end"-->
+                <!--                android:src="@drawable/ic_help"-->
+                <!--                android:layout_marginEnd="8dp"-->
+                <!--                android:contentDescription="@string/favorites_icon"-->
+                <!--                app:tint="@color/white"-->
+                <!--                android:layout_marginTop="@dimen/material_size_8"-->
+                <!--                app:layout_constraintEnd_toEndOf="parent"-->
+                <!--                app:layout_constraintTop_toTopOf="parent"-->
+                <!--                android:background="?android:attr/selectableItemBackgroundBorderless"-->
+                <!--                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>-->
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -99,16 +99,18 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/material_size_8">
+                android:layout_marginStart="@dimen/material_size_8"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:layout_marginEnd="@dimen/material_size_8">
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/ltPiggyImg"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    app:layout_constraintWidth_percent=".35"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintWidth_percent=".35"
                     app:lottie_autoPlay="true"
                     app:lottie_loop="true"
                     app:lottie_rawRes="@raw/piggy_bank" />
@@ -127,46 +129,47 @@
                     android:id="@+id/tvWalletTotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/material_size_24"
+                    android:layout_marginBottom="@dimen/material_size_12"
                     android:fontFamily="@font/roboto"
                     android:paddingStart="@dimen/material_size_8"
                     android:text="0.00"
                     android:textColor="@color/black"
                     android:textSize="24dp"
                     android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/tvTransactionText"
                     app:layout_constraintStart_toEndOf="@id/ivRupee"
-                    app:layout_constraintTop_toTopOf="@id/ltPiggyImg" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/tvTransactionText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/material_size_16"
                     android:fontFamily="@font/roboto"
                     android:text="Last Transaction: "
                     android:textColor="@color/gray700"
                     android:textSize="14dp"
+                    app:layout_constraintBottom_toTopOf="@+id/tvLastRecharge"
                     app:layout_constraintStart_toStartOf="@id/ivRupee"
-                    app:layout_constraintTop_toBottomOf="@id/tvWalletTotal" />
+                    app:layout_constraintTop_toBottomOf="@+id/tvWalletTotal" />
 
                 <TextView
                     android:id="@+id/tvTransactionDate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/material_size_4"
-                    android:fontFamily="@font/roboto"
-                    android:text="21/12/2021"
                     android:ellipsize="marquee"
-                    android:maxLines="1"
-                    android:singleLine="true"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
+                    android:fontFamily="@font/roboto"
                     android:marqueeRepeatLimit="marquee_forever"
+                    android:maxLines="1"
                     android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:text="21/12/2021"
                     android:textColor="@color/gray700"
                     android:textSize="14dp"
-                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="@id/tvTransactionText"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/tvTransactionText"
                     app:layout_constraintTop_toTopOf="@id/tvTransactionText" />
 
@@ -179,10 +182,11 @@
                     android:text="Last Recharge: "
                     android:textColor="@color/gray700"
                     android:textSize="14dp"
-                    app:layout_constraintBottom_toBottomOf="@id/tvLastRechargeDate"
+                    app:layout_constraintBottom_toTopOf="@+id/cpReferral"
                     app:layout_constraintEnd_toStartOf="@id/tvLastRechargeDate"
+                    app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="@id/tvTransactionText"
-                    app:layout_constraintTop_toTopOf="@id/tvLastRechargeDate"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionText"
                     app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
                     app:tint="@color/gray700" />
 
@@ -192,34 +196,74 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/material_size_8"
                     android:layout_marginTop="@dimen/material_size_8"
-                    android:fontFamily="@font/roboto"
-                    android:text="21/12/2021"
                     android:ellipsize="marquee"
-                    android:maxLines="1"
-                    android:singleLine="true"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
+                    android:fontFamily="@font/roboto"
                     android:marqueeRepeatLimit="marquee_forever"
+                    android:maxLines="1"
                     android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:text="21/12/2021"
                     android:textColor="@color/gray700"
                     android:textSize="12dp"
+                    app:layout_constraintBottom_toBottomOf="@id/tvLastRecharge"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/tvLastRecharge"
                     app:layout_constraintTop_toBottomOf="@+id/tvTransactionText" />
 
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivInfo"
-                    android:layout_width="@dimen/material_size_24"
-                    android:layout_height="@dimen/material_size_24"
-                    android:layout_gravity="end"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/favorites_icon"
-                    android:src="@drawable/ic_info"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpReferral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:text="REFERRAL"
+                    android:textColor="@color/chip_text_color"
+                    app:chipCornerRadius="@dimen/material_size_8"
+                    app:chipBackgroundColor="@color/chip_background_color"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/cpWallet"
+                    tools:layout_editor_absoluteY="99dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpWallet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WALLET"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/matteRed"
+                    app:chipCornerRadius="@dimen/material_size_8"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivInfo"
+                    android:layout_width="@dimen/material_size_32"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_gravity="end"
+                    android:backgroundTint="@color/green_base"
+                    android:contentDescription="@string/favorites_icon"
+                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="@dimen/material_size_4"
+                    android:src="@drawable/ic_info"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:tint="@color/green_base" />
+
+
+                <!--                <com.google.android.material.imageview.ShapeableImageView-->
+                <!--                    android:id="@+id/ivInfo"-->
+                <!--                    android:layout_width="@dimen/material_size_24"-->
+                <!--                    android:layout_height="@dimen/material_size_24"-->
+                <!--                    android:layout_gravity="end"-->
+                <!--                    android:background="?android:attr/selectableItemBackgroundBorderless"-->
+                <!--                    android:backgroundTint="@color/green_base"-->
+                <!--                    android:contentDescription="@string/favorites_icon"-->
+                <!--                    android:src="@drawable/ic_info"-->
+                <!--                    app:layout_constraintBottom_toBottomOf="parent"-->
+                <!--                    app:layout_constraintEnd_toEndOf="parent"-->
+                <!--                    app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"-->
+                <!--                    app:tint="@color/green_base" />-->
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
@@ -265,15 +309,16 @@
                 android:id="@+id/llEmptyLayout"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:orientation="vertical"
-                android:visibility="gone"
-                android:gravity="center"
                 android:background="@color/white"
                 android:elevation="@dimen/material_size_2"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivWalletFilter" >
+                app:layout_constraintTop_toBottomOf="@id/ivWalletFilter">
+
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/ltAnimImg"
                     android:layout_width="200dp"
@@ -284,6 +329,7 @@
                     app:lottie_autoPlay="true"
                     app:lottie_loop="true"
                     app:lottie_rawRes="@raw/empty" />
+
                 <TextView
                     android:id="@+id/tvEmptyMessage"
                     android:layout_width="wrap_content"
@@ -291,9 +337,9 @@
                     android:layout_marginTop="@dimen/material_size_16"
                     android:text="You don't have any Transactions in the Month !"
                     android:textColor="@color/gray500"
-                    android:textSize="16sp"
-                    />
+                    android:textSize="16sp" />
             </LinearLayout>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvTransactionHistory"
                 android:layout_width="match_parent"

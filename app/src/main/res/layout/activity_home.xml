@@ -40,6 +40,17 @@
                     app:navigationIcon="@color/white"
                     app:titleTextColor="@color/white" >
 
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivSearch"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_search"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/white" />
+
                     <ru.nikartm.support.ImageBadgeView
                         android:id="@+id/ivNotification"
                         android:layout_width="@dimen/material_size_32"
@@ -298,18 +309,18 @@
                                 android:src="@drawable/instagram"
                                 android:layout_marginStart="@dimen/material_size_4"
                                 android:layout_marginEnd="@dimen/material_size_4"/>
+<!--                            <ImageView-->
+<!--                                android:id="@+id/ivLinkedIn"-->
+<!--                                android:layout_width="56dp"-->
+<!--                                android:layout_height="56dp"-->
+<!--                                android:src="@drawable/linkedin"-->
+<!--                                android:layout_marginStart="@dimen/material_size_4"-->
+<!--                                android:layout_marginEnd="@dimen/material_size_4"/>-->
                             <ImageView
-                                android:id="@+id/ivLinkedIn"
+                                android:id="@+id/ivYoutube"
                                 android:layout_width="56dp"
                                 android:layout_height="56dp"
-                                android:src="@drawable/linkedin"
-                                android:layout_marginStart="@dimen/material_size_4"
-                                android:layout_marginEnd="@dimen/material_size_4"/>
-                            <ImageView
-                                android:id="@+id/ivTelegram"
-                                android:layout_width="56dp"
-                                android:layout_height="56dp"
-                                android:src="@drawable/telegram"
+                                android:src="@drawable/youtube"
                                 android:layout_marginStart="@dimen/material_size_4"
                                 android:layout_marginEnd="@dimen/material_size_8"/>
                         </LinearLayout>
