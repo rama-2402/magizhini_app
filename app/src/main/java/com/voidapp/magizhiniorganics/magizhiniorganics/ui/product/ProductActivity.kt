@@ -437,6 +437,16 @@ class ProductActivity :
 //            viewModel.getHowToVideo("Product")
 //        }
 
+        binding.spProductQuantity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+               setPrice(viewModel.product!!.variants[binding.spProductVariant.selectedItemPosition])
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                setPrice(viewModel.product!!.variants[binding.spProductVariant.selectedItemPosition])
+            }
+        }
+
         binding.spProductVariant.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -633,13 +643,13 @@ class ProductActivity :
             ) {
                 binding.apply {
                     tvOriginalPrice.setTextAnimation(
-                        "Rs: ${variant.variantPrice}",
+                        "Rs: ${variant.variantPrice * spProductQuantity.selectedItem.toString().toInt()}",
                         ANIMATION_DURATION
                     )
                     tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
                     tvDiscount.fadInAnimation(ANIMATION_DURATION)
                     tvDiscountedPrice.setTextAnimation(
-                        "Rs: ${viewModel.getSelectedItemPrice()}",
+                        "Rs: ${viewModel.getSelectedItemPrice() * spProductQuantity.selectedItem.toString().toInt()}",
                         ANIMATION_DURATION
                     )
                     tvDiscountPercent.setTextAnimation(
@@ -653,10 +663,10 @@ class ProductActivity :
                     tvOriginalPrice.remove()
                     tvDiscount.fadOutAnimation(ANIMATION_DURATION)
                     tvDiscountPercent.fadOutAnimation(ANIMATION_DURATION)
-                    tvDiscountedPrice.setTextAnimation("Rs. ${viewModel.getSelectedItemPrice()}")
+                    tvDiscountedPrice.setTextAnimation("Rs. ${viewModel.getSelectedItemPrice() * spProductQuantity.selectedItem.toString().toInt()}")
                     viewModel.currentCoupon?.let {
                         tvOriginalPrice.setTextAnimation(
-                            "Rs: ${variant.variantPrice}",
+                            "Rs: ${variant.variantPrice * spProductQuantity.selectedItem.toString().toInt()}",
                             ANIMATION_DURATION
                         )
                         tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG

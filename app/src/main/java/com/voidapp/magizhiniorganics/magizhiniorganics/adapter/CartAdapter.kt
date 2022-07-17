@@ -70,7 +70,7 @@ class CartAdapter(
         holder.productName.text = cartItem.productName
         holder.orderCount.text = cartItem.quantity.toString()
         holder.variantName.text = "Quantity: ${getVariantType(cartItem.variant)}"
-        setDiscountedValues(holder, cartItem.price, cartItem.originalPrice)
+        setDiscountedValues(holder, cartItem.price, cartItem.originalPrice, cartItem.quantity)
 //        val variantArray = arrayListOf<String>()
 //        var price = 0F
 
@@ -165,7 +165,8 @@ class CartAdapter(
     private fun setDiscountedValues(
         holder: CartViewHolder,
         discountPrice: Float,
-        originalPrice: Float
+        originalPrice: Float,
+        quantity: Int
     ) {
         holder.apply {
             //setting up the product discount info
@@ -174,13 +175,13 @@ class CartAdapter(
                     "${getDiscountPercent(originalPrice, discountPrice).toInt()}% Off",
                     200
                 )
-                discountedAmount.text = "Rs. $discountPrice"
-                price.visibility = View.VISIBLE
-                price.text = "Rs. $originalPrice"
-                price.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                discountedAmount.text = "Rs. ${discountPrice*quantity}"
+                price.visibility = View.GONE
+//                price.text = "Rs. $originalPrice"
+//                price.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
             } else {
                 discountBanner.fadOutAnimation()
-                discountedAmount.text = "Rs. $originalPrice"
+                discountedAmount.text = "Rs. ${discountPrice*quantity}"
                 price.visibility = View.GONE
             }
         }
