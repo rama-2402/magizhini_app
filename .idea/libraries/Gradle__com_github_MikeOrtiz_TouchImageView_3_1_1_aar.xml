@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.MikeOrtiz:TouchImageView:3.1.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/ab27d04d26144f4e80ed2ea8d5c8578f/transformed/jetified-TouchImageView-3.1.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/ab27d04d26144f4e80ed2ea8d5c8578f/transformed/jetified-TouchImageView-3.1.1/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/ab27d04d26144f4e80ed2ea8d5c8578f/transformed/jetified-TouchImageView-3.1.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/ecb4e1bc7c26d863bfa640b22a86fe35/transformed/jetified-TouchImageView-3.1.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/ecb4e1bc7c26d863bfa640b22a86fe35/transformed/jetified-TouchImageView-3.1.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/ecb4e1bc7c26d863bfa640b22a86fe35/transformed/jetified-TouchImageView-3.1.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

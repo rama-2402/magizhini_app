@@ -494,8 +494,8 @@ class HomeActivity :
             binding.dlDrawerLayout.isDrawerOpen(GravityCompat.START) ->
                 binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
             else -> {
-                finish()
-                finishAffinity()
+//                finish()
+//                finishAffinity()
                 super.onBackPressed()
             }
         }

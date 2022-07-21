@@ -415,9 +415,9 @@ class ShoppingMainActivity :
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.search, menu)
-        item = menu?.findItem(R.id.btnSearch)
+        item = menu.findItem(R.id.btnSearch)
         item?.icon?.setTint(ContextCompat.getColor(this, R.color.white))
 
         val searchView = item?.actionView as androidx.appcompat.widget.SearchView
@@ -470,7 +470,6 @@ class ShoppingMainActivity :
         if (viewModel.categoryFilter == "search") {
             checkProductsToDisplay()
         }
-
         return super.onCreateOptionsMenu(menu)
     }
 

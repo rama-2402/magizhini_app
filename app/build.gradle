@@ -53,9 +53,8 @@ android {
 }
 
 dependencies {
-
     implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.11'
-    implementation 'com.google.firebase:firebase-analytics-ktx:21.0.0'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.1.0'
 
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
 
@@ -64,9 +63,9 @@ dependencies {
 //
 //    implementation 'com.google.android.gms:play-services-maps:18.0.2'
 //    implementation 'com.google.android.gms:play-services-location:19.0.1'
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.code.gson:gson:2.9.0'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.6.21"
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.7.10'
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
@@ -85,16 +84,16 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-storage-ktx:20.0.1'
     implementation 'com.google.firebase:firebase-auth-ktx:21.0.6'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.2.0'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.2.1'
 
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.4.2'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.4.2'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.0'
 
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.5.2-native-mt'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
 
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
@@ -103,9 +102,9 @@ dependencies {
 
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0"
     //noinspection LifecycleAnnotationProcessorWithJava8
-    kapt "androidx.lifecycle:lifecycle-compiler:2.4.1"
+    kapt "androidx.lifecycle:lifecycle-compiler:2.5.0"
 
     // WorkManager Kotlin + coroutines      https://developer.android.com/topic/libraries/architecture/workmanager/basics
     implementation "androidx.work:work-runtime-ktx:2.7.1"
@@ -118,7 +117,7 @@ dependencies {
     implementation "androidx.room:room-runtime:2.4.2"
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0'
     implementation "androidx.room:room-ktx:2.4.2"
     kapt "androidx.room:room-compiler:2.4.2"
 
@@ -147,7 +146,8 @@ dependencies {
     kapt 'com.github.bumptech.glide:compiler:4.12.0'
 
     // Optional: Circle Indicator (To fix the xml preview "Missing classes" error)  https://github.com/ImaginativeShohag/Why-Not-Image-Carousel?utm_source=android-arsenal.com&utm_medium=referral&utm_campaign=8053
-    implementation 'me.relex:circleindicator:2.1.6'     //circle indicator onBoarding screen     https://github.com/ongakuer/CircleIndicator
+    implementation 'me.relex:circleindicator:2.1.6'
+    //circle indicator onBoarding screen     https://github.com/ongakuer/CircleIndicator
     implementation 'org.imaginativeworld.whynotimagecarousel:whynotimagecarousel:2.0.5'
 
     //shimmer loader for recycler view
@@ -162,7 +162,7 @@ dependencies {
     implementation 'com.github.sundeepk:compact-calendar-view:3.0.0'
 
     // Razor pay as payment gateway for the app
-    implementation 'com.razorpay:checkout:1.6.12'
+    implementation 'com.razorpay:checkout:1.6.21'
 
     //sticky header for the scrollview in the homepage      https://github.com/didikk/sticky-nestedscrollview
     implementation 'com.github.didikk:sticky-nestedscrollview:1.0.1'
@@ -172,7 +172,7 @@ dependencies {
 
     //notification badge for imageview      https://github.com/nikartm/Image-Support
     implementation 'io.github.nikartm:image-support:2.0.0'
-    
+
     //exo player
     implementation 'com.google.android.exoplayer:exoplayer:2.18.0'
 

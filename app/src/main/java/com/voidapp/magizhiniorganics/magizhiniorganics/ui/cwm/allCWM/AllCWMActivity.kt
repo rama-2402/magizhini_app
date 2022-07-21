@@ -3,10 +3,8 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -17,12 +15,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.AllCWMAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityAllCwmBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -32,8 +28,7 @@ import java.util.*
 class AllCWMActivity :
     BaseActivity(),
     KodeinAware,
-    AllCWMAdapter.CWMClickListener
-{
+    AllCWMAdapter.CWMClickListener {
 
     override val kodein: Kodein by kodein()
 
@@ -70,7 +65,7 @@ class AllCWMActivity :
     private fun initObservers() {
         lifecycleScope.launchWhenStarted {
             viewModel.status.collect { result ->
-                when(result) {
+                when (result) {
                     is NetworkResult.Success -> onSuccessCallback(result.message, result.data)
                     is NetworkResult.Failed -> onFailedCallback(result.message, result.data)
                     is NetworkResult.Loading -> {
@@ -98,9 +93,9 @@ class AllCWMActivity :
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.search, menu)
-        item = menu?.findItem(R.id.btnSearch)
+        item = menu.findItem(R.id.btnSearch)
         item?.icon?.setTint(ContextCompat.getColor(this, R.color.white))
         val searchView = item?.actionView as androidx.appcompat.widget.SearchView
 
@@ -114,7 +109,7 @@ class AllCWMActivity :
                 mFilteredItems.clear()
                 val searchText = newText!!.lowercase(Locale.getDefault())
                 if (searchText.isNotEmpty()) {
-                    mItems.forEach loop@ { it ->
+                    mItems.forEach loop@{ it ->
                         if (it.dishName.lowercase().contains(searchText)) {
                             mFilteredItems.add(it)
                         }
@@ -170,7 +165,7 @@ class AllCWMActivity :
     }
 
     private suspend fun onSuccessCallback(message: String, data: Any?) {
-        when(message) {
+        when (message) {
             "status" -> {
                 hideProgressDialog()
                 data as MutableList<CWMFood>
@@ -184,7 +179,10 @@ class AllCWMActivity :
                 hideProgressDialog()
                 data as String
                 if (data.isNullOrEmpty()) {
-                    showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                    showToast(
+                        this,
+                        "demo video will be available soon. sorry for the inconvenience."
+                    )
                 } else {
                     openInBrowser(data)
                 }
@@ -206,7 +204,7 @@ class AllCWMActivity :
     }
 
     private suspend fun onFailedCallback(message: String, data: Any?) {
-        when(message) {
+        when (message) {
             "status" -> {
                 delay(1000)
                 hideSuccessDialog()

@@ -121,7 +121,6 @@
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="false"
-            android:hardwareAccelerated="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MagizhiniOrganics.NoActionBar"
             android:windowSoftInputMode="adjustPan|stateHidden"

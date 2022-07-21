@@ -99,51 +99,53 @@ class SplashActivity : BaseActivity(), KodeinAware {
                                 )
                             )
                             ivBagFour.visible()
-                            playFruitsFallingAnimation(ivApple)
-                            delay(100)
-                            playFruitsFallingAnimation(ivMilk)
-                            delay(50)
-                            playFruitsFallingAnimation(ivBroccoli)
-                            delay(80)
-                            playFruitsFallingAnimation(ivTomato)
-                            delay(100)
-                            playFruitsFallingAnimation(ivPotato)
-                            delay(40)
-                            playFruitsFallingAnimation(ivBanana)
-                            delay(90)
-                            playFruitsFallingAnimation(ivPear)
-                            delay(50)
-                            playFruitsFallingAnimation(ivBeet)
-                            delay(80)
-                            playFruitsFallingAnimation(ivChili)
-                            delay(120)
-                            playFruitsFallingAnimation(ivLemon)
-                            delay(30)
-                            playFruitsFallingAnimation(ivCarrot)
-                            delay(382)
-                            playFruitsFallingAnimation(ivAppleOne)
-                            delay(100)
-                            playFruitsFallingAnimation(ivMilkOne)
-                            delay(50)
-                            playFruitsFallingAnimation(ivBroccoliOne)
-                            delay(80)
-                            playFruitsFallingAnimation(ivTomatoOne)
-                            delay(20)
-                            playFruitsFallingAnimation(ivPotatoOne)
-                            delay(40)
-                            playFruitsFallingAnimation(ivBananaOne)
-                            delay(90)
-                            playFruitsFallingAnimation(ivPearOne)
-                            delay(50)
-                            playFruitsFallingAnimation(ivBeetOne)
-                            delay(80)
-                            playFruitsFallingAnimation(ivChiliOne)
-                            delay(120)
-                            playFruitsFallingAnimation(ivLemonOne)
-                            delay(30)
-                            playFruitsFallingAnimation(ivCarrotOne)
+//                            playFruitsFallingAnimation(ivApple)
+//                            delay(100)
+//                            playFruitsFallingAnimation(ivMilk)
+//                            delay(50)
+//                            playFruitsFallingAnimation(ivBroccoli)
+//                            delay(80)
+//                            playFruitsFallingAnimation(ivTomato)
+//                            delay(100)
+//                            playFruitsFallingAnimation(ivPotato)
+//                            delay(40)
+//                            playFruitsFallingAnimation(ivBanana)
+//                            delay(90)
+//                            playFruitsFallingAnimation(ivPear)
+//                            delay(50)
+//                            playFruitsFallingAnimation(ivBeet)
+//                            delay(80)
+//                            playFruitsFallingAnimation(ivChili)
+//                            delay(120)
+//                            playFruitsFallingAnimation(ivLemon)
+//                            delay(30)
+//                            playFruitsFallingAnimation(ivCarrot)
+//                            delay(382)
+//                            playFruitsFallingAnimation(ivAppleOne)
+//                            delay(100)
+//                            playFruitsFallingAnimation(ivMilkOne)
+//                            delay(50)
+//                            playFruitsFallingAnimation(ivBroccoliOne)
+//                            delay(80)
+//                            playFruitsFallingAnimation(ivTomatoOne)
+//                            delay(20)
+//                            playFruitsFallingAnimation(ivPotatoOne)
+//                            delay(40)
+//                            playFruitsFallingAnimation(ivBananaOne)
+//                            delay(90)
+//                            playFruitsFallingAnimation(ivPearOne)
+//                            delay(50)
+//                            playFruitsFallingAnimation(ivBeetOne)
+//                            delay(80)
+//                            playFruitsFallingAnimation(ivChiliOne)
+//                            delay(120)
+//                            playFruitsFallingAnimation(ivLemonOne)
+//                            delay(30)
+//                            playFruitsFallingAnimation(ivCarrotOne)
                         }
                     }
+                    binding.progressCircular.visible()
+                    binding.progressCircular.animate()
                     backgroundCheck(isNewDay!!, isNewUser, month, navigation)
                 } else {
                     binding.ivLogo.fadInAnimation()
@@ -157,7 +159,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
             }
         }
         binding.tvStatus.visible()
-    }
+   }
 
     private fun playFruitsFallingAnimation(view: View) {
         lifecycleScope.launch {
@@ -188,7 +190,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
     ) {
         if (isNewUser) {
             lifecycleScope.launch {
-                delay(3000)
+//                delay(3000)
+                delay(1000)
                 hideAnimation()
                 delay(800)
                 Intent(this@SplashActivity, OnBoardingActivity::class.java).also {
@@ -244,7 +247,6 @@ class SplashActivity : BaseActivity(), KodeinAware {
     }
 
     private fun startWork(wipe: String, navigation: String?) {
-        Log.e("qw", "startWork: worker", )
         val userID = SharedPref(this).getData(USER_ID, STRING, "")
 
         val workRequest: WorkRequest =
@@ -332,7 +334,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
                 )
             ) {
 //            binding.progressCircular.remove()
-                delay(3000)
+//                delay(3000)
+//                delay(1000)
                 hideAnimation()
                 delay(800)
                 Intent(this@SplashActivity, HomeActivity::class.java).also {
@@ -351,7 +354,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
                     finishAffinity()
                 }
             } else {
-                delay(3000)
+//                delay(3000)
+//                delay(1000)
                 hideAnimation()
                 delay(800)
 //            binding.progressCircular.remove()

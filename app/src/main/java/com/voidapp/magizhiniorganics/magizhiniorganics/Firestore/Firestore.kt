@@ -244,7 +244,7 @@ class Firestore(
                     val profile = mFireStore.collection(USERS).document(currentUserID).get().await()
                         .toObject(UserProfile::class.java)
                     profile?.let {
-                        it.referrerNumber = code
+                        it.referrerNumber = profileDoc.documents[0].id
                         it.extras[0] = "yes"
                         mFireStore.collection(USERS).document(currentUserID)
                             .set(it, SetOptions.merge()).await()
@@ -253,11 +253,16 @@ class Firestore(
 //                val checkReferralLimit = async { checkReferralLimit(profile!!.id)  }
 //                val addReferralBonusToReferrer = async { addReferralBonusToReferrer(profile!!) }
                 val addReferralBonusToCurrentUser =
-                    async { addReferralBonusToCurrentUser(currentUserID) }
+                    async {
+                        addReferralBonusToCurrentUser(
+                            currentUserID,
+                            profileDoc.documents[0].id
+                        )
+                    }
                 val addReferralNumberToLocalDB = async {
                     val profile = repository.getProfileData()
                     profile?.let {
-                        it.referralId = code
+                        it.referralId = profileDoc.documents[0].id
                         if (it.extras.isNullOrEmpty()) {
                             it.extras = arrayListOf("yes")
                         } else {
@@ -285,7 +290,68 @@ class Firestore(
         }
     }
 
-    private suspend fun addReferralBonusToCurrentUser(currentUserID: String): Boolean =
+    private suspend fun addReferralEntry(
+        currentUserID: String,
+        referrerID: String,
+        amount: Float
+    ): Boolean {
+        return try {
+            val referrerDoc = mFireStore.collection(REFERRAL).document(referrerID)
+            ReferralBonus(
+                customerID = currentUserID,
+                referrerID = referrerID,
+                referralBonusTransaction = arrayListOf(
+                    ReferralBonusTransaction(
+                        date = System.currentTimeMillis(),
+                        amount = amount.toDouble()
+                    )
+                )
+            ).let {
+                mFireStore.collection(REFERRAL).document(currentUserID).get().await()?.let {
+                    mFireStore.collection(REFERRAL).document(currentUserID)
+                        .update(
+                            "referrerID", referrerID,
+                            "referralBonusTransaction",
+                            FieldValue.arrayUnion(
+                                ReferralBonusTransaction(
+                                    date = System.currentTimeMillis(),
+                                    amount = amount.toDouble()
+                                )
+                            )
+                        )
+                } ?: let {
+                    mFireStore.collection(REFERRAL).document(currentUserID)
+                        .set(it, SetOptions.merge())
+                }
+            }
+
+            referrerDoc.get().await()?.let {
+                referrerDoc
+                    .update(
+                        "referrals",
+                        FieldValue.arrayUnion(currentUserID)
+                    )
+            } ?: let {
+                referrerDoc.set(
+                    ReferralBonus(
+                        customerID = referrerID,
+                        referrals = arrayListOf(currentUserID)
+                    )
+                )
+            }
+            true
+        } catch (e: Exception) {
+            e.message?.let {
+                logCrash("firestore: applying referral", it)
+            }
+            false
+        }
+    }
+
+    private suspend fun addReferralBonusToCurrentUser(
+        currentUserID: String,
+        referrerID: String
+    ): Boolean =
         withContext(Dispatchers.IO) {
             return@withContext try {
                 if (currentUserID.isNullOrEmpty()) {
@@ -293,6 +359,7 @@ class Firestore(
                 }
                 val amount = mFireStore.collection(REFERRAL).document(REFERRAL).get().await()
                     .toObject(Referral::class.java)!!.referralAmount
+                val addReferralEntry = async { addReferralEntry(currentUserID, referrerID, amount) }
                 val addReferralMoneyToWallet =
                     async { makeTransactionFromWallet(amount, currentUserID, "Add") }
                 val createTransactionEntry = async {
@@ -332,7 +399,8 @@ class Firestore(
 
                 addReferralMoneyToWallet.await() &&
                         createTransactionEntry.await() &&
-                        createNotification.await()
+                        createNotification.await() &&
+                        addReferralEntry.await()
 
             } catch (e: Exception) {
                 e.message?.let {
@@ -425,10 +493,11 @@ class Firestore(
 
     suspend fun getReferralDetails(userID: String): ReferralBonus? = withContext(Dispatchers.IO) {
         return@withContext try {
-            mFireStore.collection(REFERRAL).document(userID).get().await().toObject(ReferralBonus::class.java)
-        }  catch (e: Exception) {
-              e.message?.let { logCrash("firestore: checking for existing referral", it) }
-              return@withContext null
+            mFireStore.collection(REFERRAL).document(userID).get().await()
+                .toObject(ReferralBonus::class.java)
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: checking for existing referral", it) }
+            return@withContext null
         }
     }
 
@@ -1802,14 +1871,14 @@ class Firestore(
         }
     }
 
-suspend fun getHowToVideo(where: String): String = withContext(Dispatchers.IO) {
+    suspend fun getHowToVideo(where: String): String = withContext(Dispatchers.IO) {
         try {
             val url = mFireStore
                 .collection("HowTo")
                 .document(where)
                 .get().await().toObject(HowToVideo::class.java)?.url
 
-            Log.e("aaa", "getHowToVideo: $url", )
+            Log.e("aaa", "getHowToVideo: $url")
 
             if (url.isNullOrEmpty()) {
                 return@withContext ""
