@@ -192,8 +192,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
             lifecycleScope.launch {
 //                delay(3000)
                 delay(1000)
-                hideAnimation()
-                delay(800)
+//                hideAnimation()
+//                delay(800)
                 Intent(this@SplashActivity, OnBoardingActivity::class.java).also {
                     startActivity(it)
                     finish()
@@ -335,9 +335,9 @@ class SplashActivity : BaseActivity(), KodeinAware {
             ) {
 //            binding.progressCircular.remove()
 //                delay(3000)
-//                delay(1000)
-                hideAnimation()
-                delay(800)
+                delay(1000)
+//                hideAnimation()
+//                delay(800)
                 Intent(this@SplashActivity, HomeActivity::class.java).also {
 //                if (
 //                    SharedPref(this@SplashActivity).getData(DOB, STRING, "").toString() == "${TimeUtil().getCurrentDateNumber()}/${TimeUtil().getMonthNumber()}"
@@ -355,9 +355,9 @@ class SplashActivity : BaseActivity(), KodeinAware {
                 }
             } else {
 //                delay(3000)
-//                delay(1000)
-                hideAnimation()
-                delay(800)
+                delay(1000)
+//                hideAnimation()
+//                delay(800)
 //            binding.progressCircular.remove()
                 Intent(this@SplashActivity, HomeActivity::class.java).also {
 //                if (

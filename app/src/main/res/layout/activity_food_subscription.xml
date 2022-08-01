@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        tools:context=".ui.foodSubscription.FoodSubscriptionActivity">
+
+        <LinearLayout
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/apbAppBarLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/green_base"
+                android:gravity="center"
+                app:iconTint="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/tbToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBackBtn"
+                        android:layout_width="32dp"
+                        android:layout_height="@dimen/material_size_32"
+                        android:layout_marginEnd="@dimen/material_size_16"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="@dimen/material_size_4"
+                        android:src="@drawable/ic_back"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/matteRed" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvToolbarTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/material_size_8"
+                            android:fontFamily="@font/roboto"
+                            android:text="Amma's Specials"
+                            android:textColor="@color/white"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/material_size_8"
+                            android:layout_marginTop="@dimen/material_size_2"
+                            android:fontFamily="@font/roboto"
+                            android:text="Authentic Home-Made Organic Food"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivHistory"
+                        android:layout_width="@dimen/material_size_24"
+                        android:layout_height="@dimen/material_size_24"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="@dimen/material_size_16"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/favorites_icon"
+                        android:src="@drawable/ic_food"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/white" />
+                </androidx.appcompat.widget.Toolbar>
+            </com.google.android.material.appbar.AppBarLayout>
+        </LinearLayout>
+        <me.didik.component.StickyNestedScrollView
+            android:id="@+id/svBody"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@android:color/white"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            tools:showIn="@layout/activity_home">
+
+            <LinearLayout
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <org.imaginativeworld.whynotimagecarousel.ImageCarousel
+                    android:id="@+id/cvBanner"
+                    android:layout_width="match_parent"
+                    android:layout_height="225dp"
+                    android:elevation="10dp"
+                    android:transitionName="thumbnail"
+                    app:autoPlay="true"
+                    app:autoPlayDelay="2000"
+                    app:autoWidthFixing="true"
+                    app:bottomShadowHeight="36dp"
+                    app:carouselType="BLOCK"
+                    app:imagePlaceholder="@drawable/carousel_default_placeholder"
+                    app:imageScaleType="fitXY"
+                    app:indicatorMargin="0dp"
+                    app:infiniteCarousel="true"
+                    app:layout_constraintCircleRadius="16dp"
+                    app:showBottomShadow="true"
+                    app:showCaption="false"
+                    app:showIndicator="true"
+                    app:showNavigationButtons="false"
+                    app:showTopShadow="false" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvFoods"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </me.didik.component.StickyNestedScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

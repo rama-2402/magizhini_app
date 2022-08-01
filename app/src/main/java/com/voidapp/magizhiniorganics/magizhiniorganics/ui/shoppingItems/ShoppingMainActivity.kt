@@ -279,7 +279,6 @@ class ShoppingMainActivity :
     }
 
     private fun clickListeners() {
-
         KeyboardVisibilityEvent.setEventListener(
             this
         ) { isOpen ->

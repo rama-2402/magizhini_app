@@ -73,6 +73,7 @@ object Constants {
     const val CWM = "CWM"
     const val ALL_DISHES = "AllDishes"
     const val QUICK_ORDER: String = "QuickOrder"
+    const val AMMASPECIAL: String = "AmmaSpecial"
 
     //Dialogs
     const val LOAD_DIALOG = "loadDialog"

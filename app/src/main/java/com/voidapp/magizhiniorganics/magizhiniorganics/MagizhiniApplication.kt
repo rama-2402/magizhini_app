@@ -5,6 +5,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.Firebase
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirebaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.Firestore
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.FoodSubscriptionUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.ProfileUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.SubscriptionUseCase
@@ -15,6 +16,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatVi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.CWMViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModelFactory
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubscriptionViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductViewModelFactory
@@ -50,6 +52,7 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { ProfileUseCase(instance(), instance()) }
         bind() from provider { QuickOrderUseCase(instance()) }
         bind() from provider { SubscriptionUseCase(instance()) }
+        bind() from provider { FoodSubscriptionUseCase(instance()) }
 
         //viewModels
         bind() from provider { SignInViewModelFactory(instance(), instance()) }
@@ -68,5 +71,6 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { CWMViewModelFactory(instance(), instance()) }
         bind() from provider { DishViewModelFactory(instance(), instance()) }
         bind() from provider { QuickOrderViewModelFactory(instance(), instance(), instance()) }
+        bind() from provider { FoodSubscriptionViewModelFactory(instance(), instance(), instance()) }
     }
 }

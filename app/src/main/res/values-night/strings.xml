@@ -69,6 +69,20 @@
         <item>Open</item>
     </string-array>
 
+    <!--    Food order family options-->
+    <string-array name="food_count_options">
+        <item>One Person</item>
+        <item>Couple</item>
+        <item>Custom</item>
+    </string-array>
+
+    <!--    Food order options-->
+    <string-array name="food_sub_options">
+        <item>Monthly</item>
+        <item>One Day</item>
+        <item>Custom</item>
+    </string-array>
+
     <!--    months names filter-->
     <string-array name="months_name">
         <item>January</item>

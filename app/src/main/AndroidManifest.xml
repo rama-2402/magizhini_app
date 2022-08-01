@@ -20,11 +20,21 @@
         android:supportsRtl="true"
         android:theme="@style/splashScreenTheme">
         <activity
-            android:name=".ui.howTo.HowToActivity"
+            android:name=".ui.foodSubscription.FoodOrderActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|stateHidden"
             tools:ignore="LockedOrientationActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.foodSubscription.FoodSubscriptionActivity"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.howTo.HowToActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.quickOrder.QuickOrderActivity"
             android:exported="false"

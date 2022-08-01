@@ -259,7 +259,6 @@
                         app:layout_constraintTop_toTopOf="@id/spProductVariant"
                         app:layout_constraintBottom_toBottomOf="@id/spProductVariant" />
 
-
                     <Spinner
                         android:id="@+id/spProductVariant"
                         android:gravity="center"

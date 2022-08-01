@@ -180,4 +180,8 @@ class TimeUtil {
         val currentHour = hourFormat.format(System.currentTimeMillis()).toLong()
         return (24 - currentHour)
     }
+
+    fun getDayName(dateLong: Long): String {
+        return SimpleDateFormat("EEEE").format(dateLong)
+    }
 }

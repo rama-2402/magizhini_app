@@ -45,6 +45,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubscriptionActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.howTo.HowToActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
@@ -88,7 +89,6 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.util.*
 
-
 class HomeActivity :
     BaseActivity(),
     KodeinAware,
@@ -97,7 +97,8 @@ class HomeActivity :
     PartnersAdapter.PartnersItemClickListener,
     BestSellersAdapter.BestSellerItemClickListener,
     CategoryHomeAdapter.CategoryItemClickListener,
-    HomeSpecialsAdapter.HomeSpecialsItemClickListener {
+    HomeSpecialsAdapter.HomeSpecialsItemClickListener
+{
     //DI Injection with kodein
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
@@ -139,7 +140,7 @@ class HomeActivity :
             binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
         }
 
-        binding.flShimmerPlaceholder.startShimmer()
+//        binding.flShimmerPlaceholder.startShimmer()
 
         FirebaseMessaging.getInstance().subscribeToTopic(Constants.BROADCAST)
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -262,6 +263,14 @@ class HomeActivity :
             ivSearch.setOnClickListener {
                 navigateToSelectedCategory("search")
             }
+            btnOrderHistory.setOnClickListener {
+                Intent(this@HomeActivity, PurchaseHistoryActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
+            btnQuickOrder.setOnClickListener {
+                navigateToQuickOrder()
+            }
 //            ivLinkedIn.setOnClickListener {
 //                openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
 //            }
@@ -316,7 +325,7 @@ class HomeActivity :
         viewModel.uiUpdate.observe(this) { event ->
             when (event) {
                 is HomeViewModel.UiUpdate.PopulateData -> {
-                    binding.flShimmerPlaceholder.remove()
+//                    binding.flShimmerPlaceholder.remove()
                     homeSpecialsAdapter.setBestSellerData(
                         viewModel.bannersList,
                         viewModel.bestSellersList,
@@ -677,6 +686,14 @@ class HomeActivity :
                     }
                 }
                 R.id.menuWallet -> navigateToWallet()
+                R.id.menuFood -> {
+                    lifecycleScope.launch {
+                        delay(200)
+                        Intent(this@HomeActivity, FoodSubscriptionActivity::class.java).also {
+                            startActivity(it)
+                        }
+                    }
+                }
                 R.id.menuSubscriptions -> {
                     lifecycleScope.launch {
                         delay(200)

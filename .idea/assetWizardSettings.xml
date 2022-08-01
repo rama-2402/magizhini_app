@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="file:$USER_HOME$/Android/Sdk/icons/material/materialicons/stop_circle/baseline_stop_circle_24.xml" />
+                                      <entry key="url" value="file:$USER_HOME$/Android/Sdk/icons/material/materialicons/food_bank/baseline_food_bank_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -34,7 +34,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="242424" />
-                            <entry key="outputName" value="ic_stop" />
+                            <entry key="outputName" value="ic_food" />
                           </map>
                         </option>
                       </PersistentState>

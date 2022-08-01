@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        tools:context=".ui.foodSubscription.FoodOrderActivity">
+
+        <LinearLayout
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/apbAppBarLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/green_base"
+                android:gravity="center"
+                app:iconTint="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/tbToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivBackBtn"
+                        android:layout_width="32dp"
+                        android:layout_height="@dimen/material_size_32"
+                        android:layout_marginEnd="@dimen/material_size_16"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="@dimen/material_size_4"
+                        android:src="@drawable/ic_back"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/matteRed" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvToolbarTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/material_size_8"
+                            android:fontFamily="@font/roboto"
+                            android:text="Amma's Specials"
+                            android:textColor="@color/white"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/material_size_8"
+                            android:layout_marginTop="@dimen/material_size_2"
+                            android:fontFamily="@font/roboto"
+                            android:text="Authentic Home-Made Organic Food"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivHistory"
+                        android:layout_width="@dimen/material_size_24"
+                        android:layout_height="@dimen/material_size_24"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="@dimen/material_size_16"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/favorites_icon"
+                        android:src="@drawable/ic_food"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/white" />
+                </androidx.appcompat.widget.Toolbar>
+
+            <TextView
+                android:id="@+id/tvTimeLimit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/material_size_8"
+                android:paddingEnd="@dimen/material_size_8"
+                android:paddingTop="@dimen/material_size_8"
+                android:paddingBottom="@dimen/material_size_8"
+                android:background="@color/green_base"
+                android:text=""
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:textColor="@color/matteRed"
+                android:textStyle="normal"
+                android:textSize="18sp"
+                style="@style/TextAppearance.MaterialComponents.Body1"
+                app:layout_constraintBottom_toTopOf="@id/clAddress"
+                app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            </com.google.android.material.appbar.AppBarLayout>
+        </LinearLayout>
+
+        <me.didik.component.StickyNestedScrollView
+            android:id="@+id/svBody"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@android:color/white"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_constraintBottom_toTopOf="@id/llPlaceOrder"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            tools:showIn="@layout/activity_home">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/material_size_8">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivPrevMonth"
+                    android:layout_width="@dimen/material_size_32"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginTop="@dimen/material_size_4"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/favorites_icon"
+                    android:src="@drawable/ic_chevron_left"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/green_base" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivNextMonth"
+                    android:layout_width="@dimen/material_size_32"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginTop="@dimen/material_size_4"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/favorites_icon"
+                    android:src="@drawable/ic_chevron_right"
+                    app:layout_constraintStart_toEndOf="@id/ivPrevMonth"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/green_base" />
+
+                <TextView
+                    android:id="@+id/tvMonth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:elevation="@dimen/material_size_4"
+                    android:text="September - 2022"
+                    android:textColor="@color/gray700"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/calendarView"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.github.sundeepk.compactcalendarview.CompactCalendarView
+                    android:id="@+id/calendarView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="220dp"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    app:compactCalendarCurrentDayBackgroundColor="@color/white"
+                    app:compactCalendarCurrentDayTextColor="@color/blue500"
+                    app:compactCalendarCurrentSelectedDayBackgroundColor="@color/green_base"
+                    app:compactCalendarCurrentSelectedDayTextColor="@color/white"
+                    app:compactCalendarMultiEventIndicatorColor="#fff"
+                    app:compactCalendarOtherMonthDaysTextColor="@color/black"
+                    app:compactCalendarShouldSelectFirstDayOfMonthOnScroll="false"
+                    app:compactCalendarTargetHeight="250dp"
+                    app:compactCalendarTextColor="@color/gray700"
+                    app:compactCalendarTextSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvMonth" />
+
+                <TextView
+                    android:id="@+id/tvRenewal"
+                    style="@style/TextAppearance.MaterialComponents.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:paddingStart="@dimen/material_size_8"
+                    android:paddingTop="@dimen/material_size_4"
+                    android:paddingEnd="@dimen/material_size_8"
+                    android:paddingBottom="@dimen/material_size_4"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:text="Food Subscription can be renewed every month only for Monthly Subscription"
+                    android:textColor="@color/gray700"
+                    android:textStyle="normal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/calendarView" />
+
+                <TextView
+                    android:id="@+id/tvOptions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Subscription \n    Options"
+                    android:textColor="@color/gray700"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/spSubOptions"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/spSubOptions" />
+
+                <Spinner
+                    android:id="@+id/spSubOptions"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="@dimen/material_size_12"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    android:background="@drawable/bg_material_box"
+                    android:entries="@array/food_sub_options"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/material_size_8"
+                    android:popupBackground="@drawable/shape_round_rectangle_8"
+                    android:theme="@style/mySpinnerItemStyle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tvOptions"
+                    app:layout_constraintTop_toBottomOf="@id/tvRenewal" />
+
+                <TextView
+                    android:id="@+id/tvNumberOptions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Place Order   \n         For"
+                    android:textColor="@color/gray700"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/spCountOptions"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/spCountOptions" />
+
+                <Spinner
+                    android:id="@+id/spCountOptions"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="@dimen/material_size_12"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    android:background="@drawable/bg_material_box"
+                    android:entries="@array/food_count_options"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/material_size_8"
+                    android:popupBackground="@drawable/shape_round_rectangle_8"
+                    android:theme="@style/mySpinnerItemStyle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tvNumberOptions"
+                    app:layout_constraintTop_toBottomOf="@id/spSubOptions" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivMinusOnePerson"
+                    android:layout_width="@dimen/material_size_32"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_marginStart="@dimen/material_size_8"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/favorites_icon"
+                    android:src="@drawable/ic_chevron_left"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/spCountOptions"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/green_base" />
+
+                <TextView
+                    android:id="@+id/tvPersonCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Food For 1 Person"
+                    android:textColor="@color/gray700"
+                    app:layout_constraintBottom_toBottomOf="@id/ivMinusOnePerson"
+                    app:layout_constraintEnd_toStartOf="@id/ivAddOnePerson"
+                    app:layout_constraintStart_toEndOf="@id/ivMinusOnePerson"
+                    app:layout_constraintTop_toTopOf="@id/ivMinusOnePerson" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivAddOnePerson"
+                    android:layout_width="@dimen/material_size_32"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_marginEnd="@dimen/material_size_8"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/favorites_icon"
+                    android:src="@drawable/ic_chevron_right"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/ivMinusOnePerson"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    app:tint="@color/green_base" />
+
+                <CheckBox
+                    android:id="@+id/cbxLeaf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:gravity="start"
+                    android:padding="@dimen/material_size_4"
+                    android:text="Include Banana Leaf with food"
+                    android:textColor="@color/gray700"
+                    android:textSize="16sp"
+                    app:flow_verticalAlign="center"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/ivMinusOnePerson" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/cbxLeaf"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlAlternateNumber"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Contact Number"
+                        android:textColorHint="@color/matteRed"
+                        app:boxStrokeColor="@color/matteRed"
+                        app:endIconMode="clear_text"
+                        app:endIconTint="@color/errorRed"
+                        app:hintTextColor="@color/matteRed"
+                        app:layout_constraintBottom_toTopOf="@id/etlEmailId"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/llDob"
+                        app:prefixTextColor="@color/green_base"
+                        app:startIconDrawable="@drawable/ic_phone_msg"
+                        app:startIconTint="@color/matteRed">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAlternateNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:cursorVisible="true"
+                            android:inputType="number"
+                            android:maxLength="13"
+                            android:textColor="@color/green_base"
+                            android:textColorHint="@color/matteRed"
+                            android:textCursorDrawable="@null" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlEmailId"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_weight="1"
+                        android:hint="Email ID"
+                        android:textColorHint="@color/matteRed"
+                        app:boxStrokeColor="@color/matteRed"
+                        app:endIconMode="clear_text"
+                        app:endIconTint="@color/errorRed"
+                        app:flow_wrapMode="aligned"
+                        app:hintTextColor="@color/matteRed"
+                        app:layout_constraintBottom_toTopOf="@id/etlAddressOne"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etlAlternateNumber"
+                        app:startIconDrawable="@drawable/ic_email"
+                        app:startIconTint="@color/matteRed">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etEmailId"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="textEmailAddress"
+                            android:textColor="@color/green_base"
+                            android:textColorHint="@color/green_base"
+                            android:textCursorDrawable="@null" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlAddressOne"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_weight="1"
+                        android:hint="Address Line 1"
+                        android:textColorHint="@color/matteRed"
+                        app:boxStrokeColor="@color/matteRed"
+                        app:endIconMode="clear_text"
+                        app:endIconTint="@color/errorRed"
+                        app:flow_wrapMode="aligned"
+                        app:hintTextColor="@color/matteRed"
+                        app:layout_constraintBottom_toTopOf="@id/etlAddressTwo"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etlEmailId"
+                        app:startIconDrawable="@drawable/ic_address"
+                        app:startIconTint="@color/matteRed">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAddressOne"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="textLongMessage"
+                            android:textColor="@color/green_base"
+                            android:textColorHint="@color/matteRed"
+                            android:textCursorDrawable="@null" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlAddressTwo"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_weight="1"
+                        android:hint="Address Line 2"
+                        android:textColorHint="@color/matteRed"
+                        app:boxStrokeColor="@color/matteRed"
+                        app:endIconMode="clear_text"
+                        app:endIconTint="@color/errorRed"
+                        app:flow_wrapMode="aligned"
+                        app:hintTextColor="@color/matteRed"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etlAddressOne"
+                        app:startIconDrawable="@drawable/ic_address"
+                        app:startIconTint="@color/matteRed">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAddressTwo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:inputType="textLongMessage"
+                            android:textColor="@color/green_base"
+                            android:textColorHint="@color/matteRed"
+                            android:textCursorDrawable="@null" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:id="@+id/llLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/etlAddressTwo">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/etlCity"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="City"
+                            android:textColorHint="@color/matteRed"
+                            app:boxStrokeColor="@color/matteRed"
+                            app:endIconMode="clear_text"
+                            app:endIconTint="@color/errorRed"
+                            app:hintTextColor="@color/matteRed"
+                            app:layout_constraintBottom_toTopOf="@id/etlEmailId"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/llDob"
+                            app:prefixTextColor="@color/green_base"
+                            app:startIconDrawable="@drawable/ic_location"
+                            app:startIconTint="@color/matteRed">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etCity"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:cursorVisible="true"
+                                android:inputType="textShortMessage"
+                                android:textColor="@color/green_base"
+                                android:textColorHint="@color/matteRed"
+                                android:textCursorDrawable="@null" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/etlArea"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:layout_weight="1"
+                            android:hint="Pincode (600001)"
+                            android:textColorHint="@color/matteRed"
+                            app:boxStrokeColor="@color/matteRed"
+                            app:endIconMode="clear_text"
+                            app:flow_wrapMode="aligned"
+                            app:hintTextColor="@color/matteRed"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/etlAddressOne"
+                            app:startIconDrawable="@drawable/ic_location"
+                            app:startIconTint="@color/matteRed">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etArea"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:inputType="number"
+                                android:maxLength="6"
+                                android:textColor="@color/green_base"
+                                android:textColorHint="@color/matteRed"
+                                android:textCursorDrawable="@null" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </me.didik.component.StickyNestedScrollView>
+
+        <LinearLayout
+            android:id="@+id/llPlaceOrder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/matteRed"
+            android:backgroundTint="@color/matteRed"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" >
+        <TextView
+            android:id="@+id/tvPlaceOrder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center"
+            android:padding="@dimen/material_size_16"
+            android:text="GET BOX"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

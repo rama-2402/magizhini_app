@@ -108,7 +108,9 @@
         <entry key="app/src/main/res/layout/activity_contact_us.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_conversation.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_dish.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/activity_home.xml" value="0.26557507987220447" />
+        <entry key="app/src/main/res/layout/activity_food_order.xml" value="0.3333333333333333" />
+        <entry key="app/src/main/res/layout/activity_food_subscription.xml" value="0.5364583333333334" />
+        <entry key="app/src/main/res/layout/activity_home.xml" value="0.38736367055283943" />
         <entry key="app/src/main/res/layout/activity_how_to.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_maps.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_new_partner.xml" value="0.5" />
@@ -161,6 +163,7 @@
         <entry key="app/src/main/res/layout/rv_cart_items.xml" value="0.5" />
         <entry key="app/src/main/res/layout/rv_chat_item.xml" value="0.5401041666666667" />
         <entry key="app/src/main/res/layout/rv_dish_item.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/rv_food_menu_items.xml" value="0.30565371024734983" />
         <entry key="app/src/main/res/layout/rv_home_category_items.xml" value="0.2833333333333333" />
         <entry key="app/src/main/res/layout/rv_home_product_items.xml" value="0.33" />
         <entry key="app/src/main/res/layout/rv_home_specials_item.xml" value="0.534375" />
@@ -179,7 +182,7 @@
         <entry key="app/src/main/res/layout/rv_reviews.xml" value="0.375" />
         <entry key="app/src/main/res/layout/rv_right_chathead.xml" value="0.4786458333333333" />
         <entry key="app/src/main/res/layout/rv_shopping_items.xml" value="0.5" />
-        <entry key="app/src/main/res/layout/rv_shopping_main_item.xml" value="0.607898448519041" />
+        <entry key="app/src/main/res/layout/rv_shopping_main_item.xml" value="0.5707620528771384" />
         <entry key="app/src/main/res/layout/rv_subscription_history.xml" value="0.5432291666666667" />
         <entry key="app/src/main/res/layout/rv_subscription_history_item.xml" value="0.1" />
         <entry key="app/src/main/res/layout/rv_testimonial_left_item.xml" value="0.5421875" />

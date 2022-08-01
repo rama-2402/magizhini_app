@@ -35,38 +35,38 @@
                     android:background="@color/green_base"
                     android:foregroundGravity="center"
                     android:gravity="center"
-                    app:title="Magizhini Organics"
                     app:iconTint="@color/white"
                     app:navigationIcon="@color/white"
-                    app:titleTextColor="@color/white" >
+                    app:title="Magizhini Organics"
+                    app:titleTextColor="@color/white">
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivSearch"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="end"
-                    android:layout_marginEnd="@dimen/material_size_8"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_search"
-                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                    app:tint="@color/white" />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivSearch"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_search"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/white" />
 
                     <ru.nikartm.support.ImageBadgeView
                         android:id="@+id/ivNotification"
                         android:layout_width="@dimen/material_size_32"
                         android:layout_height="@dimen/material_size_32"
-                        android:layout_marginEnd="@dimen/material_size_8"
                         android:layout_gravity="end"
+                        android:layout_marginEnd="@dimen/material_size_8"
                         android:padding="2dp"
-                        app:ibv_badgeValue="0"
-                        app:ibv_badgeTextSize="12sp"
-                        app:ibv_fixedBadgeRadius="8dp"
-                        app:ibv_badgeTextStyle="bold"
-                        app:ibv_badgeTextColor="#ffffff"
+                        android:src="@drawable/ic_notify_off"
                         app:ibv_badgeColor="@color/complementary_orange"
                         app:ibv_badgeLimitValue="false"
-                        android:src="@drawable/ic_notify_off"
-                        app:tint="@color/white"/>
+                        app:ibv_badgeTextColor="#ffffff"
+                        app:ibv_badgeTextSize="12sp"
+                        app:ibv_badgeTextStyle="bold"
+                        app:ibv_badgeValue="0"
+                        app:ibv_fixedBadgeRadius="8dp"
+                        app:tint="@color/white" />
 
                 </androidx.appcompat.widget.Toolbar>
 
@@ -96,30 +96,73 @@
                         android:layout_width="match_parent"
                         android:layout_height="225dp"
                         android:elevation="10dp"
+                        android:transitionName="thumbnail"
                         app:autoPlay="true"
                         app:autoPlayDelay="2000"
                         app:autoWidthFixing="true"
                         app:bottomShadowHeight="36dp"
                         app:carouselType="BLOCK"
                         app:imagePlaceholder="@drawable/carousel_default_placeholder"
+                        app:imageScaleType="fitXY"
                         app:indicatorMargin="0dp"
                         app:infiniteCarousel="true"
                         app:layout_constraintCircleRadius="16dp"
                         app:showBottomShadow="true"
-                        android:transitionName="thumbnail"
                         app:showCaption="false"
                         app:showIndicator="true"
-                        app:imageScaleType="fitXY"
                         app:showNavigationButtons="false"
-                        app:showTopShadow="false"/>
+                        app:showTopShadow="false" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:layout_marginEnd="@dimen/material_size_8"
+                        android:weightSum="2"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnOrderHistory"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="ORDERS"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="@dimen/material_size_4"
+                            app:icon="@drawable/ic_order"
+                            app:iconTint="@color/white"
+                            android:background="@drawable/shape_round_rectangle_8"
+                            app:backgroundTint="@color/green_base"
+                            android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                            />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnQuickOrder"
+                            android:layout_width="0dp"
+                            android:layout_marginStart="@dimen/material_size_4"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="QUICK ORDER"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:icon="@drawable/ic_food"
+                            app:iconTint="@color/white"
+                            android:background="@drawable/shape_round_rectangle_8"
+                            app:backgroundTint="@color/green_base"
+                            android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                            />
+
+                    </LinearLayout>
 
                     <LinearLayout
                         android:id="@+id/stickyCategory"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@color/white"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:background="@color/white"
                         android:tag="sticky"
                         android:weightSum="4">
 
@@ -146,25 +189,27 @@
                             android:textColor="@color/white"
                             app:chipCornerRadius="@dimen/material_size_8" />
                     </LinearLayout>
-                    <com.facebook.shimmer.ShimmerFrameLayout
-                        android:id="@+id/flShimmerPlaceholder"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        >
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical">
-                            <include
-                                layout="@layout/shimmer_home_products"/>
-                            <include
-                                layout="@layout/shimmer_home_products"/>
-                            <include
-                                layout="@layout/shimmer_home_products"/>
-                            <include
-                                layout="@layout/shimmer_home_products"/>
-                        </LinearLayout>
-                    </com.facebook.shimmer.ShimmerFrameLayout>
+
+<!--                    <com.facebook.shimmer.ShimmerFrameLayout-->
+<!--                        android:id="@+id/flShimmerPlaceholder"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content">-->
+
+<!--                        <LinearLayout-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="match_parent"-->
+<!--                            android:orientation="vertical">-->
+
+<!--                            <include layout="@layout/shimmer_home_products" />-->
+
+<!--                            <include layout="@layout/shimmer_home_products" />-->
+
+<!--                            <include layout="@layout/shimmer_home_products" />-->
+
+<!--                            <include layout="@layout/shimmer_home_products" />-->
+<!--                        </LinearLayout>-->
+<!--                    </com.facebook.shimmer.ShimmerFrameLayout>-->
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvHomeItems"
                         android:layout_width="match_parent"
@@ -183,8 +228,8 @@
                         android:id="@+id/stickyTestimonials"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
                         android:background="@color/white"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:tag="sticky"
                         android:weightSum="4">
@@ -207,27 +252,29 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/material_size_8"
-                            app:rippleColor="@color/matteRed"
                             android:backgroundTint="@color/matteRed"
                             android:text="Go Shopping"
                             android:textColor="@color/white"
                             app:chipCornerRadius="@dimen/material_size_8"
-                            />
+                            app:rippleColor="@color/matteRed" />
                     </LinearLayout>
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvTestimonials"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/material_size_8"/>
+                        android:layout_marginBottom="@dimen/material_size_8" />
+
                     <LinearLayout
                         android:id="@+id/stickyPartners"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
                         android:background="@color/white"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:tag="sticky"
                         android:weightSum="4">
+
                         <TextView
                             android:id="@+id/tvPartners"
                             android:layout_width="match_parent"
@@ -252,23 +299,26 @@
                         <!--                            app:chipCornerRadius="@dimen/material_size_8"-->
                         <!--                            />-->
                     </LinearLayout>
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvPartners"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_marginEnd="8dp"
-                        android:layout_marginBottom="@dimen/material_size_8"/>
+                        android:layout_marginBottom="@dimen/material_size_8" />
+
                     <LinearLayout
                         android:id="@+id/stickyFollowUs"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
                         android:background="@color/white"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:tag="sticky"
                         android:visibility="invisible"
                         android:weightSum="4">
+
                         <TextView
                             android:id="@+id/tvFollowUs"
                             android:layout_width="match_parent"
@@ -282,47 +332,50 @@
                             android:textSize="16sp"
                             android:textStyle="italic" />
                     </LinearLayout>
+
                     <HorizontalScrollView
                         android:id="@+id/llSocials"
                         android:layout_width="wrap_content"
-                        android:visibility="invisible"
                         android:layout_height="wrap_content"
-                        >
+                        android:visibility="invisible">
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/material_size_4"
                             android:layout_marginStart="@dimen/material_size_8"
+                            android:layout_marginTop="@dimen/material_size_4"
                             android:layout_marginEnd="@dimen/material_size_8"
                             android:layout_marginBottom="@dimen/material_size_8">
+
                             <ImageView
                                 android:id="@+id/ivFacebook"
                                 android:layout_width="56dp"
                                 android:layout_height="56dp"
-                                android:src="@drawable/facebook"
                                 android:layout_marginStart="@dimen/material_size_8"
-                                android:layout_marginEnd="@dimen/material_size_4"/>
+                                android:layout_marginEnd="@dimen/material_size_4"
+                                android:src="@drawable/facebook" />
+
                             <ImageView
                                 android:id="@+id/ivInstagram"
                                 android:layout_width="56dp"
                                 android:layout_height="56dp"
-                                android:src="@drawable/instagram"
                                 android:layout_marginStart="@dimen/material_size_4"
-                                android:layout_marginEnd="@dimen/material_size_4"/>
-<!--                            <ImageView-->
-<!--                                android:id="@+id/ivLinkedIn"-->
-<!--                                android:layout_width="56dp"-->
-<!--                                android:layout_height="56dp"-->
-<!--                                android:src="@drawable/linkedin"-->
-<!--                                android:layout_marginStart="@dimen/material_size_4"-->
-<!--                                android:layout_marginEnd="@dimen/material_size_4"/>-->
+                                android:layout_marginEnd="@dimen/material_size_4"
+                                android:src="@drawable/instagram" />
+                            <!--                            <ImageView-->
+                            <!--                                android:id="@+id/ivLinkedIn"-->
+                            <!--                                android:layout_width="56dp"-->
+                            <!--                                android:layout_height="56dp"-->
+                            <!--                                android:src="@drawable/linkedin"-->
+                            <!--                                android:layout_marginStart="@dimen/material_size_4"-->
+                            <!--                                android:layout_marginEnd="@dimen/material_size_4"/>-->
                             <ImageView
                                 android:id="@+id/ivYoutube"
                                 android:layout_width="56dp"
                                 android:layout_height="56dp"
-                                android:src="@drawable/youtube"
                                 android:layout_marginStart="@dimen/material_size_4"
-                                android:layout_marginEnd="@dimen/material_size_8"/>
+                                android:layout_marginEnd="@dimen/material_size_8"
+                                android:src="@drawable/youtube" />
                         </LinearLayout>
                     </HorizontalScrollView>
                 </LinearLayout>
@@ -346,15 +399,14 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            android:backgroundTint="@color/white"
             android:isScrollContainer="true"
             android:overScrollMode="always"
             android:scrollbars="vertical"
             app:headerLayout="@layout/nav_header"
-            app:menu="@menu/nav_menu"
-            android:backgroundTint="@color/white"
-            app:itemTextColor="@color/gray700"
             app:itemIconTint="@color/matteRed"
-            />
+            app:itemTextColor="@color/gray700"
+            app:menu="@menu/nav_menu" />
 
     </androidx.drawerlayout.widget.DrawerLayout>
 </layout>
