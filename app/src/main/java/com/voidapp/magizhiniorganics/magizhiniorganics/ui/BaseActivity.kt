@@ -29,6 +29,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodOrderActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
@@ -305,6 +306,11 @@ open class BaseActivity : AppCompatActivity() {
                         "referral" -> activity.openReferral()
                     }
                 }
+                is FoodOrderActivity -> {
+                    when (data) {
+                        "purchaseHistory" -> activity.navigateToOtherPage(data as String)
+                    }
+                }
                 is SubscriptionProductActivity -> {
                     when (data) {
                         "permission" -> activity.proceedToRequestPermission()
@@ -506,7 +512,11 @@ open class BaseActivity : AppCompatActivity() {
                             "contact" -> activity.selectedContactMethod(selectedItem)
                         }
                     }
-                    is SubscriptionProductActivity -> {
+                     is SubscriptionProductActivity -> {
+                        hideListBottomSheet()
+                        activity.selectedPaymentMode(selectedItem)
+                    }
+                    is FoodOrderActivity -> {
                         hideListBottomSheet()
                         activity.selectedPaymentMode(selectedItem)
                     }
@@ -554,6 +564,10 @@ open class BaseActivity : AppCompatActivity() {
         view.swipe.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
             override fun onSlideComplete(view: SlideToActView) {
                 when (activity) {
+                    is FoodOrderActivity -> {
+                        mSwipeConfirmationBottomSheet.dismiss()
+                        activity.approved(true)
+                    }
                     is SubscriptionProductActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()
                         activity.approved(true)
@@ -578,3 +592,4 @@ open class BaseActivity : AppCompatActivity() {
         mSwipeConfirmationBottomSheet.show()
     }
 }
+
