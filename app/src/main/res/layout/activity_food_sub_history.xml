@@ -88,84 +88,144 @@
             </com.google.android.material.appbar.AppBarLayout>
         </LinearLayout>
 
-        <me.didik.component.StickyNestedScrollView
-            android:id="@+id/svBody"
+        <!--        <me.didik.component.StickyNestedScrollView-->
+        <!--            android:id="@+id/svBody"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            android:background="@android:color/white"-->
+        <!--            app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@id/toolbar"-->
+        <!--            tools:showIn="@layout/activity_home">-->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="@android:color/white"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:layout_margin="@dimen/material_size_8"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/toolbar"
-            tools:showIn="@layout/activity_home">
+            app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivPrevMonth"
+                android:layout_width="@dimen/material_size_32"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_marginStart="@dimen/material_size_8"
+                android:layout_marginTop="@dimen/material_size_4"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/favorites_icon"
+                android:src="@drawable/ic_chevron_left"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivNextMonth"
+                android:layout_width="@dimen/material_size_32"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_marginStart="@dimen/material_size_8"
+                android:layout_marginTop="@dimen/material_size_4"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/favorites_icon"
+                android:src="@drawable/ic_chevron_right"
+                app:layout_constraintStart_toEndOf="@id/ivPrevMonth"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base" />
+
+            <TextView
+                android:id="@+id/tvMonth"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/material_size_8">
+                android:layout_marginTop="@dimen/material_size_8"
+                android:elevation="@dimen/material_size_4"
+                android:text="September - 2022"
+                android:textColor="@color/gray700"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/calendarView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivPrevMonth"
-                    android:layout_width="@dimen/material_size_32"
-                    android:layout_height="@dimen/material_size_32"
-                    android:layout_marginStart="@dimen/material_size_8"
-                    android:layout_marginTop="@dimen/material_size_4"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/favorites_icon"
-                    android:src="@drawable/ic_chevron_left"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                    app:tint="@color/green_base" />
+            <com.github.sundeepk.compactcalendarview.CompactCalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="wrap_content"
+                android:layout_height="220dp"
+                android:layout_marginTop="@dimen/material_size_16"
+                app:compactCalendarCurrentDayBackgroundColor="@color/white"
+                app:compactCalendarCurrentDayTextColor="@color/blue500"
+                app:compactCalendarCurrentSelectedDayBackgroundColor="@color/green_base"
+                app:compactCalendarCurrentSelectedDayTextColor="@color/white"
+                app:compactCalendarMultiEventIndicatorColor="#fff"
+                app:compactCalendarOtherMonthDaysTextColor="@color/black"
+                app:compactCalendarShouldSelectFirstDayOfMonthOnScroll="false"
+                app:compactCalendarTargetHeight="250dp"
+                app:compactCalendarTextColor="@color/gray700"
+                app:compactCalendarTextSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvMonth" />
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivNextMonth"
-                    android:layout_width="@dimen/material_size_32"
-                    android:layout_height="@dimen/material_size_32"
-                    android:layout_marginStart="@dimen/material_size_8"
-                    android:layout_marginTop="@dimen/material_size_4"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/favorites_icon"
-                    android:src="@drawable/ic_chevron_right"
-                    app:layout_constraintStart_toEndOf="@id/ivPrevMonth"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                    app:tint="@color/green_base" />
+            <TextView
+                android:id="@+id/tvFoodStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_16"
+                android:text="Food Delivery Status"
+                android:textColor="@color/gray700"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/calendarView" />
 
-                <TextView
-                    android:id="@+id/tvMonth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/material_size_8"
-                    android:elevation="@dimen/material_size_4"
-                    android:text="September - 2022"
-                    android:textColor="@color/gray700"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toTopOf="@id/calendarView"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/tvFoodStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_size_16"
+                android:text="Food Delivery Status"
+                android:textColor="@color/gray700"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvFoodStatusText" />
 
-                <com.github.sundeepk.compactcalendarview.CompactCalendarView
-                    android:id="@+id/calendarView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="220dp"
-                    android:layout_marginTop="@dimen/material_size_16"
-                    app:compactCalendarCurrentDayBackgroundColor="@color/white"
-                    app:compactCalendarCurrentDayTextColor="@color/blue500"
-                    app:compactCalendarCurrentSelectedDayBackgroundColor="@color/green_base"
-                    app:compactCalendarCurrentSelectedDayTextColor="@color/white"
-                    app:compactCalendarMultiEventIndicatorColor="#fff"
-                    app:compactCalendarOtherMonthDaysTextColor="@color/black"
-                    app:compactCalendarShouldSelectFirstDayOfMonthOnScroll="false"
-                    app:compactCalendarTargetHeight="250dp"
-                    app:compactCalendarTextColor="@color/gray700"
-                    app:compactCalendarTextSize="12sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvMonth" />
+            <Button
+                android:id="@+id/btnCancelOrder"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/material_size_8"
+                android:backgroundTint="@color/green_base"
+                android:paddingTop="@dimen/material_size_8"
+                android:paddingBottom="@dimen/material_size_8"
+                android:text="  Cancel \n Order"
+                android:textColor="@color/white"
+                app:background="@drawable/shape_round_rectangle_8"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnCancelDelivery"
+                app:layout_constraintStart_toStartOf="parent" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </me.didik.component.StickyNestedScrollView>
+            <Button
+                android:id="@+id/btnCancelDelivery"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/material_size_8"
+                android:backgroundTint="@color/green_base"
+                android:paddingTop="@dimen/material_size_8"
+                android:paddingBottom="@dimen/material_size_8"
+                android:text="  Cancel \n Delivery"
+                android:textColor="@color/white"
+                app:background="@drawable/shape_round_rectangle_8"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/btnCancelOrder" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!--        </me.didik.component.StickyNestedScrollView>-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

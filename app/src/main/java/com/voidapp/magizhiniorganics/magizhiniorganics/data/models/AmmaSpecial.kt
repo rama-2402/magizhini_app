@@ -13,7 +13,6 @@ data class AmmaSpecial(
     var displayOrder: Int = 0
 )
 
-
 data class AmmaSpecialOrder(
     var id: String = "",
     var customerID: String = "",
@@ -30,6 +29,12 @@ data class AmmaSpecialOrder(
     var orderType: String = "month",
     var orderCount: Int = 1,
     var leafNeeded: Boolean = false,
+    var status: String = "",
     var deliveryDates: ArrayList<Long> = arrayListOf(),
     var cancelledDates: ArrayList<Long> = arrayListOf()
+)
+
+data class AmmaSpecialDeliveryStatus(
+    var id: String = "",
+    var status: String = ""
 )

@@ -16,10 +16,10 @@
         android:title="ORDER HISTORY"
         android:icon="@drawable/ic_order"/>
 
-    <item
-        android:id="@+id/menuFood"
-        android:icon="@drawable/ic_food"
-        android:title="FOOD SUB" />
+<!--    <item-->
+<!--        android:id="@+id/menuFood"-->
+<!--        android:icon="@drawable/ic_food"-->
+<!--        android:title="FOOD SUB" />-->
 
     <item
         android:id="@+id/menuSubscriptions"

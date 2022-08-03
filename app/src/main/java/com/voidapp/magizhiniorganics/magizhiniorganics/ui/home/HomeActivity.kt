@@ -686,14 +686,14 @@ class HomeActivity :
                     }
                 }
                 R.id.menuWallet -> navigateToWallet()
-                R.id.menuFood -> {
-                    lifecycleScope.launch {
-                        delay(200)
-                        Intent(this@HomeActivity, FoodSubscriptionActivity::class.java).also {
-                            startActivity(it)
-                        }
-                    }
-                }
+//                R.id.menuFood -> {
+//                    lifecycleScope.launch {
+//                        delay(200)
+//                        Intent(this@HomeActivity, FoodSubscriptionActivity::class.java).also {
+//                            startActivity(it)
+//                        }
+//                    }
+//                }
                 R.id.menuSubscriptions -> {
                     lifecycleScope.launch {
                         delay(200)

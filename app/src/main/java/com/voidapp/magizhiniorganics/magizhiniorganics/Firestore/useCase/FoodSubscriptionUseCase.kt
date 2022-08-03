@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.toObject
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_DISHES
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 
 class FoodSubscriptionUseCase(
     private val fbRepository: FirestoreRepository
@@ -202,6 +204,35 @@ class FoodSubscriptionUseCase(
             }
         } catch (e: Exception) {
             "failed"
+        }
+    }
+
+    suspend fun getFoodStatus(date: Long): String? = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val doc = fireStore
+                .collection(AMMASPECIAL)
+                .document("Order")
+                .collection("Status")
+                .document(SimpleDateFormat("dd-MM-yyyy").format(date)).get().await()
+            doc.toObject(AmmaSpecialDeliveryStatus::class.java)?.status
+        } catch (e: Exception) {
+            fbRepository.logCrash("ammaspecialDeliverystatus: Checking the delivery status", e.message.toString())
+            null
+        }
+    }
+
+    suspend fun getAmmaSpecialOrders(): MutableList<AmmaSpecialOrder>? = withContext(Dispatchers.IO){
+        return@withContext try {
+           val orders = mutableListOf<AmmaSpecialOrder>()
+            val docs =  fireStore
+                    .collection(AMMASPECIAL)
+                    .document("Order")
+                    .collection("Order")
+//                    .whereEqualTo("")
+            orders
+        } catch (e: Exception) {
+            fbRepository.logCrash("ammaspecialDeliverystatus: Checking the delivery status", e.message.toString())
+            null
         }
     }
 

@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.ArrayList
 
 class FoodSubscriptionViewModel(
@@ -34,6 +35,7 @@ class FoodSubscriptionViewModel(
 
     var userProfile: UserProfileEntity? = null
     var wallet: Wallet? = null
+    var ammaSpecialOrders: MutableList<AmmaSpecialOrder> = mutableListOf()
 
     val ammaSpecials: MutableList<AmmaSpecial> = mutableListOf()
     var lunchMap: HashMap<String, Double> = hashMapOf()
@@ -42,6 +44,9 @@ class FoodSubscriptionViewModel(
     var currentSubOption: String = "month"
     var currentCountOption : Int = 0
     var totalPrice: Double = 0.0
+
+    val foodDeliveryStatusMap: HashMap<String, String> = hashMapOf()
+    var userID: String? = null
 
     fun setEmptyUiEvent() {
         _uiEvent.value = UIEvent.EmptyUIEvent
@@ -297,6 +302,30 @@ class FoodSubscriptionViewModel(
             )
     }
 
+    fun getFoodStatus(date: Long) = viewModelScope.launch {
+       _uiUpdate.value = if(foodDeliveryStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)] == null){
+              val status = foodSubscriptionUseCase.getFoodStatus(date)
+             foodDeliveryStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)] = status ?: "none"
+             UiUpdate.UpdateFoodDeliveryStatus(status)
+        } else {
+           UiUpdate.UpdateFoodDeliveryStatus(foodDeliveryStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)])
+        }
+    }
+
+    fun getAmmaSpecialsOrderDetails(date: Long) = viewModelScope.launch {
+        if (userID.isNullOrEmpty()) {
+            _uiEvent.value = UIEvent.ProgressBar(false)
+            _uiEvent.value = UIEvent.SnackBar("Failed to fetch user profile. Please Log out and Log back in to continue", true)
+            return@launch
+        } else {
+            foodSubscriptionUseCase.getAmmaSpecialOrders()?.let {
+                ammaSpecialOrders.clear()
+                ammaSpecialOrders.addAll(it)
+                getFoodStatus(date)
+            }
+        }
+   }
+
     sealed class UiUpdate {
         data class PopulateAmmaSpecials(val ammaSpecials: List<AmmaSpecial>?, val banners: List<Banner>?): UiUpdate()
         data class PopulateUserProfile(val userProfile: UserProfileEntity): UiUpdate()
@@ -311,6 +340,8 @@ class FoodSubscriptionViewModel(
         data class DismissStatusDialog(val dismiss: Boolean): UiUpdate()
         data class UpdateStatusDialog(val message: String, val data: String): UiUpdate()
 
+        //food delivery
+        data class UpdateFoodDeliveryStatus(val status: String?): UiUpdate()
         object Empty: UiUpdate()
     }
 }
