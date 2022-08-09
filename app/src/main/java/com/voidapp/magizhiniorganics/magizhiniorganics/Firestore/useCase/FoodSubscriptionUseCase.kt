@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase
 
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.toObject
@@ -145,7 +146,10 @@ class FoodSubscriptionUseCase(
                 }
             }
         } catch (e: Exception) {
-            fbRepository.logCrash("ammaspecialOrder: creating a wallet transaction", e.message.toString())
+            fbRepository.logCrash(
+                "ammaspecialOrder: creating a wallet transaction",
+                e.message.toString()
+            )
             emit(NetworkResult.Failed(e.message.toString(), null))
         }
     }.flowOn(Dispatchers.IO)
@@ -168,21 +172,21 @@ class FoodSubscriptionUseCase(
                 true
             }
             val createGlobalTransactionEntry = async {
-                    GlobalTransaction(
-                        id = "",
-                        userID = ammaSpecialsOrder.customerID,
-                        userName = ammaSpecialsOrder.userName,
-                        userMobileNumber = ammaSpecialsOrder.phoneNumber,
-                        transactionID = transactionID,
-                        transactionType = ammaSpecialsOrder.paymentMode,
-                        transactionAmount = ammaSpecialsOrder.price.toFloat(),
-                        transactionDirection = "AMMA'S SPECIAL FOOD ORDER",
-                        timestamp = System.currentTimeMillis(),
-                        transactionReason = "AMMA'S SPECIAL ${ammaSpecialsOrder.orderType} FOOD Subscription"
+                GlobalTransaction(
+                    id = "",
+                    userID = ammaSpecialsOrder.customerID,
+                    userName = ammaSpecialsOrder.userName,
+                    userMobileNumber = ammaSpecialsOrder.phoneNumber,
+                    transactionID = transactionID,
+                    transactionType = ammaSpecialsOrder.paymentMode,
+                    transactionAmount = ammaSpecialsOrder.price.toFloat(),
+                    transactionDirection = "AMMA'S SPECIAL FOOD ORDER",
+                    timestamp = System.currentTimeMillis(),
+                    transactionReason = "AMMA'S SPECIAL ${ammaSpecialsOrder.orderType} FOOD Subscription"
                 ).let { return@async fbRepository.createGlobalTransactionEntry(it) }
             }
             updateStore.await() &&
-            createGlobalTransactionEntry.await()
+                    createGlobalTransactionEntry.await()
         } catch (e: Exception) {
             fbRepository.logCrash("ammaspecialOrder: Placing a new order", e.message.toString())
             false
@@ -207,32 +211,244 @@ class FoodSubscriptionUseCase(
         }
     }
 
-    suspend fun getFoodStatus(date: Long): String? = withContext(Dispatchers.IO) {
+    suspend fun getFoodStatus(
+        date: Long,
+        ammaSpecialsOrder: List<AmmaSpecialOrder>
+    ): HashMap<String, String>? = withContext(Dispatchers.IO) {
         return@withContext try {
+            val statusMap: HashMap<String, String> = hashMapOf()
             val doc = fireStore
                 .collection(AMMASPECIAL)
-                .document("Order")
-                .collection("Status")
-                .document(SimpleDateFormat("dd-MM-yyyy").format(date)).get().await()
-            doc.toObject(AmmaSpecialDeliveryStatus::class.java)?.status
+                .document("Status")
+                .collection(SimpleDateFormat("dd-MM-yyyy").format(date))
+            if (ammaSpecialsOrder.isNotEmpty()) {
+                ammaSpecialsOrder.forEach { order ->
+                    doc.document(order.id).get().await()
+                        .toObject(AmmaSpecialDeliveryStatus::class.java)?.let {
+                            statusMap[order.id] = it.status
+                        } ?: let {
+                        statusMap[order.id] = "na"
+                    }
+                }
+            }
+            statusMap
         } catch (e: Exception) {
-            fbRepository.logCrash("ammaspecialDeliverystatus: Checking the delivery status", e.message.toString())
+            fbRepository.logCrash(
+                "ammaspecialDeliverystatus: Checking the delivery status",
+                e.message.toString()
+            )
             null
         }
     }
 
-    suspend fun getAmmaSpecialOrders(): MutableList<AmmaSpecialOrder>? = withContext(Dispatchers.IO){
-        return@withContext try {
-           val orders = mutableListOf<AmmaSpecialOrder>()
-            val docs =  fireStore
+    suspend fun getAmmaSpecialOrders(userID: String): MutableList<AmmaSpecialOrder>? =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val orders = mutableListOf<AmmaSpecialOrder>()
+                val docs = fireStore
                     .collection(AMMASPECIAL)
                     .document("Order")
                     .collection("Order")
-//                    .whereEqualTo("")
-            orders
+                    .whereEqualTo("customerID", userID).get().await()
+                docs.documents.forEach { doc ->
+                    doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
+                }
+                if (orders.isNullOrEmpty()) {
+                    null
+                } else {
+                    orders
+                }
+            } catch (e: Exception) {
+                fbRepository.logCrash(
+                    "ammaspecialDeliverystatus: Checking the delivery status",
+                    e.message.toString()
+                )
+                null
+            }
+        }
+
+    suspend fun cancelDeliveryOn(
+        date: Long,
+        selectedOrder: AmmaSpecialOrder,
+        refund: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            fireStore
+                .collection(AMMASPECIAL)
+                .document("Status")
+                .collection(SimpleDateFormat("dd-MM-yyyy").format(date))
+                .document(selectedOrder.id)
+                .update("status", "cancel", "refund", refund).await()
+            true
         } catch (e: Exception) {
-            fbRepository.logCrash("ammaspecialDeliverystatus: Checking the delivery status", e.message.toString())
-            null
+            fbRepository.logCrash(
+                "ammaspecialOrder: cancelling delivery on a particular day",
+                e.message.toString()
+            )
+            false
+        }
+    }
+
+    suspend fun cancelSubscription(selectedOrder: AmmaSpecialOrder): Boolean {
+        return try {
+            selectedOrder.status = "cancel"
+
+            fireStore
+                .collection(AMMASPECIAL)
+                .document("Status")
+                .collection(SimpleDateFormat("dd-MM-yyyy").format(System.currentTimeMillis()))
+                .document(selectedOrder.id)
+                .update("status", "cancel", "refund", "no").await()
+
+            fireStore
+                .collection(AMMASPECIAL)
+                .document("Order")
+                .collection("Order")
+                .document(selectedOrder.id).delete().await()
+
+            fireStore
+                .collection(AMMASPECIAL)
+                .document("Order")
+                .collection("Unsub")
+                .document(selectedOrder.id).set(selectedOrder, SetOptions.merge()).await()
+            true
+        } catch (e: Exception) {
+            fbRepository.logCrash(
+                "ammaspecialOrder: cancelling food sub",
+                e.message.toString()
+            )
+            false
+        }
+    }
+
+    suspend fun renewSubWithWallet(
+        ammaSpecialOrder: AmmaSpecialOrder
+    ): Flow<NetworkResult> = flow<NetworkResult> {
+        try {
+            delay(1000)
+            emit(NetworkResult.Success("transaction", "Making payment from wallet... "))
+
+            if (
+                fbRepository.makeTransactionFromWallet(
+                    ammaSpecialOrder.price.toFloat(),
+                    ammaSpecialOrder.customerID,
+                    "Remove"
+                )
+            ) {
+                TransactionHistory(
+                    id = ammaSpecialOrder.id,
+                    timestamp = System.currentTimeMillis(),
+                    month = TimeUtil().getMonth(),
+                    year = TimeUtil().getYear().toLong(),
+                    amount = ammaSpecialOrder.price.toFloat(),
+                    fromID = ammaSpecialOrder.customerID,
+                    fromUPI = ammaSpecialOrder.customerID,
+                    status = SUCCESS,
+                    purpose = SUBSCRIPTION,
+                    transactionFor = ammaSpecialOrder.customerID,
+                ).let {
+                    val transactionID =
+                        makeTransactionEntry(it, ammaSpecialOrder.orderType)
+                    if (transactionID == "failed") {
+                        emit(
+                            NetworkResult.Failed(
+                                "wallet",
+                                "Server Error! Failed to make transaction"
+                            )
+                        )
+                        return@flow
+                    } else {
+                        PushNotificationUseCase(fbRepository).sendPushNotification(
+                            ammaSpecialOrder.customerID,
+                            "New Payment from Magizhini Wallet",
+                            "You have paid Rs: ${ammaSpecialOrder.price} for a New ${ammaSpecialOrder.orderType} Subscription of Amma's Special Food Delivery Plan starting from ${ammaSpecialOrder.orderDate}",
+                            WALLET_PAGE
+                        )
+                        delay(1000)
+                        emit(NetworkResult.Success("validating", "Creating Subscription..."))
+                        if (renewOrder(ammaSpecialOrder, transactionID, "Wallet")) {
+                            delay(1000)
+                            emit(
+                                NetworkResult.Success(
+                                    "placed",
+                                    "Subscription Created Successfully..."
+                                )
+                            )
+                        } else {
+                            delay(1000)
+                            emit(
+                                NetworkResult.Failed(
+                                    "placed",
+                                    "Server Error! Failed to place order"
+                                )
+                            )
+                            return@flow
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            fbRepository.logCrash(
+                "ammaspecialOrder: creating a wallet transaction",
+                e.message.toString()
+            )
+            emit(NetworkResult.Failed(e.message.toString(), null))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun renewSubscriptionWithOnline(
+        ammaSpecialsOrder: AmmaSpecialOrder,
+        transactionID: String
+    ): Flow<NetworkResult> = flow<NetworkResult> {
+        try {
+            emit(NetworkResult.Success("validating", "Renewing your subscription..."))
+            if (renewOrder(ammaSpecialsOrder, transactionID, "Online")) {
+                delay(1000)
+                emit(NetworkResult.Success("placed", null))
+            } else {
+                delay(1000)
+                emit(NetworkResult.Success("Server Error! Failed to renew Subscription", null))
+            }
+        } catch (e: Exception) {
+            emit(NetworkResult.Failed(e.message.toString(), null))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    private suspend fun renewOrder(
+        ammaSpecialsOrder: AmmaSpecialOrder,
+        transactionID: String,
+        paymentMode: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        ammaSpecialsOrder.paymentMode = paymentMode
+        return@withContext try {
+            val updateStore = async {
+                fireStore
+                    .collection(AMMASPECIAL)
+                    .document("Order")
+                    .collection("Order")
+                    .document(ammaSpecialsOrder.id)
+                    .set(ammaSpecialsOrder, SetOptions.merge()).await()
+                true
+            }
+            val createGlobalTransactionEntry = async {
+                GlobalTransaction(
+                    id = "",
+                    userID = ammaSpecialsOrder.customerID,
+                    userName = ammaSpecialsOrder.userName,
+                    userMobileNumber = ammaSpecialsOrder.phoneNumber,
+                    transactionID = transactionID,
+                    transactionType = ammaSpecialsOrder.paymentMode,
+                    transactionAmount = ammaSpecialsOrder.price.toFloat(),
+                    transactionDirection = "AMMA'S SPECIAL FOOD RENEWAL",
+                    timestamp = System.currentTimeMillis(),
+                    transactionReason = "AMMA'S SPECIAL ${ammaSpecialsOrder.orderType} FOOD Subscription Renewal"
+                ).let { return@async fbRepository.createGlobalTransactionEntry(it) }
+            }
+            updateStore.await() &&
+                    createGlobalTransactionEntry.await()
+        } catch (e: Exception) {
+            fbRepository.logCrash("ammaspecialOrder: Placing a new order", e.message.toString())
+            false
         }
     }
 

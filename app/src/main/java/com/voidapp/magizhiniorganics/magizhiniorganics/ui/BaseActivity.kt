@@ -25,11 +25,13 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.snackbar.Snackbar
 import com.ncorti.slidetoact.SlideToActView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecialOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodOrderActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
@@ -273,7 +275,7 @@ open class BaseActivity : AppCompatActivity() {
                         R.color.gray700
                     )
                 )
-                view.tvCancelText.text = "Proceed"
+                view.tvCancelText.text = "PROCEED"
                 view.tvCancelText.setTextColor(
                     ContextCompat.getColor(
                         view.tvConfirmationText.context,
@@ -309,6 +311,13 @@ open class BaseActivity : AppCompatActivity() {
                 is FoodOrderActivity -> {
                     when (data) {
                         "purchaseHistory" -> activity.navigateToOtherPage(data as String)
+                    }
+                }
+                is FoodSubHistoryActivity -> {
+                    when(data) {
+                        "delivery" -> activity.cancelDeliveryConfirmed()
+                        "sub" -> activity.cancelSubscriptionConfirmed()
+                        "renew" -> activity.renewSubscriptionConfirmed()
                     }
                 }
                 is SubscriptionProductActivity -> {
@@ -516,6 +525,10 @@ open class BaseActivity : AppCompatActivity() {
                         hideListBottomSheet()
                         activity.selectedPaymentMode(selectedItem)
                     }
+                    is FoodSubHistoryActivity -> {
+                        hideListBottomSheet()
+                        activity.selectedPaymentMode(selectedItem)
+                    }
                     is FoodOrderActivity -> {
                         hideListBottomSheet()
                         activity.selectedPaymentMode(selectedItem)
@@ -571,6 +584,10 @@ open class BaseActivity : AppCompatActivity() {
                     is SubscriptionProductActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()
                         activity.approved(true)
+                    }
+                    is FoodSubHistoryActivity -> {
+                        mSwipeConfirmationBottomSheet.dismiss()
+                        activity.confirmWalletPayment()
                     }
                     is InvoiceActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()

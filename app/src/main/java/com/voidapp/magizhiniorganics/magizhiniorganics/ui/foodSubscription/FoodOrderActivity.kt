@@ -377,6 +377,8 @@ class FoodOrderActivity :
         val orderDetailsMap: HashMap<String, Any> = hashMapOf()
         binding.apply {
 //                showProgressDialog(true)
+            orderDetailsMap["start"] = viewModel.selectedEventDates.min()
+            orderDetailsMap["end"] = viewModel.selectedEventDates.max()
             orderDetailsMap["leaf"] = cbxLeaf.isChecked
             orderDetailsMap["phoneNumber"] = etAlternateNumber.text.toString().trim()
             orderDetailsMap["mailID"] = etEmailId.text.toString().trim()
@@ -473,7 +475,7 @@ class FoodOrderActivity :
         totalPrice *= viewModel.currentCountOption
 
         if (binding.cbxLeaf.isChecked) {
-            totalPrice += 5
+            totalPrice += 5 * viewModel.selectedEventDates.size
         }
 
         viewModel.totalPrice = totalPrice

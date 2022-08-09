@@ -588,12 +588,12 @@ class SubscriptionProductActivity :
             viewModel.address = address
             lifecycleScope.launch {
                 viewModel.wallet?.let {
-                    if (viewModel.isDeliveryAvailable(address.LocationCode)) {
+//                    if (viewModel.isDeliveryAvailable(address.LocationCode)) {
                         showListBottomSheet(this@SubscriptionProductActivity, arrayListOf("Online", "Wallet - Rs: ${it.amount}"))
-                    } else {
-                        CustomAlertDialog(this@SubscriptionProductActivity).show()
-                        return@launch
-                    }
+//                    } else {
+//                        CustomAlertDialog(this@SubscriptionProductActivity).show()
+//                        return@launch
+//                    }
                 } ?:let {
                     showToast(this@SubscriptionProductActivity, "Wallet Data not available")
                     selectedPaymentMode("Online")

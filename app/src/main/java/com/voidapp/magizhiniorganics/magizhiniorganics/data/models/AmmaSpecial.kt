@@ -17,6 +17,8 @@ data class AmmaSpecialOrder(
     var id: String = "",
     var customerID: String = "",
     var orderDate: String = "",
+    var startDate: Long = 0,
+    var endDate: Long = 0,
     var price: Double = 0.0,
     var paymentMode: String = "",
     var userName: String = "",
@@ -29,12 +31,13 @@ data class AmmaSpecialOrder(
     var orderType: String = "month",
     var orderCount: Int = 1,
     var leafNeeded: Boolean = false,
-    var status: String = "",
+    var status: String = "success",
     var deliveryDates: ArrayList<Long> = arrayListOf(),
     var cancelledDates: ArrayList<Long> = arrayListOf()
 )
 
 data class AmmaSpecialDeliveryStatus(
     var id: String = "",
-    var status: String = ""
+    var status: String = "",
+    var refund: String = "no"
 )

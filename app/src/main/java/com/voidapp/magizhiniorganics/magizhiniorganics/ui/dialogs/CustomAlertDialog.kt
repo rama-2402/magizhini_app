@@ -9,8 +9,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogDeliver
 
 class CustomAlertDialog(
     private val context: Context,
-//    private val title: String?,
-//    private val body: String?
+    private val title: String?,
+    private val body: String?,
+    private val button: String?,
+    private val content: String,
+    private val onItemClickListener: CustomAlertClickListener
 ) {
 
     private val bottomSheetDialog: BottomSheetDialog =
@@ -28,8 +31,19 @@ class CustomAlertDialog(
         bottomSheetDialog.setCancelable(true)
         bottomSheetDialog.setContentView(view.root)
 
+
         view.apply {
+            title?.let {
+                tvTitle.text = it
+            }
+            body?.let {
+                tvBody.text = it
+            }
+            button?.let {
+                tvClose.text = it
+            }
             tvClose.setOnClickListener {
+                onItemClickListener.onClick()
                 dismiss()
             }
         }
@@ -39,4 +53,8 @@ class CustomAlertDialog(
     fun show() = bottomSheetDialog.show()
 
     fun dismiss() = bottomSheetDialog.dismiss()
+}
+
+interface CustomAlertClickListener {
+    fun onClick()
 }

@@ -102,7 +102,6 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_margin="@dimen/material_size_8"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -113,7 +112,7 @@
                 android:layout_width="@dimen/material_size_32"
                 android:layout_height="@dimen/material_size_32"
                 android:layout_marginStart="@dimen/material_size_8"
-                android:layout_marginTop="@dimen/material_size_4"
+                android:layout_marginTop="@dimen/material_size_12"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/favorites_icon"
                 android:src="@drawable/ic_chevron_left"
@@ -127,7 +126,7 @@
                 android:layout_width="@dimen/material_size_32"
                 android:layout_height="@dimen/material_size_32"
                 android:layout_marginStart="@dimen/material_size_8"
-                android:layout_marginTop="@dimen/material_size_4"
+                android:layout_marginTop="@dimen/material_size_12"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/favorites_icon"
                 android:src="@drawable/ic_chevron_right"
@@ -140,7 +139,8 @@
                 android:id="@+id/tvMonth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/material_size_8"
+                android:layout_marginTop="@dimen/material_size_12"
+                android:layout_marginEnd="@dimen/material_size_8"
                 android:elevation="@dimen/material_size_4"
                 android:text="September - 2022"
                 android:textColor="@color/gray700"
@@ -173,7 +173,7 @@
                 android:id="@+id/tvFoodStatusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/material_size_16"
+                android:layout_marginTop="@dimen/material_size_8"
                 android:text="Food Delivery Status"
                 android:textColor="@color/gray700"
                 android:textSize="20sp"
@@ -185,44 +185,136 @@
             <TextView
                 android:id="@+id/tvFoodStatus"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/material_size_16"
-                android:text="Food Delivery Status"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:gravity="center"
+                android:text=""
                 android:textColor="@color/gray700"
                 android:textSize="20sp"
+                app:layout_constraintBottom_toTopOf="@id/btnGoToBox"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvFoodStatusText" />
 
-            <Button
-                android:id="@+id/btnCancelOrder"
+            <TextView
+                android:id="@+id/btnRenewSub"
                 android:layout_width="0dp"
+                app:layout_constraintWidth_percent=".5"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/material_size_8"
-                android:backgroundTint="@color/green_base"
-                android:paddingTop="@dimen/material_size_8"
-                android:paddingBottom="@dimen/material_size_8"
-                android:text="  Cancel \n Order"
-                android:textColor="@color/white"
-                app:background="@drawable/shape_round_rectangle_8"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/btnCancelDelivery"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <Button
-                android:id="@+id/btnCancelDelivery"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/material_size_8"
-                android:backgroundTint="@color/green_base"
-                android:paddingTop="@dimen/material_size_8"
-                android:paddingBottom="@dimen/material_size_8"
-                android:text="  Cancel \n Delivery"
-                android:textColor="@color/white"
-                app:background="@drawable/shape_round_rectangle_8"
+                android:layout_weight="1"
+                android:background="@color/green_base"
+                android:gravity="center"
+                android:padding="@dimen/material_size_12"
+                android:text="RENEW \n SUBSCRIPTION"
+                android:visibility="gone"
+                android:textSize="16sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/btnCancelOrder" />
+                app:layout_constraintStart_toEndOf="@id/btnGoToBox" />
+
+            <TextView
+                android:id="@+id/btnGoToBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/matteRed"
+                android:gravity="center"
+                android:padding="@dimen/material_size_12"
+                android:text="OPEN MENU"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnRenewSub"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvFoodStatus"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/btnGoToBox"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvFoodStatusText" />
+            <!--                <LinearLayout-->
+            <!--                    android:id="@+id/llCancel"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:orientation="horizontal"-->
+            <!--                    android:weightSum="2"-->
+            <!--                    android:visibility="gone"-->
+            <!--                    app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                    app:layout_constraintStart_toStartOf="parent"-->
+            <!--                    app:layout_constraintEnd_toEndOf="parent">-->
+            <!--                    <TextView-->
+            <!--                        android:id="@+id/btnCancelSubscription"-->
+            <!--                        android:layout_width="0dp"-->
+            <!--                        android:layout_weight="1"-->
+            <!--                        android:layout_height="wrap_content"-->
+            <!--                        android:background="@color/green_base"-->
+            <!--                        android:padding="@dimen/material_size_8"-->
+            <!--                        android:gravity="center"-->
+            <!--                        android:textSize="16sp"-->
+            <!--                        android:textStyle="bold"-->
+            <!--                        android:text=" CANCEL \n SUBSCRIPTION"-->
+            <!--                        />-->
+            <!--                    <TextView-->
+            <!--                        android:id="@+id/btnCancelDelivery"-->
+            <!--                        android:layout_width="0dp"-->
+            <!--                        android:layout_weight="1"-->
+            <!--                        android:layout_height="wrap_content"-->
+            <!--                        android:background="@color/matteRed"-->
+            <!--                        android:padding="@dimen/material_size_8"-->
+            <!--                        android:gravity="center"-->
+            <!--                        android:textSize="16sp"-->
+            <!--                        android:textStyle="bold"-->
+            <!--                        android:text="  CANCEL \n DELIVERY"-->
+            <!--                        />-->
+            <!--                </LinearLayout>-->
+
+            <!--            <TextView-->
+            <!--                android:id="@+id/tvFoodStatus"-->
+            <!--                android:layout_width="0dp"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginTop="@dimen/material_size_16"-->
+            <!--                android:text="Food Delivery Status"-->
+            <!--                android:textColor="@color/gray700"-->
+            <!--                android:textSize="20sp"-->
+            <!--                app:layout_constraintEnd_toEndOf="parent"-->
+            <!--                app:layout_constraintStart_toStartOf="parent"-->
+            <!--                app:layout_constraintTop_toBottomOf="@id/tvFoodStatusText" />-->
+
+            <!--            <Button-->
+            <!--                android:id="@+id/btnCancelOrder"-->
+            <!--                android:layout_width="0dp"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginEnd="@dimen/material_size_8"-->
+            <!--                android:backgroundTint="@color/green_base"-->
+            <!--                android:paddingTop="@dimen/material_size_8"-->
+            <!--                android:paddingBottom="@dimen/material_size_8"-->
+            <!--                android:text="  Cancel \n Order"-->
+            <!--                android:textColor="@color/white"-->
+            <!--                app:background="@drawable/shape_round_rectangle_8"-->
+            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                app:layout_constraintEnd_toStartOf="@id/btnCancelDelivery"-->
+            <!--                app:layout_constraintStart_toStartOf="parent" />-->
+
+            <!--            <Button-->
+            <!--                android:id="@+id/btnCancelDelivery"-->
+            <!--                android:layout_width="0dp"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginStart="@dimen/material_size_8"-->
+            <!--                android:backgroundTint="@color/green_base"-->
+            <!--                android:paddingTop="@dimen/material_size_8"-->
+            <!--                android:paddingBottom="@dimen/material_size_8"-->
+            <!--                android:text="  Cancel \n Delivery"-->
+            <!--                android:textColor="@color/white"-->
+            <!--                app:background="@drawable/shape_round_rectangle_8"-->
+            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                app:layout_constraintEnd_toEndOf="parent"-->
+            <!--                app:layout_constraintStart_toEndOf="@+id/btnCancelOrder" />-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
