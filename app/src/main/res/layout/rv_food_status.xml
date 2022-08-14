@@ -162,7 +162,7 @@
             android:id="@+id/tvCancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="CANCELLED"
+            android:text="CANCEL"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:paddingTop="@dimen/material_size_12"

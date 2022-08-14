@@ -171,7 +171,8 @@
 
             <TextView
                 android:id="@+id/tvFoodStatusText"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="center"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/material_size_8"
                 android:text="Food Delivery Status"
@@ -189,8 +190,9 @@
                 android:layout_marginTop="@dimen/material_size_8"
                 android:gravity="center"
                 android:text=""
+                android:layout_margin="@dimen/material_size_16"
                 android:textColor="@color/gray700"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toTopOf="@id/btnGoToBox"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

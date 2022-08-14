@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,7 +10,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.PushNot
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
@@ -41,6 +39,8 @@ class FoodSubscriptionViewModel(
     val ammaSpecials: MutableList<AmmaSpecial> = mutableListOf()
     var lunchMap: HashMap<String, Double> = hashMapOf()
 
+    var nonDeliveryDatesLong: MutableList<Long>? = null
+    var nonDeliveryDatesString: MutableList<String> = mutableListOf()
     val selectedEventDates: MutableList<Long> = mutableListOf()
     var currentSubOption: String = "month"
     var currentCountOption: Int = 0
@@ -476,22 +476,22 @@ class FoodSubscriptionViewModel(
     fun getFoodStatus(date: Long) = viewModelScope.launch {
         if (ammaSpecialOrders.isNotEmpty()) {
             _uiUpdate.value =
-                if (orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)] == null) {
+                if (orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)].isNullOrEmpty()) {
                     val status = foodSubscriptionUseCase.getFoodStatus(
                         date,
                         ammaSpecialOrders.filter { it.endDate >= date })
                     orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)] =
                         status
-                    UiUpdate.UpdateFoodDeliveryStatus(status)
+                    UiUpdate.UpdateFoodDeliveryStatus(status, true)
                 } else {
                     UiUpdate.UpdateFoodDeliveryStatus(
                         orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(
                             date
-                        )]
+                        )], true
                     )
                 }
         } else {
-            _uiUpdate.value = UiUpdate.UpdateFoodDeliveryStatus(null)
+            _uiUpdate.value = UiUpdate.UpdateFoodDeliveryStatus(null, false)
         }
     }
 
@@ -509,7 +509,7 @@ class FoodSubscriptionViewModel(
                 ammaSpecialOrders.addAll(orders.filter { it.endDate >= System.currentTimeMillis() })
                 getFoodStatus(date)
             } ?: let {
-                _uiEvent.value = UIEvent.ProgressBar(false)
+                _uiUpdate.value = UiUpdate.UpdateFoodDeliveryStatus(null, false)
             }
         }
     }
@@ -554,8 +554,18 @@ class FoodSubscriptionViewModel(
         }
     }
 
-    fun fetchUpdatedFoodPrices() {
-
+    fun getNonDeliveryDays() = viewModelScope.launch {
+        nonDeliveryDatesLong?.let {
+            _uiUpdate.value = UiUpdate.PopulateNonDeliveryDates(it)
+        } ?:let {
+            foodSubscriptionUseCase.getNonDeliveryDays().let { dates ->
+                nonDeliveryDatesLong = mutableListOf()
+                nonDeliveryDatesLong!!.clear()
+                dates?.let { it -> nonDeliveryDatesLong!!.addAll(it) }
+                nonDeliveryDatesString.addAll(nonDeliveryDatesLong!!.map { TimeUtil().getCustomDate(dateLong = it) })
+                _uiUpdate.value = UiUpdate.PopulateNonDeliveryDates(nonDeliveryDatesLong)
+            }
+        }
     }
 
 
@@ -566,6 +576,7 @@ class FoodSubscriptionViewModel(
         ) : UiUpdate()
 
         data class PopulateUserProfile(val userProfile: UserProfileEntity) : UiUpdate()
+        data class PopulateNonDeliveryDates(val dates: List<Long>?): UiUpdate()
 
         //placing order
         data class PlacingOrder(val message: String, val data: String) : UiUpdate()
@@ -583,7 +594,7 @@ class FoodSubscriptionViewModel(
         data class RenewSubscription(val status: Boolean, val message: String) : UiUpdate()
 
         //food delivery
-        data class UpdateFoodDeliveryStatus(val status: HashMap<String, String>?) : UiUpdate()
+        data class UpdateFoodDeliveryStatus(val status: HashMap<String, String>?, val isOrdersAvailable: Boolean) : UiUpdate()
         object Empty : UiUpdate()
     }
 }

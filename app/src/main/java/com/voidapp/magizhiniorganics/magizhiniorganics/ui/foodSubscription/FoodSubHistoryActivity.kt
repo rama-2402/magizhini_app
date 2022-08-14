@@ -3,12 +3,15 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.sundeepk.compactcalendarview.CompactCalendarView
+import com.github.sundeepk.compactcalendarview.domain.Event
 import com.razorpay.Checkout
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -28,11 +31,13 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
 import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import java.text.FieldPosition
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashMap
@@ -42,13 +47,15 @@ class FoodSubHistoryActivity :
     KodeinAware,
     FoodStatusOnClickListener,
     PaymentResultListener,
-    CustomAlertClickListener {
+    CustomAlertClickListener
+{
 
     override val kodein: Kodein by kodein()
 
     private lateinit var binding: ActivityFoodSubHistoryBinding
     private val factory: FoodSubscriptionViewModelFactory by instance()
     private lateinit var viewModel: FoodSubscriptionViewModel
+    private lateinit var statusAdapter: FoodStatusAdapter
 
     private var date: Long = System.currentTimeMillis()
 
@@ -60,11 +67,17 @@ class FoodSubHistoryActivity :
         Checkout.preload(applicationContext)
 
         initData()
+        initLiveData()
         initListeners()
     }
 
     private fun initListeners() {
         binding.apply {
+            ivHistory.setOnClickListener {
+                Intent(this@FoodSubHistoryActivity, FoodSubscriptionActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
@@ -74,12 +87,29 @@ class FoodSubHistoryActivity :
             ivNextMonth.setOnClickListener {
                 calendarView.scrollRight()
             }
+            tvFoodStatusText.setOnClickListener {
+                statusAdapter.selectedPosition = null
+                statusAdapter.notifyDataSetChanged()
+                btnGoToBox.remove()
+            }
             calendarView.setListener(object : CompactCalendarView.CompactCalendarViewListener {
                 override fun onDayClick(dateClicked: Date?) {
                     val instanceToGetLongDate = Calendar.getInstance()
                     instanceToGetLongDate.time = dateClicked!!
 
                     date = instanceToGetLongDate.timeInMillis
+
+                    if (
+                        TimeUtil().getDayName(date) == "Saturday" ||
+                        TimeUtil().getDayName(date) == "Sunday"
+                    ) {
+                        showToast(
+                            this@FoodSubHistoryActivity,
+                            "Delivery not available on Saturdays and Sundays"
+                        )
+                        rvFoodStatus.remove()
+                        return
+                    }
 
                     if (viewModel.ammaSpecialOrders.isNotEmpty()) {
                         showProgressDialog(true)
@@ -99,10 +129,15 @@ class FoodSubHistoryActivity :
                         finish()
                     }
                 } else {
+//                    showExitSheet(
+//                        this@FoodSubHistoryActivity,
+//                        "You are about to cancel your Magizhini Amma's Special Food Subscription. If you are unsubscribed your refund for the not delivered days will be reverted back in 3 to 5 business days. \n \nClick PROCEED to confirm cancellation",
+//                        "sub"
+//                    )
                     showExitSheet(
                         this@FoodSubHistoryActivity,
-                        "You are about to cancel your Magizhini Amma's Special Food Subscription. If you are unsubscribed your balance money will be reverted back in 3 to 5 business days. \n \nClick PROCEED to confirm cancellation",
-                        "sub"
+                        "You are about to renew your Monthly Subscription for Magizhini's Amma's Special Authentic Home-made Food plan. \n \nClick PROCEED to renew your subscription for the next month",
+                        "renew"
                     )
                 }
             }
@@ -118,9 +153,14 @@ class FoodSubHistoryActivity :
 
     private fun initData() {
         showProgressDialog(true)
+
+        binding.tvMonth.text = SimpleDateFormat("MMMM - yyyy").format(date)
+
+
         viewModel.userID =
             SharedPref(this).getData(USER_ID, STRING, "").toString()
         viewModel.getAmmaSpecialsOrderDetails(date)
+        viewModel.getNonDeliveryDays()
     }
 
     private fun initLiveData() {
@@ -160,7 +200,7 @@ class FoodSubHistoryActivity :
 
                             CustomAlertDialog(
                                 this,
-                                "Subscription renewal for ${TimeUtil().getMonth(dateLong = viewModel.selectedEventDates.random())}",
+                                "Monthly Subscription Renewal",
                                 "Your Subscription for Amma's Special Authentic Home-made Food ends on ${
                                     TimeUtil().getCustomDate(
                                         dateLong = it.endDate
@@ -169,16 +209,29 @@ class FoodSubHistoryActivity :
                                 "RENEW SUBSCRIPTION",
                                 "food",
                                 this
-                            )
+                            ).show()
                         }
                     }
                 }
                 is FoodSubscriptionViewModel.UiUpdate.UpdateFoodDeliveryStatus -> {
                     hideProgressDialog()
                     if (event.status == null) {
-                        statusNotAvailableUI()
-                    } else {
-                        populateDeliveryStatus(event.status)
+                        if (!event.isOrdersAvailable) {
+                            statusNotAvailableUI()
+                        }
+                    }
+
+                    event.status?.let { populateDeliveryStatus(it) }
+
+                    if (
+                        TimeUtil().getDayName(date) == "Saturday" ||
+                        TimeUtil().getDayName(date) == "Sunday"
+                    ) {
+                        showToast(
+                            this@FoodSubHistoryActivity,
+                            "Delivery not available on Saturdays and Sundays"
+                        )
+                        binding.rvFoodStatus.remove()
                     }
                 }
                 is FoodSubscriptionViewModel.UiUpdate.CancelOrderStatus -> {
@@ -188,6 +241,9 @@ class FoodSubHistoryActivity :
                     } else {
                         showToast(this, event.message, LONG)
                     }
+                }
+                is FoodSubscriptionViewModel.UiUpdate.PopulateNonDeliveryDates -> {
+                    populateNonDeliveryDates(event.dates)
                 }
                 is FoodSubscriptionViewModel.UiUpdate.CancelSubscription -> {
                     hideProgressDialog()
@@ -222,6 +278,15 @@ class FoodSubHistoryActivity :
                     updateLoadStatusDialog(event.message, event.data)
                 }
                 is FoodSubscriptionViewModel.UiUpdate.PlacedOrder -> {
+                    for (i in viewModel.ammaSpecialOrders.indices) {
+                        viewModel.selectedOrder?.let {
+                            if (viewModel.ammaSpecialOrders[i].id == it.id) {
+                                viewModel.ammaSpecialOrders[i] = it
+                            }
+                        }
+                    }
+                    statusAdapter.orders = viewModel.ammaSpecialOrders
+                    statusAdapter.notifyDataSetChanged()
                     updateLoadStatusDialog(event.message, event.data)
                 }
                 is FoodSubscriptionViewModel.UiUpdate.DismissStatusDialog -> {
@@ -243,6 +308,44 @@ class FoodSubHistoryActivity :
         }
     }
 
+    private fun populateNonDeliveryDates(dates: List<Long>?) {
+        dates?.forEach {
+            Event(
+                resources.getColor(
+                    R.color.errorRed,
+                    theme
+                ), it, "leave"
+            ).let { event ->
+                binding.calendarView.addEvent(event)
+            }
+        }
+
+        var today: Long = System.currentTimeMillis()
+        var monthNum = 0
+        while (true) {
+            today += SINGLE_DAY_LONG
+            if (TimeUtil().getDayName(dateLong = today) == "Saturday" ||
+                TimeUtil().getDayName(dateLong = today) == "Sunday"
+            ) {
+
+                Event(
+                    resources.getColor(
+                        R.color.errorRed,
+                        theme
+                    ), today, "leave"
+                ).let { event ->
+                    binding.calendarView.addEvent(event)
+                }
+            }
+            if (TimeUtil().getDateNumber(dateLong = today) == "01") {
+                monthNum += 1
+            }
+            if (monthNum == 2) {
+                return
+            }
+        }
+    }
+
     private fun updateLoadStatusDialog(message: String, data: String) {
         LoadStatusDialog.statusContent = message
         LoadStatusDialog.statusText.value = data
@@ -260,22 +363,24 @@ class FoodSubHistoryActivity :
 
     private fun calculateRenewMonthDays(endDate: Long): Int {
         viewModel.selectedEventDates.clear()
-        var newMonthCounter = 0
         var currentDate: Long = endDate
-        while (true) {
+        var dayCount = 1
+
+        while (dayCount <= 30) {
             currentDate += SINGLE_DAY_LONG
-            if (TimeUtil().getDateNumber(currentDate) == "01") {
-                newMonthCounter += 1
-                if (newMonthCounter == 2) {
-                    return viewModel.selectedEventDates.size
-                }
-            }
+
             if (
-                TimeUtil().getDayName(currentDate) != "Sunday"
+                TimeUtil().getDayName(currentDate) != "Saturday" &&
+                TimeUtil().getDayName(currentDate) != "Sunday" &&
+                !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
             ) {
                 viewModel.selectedEventDates.add(currentDate)
             }
+
+            dayCount += 1
         }
+
+        return viewModel.selectedEventDates.size
     }
 
     private fun statusNotAvailableUI() {
@@ -285,7 +390,7 @@ class FoodSubHistoryActivity :
             btnGoToBox.visible()
             btnRenewSub.remove()
             tvFoodStatus.text =
-                "You don't have any food subscriptions yet. To eat Healthy Authentic Home-Made Food made with 100% Organic materials please check out our different Lunch Boxes to place an order "
+                "You don't have any food subscriptions yet 🍱 \n\n\nTo eat Healthy Authentic Home-Made Food made with 100% Organic materials please check out our different Lunch Boxes to place an order 😋😋😋"
             btnGoToBox.text = "OPEN MENU"
         }
     }
@@ -303,8 +408,10 @@ class FoodSubHistoryActivity :
             FoodStatusAdapter(
                 viewModel.ammaSpecialOrders.filter { it.endDate >= date },
                 status,
+                null,
                 this@FoodSubHistoryActivity
             ).let {
+                statusAdapter = it
                 rvFoodStatus.adapter = it
                 rvFoodStatus.layoutManager = LinearLayoutManager(this@FoodSubHistoryActivity)
             }
@@ -333,6 +440,7 @@ class FoodSubHistoryActivity :
     }
 
     fun renewSubscriptionConfirmed() {
+        viewModel.getProfile()
         viewModel.getAmmaSpecials()
     }
 
@@ -340,6 +448,26 @@ class FoodSubHistoryActivity :
         if (item == "Use Magizhini Wallet") {
             showSwipeConfirmationDialog(this, "")
         } else {
+            viewModel.userProfile?.let {
+                viewModel.selectedOrder?.let { order ->
+                    startPayment(
+                        this,
+                        it.mailId,
+                        (order.price * 100).toFloat(),
+                        it.name,
+                        it.id,
+                        it.phNumber
+                    ).also { status ->
+                        if (!status) {
+                            Toast.makeText(
+                                this,
+                                "Error in processing payment. Try Later ",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } ?: showToast(this, "Please select the order and try again")
+            } ?: showToast(this, "Failed to fetch your profile. Refresh and try again")
         }
     }
 
@@ -347,8 +475,10 @@ class FoodSubHistoryActivity :
         viewModel.renewSubWithWallet()
     }
 
-    override fun selectedOrder(order: AmmaSpecialOrder) {
+    override fun selectedOrder(order: AmmaSpecialOrder, position: Int) {
         viewModel.selectedOrder = order
+        statusAdapter.selectedPosition = position
+        statusAdapter.notifyDataSetChanged()
         binding.apply {
             btnGoToBox.visible()
             if (
@@ -359,11 +489,11 @@ class FoodSubHistoryActivity :
                 order.orderType == "month"
             ) {
                 btnRenewSub.visible()
-                btnGoToBox.text = "CANCEL \nDELIVERY"
+                btnGoToBox.text = "CANCEL \nSUBSCRIPTION"
                 btnRenewSub.text = "RENEW \nSUBSCRIPTION"
             } else {
                 btnRenewSub.remove()
-                btnGoToBox.text = "CANCEL DELIVERY"
+                btnGoToBox.text = "CANCEL SUBSCRIPTION"
             }
         }
     }

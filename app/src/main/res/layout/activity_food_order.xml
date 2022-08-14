@@ -85,30 +85,30 @@
                         app:tint="@color/white" />
                 </androidx.appcompat.widget.Toolbar>
 
-            <TextView
-                android:id="@+id/tvTimeLimit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="@dimen/material_size_8"
-                android:paddingEnd="@dimen/material_size_8"
-                android:paddingTop="@dimen/material_size_8"
-                android:paddingBottom="@dimen/material_size_8"
-                android:background="@color/green_base"
-                android:text=""
-                android:ellipsize="marquee"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:scrollHorizontally="true"
-                android:singleLine="true"
-                android:textColor="@color/matteRed"
-                android:textStyle="normal"
-                android:textSize="18sp"
-                style="@style/TextAppearance.MaterialComponents.Body1"
-                app:layout_constraintBottom_toTopOf="@id/clAddress"
-                app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                <TextView
+                    android:id="@+id/tvTimeLimit"
+                    style="@style/TextAppearance.MaterialComponents.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/green_base"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:paddingStart="@dimen/material_size_8"
+                    android:paddingTop="@dimen/material_size_8"
+                    android:paddingEnd="@dimen/material_size_8"
+                    android:paddingBottom="@dimen/material_size_8"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:text=""
+                    android:textColor="@color/matteRed"
+                    android:textSize="18sp"
+                    android:textStyle="normal"
+                    app:layout_constraintBottom_toTopOf="@id/clAddress"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/apbAppBarLayout" />
 
             </com.google.android.material.appbar.AppBarLayout>
         </LinearLayout>
@@ -191,27 +191,68 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvMonth" />
 
-                <TextView
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/tvRenewal"
-                    style="@style/TextAppearance.MaterialComponents.Body1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ellipsize="marquee"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:paddingStart="@dimen/material_size_8"
-                    android:paddingTop="@dimen/material_size_4"
-                    android:paddingEnd="@dimen/material_size_8"
-                    android:paddingBottom="@dimen/material_size_4"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"
-                    android:text="Food Subscription can be renewed every month only for Monthly Subscription"
-                    android:textColor="@color/gray700"
-                    android:textStyle="normal"
+                    android:layout_marginStart="@dimen/material_size_4"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    android:layout_marginEnd="@dimen/material_size_4"
+                    android:layout_marginBottom="@dimen/material_size_16"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/calendarView" />
+                    app:layout_constraintTop_toBottomOf="@id/calendarView">
+
+                    <ImageView
+                        android:id="@+id/ivDelivered"
+                        android:layout_width="@dimen/material_size_16"
+                        android:layout_height="@dimen/material_size_16"
+                        android:background="@drawable/shape_round_rectangle_16"
+                        android:backgroundTint="@color/green_base"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvDelivered"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:text="Selected Dates"
+                        android:textColor="@color/gray700"
+                        android:textSize="16sp"
+                        android:textStyle="normal"
+                        app:layout_constraintBottom_toBottomOf="@id/ivDelivered"
+                        app:layout_constraintStart_toEndOf="@id/ivDelivered"
+                        app:layout_constraintTop_toTopOf="@id/ivDelivered" />
+
+                    <ImageView
+                        android:id="@+id/ivCancelled"
+                        android:layout_width="@dimen/material_size_16"
+                        android:layout_height="@dimen/material_size_16"
+                        android:layout_marginEnd="@dimen/material_size_4"
+                        android:background="@drawable/shape_round_rectangle_16"
+                        android:backgroundTint="@color/red900"
+                        app:layout_constraintBottom_toBottomOf="@id/ivDelivered"
+                        app:layout_constraintEnd_toStartOf="@id/tvCancelled"
+                        app:layout_constraintTop_toTopOf="@id/ivDelivered" />
+
+                    <TextView
+                        android:id="@+id/tvCancelled"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:text="Delivery Not Available"
+                        android:textColor="@color/gray700"
+                        android:textSize="16sp"
+                        android:textStyle="normal"
+                        app:layout_constraintBottom_toBottomOf="@id/ivCancelled"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.606"
+                        app:layout_constraintStart_toEndOf="@id/tvDelivered"
+                        app:layout_constraintTop_toTopOf="@id/ivCancelled" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
                     android:id="@+id/tvOptions"
@@ -313,7 +354,7 @@
                     android:layout_marginTop="@dimen/material_size_8"
                     android:gravity="start"
                     android:padding="@dimen/material_size_4"
-                    android:text="Include Banana Leaf with food"
+                    android:text="Include Banana Leaf with food (Rs: 5/Serving)"
                     android:textColor="@color/gray700"
                     android:textSize="16sp"
                     app:flow_verticalAlign="center"
@@ -323,11 +364,11 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/cbxLeaf"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    android:orientation="vertical">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/cbxLeaf">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/etlAlternateNumber"
@@ -504,6 +545,7 @@
                                 android:textColorHint="@color/matteRed"
                                 android:textCursorDrawable="@null" />
                         </com.google.android.material.textfield.TextInputLayout>
+
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/etlArea"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -543,24 +585,25 @@
             android:id="@+id/llPlaceOrder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:background="@color/matteRed"
             android:backgroundTint="@color/matteRed"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" >
-        <TextView
-            android:id="@+id/tvPlaceOrder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:background="?android:attr/selectableItemBackground"
-            android:gravity="center"
-            android:padding="@dimen/material_size_16"
-            android:text="GET BOX"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
-    </LinearLayout>
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/tvPlaceOrder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackground"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:gravity="center"
+                android:padding="@dimen/material_size_16"
+                android:text="GET BOX"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

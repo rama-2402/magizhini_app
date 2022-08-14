@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase
 
+import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -216,7 +217,7 @@ class FoodSubscriptionUseCase(
         ammaSpecialsOrder: List<AmmaSpecialOrder>
     ): HashMap<String, String>? = withContext(Dispatchers.IO) {
         return@withContext try {
-            val statusMap: HashMap<String, String> = hashMapOf()
+            var statusMap: HashMap<String, String> = hashMapOf()
             val doc = fireStore
                 .collection(AMMASPECIAL)
                 .document("Status")
@@ -231,6 +232,7 @@ class FoodSubscriptionUseCase(
                     }
                 }
             }
+            Log.e("qwq", "getFoodStatus: $statusMap", )
             statusMap
         } catch (e: Exception) {
             fbRepository.logCrash(
@@ -273,12 +275,24 @@ class FoodSubscriptionUseCase(
         refund: String
     ): Boolean = withContext(Dispatchers.IO) {
         try {
-            fireStore
+            val doc = fireStore
                 .collection(AMMASPECIAL)
                 .document("Status")
                 .collection(SimpleDateFormat("dd-MM-yyyy").format(date))
-                .document(selectedOrder.id)
+
+            if (doc.document(selectedOrder.id).get().await().exists()) {
+                 doc.document(selectedOrder.id)
                 .update("status", "cancel", "refund", refund).await()
+            } else {
+                AmmaSpecialDeliveryStatus(
+                    selectedOrder.id,
+                    "cancel",
+                    refund
+                ).let {
+                    doc.document(it.id).set(it, SetOptions.merge())
+                }
+            }
+
             true
         } catch (e: Exception) {
             fbRepository.logCrash(
@@ -449,6 +463,22 @@ class FoodSubscriptionUseCase(
         } catch (e: Exception) {
             fbRepository.logCrash("ammaspecialOrder: Placing a new order", e.message.toString())
             false
+        }
+    }
+
+    suspend fun getNonDeliveryDays(): MutableList<Long>? = withContext(Dispatchers.IO) {
+        try {
+            val dates = mutableListOf<Long>()
+            fireStore
+                .collection(AMMASPECIAL)
+                .document("Leaves")
+                .get().await().toObject(NonDeliveryDates::class.java)?.let {
+                    dates.addAll(it.dates)
+                }
+            dates
+        } catch (e: Exception) {
+            fbRepository.logCrash("ammaspecialOrder: getting non delivery dates", e.message.toString())
+            null
         }
     }
 

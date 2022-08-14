@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/splashScreenTheme">
         <activity
-            android:name=".FoodSubHistoryActivity"
+            android:name=".ui.foodSubscription.FoodSubHistoryActivity"
             android:exported="false" />
         <activity
             android:name=".ui.foodSubscription.FoodOrderActivity"

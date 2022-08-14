@@ -61,8 +61,8 @@
 
     <!--    Food order options-->
     <string-array name="food_sub_options">
-        <item>Monthly</item>
         <item>One Day</item>
+        <item>Monthly</item>
         <item>Custom</item>
     </string-array>
 

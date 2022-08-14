@@ -45,6 +45,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubscriptionActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.howTo.HowToActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsActivity
@@ -697,7 +698,7 @@ class HomeActivity :
                 R.id.menuSubscriptions -> {
                     lifecycleScope.launch {
                         delay(200)
-                        Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
+                        Intent(this@HomeActivity, FoodSubHistoryActivity::class.java).also {
                             startActivity(it)
                         }
                     }

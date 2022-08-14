@@ -41,3 +41,7 @@ data class AmmaSpecialDeliveryStatus(
     var status: String = "",
     var refund: String = "no"
 )
+
+data class NonDeliveryDates(
+    val dates: ArrayList<Long> = arrayListOf()
+)

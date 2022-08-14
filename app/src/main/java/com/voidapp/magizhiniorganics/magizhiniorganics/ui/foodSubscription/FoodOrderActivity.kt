@@ -1,14 +1,17 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -41,6 +44,7 @@ class FoodOrderActivity :
     BaseActivity(),
     PaymentResultListener,
     KodeinAware {
+
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityFoodOrderBinding
     private val factory: FoodSubscriptionViewModelFactory by instance()
@@ -136,52 +140,56 @@ class FoodOrderActivity :
             }
             calendarView.setListener(object : CompactCalendarView.CompactCalendarViewListener {
                 override fun onDayClick(dateClicked: Date?) {
-                    if (viewModel.currentSubOption == "month") {
-                        return
-                    }
+
                     val instanceToGetLongDate = Calendar.getInstance()
                     instanceToGetLongDate.time = dateClicked!!
 
-                    val limitTime = if (loop) {
-                        System.currentTimeMillis() - SINGLE_DAY_LONG
-                    } else {
-                        System.currentTimeMillis()
+                    if (viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = instanceToGetLongDate.timeInMillis))) {
+                        showToast(
+                            this@FoodOrderActivity,
+                            "Delivery not available on ${TimeUtil().getCustomDate(dateLong = instanceToGetLongDate.timeInMillis)}"
+                        )
+                        return
                     }
 
-                    if (viewModel.currentSubOption == "custom") {
-                        if (instanceToGetLongDate.timeInMillis > limitTime) {
-                            if (TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Sunday") {
-                                showToast(
-                                    this@FoodOrderActivity,
-                                    "Delivery Not Available on Sundays"
-                                )
-                                return
-                            }
+                    if (
+                        TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Saturday" ||
+                        TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Sunday"
+                    ) {
+                        showToast(
+                            this@FoodOrderActivity,
+                            "Delivery Not Available on Saturdays and Sundays"
+                        )
+                        return
+                    }
+
+                    if (instanceToGetLongDate.timeInMillis < System.currentTimeMillis()) {
+                        showToast(this@FoodOrderActivity, "Delivery only available from tomorrow.")
+                        return
+                    }
+
+                    when (viewModel.currentSubOption) {
+                        "month" -> {
+                            viewModel.selectedEventDates.clear()
+                            calendarView.removeAllEvents()
+                            populateMonthEvents(instanceToGetLongDate.timeInMillis)
+                        }
+                        "custom" -> {
                             if (viewModel.selectedEventDates.contains(instanceToGetLongDate.timeInMillis)) {
                                 removeEvent(instanceToGetLongDate.timeInMillis)
                             } else {
                                 addEvent(instanceToGetLongDate.timeInMillis)
                             }
-                        } else {
-                            showToast(this@FoodOrderActivity, "Please pick a valid date")
                         }
-                    } else {
-                        if (TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Sunday") {
-                            showToast(this@FoodOrderActivity, "Delivery Not Available on Sundays")
-                            return
-                        }
-                        if (viewModel.selectedEventDates.isNotEmpty()) {
-                            removeEvent(viewModel.selectedEventDates[0])
-                        }
-                        viewModel.selectedEventDates.clear()
-                        if (
-                            instanceToGetLongDate.timeInMillis > limitTime
-                        ) {
+                        else -> {
+                            if (viewModel.selectedEventDates.isNotEmpty()) {
+                                removeEvent(viewModel.selectedEventDates[0])
+                            }
+                            viewModel.selectedEventDates.clear()
                             addEvent(instanceToGetLongDate.timeInMillis)
-                        } else {
-                            showToast(this@FoodOrderActivity, "Please pick a valid date")
                         }
                     }
+                    populateNonDeliveryDates(viewModel.nonDeliveryDatesLong)
 
                     setPrice()
                 }
@@ -200,14 +208,15 @@ class FoodOrderActivity :
                     calendarView.removeAllEvents()
                     viewModel.selectedEventDates.clear()
                     viewModel.currentSubOption = when (position) {
-                        0 -> {
-                            populateMonthEvents()
+                        0 -> "single"
+                        1 -> {
+                            populateMonthEvents(System.currentTimeMillis() + SINGLE_DAY_LONG)
                             "month"
                         }
-                        1 -> "single"
                         else -> "custom"
                     }
                     setPrice()
+                    viewModel.getNonDeliveryDays()
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -294,12 +303,12 @@ class FoodOrderActivity :
         binding.apply {
             if (viewModel.currentSubOption == "single" || viewModel.currentSubOption == "custom") {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                        showErrorSnackBar(
-                            "Select delivery dates in the calendar to place order",
-                            true
-                        )
+                    showErrorSnackBar(
+                        "Select delivery dates in the calendar to place order",
+                        true
+                    )
                     return
-                    }
+                }
             }
             when {
                 etAlternateNumber.text.isNullOrEmpty() -> showErrorSnackBar(
@@ -356,7 +365,11 @@ class FoodOrderActivity :
                     it.phNumber
                 ).also { status ->
                     if (!status) {
-                        Toast.makeText(this@FoodOrderActivity,"Error in processing payment. Try Later ", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@FoodOrderActivity,
+                            "Error in processing payment. Try Later ",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -414,10 +427,15 @@ class FoodOrderActivity :
                     hideProgressDialog()
                     populateProfileData(event.userProfile)
                 }
+                is FoodSubscriptionViewModel.UiUpdate.PopulateNonDeliveryDates -> {
+                    populateNonDeliveryDates(event.dates)
+                }
                 is FoodSubscriptionViewModel.UiUpdate.CreateStatusDialog -> {
-                    LoadStatusDialog.newInstance("", "Creating Subscription...", "placingOrder").show(supportFragmentManager,
-                        Constants.LOAD_DIALOG
-                    )
+                    LoadStatusDialog.newInstance("", "Creating Subscription...", "placingOrder")
+                        .show(
+                            supportFragmentManager,
+                            Constants.LOAD_DIALOG
+                        )
                 }
                 is FoodSubscriptionViewModel.UiUpdate.ValidatingTransaction -> {
                     updateLoadStatusDialog(event.message, event.data)
@@ -431,9 +449,17 @@ class FoodOrderActivity :
                 is FoodSubscriptionViewModel.UiUpdate.DismissStatusDialog -> {
                     (supportFragmentManager.findFragmentByTag(Constants.LOAD_DIALOG) as DialogFragment).dismiss()
                     if (event.dismiss) {
-                        showExitSheet(this, "Food Subscription created Successfully! \n\n You can manager your subscriptions in Amma's Special Subscription History page. To open click PROCEED below. ", "purchaseHistory")
+                        showExitSheet(
+                            this,
+                            "Food Subscription created Successfully! \n\n You can manager your subscriptions in Amma's Special Subscription History page. To open click PROCEED below. ",
+                            "purchaseHistory"
+                        )
                     } else {
-                        showExitSheet(this, "Server Error! Something went wrong while creating your subscription. \n \n If Money is already debited, Please contact customer support and the transaction will be reverted in 24 Hours", "cs")
+                        showExitSheet(
+                            this,
+                            "Server Error! Something went wrong while creating your subscription. \n \n If Money is already debited, Please contact customer support and the transaction will be reverted in 24 Hours",
+                            "cs"
+                        )
                     }
                 }
                 is FoodSubscriptionViewModel.UiUpdate.Empty -> return@observe
@@ -443,10 +469,48 @@ class FoodOrderActivity :
         }
     }
 
+    private fun populateNonDeliveryDates(dates: List<Long>?) {
+        dates?.forEach {
+            Event(
+                resources.getColor(
+                    R.color.errorRed,
+                    theme
+                ), it, "leave"
+            ).let { event ->
+                binding.calendarView.addEvent(event)
+            }
+        }
+
+        var today: Long = System.currentTimeMillis()
+        var monthNum = 0
+        while (true) {
+            today += SINGLE_DAY_LONG
+            if (TimeUtil().getDayName(dateLong = today) == "Saturday" ||
+                TimeUtil().getDayName(dateLong = today) == "Sunday"
+            ) {
+
+                Event(
+                    resources.getColor(
+                        R.color.errorRed,
+                        theme
+                    ), today, "leave"
+                ).let { event ->
+                    binding.calendarView.addEvent(event)
+                }
+            }
+            if (TimeUtil().getDateNumber(dateLong = today) == "01") {
+                monthNum += 1
+            }
+            if (monthNum == 2) {
+                return
+            }
+        }
+    }
+
     private fun removeEvent(time: Long) {
         Event(
             resources.getColor(
-                R.color.matteRed,
+                R.color.green_base,
                 theme
             ), time, "date"
         ).let { event ->
@@ -458,7 +522,7 @@ class FoodOrderActivity :
     private fun addEvent(time: Long) {
         Event(
             resources.getColor(
-                R.color.matteRed,
+                R.color.green_base,
                 theme
             ), time, "date"
         ).let { event ->
@@ -493,23 +557,22 @@ class FoodOrderActivity :
         }
     }
 
-    private fun populateMonthEvents() {
-        var currentDate: Long = System.currentTimeMillis()
-        var prevDay = TimeUtil().getDateNumber(currentDate)
-        if (loop) {
-            currentDate -= SINGLE_DAY_LONG
-        }
-        while (true) {
-            currentDate += SINGLE_DAY_LONG
-            if (prevDay > TimeUtil().getDateNumber(currentDate)) {
-                return
-            }
-            prevDay = TimeUtil().getDateNumber(currentDate)
+    private fun populateMonthEvents(startDate: Long) {
+        var dayCount = 1
+        var currentDate: Long = startDate
+
+        while (dayCount <= 30) {
             if (
-                TimeUtil().getDayName(currentDate) != "Sunday"
+                TimeUtil().getDayName(currentDate) != "Saturday" &&
+                TimeUtil().getDayName(currentDate) != "Sunday" &&
+                !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
             ) {
                 addEvent(currentDate)
+                viewModel.selectedEventDates.add(currentDate)
             }
+
+            currentDate += SINGLE_DAY_LONG
+            dayCount += 1
         }
     }
 
@@ -523,7 +586,7 @@ class FoodOrderActivity :
                 // There is no minute different between the two, only 8 hours difference. We are not considering Date, So minute will always remain 0
                 val date1: Date =
                     simpleDateFormat.parse(simpleDateFormat.format(System.currentTimeMillis()))
-                val date2: Date = simpleDateFormat.parse("08:30 AM")
+                val date2: Date = simpleDateFormat.parse("11:59 PM")
 
                 difference = (date2.time - date1.time) / 1000
                 val hours: Long = difference % (24 * 3600) / 3600 // Calculating Hours
@@ -536,15 +599,15 @@ class FoodOrderActivity :
                         loop = false
                     } else {
                         binding.tvTimeLimit.text =
-                            "Place order in the next $hours Hour $minute Minutes to get delivery starting from today"
+                            "Order Intake for tomorrow is closing in next $hours Hours and $minute Minutes"
                     }
                 }
+                delay(10000)
 //            min =
 //                minute + (hours * 60) // This will be our final minutes. Multiplying by 60 as 1 hour contains 60 mins
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            delay(1000)
         }
     }
 

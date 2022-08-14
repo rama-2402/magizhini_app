@@ -47,6 +47,11 @@ class FoodSubscriptionActivity :
 
     private fun initListeners() {
         binding.apply {
+            ivHistory.setOnClickListener {
+                Intent(this@FoodSubscriptionActivity, FoodOrderActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
