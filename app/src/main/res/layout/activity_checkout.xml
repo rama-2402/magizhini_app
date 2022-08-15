@@ -200,7 +200,6 @@
             android:layout_height="0dp"
             android:elevation="@dimen/material_size_8"
             android:layout_marginTop="@dimen/material_size_4"
-            android:visibility="invisible"
             app:layout_constraintTop_toBottomOf="@id/clAddress"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -364,6 +363,17 @@
                         app:layout_constraintEnd_toStartOf="@id/tvSavingsInDiscountAmt" />
 
                     <TextView
+                        android:id="@+id/tvDisountMinus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="-"
+                        android:textStyle="normal"
+                        android:textColor="@color/gray700"
+                        style="@style/TextAppearance.MaterialComponents.Body1"
+                        android:layout_marginEnd="@dimen/material_size_4"
+                        app:layout_constraintTop_toTopOf="@id/tvSavingsInDiscountAmt"
+                        app:layout_constraintEnd_toStartOf="@id/tvSavingsInDiscountAmt" />
+                    <TextView
                         android:id="@+id/tvSavingsInDiscountAmt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -411,6 +421,30 @@
                         app:layout_constraintTop_toTopOf="@id/tvSavingsInCoupon"
                         app:layout_constraintEnd_toEndOf="parent" />
 
+                    <TextView
+                        android:id="@+id/tvGst"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GST - 5%"
+                        android:textStyle="normal"
+                        android:textColor="@color/gray700"
+                        style="@style/TextAppearance.MaterialComponents.Body1"
+                        android:layout_marginTop="@dimen/material_size_8"
+                        app:layout_constraintTop_toBottomOf="@id/tvSavingsInCoupon"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvGstAmt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0"
+                        android:textColor="@color/gray700"
+                        android:textStyle="normal"
+                        style="@style/TextAppearance.MaterialComponents.Body1"
+                        android:layout_marginEnd="@dimen/material_size_16"
+                        app:layout_constraintTop_toTopOf="@id/tvGst"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
                     <View
                         android:id="@+id/vDivider"
                         android:layout_width="0dp"
@@ -420,7 +454,7 @@
                         android:layout_marginTop="12dp"
                         android:textColor="@color/gray700"
                         app:layout_constraintStart_toStartOf="@id/tvTotalAmt"
-                        app:layout_constraintTop_toBottomOf="@id/tvSavingsInCouponAmt"
+                        app:layout_constraintTop_toBottomOf="@id/tvGstAmt"
                         app:layout_constraintEnd_toEndOf="parent" />
 
                     <TextView

@@ -191,6 +191,7 @@ class FoodSubHistoryActivity :
                                     ?: 0.0
                             }
                             totalPrice *= it.orderCount
+                            totalPrice = (totalPrice * 5)/100
 
                             if (it.leafNeeded) {
                                 totalPrice += 5 * viewModel.selectedEventDates.size
@@ -205,7 +206,7 @@ class FoodSubHistoryActivity :
                                     TimeUtil().getCustomDate(
                                         dateLong = it.endDate
                                     )
-                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: $totalPrice to renew your subscription for the next month. For further queries please contact customer support.",
+                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: $totalPrice (Incl 5% GST) to renew your subscription for the next month. For further queries please contact customer support.",
                                 "RENEW SUBSCRIPTION",
                                 "food",
                                 this
@@ -572,6 +573,5 @@ class FoodSubHistoryActivity :
         }
         super.onBackPressed()
     }
-
 }
 

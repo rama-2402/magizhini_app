@@ -210,6 +210,7 @@ class QuickOrderViewModel(
                 cartPrice += (item.price * item.quantity)
             }
         }
+        cartPrice += (cartPrice * 5)/100
         return cartPrice
     }
 

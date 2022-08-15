@@ -47,6 +47,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 class PurchaseHistoryActivity :
     BaseActivity(),
@@ -456,28 +457,43 @@ class PurchaseHistoryActivity :
             color = ContextCompat.getColor(this@PurchaseHistoryActivity, R.color.black)
         }
 
-        canvas.drawText(order.address.userId, 2400f, topStartText, paintTitleText)   //ls - 300
+        val namesX = 2400f
+
+        var reminder = ""
+        val lineOne = if (order.address.addressLineOne.length > 50) {
+            reminder = order.address.addressLineOne.substring(50, order.address.addressLineOne.length)
+            "${order.address.addressLineOne.substring(0, 50)} -"
+        } else {
+            order.address.addressLineOne
+        }
+        val lineTwo = if (reminder != "") {
+            "- $reminder, ${order.address.addressLineTwo}"
+        } else {
+            order.address.addressLineTwo
+        }
+
+        canvas.drawText(order.address.userId, namesX, topStartText, paintTitleText)   //ls - 300
         canvas.drawText(
-            order.address.addressLineOne,
-            2400f,
+            lineOne,
+            namesX,
             topStartText + normaLineSpace,
             paintNormalText
         ) //400
         canvas.drawText(
-            order.address.addressLineTwo,
-            2400f,
+            lineTwo,
+            namesX,
             topStartText + (2 * normaLineSpace),
             paintNormalText
         )  //500
         canvas.drawText(
             order.address.LocationCode,
-            2400f,
+            namesX,
             topStartText + (3 * normaLineSpace),
             paintNormalText
         ) //600
         canvas.drawText(
             "Ph: $phoneNumber",
-            2400f,
+            namesX,
             topStartText + (4 * normaLineSpace),
             paintNormalText
         ) //700
@@ -487,38 +503,47 @@ class PurchaseHistoryActivity :
 
         paintTitleText.textAlign = Paint.Align.LEFT
         paintNormalText.textAlign = Paint.Align.LEFT
-        canvas.drawText("MAGIZHINI ORGANICS", 40f, 1200f, paintTitleText)
-        canvas.drawText("GST NO: - ", 40f, 1300f, paintNormalText)
-        canvas.drawText("Mail: magizhiniorganics2018@gmail.com", 40f, 1400f, paintNormalText)
-        canvas.drawText("Mobile: 72998 27393", 40f, 1500f, paintNormalText)
+
+        val companyY = 1200f
+
+        canvas.drawText("MAGIZHINI ORGANICS", 40f, companyY, paintTitleText)
+        canvas.drawText("No:26/28, Thirupaacheeswarar Street,", 40f, companyY+100, paintNormalText)
+        canvas.drawText("Ayanavaram, Chennai - 23.", 40f, companyY+200, paintNormalText)
+        canvas.drawText("GST NO: - 33CDKPG6363B1ZU", 40f, companyY+300, paintNormalText)
+        canvas.drawText("Mail: magizhiniorganics2018@gmail.com", 40f, companyY+400, paintNormalText)
+        canvas.drawText("Mobile: 72998 27393", 40f, companyY+500, paintNormalText)
+
+        val ogPrice = (((order.price * 100)/105) * 100.0).roundToInt() / 100.0
 
         paintNormalText.textAlign = Paint.Align.RIGHT
-        canvas.drawText("Order ID: ${order.orderId}", 2400f, 1200f, paintNormalText)
-        canvas.drawText("Date: ${order.purchaseDate}", 2400f, 1300f, paintNormalText)
-        canvas.drawText("Payment: ${order.paymentMethod}", 2400f, 1400f, paintNormalText)
-        canvas.drawText("Amount(Incl GST): Rs ${order.price}", 2400f, 1500f, paintNormalText)
+        canvas.drawText("Order ID: ${order.orderId}", namesX, companyY, paintNormalText)
+        canvas.drawText("Date: ${order.purchaseDate}", namesX, companyY+100, paintNormalText)
+        canvas.drawText("Payment: ${order.paymentMethod}", namesX, companyY+200, paintNormalText)
+        canvas.drawText("Bill Price: Rs ${ogPrice}", namesX, companyY+300, paintNormalText)
+        canvas.drawText("GST 5%: Rs ${((order.price - ogPrice) * 100.0).roundToInt() / 100.0}", namesX, companyY+400, paintNormalText)
+        canvas.drawText("Total Bill: Rs ${(order.price * 100.0).roundToInt() / 100.0}", namesX, companyY+500, paintNormalText)
 
         paintNormalText.style = Paint.Style.STROKE
         paintNormalText.strokeWidth = 2f
-        canvas.drawRect(20f, 1600f, (pgWidth - 40).toFloat(), 860f, paintNormalText)
-        canvas.drawRect(20f, 1650f, (pgWidth - 40).toFloat(), 1800f, paintNormalText)
+        canvas.drawRect(20f, 1800f, (pgWidth - 40).toFloat(), 860f, paintNormalText)
+        canvas.drawRect(20f, 1850f, (pgWidth - 40).toFloat(), 2000f, paintNormalText)
 
         with(paintNormalText) {
             textAlign = Paint.Align.LEFT
             style = Paint.Style.FILL
         }
-        canvas.drawText("Sl.No.", 80f, 1750f, paintNormalText) //40f
-        canvas.drawText("Product Name", 600f, 1750f, paintNormalText)   //300f
-        canvas.drawText("Price", 1350f, 1750f, paintNormalText) //1300f
-        canvas.drawText("Qty", 1800f, 1750f, paintNormalText)   //1650f
-        canvas.drawText("Total", 2160f, 1750f, paintNormalText) //2100f
+        canvas.drawText("Sl.No.", 80f, 1950f, paintNormalText) //40f
+        canvas.drawText("Product Name", 600f, 1950f, paintNormalText)   //300f
+        canvas.drawText("Price", 1350f, 1950f, paintNormalText) //1300f
+        canvas.drawText("Qty", 1800f, 1950f, paintNormalText)   //1650f
+        canvas.drawText("Total", 2160f, 1950f, paintNormalText) //2100f
 
-        canvas.drawLine(280f, 1670f, 280f, 1775f, paintNormalText)
-        canvas.drawLine(1280f, 1670f, 1280f, 1775f, paintNormalText)
-        canvas.drawLine(1700f, 1670f, 1700f, 1775f, paintNormalText)
-        canvas.drawLine(2000f, 1670f, 2000f, 1775f, paintNormalText)
+        canvas.drawLine(280f, 1870f, 280f, 1975f, paintNormalText)
+        canvas.drawLine(1280f, 1870f, 1280f, 1975f, paintNormalText)
+        canvas.drawLine(1700f, 1870f, 1700f, 1975f, paintNormalText)
+        canvas.drawLine(2000f, 1870f, 2000f, 1975f, paintNormalText)
 
-        var startHeight = 1750f   //margin from top of the page i.e starting position of the line
+        var startHeight = 1950f   //margin from top of the page i.e starting position of the line
         val difference = 200f   //line spacing between each distinct value of lines
         var lineNumbers = 0f    //number of word wrapped lines of the content from the same value
         var lastEndingHeight = 0f
@@ -628,7 +653,6 @@ class PurchaseHistoryActivity :
             }
             prodNames.removeAt(0)
             if (lastEndingHeight >= pgHeight - 400f && prodNames.isNotEmpty()) {
-                Log.e("TAG", "createPDF: move 2")
                 canvas.drawBitmap(scaledBitmap, 40f, 50f, paintBmp)
                 paintNormalText.textAlign = Paint.Align.LEFT
                 canvas.drawText(
@@ -641,7 +665,6 @@ class PurchaseHistoryActivity :
                 otherPages(prodNames, pdfDocument, 2, serialNo + 1)
                 break
             } else if (prodNames.isEmpty()) {
-                Log.e("TAG", "createPDF: save")
                 canvas.drawBitmap(scaledBitmap, 40f, 50f, paintBmp)
                 paintNormalText.textAlign = Paint.Align.LEFT
                 canvas.drawText(

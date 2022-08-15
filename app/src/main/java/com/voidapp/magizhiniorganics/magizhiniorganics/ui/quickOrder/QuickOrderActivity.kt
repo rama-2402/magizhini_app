@@ -984,7 +984,7 @@ class QuickOrderActivity :
                         checkoutText.text = "PURCHASE HISTORY"
                     } else {
                         checkoutText.setTextAnimation(
-                            "Rs: ${viewModel.couponAppliedPrice ?: viewModel.getTotalCartPrice()} + ${viewModel.getDeliveryCharge()}",
+                            "Rs: ${viewModel.couponAppliedPrice ?: viewModel.getTotalCartPrice() } + ${viewModel.getDeliveryCharge()} (Incl 5% GST)",
                             200
                         )
                         if (viewModel.quickOrder?.cart?.isNotEmpty() == true) {

@@ -542,8 +542,10 @@ class FoodOrderActivity :
             totalPrice += 5 * viewModel.selectedEventDates.size
         }
 
+        totalPrice += (totalPrice * 5)/100
+
         viewModel.totalPrice = totalPrice
-        binding.tvPlaceOrder.setTextAnimation("Order Box (Rs: $totalPrice)")
+        binding.tvPlaceOrder.setTextAnimation("Order Box for Rs: $totalPrice (Incl 5% GST)")
     }
 
     private fun populateProfileData(userProfile: UserProfileEntity) {

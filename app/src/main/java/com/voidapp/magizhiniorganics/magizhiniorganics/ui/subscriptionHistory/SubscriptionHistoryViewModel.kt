@@ -342,11 +342,12 @@ class SubscriptionHistoryViewModel(
                     return@withContext 0f
                 }
 
-                val estimateAmount = when(sub.subType) {
+                var estimateAmount = when(sub.subType) {
                     CUSTOM_DAYS -> (it.variants[variantPosition].variantPrice * updatedCustomDaysForSubRenewal).toFloat()
                     ALTERNATE_DAYS -> (it.variants[variantPosition].variantPrice * 15).toFloat()
                     else -> (it.variants[variantPosition].variantPrice * 30).toFloat()
                 }
+                estimateAmount += (estimateAmount * 5) / 100
                 return@withContext estimateAmount
             } else {
                 return@withContext 0f

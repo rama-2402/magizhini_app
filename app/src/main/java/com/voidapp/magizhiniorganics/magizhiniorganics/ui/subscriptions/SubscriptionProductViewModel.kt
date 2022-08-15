@@ -292,11 +292,13 @@ class SubscriptionProductViewModel(
 
     suspend fun getEstimateAmount(subTypePosition: Int, selectedVariantPosition: Int): Double = withContext(Dispatchers.Default) {
         product?.let {
-            return@withContext when(subTypePosition) {
+            var estimate = when(subTypePosition) {
                 0 -> it.variants[selectedVariantPosition].variantPrice * 30
                 1 -> it.variants[selectedVariantPosition].variantPrice * 15
                 else -> it.variants[selectedVariantPosition].variantPrice * (30 - subCancelledDates.size)
             }
+            estimate += (estimate * 5)/100
+            return@withContext estimate
         } ?: 0.0
     }
 

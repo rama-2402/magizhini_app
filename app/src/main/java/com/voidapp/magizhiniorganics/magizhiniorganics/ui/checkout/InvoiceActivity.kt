@@ -568,13 +568,14 @@ class InvoiceActivity :
             tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
             tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0f}"
             val totalPrice = cartPrice - (viewModel.couponPrice ?: 0f)
+            tvGstAmt.text = "${(totalPrice * 5)/100}"
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
                 viewModel.getDeliveryCharge()
                 tvTotalAmt.setTextAnimation(totalPrice.toString())
             } else {
                 tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
-                tvTotalAmt.setTextAnimation("${totalPrice + tvDeliveryChargeAmt.text.toString().toFloat()}")
+                tvTotalAmt.setTextAnimation("${totalPrice + tvDeliveryChargeAmt.text.toString().toFloat() + tvGstAmt.text.toString().toFloat()}")
             }
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 checkoutText.setTextAnimation("Rs: $cartPrice")

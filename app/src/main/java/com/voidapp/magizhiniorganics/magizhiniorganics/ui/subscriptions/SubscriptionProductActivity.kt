@@ -327,18 +327,18 @@ class SubscriptionProductActivity :
                 when(selectedSubsType) {
                     0 -> {
                         tvEstimate.setTextAnimation("(30 days cycle)")
-                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * 30}")
+                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * 30} + 5% GST")
                         viewModel.customSubDays.clear()
                     }
                     1 -> {
                         tvEstimate.setTextAnimation("(15/30 days cycle)")
-                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * 15}")
+                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * 15} + 5% GST")
                         viewModel.customSubDays.clear()
                     }
                     2 -> {
                         val deliverableDates = 30 - viewModel.subCancelledDates.size
                         tvEstimate.setTextAnimation("($deliverableDates/30 days cycle)")
-                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * deliverableDates}")
+                        tvEstimateAmount.setTextAnimation("Rs: ${viewModel.product!!.variants[selectedVariantPosition].variantPrice * deliverableDates} + 5% GST")
                     }
                 }
             }
