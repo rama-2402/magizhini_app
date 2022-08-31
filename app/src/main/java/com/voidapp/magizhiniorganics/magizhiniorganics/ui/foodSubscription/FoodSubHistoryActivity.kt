@@ -156,7 +156,6 @@ class FoodSubHistoryActivity :
 
         binding.tvMonth.text = SimpleDateFormat("MMMM - yyyy").format(date)
 
-
         viewModel.userID =
             SharedPref(this).getData(USER_ID, STRING, "").toString()
         viewModel.getAmmaSpecialsOrderDetails(date)

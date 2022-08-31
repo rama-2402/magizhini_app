@@ -108,10 +108,10 @@
         <entry key="app/src/main/res/layout/activity_contact_us.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_conversation.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_dish.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/activity_food_order.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/activity_food_order.xml" value="0.2388888888888889" />
         <entry key="app/src/main/res/layout/activity_food_sub_history.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/activity_food_subscription.xml" value="0.5364583333333334" />
-        <entry key="app/src/main/res/layout/activity_home.xml" value="0.38736367055283943" />
+        <entry key="app/src/main/res/layout/activity_food_subscription.xml" value="0.22279792746113988" />
+        <entry key="app/src/main/res/layout/activity_home.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_how_to.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_maps.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_new_partner.xml" value="0.5" />
@@ -123,7 +123,7 @@
         <entry key="app/src/main/res/layout/activity_purchase_history.xml" value="0.4296577946768061" />
         <entry key="app/src/main/res/layout/activity_quick_order.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_shopping_main.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_subscription_history.xml" value="0.44880546075085326" />
         <entry key="app/src/main/res/layout/activity_subscription_product.xml" value="0.4321223709369025" />
@@ -144,7 +144,7 @@
         <entry key="app/src/main/res/layout/dialog_calendar_filter.xml" value="0.5395833333333333" />
         <entry key="app/src/main/res/layout/dialog_custom_sub_days.xml" value="0.5395833333333333" />
         <entry key="app/src/main/res/layout/dialog_data_picker.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/dialog_delivery_out_of_service.xml" value="0.534375" />
+        <entry key="app/src/main/res/layout/dialog_delivery_out_of_service.xml" value="0.25996533795493937" />
         <entry key="app/src/main/res/layout/dialog_loading.xml" value="0.46648550724637683" />
         <entry key="app/src/main/res/layout/dialog_referral.xml" value="0.5421875" />
         <entry key="app/src/main/res/layout/dialog_subscription_details.xml" value="0.5421875" />

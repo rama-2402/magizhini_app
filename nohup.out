@@ -1,0 +1,24 @@
+mpv 0.34.1 Copyright © 2000-2021 mpv/MPlayer/mplayer2 projects
+ built on UNKNOWN
+FFmpeg library versions:
+   libavutil       56.70.100
+   libavcodec      58.134.100
+   libavformat     58.76.100
+   libswscale      5.9.100
+   libavfilter     7.110.100
+   libswresample   3.9.100
+FFmpeg version: 4.4.2-0ubuntu0.22.04.1
+
+Usage:   mpv [options] [url|path/]filename
+
+Basic options:
+ --start=<time>    seek to given (percent, seconds, or hh:mm:ss) position
+ --no-audio        do not play sound
+ --no-video        do not play video
+ --fs              fullscreen playback
+ --sub-file=<file> specify subtitle file to use
+ --playlist=<file> specify playlist file
+
+ --list-options    list all mpv options
+ --h=<string>      print options which contain the given string in their name
+

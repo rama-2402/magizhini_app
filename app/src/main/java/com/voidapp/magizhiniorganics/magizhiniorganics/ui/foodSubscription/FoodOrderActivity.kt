@@ -389,7 +389,6 @@ class FoodOrderActivity :
     private fun generateOrderDetailsMap(): HashMap<String, Any> {
         val orderDetailsMap: HashMap<String, Any> = hashMapOf()
         binding.apply {
-//                showProgressDialog(true)
             orderDetailsMap["start"] = viewModel.selectedEventDates.min()
             orderDetailsMap["end"] = viewModel.selectedEventDates.max()
             orderDetailsMap["leaf"] = cbxLeaf.isChecked
@@ -399,7 +398,6 @@ class FoodOrderActivity :
             orderDetailsMap["two"] = etAddressTwo.text.toString().trim()
             orderDetailsMap["city"] = etCity.text.toString().trim()
             orderDetailsMap["code"] = etArea.text.toString().trim()
-//                viewModel.placeOrder(orderDetailsMap)
         }
         return orderDetailsMap
     }

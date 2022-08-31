@@ -114,7 +114,6 @@ class DishViewModel(
             _status.value = NetworkResult.Loading("")
         }
         if (uri == null) {
-            Log.e("qw", "upsertProductReview: no img", )
             uploadReviewToFirebase(review)
         } else {
             val imageUrl = fbRepository.uploadImage(

@@ -7,6 +7,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.toObject
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADMINID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_DISHES
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.AMMASPECIAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BANNER
@@ -186,6 +187,13 @@ class FoodSubscriptionUseCase(
                     transactionReason = "AMMA'S SPECIAL ${ammaSpecialsOrder.orderType} FOOD Subscription"
                 ).let { return@async fbRepository.createGlobalTransactionEntry(it) }
             }
+            PushNotificationUseCase(fbRepository).sendPushNotification(
+                ADMINID,
+                "Amma's Special New subscription received",
+                "${ammaSpecialsOrder.userName} has subscribed to ${ammaSpecialsOrder.orderType} subscription till ${ammaSpecialsOrder.endDate} and paid ${ammaSpecialsOrder.price}. Please follow up this new order",
+                ""
+            )
+
             updateStore.await() &&
                     createGlobalTransactionEntry.await()
         } catch (e: Exception) {
@@ -232,7 +240,6 @@ class FoodSubscriptionUseCase(
                     }
                 }
             }
-            Log.e("qwq", "getFoodStatus: $statusMap", )
             statusMap
         } catch (e: Exception) {
             fbRepository.logCrash(
@@ -281,8 +288,8 @@ class FoodSubscriptionUseCase(
                 .collection(SimpleDateFormat("dd-MM-yyyy").format(date))
 
             if (doc.document(selectedOrder.id).get().await().exists()) {
-                 doc.document(selectedOrder.id)
-                .update("status", "cancel", "refund", refund).await()
+                doc.document(selectedOrder.id)
+                    .update("status", "cancel", "refund", refund).await()
             } else {
                 AmmaSpecialDeliveryStatus(
                     selectedOrder.id,
@@ -291,6 +298,27 @@ class FoodSubscriptionUseCase(
                 ).let {
                     doc.document(it.id).set(it, SetOptions.merge())
                 }
+            }
+
+            val leaf = if (selectedOrder.leafNeeded) "leaf" else "No leaf"
+            RefundEntry(
+                customerID = selectedOrder.customerID,
+                customerName = selectedOrder.userName,
+                orderID = selectedOrder.id,
+                cancelledDateTime = System.currentTimeMillis(),
+                refundAmount = "${selectedOrder.orderFoodTime} - ${TimeUtil().getDayName(date)} - $leaf",
+                refunded = false,
+                modeOfRefund = "",
+                refundFor = AMMASPECIAL
+            ).let { refundEntry ->
+                fbRepository.addRefundEntry(refundEntry)
+
+                PushNotificationUseCase(fbRepository).sendPushNotification(
+                    ADMINID,
+                    "New Refund requested.",
+                    "A new refund request has been submitted by ${selectedOrder.userName} for his/her Magizhini Food Delivery cancellation. Please check and process the refund",
+                    ""
+                )
             }
 
             true
@@ -325,6 +353,28 @@ class FoodSubscriptionUseCase(
                 .document("Order")
                 .collection("Unsub")
                 .document(selectedOrder.id).set(selectedOrder, SetOptions.merge()).await()
+
+
+            RefundEntry(
+                customerID = selectedOrder.customerID,
+                customerName = selectedOrder.userName,
+                orderID = selectedOrder.id,
+                cancelledDateTime = System.currentTimeMillis(),
+                refundAmount = "Amma's Special Subscription ID: ${selectedOrder.id} by ${selectedOrder.userName} cancelled subscription",
+                refunded = false,
+                modeOfRefund = "",
+                refundFor = AMMASPECIAL
+            ).let { refundEntry ->
+                fbRepository.addRefundEntry(refundEntry)
+
+                PushNotificationUseCase(fbRepository).sendPushNotification(
+                    ADMINID,
+                    "New Refund requested.",
+                    "Amma's Special Subscription ID: ${selectedOrder.id} by ${selectedOrder.userName} has cancelled subscription and has requested refund. Please check and process the refund",
+                    ""
+                )
+            }
+
             true
         } catch (e: Exception) {
             fbRepository.logCrash(
@@ -458,6 +508,13 @@ class FoodSubscriptionUseCase(
                     transactionReason = "AMMA'S SPECIAL ${ammaSpecialsOrder.orderType} FOOD Subscription Renewal"
                 ).let { return@async fbRepository.createGlobalTransactionEntry(it) }
             }
+            PushNotificationUseCase(fbRepository).sendPushNotification(
+                ADMINID,
+                "Amma's Special subscription renewed",
+                "${ammaSpecialsOrder.userName} has renewd their food subscription till ${ammaSpecialsOrder.endDate} and paid ${ammaSpecialsOrder.price}",
+                ""
+            )
+
             updateStore.await() &&
                     createGlobalTransactionEntry.await()
         } catch (e: Exception) {
@@ -477,7 +534,10 @@ class FoodSubscriptionUseCase(
                 }
             dates
         } catch (e: Exception) {
-            fbRepository.logCrash("ammaspecialOrder: getting non delivery dates", e.message.toString())
+            fbRepository.logCrash(
+                "ammaspecialOrder: getting non delivery dates",
+                e.message.toString()
+            )
             null
         }
     }

@@ -79,6 +79,7 @@ class FirestoreRepository (
     suspend fun createWallet(wallet: Wallet) = firestore.createWallet(wallet)
     suspend fun getReferralDetails(userID: String): ReferralBonus? = firestore.getReferralDetails(userID)
     suspend fun getWalletAmount(id: String): Float = firestore.getWalletAmount(id)
+    suspend fun addRefundEntry(refundEntry: RefundEntry): String? = firestore.addRefundEntry(refundEntry)
 
     //review listener
     suspend fun productReviewsListener(id: String, viewModel: ViewModel) = firestore.productReviewsListener(id, viewModel)

@@ -17,6 +17,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.SplashActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.AMMASPECIAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BOOLEAN
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CUSTOMER_SUPPORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_PAGE
@@ -50,6 +51,12 @@ class FirebaseService : FirebaseMessagingService() {
             SUB_HISTORY_PAGE -> {
                 val intent = Intent(this, SplashActivity::class.java).also {
                     it.putExtra("navigate", SUB_HISTORY_PAGE)
+                }
+                intent
+            }
+            AMMASPECIAL -> {
+                val intent = Intent(this, SplashActivity::class.java).also {
+                    it.putExtra("navigate", AMMASPECIAL)
                 }
                 intent
             }

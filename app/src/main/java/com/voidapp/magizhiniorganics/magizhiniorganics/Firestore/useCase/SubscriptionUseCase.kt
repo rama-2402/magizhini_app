@@ -5,6 +5,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Subscription
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TransactionHistory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADMINID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
@@ -32,6 +33,7 @@ class SubscriptionUseCase(
         flow<NetworkResult> {
             try {
                 emit(NetworkResult.Success("validating", "Creating Subscription..."))
+
                 if (placeSubscription(subscription, userName, transactionID)) {
                     delay(1000)
                     emit(NetworkResult.Success("placed", null))
@@ -115,6 +117,12 @@ class SubscriptionUseCase(
                         "Thanks for Subscribing to our product ${subscription.productName} - ${subscription.variantName} starting from ${TimeUtil().getCustomDate(dateLong = subscription.startDate)}. You can manage your subscriptions from Subscription History Page",
                         Constants.SUB_HISTORY_PAGE
                     )
+                    PushNotificationUseCase(fbRepository).sendPushNotification(
+                    ADMINID,
+                    "You have a new product subscription",
+                    "${subscription.address.userId} has now made a new ${subscription.subType} subscription to ${subscription.productName} starting from ${TimeUtil().getCustomDate(dateLong = subscription.startDate)} to ${TimeUtil().getCustomDate(dateLong = subscription.endDate)}. Please follow up the new subscription.",
+                    ""
+                )
                     true
                 }
                 is NetworkResult.Failed -> false

@@ -515,6 +515,24 @@ class Firestore(
         }
     }
 
+    suspend fun addRefundEntry(refundEntry: RefundEntry): String? = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val doc = mFireStore.collection(WALLET)
+                .document("Refund")
+                .collection(refundEntry.customerID)
+
+            if (refundEntry.id == "") {
+                refundEntry.id = doc.document().id
+            }
+            doc.document(refundEntry.id).set(refundEntry, SetOptions.merge()).await()
+            ""
+        } catch (e: Exception) {
+            e.message?.let { logCrash("firestore: upserting the refundEntry", it) }
+            null
+        }
+    }
+
+
     //live update of the limited items
     suspend fun getLimitedItems(viewModel: ShoppingMainViewModel) = withContext(Dispatchers.IO) {
         try {

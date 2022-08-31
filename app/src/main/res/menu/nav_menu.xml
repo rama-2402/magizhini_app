@@ -27,9 +27,9 @@
         android:title="SUBSCRIPTIONS" />
 
     <item
-        android:id="@+id/menuQuickOrder"
-        android:icon="@drawable/ic_attach_picture"
-        android:title="QUICK ORDER" />
+        android:id="@+id/menuAmmaspecial"
+        android:icon="@drawable/ic_food"
+        android:title="AMMA'S SPECIAL" />
 
     <item
         android:id="@+id/menuCWM"

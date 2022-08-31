@@ -8,6 +8,9 @@ object Constants {
     //database
     const val DATABASE: String = "UserDatabase.db"
 
+    //store user ID
+    const val ADMINID: String ="6nd6FEUYGpTZa3ej18CGjHkQnWr1"
+
     //permission request codes
     const val PICK_IMAGE_REQUEST_CODE: Int = 1
     const val AUDIO_PERMISSION_CODE = 2

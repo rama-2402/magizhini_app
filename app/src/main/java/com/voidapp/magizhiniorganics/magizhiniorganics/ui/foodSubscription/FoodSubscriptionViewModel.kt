@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.ArrayList
+
 
 class FoodSubscriptionViewModel(
     private val fbRepository: FirestoreRepository,
@@ -195,6 +195,10 @@ class FoodSubscriptionViewModel(
     }
 
     fun placeOrderOnlinePayment(orderDetailsMap: HashMap<String, Any>) = viewModelScope.launch {
+        val deliveryDatesString = mutableListOf<String>()
+        selectedEventDates.forEach {
+            deliveryDatesString.add(TimeUtil().getCustomDate(dateLong = it))
+        }
         userProfile?.let { profile ->
             AmmaSpecialOrder(
                 id = "",
@@ -210,10 +214,11 @@ class FoodSubscriptionViewModel(
                 code = orderDetailsMap["code"].toString(),
                 phoneNumber = orderDetailsMap["phoneNumber"].toString(),
                 mailID = orderDetailsMap["mailID"].toString(),
+                orderFoodTime = arrayListOf("lunch"),
                 leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
                 orderType = currentSubOption,
                 orderCount = currentCountOption,
-                deliveryDates = selectedEventDates as ArrayList<Long>
+                deliveryDates = deliveryDatesString as ArrayList<String>
             ).let {
                 _uiUpdate.value = UiUpdate.CreateStatusDialog(null, null)
                 foodSubscriptionUseCase.placeFoodSubscriptionOnlinePayment(
@@ -279,6 +284,10 @@ class FoodSubscriptionViewModel(
     }
 
     fun placeOrderWalletPayment(orderDetailsMap: HashMap<String, Any>) = viewModelScope.launch {
+        val deliveryDatesString = mutableListOf<String>()
+        selectedEventDates.forEach {
+            deliveryDatesString.add(TimeUtil().getCustomDate(dateLong = it))
+        }
         userProfile?.let { profile ->
             AmmaSpecialOrder(
                 id = "",
@@ -294,10 +303,11 @@ class FoodSubscriptionViewModel(
                 code = orderDetailsMap["code"].toString(),
                 phoneNumber = orderDetailsMap["phoneNumber"].toString(),
                 mailID = orderDetailsMap["mailID"].toString(),
+                orderFoodTime = arrayListOf("lunch"),
                 leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
                 orderType = currentSubOption,
                 orderCount = currentCountOption,
-                deliveryDates = selectedEventDates as ArrayList<Long>
+                deliveryDates = deliveryDatesString as ArrayList<String>
             ).let {
                 _uiUpdate.value = UiUpdate.CreateStatusDialog(null, null)
                 foodSubscriptionUseCase.placeFoodSubscriptionWithWallet(
@@ -459,8 +469,10 @@ class FoodSubscriptionViewModel(
 
     private fun getRenewedSubDetails(order: AmmaSpecialOrder): AmmaSpecialOrder {
         order.deliveryDates.clear()
-        order.deliveryDates.addAll(selectedEventDates)
-        order.endDate = order.deliveryDates.max()
+        selectedEventDates.forEach {
+            order.deliveryDates.add(TimeUtil().getCustomDate(dateLong = it))
+        }
+        order.endDate = selectedEventDates.max()
         return order
     }
 

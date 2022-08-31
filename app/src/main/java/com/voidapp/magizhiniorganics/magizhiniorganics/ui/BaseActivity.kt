@@ -382,7 +382,7 @@ open class BaseActivity : AppCompatActivity() {
                 is HomeActivity -> {
                     when(data) {
                         "business" -> activity.addNewPartnerAccount()
-                        else -> activity.showReferralOptions()
+//                        else -> activity.showReferralOptions()
                     }
                 }
             }

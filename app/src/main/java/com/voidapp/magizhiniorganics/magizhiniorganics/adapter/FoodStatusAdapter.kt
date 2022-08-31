@@ -43,7 +43,8 @@ class FoodStatusAdapter (
             tvOrderStatus.text = when(orderStatusMap[order.id]) {
                 "preparing" -> "Manual Quality check for all ingredients are complete and sent for cooking"
                 "cooking" -> "Your Food is being cooked right now"
-                "ready" -> "Your Food is packed and out for delivery"
+                "ready" -> "Your Food is packed and ready"
+                "delivery" -> "Your Food is out for delivery. Have a happy meal :)"
                 "success" -> "Your order has been delivered successfully"
                 "cancel" -> {
                     btnSend.visibility = View.GONE

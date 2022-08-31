@@ -45,6 +45,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.AllCWMActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubscriptionActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.howTo.HowToActivity
@@ -58,6 +60,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.Su
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.AMMASPECIAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CWM_PAGE
@@ -98,13 +101,12 @@ class HomeActivity :
     PartnersAdapter.PartnersItemClickListener,
     BestSellersAdapter.BestSellerItemClickListener,
     CategoryHomeAdapter.CategoryItemClickListener,
-    HomeSpecialsAdapter.HomeSpecialsItemClickListener
+    HomeSpecialsAdapter.HomeSpecialsItemClickListener,
+        CustomAlertClickListener
 {
-    //DI Injection with kodein
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
 
-    //initializing the viewModel and binding for activity
     private lateinit var viewModel: HomeViewModel
     private lateinit var binding: ActivityHomeBinding
 
@@ -187,6 +189,11 @@ class HomeActivity :
                 }
             }
             QUICK_ORDER_PAGE -> navigateToQuickOrder()
+            AMMASPECIAL -> {
+                Intent(this@HomeActivity, FoodSubHistoryActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
             CWM_PAGE -> navigateToCWM()
         }
     }
@@ -308,6 +315,7 @@ class HomeActivity :
             QUICK_ORDER -> navigateToQuickOrder()
             CWM -> navigateToCWM()
             WALLET -> navigateToWallet()
+            AMMASPECIAL -> navigateToAmmaSpecial()
             REFERRAL -> showReferralBs(
                 SharedPref(this@HomeActivity).getData(USER_ID, STRING, "").toString()
             )
@@ -576,6 +584,12 @@ class HomeActivity :
         }
     }
 
+    private fun navigateToAmmaSpecial() {
+        Intent(this@HomeActivity, FoodSubscriptionActivity::class.java).also {
+                    startActivity(it)
+                }
+    }
+
     private fun navigateToProductDetails(
         productID: String,
         productName: String,
@@ -698,19 +712,27 @@ class HomeActivity :
                 R.id.menuSubscriptions -> {
                     lifecycleScope.launch {
                         delay(200)
-                        Intent(this@HomeActivity, FoodSubHistoryActivity::class.java).also {
+                        Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
                             startActivity(it)
                         }
                     }
                 }
                 R.id.menuCWM -> navigateToCWM()
-                R.id.menuQuickOrder -> navigateToQuickOrder()
+                R.id.menuAmmaspecial -> navigateToAmmaSpecial()
                 R.id.menuReferral -> {
                     binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
-                    showExitSheet(
+                    CustomAlertDialog(
                         this,
-                        "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus after their first delivery! Click Proceed to Continue"
-                    )
+                        "Magizhini Referral Program",
+                        "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus after their first delivery! As an added bonus you will be rewarded with 1% of the total bill amount anytime one of your referrals makes a purchase in Magizhini Organics. Click Proceed to Continue",
+                        "continue",
+                        "referral",
+                        this
+                    ).show()
+//                    showExitSheet(
+//                        this,
+//                        "Magizhini Referral Program Offers Customers Referral Bonus Rewards for each successful New Customer using your PHONE NUMBER as Referral Code. Both You and any New Customer using your phone number as Referral ID will received Exciting Referral Bonus after their first delivery! Click Proceed to Continue"
+//                    )
                 }
                 R.id.menuSubDetails -> {
                     binding.dlDrawerLayout.closeDrawer(GravityCompat.START)
@@ -906,6 +928,15 @@ class HomeActivity :
 
     //from categories adapter
     override fun selectedCategory(categoryName: String) {
-        navigateToSelectedCategory(categoryName)
+        if (categoryName.lowercase().contains("amma")) {
+            navigateToAmmaSpecial()
+        } else {
+            navigateToSelectedCategory(categoryName)
+        }
+    }
+
+    //custom alert dialog
+    override fun onClick() {
+        showReferralOptions()
     }
 }

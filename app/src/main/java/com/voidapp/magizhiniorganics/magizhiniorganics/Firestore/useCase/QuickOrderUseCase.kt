@@ -8,6 +8,7 @@ import com.google.firebase.storage.StorageReference
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADMINID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_ESTIMATE_PATH
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PENDING
@@ -108,6 +109,12 @@ class QuickOrderUseCase(
                         .set(it, SetOptions.merge())
                         .await()
 
+                    PushNotificationUseCase(fbRepository).sendPushNotification(
+                        ADMINID,
+                        "New Quick Order Estimate Request",
+                        "${it.customerName} has requested a new Estimate Request for his quick order. Please follow up with his request",
+                        QUICK_ORDER_PAGE
+                    )
 
                     PushNotificationUseCase(fbRepository).sendPushNotification(
                         it.customerID,
@@ -371,6 +378,12 @@ class QuickOrderUseCase(
                 }
                 when (fbRepository.placeOrder(it)) {
                     is NetworkResult.Success -> {
+                        PushNotificationUseCase(fbRepository).sendPushNotification(
+                            ADMINID,
+                            "New order received",
+                            "There is a new order received on Magizhini Store. Please follow up with new order",
+                            ORDER_HISTORY_PAGE
+                        )
                         PushNotificationUseCase(fbRepository).sendPushNotification(
                             it.customerId,
                             "Order Placed",

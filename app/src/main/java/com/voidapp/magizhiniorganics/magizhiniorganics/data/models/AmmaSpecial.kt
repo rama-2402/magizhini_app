@@ -28,11 +28,12 @@ data class AmmaSpecialOrder(
     var code: String = "",
     var phoneNumber: String = "",
     var mailID: String = "",
+    var orderFoodTime: ArrayList<String> = arrayListOf(),
     var orderType: String = "month",
     var orderCount: Int = 1,
     var leafNeeded: Boolean = false,
     var status: String = "success",
-    var deliveryDates: ArrayList<Long> = arrayListOf(),
+    var deliveryDates: ArrayList<String> = arrayListOf(),
     var cancelledDates: ArrayList<Long> = arrayListOf()
 )
 
