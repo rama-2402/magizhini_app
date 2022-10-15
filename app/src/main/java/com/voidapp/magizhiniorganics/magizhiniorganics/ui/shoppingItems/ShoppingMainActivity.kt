@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -16,7 +15,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.databinding.DataBindingUtil.bind
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -34,8 +32,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEnti
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityShoppingMainBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.ItemsBottomSheet
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
@@ -66,7 +67,9 @@ class ShoppingMainActivity :
     BaseActivity(),
     KodeinAware,
     ShoppingMainAdapter.ShoppingMainListener,
-    CategoryHomeAdapter.CategoryItemClickListener {
+    CategoryHomeAdapter.CategoryItemClickListener,
+    CustomAlertClickListener
+{
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityShoppingMainBinding
@@ -363,14 +366,25 @@ class ShoppingMainActivity :
                     binding.svHorizontalChipScroll.fullScroll(View.FOCUS_RIGHT)
                 }
                 R.id.cpFavorites -> {
-                    binding.cpFavorites.also {
-                        it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                    viewModel.profile?.let {
+                         binding.cpFavorites.also {
+                            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
+                        }
+                        showShimmer()
+                        isFiltered = false
+                        binding.tvToolbarTitle.text = "Favorites"
+                        viewModel.getAllFavoritesStatic()
+                    } ?:let {
+                        CustomAlertDialog(
+                            this,
+                            "User Not Signed In",
+                            "You must be signed in with your Google Account to create a list of favorite products. Please click on SIGN IN WITH GOOGLE button to proceed with sign in.",
+                            "Sign In with Google",
+                            "newID",
+                            this
+                        ).show()
                     }
-                    showShimmer()
-                    isFiltered = false
-                    binding.tvToolbarTitle.text = "Favorites"
-                    viewModel.getAllFavoritesStatic()
-                }
+               }
                 R.id.cpDiscounts -> {
                     binding.cpDiscounts.also {
                         it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
@@ -699,6 +713,17 @@ class ShoppingMainActivity :
         binding.cpCategoryFilter.isChecked = true
         viewModel.getAllProductByCategoryStatic(categoryName)
     }
+
+    override fun onClick() {
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "newID")
+            startActivity(it)
+        }
+    }
+
 }
 
 

@@ -28,7 +28,7 @@ class ProfileViewModel (
     var tempFile: File? = null
     var userID: String? = null
     var phoneNumber: String? = null
-    var mailID: String = ""
+    var mailID: String? = null
     var DobLong: Long? = null
     var referralCode: String? = null
     var profilePicUri: Uri? = null
@@ -43,7 +43,7 @@ class ProfileViewModel (
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
     val uiEvent: LiveData<UIEvent> = _uiEvent
 
-    fun getCurrentUserID() = fbRepository.getCurrentUserId()!!
+    fun getCurrentUserID() = fbRepository.getCurrentUserId()
 
     fun setEmptyUiEvent() {
         _uiEvent.value = UIEvent.EmptyUIEvent

@@ -30,10 +30,11 @@ class CheckoutViewModel(
     private val dbRepository: DatabaseRepository,
     private val fbRepository: FirestoreRepository,
     private val quickOrderUseCase: QuickOrderUseCase
-): ViewModel() {
+) : ViewModel() {
 
     var userProfile: UserProfileEntity? = null
     var wallet: Wallet? = null
+    var tempAddress: Address? = null
 
     var currentCoupon: CouponEntity? = null
     var couponPrice: Float? = null
@@ -43,7 +44,7 @@ class CheckoutViewModel(
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
     val clearedProductIDs: MutableList<String> = mutableListOf()
 
-//    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
+    //    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
 //    val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
@@ -53,7 +54,8 @@ class CheckoutViewModel(
     var cwmDish: MutableList<CartEntity> = mutableListOf()
     var isCWMCart: Boolean = false
 
-    private val _status: MutableStateFlow<NetworkResult> = MutableStateFlow<NetworkResult>(NetworkResult.Empty)
+    private val _status: MutableStateFlow<NetworkResult> =
+        MutableStateFlow<NetworkResult>(NetworkResult.Empty)
     val status: StateFlow<NetworkResult> = _status
 
     fun setEmptyUiEvent() {
@@ -69,9 +71,14 @@ class CheckoutViewModel(
             dbRepository.getProfileData()?.let { profile ->
                 withContext(Dispatchers.Main) {
                     userProfile = profile
-                    _uiUpdate.value = UiUpdate.PopulateAddressData(profile.address.map { it.copy() } as MutableList<Address>)
+                    _uiUpdate.value =
+                        UiUpdate.PopulateAddressData(profile.address.map { it.copy() } as MutableList<Address>)
                 }
                 getWallet(profile.id)
+            } ?: let {
+                withContext(Dispatchers.Main) {
+                    _uiUpdate.value = UiUpdate.NoProfileFound
+                }
             }
         } catch (e: IOException) {
             e.message?.let { fbRepository.logCrash("checkout: getting profile from db", it) }
@@ -79,7 +86,7 @@ class CheckoutViewModel(
     }
 
     private fun getWallet(userID: String) = viewModelScope.launch {
-        when(val result = fbRepository.getWallet(userID)) {
+        when (val result = fbRepository.getWallet(userID)) {
             is NetworkResult.Success -> {
                 _uiEvent.value = UIEvent.ProgressBar(false)
                 wallet = result.data as Wallet
@@ -118,7 +125,7 @@ class CheckoutViewModel(
             }
         } catch (e: IOException) {
             withContext(Dispatchers.Main) {
-                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), 0,null, false)
+                _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), 0, null, false)
             }
             e.message?.let {
                 fbRepository.logCrash(
@@ -129,7 +136,7 @@ class CheckoutViewModel(
         }
     }
 
-    fun getAllCartItem(cartItems: MutableList<CartEntity>) = viewModelScope.launch (Dispatchers.IO) {
+    fun getAllCartItem(cartItems: MutableList<CartEntity>) = viewModelScope.launch(Dispatchers.IO) {
         /*
         * we are making two different copies where one copy is passed initially and hard copy is made which is later used for recycler view
         * */
@@ -150,44 +157,46 @@ class CheckoutViewModel(
         }
     }
 
-    fun deleteCartItem(id: Int, productId: String, variant: String, position: Int = 0) = viewModelScope.launch (Dispatchers.IO) {
-        try {
-            if (isCWMCart) {
-                cwmDish.removeAt(position)
-            } else {
-                totalCartItems.removeAt(position)
-                val delete = async { dbRepository.deleteCartItem(id) }
-                val updateProduct = async { updatingTheCartInProduct(productId, variant) }
-                delete.await()
-                updateProduct.await()
+    fun deleteCartItem(id: Int, productId: String, variant: String, position: Int = 0) =
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                if (isCWMCart) {
+                    cwmDish.removeAt(position)
+                } else {
+                    totalCartItems.removeAt(position)
+                    val delete = async { dbRepository.deleteCartItem(id) }
+                    val updateProduct = async { updatingTheCartInProduct(productId, variant) }
+                    delete.await()
+                    updateProduct.await()
+                }
+                withContext(Dispatchers.Main) {
+                    clearedProductIDs.add(productId)
+                    _uiUpdate.value = UiUpdate.UpdateCartData("delete", position, null)
+                }
+            } catch (e: Exception) {
+                e.message?.let { fbRepository.logCrash("checkout: deleting cart item in db", it) }
             }
-            withContext(Dispatchers.Main) {
-                clearedProductIDs.add(productId)
-                _uiUpdate.value = UiUpdate.UpdateCartData("delete", position, null)
-            }
-        } catch (e: Exception) {
-            e.message?.let { fbRepository.logCrash("checkout: deleting cart item in db", it) }
         }
-    }
 
-    fun updateCartItem(id: Int, updatedCount: Int, position: Int = 0) = viewModelScope.launch (Dispatchers.IO) {
-        try {
-            if (isCWMCart) {
-                cwmDish[position].quantity = updatedCount
-            } else {
-                dbRepository.updateCartItem(id, updatedCount)
+    fun updateCartItem(id: Int, updatedCount: Int, position: Int = 0) =
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                if (isCWMCart) {
+                    cwmDish[position].quantity = updatedCount
+                } else {
+                    dbRepository.updateCartItem(id, updatedCount)
+                }
+                withContext(Dispatchers.Main) {
+                    totalCartItems[position].quantity = updatedCount
+                    _uiUpdate.value = UiUpdate.UpdateCartData("update", position, updatedCount)
+                }
+            } catch (e: Exception) {
+                e.message?.let { fbRepository.logCrash("checkout: updating cart item in db", it) }
             }
-            withContext(Dispatchers.Main) {
-                totalCartItems[position].quantity = updatedCount
-                _uiUpdate.value = UiUpdate.UpdateCartData("update", position, updatedCount)
-            }
-        } catch (e: Exception) {
-            e.message?.let { fbRepository.logCrash("checkout: updating cart item in db", it) }
         }
-    }
 
     private suspend fun updatingTheCartInProduct(productId: String, variant: String) {
-        withContext (Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             try {
                 val entity = dbRepository.getProductWithIdForUpdate(productId)
                 entity?.let { productEntity ->
@@ -198,7 +207,12 @@ class CheckoutViewModel(
                     dbRepository.upsertProduct(productEntity)
                 }
             } catch (e: Exception) {
-                e.message?.let { fbRepository.logCrash("checkout: updating the product in cart in db", it) }
+                e.message?.let {
+                    fbRepository.logCrash(
+                        "checkout: updating the product in cart in db",
+                        it
+                    )
+                }
             }
         }
     }
@@ -221,7 +235,7 @@ class CheckoutViewModel(
 
     //extracting the sum of cart items quantity sent from shopping activity and cartitems observer
     fun getCartItemsQuantity(cartItems: List<CartEntity>): Int {
-       var quantities = 0
+        var quantities = 0
         cartItems.forEach {
             quantities += it.quantity
         }
@@ -255,46 +269,49 @@ class CheckoutViewModel(
     }
 
     //Coupons
-    fun verifyCoupon(couponCode: String, cartItems: List<CartEntity>) = viewModelScope.launch(Dispatchers.IO) {
-        if (couponCode == "") {
-            return@launch
-        } else {
-            val code: CouponEntity? = currentCoupon?.let{
-                currentCoupon
-            } ?: dbRepository.getCouponByCode(couponCode)
-            code?.let { coupon ->
-                val cartPrice = getCartPrice(cartItems)
-                if (!coupon.categories.contains(Constants.ALL)) {
-                    withContext(Dispatchers.Main) {
-                        _uiEvent.value = UIEvent.Toast("Coupon Applies only for few product categories")
-                    }
-                    return@launch
-                }
-                if (cartPrice >= coupon.purchaseLimit) {
-                    if (couponPrice == null) {
+    fun verifyCoupon(couponCode: String, cartItems: List<CartEntity>) =
+        viewModelScope.launch(Dispatchers.IO) {
+            if (couponCode == "") {
+                return@launch
+            } else {
+                val code: CouponEntity? = currentCoupon?.let {
+                    currentCoupon
+                } ?: dbRepository.getCouponByCode(couponCode)
+                code?.let { coupon ->
+                    val cartPrice = getCartPrice(cartItems)
+                    if (!coupon.categories.contains(Constants.ALL)) {
                         withContext(Dispatchers.Main) {
-                            _uiUpdate.value = UiUpdate.CouponApplied(
-                                "Coupon Applied Successfully!"
-                            )
+                            _uiEvent.value =
+                                UIEvent.Toast("Coupon Applies only for few product categories")
                         }
+                        return@launch
                     }
-                    withContext(Dispatchers.Main) {
-                        currentCoupon = coupon
-                        couponPrice = couponDiscount(coupon, cartPrice)
-                    }
+                    if (cartPrice >= coupon.purchaseLimit) {
+                        if (couponPrice == null) {
+                            withContext(Dispatchers.Main) {
+                                _uiUpdate.value = UiUpdate.CouponApplied(
+                                    "Coupon Applied Successfully!"
+                                )
+                            }
+                        }
+                        withContext(Dispatchers.Main) {
+                            currentCoupon = coupon
+                            couponPrice = couponDiscount(coupon, cartPrice)
+                        }
 //                    couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
-                } else {
-                    withContext(Dispatchers.Main) {
-                        _uiUpdate.value = UiUpdate.CouponApplied("")
-                        _uiEvent.value = UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            _uiUpdate.value = UiUpdate.CouponApplied("")
+                            _uiEvent.value =
+                                UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
+                        }
+                        return@launch
                     }
-                    return@launch
+                } ?: withContext(Dispatchers.Main) {
+                    _uiEvent.value = UIEvent.Toast("Coupon Code does not exist.")
                 }
-            } ?: withContext(Dispatchers.Main) {
-                _uiEvent.value = UIEvent.Toast("Coupon Code does not exist.")
             }
         }
-    }
 
     private fun couponDiscount(coupon: CouponEntity, cartPrice: Float): Float {
         var discountPrice = when (coupon.type) {
@@ -317,21 +334,36 @@ class CheckoutViewModel(
         return freeDeliveryLimit
     }
 
-    suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO){
+    suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO) {
         return@withContext userProfile?.let {
-                dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
-                    if (pinCodes.isNullOrEmpty()) {
+            dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
+                if (pinCodes.isNullOrEmpty()) {
 //                        deliveryAvailability(null)
+                    30f
+                } else {
+//                        deliveryAvailability(pinCodes[0])
+                    pinCodes[0].deliveryCharge.toFloat()
+                }
+            } ?: let {
+//                    deliveryAvailability(null)
+                30f
+            }
+        } ?: let {
+            tempAddress?.let {
+                dbRepository.getDeliveryCharge(it.LocationCode)?.let { pinCodes ->
+                    if (pinCodes.isNullOrEmpty()) {
+                        //                        deliveryAvailability(null)
                         30f
                     } else {
-//                        deliveryAvailability(pinCodes[0])
+                        //                        deliveryAvailability(pinCodes[0])
                         pinCodes[0].deliveryCharge.toFloat()
                     }
-                } ?:let {
-//                    deliveryAvailability(null)
+                } ?: let {
+                    //                    deliveryAvailability(null)
                     30f
                 }
-            } ?: 30f
+            }
+        } ?: 30f
     }
 
 //    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) = withContext(Dispatchers.Main){
@@ -396,113 +428,86 @@ class CheckoutViewModel(
 //        }
 //    }
 
-    fun proceedForWalletPayment(
-        orderDetailsMap: HashMap<String, Any>
-    ) {
-        viewModelScope.launch {
-            val cartItems = if (isCWMCart) {
-                cwmDish
+fun proceedForWalletPayment(
+    orderDetailsMap: HashMap<String, Any>
+) {
+    viewModelScope.launch {
+        val cartItems = if (isCWMCart) {
+            cwmDish
+        } else {
+            totalCartItems
+        }
+        val mrp = orderDetailsMap["mrp"].toString().toFloat()
+        orderDetailsMap["orderID"] = generateOrderID()
+        orderDetailsMap["referral"] = addReferralBonusStatus()
+        wallet?.let {
+            if (mrp > it.amount) {
+                _uiEvent.value =
+                    UIEvent.SnackBar(
+                        "Insufficient Wallet Balance. Please choose any other payment method",
+                        true
+                    )
+                return@launch
             } else {
-                totalCartItems
-            }
-            val mrp = orderDetailsMap["mrp"].toString().toFloat()
-            orderDetailsMap["orderID"] = generateOrderID()
-            orderDetailsMap["referral"] = addReferralBonusStatus()
-            wallet?.let {
-                if (mrp > it.amount) {
-                    _uiEvent.value =
-                        UIEvent.SnackBar("Insufficient Wallet Balance. Please choose any other payment method", true)
-                    return@launch
-                } else {
-                    quickOrderUseCase
-                        .initiateWalletTransaction(
-                            orderDetailsMap,
-                            mrp,
-                            PURCHASE,
-                            cart = cartItems as ArrayList<CartEntity>,
-                            false
-                        )
-                        .collect { result ->
-                            withContext(Dispatchers.Main) {
-                                when (result) {
-                                    is NetworkResult.Loading -> {}
-                                    is NetworkResult.Success -> {
-                                        when (result.message) {
-                                            "transaction" -> _uiUpdate.value =
-                                                UiUpdate.StartingTransaction(
-                                                    result.data.toString()
-                                                )
-                                            "order" -> _uiUpdate.value = UiUpdate.PlacingOrder("Placing your Order...")
-                                            "success" -> _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
-                                        }
-                                    }
-                                    is NetworkResult.Failed -> {
-                                        when (result.message) {
-                                            "wallet" -> _uiUpdate.value = UiUpdate.WalletTransactionFailed(
+                quickOrderUseCase
+                    .initiateWalletTransaction(
+                        orderDetailsMap,
+                        mrp,
+                        PURCHASE,
+                        cart = cartItems as ArrayList<CartEntity>,
+                        false
+                    )
+                    .collect { result ->
+                        withContext(Dispatchers.Main) {
+                            when (result) {
+                                is NetworkResult.Loading -> {}
+                                is NetworkResult.Success -> {
+                                    when (result.message) {
+                                        "transaction" -> _uiUpdate.value =
+                                            UiUpdate.StartingTransaction(
                                                 result.data.toString()
                                             )
-                                            "order" -> _uiUpdate.value = UiUpdate.OrderPlacementFailed(
-                                                result.data.toString()
-                                            )
-                                        }
+                                        "order" -> _uiUpdate.value =
+                                            UiUpdate.PlacingOrder("Placing your Order...")
+                                        "success" -> _uiUpdate.value =
+                                            UiUpdate.OrderPlaced("Order Placed Successfully...!")
                                     }
-                                    else -> Unit
                                 }
+                                is NetworkResult.Failed -> {
+                                    when (result.message) {
+                                        "wallet" -> _uiUpdate.value =
+                                            UiUpdate.WalletTransactionFailed(
+                                                result.data.toString()
+                                            )
+                                        "order" -> _uiUpdate.value = UiUpdate.OrderPlacementFailed(
+                                            result.data.toString()
+                                        )
+                                    }
+                                }
+                                else -> Unit
                             }
                         }
-                }
-            }
-        }
-
-    }
-
-    private fun addReferralBonusStatus(): String {
-        return userProfile?.let {
-            if (it.extras[0] == "yes") {
-                it.referralId.toString()
-            } else {
-                ""
-            }
-        } ?: ""
-    }
-
-    fun placeCashOnDeliveryOrder(
-        orderDetailsMap: HashMap<String, Any>
-    ) {
-        viewModelScope.launch {
-            val cartItems = if (isCWMCart) {
-                cwmDish
-            } else {
-                totalCartItems
-            }
-            val mrp = orderDetailsMap["mrp"].toString().toFloat()
-            orderDetailsMap["orderID"] = generateOrderID()
-            orderDetailsMap["referral"] = addReferralBonusStatus()
-            quickOrderUseCase
-                .placeCashOnDeliveryOrder(
-                    orderDetailsMap,
-                    cartItems as ArrayList<CartEntity>,
-                    mrp,
-                    false
-                ).onEach { result ->
-                    when(result) {
-                        is NetworkResult.Success -> {
-                            if (result.message == "placing") {
-                                _uiUpdate.value = UiUpdate.PlacingOrder("Placing your Order...")
-                            } else {
-                                _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
-                            }
-                        }
-                        is NetworkResult.Failed -> {
-                            _uiUpdate.value = UiUpdate.OrderPlacementFailed("Server Error! failed to place order. Try again")
-                        }
-                        else -> Unit
                     }
-                }.launchIn(this)
+            }
         }
     }
 
-    fun placeOrderWithOnlinePayment(orderDetailsMap: HashMap<String, Any>) = viewModelScope.launch {
+}
+
+private fun addReferralBonusStatus(): String {
+    return userProfile?.let {
+        if (it.extras[0] == "yes") {
+            it.referralId.toString()
+        } else {
+            ""
+        }
+    } ?: ""
+}
+
+fun placeCashOnDeliveryOrder(
+    orderDetailsMap: HashMap<String, Any>
+) {
+    viewModelScope.launch {
         val cartItems = if (isCWMCart) {
             cwmDish
         } else {
@@ -512,74 +517,123 @@ class CheckoutViewModel(
         orderDetailsMap["orderID"] = generateOrderID()
         orderDetailsMap["referral"] = addReferralBonusStatus()
         quickOrderUseCase
-            .placeOnlinePaymentOrder(
+            .placeCashOnDeliveryOrder(
                 orderDetailsMap,
-                mrp,
-                PURCHASE,
-                "Product Purchase Online Transaction",
                 cartItems as ArrayList<CartEntity>,
+                mrp,
                 false
-            ).collect { result ->
-                when(result) {
+            ).onEach { result ->
+                when (result) {
                     is NetworkResult.Success -> {
-                        when (result.message) {
-                            "validation" -> _uiUpdate.value = UiUpdate.ValidatingPurchase("")
-                            "placing" -> _uiUpdate.value = UiUpdate.PlacingOrder("Placing Order...")
-                            "placed" -> _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
+                        if (result.message == "placing") {
+                            _uiUpdate.value = UiUpdate.PlacingOrder("Placing your Order...")
+                        } else {
+                            _uiUpdate.value = UiUpdate.OrderPlaced("Order Placed Successfully...!")
                         }
                     }
                     is NetworkResult.Failed -> {
-                        _uiUpdate.value = UiUpdate.OrderPlacementFailed("")
+                        _uiUpdate.value =
+                            UiUpdate.OrderPlacementFailed("Server Error! failed to place order. Try again")
                     }
                     else -> Unit
                 }
-            }
+            }.launchIn(this)
     }
+}
 
-    private fun generateOrderID(): String {
-        return userProfile?.let {
-            TimeUtil().getOrderIDFormat(it.phNumber.takeLast(4))
-        } ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
+fun placeOrderWithOnlinePayment(orderDetailsMap: HashMap<String, Any>) = viewModelScope.launch {
+    val cartItems = if (isCWMCart) {
+        cwmDish
+    } else {
+        totalCartItems
     }
-
-    fun updateReferralStatus() = viewModelScope.launch(Dispatchers.IO) {
-        userProfile?.let {
-            if (it.referralId != "" && it.extras[0] == "yes") {
-                it.extras[0] = "no"
-                fbRepository.uploadProfile(it.toUserProfile())
+    val mrp = orderDetailsMap["mrp"].toString().toFloat()
+    orderDetailsMap["orderID"] = generateOrderID()
+    orderDetailsMap["referral"] = addReferralBonusStatus()
+    quickOrderUseCase
+        .placeOnlinePaymentOrder(
+            orderDetailsMap,
+            mrp,
+            PURCHASE,
+            "Product Purchase Online Transaction",
+            cartItems as ArrayList<CartEntity>,
+            false
+        ).collect { result ->
+            when (result) {
+                is NetworkResult.Success -> {
+                    when (result.message) {
+                        "validation" -> _uiUpdate.value = UiUpdate.ValidatingPurchase("")
+                        "placing" -> _uiUpdate.value = UiUpdate.PlacingOrder("Placing Order...")
+                        "placed" -> _uiUpdate.value =
+                            UiUpdate.OrderPlaced("Order Placed Successfully...!")
+                    }
+                }
+                is NetworkResult.Failed -> {
+                    _uiUpdate.value = UiUpdate.OrderPlacementFailed("")
+                }
+                else -> Unit
             }
         }
-    }
+}
 
-    fun getHowToVideo(where: String) = viewModelScope.launch {
-        val url = fbRepository.getHowToVideo(where)
-        _uiUpdate.value = UiUpdate.HowToVideo(url)
+private fun generateOrderID(): String {
+    return userProfile?.let {
+        TimeUtil().getOrderIDFormat(it.phNumber.takeLast(4))
     }
+        ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
+}
 
-    sealed class UiUpdate {
-        //address
-        data class PopulateAddressData(val addressList: MutableList<Address>): UiUpdate()
-        data class AddressUpdate(val message: String, val position: Int, val address: Address?, val isSuccess: Boolean): UiUpdate()
-        //coupon
-        data class CouponApplied(val message: String): UiUpdate()
-        //wallet
-        data class WalletData(val wallet: Wallet): UiUpdate()
-        //cwm
-        data class UpdateCartData(val message: String, val position: Int, val count: Int?): UiUpdate()
-        //cart
-        data class PopulateCartData(val cartItems: List<CartEntity>?): UiUpdate()
-        data class CartCleared(val message: String?): UiUpdate()
-        //order
-        data class ValidatingPurchase(val message: String): UiUpdate()
-        data class StartingTransaction(val message: String): UiUpdate()
-        data class PlacingOrder(val message: String): UiUpdate()
-        data class OrderPlaced(val message: String): UiUpdate()
-        data class WalletTransactionFailed(val message: String): UiUpdate()
-        data class OrderPlacementFailed(val message: String): UiUpdate()
-        //how to
-        data class HowToVideo(val url: String): UiUpdate()
-
-        object Empty: UiUpdate()
+fun updateReferralStatus() = viewModelScope.launch(Dispatchers.IO) {
+    userProfile?.let {
+        if (it.referralId != "" && it.extras[0] == "yes") {
+            it.extras[0] = "no"
+            fbRepository.uploadProfile(it.toUserProfile())
+        }
     }
+}
+
+fun getHowToVideo(where: String) = viewModelScope.launch {
+    val url = fbRepository.getHowToVideo(where)
+    _uiUpdate.value = UiUpdate.HowToVideo(url)
+}
+
+sealed class UiUpdate {
+    //address
+    data class PopulateAddressData(val addressList: MutableList<Address>) : UiUpdate()
+    data class AddressUpdate(
+        val message: String,
+        val position: Int,
+        val address: Address?,
+        val isSuccess: Boolean
+    ) : UiUpdate()
+
+    object NoProfileFound : UiUpdate()
+
+    //coupon
+    data class CouponApplied(val message: String) : UiUpdate()
+
+    //wallet
+    data class WalletData(val wallet: Wallet) : UiUpdate()
+
+    //cwm
+    data class UpdateCartData(val message: String, val position: Int, val count: Int?) : UiUpdate()
+
+    //cart
+    data class PopulateCartData(val cartItems: List<CartEntity>?) : UiUpdate()
+    data class CartCleared(val message: String?) : UiUpdate()
+
+    //order
+    data class ValidatingPurchase(val message: String) : UiUpdate()
+    data class StartingTransaction(val message: String) : UiUpdate()
+    data class PlacingOrder(val message: String) : UiUpdate()
+    data class OrderPlaced(val message: String) : UiUpdate()
+    data class WalletTransactionFailed(val message: String) : UiUpdate()
+    data class OrderPlacementFailed(val message: String) : UiUpdate()
+
+    //how to
+    data class HowToVideo(val url: String) : UiUpdate()
+
+    object Empty : UiUpdate()
+}
 
 }

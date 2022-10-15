@@ -21,8 +21,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.UserProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityProfileBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomAddReferralBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
@@ -41,7 +45,9 @@ import org.kodein.di.generic.instance
 
 class ProfileActivity :
     BaseActivity(),
-    KodeinAware {
+    KodeinAware,
+    CustomAlertClickListener
+{
 
     lateinit var binding: ActivityProfileBinding
     override val kodein by kodein()
@@ -50,6 +56,7 @@ class ProfileActivity :
     private val factory: ProfileViewModelFactory by instance()
 
     private var permissionType: String = ""
+    private var navigateTo: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,9 +75,10 @@ class ProfileActivity :
             )
         }
 
-        viewModel.phoneNumber = intent.getStringExtra(PHONE_NUMBER).toString()
+        viewModel.phoneNumber = intent.getStringExtra(PHONE_NUMBER)
         viewModel.userID = intent.getStringExtra(USER_ID) ?: viewModel.getCurrentUserID()
-        viewModel.mailID = intent.getStringExtra(MAIL_ID).toString()
+        viewModel.mailID = intent.getStringExtra(MAIL_ID)
+        navigateTo = intent.getStringExtra("goto")
         binding.tvReferral.remove()
 
         lifecycleScope.launch {
@@ -88,7 +96,6 @@ class ProfileActivity :
     }
 
     private fun observers() {
-
         viewModel.uiEvent.observe(this) { event ->
             when (event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)
@@ -115,6 +122,15 @@ class ProfileActivity :
                         viewModel.userID?.let {
                             binding.etPhoneNumber.isEnabled = false //disabling the phone number so that the user can't change it after logging in for the first time
                             viewModel.createNewUserWallet(it)
+                        } ?: let {
+                            CustomAlertDialog(
+                                this,
+                                "User Not Signed In",
+                                "Please Sign In with your Google Profile to continue creating your profile with Magizhini Organics. Click SIGN IN to proceed with google sign in. Click SKIP to close and continue shopping.",
+                                "Sign In with Google",
+                                "newID",
+                                this
+                            ).show()
                         }
                     }
                 }
@@ -520,18 +536,35 @@ class ProfileActivity :
 
     private fun transitionFromProfile() {
         //movement of profile to home activity for old user
-        Intent(this, HomeActivity::class.java).also {
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-            finish()
+         if (navigateTo == "order") {
+            Intent(this, InvoiceActivity::class.java).also {
+                startActivity(it)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+            }
+        } else {
+           Intent(this, HomeActivity::class.java).also {
+                startActivity(it)
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                finish()
+            }
         }
+
     }
 
     private fun newUserTransitionFromProfile() {
-        Intent(this, HomeActivity::class.java).also {
-            startActivity(it)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-            finish()
+        if (navigateTo == "order") {
+            Intent(this, InvoiceActivity::class.java).also {
+                startActivity(it)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+            }
+        } else {
+            Intent(this, HomeActivity::class.java).also {
+                startActivity(it)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                finish()
+            }
         }
     }
 //
@@ -588,6 +621,25 @@ class ProfileActivity :
                     "setting"
                 )
             }
+        }
+    }
+
+    override fun onClick() {
+
+    }
+
+    override fun closeActivity() {
+        Intent(this, HomeActivity::class.java).also {
+            startActivity(it)
+            finish()
+        }
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "newID")
+            startActivity(it)
+            finish()
         }
     }
 //

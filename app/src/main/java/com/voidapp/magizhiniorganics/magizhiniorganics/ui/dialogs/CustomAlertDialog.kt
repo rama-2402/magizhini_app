@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import androidx.databinding.DataBindingUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -33,6 +34,14 @@ class CustomAlertDialog(
 
 
         view.apply {
+            if (content == "order" ) {
+                tvwhatsapp.visibility = View.VISIBLE
+            }
+            if (content == "newID") {
+                bottomSheetDialog.setCancelable(false)
+                tvwhatsapp.visibility = View.VISIBLE
+                tvwhatsapp.text = "Skip Sign In"
+            }
             title?.let {
                 tvTitle.text = it
             }
@@ -43,9 +52,31 @@ class CustomAlertDialog(
                 tvClose.text = it
             }
             tvClose.setOnClickListener {
-                onItemClickListener.onClick()
-                dismiss()
+                when (content) {
+                    "order" -> {
+                        onItemClickListener.goToSignIn()
+                        dismiss()
+                    }
+                    "newID" -> {
+                        onItemClickListener.goToSignIn()
+                        dismiss()
+                    }
+                    else -> {
+                        onItemClickListener.onClick()
+                        dismiss()
+                    }
+                }
             }
+            tvwhatsapp.setOnClickListener {
+                if (content == "order") {
+                    onItemClickListener.placeOrderWithWhatsapp()
+                    dismiss()
+                }
+                if (content == "newID") {
+                    onItemClickListener.closeActivity()
+                    dismiss()
+                }
+           }
         }
 
     }
@@ -57,4 +88,7 @@ class CustomAlertDialog(
 
 interface CustomAlertClickListener {
     fun onClick()
+    fun goToSignIn() {}
+    fun placeOrderWithWhatsapp() {}
+    fun closeActivity() {}
 }

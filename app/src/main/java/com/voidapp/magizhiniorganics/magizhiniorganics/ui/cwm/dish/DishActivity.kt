@@ -36,6 +36,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityDishB
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
@@ -284,7 +286,7 @@ class DishActivity :
                     it.putExtra("cwm", true)
                     startActivity(it)
                 }
-            } else {
+           } else {
                 showErrorSnackBar("Please check network connection", true)
             }
         }
@@ -414,5 +416,4 @@ class DishActivity :
         }
         super.onDestroy()
     }
-
 }

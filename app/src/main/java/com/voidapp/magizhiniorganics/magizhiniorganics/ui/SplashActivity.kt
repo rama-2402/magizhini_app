@@ -1,14 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
@@ -23,7 +18,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.INT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOGIN_STATUS
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUARTER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
@@ -183,11 +177,12 @@ class SplashActivity : BaseActivity(), KodeinAware {
     }
 
     private fun startWork(wipe: String, navigation: String?) {
-        val userID = SharedPref(this).getData(USER_ID, STRING, "")
+        val userID = SharedPref(this).getData(USER_ID, STRING, "").toString()
 
-        val workRequest: WorkRequest =
+        if (userID != "" && userID != "null") {
+         val workRequest: WorkRequest =
             if (wipe == "") {
-                OneTimeWorkRequestBuilder<UpdateDataService>()
+                 OneTimeWorkRequestBuilder<UpdateDataService>()
                     .setInputData(
                         workDataOf(
                             "wipe" to wipe,
@@ -204,9 +199,12 @@ class SplashActivity : BaseActivity(), KodeinAware {
                     )
                     .build()
             }
-
         WorkManager.getInstance(this).enqueue(workRequest)
         navigateToHomeScreen(true, navigation)
+        } else {
+            navigateToHomeScreen(true, navigation)
+        }
+
 //        WorkManager.getInstance(this)
 //            .getWorkInfoByIdLiveData(workRequest.id)
 //            .observe(this) {

@@ -10,6 +10,7 @@ import com.google.gson.reflect.TypeToken
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.TotalOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Converters
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import kotlinx.coroutines.tasks.await
 
@@ -21,7 +22,7 @@ class UpdateTotalOrderItemService(
     override suspend fun doWork(): Result {
         val stringConvertedCart = inputData.getString("cart")
         val status = inputData.getBoolean(Constants.STATUS, true)
-        val cartItems = stringToCartConverter(stringConvertedCart!!)
+        val cartItems = Converters().stringToCartConverter(stringConvertedCart!!)
         val date = TimeUtil().getCurrentDateNumber()
         val docID = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
 
@@ -65,8 +66,4 @@ class UpdateTotalOrderItemService(
         }
     }
 
-    private fun stringToCartConverter(value: String): MutableList<CartEntity> {
-        val listType = object : TypeToken<MutableList<CartEntity>>() {}.type
-        return Gson().fromJson(value, listType)
-    }
 }

@@ -37,3 +37,38 @@
 }
 
 -keep class com.voidapp.magizhiniorganics.magizhiniorganics.data.** { *; }
+
+-keepattributes Signature
+-keep class com.google.gson.examples.android.model.** { <fields>; }
+-keep class * extends com.google.gson.TypeAdapter
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+-keep class com.voidapp.magizhiniorganics.magizhiniorganics.utils.Converters
+
+-keepclassmembers,allowobfuscation class * {
+  @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Retain generic signatures of TypeToken and its subclasses with R8 version 3.0 and higher.
+-keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
+-keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
+
+-keep class org.kodein.di.TypeReference { *; }
+-keep class org.kodein.di.TypeToken { *; }
+-keep class org.kodein.di.TypeTokenKt { *; }
+-keep class org.kodein.di.JVMTypeToken { *; }
+-keep class org.kodein.di.KodeinAwareJVMKt { *; }
+-keep class org.kodein.di.KodeinAware { *; }
+-keep class org.kodein.di.KodeinAwareKt { *; }
+-keep class org.kodein.di.KodeinAwareJVMKt { *; }
+#-keep class org.kodein { *; }
+
+
+-keep, allowobfuscation, allowoptimization class org.kodein.di.TypeReference
+-keep, allowobfuscation, allowoptimization class org.kodein.di.JVMTypeToken
+-keep, allowobfuscation, allowoptimization class org.kodein.di.JVMTypeToken
+
+-keep, allowobfuscation, allowoptimization class * extends org.kodein.di.TypeReference
+-keep, allowobfuscation, allowoptimization class * extends org.kodein.di.JVMTypeToken
+

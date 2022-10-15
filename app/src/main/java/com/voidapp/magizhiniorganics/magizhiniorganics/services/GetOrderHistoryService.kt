@@ -45,14 +45,16 @@ class GetOrderHistoryService(
 
         try {
             withContext(Dispatchers.IO) {
-                val getOrders = async { getOrders(userID) }
-                val getSubscriptions = async { getSubscriptions(userID) }
-                val getCancelledSubscriptions = async { getCancelledSubscriptions(userID) }
+                if (userID != "" && userID != "null") {
+                    val getOrders = async { getOrders(userID) }
+                    val getSubscriptions = async { getSubscriptions(userID) }
+                    val getCancelledSubscriptions = async { getCancelledSubscriptions(userID) }
 
-                getOrders.await()
-                getSubscriptions.await()
-                getCancelledSubscriptions.await()
-            }
+                    getOrders.await()
+                    getSubscriptions.await()
+                    getCancelledSubscriptions.await()
+                }
+           }
         } catch (e: Exception) {
             return Result.retry()
         }

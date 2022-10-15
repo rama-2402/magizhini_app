@@ -30,6 +30,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.services.GetOrderHistoryS
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.PortPhoneAuthToGmailAuth
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateDataService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
@@ -69,11 +70,15 @@ class SignInActivity : BaseActivity(), KodeinAware {
     private lateinit var oneTapClient: SignInClient
     private lateinit var signInRequest: BeginSignInRequest
 
+    private var signInOption: String? = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_sign_in)
         viewModel = ViewModelProvider(this, factory)[SignInViewModel::class.java]
+
+        signInOption = intent.getStringExtra("goto")
 
         lifecycleScope.launch {
             binding.apply {
@@ -299,13 +304,21 @@ class SignInActivity : BaseActivity(), KodeinAware {
                 }
             }
 
-//                oneTapClient.beginSignIn(signInRequest)
-//                    .addOnSuccessListener(this) {
-//                        startIntentSenderForResult(it.pendingIntent.intentSender, SIGNIN_REQ, null, 0,0,0,null)
-//                    }
-
 //                val signInIntent = signInClient.signInIntent
 //                activityForResult.launch(signInIntent)
+            }
+        }
+        binding.btnSkip.setOnClickListener {
+           if (signInOption == "order") {
+                showToast(this, "Skipping SignIn")
+                navigateToCheckout()
+           }
+            if (signInOption == "newID") {
+                onBackPressed()
+            } else {
+                showProgressDialog(true)
+                showToast(this, "Getting latest offers and syncing store...")
+                startGetAllDataService("home")
             }
         }
     }
@@ -353,9 +366,9 @@ class SignInActivity : BaseActivity(), KodeinAware {
         auth = FirebaseAuth.getInstance()
         oneTapClient = Identity.getSignInClient(this)
         signInRequest = BeginSignInRequest.builder()
-            .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
-                .setSupported(true)
-                .build())
+//            .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+//                .setSupported(true)
+//                .build())
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
@@ -363,6 +376,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
                     .setFilterByAuthorizedAccounts(true)
                     .build()
             ).setAutoSelectEnabled(true).build()
+
 //        val signInRequest = GoogleSignInOptions
 //            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 //            .requestIdToken(resources.getString(R.string.google_token_id))
@@ -452,12 +466,13 @@ class SignInActivity : BaseActivity(), KodeinAware {
         }
     }
 
-    private fun navigateToProfilePage() {
+    private fun navigateToProfilePage(navigateTo: String?) {
         hideProgressDialog()
         Intent(this@SignInActivity, ProfileActivity::class.java).also {
             it.putExtra(PHONE_NUMBER, mPhoneNumber)
             it.putExtra(USER_ID, mCurrentUserID)
             it.putExtra(MAIL_ID, mMailID)
+            it.putExtra("goto", navigateTo)
             startActivity(it)
             finish()
         }
@@ -465,12 +480,16 @@ class SignInActivity : BaseActivity(), KodeinAware {
 
     private fun navigateToHomePage() {
         hideProgressDialog()
-        SharedPref(this).putData(LOGIN_STATUS, BOOLEAN, false)
-        Intent(this, HomeActivity::class.java).also {
-            startActivity(it)
-            finish()
+        if (signInOption == "order") {
+            navigateToCheckout()
+        } else {
+            SharedPref(this).putData(LOGIN_STATUS, BOOLEAN, false)
+            Intent(this, HomeActivity::class.java).also {
+                startActivity(it)
+                finish()
+            }
         }
-    }
+   }
 
     private fun startGetProfileDataService() {
         val currentMonthYear = "${TimeUtil().getMonth()}${TimeUtil().getYear()}"
@@ -488,7 +507,6 @@ class SignInActivity : BaseActivity(), KodeinAware {
     }
 
     private fun startGetAllDataService(navigateTo: String) {
-
         val workRequest: WorkRequest =
             OneTimeWorkRequestBuilder<UpdateDataService>()
                 .setInputData(
@@ -521,25 +539,23 @@ class SignInActivity : BaseActivity(), KodeinAware {
                         )
                     }
                     WorkInfo.State.SUCCEEDED -> {
-                        hideProgressDialog()
 
                         val periodicWorkRequest: WorkRequest =
-                            PeriodicWorkRequestBuilder<UpdateDataService>(8, TimeUnit.HOURS)
-                                .setInitialDelay(TimeUtil().getHoursBeforeMidNight(), TimeUnit.HOURS)
-                                .setInputData(
-                                    workDataOf(
-                                        "wipe" to "",
-                                        "id" to mCurrentUserID
-                                    )
+                    PeriodicWorkRequestBuilder<UpdateDataService>(8, TimeUnit.HOURS)
+                            .setInitialDelay(TimeUtil().getHoursBeforeMidNight(), TimeUnit.HOURS)
+                            .setInputData(
+                                workDataOf(
+                                    "wipe" to "",
+                                    "id" to mCurrentUserID
                                 )
-                                .build()
-
+                            )
+                            .build()
                         WorkManager.getInstance(this).enqueue(periodicWorkRequest)
 
-                        if (navigateTo == "home") {
-                            navigateToHomePage()
-                        } else {
-                            navigateToProfilePage()
+                        when(navigateTo) {
+                            "home" -> navigateToHomePage()
+                            "profile" -> navigateToProfilePage("order")
+                            else -> navigateToCheckout()
                         }
                     }
                     WorkInfo.State.BLOCKED -> Log.e("qw", "blocked")
@@ -548,6 +564,13 @@ class SignInActivity : BaseActivity(), KodeinAware {
                     else -> Unit
                 }
             }
+    }
+
+    private fun navigateToCheckout() {
+        Intent(this, InvoiceActivity::class.java).also {
+            startActivity(it)
+            finish()
+        }
     }
 
     //checking the network connection before proceeding

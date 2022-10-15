@@ -1643,22 +1643,24 @@ class Firestore(
 
     suspend fun updateNotifications(userID: String): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
-            val notificationsDoc = mFireStore.collection(USER_NOTIFICATIONS)
-                .document(USER_NOTIFICATIONS)
-                .collection(userID)
-                .whereLessThanOrEqualTo("timestamp", System.currentTimeMillis()).get()
-                .await()
+            if (userID != "" && userID != "null") {
+                val notificationsDoc = mFireStore.collection(USER_NOTIFICATIONS)
+                    .document(USER_NOTIFICATIONS)
+                    .collection(userID)
+                    .whereLessThanOrEqualTo("timestamp", System.currentTimeMillis()).get()
+                    .await()
 
-            repository.deleteAllNotifications()
+                repository.deleteAllNotifications()
 
-            for (doc in notificationsDoc.documents) {
-                val notification = doc.toObject(UserNotification::class.java)
-                notification!!.id = doc.id
-                val notificationEntity: UserNotificationEntity =
-                    notification.toUserNotificationEntity()
-                repository.upsertNotification(notificationEntity)
+                for (doc in notificationsDoc.documents) {
+                    val notification = doc.toObject(UserNotification::class.java)
+                    notification!!.id = doc.id
+                    val notificationEntity: UserNotificationEntity =
+                        notification.toUserNotificationEntity()
+                    repository.upsertNotification(notificationEntity)
+                }
             }
-            true
+           true
         } catch (e: Exception) {
             false
         }

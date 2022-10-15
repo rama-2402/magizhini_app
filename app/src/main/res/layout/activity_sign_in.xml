@@ -303,8 +303,8 @@
             android:layout_marginStart="@dimen/material_size_16"
             android:layout_marginEnd="@dimen/material_size_16"
             android:background="@drawable/shape_round_rectangle_16"
-            android:elevation="@dimen/material_size_16"
             android:visibility="invisible"
+            android:elevation="@dimen/material_size_16"
             app:layout_constraintBottom_toTopOf="@id/ivBagTwo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -385,18 +385,38 @@
                         android:textColor="@color/green_base"
                         android:textSize="10sp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnGoogleLogIn"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="horizontal"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="@dimen/material_size_16"
-                        android:layout_weight="1"
-                        android:background="@drawable/shape_round_rectangle_8"
-                        android:text="Google Sign IN"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        app:backgroundTint="@color/matteRed" />
+                        android:gravity="center"
+                        >
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnGoogleLogIn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/shape_round_rectangle_8"
+                            android:text="Google Sign IN"
+                            android:layout_marginEnd="@dimen/material_size_8"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:backgroundTint="@color/matteRed" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSkip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/shape_round_rectangle_8"
+                            android:layout_marginStart="@dimen/material_size_8"
+                            android:text="SKIP"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:backgroundTint="@color/green_base" />
+
+                    </LinearLayout>
 
                     <!--                    </LinearLayout>-->
 

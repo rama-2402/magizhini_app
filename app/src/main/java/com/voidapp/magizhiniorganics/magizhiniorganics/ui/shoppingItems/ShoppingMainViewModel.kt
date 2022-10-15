@@ -58,7 +58,7 @@ class ShoppingMainViewModel(
     val removedProductIDsFromCart: MutableList<String> = mutableListOf()
 
     fun getProfile() {
-        profile = dbRepository.getProfileData()!!
+        profile = dbRepository.getProfileData()
     }
     fun getAllCartItems() = dbRepository.getAllCartItems()
     fun getCartItemsPrice() = dbRepository.getCartPrice()

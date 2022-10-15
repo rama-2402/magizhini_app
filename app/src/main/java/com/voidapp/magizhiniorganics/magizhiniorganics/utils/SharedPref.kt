@@ -7,7 +7,7 @@ class SharedPref(context: Context) {
 
     private val sPref = context.getSharedPreferences(Constants.USERS, Context.MODE_PRIVATE)
 
-    fun getData(key: String, type: String, defValue: Any) : Any {
+    fun getData(key: String, type: String, defValue: Any?) : Any? {
         val data = when(type) {
             Constants.STRING -> {
                 sPref.getString(key, defValue.toString())

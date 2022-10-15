@@ -56,11 +56,12 @@
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
     <TextView
         android:id="@+id/tvClose"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="close"
+        android:text="Close"
         android:background="@drawable/shape_round_rectangle_8"
         android:backgroundTint="@color/matteRed"
         android:foreground="?android:selectableItemBackgroundBorderless"
@@ -72,9 +73,31 @@
         android:paddingTop="@dimen/material_size_8"
         android:paddingBottom="@dimen/material_size_8"
         android:layout_marginTop="@dimen/material_size_16"
+        android:layout_marginBottom="@dimen/material_size_8"
+        app:layout_constraintBottom_toTopOf="@id/tvwhatsapp"
+        app:layout_constraintTop_toBottomOf="@id/tvBody"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+    <TextView
+        android:id="@+id/tvwhatsapp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Place order in Whatsapp"
+        android:background="@drawable/shape_round_rectangle_8"
+        android:visibility="gone"
+        android:backgroundTint="@color/green_base"
+        android:foreground="?android:selectableItemBackgroundBorderless"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:paddingTop="@dimen/material_size_8"
+        android:paddingBottom="@dimen/material_size_8"
+        android:layout_marginTop="@dimen/material_size_8"
         android:layout_marginBottom="@dimen/material_size_16"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvBody"
+        app:layout_constraintTop_toBottomOf="@id/tvClose"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -38,15 +38,16 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityCheck
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialogClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADDRESS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CHECKOUT_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NAVIGATION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STATUS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -63,7 +64,8 @@ class InvoiceActivity :
     BaseActivity(),
     KodeinAware,
     PaymentResultListener,
-    AddressDialogClickListener
+    AddressDialogClickListener,
+    CustomAlertClickListener
 {
     override val kodein: Kodein by kodein()
     private val factory: CheckoutViewModelFactory by instance()
@@ -106,8 +108,18 @@ class InvoiceActivity :
         lifecycleScope.launch {
             delay(500)
             binding.apply {
-                clAddress.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_in_right_bounce))
-                nsvScrollBody.startAnimation(AnimationUtils.loadAnimation(this@InvoiceActivity, R.anim.slide_up))
+                clAddress.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@InvoiceActivity,
+                        R.anim.slide_in_right_bounce
+                    )
+                )
+                nsvScrollBody.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        this@InvoiceActivity,
+                        R.anim.slide_up
+                    )
+                )
                 clAddress.visible()
                 nsvScrollBody.visible()
                 tvFreeDelivery.isSelected = true
@@ -182,7 +194,7 @@ class InvoiceActivity :
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        val content = if(viewModel.isCWMCart) {
+                        val content = if (viewModel.isCWMCart) {
                             "Rs: ${viewModel.getCartPrice(viewModel.cwmDish)}"
                         } else {
                             "Rs: ${viewModel.getCartPrice(viewModel.totalCartItems)}"
@@ -204,7 +216,7 @@ class InvoiceActivity :
         filterBtn.setOnClickListener {
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 lifecycleScope.launch {
-                    if(viewModel.isCWMCart) {
+                    if (viewModel.isCWMCart) {
                         viewModel.clearCart(viewModel.cwmDish)
                     } else {
                         viewModel.clearCart(viewModel.totalCartItems)
@@ -226,7 +238,7 @@ class InvoiceActivity :
 
         cartBtn.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            if(cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
+            if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
             } else {
                 cartBottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
@@ -245,12 +257,32 @@ class InvoiceActivity :
                     return@setOnClickListener
                 }
             }
-            showListBottomSheet(this, arrayListOf<String>("Online", "Wallet (Rs: ${viewModel.wallet?.amount})", "Cash On Delivery"))
-        }
+            viewModel.userProfile?.let {
+                showListBottomSheet(
+                    this,
+                    arrayListOf<String>(
+                        "Online",
+                        "Wallet (Rs: ${viewModel.wallet?.amount})",
+                        "Cash On Delivery"
+                    )
+                )
+            } ?:let {
+                viewModel.tempAddress?.let {
+                    CustomAlertDialog(
+                        this,
+                        "User not Signed In",
+                    "To place order you should be Signed In with Google Account. If you do not wish to login you can still place order using Whatsapp. Select PLACE ORDER WITH WHATSAPP Option to place your order through whatsapp.",
+                        "Sign In",
+                        "order",
+                        this
+                    ).show()
+                } ?: showToast(this, "Enter address to place order")
+           }
+       }
     }
 
     private fun setBottomSheetIcon(content: String) {
-        val icon =  when(content) {
+        val icon = when (content) {
             "coupon" -> R.drawable.ic_coupon
             "delete" -> R.drawable.ic_delete
             "wallet" -> R.drawable.ic_wallet
@@ -272,7 +304,7 @@ class InvoiceActivity :
 //            CustomAlertDialog(this).show()
 //        }
         viewModel.uiEvent.observe(this) { event ->
-            when(event) {
+            when (event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)
                 is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
                 is UIEvent.ProgressBar -> {
@@ -357,12 +389,27 @@ class InvoiceActivity :
                 is CheckoutViewModel.UiUpdate.PopulateAddressData -> {
                     updateAddressInView(event.addressList[0])
                     setDataToViews()
+                    updateDeliveryCharge()
                 }
+                is CheckoutViewModel.UiUpdate.NoProfileFound -> {
+                    SharedPref(this).getData(ADDRESS, STRING, "").let { address ->
+                        if (address != "") {
+                            viewModel.tempAddress =  Utils.toAddressDataClass(address as String)
+                        }
+                        updateAddressInView(viewModel.tempAddress)
+                        setDataToViews()
+                        updateDeliveryCharge()
+                    }
+               }
                 is CheckoutViewModel.UiUpdate.AddressUpdate -> {
                     if (event.isSuccess) {
                         showToast(this@InvoiceActivity, "Address Updated")
-                        updateAddressInView(event.address!!)
+                        viewModel.userProfile?.let {
+                            updateAddressInView(event.address!!)
+                        } ?: updateAddressInView(viewModel.tempAddress)
+
                         setDataToViews()
+                        updateDeliveryCharge()
                     } else {
                         showErrorSnackBar(event.message, true)
                     }
@@ -387,7 +434,10 @@ class InvoiceActivity :
                 is CheckoutViewModel.UiUpdate.HowToVideo -> {
                     hideProgressDialog()
                     if (event.url == "") {
-                        showToast(this, "Demo Video will be available soon. Sorry for the inconvenience.")
+                        showToast(
+                            this,
+                            "Demo Video will be available soon. Sorry for the inconvenience."
+                        )
                     } else {
                         openInBrowser(event.url)
                     }
@@ -410,12 +460,20 @@ class InvoiceActivity :
         }
     }
 
-    private fun updateAddressInView(address: Address) {
+    private fun updateAddressInView(addressData: Address?) {
         binding.apply {
-            tvUserName.setTextAnimation(address.userId)
-            tvAddressOne.setTextAnimation(address.addressLineOne)
-            tvAddressTwo.setTextAnimation(address.addressLineTwo)
-            tvAddressCity.setTextAnimation("${address.city} - ${address.LocationCode}")
+            addressData?.let { address ->
+                tvUserName.setTextAnimation(address.userId)
+                tvAddressOne.setTextAnimation(address.addressLineOne)
+                tvAddressTwo.setTextAnimation(address.addressLineTwo)
+                tvAddressCity.setTextAnimation("${address.city} - ${address.LocationCode}")
+            } ?: let {
+                tvUserName.setTextAnimation("You have not Logged In")
+                tvAddressOne.setTextAnimation("Tap to update Address Details to place order")
+                tvAddressTwo.setTextAnimation("")
+                tvAddressCity.setTextAnimation("")
+                tvDeliveryChargeAmt.setTextAnimation("0.00")
+            }
         }
     }
 
@@ -438,7 +496,8 @@ class InvoiceActivity :
     }
 
     private fun showLoadStatusDialog(title: String, body: String, content: String) {
-        LoadStatusDialog.newInstance(title, body, content).show(supportFragmentManager,
+        LoadStatusDialog.newInstance(title, body, content).show(
+            supportFragmentManager,
             Constants.LOAD_DIALOG
         )
     }
@@ -488,14 +547,14 @@ class InvoiceActivity :
             } else {
                 viewModel.totalCartItems
             }
-            when(paymentMethod) {
+            when (paymentMethod) {
                 "Online" -> {
                     val mrp = binding.tvTotalAmt.text.toString().toFloat()
                     viewModel.userProfile?.let {
                         startPayment(
                             this@InvoiceActivity,
                             mailID = it.mailId,
-                            mrp  * 100f,
+                            mrp * 100f,
                             name = it.name,
                             userID = it.id,
                             phoneNumber = it.phNumber
@@ -507,10 +566,18 @@ class InvoiceActivity :
                     }
                 }
                 "Cash On Delivery" -> {
-                    showSwipeConfirmationDialog(this@InvoiceActivity, "Swipe Right to place order", "cod")
+                    showSwipeConfirmationDialog(
+                        this@InvoiceActivity,
+                        "Swipe Right to place order",
+                        "cod"
+                    )
                 }
                 else -> {
-                    showSwipeConfirmationDialog(this@InvoiceActivity, "Swipe Right to make payment", "wallet")
+                    showSwipeConfirmationDialog(
+                        this@InvoiceActivity,
+                        "Swipe Right to make payment",
+                        "wallet"
+                    )
                 }
             }
         }
@@ -531,6 +598,21 @@ class InvoiceActivity :
                 generateOrderDetailsMap()
             )
         }
+    }
+
+    private fun updateDeliveryCharge() {
+        lifecycleScope.launch {
+            viewModel.userProfile?.let {
+                binding.tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
+            } ?: let {
+                viewModel.tempAddress?.let {
+                    binding.tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
+                } ?: let {
+                    binding.tvDeliveryChargeAmt.setTextAnimation("0.00")
+                }
+            }
+        }
+        hideProgressDialog()
     }
 
     private fun setDataToViews() {
@@ -563,20 +645,28 @@ class InvoiceActivity :
             tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
             tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0f}"
             val totalPrice = cartPrice - (viewModel.couponPrice ?: 0f)
-            tvGstAmt.text = "${(totalPrice * 5)/100}"
+            tvGstAmt.text = "${(totalPrice * 5) / 100}"
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
-                viewModel.getDeliveryCharge()
+//                viewModel.getDeliveryCharge()
                 tvTotalAmt.setTextAnimation(totalPrice.toString())
             } else {
-                tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
-                tvTotalAmt.setTextAnimation("${totalPrice + tvDeliveryChargeAmt.text.toString().toFloat() + tvGstAmt.text.toString().toFloat()}")
+                updateDeliveryCharge()
             }
+            binding.tvTotalAmt.setTextAnimation(
+                "${
+                    totalPrice + binding.tvDeliveryChargeAmt.text.toString()
+                        .toFloat() + binding.tvGstAmt.text.toString().toFloat()
+                }"
+            )
+
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 checkoutText.setTextAnimation("Rs: $cartPrice")
             }
-            tvFreeDelivery.text = "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
-            tvFreeDeliveryNotif.text = "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
+            tvFreeDelivery.text =
+                "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
+            tvFreeDeliveryNotif.text =
+                "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
         }
     }
 
@@ -586,7 +676,8 @@ class InvoiceActivity :
 //                binding.nsvScrollBody.requestDisallowInterceptTouchEvent(true)
 //                false
 //            }
-            KeyboardVisibilityEvent.setEventListener(this@InvoiceActivity
+            KeyboardVisibilityEvent.setEventListener(
+                this@InvoiceActivity
             ) { isOpen ->
                 if (isOpen) {
                     cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
@@ -666,7 +757,8 @@ class InvoiceActivity :
 
     private fun updatePreferenceData() {
         if (viewModel.clearedProductIDs.isNotEmpty()) {
-            val productIDString = SharedPref(this).getData(PRODUCTS, Constants.STRING, "").toString()
+            val productIDString =
+                SharedPref(this).getData(PRODUCTS, Constants.STRING, "").toString()
             val productIDs: MutableList<String> = if (productIDString != "") {
                 productIDString.split(":").map { it } as MutableList<String>
             } else {
@@ -679,7 +771,8 @@ class InvoiceActivity :
             }
 //            productIDs.addAll(viewModel.clearedProductIDs.distinct())
             viewModel.clearedProductIDs.clear()
-            SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":")).toString()
+            SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":"))
+                .toString()
         }
     }
 
@@ -710,13 +803,17 @@ class InvoiceActivity :
             showErrorSnackBar("Please check your Internet Connection", true)
             return
         }
-        viewModel.userProfile?.let {
-            val dialog = AddressDialog()
-            val bundle = Bundle()
-            bundle.putParcelable("address", it.address[0])
-            dialog.arguments = bundle
-            dialog.show(supportFragmentManager, "addressDialog")
+        val address = viewModel.userProfile?.let {
+            it.address[0]
+        } ?: let {
+            viewModel.tempAddress
         }
+        val dialog = AddressDialog()
+        val bundle = Bundle()
+
+        bundle.putParcelable("address", address)
+        dialog.arguments = bundle
+        dialog.show(supportFragmentManager, "addressDialog")
     }
 
     //from address dialog
@@ -734,7 +831,15 @@ class InvoiceActivity :
             city = addressMap["city"].toString()
         ).also { address ->
             viewModel.deliveryAvailable = true
-            viewModel.updateAddress(address)
+            viewModel.userProfile?.let {
+                viewModel.updateAddress(address)
+            } ?:let {
+                viewModel.tempAddress = address
+                SharedPref(this).putData(ADDRESS, STRING, Utils.toStringForSharedPref(address))
+                setDataToViews()
+                updateDeliveryCharge()
+                updateAddressInView(address)
+            }
         }
     }
 
@@ -754,5 +859,40 @@ class InvoiceActivity :
             }
         }
         return super.dispatchTouchEvent(event)
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "order")
+            startActivity(it)
+            finish()
+        }
+    }
+
+    override fun placeOrderWithWhatsapp() {
+            lifecycleScope.launch {
+                val cartItems = if (viewModel.isCWMCart) {
+                        viewModel.cwmDish
+                    } else {
+                        viewModel.totalCartItems
+                    }
+
+                val message: String = "Order ID: ${System.currentTimeMillis()} \n Customer ID: Not Signed In \n Price: ${binding.tvTotalAmt.text} (Incl GST + Delivery Charge) \n Delivery Charge: ${binding.tvDeliveryChargeAmt.text} \n GST: ${binding.tvGstAmt.text} \n Transaction ID: COD \n Purchase Date: ${TimeUtil().getCurrentDate()} \n PaymentDone: False \n Payment Method: COD \n Delivery Preference: ${binding.spDeliveryPreference.selectedItem} \n Delivery Note: ${binding.etDeliveryNote.text} \n Address: ${viewModel.tempAddress!!.userId}, ${viewModel.tempAddress!!.addressLineOne}, ${viewModel.tempAddress!!.addressLineTwo}, ${viewModel.tempAddress!!.city}, ${viewModel.tempAddress!!.LocationCode} \n Cart Items: ${Utils.createOrderForWhatsapp(
+                    cartItems as ArrayList<CartEntity>
+                )}"
+
+                 startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(
+                            "https://api.whatsapp.com/send?phone=+917299827393&text=$message"
+                        )
+                    )
+                )
+            }
+    }
+
+    override fun onClick() {
+        Unit
     }
 }

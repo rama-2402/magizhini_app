@@ -8,6 +8,138 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEnti
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 
 class Converters {
+//
+//    @TypeConverter
+//    fun fromString(value: String?): ArrayList<String> {
+//        val listType = TypeToken.getParameterized(ArrayList::class.java, String::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//
+//    @TypeConverter
+//    fun fromArrayList(list: ArrayList<String?>): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    @TypeConverter
+//    fun fromStringToArrayListLong(value: String?): ArrayList<Long> {
+//        val listType = TypeToken.getParameterized(ArrayList::class.java, Long::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//
+//    @TypeConverter
+//    fun fromArrayListLongToString(list: ArrayList<Long?>): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    @TypeConverter
+//    fun fromStringToProductEntity(value: String?): ProductEntity {
+//        val listType = TypeToken.getParameterized(ProductEntity::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//
+//    @TypeConverter
+//    fun fromProductEntity(list: ProductEntity): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    @TypeConverter
+//    fun fromStringToVariants(value: String?): ArrayList<ProductVariant> {
+//        val listType = TypeToken.getParameterized(ProductVariant::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//
+//    @TypeConverter
+//    fun fromVariantList(list: ArrayList<ProductVariant?>): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    @TypeConverter
+//    fun fromStringToDefaultVariants(value: String?): ArrayList<DefaultVariant> {
+//        val listType = TypeToken.getParameterized(DefaultVariant::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//
+//    @TypeConverter
+//    fun fromDefaultVariantList(list: ArrayList<DefaultVariant?>): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    @TypeConverter
+//    fun fromStringToCart(value: String?): ArrayList<Order> {
+//        val listType = TypeToken.getParameterized(Order::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//
+//    @TypeConverter
+//    fun fromCartList(list: ArrayList<Order?>): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    @TypeConverter
+//    fun fromStringToReviewsArray(value: String?): ArrayList<Review> {
+//        val listType = TypeToken.getParameterized(ArrayList::class.java, Review::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//    @TypeConverter
+//    fun fromReviewArray(list: ArrayList<Review?>): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    @TypeConverter
+//    fun fromStringToAddressArray(value: String?): ArrayList<Address> {
+//        val listType = TypeToken.getParameterized(ArrayList::class.java, Address::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//    @TypeConverter
+//    fun fromAddressArray(list: ArrayList<Address?>): String {
+//        return Gson().toJson(list)
+//    }
+//    @TypeConverter
+//    fun fromStringToCartEntityArray(value: String?): ArrayList<Cart> {
+//        val listType = TypeToken.getParameterized(ArrayList::class.java, Cart::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//    @TypeConverter
+//    fun fromCartEntityArray(list: ArrayList<Cart?>): String {
+//        return Gson().toJson(list)
+//    }
+//    @TypeConverter
+//    fun fromStringToCartEntityList(value: String?): List<CartEntity> {
+//        val listType = TypeToken.getParameterized(List::class.java, CartEntity::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//    @TypeConverter
+//    fun fromCartEntityList(list: List<CartEntity?>): String {
+//        return Gson().toJson(list)
+//    }
+//
+//
+//    @TypeConverter
+//    fun fromStringToAddress(value: String?): Address {
+//        val listType = TypeToken.getParameterized(Address::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//
+//    @TypeConverter
+//    fun fromAddress(list: Address): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    @TypeConverter
+//    fun fromStringToTransactionClass(value: String?): List<TransactionHistory> {
+//        val listType = TypeToken.getParameterized(List::class.java, TransactionHistory::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
+//
+//    @TypeConverter
+//    fun fromTransactionClass(list: List<TransactionHistory?>): String {
+//        return Gson().toJson(list)
+//    }
+//
+//    fun stringToCartConverter(value: String): MutableList<CartEntity> {
+//        val listType = TypeToken.getParameterized(MutableList::class.java, CartEntity::class.java).type
+//        return Gson().fromJson(value, listType)
+//    }
 
     @TypeConverter
     fun fromString(value: String?): ArrayList<String> {
@@ -134,5 +266,10 @@ class Converters {
     @TypeConverter
     fun fromTransactionClass(list: List<TransactionHistory?>): String {
         return Gson().toJson(list)
+    }
+
+    fun stringToCartConverter(value: String): MutableList<CartEntity> {
+        val listType = object : TypeToken<MutableList<CartEntity>>() {}.type
+        return Gson().fromJson(value, listType)
     }
 }

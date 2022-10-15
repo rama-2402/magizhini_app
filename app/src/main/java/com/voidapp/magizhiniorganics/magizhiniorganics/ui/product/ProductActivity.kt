@@ -33,7 +33,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeSpecialsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
