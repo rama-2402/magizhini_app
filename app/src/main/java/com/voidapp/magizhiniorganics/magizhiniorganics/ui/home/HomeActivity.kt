@@ -29,7 +29,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.BuildConfig
 import com.google.firebase.messaging.FirebaseMessaging
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.*
@@ -122,7 +121,7 @@ class HomeActivity :
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
-        viewModel = ViewModelProvider(this, factory).get(HomeViewModel::class.java)
+        viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
 
         setSupportActionBar(binding.tbToolbar)
 
@@ -585,7 +584,7 @@ class HomeActivity :
     }
 
     private fun navigateToAmmaSpecial() {
-        Intent(this@HomeActivity, FoodSubscriptionActivity::class.java).also {
+        Intent(this@HomeActivity, FoodSubHistoryActivity::class.java).also {
                     startActivity(it)
                 }
     }

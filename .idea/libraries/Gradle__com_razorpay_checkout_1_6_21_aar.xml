@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.razorpay:checkout:1.6.21@aar">
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/3babed2dac2e1912ed1fbf0e32d5edaf/transformed/jetified-checkout-1.6.21/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/3babed2dac2e1912ed1fbf0e32d5edaf/transformed/jetified-checkout-1.6.21/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/3babed2dac2e1912ed1fbf0e32d5edaf/transformed/jetified-checkout-1.6.21/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/92852e8ced1068ec3aa5b880b84dac6a/transformed/jetified-checkout-1.6.21/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/92852e8ced1068ec3aa5b880b84dac6a/transformed/jetified-checkout-1.6.21/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/92852e8ced1068ec3aa5b880b84dac6a/transformed/jetified-checkout-1.6.21/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.razorpay/checkout/1.6.21/772641c8514e72dd0ca07f44f96e5eabc92911e4/checkout-1.6.21-javadoc.jar!/" />

@@ -90,10 +90,6 @@ class PurchaseHistoryActivity :
         binding.ivBackBtn.setOnClickListener {
             onBackPressed()
         }
-//        binding.ivHowTo.setOnClickListener {
-//            showProgressDialog(true)
-//            viewModel.getHowToVideo("PurchaseHistory")
-//        }
         binding.ivFilter.setOnClickListener {
             showCalendarFilterDialog(viewModel.filterMonth, viewModel.filterYear)
         }

@@ -31,7 +31,9 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.BestSellersAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.CartAdapter
+import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.HomeSpecialsAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ReviewAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ProductViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
@@ -62,7 +64,8 @@ import kotlin.math.abs
 class ProductActivity :
     BaseActivity(),
     KodeinAware,
-    ReviewAdapter.ReviewItemClickListener
+    ReviewAdapter.ReviewItemClickListener,
+        BestSellersAdapter.BestSellerItemClickListener
 {
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityProductBinding
@@ -137,7 +140,6 @@ class ProductActivity :
 
         setBottomSheetIcon("coupon")
 
-
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
         cartAdapter = CartAdapter(
@@ -181,7 +183,8 @@ class ProductActivity :
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 viewModel.clearCart()
             } else {
-                showAddCouponDialog()
+                showToast(this, "No Coupon Available")
+//                showAddCouponDialog()
             }
         }
         checkoutBtn.setOnClickListener {
@@ -299,6 +302,7 @@ class ProductActivity :
                         refreshLimitedItemCount()
                     } ?: showErrorSnackBar(event.message!!, true)
                 }
+                is ProductViewModel.UiUpdate.PopulateSimilarProducts -> populateSimilarProducts()
                 is ProductViewModel.UiUpdate.UpdateLimitedItemCount -> {
                     refreshLimitedItemCount()
                 }
@@ -393,6 +397,19 @@ class ProductActivity :
                 else -> Unit
             }
             viewModel.setEmptyUiEvent()
+        }
+    }
+
+    private fun populateSimilarProducts() {
+        binding.apply {
+            BestSellersAdapter(
+                this@ProductActivity,
+                viewModel.similarProducts,
+                this@ProductActivity
+            ).also {
+                rvProducts.adapter = it
+                rvProducts.layoutManager = LinearLayoutManager(this@ProductActivity, LinearLayoutManager.HORIZONTAL, false)
+            }
         }
     }
 
@@ -817,6 +834,20 @@ class ProductActivity :
                 ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, ViewCompat.getTransitionName(thumbnail)!!)
             startActivity(intent, options.toBundle())
         }
+    }
+
+    override fun moveToProductDetails(
+        productID: String,
+        productName: String,
+        thumbnail: ShapeableImageView
+    ) {
+        binding.tvProductName.text = productName
+        binding.tvProductName.isSelected = true
+        viewModel.productID = productID
+        binding.spProductVariant.setSelection(0)
+        binding.spProductQuantity.setSelection(0)
+        viewModel.selectedVariantPosition = 0
+        viewModel.getProductByID()
     }
 }
 

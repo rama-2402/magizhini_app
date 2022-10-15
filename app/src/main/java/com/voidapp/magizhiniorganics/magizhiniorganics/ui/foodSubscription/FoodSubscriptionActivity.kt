@@ -47,11 +47,6 @@ class FoodSubscriptionActivity :
 
     private fun initListeners() {
         binding.apply {
-            ivHistory.setOnClickListener {
-                Intent(this@FoodSubscriptionActivity, FoodOrderActivity::class.java).also {
-                    startActivity(it)
-                }
-            }
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
@@ -80,11 +75,18 @@ class FoodSubscriptionActivity :
                 is FoodSubscriptionViewModel.UiUpdate.PopulateAmmaSpecials -> {
                     populateBanners(event.banners)
                     event.ammaSpecials?.let { specials ->
-                        FoodSubscriptionAdapter(specials.sortedBy { it.displayOrder }, this).let { adapter ->
-                            binding.rvFoods.adapter = adapter
-                            binding.rvFoods.layoutManager = LinearLayoutManager(this)
+                        if (specials.isEmpty()) {
+                            binding.tvFoodStatus.visible()
+                            binding.svBody.remove()
+                        } else {
+                            binding.tvFoodStatus.remove()
+                            binding.svBody.visible()
+                            FoodSubscriptionAdapter(specials.sortedBy { it.displayOrder }, this).let { adapter ->
+                                binding.rvFoods.adapter = adapter
+                                binding.rvFoods.layoutManager = LinearLayoutManager(this)
+                            }
                         }
-                    }?: showErrorSnackBar("Server Error! Please try again later", true)
+                   }?: showErrorSnackBar("Server Error! Please try again later", true)
                     hideProgressDialog()
                 }
                 is FoodSubscriptionViewModel.UiUpdate.Empty -> {

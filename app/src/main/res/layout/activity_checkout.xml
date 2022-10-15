@@ -513,67 +513,67 @@
                     android:paddingBottom="@dimen/material_size_8"
                     android:elevation="@dimen/material_size_4">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/etlCoupon"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:hint="Coupon Code"
-                        android:layout_margin="@dimen/material_size_8"
-                        app:boxStrokeColor="@color/matteRed"
-                        app:flow_wrapMode="aligned"
-                        app:endIconMode="clear_text"
-                        app:hintTextColor="@color/matteRed"
-                        android:textColorHint="@color/grey"
-                        app:layout_constraintEnd_toStartOf="@id/btnApplyCoupon"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        >
+<!--                    <com.google.android.material.textfield.TextInputLayout-->
+<!--                        android:id="@+id/etlCoupon"-->
+<!--                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:hint="Coupon Code"-->
+<!--                        android:layout_margin="@dimen/material_size_8"-->
+<!--                        app:boxStrokeColor="@color/matteRed"-->
+<!--                        app:flow_wrapMode="aligned"-->
+<!--                        app:endIconMode="clear_text"-->
+<!--                        app:hintTextColor="@color/matteRed"-->
+<!--                        android:textColorHint="@color/grey"-->
+<!--                        app:layout_constraintEnd_toStartOf="@id/btnApplyCoupon"-->
+<!--                        app:layout_constraintStart_toStartOf="parent"-->
+<!--                        app:layout_constraintTop_toTopOf="parent"-->
+<!--                        >-->
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etCoupon"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:cursorVisible="true"
-                            android:inputType="textShortMessage"
-                            android:textColorHint="@color/green_base"
-                            android:textColor="@color/gray700"
-                            android:textCursorDrawable="@null" />
-                    </com.google.android.material.textfield.TextInputLayout>
+<!--                        <com.google.android.material.textfield.TextInputEditText-->
+<!--                            android:id="@+id/etCoupon"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="match_parent"-->
+<!--                            android:cursorVisible="true"-->
+<!--                            android:inputType="textShortMessage"-->
+<!--                            android:textColorHint="@color/green_base"-->
+<!--                            android:textColor="@color/gray700"-->
+<!--                            android:textCursorDrawable="@null" />-->
+<!--                    </com.google.android.material.textfield.TextInputLayout>-->
 
-                    <Button
-                        android:id="@+id/btnApplyCoupon"
-                        android:layout_width="0dp"
-                        app:layout_constraintWidth_percent=".3"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/material_size_8"
-                        android:layout_marginEnd="@dimen/material_size_8"
-                        android:text="Apply"
-                        android:background="@drawable/shape_round_rectangle_8"
-                        android:textSize="16sp"
-                        android:textColor="@color/white"
-                        app:backgroundTint="@color/matteRed"
-                        app:layout_constraintEnd_toStartOf="@id/ivCouponInfo"
-                        app:layout_constraintStart_toEndOf="@id/etlCoupon"
-                        app:layout_constraintTop_toTopOf="@id/etlCoupon"
-                        app:layout_constraintBottom_toBottomOf="@id/etlCoupon"
-                         />
+<!--                    <Button-->
+<!--                        android:id="@+id/btnApplyCoupon"-->
+<!--                        android:layout_width="0dp"-->
+<!--                        app:layout_constraintWidth_percent=".3"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginStart="@dimen/material_size_8"-->
+<!--                        android:layout_marginEnd="@dimen/material_size_8"-->
+<!--                        android:text="Apply"-->
+<!--                        android:background="@drawable/shape_round_rectangle_8"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textColor="@color/white"-->
+<!--                        app:backgroundTint="@color/matteRed"-->
+<!--                        app:layout_constraintEnd_toStartOf="@id/ivCouponInfo"-->
+<!--                        app:layout_constraintStart_toEndOf="@id/etlCoupon"-->
+<!--                        app:layout_constraintTop_toTopOf="@id/etlCoupon"-->
+<!--                        app:layout_constraintBottom_toBottomOf="@id/etlCoupon"-->
+<!--                         />-->
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/ivCouponInfo"
-                        android:layout_width="@dimen/material_size_32"
-                        android:layout_height="@dimen/material_size_32"
-                        app:layout_constraintTop_toTopOf="@id/btnApplyCoupon"
-                        app:layout_constraintBottom_toBottomOf="@id/btnApplyCoupon"
-                        app:layout_constraintStart_toEndOf="@id/btnApplyCoupon"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        android:src="@drawable/ic_info"
-                        android:layout_marginEnd="@dimen/material_size_8"
-                        android:visibility="gone"
-                        android:contentDescription="@string/favorites_icon"
-                        app:tint="@color/green_base"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
-                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>
+<!--                    <com.google.android.material.imageview.ShapeableImageView-->
+<!--                        android:id="@+id/ivCouponInfo"-->
+<!--                        android:layout_width="@dimen/material_size_32"-->
+<!--                        android:layout_height="@dimen/material_size_32"-->
+<!--                        app:layout_constraintTop_toTopOf="@id/btnApplyCoupon"-->
+<!--                        app:layout_constraintBottom_toBottomOf="@id/btnApplyCoupon"-->
+<!--                        app:layout_constraintStart_toEndOf="@id/btnApplyCoupon"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent"-->
+<!--                        android:src="@drawable/ic_info"-->
+<!--                        android:layout_marginEnd="@dimen/material_size_8"-->
+<!--                        android:visibility="gone"-->
+<!--                        android:contentDescription="@string/favorites_icon"-->
+<!--                        app:tint="@color/green_base"-->
+<!--                        android:background="?android:attr/selectableItemBackgroundBorderless"-->
+<!--                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"/>-->
 
                     <TextView
                         android:id="@+id/tvDeliveryPreference"
@@ -584,9 +584,9 @@
                         android:gravity="center"
                         style="@style/TextAppearance.MaterialComponents.Body1"
                         android:layout_marginStart="@dimen/material_size_8"
-                        android:layout_marginTop="@dimen/material_size_32"
+                        android:layout_marginTop="@dimen/material_size_8"
                         android:textColor="@color/gray700"
-                        app:layout_constraintTop_toBottomOf="@id/etlCoupon"
+                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <Spinner

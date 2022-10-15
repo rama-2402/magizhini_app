@@ -76,6 +76,7 @@ class FoodSubHistoryActivity :
             ivHistory.setOnClickListener {
                 Intent(this@FoodSubHistoryActivity, FoodSubscriptionActivity::class.java).also {
                     startActivity(it)
+                    finish()
                 }
             }
             ivBackBtn.setOnClickListener {

@@ -61,11 +61,11 @@ class FoodSubscriptionViewModel(
     }
 
     fun getAmmaSpecials() = viewModelScope.launch {
-//        val specials = foodSubscriptionUseCase.getAllAmmaSpecials()
-//        val banners = foodSubscriptionUseCase.getAllBanners()
-        val specials = generateSampleSpecials()
+        val specials = foodSubscriptionUseCase.getAllAmmaSpecials()
+        val banners = foodSubscriptionUseCase.getAllBanners()
+//        val specials = generateSampleSpecials()
         ammaSpecials.clear()
-        specials.let { specialsList ->
+        specials?.let { specialsList ->
             ammaSpecials.addAll(specialsList)
             specialsList.forEach {
                 lunchMap[it.foodDay] = if (it.discountedPrice == 0.0) {
@@ -75,8 +75,8 @@ class FoodSubscriptionViewModel(
                 }
             }
         }
-//        _uiUpdate.value = UiUpdaate.PopulateAmmaSpecials(specials, banners)
-        _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, null)
+        _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, banners)
+//        _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, null)
     }
 
     private fun generateSampleSpecials(): MutableList<AmmaSpecial> {

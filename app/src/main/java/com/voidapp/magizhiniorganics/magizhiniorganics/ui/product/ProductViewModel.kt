@@ -36,6 +36,7 @@ class ProductViewModel(
     var productID: String = ""
     var selectedVariantPosition: Int = 0
     var selectedVariantName: String = ""
+    val similarProducts: MutableList<ProductEntity> = mutableListOf()
 
     val cartItems: MutableList<CartEntity> = mutableListOf()
     val clearedIDsFromCart: MutableList<String> = mutableListOf()
@@ -89,6 +90,15 @@ class ProductViewModel(
                 product = it
                 _description.value = it.description
                 _uiUpdate.value = UiUpdate.PopulateProductData(null, it)
+            }
+            if (similarProducts.isEmpty()) {
+                dbRepository.getAllProductByCategoryStatic(it.category).let { products ->
+                    similarProducts.clear()
+                    similarProducts.addAll(products.shuffled())
+                }
+                withContext(Dispatchers.Main) {
+                    _uiUpdate.value = UiUpdate.PopulateSimilarProducts
+                }
             }
         } ?: withContext(Dispatchers.Main) {
             _uiUpdate.value = UiUpdate.PopulateProductData("Product not available", null)
@@ -288,6 +298,8 @@ class ProductViewModel(
         * we are making two different copies where one copy is passed initially and hard copy is made which is later used for recycler view
         * */
         dbRepository.getAllCartItem()?.let { cart ->
+            cartItems.clear()
+            cartItemsCount = 0
             cart.forEach {
                 cartItemsCount += it.quantity
             }
@@ -567,6 +579,7 @@ class ProductViewModel(
     sealed class UiUpdate {
         data class PopulateProductData(val message: String?, val product: ProductEntity?) :
             UiUpdate()
+        object PopulateSimilarProducts: UiUpdate()
 
         data class UpdateLimitedItemCount(val message: String?) : UiUpdate()
         data class UpdateFavorites(val isFavorite: Boolean) : UiUpdate()

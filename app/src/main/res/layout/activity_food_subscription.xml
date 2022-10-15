@@ -72,20 +72,26 @@
                             android:textSize="@dimen/text_size_small" />
                     </LinearLayout>
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/ivHistory"
-                        android:layout_width="@dimen/material_size_24"
-                        android:layout_height="@dimen/material_size_24"
-                        android:layout_gravity="end"
-                        android:layout_marginEnd="@dimen/material_size_16"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/favorites_icon"
-                        android:src="@drawable/ic_food"
-                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
-                        app:tint="@color/white" />
                 </androidx.appcompat.widget.Toolbar>
             </com.google.android.material.appbar.AppBarLayout>
         </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvFoodStatus"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/material_size_8"
+                android:gravity="center"
+                android:text="Coming Soon...\n\n\nWe are working hard to provide Healthy opportunities at Affordable prices by soon launching our special Homemade Amma cooked meal with Organic Ingredients from Magizhini Organics 😋"
+                android:layout_margin="@dimen/material_size_16"
+                android:visibility="gone"
+                android:textColor="@color/gray700"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
         <me.didik.component.StickyNestedScrollView
             android:id="@+id/svBody"
             android:layout_width="match_parent"

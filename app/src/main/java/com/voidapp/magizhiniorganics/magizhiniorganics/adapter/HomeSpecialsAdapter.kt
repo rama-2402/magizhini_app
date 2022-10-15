@@ -43,11 +43,6 @@ class HomeSpecialsAdapter(
             ivBannerTwo.loadSimple(banners[getBannerPosition(position, 1)].url)
             ivBannerThree.loadSimple(banners[getBannerPosition(position, 2)].url)
 
-
-//            ivBannerOne.loadSimple(banner[0].url)
-//            ivBannerTwo.loadSimple(banner[1].url)
-//            ivBannerThree.loadSimple(banner[2].url)
-
             cpBestSellers.setOnClickListener {
                 it.startAnimation(
                     AnimationUtils.loadAnimation(
@@ -116,7 +111,6 @@ class HomeSpecialsAdapter(
         val bestSellerAdapter = BestSellersAdapter(context, bestSellerList, bestSellerItemClickListener)
         recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         recyclerView.adapter = bestSellerAdapter
-
     }
 
     interface HomeSpecialsItemClickListener {

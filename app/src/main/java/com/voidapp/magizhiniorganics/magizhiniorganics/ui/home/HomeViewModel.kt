@@ -209,13 +209,21 @@ class HomeViewModel (
     }
 
     fun getEndData() = viewModelScope.launch(Dispatchers.IO) {
-        val partnersLocal =
-            withContext(Dispatchers.Default) { fbRepository.getAllPartners() }
+//        val partnersLocal =
+//            withContext(Dispatchers.Default) { fbRepository.getAllPartners() }
         val testimonialsLocal =
             withContext(Dispatchers.Default) { dbRepository.getAllTestimonials() }
 
         withContext(Dispatchers.Main) {
-            partnersLocal?.let { partners.addAll(it) }
+//            partnersLocal?.let { partners.addAll(it) }
+            partners.add(
+                Partners(
+                    "",
+                    "Eyalvathu Karavel",
+                    "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/partners%2Feyalvathu_karavel.jpg?alt=media&token=b69cfd95-2bba-4322-a734-919e47c99362",
+                    "Open"
+                )
+            )
             testimonialsLocal?.let { testimonials.addAll(it) }
             _uiUpdate.value = UiUpdate.PopulateEnd(testimonials, partners)
         }

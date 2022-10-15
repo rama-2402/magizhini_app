@@ -15,7 +15,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadSimple
 class BestSellersAdapter(
     val context: Context,
     var products: List<ProductEntity>,
-//    var recycler: String,
     val onItemClickListener: BestSellerItemClickListener
 ) : RecyclerView.Adapter<BestSellersAdapter.ProductHomeViewHolder>() {
 
@@ -23,9 +22,6 @@ class BestSellersAdapter(
         RecyclerView.ViewHolder(binding.root)
 
     private var variantDisplayName = ""
-//    val id: String =
-//        SharedPref(context).getData(Constants.USER_ID, Constants.STRING, "").toString()
-//
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductHomeViewHolder {
         val view =
@@ -53,24 +49,11 @@ class BestSellersAdapter(
             else -> "${product.variants[variantInCartPosition].variantName}ml"
         }
 
-//        var variantPrice: Float = product.variants[0].variantPrice.toFloat()
         with(holder.binding) {
             tvProductName.text = product.name
             checkVariantAvailability(holder, product.variants[variantInCartPosition])
 
-//            CoroutineScope(Dispatchers.IO).launch {
-//                val url: URL = URL(product.thumbnailUrl)
-//                val img: InputStream = url.content as InputStream
-//                val options = BitmapFactory.Options()
-//                options.inPreferredConfig = Bitmap.Config.RGB_565
-//                val image = BitmapFactory.decodeStream(img, null, options)
-//                withContext(Dispatchers.Main) {
-//                    image?.let { ivProductThumbnail.loadImg(it) {} }
-//                }
-//            }
-
             ivProductThumbnail.loadSimple(product.thumbnailUrl)
-//            ivProductThumbnail.loadImg(product.thumbnailUrl) {}
 
             //if discount is available then we make the discount layout visible and set the discount amount and percentage
             if (product.variants[variantInCartPosition].discountPrice != 0.0) {

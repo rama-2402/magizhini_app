@@ -99,49 +99,6 @@ class SplashActivity : BaseActivity(), KodeinAware {
                                 )
                             )
                             ivBagFour.visible()
-//                            playFruitsFallingAnimation(ivApple)
-//                            delay(100)
-//                            playFruitsFallingAnimation(ivMilk)
-//                            delay(50)
-//                            playFruitsFallingAnimation(ivBroccoli)
-//                            delay(80)
-//                            playFruitsFallingAnimation(ivTomato)
-//                            delay(100)
-//                            playFruitsFallingAnimation(ivPotato)
-//                            delay(40)
-//                            playFruitsFallingAnimation(ivBanana)
-//                            delay(90)
-//                            playFruitsFallingAnimation(ivPear)
-//                            delay(50)
-//                            playFruitsFallingAnimation(ivBeet)
-//                            delay(80)
-//                            playFruitsFallingAnimation(ivChili)
-//                            delay(120)
-//                            playFruitsFallingAnimation(ivLemon)
-//                            delay(30)
-//                            playFruitsFallingAnimation(ivCarrot)
-//                            delay(382)
-//                            playFruitsFallingAnimation(ivAppleOne)
-//                            delay(100)
-//                            playFruitsFallingAnimation(ivMilkOne)
-//                            delay(50)
-//                            playFruitsFallingAnimation(ivBroccoliOne)
-//                            delay(80)
-//                            playFruitsFallingAnimation(ivTomatoOne)
-//                            delay(20)
-//                            playFruitsFallingAnimation(ivPotatoOne)
-//                            delay(40)
-//                            playFruitsFallingAnimation(ivBananaOne)
-//                            delay(90)
-//                            playFruitsFallingAnimation(ivPearOne)
-//                            delay(50)
-//                            playFruitsFallingAnimation(ivBeetOne)
-//                            delay(80)
-//                            playFruitsFallingAnimation(ivChiliOne)
-//                            delay(120)
-//                            playFruitsFallingAnimation(ivLemonOne)
-//                            delay(30)
-//                            playFruitsFallingAnimation(ivCarrotOne)
                         }
                     }
                     binding.progressCircular.visible()
@@ -160,27 +117,6 @@ class SplashActivity : BaseActivity(), KodeinAware {
         }
         binding.tvStatus.visible()
    }
-
-    private fun playFruitsFallingAnimation(view: View) {
-        lifecycleScope.launch {
-            view.visible()
-            val screenHeight: Int = resources.displayMetrics.heightPixels
-            val positionAnimator = ValueAnimator.ofFloat(-100f, screenHeight.toFloat())
-            positionAnimator.addUpdateListener {
-                val value = it.animatedValue as Float
-                view.translationY = value
-            }
-            val rotationAnimator = ObjectAnimator.ofFloat(view, "rotation", 0f, 180f)
-            val animatorSet = AnimatorSet()
-            animatorSet.play(positionAnimator).with(rotationAnimator)
-            animatorSet.duration = 2969
-            animatorSet.start()
-            delay(1750)
-            view.fadOutAnimation()
-            binding.progressCircular.visible()
-            binding.progressCircular.animate()
-        }
-    }
 
     private fun backgroundCheck(
         isNewDay: String,
@@ -270,57 +206,56 @@ class SplashActivity : BaseActivity(), KodeinAware {
             }
 
         WorkManager.getInstance(this).enqueue(workRequest)
-
-        WorkManager.getInstance(this)
-            .getWorkInfoByIdLiveData(workRequest.id)
-            .observe(this) {
-                when (it.state) {
-                    WorkInfo.State.CANCELLED -> {
-//                        showRetry()
-                        showToast(
-                            this,
-                            "Failed to update product catalog. Try restarting the app again",
-                            LONG
-                        )
-                    }
-                    WorkInfo.State.FAILED -> {
-//                        showRetry()
-                        showToast(
-                            this,
-                            "Failed to update product catalog. Try restarting the app again",
-                            LONG
-                        )
-                    }
-                    WorkInfo.State.SUCCEEDED -> {
-                        val periodicWorker: WorkRequest =
-                            if (wipe == "") {
-                                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
-                                    .setInitialDelay(TimeUtil().getHoursBeforeMidNight(), TimeUnit.HOURS)
-                                    .setInputData(
-                                        workDataOf(
-                                            "wipe" to wipe,
-                                            "id" to userID
-                                        )
-                                    )
-                                    .build()
-                            } else {
-                                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
-                                    .setInputData(
-                                        workDataOf(
-                                            "id" to userID
-                                        )
-                                    )
-                                    .build()
-                            }
-
-                        WorkManager.getInstance(this).enqueue(periodicWorker)
-                        navigateToHomeScreen(true, navigation)
-                    }
-                    else -> {
-//                        navigateToHomeScreen()
-                    }
-                }
-            }
+        navigateToHomeScreen(true, navigation)
+//        WorkManager.getInstance(this)
+//            .getWorkInfoByIdLiveData(workRequest.id)
+//            .observe(this) {
+//                when (it.state) {
+//                    WorkInfo.State.CANCELLED -> {
+////                        showRetry()
+//                        showToast(
+//                            this,
+//                            "Failed to update product catalog. Try restarting the app again",
+//                            LONG
+//                        )
+//                    }
+//                    WorkInfo.State.FAILED -> {
+////                        showRetry()
+//                        showToast(
+//                            this,
+//                            "Failed to update product catalog. Try restarting the app again",
+//                            LONG
+//                        )
+//                    }
+//                    WorkInfo.State.SUCCEEDED -> {
+////                        val periodicWorker: WorkRequest =
+////                            if (wipe == "") {
+////                                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+////                                    .setInitialDelay(TimeUtil().getHoursBeforeMidNight(), TimeUnit.HOURS)
+////                                    .setInputData(
+////                                        workDataOf(
+////                                            "wipe" to wipe,
+////                                            "id" to userID
+////                                        )
+////                                    )
+////                                    .build()
+////                            } else {
+////                                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+////                                    .setInputData(
+////                                        workDataOf(
+////                                            "id" to userID
+////                                        )
+////                                    )
+////                                    .build()
+////                            }
+////                        WorkManager.getInstance(this).enqueue(periodicWorker)
+//                        navigateToHomeScreen(true, navigation)
+//                    }
+//                    else -> {
+////                        navigateToHomeScreen()
+//                    }
+//                }
+//            }
     }
 
     private fun navigateToHomeScreen(newDayCheck: Boolean, navigation: String?) =
@@ -376,43 +311,4 @@ class SplashActivity : BaseActivity(), KodeinAware {
                 }
             }
         }
-
-    private suspend fun hideAnimation() {
-        lifecycleScope.launch {
-            binding.apply {
-                binding.tvStatus.remove()
-                ivBagOne.startAnimation(
-                    AnimationUtils.loadAnimation(
-                        this@SplashActivity,
-                        R.anim.slide_out_left
-                    )
-                )
-                ivBagOne.hide()
-                delay(64)
-                ivBagThree.startAnimation(
-                    AnimationUtils.loadAnimation(
-                        this@SplashActivity,
-                        R.anim.slide_out_right
-                    )
-                )
-                ivBagThree.hide()
-                delay(90)
-                ivBagTwo.startAnimation(
-                    AnimationUtils.loadAnimation(
-                        this@SplashActivity,
-                        R.anim.slide_out_left
-                    )
-                )
-                ivBagTwo.hide()
-                delay(34)
-                ivBagFour.startAnimation(
-                    AnimationUtils.loadAnimation(
-                        this@SplashActivity,
-                        R.anim.slide_out_right
-                    )
-                )
-                ivBagFour.hide()
-            }
-        }
-    }
 }

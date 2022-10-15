@@ -15,6 +15,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.work.*
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -42,6 +45,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
+import org.kodein.di.android.retainedSubKodein
 import org.kodein.di.generic.instance
 import java.util.concurrent.TimeUnit
 
@@ -59,6 +63,11 @@ class SignInActivity : BaseActivity(), KodeinAware {
     private var mMailID: String = ""
     private var mPhoneNumber: String = ""
     private var mCurrentUserID: String = ""
+
+    private val SIGNIN_REQ = 1
+    private var showOneTapUI = true
+    private lateinit var oneTapClient: SignInClient
+    private lateinit var signInRequest: BeginSignInRequest
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -278,22 +287,89 @@ class SignInActivity : BaseActivity(), KodeinAware {
             }
             if (isOnline()) {
                 mPhoneNumber = "+91${binding.etPhoneNumber.text.toString().trim()}"
-                val signInIntent = signInClient.signInIntent
-                activityForResult.launch(signInIntent)
+
+        oneTapClient.beginSignIn(signInRequest)
+            .addOnSuccessListener(this) { result ->
+                try {
+                    startIntentSenderForResult(
+                        result.pendingIntent.intentSender, SIGNIN_REQ, null, 0,0,0,null
+                    )
+                } catch (e: Exception) {
+
+                }
+            }
+
+//                oneTapClient.beginSignIn(signInRequest)
+//                    .addOnSuccessListener(this) {
+//                        startIntentSenderForResult(it.pendingIntent.intentSender, SIGNIN_REQ, null, 0,0,0,null)
+//                    }
+
+//                val signInIntent = signInClient.signInIntent
+//                activityForResult.launch(signInIntent)
             }
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            SIGNIN_REQ -> {
+                try {
+                    val credential = oneTapClient.getSignInCredentialFromIntent(data)
+                    val idToken = credential.googleIdToken
+                    val username = credential.id
+                    val password = credential.password
+                    when {
+                        idToken != null -> {
+                            firebaseAuthWithGoogle(idToken)
+                            // Got an ID token from Google. Use it to authenticate
+                            // with your backend.
+                            Log.d(TAG, "Got ID token.")
+                        }
+                        password != null -> {
+                            // Got a saved username and password. Use them to authenticate
+                            // with your backend.
+                            showToast(this, "non null password")
+                            Log.d(TAG, "Got password.")
+                        }
+                        else -> {
+                            // Shouldn't happen.
+                            showToast(this, "No ID token or password!")
+                            Log.d(TAG, "No ID token or password!")
+                        }
+                    }
+                } catch (e: ApiException) {
+                    showToast(this, e.message.toString())
+                    // ...
+                }
+            }
+            else ->  {
+                showToast(this, "req code else block")
+            }
+        }
+        }
+
     private fun googleSignInVerification() {
         auth = FirebaseAuth.getInstance()
-
-        val signInRequest = GoogleSignInOptions
-            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(resources.getString(R.string.google_token_id))
-            .requestEmail()
-            .build()
-
-        signInClient = GoogleSignIn.getClient(this, signInRequest)
+        oneTapClient = Identity.getSignInClient(this)
+        signInRequest = BeginSignInRequest.builder()
+            .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+                .setSupported(true)
+                .build())
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    .setServerClientId(resources.getString(R.string.google_token_id))
+                    .setFilterByAuthorizedAccounts(true)
+                    .build()
+            ).setAutoSelectEnabled(true).build()
+//        val signInRequest = GoogleSignInOptions
+//            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//            .requestIdToken(resources.getString(R.string.google_token_id))
+//            .requestEmail()
+//            .build()
+//
+//        signInClient = GoogleSignIn.getClient(this, signInRequest)
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
@@ -315,19 +391,38 @@ class SignInActivity : BaseActivity(), KodeinAware {
             }
     }
 
-    private val activityForResult =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                try {
-                    val account = task.getResult(ApiException::class.java)
-                    account.idToken?.let { firebaseAuthWithGoogle(it) }
-                    Log.e("qw", "token ${account.idToken}")
-                } catch (e: Exception) {
-                    Log.e("qw", "activity result${e.message}: ")
-                }
-            }
-        }
+//    private val activityForResult =
+//        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//            if (result.resultCode == Activity.RESULT_OK) {
+////                try {
+////                    val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
+////                    val idToken = credential.googleIdToken
+////                    when {
+////                        idToken != null -> {
+////                            firebaseAuthWithGoogle(idToken)
+////                            // Got an ID token from Google. Use it to authenticate
+////                            // with Firebase.
+////                            Log.d(TAG, "Got ID token.")
+////                        }
+////                        else -> {
+////                            // Shouldn't happen.
+////                            Log.d(TAG, "No ID token!")
+////                        }
+////                    }
+////                } catch (e: ApiException) {
+////                    // ...
+////                }
+//
+//                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+//                try {
+//                    val account = task.getResult(ApiException::class.java)
+//                    account.idToken?.let { firebaseAuthWithGoogle(it) }
+//                    Log.e("qw", "token ${account.idToken}")
+//                } catch (e: Exception) {
+//                    Log.e("qw", "activity result${e.message}: ")
+//                }
+//            }
+//        }
 
     private suspend fun newUserVerification() {
         when (val status = viewModel.checkUserProfileDetails()) {

@@ -134,7 +134,6 @@ class ShoppingMainActivity :
                 adapter.notifyItemChanged(position)
             }
         }
-
         viewModel.changedPositions.observe(this) {
             for (i in viewModel.changedProductsPositions.indices) {
                 adapter.products[viewModel.changedProductsPositions[i]] =
@@ -142,7 +141,6 @@ class ShoppingMainActivity :
                 adapter.notifyItemChanged(viewModel.changedProductsPositions[i])
             }
         }
-
         viewModel.howToVideo.observe(this) { url ->
             url?.let {
                 hideProgressDialog()
@@ -198,20 +196,6 @@ class ShoppingMainActivity :
             hideShimmer()
             adapter.setData(it)
         }
-        viewModel.getAllCartItems().observe(this) {
-            if (it.isEmpty()) {
-                cartBtn.badgeValue = 0
-//                cartBtn.visibleBadge(false)
-            } else {
-                cartBtn.visibleBadge(true)
-                var quantities = 0
-                it.forEach { cart ->
-                    quantities += cart.quantity
-                }
-                cartBtn.badgeValue = quantities
-            }
-            cartAdapter.setCartData(it as MutableList<CartEntity>)
-        }
         viewModel.availableCategoryNames.observe(this) {
             showListBottomSheet(this, it as ArrayList<String>)
         }
@@ -233,6 +217,24 @@ class ShoppingMainActivity :
                     adapter
                 )
             }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.getAllCartItems().observe(this) {
+            if (it.isEmpty()) {
+                cartBtn.badgeValue = 0
+//                cartBtn.visibleBadge(false)
+            } else {
+                cartBtn.visibleBadge(true)
+                var quantities = 0
+                it.forEach { cart ->
+                    quantities += cart.quantity
+                }
+                cartBtn.badgeValue = quantities
+            }
+            cartAdapter.setCartData(it as MutableList<CartEntity>)
         }
     }
 

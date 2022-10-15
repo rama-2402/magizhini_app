@@ -136,11 +136,12 @@ class InvoiceActivity :
         orderDetailsMap["mrp"] = binding.tvTotalAmt.text.toString().toFloat()
         orderDetailsMap["deliveryPreference"] = binding.spDeliveryPreference.selectedItem
         orderDetailsMap["deliveryNote"] = binding.etDeliveryNote.text.toString().trim()
-        orderDetailsMap["appliedCoupon"] = if (viewModel.couponPrice != null) {
-            binding.etCoupon.text.toString().trim()
-        } else {
-            ""
-        }
+        orderDetailsMap["appliedCoupon"] = ""
+//            if (viewModel.couponPrice != null) {
+//            binding.etCoupon.text.toString().trim()
+//        } else {
+//            ""
+//        }
         viewModel.userProfile?.let { profile ->
             orderDetailsMap["userID"] = profile.id
             orderDetailsMap["name"] = profile.name
@@ -454,24 +455,18 @@ class InvoiceActivity :
     private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
         binding.apply {
             if (isCouponApplied) {
-                etCoupon.disable()
-                ivCouponInfo.fadInAnimation()
-                btnApplyCoupon.text = "Remove"
-//                btnApplyCoupon.setBackgroundColor(
-//                    ContextCompat.getColor(
-//                        baseContext,
-//                        R.color.matteRed
-//                    )
-//                )
+//                etCoupon.disable()
+//                ivCouponInfo.fadInAnimation()
+//                btnApplyCoupon.text = "Remove"
             } else {
                 viewModel.couponPrice = null
                 viewModel.currentCoupon = null
                 setDataToViews()
-                etCoupon.setText("")
-                etCoupon.enable()
-                ivCouponInfo.fadOutAnimation()
-                ivCouponInfo.remove()
-                btnApplyCoupon.text = "Apply"
+//                etCoupon.setText("")
+//                etCoupon.enable()
+//                ivCouponInfo.fadOutAnimation()
+//                ivCouponInfo.remove()
+//                btnApplyCoupon.text = "Apply"
 //                btnApplyCoupon.setBackgroundColor(
 //                    ContextCompat.getColor(
 //                        baseContext,
@@ -602,25 +597,25 @@ class InvoiceActivity :
             clAddress.setOnClickListener {
                 updateAddress()
             }
-            btnApplyCoupon.setOnClickListener {
-                val couponCode: String = binding.etCoupon.text.toString().trim()
-                if (couponCode.isNullOrEmpty()) {
-                    showToast(this@InvoiceActivity, "Enter a coupon code")
-                    return@setOnClickListener
-                }
-                viewModel.couponPrice?.let {
-                    applyUiChangesWithCoupon(false)
-                } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim(), viewModel.totalCartItems)
-            }
-            ivCouponInfo.setOnClickListener {
-                ivCouponInfo.startAnimation(AnimationUtils.loadAnimation(ivCouponInfo.context, R.anim.bounce))
-                viewModel.currentCoupon?.let { coupon ->
-                    val content = "This Coupon can be used only for the following criteria: \n \n Minimum Purchase Amount: ${coupon.purchaseLimit} \n " +
-                            "Maximum Discount Amount: ${coupon.maxDiscount}\n" +
-                            "\n \n \n ${coupon.description}"
-                    showDescriptionBs(content)
-                }
-            }
+//            btnApplyCoupon.setOnClickListener {
+//                val couponCode: String = binding.etCoupon.text.toString().trim()
+//                if (couponCode.isNullOrEmpty()) {
+//                    showToast(this@InvoiceActivity, "Enter a coupon code")
+//                    return@setOnClickListener
+//                }
+//                viewModel.couponPrice?.let {
+//                    applyUiChangesWithCoupon(false)
+//                } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim(), viewModel.totalCartItems)
+//            }
+//            ivCouponInfo.setOnClickListener {
+//                ivCouponInfo.startAnimation(AnimationUtils.loadAnimation(ivCouponInfo.context, R.anim.bounce))
+//                viewModel.currentCoupon?.let { coupon ->
+//                    val content = "This Coupon can be used only for the following criteria: \n \n Minimum Purchase Amount: ${coupon.purchaseLimit} \n " +
+//                            "Maximum Discount Amount: ${coupon.maxDiscount}\n" +
+//                            "\n \n \n ${coupon.description}"
+//                    showDescriptionBs(content)
+//                }
+//            }
         }
 
         binding.ivBackBtn.setOnClickListener {
@@ -692,7 +687,7 @@ class InvoiceActivity :
         when {
             cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED ->
                 cartBottomSheet.state = BottomSheetBehavior.STATE_COLLAPSED
-            binding.etCoupon.isFocused -> binding.etCoupon.clearFocus()
+//            binding.etCoupon.isFocused -> binding.etCoupon.clearFocus()
             binding.etDeliveryNote.isFocused -> binding.etDeliveryNote.clearFocus()
             else -> {
                 updatePreferenceData()
