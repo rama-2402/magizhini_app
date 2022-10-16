@@ -90,12 +90,16 @@ class QuickOrderViewModel(
                 withContext(Dispatchers.Main) {
                     _uiEvent.value = UIEvent.ProgressBar(true)
                     _uiUpdate.value = UiUpdate.AddressUpdate("address", it.address[0], true)
+                    getWallet(userProfile!!.id)
+                    getDeliveryCharge()
+                }
+            } ?:let {
+                withContext(Dispatchers.Main) {
+                    _uiUpdate.value = UiUpdate.AddressUpdate("address",null, true)
                 }
             }
             // while getting the address data we also check for previous estimate request and get the user wallet
             checkForPreviousEstimate()
-            getWallet(userProfile!!.id)
-            getDeliveryCharge()
         } catch (e: IOException) {
             _uiUpdate.value = UiUpdate.AddressUpdate(e.message.toString(), null, false)
         }

@@ -54,10 +54,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityQuick
 import com.voidapp.magizhiniorganics.magizhiniorganics.services.UpdateTotalOrderItemService
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.AddressDialogClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory.PurchaseHistoryActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOAD_DIALOG
@@ -79,7 +78,9 @@ class QuickOrderActivity :
     KodeinAware,
     PaymentResultListener,
     QuickOrderClickListener,
-    AddressDialogClickListener {
+    AddressDialogClickListener,
+    CustomAlertClickListener
+{
     override val kodein: Kodein by kodein()
 
     private lateinit var binding: ActivityQuickOrderBinding
@@ -554,7 +555,7 @@ class QuickOrderActivity :
                         if (event.message == "update") {
                             showToast(this@QuickOrderActivity, "Address Updated")
                         }
-                        event.address?.let { populateAddressDetails(it) }
+                        event.address?.let { populateAddressDetails(it) } ?: showSkippedUserDialog()
                     } else {
                         showErrorSnackBar(event.message, true)
                     }
@@ -623,6 +624,17 @@ class QuickOrderActivity :
             }
             viewModel.setEmptyStatus()
         }
+    }
+
+    private fun showSkippedUserDialog() {
+        CustomAlertDialog(
+            this,
+            "User Not Signed In",
+            "With Magizhini Quick Order you can place order with an image, voice note, or simple text of your purchase list. You must be signed in with Magizhini Organics to use Quick Order Feature. Click on SIGN IN WITH GOOGLE button to signin with Magizhini Organics.",
+            "Sign In with Google",
+            "newID",
+            this
+        ).show()
     }
 
     private fun openInBrowser(url: String) {
@@ -1633,6 +1645,21 @@ class QuickOrderActivity :
         super.onDestroy()
     }
 
+    override fun onClick() {
+
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "wallet")
+            startActivity(it)
+            finish()
+        }
+    }
+
+    override fun closeActivity() {
+       finish()
+    }
 }
 
 
