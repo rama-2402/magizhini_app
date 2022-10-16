@@ -67,9 +67,8 @@ class ProductActivity :
     BaseActivity(),
     KodeinAware,
     ReviewAdapter.ReviewItemClickListener,
-        BestSellersAdapter.BestSellerItemClickListener,
-        CustomAlertClickListener
-{
+    BestSellersAdapter.BestSellerItemClickListener,
+    CustomAlertClickListener {
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityProductBinding
 
@@ -96,7 +95,12 @@ class ProductActivity :
 
         setSupportActionBar(binding.tbCollapsedToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.tbCollapsedToolbar.navigationIcon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
+        binding.tbCollapsedToolbar.navigationIcon?.setTint(
+            ContextCompat.getColor(
+                this,
+                R.color.matteRed
+            )
+        )
         title = ""
         binding.tvProductName.text = intent.getStringExtra(PRODUCT_NAME).toString()
         binding.tvProductName.isSelected = true
@@ -112,8 +116,18 @@ class ProductActivity :
         initClickListeners()
 
         binding.apply {
-            clProductDetails.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.slide_in_right_bounce))
-            llViewPager.startAnimation(AnimationUtils.loadAnimation(this@ProductActivity, R.anim.slide_up))
+            clProductDetails.startAnimation(
+                AnimationUtils.loadAnimation(
+                    this@ProductActivity,
+                    R.anim.slide_in_right_bounce
+                )
+            )
+            llViewPager.startAnimation(
+                AnimationUtils.loadAnimation(
+                    this@ProductActivity,
+                    R.anim.slide_up
+                )
+            )
         }
     }
 
@@ -141,7 +155,7 @@ class ProductActivity :
         cartBtn = findViewById(R.id.ivCart)
         checkoutText = findViewById(R.id.tvCheckOut)
 
-        setBottomSheetIcon("coupon")
+        setBottomSheetIcon("share")
 
         cartBottomSheet = BottomSheetBehavior.from(bottomSheet)
 
@@ -186,8 +200,7 @@ class ProductActivity :
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
                 viewModel.clearCart()
             } else {
-                showToast(this, "No Coupon Available")
-//                showAddCouponDialog()
+                shareProductLink()
             }
         }
         checkoutBtn.setOnClickListener {
@@ -203,9 +216,18 @@ class ProductActivity :
         }
     }
 
+    private fun shareProductLink() {
+        Intent(Intent.ACTION_SEND).also { i ->
+            i.setType("text/plain")
+            i.putExtra(Intent.EXTRA_SUBJECT, "Sharing URL")
+            i.putExtra(Intent.EXTRA_TEXT, "https://magizhiniorganics.in/product/${viewModel.productID}/")
+            startActivity(Intent.createChooser(i, "Share URL"))
+        }
+    }
+
     private fun setBottomSheetIcon(content: String) {
-        val icon =  when(content) {
-            "coupon" -> R.drawable.ic_coupon
+        val icon = when (content) {
+            "share" -> R.drawable.ic_share
             "delete" -> R.drawable.ic_delete
             else -> R.drawable.ic_filter
         }
@@ -215,16 +237,21 @@ class ProductActivity :
         filterBtn.imageTintList =
             if (content == "delete") {
                 ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
-        } else {
+            } else {
                 ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
-        }
+            }
     }
 
     private fun showAddCouponDialog() {
         //BS to add referral number
         dialogAddCouponBs = BottomSheetDialog(this, R.style.BottomSheetDialog)
 
-        val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(LayoutInflater.from(applicationContext),R.layout.dialog_bottom_add_referral,null,false)
+        val view: DialogBottomAddReferralBinding = DataBindingUtil.inflate(
+            LayoutInflater.from(applicationContext),
+            R.layout.dialog_bottom_add_referral,
+            null,
+            false
+        )
         dialogAddCouponBs.setCancelable(true)
         dialogAddCouponBs.setContentView(view.root)
         dialogAddCouponBs.dismissWithAnimation = true
@@ -234,7 +261,12 @@ class ProductActivity :
             with(view) {
                 etReferralNumber.setText(coupon.code)
                 etReferralNumber.disable()
-                btnApply.setBackgroundColor(ContextCompat.getColor(this@ProductActivity, R.color.matteRed))
+                btnApply.setBackgroundColor(
+                    ContextCompat.getColor(
+                        this@ProductActivity,
+                        R.color.matteRed
+                    )
+                )
                 btnApply.text = "Remove"
             }
         }
@@ -261,7 +293,10 @@ class ProductActivity :
         dialogAddCouponBs.show()
     }
 
-    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean, view: DialogBottomAddReferralBinding?) {
+    private fun applyUiChangesWithCoupon(
+        isCouponApplied: Boolean,
+        view: DialogBottomAddReferralBinding?
+    ) {
         binding.apply {
             if (isCouponApplied) {
                 view?.apply {
@@ -297,7 +332,7 @@ class ProductActivity :
 
     private fun initLiveData() {
         viewModel.uiUpdate.observe(this) { event ->
-            when(event) {
+            when (event) {
                 is ProductViewModel.UiUpdate.PopulateProductData -> {
                     event.product?.let {
                         binding.spProductVariant.setSelection(viewModel.selectedVariantPosition)
@@ -319,7 +354,11 @@ class ProductActivity :
                         showToast(this, "Storage Permission Granted")
                         viewModel.previewImage("granted")
                     } else {
-                        showExitSheet(this, "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
+                        showExitSheet(
+                            this,
+                            "The App Needs Storage Permission to access Gallery. \n\n Please provide ALLOW in the following Storage Permissions",
+                            "permission"
+                        )
                     }
                 }
 //                is ProductViewModel.UiUpdate.OpenPreviewImage -> {
@@ -376,7 +415,10 @@ class ProductActivity :
                 is ProductViewModel.UiUpdate.HowToVideo -> {
                     hideProgressDialog()
                     if (event.url == "") {
-                        showToast(this, "demo video will be available soon. sorry for the inconvenience.")
+                        showToast(
+                            this,
+                            "demo video will be available soon. sorry for the inconvenience."
+                        )
                     } else {
                         openInBrowser(event.url)
                     }
@@ -388,7 +430,7 @@ class ProductActivity :
         }
 
         viewModel.uiEvent.observe(this) { event ->
-            when(event) {
+            when (event) {
                 is UIEvent.Toast -> showToast(this, event.message, event.duration)
                 is UIEvent.SnackBar -> showErrorSnackBar(event.message, event.isError)
                 is UIEvent.ProgressBar -> {
@@ -413,7 +455,8 @@ class ProductActivity :
                 this@ProductActivity
             ).also {
                 rvProducts.adapter = it
-                rvProducts.layoutManager = LinearLayoutManager(this@ProductActivity, LinearLayoutManager.HORIZONTAL, false)
+                rvProducts.layoutManager =
+                    LinearLayoutManager(this@ProductActivity, LinearLayoutManager.HORIZONTAL, false)
             }
         }
     }
@@ -445,7 +488,8 @@ class ProductActivity :
     }
 
     private fun initClickListeners() {
-        KeyboardVisibilityEvent.setEventListener(this
+        KeyboardVisibilityEvent.setEventListener(
+            this
         ) { isOpen ->
             if (isOpen) {
                 cartBottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
@@ -459,58 +503,66 @@ class ProductActivity :
 //            viewModel.getHowToVideo("Product")
 //        }
 
-        binding.spProductQuantity.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-               setPrice(viewModel.product!!.variants[binding.spProductVariant.selectedItemPosition])
-            }
+        binding.spProductQuantity.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                    setPrice(viewModel.product!!.variants[binding.spProductVariant.selectedItemPosition])
+                }
 
-            override fun onNothingSelected(p0: AdapterView<*>?) {
-                setPrice(viewModel.product!!.variants[binding.spProductVariant.selectedItemPosition])
-            }
-        }
-
-        binding.spProductVariant.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                variantposition: Int,
-                id: Long
-            ) {
-                viewModel.selectedVariantPosition = variantposition
-                viewModel.updateVariantName(variantposition)
-                setPrice(viewModel.product!!.variants[variantposition])
-                refreshLimitedItemCount()
-                setAddButtonContent(
-                    viewModel.selectedVariantName
-                )
-                viewModel.product?.let {
-                    updateNumberOfItemsFromCart(it.name, "${it.variants[variantposition].variantName} ${it.variants[variantposition].variantType}")
+                override fun onNothingSelected(p0: AdapterView<*>?) {
+                    setPrice(viewModel.product!!.variants[binding.spProductVariant.selectedItemPosition])
                 }
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                setAddButtonContent(
-                    viewModel.selectedVariantName
-                )
-                viewModel.product?.let {
-                    updateNumberOfItemsFromCart(it.name, "${it.variants[0].variantName} ${it.variants[0].variantType}")
+        binding.spProductVariant.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    variantposition: Int,
+                    id: Long
+                ) {
+                    viewModel.selectedVariantPosition = variantposition
+                    viewModel.updateVariantName(variantposition)
+                    setPrice(viewModel.product!!.variants[variantposition])
+                    refreshLimitedItemCount()
+                    setAddButtonContent(
+                        viewModel.selectedVariantName
+                    )
+                    viewModel.product?.let {
+                        updateNumberOfItemsFromCart(
+                            it.name,
+                            "${it.variants[variantposition].variantName} ${it.variants[variantposition].variantType}"
+                        )
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    setAddButtonContent(
+                        viewModel.selectedVariantName
+                    )
+                    viewModel.product?.let {
+                        updateNumberOfItemsFromCart(
+                            it.name,
+                            "${it.variants[0].variantName} ${it.variants[0].variantType}"
+                        )
+                    }
                 }
             }
-        }
 
         binding.ivFavourite.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
             viewModel.userProfile?.let {
                 viewModel.updateFavorites()
-            } ?:let {
+            } ?: let {
                 CustomAlertDialog(
                     this,
                     "User Not Signed In",
                     "You must be signed in with your Google Account to create a list of favorite products. Please click on SIGN IN WITH GOOGLE button to proceed with sign in.",
-                            "Sign In with Google",
-                            "newID",
-                            this
-                        ).show()
+                    "Sign In with Google",
+                    "newID",
+                    this
+                ).show()
             }
         }
 
@@ -535,29 +587,74 @@ class ProductActivity :
         }
 
         binding.tbAppBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
-            title = if (abs(verticalOffset) -appBarLayout.totalScrollRange == 0) {
+            title = if (abs(verticalOffset) - appBarLayout.totalScrollRange == 0) {
                 viewModel.product?.name
             } else {
                 ""
             }
         })
-        binding.tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+        binding.tlTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                when(tab?.position) {
+                when (tab?.position) {
                     0 -> {
-                        tab.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.matteRed))
-                        binding.tlTabLayout.getTabAt(1)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
-                        binding.tlTabLayout.getTabAt(2)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                        tab.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.matteRed
+                            )
+                        )
+                        binding.tlTabLayout.getTabAt(1)?.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.green_base
+                            )
+                        )
+                        binding.tlTabLayout.getTabAt(2)?.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.green_base
+                            )
+                        )
                     }
                     1 -> {
-                        tab.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.matteRed))
-                        binding.tlTabLayout.getTabAt(0)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
-                        binding.tlTabLayout.getTabAt(2)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                        tab.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.matteRed
+                            )
+                        )
+                        binding.tlTabLayout.getTabAt(0)?.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.green_base
+                            )
+                        )
+                        binding.tlTabLayout.getTabAt(2)?.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.green_base
+                            )
+                        )
                     }
                     2 -> {
-                        tab.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.matteRed))
-                        binding.tlTabLayout.getTabAt(0)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
-                        binding.tlTabLayout.getTabAt(1)?.icon?.setTint(ContextCompat.getColor(this@ProductActivity, R.color.green_base))
+                        tab.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.matteRed
+                            )
+                        )
+                        binding.tlTabLayout.getTabAt(0)?.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.green_base
+                            )
+                        )
+                        binding.tlTabLayout.getTabAt(1)?.icon?.setTint(
+                            ContextCompat.getColor(
+                                this@ProductActivity,
+                                R.color.green_base
+                            )
+                        )
                     }
                 }
             }
@@ -575,7 +672,7 @@ class ProductActivity :
     private fun updateNumberOfItemsFromCart(productName: String, variantName: String) {
         binding.apply {
             viewModel.cartItems.isNotEmpty().let {
-                for(cart in viewModel.cartItems) {
+                for (cart in viewModel.cartItems) {
                     if (cart.productName == productName && variantName == cart.variant) {
                         spProductQuantity.setSelection(cart.quantity - 1)
                         return
@@ -593,9 +690,11 @@ class ProductActivity :
                     .addTransition(android.transition.ChangeImageTransform())
                     .addTransition(android.transition.ChangeBounds())
                     .apply {
-                        doOnEnd { binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {
-                            startPostponedEnterTransition()
-                        } }
+                        doOnEnd {
+                            binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {
+                                startPostponedEnterTransition()
+                            }
+                        }
                     }
             }
             binding.ivProductThumbnail.loadImg(product.thumbnailUrl) {
@@ -621,10 +720,12 @@ class ProductActivity :
         //setting the favorties icon for the products
         if (isFavorite) {
             binding.ivFavourite.setImageResource(R.drawable.ic_favorite_filled)
-            binding.ivFavourite.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
+            binding.ivFavourite.imageTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.matteRed))
         } else {
             binding.ivFavourite.setImageResource(R.drawable.ic_favorite_outline)
-            binding.ivFavourite.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
+            binding.ivFavourite.imageTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green_base))
         }
     }
 
@@ -654,7 +755,7 @@ class ProductActivity :
     @SuppressLint("SetTextI18n")
     private fun refreshLimitedItemCount() {
         val variant = viewModel.product!!.variants[viewModel.selectedVariantPosition]
-        when(variant.status) {
+        when (variant.status) {
             NO_LIMIT -> {
                 binding.tvLimited.hide()
             }
@@ -673,47 +774,64 @@ class ProductActivity :
     }
 
     private fun setPrice(variant: ProductVariant) {
-            if (
-                variant.discountPrice != 0.0
-            ) {
-                binding.apply {
+        if (
+            variant.discountPrice != 0.0
+        ) {
+            binding.apply {
+                tvOriginalPrice.setTextAnimation(
+                    "Rs: ${
+                        variant.variantPrice * spProductQuantity.selectedItem.toString().toInt()
+                    }",
+                    ANIMATION_DURATION
+                )
+                tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                tvDiscount.fadInAnimation(ANIMATION_DURATION)
+                tvDiscountedPrice.setTextAnimation(
+                    "Rs: ${
+                        viewModel.getSelectedItemPrice() * spProductQuantity.selectedItem.toString()
+                            .toInt()
+                    }",
+                    ANIMATION_DURATION
+                )
+                tvDiscountPercent.setTextAnimation(
+                    "${
+                        viewModel.getDiscountPercent(
+                            variant.variantPrice.toFloat(),
+                            variant.discountPrice.toFloat()
+                        ).toInt()
+                    }% Off",
+                    ANIMATION_DURATION
+                )
+            }
+        } else {
+            binding.apply {
+                tvOriginalPrice.fadOutAnimation(ANIMATION_DURATION)
+                tvOriginalPrice.remove()
+                tvDiscount.fadOutAnimation(ANIMATION_DURATION)
+                tvDiscountPercent.fadOutAnimation(ANIMATION_DURATION)
+                tvDiscountedPrice.setTextAnimation(
+                    "Rs. ${
+                        viewModel.getSelectedItemPrice() * spProductQuantity.selectedItem.toString()
+                            .toInt()
+                    }"
+                )
+                viewModel.currentCoupon?.let {
                     tvOriginalPrice.setTextAnimation(
-                        "Rs: ${variant.variantPrice * spProductQuantity.selectedItem.toString().toInt()}",
+                        "Rs: ${
+                            variant.variantPrice * spProductQuantity.selectedItem.toString().toInt()
+                        }",
                         ANIMATION_DURATION
                     )
                     tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
-                    tvDiscount.fadInAnimation(ANIMATION_DURATION)
-                    tvDiscountedPrice.setTextAnimation(
-                        "Rs: ${viewModel.getSelectedItemPrice() * spProductQuantity.selectedItem.toString().toInt()}",
-                        ANIMATION_DURATION
-                    )
-                    tvDiscountPercent.setTextAnimation(
-                        "${viewModel.getDiscountPercent(variant.variantPrice.toFloat(), variant.discountPrice.toFloat()).toInt()}% Off",
-                        ANIMATION_DURATION
-                    )
                 }
-            } else {
-                binding.apply {
-                    tvOriginalPrice.fadOutAnimation(ANIMATION_DURATION)
-                    tvOriginalPrice.remove()
-                    tvDiscount.fadOutAnimation(ANIMATION_DURATION)
-                    tvDiscountPercent.fadOutAnimation(ANIMATION_DURATION)
-                    tvDiscountedPrice.setTextAnimation("Rs. ${viewModel.getSelectedItemPrice() * spProductQuantity.selectedItem.toString().toInt()}")
-                    viewModel.currentCoupon?.let {
-                        tvOriginalPrice.setTextAnimation(
-                            "Rs: ${variant.variantPrice * spProductQuantity.selectedItem.toString().toInt()}",
-                            ANIMATION_DURATION
-                        )
-                        tvOriginalPrice.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
-                    }
 
-                }
             }
+        }
     }
 
 
     private fun addToCart() {
-        if(viewModel.isProductAvailable()) {
+        if (viewModel.isProductAvailable()) {
             viewModel.upsertCartItem(binding.spProductQuantity.selectedItem.toString().toInt())
             setRemoveButton()
         } else {
@@ -729,14 +847,16 @@ class ProductActivity :
     private fun setRemoveButton() {
         with(binding.btnAdd) {
             text = "Remove"
-            backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(baseContext, R.color.matteRed))
+            backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(baseContext, R.color.matteRed))
         }
     }
 
     private fun setAddButton() {
         with(binding.btnAdd) {
             text = "Add"
-            backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(baseContext, R.color.green_base))
+            backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(baseContext, R.color.green_base))
         }
     }
 
@@ -744,7 +864,7 @@ class ProductActivity :
         val adapter = ProductViewPager(supportFragmentManager, lifecycle)
         binding.vpFragmentContent.adapter = adapter
         TabLayoutMediator(binding.tlTabLayout, binding.vpFragmentContent) { tab, position ->
-            when(position) {
+            when (position) {
                 0 -> {
                     tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_about_us)
                     tab.icon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
@@ -791,7 +911,8 @@ class ProductActivity :
         if (!productIDs.contains(viewModel.productID)) {
             productIDs.add(viewModel.productID)
         }
-        SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":")).toString()
+        SharedPref(this).putData(PRODUCTS, Constants.STRING, productIDs.joinToString(":"))
+            .toString()
     }
 
     override fun onStop() {
@@ -832,14 +953,18 @@ class ProductActivity :
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
-            if(
+            if (
                 grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
                 showToast(this, "Storage Permission Granted")
                 viewModel.previewImage("granted")
             } else {
                 showToast(this, "Storage Permission Denied")
-                showExitSheet(this, "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]", "setting")
+                showExitSheet(
+                    this,
+                    "Some or All of the Storage Permission Denied. Please click PROCEED to go to App settings to Allow Permission Manually \n\n PROCEED >> [Settings] >> [Permission] >> Permission Name Containing [Storage or Media or Photos]",
+                    "setting"
+                )
             }
         }
     }
@@ -849,7 +974,11 @@ class ProductActivity :
             intent.putExtra("url", url)
             intent.putExtra("contentType", "image")
             val options: ActivityOptionsCompat =
-                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, ViewCompat.getTransitionName(thumbnail)!!)
+                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    this,
+                    thumbnail,
+                    ViewCompat.getTransitionName(thumbnail)!!
+                )
             startActivity(intent, options.toBundle())
         }
     }

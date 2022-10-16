@@ -148,7 +148,7 @@ class FoodSubHistoryActivity :
     }
 
     private fun initData() {
-        showProgressDialog(true)
+//        showProgressDialog(true)
 
         binding.tvMonth.text = SimpleDateFormat("MMMM - yyyy").format(date)
 
