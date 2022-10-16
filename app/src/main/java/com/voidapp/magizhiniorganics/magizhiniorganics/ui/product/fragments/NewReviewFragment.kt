@@ -126,7 +126,7 @@ class NewReviewFragment : Fragment(), KodeinAware {
                             )
                         }
                     }
-                }
+                } ?: Toast.makeText(requireContext(), "Sign In to add Review", Toast.LENGTH_SHORT).show()
             }
         }
     }

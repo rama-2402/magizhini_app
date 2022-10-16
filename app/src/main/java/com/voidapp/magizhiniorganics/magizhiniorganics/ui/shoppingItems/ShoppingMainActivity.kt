@@ -655,7 +655,11 @@ class ShoppingMainActivity :
             showErrorSnackBar("Please check your Internet Connection", true)
             return
         }
-        viewModel.updateFavorites(id, product, position)
+        viewModel.profile?.let {
+            viewModel.updateFavorites(id, product, position)
+        } ?:let {
+
+        }
     }
 
     override fun navigateToProduct(

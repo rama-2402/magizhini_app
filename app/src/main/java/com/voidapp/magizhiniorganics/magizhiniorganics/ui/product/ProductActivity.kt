@@ -42,6 +42,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.DialogBottomA
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
@@ -64,7 +67,8 @@ class ProductActivity :
     BaseActivity(),
     KodeinAware,
     ReviewAdapter.ReviewItemClickListener,
-        BestSellersAdapter.BestSellerItemClickListener
+        BestSellersAdapter.BestSellerItemClickListener,
+        CustomAlertClickListener
 {
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityProductBinding
@@ -306,7 +310,9 @@ class ProductActivity :
                     refreshLimitedItemCount()
                 }
                 is ProductViewModel.UiUpdate.UpdateFavorites -> {
-                    setFavorites(event.isFavorite)
+                    viewModel.userProfile?.let {
+                        setFavorites(event.isFavorite)
+                    }
                 }
                 is ProductViewModel.UiUpdate.CheckStoragePermission -> {
                     if (PermissionsUtil.hasStoragePermission(this)) {
@@ -494,7 +500,18 @@ class ProductActivity :
 
         binding.ivFavourite.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.bounce))
-            viewModel.updateFavorites()
+            viewModel.userProfile?.let {
+                viewModel.updateFavorites()
+            } ?:let {
+                CustomAlertDialog(
+                    this,
+                    "User Not Signed In",
+                    "You must be signed in with your Google Account to create a list of favorite products. Please click on SIGN IN WITH GOOGLE button to proceed with sign in.",
+                            "Sign In with Google",
+                            "newID",
+                            this
+                        ).show()
+            }
         }
 
         binding.btnAdd.setOnClickListener {
@@ -585,7 +602,9 @@ class ProductActivity :
                 startPostponedEnterTransition()
             }
             setPrice(product.variants[viewModel.selectedVariantPosition])
-            setFavorites(product.favorite)
+            viewModel.userProfile?.let {
+                setFavorites(product.favorite)
+            }
             setVariantAdapter(product.variants)
             setAddButtonContent(
                 viewModel.selectedVariantName
@@ -848,5 +867,17 @@ class ProductActivity :
         viewModel.selectedVariantPosition = 0
         viewModel.getProductByID()
     }
+
+    override fun onClick() {
+
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "newID")
+            startActivity(it)
+        }
+    }
+
 }
 

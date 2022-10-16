@@ -13,6 +13,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.ProductVarian
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
@@ -174,6 +175,10 @@ class ProductViewModel(
         extension: String
     ) = viewModelScope.launch(Dispatchers.IO) {
         withContext(Dispatchers.Main) {
+            userProfile?:let {
+                UIEvent.Toast("You must be signed in to add review", SHORT)
+                return@withContext
+            }
             _uiEvent.value = UIEvent.ProgressBar(true)
         }
         if (uri == null) {
@@ -200,6 +205,12 @@ class ProductViewModel(
     }
 
     private suspend fun uploadReviewToFirebase(review: Review) = withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
+            userProfile?:let {
+                UIEvent.Toast("You must be signed in to add review", SHORT)
+                return@withContext
+            }
+        }
         fbRepository.addReview(productID, review)
         tempFile?.delete()
         tempFile = null

@@ -330,6 +330,7 @@
                         android:text="Recommended Products"
                         android:textColor="@color/gray700"
                         android:textSize="14sp"
+                        android:layout_marginBottom="@dimen/material_size_16"
                         android:textStyle="italic"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"/>
