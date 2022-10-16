@@ -313,12 +313,14 @@ class SignInActivity : BaseActivity(), KodeinAware {
                 showToast(this, "Skipping SignIn")
                 navigateToCheckout()
            }
-            if (signInOption == "newID") {
-                finish()
-            } else {
-                showProgressDialog(true)
-                showToast(this, "Getting latest offers and syncing store...")
-                startGetAllDataService("home")
+            when (signInOption) {
+                "newID" -> finish()
+                "wallet" -> finish()
+                else -> {
+                    showProgressDialog(true)
+                    showToast(this, "Getting latest offers and syncing store...")
+                    startGetAllDataService("home")
+                }
             }
         }
     }
@@ -457,11 +459,17 @@ class SignInActivity : BaseActivity(), KodeinAware {
             }
             else -> {
                 showToast(this, "Syncing your profile... Please wait... ")
-                mCurrentUserID = status
-                SharedPref(this).putData(USER_ID, STRING, mCurrentUserID)
-                SharedPref(this).putData(PHONE_NUMBER, STRING, mPhoneNumber)
-                startGetProfileDataService()
-                startGetAllDataService("home")
+                when(signInOption) {
+                    "wallet" -> finish()
+                    "newID" -> finish()
+                    else -> {
+                        mCurrentUserID = status
+                        SharedPref(this).putData(USER_ID, STRING, mCurrentUserID)
+                        SharedPref(this).putData(PHONE_NUMBER, STRING, mPhoneNumber)
+                        startGetProfileDataService()
+                        startGetAllDataService("home")
+                    }
+                }
             }
         }
     }

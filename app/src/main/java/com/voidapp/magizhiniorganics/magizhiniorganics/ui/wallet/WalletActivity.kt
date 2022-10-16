@@ -28,8 +28,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CalendarFilterDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.dialog_listener.CalendarFilerDialogClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET
@@ -41,7 +44,9 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 
 class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener,
-    CalendarFilerDialogClickListener {
+    CalendarFilerDialogClickListener,
+    CustomAlertClickListener
+{
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityWalletBinding
@@ -91,9 +96,26 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener,
     private fun initData() {
         showProgressDialog(true)
         showShimmer()
-        viewModel.userID =
+        val tempUserID =
             SharedPref(this).getData(Constants.USER_ID, Constants.STRING, "").toString()
+        viewModel.userID = if (tempUserID == "") {
+            showSkippedUserDialog()
+            ""
+        } else {
+            tempUserID
+        }
         viewModel.getWallet()
+    }
+
+    private fun showSkippedUserDialog() {
+        CustomAlertDialog(
+            this,
+            "User Not Signed In",
+            "You must be signed in with your Google Account to use Magizhini Wallet Feature. Please click SIGN IN WITH GOOGLE button to signin with your google account.",
+            "Sign In with Google",
+            "newID",
+            this
+        ).show()
     }
 
     private fun initReferral() {
@@ -355,7 +377,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener,
         viewModel.moneyToAddInWallet?.let {
             viewModel.makeTransactionFromWallet(
                 it,
-                viewModel.userID,
+                viewModel.userID?:"Not Signed In",
                 orderID!!,
                 "Add"
             )
@@ -481,5 +503,21 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener,
 
     override fun cancelDialog() {
         dismissCalendarFilterDialog()
+    }
+
+    override fun onClick() {
+
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "wallet")
+            startActivity(it)
+            finish()
+        }
+    }
+
+    override fun closeActivity() {
+       finish()
     }
 }

@@ -878,6 +878,5 @@ class ProductActivity :
             startActivity(it)
         }
     }
-
 }
 
