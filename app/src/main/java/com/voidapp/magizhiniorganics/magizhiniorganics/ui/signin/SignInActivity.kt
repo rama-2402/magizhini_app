@@ -314,7 +314,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
                 navigateToCheckout()
            }
             if (signInOption == "newID") {
-                onBackPressed()
+                finish()
             } else {
                 showProgressDialog(true)
                 showToast(this, "Getting latest offers and syncing store...")

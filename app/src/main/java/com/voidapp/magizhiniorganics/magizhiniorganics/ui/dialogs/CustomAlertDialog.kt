@@ -34,14 +34,21 @@ class CustomAlertDialog(
 
 
         view.apply {
-            if (content == "order" ) {
-                tvwhatsapp.visibility = View.VISIBLE
-            }
-            if (content == "newID") {
-                bottomSheetDialog.setCancelable(false)
-                tvwhatsapp.visibility = View.VISIBLE
-                tvwhatsapp.text = "Skip Sign In"
-            }
+             when (content) {
+                 "order" -> {
+                     tvwhatsapp.visibility = View.VISIBLE
+                 }
+                 "newID" -> {
+                      bottomSheetDialog.setCancelable(false)
+                     tvwhatsapp.visibility = View.VISIBLE
+                     tvwhatsapp.text = "Skip Sign In"
+                }
+                 "support" -> {
+                     bottomSheetDialog.setCancelable(false)
+                     tvwhatsapp.visibility = View.VISIBLE
+                     tvwhatsapp.text = "Contact Support with Whatsapp"
+                 }
+             }
             title?.let {
                 tvTitle.text = it
             }
@@ -61,6 +68,10 @@ class CustomAlertDialog(
                         onItemClickListener.goToSignIn()
                         dismiss()
                     }
+                    "support" -> {
+                        onItemClickListener.goToSignIn()
+                        dismiss()
+                    }
                     else -> {
                         onItemClickListener.onClick()
                         dismiss()
@@ -68,13 +79,19 @@ class CustomAlertDialog(
                 }
             }
             tvwhatsapp.setOnClickListener {
-                if (content == "order") {
-                    onItemClickListener.placeOrderWithWhatsapp()
-                    dismiss()
-                }
-                if (content == "newID") {
-                    onItemClickListener.closeActivity()
-                    dismiss()
+                when (content) {
+                "order" -> {
+                onItemClickListener.placeOrderWithWhatsapp()
+                dismiss()
+            }
+                "newID" -> {
+                onItemClickListener.closeActivity()
+                dismiss()
+            }
+                "support" -> {
+                onItemClickListener.placeOrderWithWhatsapp()
+                dismiss()
+            }
                 }
            }
         }

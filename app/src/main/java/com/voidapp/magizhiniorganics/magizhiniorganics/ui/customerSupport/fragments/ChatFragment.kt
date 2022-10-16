@@ -49,7 +49,6 @@ class ChatFragment :
         binding.rvConversation.visibility = View.VISIBLE
         binding.tvNoMessages.visibility = View.GONE
 
-        showProgressDialog()
         setRecyclerView()
         initObservers()
 

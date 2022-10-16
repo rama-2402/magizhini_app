@@ -2,6 +2,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport
 
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -15,6 +16,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.SupportProfil
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityChatBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
@@ -26,7 +30,9 @@ import org.kodein.di.generic.instance
 class ChatActivity :
     BaseActivity(),
     KodeinAware,
-    ContactsAdapter.ContactItemClickListener {
+    ContactsAdapter.ContactItemClickListener,
+    CustomAlertClickListener
+{
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityChatBinding
@@ -45,6 +51,8 @@ class ChatActivity :
             onBackPressed()
         }
 
+        showProgressDialog(true)
+
         initData()
         initObservers()
         initViewPager()
@@ -55,13 +63,25 @@ class ChatActivity :
         viewModel.navigateToConversation.observe(this) {
             moveToConversationPage(it)
         }
-        viewModel.currentUserProfile.observe(this) {
+        viewModel.currentUserProfile.observe(this) { profile ->
             //setting the toolbar data - profile pic and user name
-            if (!it.profilePicUrl.isNullOrEmpty()) {
-                binding.ivProfileImage.loadImg(it.profilePicUrl) {}
+            profile?.let {
+                 if (!it.profilePicUrl.isNullOrEmpty()) {
+                    binding.ivProfileImage.loadImg(it.profilePicUrl) {}
+                }
+                binding.tvProfileName.text = it.name
+            } ?: let {
+                hideProgressDialog()
+                CustomAlertDialog(
+                    this,
+                    "User Not Signed In",
+                    "Customer satisfaction is our top priority in Magizhini Organics. To avail Magizhini Organic's 24*7 customer support facility please signin with your Google Account. You can still avail customer support using direct whatsapp contact if you do not wish to signin",
+                    "Sign In",
+                    "support",
+                    this
+                ).show()
             }
-            binding.tvProfileName.text = it.name
-        }
+       }
     }
 
     private fun initViewPager() {
@@ -156,5 +176,29 @@ class ChatActivity :
 
     override fun moveToConversations(supportProfile: SupportProfile) {
         moveToConversationPage(supportProfile)
+    }
+
+    override fun onClick() {
+
+    }
+
+    override fun placeOrderWithWhatsapp() {
+         startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    "https://api.whatsapp.com/send?phone=+917299827393&text=Hi, I'm having some trouble with the app. could you please help. Thanks."
+                )
+            )
+        )
+        finish()
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "newID")
+            startActivity(it)
+            finish()
+        }
     }
 }
