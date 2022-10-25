@@ -202,6 +202,16 @@ class SplashActivity : BaseActivity(), KodeinAware {
         WorkManager.getInstance(this).enqueue(workRequest)
         navigateToHomeScreen(true, navigation)
         } else {
+            val request = OneTimeWorkRequestBuilder<UpdateDataService>()
+                    .setInputData(
+                        workDataOf(
+                            "id" to userID
+                        )
+                    )
+                    .build()
+
+            WorkManager.getInstance(this).enqueue(request)
+
             navigateToHomeScreen(true, navigation)
         }
 

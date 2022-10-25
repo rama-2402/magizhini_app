@@ -388,7 +388,16 @@ class PurchaseHistoryActivity :
         viewModel.order = viewModel.purchaseHistory[position]
         if (PermissionsUtil.hasStoragePermission(this)) {
             showProgressDialog(false)
-            createPDF(viewModel.order!!)
+            if (viewModel.order!!.address.gpsAddress.isNullOrEmpty()) {
+                hideProgressDialog()
+                showErrorSnackBar("Invoice not generated yet. Please try after some time", true)
+            } else {
+                hideProgressDialog()
+                Intent(Intent.ACTION_VIEW, Uri.parse(viewModel.order!!.address.gpsAddress)).also {
+                    startActivity(it)
+                }
+            }
+//            createPDF(viewModel.order!!)
         } else {
             showExitSheet(this, "The App Needs Storage Permission to save PDF invoice. \n\n Please provide ALLOW in the following Storage Permissions", "permission")
         }
