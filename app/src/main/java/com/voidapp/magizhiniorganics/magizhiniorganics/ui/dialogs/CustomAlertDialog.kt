@@ -32,23 +32,26 @@ class CustomAlertDialog(
         bottomSheetDialog.setCancelable(true)
         bottomSheetDialog.setContentView(view.root)
 
-
         view.apply {
-             when (content) {
-                 "order" -> {
-                     tvwhatsapp.visibility = View.VISIBLE
-                 }
-                 "newID" -> {
-                      bottomSheetDialog.setCancelable(false)
-                     tvwhatsapp.visibility = View.VISIBLE
-                     tvwhatsapp.text = "Skip Sign In"
+            when (content) {
+                "order" -> {
+                    tvwhatsapp.visibility = View.VISIBLE
                 }
-                 "support" -> {
-                     bottomSheetDialog.setCancelable(false)
-                     tvwhatsapp.visibility = View.VISIBLE
-                     tvwhatsapp.text = "Contact Support with Whatsapp"
-                 }
-             }
+                "newID" -> {
+                    bottomSheetDialog.setCancelable(false)
+                    tvwhatsapp.visibility = View.VISIBLE
+                    tvwhatsapp.text = "Skip Sign In"
+                }
+                "support" -> {
+                    bottomSheetDialog.setCancelable(false)
+                    tvwhatsapp.visibility = View.VISIBLE
+                    tvwhatsapp.text = "Contact Support with Whatsapp"
+                }
+                "whatsapp" -> {
+                    tvwhatsapp.visibility = View.VISIBLE
+                    tvwhatsapp.text = "Get Support with Whatsapp"
+                }
+            }
             title?.let {
                 tvTitle.text = it
             }
@@ -72,6 +75,10 @@ class CustomAlertDialog(
                         onItemClickListener.goToSignIn()
                         dismiss()
                     }
+                    "whatsapp" -> {
+                        onItemClickListener.goToSignIn()
+                        dismiss()
+                    }
                     else -> {
                         onItemClickListener.onClick()
                         dismiss()
@@ -80,20 +87,24 @@ class CustomAlertDialog(
             }
             tvwhatsapp.setOnClickListener {
                 when (content) {
-                "order" -> {
-                onItemClickListener.placeOrderWithWhatsapp()
-                dismiss()
-            }
-                "newID" -> {
-                onItemClickListener.closeActivity()
-                dismiss()
-            }
-                "support" -> {
-                onItemClickListener.placeOrderWithWhatsapp()
-                dismiss()
-            }
+                    "order" -> {
+                        onItemClickListener.placeOrderWithWhatsapp()
+                        dismiss()
+                    }
+                    "newID" -> {
+                        onItemClickListener.closeActivity()
+                        dismiss()
+                    }
+                    "whatsapp" -> {
+                        onItemClickListener.placeOrderWithWhatsapp()
+                        dismiss()
+                    }
+                    "support" -> {
+                        onItemClickListener.placeOrderWithWhatsapp()
+                        dismiss()
+                    }
                 }
-           }
+            }
         }
 
     }

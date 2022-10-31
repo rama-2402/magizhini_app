@@ -24,14 +24,12 @@ class FoodSubscriptionAdapter(
     override fun onBindViewHolder(holder: FoodDayViewHolder, position: Int) {
         val item = ammaSpecials[position]
         holder.binding.apply {
-            ivProductThumbnail.loadImg(item.thumbnailUrl) {}
-            tvDay.text = "${item.foodDay} - ${item.foodTime}"
-            tvProductName.text = item.foodName
+            tvProductName.text = "${item.foodDay} - ${item.foodTime}"
             tvPrice.text = if (item.discountedPrice != 0.0) {
                 tvDiscount.visibility = View.VISIBLE
                 tvDiscount.text = "Rs: ${item.price}"
                 tvDiscount.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
-                "Rs: ${item.discountedPrice}"
+                "${item.discountedPrice}"
             } else {
                 tvDiscount.visibility = View.GONE
                 item.price.toString()
@@ -45,9 +43,17 @@ class FoodSubscriptionAdapter(
 
     private fun listIngredients(ingredients: ArrayList<String>): String {
         var ingredientListString = ""
-        ingredients.forEach {
-            ingredientListString = "$ingredientListString \n * $it"
+        for (item in 0 until ingredients.size) {
+            ingredientListString = if (item == 0) {
+                ingredients[item]
+            } else {
+                "$ingredientListString, ${ingredients[item]}"
+            }
         }
+//        ingredients.forEach {
+////            ingredientListString = "$ingredientListString \n * $it"
+//            ingredientListString = "$ingredientListString, $it"
+//        }
         return ingredientListString
     }
 

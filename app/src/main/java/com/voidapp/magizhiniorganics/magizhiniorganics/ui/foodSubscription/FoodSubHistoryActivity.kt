@@ -1,11 +1,13 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.sundeepk.compactcalendarview.CompactCalendarView
 import com.github.sundeepk.compactcalendarview.domain.Event
@@ -20,6 +22,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADDRESS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LOAD_DIALOG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SINGLE_DAY_LONG
@@ -27,8 +31,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.USER_ID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.startPayment
+import kotlinx.coroutines.launch
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -42,8 +48,7 @@ class FoodSubHistoryActivity :
     KodeinAware,
     FoodStatusOnClickListener,
     PaymentResultListener,
-    CustomAlertClickListener
-{
+    CustomAlertClickListener {
 
     override val kodein: Kodein by kodein()
 
@@ -60,6 +65,8 @@ class FoodSubHistoryActivity :
         viewModel = ViewModelProvider(this, factory)[FoodSubscriptionViewModel::class.java]
 
         Checkout.preload(applicationContext)
+
+        showProgressDialog(true)
 
         initData()
         initLiveData()
@@ -95,13 +102,14 @@ class FoodSubHistoryActivity :
 
                     date = instanceToGetLongDate.timeInMillis
 
+                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
+
                     if (
-                        TimeUtil().getDayName(date) == "Saturday" ||
                         TimeUtil().getDayName(date) == "Sunday"
                     ) {
                         showToast(
                             this@FoodSubHistoryActivity,
-                            "Delivery not available on Saturdays and Sundays"
+                            "Delivery not available on Sundays"
                         )
                         rvFoodStatus.remove()
                         return
@@ -110,12 +118,17 @@ class FoodSubHistoryActivity :
                     if (viewModel.ammaSpecialOrders.isNotEmpty()) {
                         showProgressDialog(true)
                         viewModel.getFoodStatus(date)
+                    } else {
+                        if (viewModel.userID.isNullOrEmpty()) {
+                            userNotLoggedIn()
+                        }
                     }
                 }
 
                 override fun onMonthScroll(firstDayOfNewMonth: Date?) {
                     val month = SimpleDateFormat("MMMM - yyyy")
                     tvMonth.text = month.format(firstDayOfNewMonth!!)
+                    getListOfSundays(firstDayOfNewMonth.time)
                 }
             })
             btnGoToBox.setOnClickListener {
@@ -125,15 +138,10 @@ class FoodSubHistoryActivity :
                         finish()
                     }
                 } else {
-//                    showExitSheet(
-//                        this@FoodSubHistoryActivity,
-//                        "You are about to cancel your Magizhini Amma's Special Food Subscription. If you are unsubscribed your refund for the not delivered days will be reverted back in 3 to 5 business days. \n \nClick PROCEED to confirm cancellation",
-//                        "sub"
-//                    )
                     showExitSheet(
                         this@FoodSubHistoryActivity,
-                        "You are about to renew your Monthly Subscription for Magizhini's Amma's Special Authentic Home-made Food plan. \n \nClick PROCEED to renew your subscription for the next month",
-                        "renew"
+                        "You are about to cancel your Magizhini Amma's Special Food Subscription. If you are unsubscribed your refund for the not delivered days will be reverted back in 3 to 5 business days. \n \nClick PROCEED to confirm cancellation",
+                        "cancel"
                     )
                 }
             }
@@ -147,9 +155,29 @@ class FoodSubHistoryActivity :
         }
     }
 
-    private fun initData() {
-//        showProgressDialog(true)
+    private fun getListOfSundays(dayCount: Long) {
+        var dayLong = dayCount
+        for (count in 1..30) {
+            if (TimeUtil().getDayName(dayLong) == "Sunday") {
+                Event(
+                    resources.getColor(
+                        R.color.errorRed,
+                        theme
+                    ), dayLong, "leave"
+                ).let { event ->
+                    if (!binding.calendarView.getEvents(dayLong).isNullOrEmpty()) {
+                        if (binding.calendarView.getEvents(dayLong)[0].data == "leave") {
+                            binding.calendarView.removeEvents(dayLong)
+                        }
+                    }
+                    binding.calendarView.addEvent(event)
+                }
+            }
+            dayLong += SINGLE_DAY_LONG
+        }
+    }
 
+    private fun initData() {
         binding.tvMonth.text = SimpleDateFormat("MMMM - yyyy").format(date)
 
         viewModel.userID =
@@ -186,11 +214,12 @@ class FoodSubHistoryActivity :
                                     ?: 0.0
                             }
                             totalPrice *= it.orderCount
-                            totalPrice = (totalPrice * 5)/100
 
                             if (it.leafNeeded) {
                                 totalPrice += 5 * viewModel.selectedEventDates.size
                             }
+
+                            totalPrice = (totalPrice * 118) / 100
 
                             it.price = totalPrice
 
@@ -201,7 +230,7 @@ class FoodSubHistoryActivity :
                                     TimeUtil().getCustomDate(
                                         dateLong = it.endDate
                                     )
-                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: $totalPrice (Incl 5% GST) to renew your subscription for the next month. For further queries please contact customer support.",
+                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: $totalPrice (Incl 18% GST) to renew your subscription for the next month. For further queries please contact customer support.",
                                 "RENEW SUBSCRIPTION",
                                 "food",
                                 this
@@ -214,18 +243,20 @@ class FoodSubHistoryActivity :
                     if (event.status == null) {
                         if (!event.isOrdersAvailable) {
                             statusNotAvailableUI()
+                        } else {
+                            userNotLoggedIn()
+                            return@observe
                         }
                     }
 
                     event.status?.let { populateDeliveryStatus(it) }
 
                     if (
-                        TimeUtil().getDayName(date) == "Saturday" ||
                         TimeUtil().getDayName(date) == "Sunday"
                     ) {
                         showToast(
                             this@FoodSubHistoryActivity,
-                            "Delivery not available on Saturdays and Sundays"
+                            "Delivery not available on Sundays"
                         )
                         binding.rvFoodStatus.remove()
                     }
@@ -304,6 +335,22 @@ class FoodSubHistoryActivity :
         }
     }
 
+    private fun userNotLoggedIn() {
+        SharedPref(this).getData(ADDRESS, STRING, "").let { address ->
+            if (address != "") {
+                viewModel.tempAddress = Utils.toAddressDataClass(address as String)
+            }
+            CustomAlertDialog(
+                this,
+                "User not Signed In",
+                "You have not Signed In to Magizhini Organics. To utilize the feature to fullest please consider Signing In. You can still check the progress of your Food Subscription and makes changes to the order through whatsapp. Click SIGN IN to login or ",
+                "Sign In",
+                "whatsapp",
+                this
+            ).show()
+        }
+    }
+
     private fun populateNonDeliveryDates(dates: List<Long>?) {
         dates?.forEach {
             Event(
@@ -312,6 +359,11 @@ class FoodSubHistoryActivity :
                     theme
                 ), it, "leave"
             ).let { event ->
+                if (!binding.calendarView.getEvents(it).isNullOrEmpty()) {
+                    if (binding.calendarView.getEvents(it)[0].data == "leave") {
+                        binding.calendarView.removeEvents(it)
+                    }
+                }
                 binding.calendarView.addEvent(event)
             }
         }
@@ -320,7 +372,7 @@ class FoodSubHistoryActivity :
         var monthNum = 0
         while (true) {
             today += SINGLE_DAY_LONG
-            if (TimeUtil().getDayName(dateLong = today) == "Saturday" ||
+            if (
                 TimeUtil().getDayName(dateLong = today) == "Sunday"
             ) {
 
@@ -330,7 +382,12 @@ class FoodSubHistoryActivity :
                         theme
                     ), today, "leave"
                 ).let { event ->
-                    binding.calendarView.addEvent(event)
+                 if (!binding.calendarView.getEvents(today).isNullOrEmpty()) {
+                    if (binding.calendarView.getEvents(today)[0].data == "leave") {
+                        binding.calendarView.removeEvents(today)
+                    }
+                }
+                binding.calendarView.addEvent(event)
                 }
             }
             if (TimeUtil().getDateNumber(dateLong = today) == "01") {
@@ -366,7 +423,6 @@ class FoodSubHistoryActivity :
             currentDate += SINGLE_DAY_LONG
 
             if (
-                TimeUtil().getDayName(currentDate) != "Saturday" &&
                 TimeUtil().getDayName(currentDate) != "Sunday" &&
                 !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
             ) {
@@ -463,7 +519,7 @@ class FoodSubHistoryActivity :
                         }
                     }
                 } ?: showToast(this, "Please select the order and try again")
-            } ?: showToast(this, "Failed to fetch your profile. Refresh and try again")
+            } ?: showToast(this, "Failed to fetch your profile. Relaunch App and try again")
         }
     }
 
@@ -564,9 +620,34 @@ class FoodSubHistoryActivity :
         viewModel.apply {
             selectedOrder = null
             userID = null
+            tempAddress = null
             orderStatusMap.clear()
         }
         super.onBackPressed()
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "food")
+            startActivity(it)
+            finish()
+        }
+    }
+
+    override fun placeOrderWithWhatsapp() {
+        lifecycleScope.launch {
+            val message: String =
+                "Hi, ${viewModel.tempAddress?.let { "I\'m ${it.userId}" } ?: "I haven't Logged In."}. I need support with my Amma\'s Special Subscription. I have provided my Name, Subscription ID and Reason below for further reference. Thank you."
+
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(
+                        "https://api.whatsapp.com/send?phone=+917299827393&text=$message"
+                    )
+                )
+            )
+        }
     }
 }
 

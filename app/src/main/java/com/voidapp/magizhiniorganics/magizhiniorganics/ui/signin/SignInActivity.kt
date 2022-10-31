@@ -327,6 +327,7 @@ class SignInActivity : BaseActivity(), KodeinAware {
             when (signInOption) {
                 "newID" -> finish()
                 "wallet" -> finish()
+                "food" -> finish()
                 else -> {
                     showProgressDialog(true)
                     showToast(this, "Getting latest offers and syncing store...")

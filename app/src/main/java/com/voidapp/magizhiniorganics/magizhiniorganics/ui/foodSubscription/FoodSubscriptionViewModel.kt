@@ -35,6 +35,7 @@ class FoodSubscriptionViewModel(
     var userProfile: UserProfileEntity? = null
     var wallet: Wallet? = null
     var ammaSpecialOrders: MutableList<AmmaSpecialOrder> = mutableListOf()
+    var tempAddress: Address? = null
 
     val ammaSpecials: MutableList<AmmaSpecial> = mutableListOf()
     var lunchMap: HashMap<String, Double> = hashMapOf()
@@ -510,10 +511,11 @@ class FoodSubscriptionViewModel(
     fun getAmmaSpecialsOrderDetails(date: Long) = viewModelScope.launch {
         if (userID.isNullOrEmpty()) {
             _uiEvent.value = UIEvent.ProgressBar(false)
-            _uiEvent.value = UIEvent.SnackBar(
-                "Failed to fetch user profile. Please Log out and Log back in to continue",
-                true
-            )
+//            _uiEvent.value = UIEvent.SnackBar(
+//                "Failed to fetch user profile. Please Log out and Log back in to continue",
+//                true
+//            )
+            _uiUpdate.value = UiUpdate.UpdateFoodDeliveryStatus(null, true) //this case is when user not logged in but has opted for food
             return@launch
         } else {
             foodSubscriptionUseCase.getAmmaSpecialOrders(userID!!)?.let { orders ->

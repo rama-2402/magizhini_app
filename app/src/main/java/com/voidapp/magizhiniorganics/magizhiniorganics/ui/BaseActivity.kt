@@ -316,7 +316,7 @@ open class BaseActivity : AppCompatActivity() {
                 is FoodSubHistoryActivity -> {
                     when(data) {
                         "delivery" -> activity.cancelDeliveryConfirmed()
-                        "sub" -> activity.cancelSubscriptionConfirmed()
+                        "cancel" -> activity.cancelSubscriptionConfirmed()
                         "renew" -> activity.renewSubscriptionConfirmed()
                     }
                 }
