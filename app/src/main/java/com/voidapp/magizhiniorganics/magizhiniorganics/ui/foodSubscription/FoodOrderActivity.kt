@@ -25,7 +25,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityFoodO
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADDRESS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SINGLE_DAY_LONG
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -58,7 +60,7 @@ class FoodOrderActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_food_order)
         viewModel = ViewModelProvider(this, factory)[FoodSubscriptionViewModel::class.java]
 
-        viewModel.lunchMap = intent.extras!!.get("lunch") as HashMap<String, Double>
+//        viewModel.lunchMap = intent.extras!!.get("lunch") as HashMap<String, Double>
 
         initData()
         initLiveData()
@@ -77,11 +79,13 @@ class FoodOrderActivity :
             calendarView.shouldScrollMonth(false)
 
             tvMonth.text = month.format(System.currentTimeMillis())
-            ivPrevMonth.setColor(R.color.green_light)
+//            ivPrevMonth.setColor(R.color.green_light)
             ivMinusOnePerson.setColor(R.color.green_light)
 
             tvRenewal.isSelected = true
             tvTimeLimit.isSelected = true
+
+            getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
         }
     }
 
@@ -121,22 +125,22 @@ class FoodOrderActivity :
                 setPrice()
             }
             ivPrevMonth.setOnClickListener {
-                if (tvMonth.text == month.format(System.currentTimeMillis())) {
-                    showToast(this@FoodOrderActivity, "Already in current month")
-                } else {
+//                if (tvMonth.text == month.format(System.currentTimeMillis())) {
+//                    showToast(this@FoodOrderActivity, "Already in current month")
+//                } else {
                     calendarView.scrollLeft()
-                    ivPrevMonth.setColor(R.color.green_light)
-                    ivNextMonth.setColor(R.color.green_base)
-                }
+//                    ivPrevMonth.setColor(R.color.green_light)
+//                    ivNextMonth.setColor(R.color.green_base)
+//                }
             }
             ivNextMonth.setOnClickListener {
-                if (tvMonth.text == month.format(System.currentTimeMillis())) {
+//                if (tvMonth.text == month.format(System.currentTimeMillis())) {
                     calendarView.scrollRight()
-                    ivNextMonth.setColor(R.color.green_light)
-                    ivPrevMonth.setColor(R.color.green_base)
-                } else {
-                    showToast(this@FoodOrderActivity, "Pre-Order not available for other months")
-                }
+//                    ivNextMonth.setColor(R.color.green_light)
+//                    ivPrevMonth.setColor(R.color.green_base)
+//                } else {
+//                    showToast(this@FoodOrderActivity, "Pre-Order not available for other months")
+//                }
             }
             calendarView.setListener(object : CompactCalendarView.CompactCalendarViewListener {
                 override fun onDayClick(dateClicked: Date?) {
@@ -153,12 +157,11 @@ class FoodOrderActivity :
                     }
 
                     if (
-                        TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Saturday" ||
                         TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Sunday"
                     ) {
                         showToast(
                             this@FoodOrderActivity,
-                            "Delivery Not Available on Saturdays and Sundays"
+                            "Delivery Not Available on Sundays"
                         )
                         return
                     }
@@ -196,6 +199,7 @@ class FoodOrderActivity :
 
                 override fun onMonthScroll(firstDayOfNewMonth: Date?) {
                     tvMonth.text = month.format(firstDayOfNewMonth!!)
+                    getListOfSundays(firstDayOfNewMonth.time)
                 }
             })
             spSubOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -216,7 +220,18 @@ class FoodOrderActivity :
                         else -> "custom"
                     }
                     setPrice()
+                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
                     viewModel.getNonDeliveryDays()
+                }
+
+                override fun onNothingSelected(p0: AdapterView<*>?) {
+                }
+            }
+            spFoodOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    viewModel.currentServingOption = position
+                    setPrice()
+                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -247,6 +262,7 @@ class FoodOrderActivity :
                         }
                     }
                     setPrice()
+                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
                 }
 
                 override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -268,13 +284,12 @@ class FoodOrderActivity :
                     10 -> {
                         ivAddOnePerson.setColor(R.color.green_light)
                         tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
-                        setPrice()
                     }
                     else -> {
-                        setPrice()
                         tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
                     }
                 }
+                setPrice()
             }
             ivMinusOnePerson.setOnClickListener {
                 ivAddOnePerson.setColor(R.color.green_base)
@@ -292,6 +307,7 @@ class FoodOrderActivity :
                     3 -> spCountOptions.setSelection(2)
                     else -> setPrice()
                 }
+                setPrice()
             }
             tvPlaceOrder.setOnClickListener {
                 validateEntries()
@@ -423,7 +439,7 @@ class FoodOrderActivity :
             when (event) {
                 is FoodSubscriptionViewModel.UiUpdate.PopulateUserProfile -> {
                     hideProgressDialog()
-                    populateProfileData(event.userProfile)
+                    event.userProfile?.let { populateProfileData(it) }
                 }
                 is FoodSubscriptionViewModel.UiUpdate.PopulateNonDeliveryDates -> {
                     populateNonDeliveryDates(event.dates)
@@ -475,6 +491,11 @@ class FoodOrderActivity :
                     theme
                 ), it, "leave"
             ).let { event ->
+                if (!binding.calendarView.getEvents(it).isNullOrEmpty()) {
+                    if (binding.calendarView.getEvents(it)[0].data == "leave") {
+                        binding.calendarView.removeEvents(it)
+                    }
+                }
                 binding.calendarView.addEvent(event)
             }
         }
@@ -483,7 +504,7 @@ class FoodOrderActivity :
         var monthNum = 0
         while (true) {
             today += SINGLE_DAY_LONG
-            if (TimeUtil().getDayName(dateLong = today) == "Saturday" ||
+            if (
                 TimeUtil().getDayName(dateLong = today) == "Sunday"
             ) {
 
@@ -493,6 +514,11 @@ class FoodOrderActivity :
                         theme
                     ), today, "leave"
                 ).let { event ->
+                    if (!binding.calendarView.getEvents(today).isNullOrEmpty()) {
+                        if (binding.calendarView.getEvents(today)[0].data == "leave") {
+                            binding.calendarView.removeEvents(today)
+                        }
+                    }
                     binding.calendarView.addEvent(event)
                 }
             }
@@ -502,6 +528,28 @@ class FoodOrderActivity :
             if (monthNum == 2) {
                 return
             }
+        }
+    }
+
+    private fun getListOfSundays(dayCount: Long) {
+        var dayLong = dayCount
+        for (count in 1..30) {
+            if (TimeUtil().getDayName(dayLong) == "Sunday") {
+                Event(
+                    resources.getColor(
+                        R.color.errorRed,
+                        theme
+                    ), dayLong, "leave"
+                ).let { event ->
+                    if (!binding.calendarView.getEvents(dayLong).isNullOrEmpty()) {
+                        if (binding.calendarView.getEvents(dayLong)[0].data == "leave") {
+                            binding.calendarView.removeEvents(dayLong)
+                        }
+                    }
+                    binding.calendarView.addEvent(event)
+                }
+            }
+            dayLong += SINGLE_DAY_LONG
         }
     }
 
@@ -530,20 +578,29 @@ class FoodOrderActivity :
     }
 
     private fun setPrice() {
-        var totalPrice = 0.0
-        viewModel.selectedEventDates.forEach { dateLong ->
-            totalPrice += viewModel.lunchMap[TimeUtil().getDayName(dateLong)] ?: 0.0
-        }
+        var totalPrice: Double = when(viewModel.currentServingOption) {
+                    0 -> {
+                        viewModel.selectedEventDates.size * 98.0
+                    }
+                    1 -> {
+                        viewModel.selectedEventDates.size * 89.0
+                    }
+                    else -> {
+                        (viewModel.selectedEventDates.size * 98.0) + (viewModel.selectedEventDates.size * 89.0)
+                    }
+                }
+            //we have to calculate the price based on if it is lunch or dinner or both for the total number of days selected by the user for delivery
+//            totalPrice += viewModel.lunchMap[TimeUtil().getDayName(dateLong)] ?: 0.0
         totalPrice *= viewModel.currentCountOption
 
         if (binding.cbxLeaf.isChecked) {
             totalPrice += 5 * viewModel.selectedEventDates.size
         }
 
-        totalPrice += (totalPrice * 5)/100
+        totalPrice = (totalPrice * 118)/100
 
         viewModel.totalPrice = totalPrice
-        binding.tvPlaceOrder.setTextAnimation("Order Box for Rs: $totalPrice (Incl 5% GST)")
+        binding.tvPlaceOrder.setTextAnimation("Order Box for Rs: $totalPrice (Incl 18% GST)")
     }
 
     private fun populateProfileData(userProfile: UserProfileEntity) {
@@ -563,7 +620,6 @@ class FoodOrderActivity :
 
         while (dayCount <= 30) {
             if (
-                TimeUtil().getDayName(currentDate) != "Saturday" &&
                 TimeUtil().getDayName(currentDate) != "Sunday" &&
                 !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
             ) {

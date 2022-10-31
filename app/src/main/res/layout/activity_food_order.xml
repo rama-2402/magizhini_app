@@ -175,7 +175,7 @@
                 <com.github.sundeepk.compactcalendarview.CompactCalendarView
                     android:id="@+id/calendarView"
                     android:layout_width="wrap_content"
-                    android:layout_height="220dp"
+                    android:layout_height="250dp"
                     android:layout_marginTop="@dimen/material_size_16"
                     app:compactCalendarCurrentDayBackgroundColor="@color/white"
                     app:compactCalendarCurrentDayTextColor="@color/blue500"
@@ -282,6 +282,33 @@
                     app:layout_constraintTop_toBottomOf="@id/tvRenewal" />
 
                 <TextView
+                    android:id="@+id/tvFoodOptions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="   Serving \n   Options"
+                    android:textColor="@color/gray700"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/spFoodOptions"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/spFoodOptions" />
+
+                <Spinner
+                    android:id="@+id/spFoodOptions"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="@dimen/material_size_12"
+                    android:layout_marginTop="@dimen/material_size_16"
+                    android:background="@drawable/bg_material_box"
+                    android:entries="@array/food_serving_options"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/material_size_8"
+                    android:popupBackground="@drawable/shape_round_rectangle_8"
+                    android:theme="@style/mySpinnerItemStyle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tvOptions"
+                    app:layout_constraintTop_toBottomOf="@id/spSubOptions" />
+
+                <TextView
                     android:id="@+id/tvNumberOptions"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -306,7 +333,7 @@
                     android:theme="@style/mySpinnerItemStyle"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/tvNumberOptions"
-                    app:layout_constraintTop_toBottomOf="@id/spSubOptions" />
+                    app:layout_constraintTop_toBottomOf="@id/spFoodOptions" />
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivMinusOnePerson"

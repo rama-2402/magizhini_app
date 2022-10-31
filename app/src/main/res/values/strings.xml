@@ -59,6 +59,13 @@
         <item>Custom</item>
     </string-array>
 
+    <!--    Food serving options-->
+    <string-array name="food_serving_options">
+        <item>Lunch Only</item>
+        <item>Dinner Only</item>
+        <item>Lunch and Dinner</item>
+    </string-array>
+
     <!--    Food order options-->
     <string-array name="food_sub_options">
         <item>One Day</item>

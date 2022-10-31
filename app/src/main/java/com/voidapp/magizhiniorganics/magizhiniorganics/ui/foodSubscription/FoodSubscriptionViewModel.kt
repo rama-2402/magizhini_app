@@ -45,6 +45,7 @@ class FoodSubscriptionViewModel(
     val selectedEventDates: MutableList<Long> = mutableListOf()
     var currentSubOption: String = "month"
     var currentCountOption: Int = 0
+    var currentServingOption: Int = 0
     var totalPrice: Double = 0.0
 
     //the outer hashmap holds the data as key and the orderids as values
@@ -192,6 +193,8 @@ class FoodSubscriptionViewModel(
                 userProfile = profile
                 _uiUpdate.value = UiUpdate.PopulateUserProfile(profile)
             }
+        } ?: withContext(Dispatchers.Main) {
+            _uiUpdate.value = UiUpdate.PopulateUserProfile(null)
         }
     }
 
@@ -589,7 +592,7 @@ class FoodSubscriptionViewModel(
             val banners: List<Banner>?
         ) : UiUpdate()
 
-        data class PopulateUserProfile(val userProfile: UserProfileEntity) : UiUpdate()
+        data class PopulateUserProfile(val userProfile: UserProfileEntity?) : UiUpdate()
         data class PopulateNonDeliveryDates(val dates: List<Long>?): UiUpdate()
 
         //placing order

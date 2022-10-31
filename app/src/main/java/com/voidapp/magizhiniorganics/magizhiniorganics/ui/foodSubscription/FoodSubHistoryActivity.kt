@@ -102,8 +102,6 @@ class FoodSubHistoryActivity :
 
                     date = instanceToGetLongDate.timeInMillis
 
-                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
-
                     if (
                         TimeUtil().getDayName(date) == "Sunday"
                     ) {
@@ -184,6 +182,7 @@ class FoodSubHistoryActivity :
             SharedPref(this).getData(USER_ID, STRING, "").toString()
         viewModel.getAmmaSpecialsOrderDetails(date)
         viewModel.getNonDeliveryDays()
+        getListOfSundays(binding.calendarView.firstDayOfCurrentMonth.time)
     }
 
     private fun initLiveData() {
@@ -375,7 +374,6 @@ class FoodSubHistoryActivity :
             if (
                 TimeUtil().getDayName(dateLong = today) == "Sunday"
             ) {
-
                 Event(
                     resources.getColor(
                         R.color.errorRed,
