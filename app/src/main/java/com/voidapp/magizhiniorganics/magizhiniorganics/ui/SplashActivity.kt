@@ -172,7 +172,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
                 startWork("", navigation)
             }
         } else {
-            navigateToHomeScreen(false, navigation)
+            startWork("", navigation)
+//            navigateToHomeScreen(false, navigation)
         }
     }
 
@@ -181,7 +182,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
 
         if (userID != "" && userID != "null") {
          val workRequest: WorkRequest =
-            if (wipe == "") {
+            if (wipe == "wipe") {
                  OneTimeWorkRequestBuilder<UpdateDataService>()
                     .setInputData(
                         workDataOf(
@@ -205,7 +206,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
             val request = OneTimeWorkRequestBuilder<UpdateDataService>()
                     .setInputData(
                         workDataOf(
-                            "id" to userID
+                            "id" to ""
                         )
                     )
                     .build()

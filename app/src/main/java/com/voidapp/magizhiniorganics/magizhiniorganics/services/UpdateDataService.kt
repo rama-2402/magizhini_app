@@ -46,7 +46,6 @@ class UpdateDataService (
     }
 
     private val wipe = inputData.getString("wipe")
-    private val userID = inputData.getString("id")!!
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         if (wipe == "wipe") {

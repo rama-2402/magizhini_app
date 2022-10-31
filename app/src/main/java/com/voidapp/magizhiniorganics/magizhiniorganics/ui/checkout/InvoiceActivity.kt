@@ -645,7 +645,6 @@ class InvoiceActivity :
             tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
             tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0f}"
             val totalPrice = cartPrice - (viewModel.couponPrice ?: 0f)
-            tvGstAmt.text = "${(totalPrice * 5) / 100}"
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
 //                viewModel.getDeliveryCharge()
@@ -656,7 +655,7 @@ class InvoiceActivity :
             binding.tvTotalAmt.setTextAnimation(
                 "${
                     totalPrice + binding.tvDeliveryChargeAmt.text.toString()
-                        .toFloat() + binding.tvGstAmt.text.toString().toFloat()
+                        .toFloat()
                 }"
             )
 
@@ -877,7 +876,7 @@ class InvoiceActivity :
                         viewModel.totalCartItems
                     }
 
-                val message: String = "Order ID: ${System.currentTimeMillis()} \n Customer ID: Not Signed In \n Price: ${binding.tvTotalAmt.text} (Incl GST + Delivery Charge) \n Delivery Charge: ${binding.tvDeliveryChargeAmt.text} \n GST: ${binding.tvGstAmt.text} \n Transaction ID: COD \n Purchase Date: ${TimeUtil().getCurrentDate()} \n PaymentDone: False \n Payment Method: COD \n Delivery Preference: ${binding.spDeliveryPreference.selectedItem} \n Delivery Note: ${binding.etDeliveryNote.text} \n Address: ${viewModel.tempAddress!!.userId}, ${viewModel.tempAddress!!.addressLineOne}, ${viewModel.tempAddress!!.addressLineTwo}, ${viewModel.tempAddress!!.city}, ${viewModel.tempAddress!!.LocationCode} \n Cart Items: ${Utils.createOrderForWhatsapp(
+                val message: String = "Order ID: ${System.currentTimeMillis()} \n Customer ID: Not Signed In \n Price: ${binding.tvTotalAmt.text} (Incl GST + Delivery Charge) \n Delivery Charge: ${binding.tvDeliveryChargeAmt.text} \n Transaction ID: COD \n Purchase Date: ${TimeUtil().getCurrentDate()} \n PaymentDone: False \n Payment Method: COD \n Delivery Preference: ${binding.spDeliveryPreference.selectedItem} \n Delivery Note: ${binding.etDeliveryNote.text} \n Address: ${viewModel.tempAddress!!.userId}, ${viewModel.tempAddress!!.addressLineOne}, ${viewModel.tempAddress!!.addressLineTwo}, ${viewModel.tempAddress!!.city}, ${viewModel.tempAddress!!.LocationCode} \n Cart Items: ${Utils.createOrderForWhatsapp(
                     cartItems as ArrayList<CartEntity>
                 )}"
 

@@ -179,21 +179,21 @@
                         app:layout_constraintTop_toTopOf="@id/tvDiscountedPrice"
                         app:layout_constraintStart_toEndOf="@id/tvDiscountedPrice"
                         app:layout_constraintBottom_toBottomOf="@id/tvDiscountedPrice"/>
-<!--                    <TextView-->
-<!--                        android:id="@+id/tvGST"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_marginStart="@dimen/material_size_8"-->
-<!--                        android:ellipsize="end"-->
-<!--                        android:fontFamily="@font/roboto"-->
-<!--                        android:singleLine="true"-->
-<!--                        android:text="(incl GST)"-->
-<!--                        android:textStyle="italic"-->
-<!--                        android:textColor="@color/grey"-->
-<!--                        android:textSize="14sp"-->
-<!--                        app:layout_constraintTop_toTopOf="@id/tvOriginalPrice"-->
-<!--                        app:layout_constraintStart_toEndOf="@id/tvOriginalPrice"-->
-<!--                        app:layout_constraintBottom_toBottomOf="@id/tvOriginalPrice"/>-->
+                    <TextView
+                        android:id="@+id/tvGst"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/material_size_8"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/roboto"
+                        android:singleLine="true"
+                        android:text="(incl GST)"
+                        android:textStyle="italic"
+                        android:textColor="@color/grey"
+                        android:textSize="14sp"
+                        app:layout_constraintTop_toTopOf="@id/tvOriginalPrice"
+                        app:layout_constraintStart_toEndOf="@id/tvOriginalPrice"
+                        app:layout_constraintBottom_toBottomOf="@id/tvOriginalPrice"/>
                     <TextView
                         android:id="@+id/tvDiscount"
                         android:layout_width="wrap_content"
