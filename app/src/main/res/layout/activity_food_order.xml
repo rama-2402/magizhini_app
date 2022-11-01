@@ -398,11 +398,45 @@
                     app:layout_constraintTop_toBottomOf="@id/cbxLeaf">
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/etlName"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Customer Name"
+                        android:textColorHint="@color/matteRed"
+                        app:boxStrokeColor="@color/matteRed"
+                        app:endIconMode="clear_text"
+                        app:endIconTint="@color/errorRed"
+                        app:hintTextColor="@color/matteRed"
+                        app:layout_constraintBottom_toTopOf="@id/etlEmailId"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/llDob"
+                        app:prefixTextColor="@color/green_base"
+                        app:startIconDrawable="@drawable/ic_person"
+                        app:startIconTint="@color/matteRed">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:cursorVisible="true"
+                            android:inputType="textPersonName"
+                            android:textColor="@color/green_base"
+                            android:textColorHint="@color/matteRed"
+                            android:textCursorDrawable="@null" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/etlAlternateNumber"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginTop="8dp"
                         android:hint="Contact Number"
                         android:textColorHint="@color/matteRed"
                         app:boxStrokeColor="@color/matteRed"

@@ -43,7 +43,7 @@ class FoodSubscriptionViewModel(
     var nonDeliveryDatesLong: MutableList<Long>? = null
     var nonDeliveryDatesString: MutableList<String> = mutableListOf()
     val selectedEventDates: MutableList<Long> = mutableListOf()
-    var currentSubOption: String = "month"
+    var currentSubOption: String = "single"
     var currentCountOption: Int = 0
     var currentServingOption: Int = 0
     var totalPrice: Double = 0.0
@@ -211,7 +211,7 @@ class FoodSubscriptionViewModel(
                 startDate = orderDetailsMap["start"].toString().toLong(),
                 endDate = orderDetailsMap["end"].toString().toLong(),
                 price = totalPrice,
-                userName = profile.name,
+                userName = orderDetailsMap["name"].toString(),
                 addressOne = orderDetailsMap["one"].toString(),
                 addressTwo = orderDetailsMap["two"].toString(),
                 city = orderDetailsMap["city"].toString(),
@@ -300,7 +300,7 @@ class FoodSubscriptionViewModel(
                 startDate = orderDetailsMap["start"].toString().toLong(),
                 endDate = orderDetailsMap["end"].toString().toLong(),
                 price = totalPrice,
-                userName = profile.name,
+                userName = orderDetailsMap["name"].toString(),
                 addressOne = orderDetailsMap["one"].toString(),
                 addressTwo = orderDetailsMap["two"].toString(),
                 city = orderDetailsMap["city"].toString(),

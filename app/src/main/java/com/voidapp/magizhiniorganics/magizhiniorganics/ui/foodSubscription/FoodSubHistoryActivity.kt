@@ -342,7 +342,7 @@ class FoodSubHistoryActivity :
             CustomAlertDialog(
                 this,
                 "User not Signed In",
-                "You have not Signed In to Magizhini Organics. To utilize the feature to fullest please consider Signing In. You can still check the progress of your Food Subscription and makes changes to the order through whatsapp. Click SIGN IN to login or ",
+                "You have not Signed In to Magizhini Organics. To utilize the feature to fullest please consider Signing In. You can still check the progress of your Food Subscription and makes changes to the order through whatsapp. Click SIGN IN to login",
                 "Sign In",
                 "whatsapp",
                 this

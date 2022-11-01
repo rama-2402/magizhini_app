@@ -1,17 +1,15 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -23,11 +21,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityFoodOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADDRESS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SINGLE_DAY_LONG
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -45,7 +44,9 @@ import kotlin.collections.HashMap
 class FoodOrderActivity :
     BaseActivity(),
     PaymentResultListener,
-    KodeinAware {
+    KodeinAware,
+    CustomAlertClickListener
+{
 
     override val kodein: Kodein by kodein()
     private lateinit var binding: ActivityFoodOrderBinding
@@ -327,6 +328,10 @@ class FoodOrderActivity :
                 }
             }
             when {
+                etName.text.isNullOrEmpty() -> showErrorSnackBar(
+                    "Please Enter a Valid Customer Name for contact",
+                    true
+                )
                 etAlternateNumber.text.isNullOrEmpty() -> showErrorSnackBar(
                     "Please Enter a Valid Mobile Number",
                     true
@@ -351,6 +356,16 @@ class FoodOrderActivity :
                     "Please Enter a Valid Area Code",
                     true
                 )
+                viewModel.userID == null || viewModel.userID == "" -> {
+                    CustomAlertDialog(
+                        this@FoodOrderActivity,
+                        "User not Signed In",
+                        "You have not Signed In to Magizhini Organics. To utilize the feature to fullest please consider Signing In. You can still subscribe to Amma's Special Food via whatsapp. Click SIGN IN to login or SUBSCRIBE button to place subscription via whatsapp",
+                        "Sign In",
+                        "food",
+                        this@FoodOrderActivity
+                    ).show()
+                }
                 else -> {
                     if (!NetworkHelper.isOnline(this@FoodOrderActivity)) {
                         showErrorSnackBar("Please check your Internet Connection", true)
@@ -408,6 +423,7 @@ class FoodOrderActivity :
             orderDetailsMap["start"] = viewModel.selectedEventDates.min()
             orderDetailsMap["end"] = viewModel.selectedEventDates.max()
             orderDetailsMap["leaf"] = cbxLeaf.isChecked
+            orderDetailsMap["name"] = etName.text.toString().trim()
             orderDetailsMap["phoneNumber"] = etAlternateNumber.text.toString().trim()
             orderDetailsMap["mailID"] = etEmailId.text.toString().trim()
             orderDetailsMap["one"] = etAddressOne.text.toString().trim()
@@ -624,7 +640,6 @@ class FoodOrderActivity :
                 !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
             ) {
                 addEvent(currentDate)
-                viewModel.selectedEventDates.add(currentDate)
             }
 
             currentDate += SINGLE_DAY_LONG
@@ -684,6 +699,80 @@ class FoodOrderActivity :
             finish()
         }
     }
+
+    override fun onClick() {
+
+    }
+
+    override fun goToSignIn() {
+        Intent(this, SignInActivity::class.java).also {
+            it.putExtra("goto", "food")
+            startActivity(it)
+            finish()
+        }
+    }
+
+    override fun placeOrderWithWhatsapp() {
+        lifecycleScope.launch {
+            val message: String = generateOrderDetailsForWhatsapp()
+
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(
+                        "https://api.whatsapp.com/send?phone=+917299827393&text=$message"
+                    )
+                )
+            )
+        }
+    }
+
+
+    private fun generateOrderDetailsForWhatsapp(): String {
+        binding.apply {
+            var deliveryDates: String = ""
+            for (item in 0 until viewModel.selectedEventDates.size) {
+                deliveryDates = if (item == 0) {
+                    TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates[item])
+                } else {
+                    "$deliveryDates, ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates[item])}"
+                }
+            }
+
+            val foodType = when (viewModel.currentServingOption) {
+                0 -> "Lunch Only"
+                1 -> "Dinner Only"
+                else -> "Lunch and Dinner"
+            }
+
+            return "Subscription ID: ${System.currentTimeMillis()} \n" +
+            "Customer Name: ${etName.text} \n" +
+            "Contact Number: ${etAlternateNumber.text} \n" +
+            "Address: ${etAddressOne.text}, ${etAddressTwo.text}, ${etCity.text}, ${etArea.text} \n" +
+            "Email ID: ${etEmailId.text} \n" +
+            "Subscription Status: New Subscription \n" +
+            "Subscription Type: ${viewModel.currentSubOption} ${if (viewModel.currentSubOption == "custom") "- ${viewModel.selectedEventDates.size} days" else ""}\n" +
+            "Food Type: $foodType \n" +
+            "No of Serving: ${viewModel.currentCountOption} \n" +
+            "Banana Leaf: ${if (cbxLeaf.isChecked) "Yes" else "No"} \n" +
+                    "Total Price: ${viewModel.totalPrice} \n" +
+            "Start Date: ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.min())} \n" +
+            "End Date: ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.max())} \n" +
+            "Delivery Dates: $deliveryDates"
+        }
+
+//        orderDetailsMap["start"] = viewModel.selectedEventDates.min()
+//        orderDetailsMap["end"] = viewModel.selectedEventDates.max()
+//        orderDetailsMap["leaf"] = cbxLeaf.isChecked
+//        orderDetailsMap["name"] = etName.text.toString().trim()
+//        orderDetailsMap["phoneNumber"] = etAlternateNumber.text.toString().trim()
+//        orderDetailsMap["mailID"] = etEmailId.text.toString().trim()
+//        orderDetailsMap["one"] = etAddressOne.text.toString().trim()
+//        orderDetailsMap["two"] = etAddressTwo.text.toString().trim()
+//        orderDetailsMap["city"] = etCity.text.toString().trim()
+//        orderDetailsMap["code"] = etArea.text.toString().trim()
+    }
+
 
     //function to remove focus of edit text when clicked outside
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {

@@ -47,6 +47,11 @@ class CustomAlertDialog(
                     tvwhatsapp.visibility = View.VISIBLE
                     tvwhatsapp.text = "Contact Support with Whatsapp"
                 }
+
+                "food" -> {
+                    tvwhatsapp.visibility = View.VISIBLE
+                    tvwhatsapp.text = "Subscribe via Whatsapp"
+                }
                 "whatsapp" -> {
                     tvwhatsapp.visibility = View.VISIBLE
                     tvwhatsapp.text = "Get Support with Whatsapp"
@@ -79,6 +84,10 @@ class CustomAlertDialog(
                         onItemClickListener.goToSignIn()
                         dismiss()
                     }
+                    "food" -> {
+                        onItemClickListener.goToSignIn()
+                        dismiss()
+                    }
                     else -> {
                         onItemClickListener.onClick()
                         dismiss()
@@ -100,6 +109,10 @@ class CustomAlertDialog(
                         dismiss()
                     }
                     "support" -> {
+                        onItemClickListener.placeOrderWithWhatsapp()
+                        dismiss()
+                    }
+                    "food" -> {
                         onItemClickListener.placeOrderWithWhatsapp()
                         dismiss()
                     }
