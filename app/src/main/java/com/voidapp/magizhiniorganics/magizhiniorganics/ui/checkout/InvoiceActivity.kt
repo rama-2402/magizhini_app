@@ -58,6 +58,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
+import kotlin.math.roundToInt
 
 
 class InvoiceActivity :
@@ -645,7 +646,7 @@ class InvoiceActivity :
             tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
             tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
             tvGstAmount.text = "${viewModel.gstAmount ?: 0.0f}"
-            val totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
+            var totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
 //                viewModel.getDeliveryCharge()
@@ -653,10 +654,11 @@ class InvoiceActivity :
             } else {
                 updateDeliveryCharge()
             }
+            totalPrice += viewModel.gstAmount + binding.tvDeliveryChargeAmt.text.toString()
+                .toFloat()
             binding.tvTotalAmt.setTextAnimation(
                 "${
-                    totalPrice + viewModel.gstAmount + binding.tvDeliveryChargeAmt.text.toString()
-                        .toDouble()
+                    (totalPrice * 100.0).roundToInt() / 100.0
                 }"
             )
 

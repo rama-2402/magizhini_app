@@ -47,6 +47,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.BirthdayCardDi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubHistoryActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubscriptionActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.howTo.HowToActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.notification.NotificationsActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
@@ -926,8 +927,10 @@ class HomeActivity :
 
     //from categories adapter
     override fun selectedCategory(categoryName: String) {
-        if (categoryName.lowercase().contains("amma")) {
-            navigateToAmmaSpecial()
+        if (categoryName.lowercase().contains("amma samayal")) {
+            Intent(this, FoodSubscriptionActivity::class.java).also {
+                startActivity(it)
+            }
         } else {
             navigateToSelectedCategory(categoryName)
         }

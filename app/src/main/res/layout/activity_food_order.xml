@@ -57,7 +57,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/material_size_8"
                             android:fontFamily="@font/roboto"
-                            android:text="Amma's Specials Lunch"
+                            android:text="Amma Samayal"
                             android:textColor="@color/white"
                             android:textSize="18sp" />
 
