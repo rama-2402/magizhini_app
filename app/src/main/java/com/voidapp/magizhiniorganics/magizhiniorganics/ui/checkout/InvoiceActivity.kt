@@ -643,8 +643,9 @@ class InvoiceActivity :
             cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
             tvMrpAmount.text = cartOriginalPrice.toString()
             tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
-            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0f}"
-            val totalPrice = cartPrice - (viewModel.couponPrice ?: 0f)
+            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
+            tvGstAmount.text = "${viewModel.gstAmount ?: 0.0f}"
+            val totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
 //                viewModel.getDeliveryCharge()
@@ -654,7 +655,7 @@ class InvoiceActivity :
             }
             binding.tvTotalAmt.setTextAnimation(
                 "${
-                    totalPrice + binding.tvDeliveryChargeAmt.text.toString()
+                    totalPrice + viewModel.gstAmount + binding.tvDeliveryChargeAmt.text.toString()
                         .toFloat()
                 }"
             )

@@ -81,111 +81,6 @@ class FoodSubscriptionViewModel(
 //        _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, null)
     }
 
-    private fun generateSampleSpecials(): MutableList<AmmaSpecial> {
-        val mon = AmmaSpecial(
-            "",
-            thumbnailUrl = "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/products%2FTomato%20%2F%20%E0%AE%A4%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B3%E0%AE%BF.jpg?alt=media&token=5171b4cf-0a61-47f8-99e4-2ff91abe828c",
-            foodName = "Beet root saatham and appalam and murukku",
-            foodDay = "Monday",
-            foodTime = "Lunch",
-            price = 100.50,
-            discountedPrice = 80.00,
-            description = "Something something and something for that and this products purchase",
-            ingredients = arrayListOf(
-                "podi",
-                "powder",
-                "water/thanni",
-                "sombu/ nee vanthu oombu",
-                "enga da pora unakaaga thaan ithu panren/and somethig like that"
-            )
-        )
-
-        val tue = AmmaSpecial(
-            "",
-            thumbnailUrl = "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/products%2FTomato%20%2F%20%E0%AE%A4%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B3%E0%AE%BF.jpg?alt=media&token=5171b4cf-0a61-47f8-99e4-2ff91abe828c",
-            foodName = "random saatham and rice for eating and dinning and something more like that for eating",
-            foodDay = "Tuesday",
-            foodTime = "Dinner",
-            price = 100.50,
-            description = "Something something and something for that and this products purchase",
-            ingredients = arrayListOf(
-                "podi",
-                "powder",
-                "water/thanni",
-                "sombu/ nee vanthu oombu",
-                "enga da pora unakaaga thaan ithu panren/and somethig like that"
-            )
-        )
-        val wed = AmmaSpecial(
-            "",
-            thumbnailUrl = "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/products%2FTomato%20%2F%20%E0%AE%A4%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B3%E0%AE%BF.jpg?alt=media&token=5171b4cf-0a61-47f8-99e4-2ff91abe828c",
-            foodName = "random saatham and rice for eating and dinning and something more like that for eating",
-            foodDay = "Wednesday",
-            foodTime = "Dinner",
-            price = 200.0,
-            description = "Something something and something for that and this products purchase",
-            ingredients = arrayListOf(
-                "podi",
-                "powder",
-                "water/thanni",
-                "sombu/ nee vanthu oombu",
-                "enga da pora unakaaga thaan ithu panren/and somethig like that"
-            )
-        )
-        val thu = AmmaSpecial(
-            "",
-            thumbnailUrl = "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/products%2FTomato%20%2F%20%E0%AE%A4%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B3%E0%AE%BF.jpg?alt=media&token=5171b4cf-0a61-47f8-99e4-2ff91abe828c",
-            foodName = "random saatham and rice for eating and dinning and something more like that for eating",
-            foodDay = "Thursday",
-            foodTime = "Dinner",
-            price = 100.50,
-            discountedPrice = 50.0,
-            description = "Something something and something for that and this products purchase",
-            ingredients = arrayListOf(
-                "podi",
-                "powder",
-                "water/thanni",
-                "sombu/ nee vanthu oombu",
-                "enga da pora unakaaga thaan ithu panren/and somethig like that"
-            )
-        )
-        val fri = AmmaSpecial(
-            "",
-            thumbnailUrl = "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/products%2FTomato%20%2F%20%E0%AE%A4%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B3%E0%AE%BF.jpg?alt=media&token=5171b4cf-0a61-47f8-99e4-2ff91abe828c",
-            foodName = "random saatham and rice for eating and dinning and something more like that for eating",
-            foodDay = "Friday",
-            foodTime = "Dinner",
-            price = 20.50,
-            description = "Something something and something for that and this products purchase",
-            ingredients = arrayListOf(
-                "podi",
-                "powder",
-                "water/thanni",
-                "sombu/ nee vanthu oombu",
-                "enga da pora unakaaga thaan ithu panren/and somethig like that"
-            )
-        )
-        val sat = AmmaSpecial(
-            "",
-            thumbnailUrl = "https://firebasestorage.googleapis.com/v0/b/magizhiniorganics-56636.appspot.com/o/products%2FTomato%20%2F%20%E0%AE%A4%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B3%E0%AE%BF.jpg?alt=media&token=5171b4cf-0a61-47f8-99e4-2ff91abe828c",
-            foodName = "random saatham and rice for eating and dinning and something more like that for eating",
-            foodDay = "Saturday",
-            foodTime = "Dinner",
-            price = 500.50,
-            discountedPrice = 90.00,
-            description = "Something something and something for that and this products purchase",
-            ingredients = arrayListOf(
-                "podi",
-                "powder",
-                "water/thanni",
-                "sombu/ nee vanthu oombu",
-                "enga da pora unakaaga thaan ithu panren/and somethig like that"
-            )
-        )
-
-        return mutableListOf(mon, tue, wed, thu, fri, sat)
-    }
-
     //order activity
     fun getProfile() = viewModelScope.launch(Dispatchers.IO) {
         dbRepository.getProfileData()?.let { profile ->
@@ -365,6 +260,7 @@ class FoodSubscriptionViewModel(
         _uiUpdate.value = UiUpdate.CreateStatusDialog("wallet", null)
 
         selectedOrder?.let {
+
             fetchWallet()?.let { wallet ->
                 if (wallet.amount < it.price) {
                     _uiUpdate.value = UiUpdate.DismissStatusDialog(true)
@@ -377,6 +273,14 @@ class FoodSubscriptionViewModel(
                     UIEvent.SnackBar("Failed to fetch Wallet. Try different payment method", true)
                 return@launch
             }
+
+            val deliveryDatesString = mutableListOf<String>()
+            selectedEventDates.forEach {
+                deliveryDatesString.add(TimeUtil().getCustomDate(dateLong = it))
+            }
+
+            it.deliveryDates.addAll(deliveryDatesString)
+
             foodSubscriptionUseCase
                 .renewSubWithWallet(getRenewedSubDetails(it))
                 .onEach { result ->
@@ -428,6 +332,14 @@ class FoodSubscriptionViewModel(
         _uiUpdate.value = UiUpdate.CreateStatusDialog(null, null)
 
         selectedOrder?.let {
+
+            val deliveryDatesString = mutableListOf<String>()
+            selectedEventDates.forEach {
+                deliveryDatesString.add(TimeUtil().getCustomDate(dateLong = it))
+            }
+
+            it.deliveryDates.addAll(deliveryDatesString)
+
             foodSubscriptionUseCase
                 .renewSubscriptionWithOnline(
                     it,

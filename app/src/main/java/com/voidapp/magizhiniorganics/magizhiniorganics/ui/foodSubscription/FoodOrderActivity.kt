@@ -613,6 +613,16 @@ class FoodOrderActivity :
             totalPrice += 5 * viewModel.selectedEventDates.size
         }
 
+        totalPrice = if (viewModel.currentServingOption == 2) {
+                totalPrice + viewModel.selectedEventDates.size * 60
+        } else {
+            if (viewModel.selectedEventDates.size > 10) {
+                totalPrice
+            } else {
+                totalPrice + viewModel.selectedEventDates.size * 30
+            }
+        }
+
         totalPrice = (totalPrice * 118)/100
 
         viewModel.totalPrice = totalPrice
@@ -760,17 +770,6 @@ class FoodOrderActivity :
             "End Date: ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.max())} \n" +
             "Delivery Dates: $deliveryDates"
         }
-
-//        orderDetailsMap["start"] = viewModel.selectedEventDates.min()
-//        orderDetailsMap["end"] = viewModel.selectedEventDates.max()
-//        orderDetailsMap["leaf"] = cbxLeaf.isChecked
-//        orderDetailsMap["name"] = etName.text.toString().trim()
-//        orderDetailsMap["phoneNumber"] = etAlternateNumber.text.toString().trim()
-//        orderDetailsMap["mailID"] = etEmailId.text.toString().trim()
-//        orderDetailsMap["one"] = etAddressOne.text.toString().trim()
-//        orderDetailsMap["two"] = etAddressTwo.text.toString().trim()
-//        orderDetailsMap["city"] = etCity.text.toString().trim()
-//        orderDetailsMap["code"] = etArea.text.toString().trim()
     }
 
 

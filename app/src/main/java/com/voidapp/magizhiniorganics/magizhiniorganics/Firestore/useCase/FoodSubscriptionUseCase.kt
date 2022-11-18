@@ -351,6 +351,12 @@ class FoodSubscriptionUseCase(
             fireStore
                 .collection(AMMASPECIAL)
                 .document("Order")
+                .collection("recentUnSub")
+                .document(selectedOrder.id).set(selectedOrder, SetOptions.merge()).await()
+
+            fireStore
+                .collection(AMMASPECIAL)
+                .document("Order")
                 .collection("Unsub")
                 .document(selectedOrder.id).set(selectedOrder, SetOptions.merge()).await()
 

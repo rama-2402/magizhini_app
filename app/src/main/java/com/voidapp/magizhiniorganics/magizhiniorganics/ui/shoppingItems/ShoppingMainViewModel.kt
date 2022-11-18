@@ -206,7 +206,8 @@ class ShoppingMainViewModel(
             maxOrderQuantity = orderQuantity,
             price = price,
             originalPrice = originalPrice,
-            variantIndex = variantIndex
+            variantIndex = variantIndex,
+            couponName = if (product.extras.isEmpty()) "0" else product.extras[0]
         ).also { cartEntity ->
             dbRepository.upsertCart(cartEntity)
             product.variantInCart.add(variant)

@@ -337,7 +337,7 @@ class ProductViewModel(
                 maxOrderQuantity = getMaxOrderQuantity(),
                 price = getSelectedItemPrice(),  //todo
                 originalPrice = getVariantOriginalPrice(selectedVariantPosition),
-                couponName = currentCoupon?.code ?: "",
+                couponName = if (product!!.extras.isEmpty()) "0" else product!!.extras[0].toString(),
                 variantIndex = selectedVariantPosition
             ).let { cartEntity ->
                 val cartJob = async {

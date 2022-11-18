@@ -207,21 +207,6 @@ class FoodSubHistoryActivity :
                 is FoodSubscriptionViewModel.UiUpdate.PopulateAmmaSpecials -> {
                     viewModel.selectedOrder?.let {
                         calculateRenewMonthDays(it.endDate).let { days ->
-                            var totalPrice = 0.0
-                            viewModel.selectedEventDates.forEach { dateLong ->
-                                totalPrice += viewModel.lunchMap[TimeUtil().getDayName(dateLong)]
-                                    ?: 0.0
-                            }
-                            totalPrice *= it.orderCount
-
-                            if (it.leafNeeded) {
-                                totalPrice += 5 * viewModel.selectedEventDates.size
-                            }
-
-                            totalPrice = (totalPrice * 118) / 100
-
-                            it.price = totalPrice
-
                             CustomAlertDialog(
                                 this,
                                 "Monthly Subscription Renewal",
@@ -229,7 +214,7 @@ class FoodSubHistoryActivity :
                                     TimeUtil().getCustomDate(
                                         dateLong = it.endDate
                                     )
-                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: $totalPrice (Incl 18% GST) to renew your subscription for the next month. For further queries please contact customer support.",
+                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: ${it.price} (Incl 18% GST) to renew your subscription for the next month. For further queries please contact customer support.",
                                 "RENEW SUBSCRIPTION",
                                 "food",
                                 this

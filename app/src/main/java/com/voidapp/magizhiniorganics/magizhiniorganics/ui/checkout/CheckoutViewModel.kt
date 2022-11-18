@@ -54,6 +54,8 @@ class CheckoutViewModel(
     var cwmDish: MutableList<CartEntity> = mutableListOf()
     var isCWMCart: Boolean = false
 
+    var gstAmount: Float = 0f
+
     private val _status: MutableStateFlow<NetworkResult> =
         MutableStateFlow<NetworkResult>(NetworkResult.Empty)
     val status: StateFlow<NetworkResult> = _status
@@ -219,10 +221,19 @@ class CheckoutViewModel(
 
     //extracting the sum of cart items price sent from shopping activity and cartitems observer
     fun getCartPrice(cartItems: List<CartEntity>): Float {
-        return cartItems.indices
-            .asSequence()
-            .map { (cartItems[it].price * cartItems[it].quantity) }
-            .sum()
+        var price: Float = 0f
+        gstAmount = 0f
+
+        for (item in cartItems) {
+            gstAmount += ((item.price * item.couponName.toInt() / 100) * item.quantity)
+            price += item.price * item.quantity
+        }
+
+        return price
+//        return cartItems.indices
+//            .asSequence()
+//            .map { (cartItems[it].price * cartItems[it].quantity) }
+//            .sum()
     }
 
     //extracting the sum of cart items price sent from shopping activity and cartitems observer
