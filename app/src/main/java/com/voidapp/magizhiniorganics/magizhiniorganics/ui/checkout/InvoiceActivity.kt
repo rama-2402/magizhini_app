@@ -656,7 +656,7 @@ class InvoiceActivity :
             binding.tvTotalAmt.setTextAnimation(
                 "${
                     totalPrice + viewModel.gstAmount + binding.tvDeliveryChargeAmt.text.toString()
-                        .toFloat()
+                        .toDouble()
                 }"
             )
 
