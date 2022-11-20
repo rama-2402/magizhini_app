@@ -47,6 +47,8 @@ class FoodSubscriptionViewModel(
     var currentCountOption: Int = 0
     var currentServingOption: Int = 0
     var totalPrice: Double = 0.0
+    var lunchPrice: Double = 0.0
+    var dinnerPrice: Double = 0.0
 
     //the outer hashmap holds the data as key and the orderids as values
     //the inner hashmap has orderid as key and the status as value
@@ -497,6 +499,20 @@ class FoodSubscriptionViewModel(
         }
     }
 
+    suspend fun getDeliveryCharge(pincode: String): Float = withContext(Dispatchers.IO) {
+        dbRepository.getDeliveryCharge(pincode)?.let { pinCodes ->
+            if (pinCodes.isNullOrEmpty()) {
+                //                        deliveryAvailability(null)
+                30f
+            } else {
+                //                        deliveryAvailability(pinCodes[0])
+                pinCodes[0].deliveryCharge.toFloat()
+            }
+        } ?: let {
+            //                    deliveryAvailability(null)
+            30f
+        }
+    }
 
     sealed class UiUpdate {
         data class PopulateAmmaSpecials(

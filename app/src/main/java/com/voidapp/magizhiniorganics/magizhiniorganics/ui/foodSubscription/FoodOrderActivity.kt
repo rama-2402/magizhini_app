@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -62,6 +63,8 @@ class FoodOrderActivity :
         viewModel = ViewModelProvider(this, factory)[FoodSubscriptionViewModel::class.java]
 
 //        viewModel.lunchMap = intent.extras!!.get("lunch") as HashMap<String, Double>
+        viewModel.lunchPrice = intent.getDoubleExtra("lunch", Double.MAX_VALUE)
+        viewModel.dinnerPrice = intent.getDoubleExtra("dinner", Double.MAX_VALUE)
 
         initData()
         initLiveData()
@@ -158,11 +161,12 @@ class FoodOrderActivity :
                     }
 
                     if (
+                        TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Saturday" ||
                         TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Sunday"
                     ) {
                         showToast(
                             this@FoodOrderActivity,
-                            "Delivery Not Available on Sundays"
+                            "Delivery Not Available on Saturdays and Sundays"
                         )
                         return
                     }
@@ -521,6 +525,7 @@ class FoodOrderActivity :
         while (true) {
             today += SINGLE_DAY_LONG
             if (
+                TimeUtil().getDayName(dateLong = today) == "Saturday" ||
                 TimeUtil().getDayName(dateLong = today) == "Sunday"
             ) {
 
@@ -550,7 +555,10 @@ class FoodOrderActivity :
     private fun getListOfSundays(dayCount: Long) {
         var dayLong = dayCount
         for (count in 1..30) {
-            if (TimeUtil().getDayName(dayLong) == "Sunday") {
+            if (
+                TimeUtil().getDayName(dayLong) == "Saturday" ||
+                TimeUtil().getDayName(dayLong) == "Sunday"
+            ) {
                 Event(
                     resources.getColor(
                         R.color.errorRed,
@@ -594,39 +602,34 @@ class FoodOrderActivity :
     }
 
     private fun setPrice() {
-        var totalPrice: Double = when(viewModel.currentServingOption) {
-                    0 -> {
-                        viewModel.selectedEventDates.size * 98.0
-                    }
-                    1 -> {
-                        viewModel.selectedEventDates.size * 89.0
-                    }
-                    else -> {
-                        (viewModel.selectedEventDates.size * 98.0) + (viewModel.selectedEventDates.size * 89.0)
-                    }
+
+    var totalPrice: Double = when(viewModel.currentServingOption) {
+                0 -> {
+                    viewModel.selectedEventDates.size * viewModel.lunchPrice
                 }
+                1 -> {
+                    viewModel.selectedEventDates.size * viewModel.dinnerPrice
+                }
+                else -> {
+                    (viewModel.selectedEventDates.size * viewModel.lunchPrice) + (viewModel.selectedEventDates.size * viewModel.dinnerPrice)
+                }
+            }
             //we have to calculate the price based on if it is lunch or dinner or both for the total number of days selected by the user for delivery
 //            totalPrice += viewModel.lunchMap[TimeUtil().getDayName(dateLong)] ?: 0.0
         totalPrice *= viewModel.currentCountOption
 
         if (binding.cbxLeaf.isChecked) {
-            totalPrice += 5 * viewModel.selectedEventDates.size
-        }
-
-        totalPrice = if (viewModel.currentServingOption == 2) {
-                totalPrice + viewModel.selectedEventDates.size * 60
-        } else {
-            if (viewModel.selectedEventDates.size > 10) {
-                totalPrice
+            totalPrice = if (viewModel.currentServingOption == 2) {
+                totalPrice + (20 * viewModel.selectedEventDates.size)
             } else {
-                totalPrice + viewModel.selectedEventDates.size * 30
+                totalPrice + (10 * viewModel.selectedEventDates.size)
             }
         }
 
-        totalPrice = (totalPrice * 118)/100
+//        totalPrice = (totalPrice * 118)/100  //GST calculation
 
         viewModel.totalPrice = totalPrice
-        binding.tvPlaceOrder.setTextAnimation("Order Box for Rs: $totalPrice (Incl 18% GST)")
+        binding.tvPlaceOrder.setTextAnimation("Order Box for Rs: $totalPrice")
     }
 
     private fun populateProfileData(userProfile: UserProfileEntity) {
@@ -646,6 +649,7 @@ class FoodOrderActivity :
 
         while (dayCount <= 30) {
             if (
+                TimeUtil().getDayName(currentDate) != "Saturday" &&
                 TimeUtil().getDayName(currentDate) != "Sunday" &&
                 !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
             ) {
@@ -737,7 +741,6 @@ class FoodOrderActivity :
         }
     }
 
-
     private fun generateOrderDetailsForWhatsapp(): String {
         binding.apply {
             var deliveryDates: String = ""
@@ -771,7 +774,6 @@ class FoodOrderActivity :
             "Delivery Dates: $deliveryDates"
         }
     }
-
 
     //function to remove focus of edit text when clicked outside
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {

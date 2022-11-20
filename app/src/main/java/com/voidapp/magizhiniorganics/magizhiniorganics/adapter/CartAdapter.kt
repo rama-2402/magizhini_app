@@ -175,13 +175,13 @@ class CartAdapter(
                     "${getDiscountPercent(originalPrice, discountPrice).toInt()}% Off",
                     200
                 )
-                discountedAmount.text = "Rs. ${discountPrice*quantity}"
-                price.visibility = View.GONE
-//                price.text = "Rs. $originalPrice"
-//                price.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                discountedAmount.text = "Rs. ${discountPrice}"
+                price.visibility = View.VISIBLE
+                price.text = "Rs. $originalPrice"
+                price.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
             } else {
                 discountBanner.fadOutAnimation()
-                discountedAmount.text = "Rs. ${discountPrice*quantity}"
+                discountedAmount.text = "Rs. ${discountPrice}"
                 price.visibility = View.GONE
             }
         }

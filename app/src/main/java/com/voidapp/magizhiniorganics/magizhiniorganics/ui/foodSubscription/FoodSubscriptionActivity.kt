@@ -30,6 +30,9 @@ class FoodSubscriptionActivity :
     private val factory: FoodSubscriptionViewModelFactory by instance()
     private lateinit var viewModel: FoodSubscriptionViewModel
 
+    private var lunchPrice = 0.0
+    private var dinnerPrice = 0.0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_food_subscription)
@@ -85,6 +88,15 @@ class FoodSubscriptionActivity :
                                 binding.rvFoods.adapter = adapter
                                 binding.rvFoods.layoutManager = LinearLayoutManager(this)
                             }
+
+                            specials.forEach {
+                                if (it.foodTime.lowercase().contains("lunch")) {
+                                    lunchPrice = it.price
+                                }
+                                if (it.foodTime.lowercase().contains("dinner")) {
+                                    dinnerPrice = it.price
+                                }
+                            }
                         }
                    }?: showErrorSnackBar("Server Error! Please try again later", true)
                     hideProgressDialog()
@@ -116,7 +128,8 @@ class FoodSubscriptionActivity :
 
     override fun itemClicked() {
         Intent(this, FoodOrderActivity::class.java).also {
-            it.putExtra("lunch", viewModel.lunchMap)
+            it.putExtra("lunch", lunchPrice)
+            it.putExtra("dinner", dinnerPrice)
             startActivity(it)
         }
     }

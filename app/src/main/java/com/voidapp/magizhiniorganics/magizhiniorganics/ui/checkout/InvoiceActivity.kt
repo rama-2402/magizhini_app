@@ -644,7 +644,7 @@ class InvoiceActivity :
             cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
             tvMrpAmount.text = cartOriginalPrice.toString()
             tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
-            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
+//            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
             tvGstAmount.text = "${viewModel.gstAmount ?: 0.0f}"
             var totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
             if (totalPrice >= freeDeliveryLimit) {

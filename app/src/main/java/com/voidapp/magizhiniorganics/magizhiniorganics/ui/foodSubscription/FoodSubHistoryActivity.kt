@@ -103,11 +103,12 @@ class FoodSubHistoryActivity :
                     date = instanceToGetLongDate.timeInMillis
 
                     if (
+                        TimeUtil().getDayName(date) == "Saturday" ||
                         TimeUtil().getDayName(date) == "Sunday"
                     ) {
                         showToast(
                             this@FoodSubHistoryActivity,
-                            "Delivery not available on Sundays"
+                            "Delivery not available on Saturdays and Sundays"
                         )
                         rvFoodStatus.remove()
                         return
@@ -138,7 +139,7 @@ class FoodSubHistoryActivity :
                 } else {
                     showExitSheet(
                         this@FoodSubHistoryActivity,
-                        "You are about to cancel your Magizhini Amma's Special Food Subscription. If you are unsubscribed your refund for the not delivered days will be reverted back in 3 to 5 business days. \n \nClick PROCEED to confirm cancellation",
+                        "You are about to cancel your Magizhini Amma Samayal Food Subscription. If you are unsubscribed your refund for the not delivered days will be reverted back in 3 to 5 business days. \n \nClick PROCEED to confirm cancellation",
                         "cancel"
                     )
                 }
@@ -146,7 +147,7 @@ class FoodSubHistoryActivity :
             btnRenewSub.setOnClickListener {
                 showExitSheet(
                     this@FoodSubHistoryActivity,
-                    "You are about to renew your Monthly Subscription for Magizhini's Amma's Special Authentic Home-made Food plan. \n \nClick PROCEED to renew your subscription for the next month",
+                    "You are about to renew your Monthly Subscription for Magizhini's Amma Samayal Authentic Home-made Food plan. \n \nClick PROCEED to renew your subscription for the next month",
                     "renew"
                 )
             }
@@ -156,7 +157,10 @@ class FoodSubHistoryActivity :
     private fun getListOfSundays(dayCount: Long) {
         var dayLong = dayCount
         for (count in 1..30) {
-            if (TimeUtil().getDayName(dayLong) == "Sunday") {
+            if (
+                TimeUtil().getDayName(dayLong) == "Saturday" ||
+                TimeUtil().getDayName(dayLong) == "Sunday"
+            ) {
                 Event(
                     resources.getColor(
                         R.color.errorRed,
@@ -210,11 +214,11 @@ class FoodSubHistoryActivity :
                             CustomAlertDialog(
                                 this,
                                 "Monthly Subscription Renewal",
-                                "Your Subscription for Amma's Special Authentic Home-made Food ends on ${
+                                "Your Subscription for Amma Samayal Authentic Home-made Food ends on ${
                                     TimeUtil().getCustomDate(
                                         dateLong = it.endDate
                                     )
-                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: ${it.price} (Incl 18% GST) to renew your subscription for the next month. For further queries please contact customer support.",
+                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: ${it.price} to renew your subscription for the next month. For further queries please contact customer support.",
                                 "RENEW SUBSCRIPTION",
                                 "food",
                                 this
@@ -236,11 +240,12 @@ class FoodSubHistoryActivity :
                     event.status?.let { populateDeliveryStatus(it) }
 
                     if (
+                        TimeUtil().getDayName(date) == "Saturday" ||
                         TimeUtil().getDayName(date) == "Sunday"
                     ) {
                         showToast(
                             this@FoodSubHistoryActivity,
-                            "Delivery not available on Sundays"
+                            "Delivery not available on Saturdays and Sundays"
                         )
                         binding.rvFoodStatus.remove()
                     }
@@ -357,6 +362,7 @@ class FoodSubHistoryActivity :
         while (true) {
             today += SINGLE_DAY_LONG
             if (
+                TimeUtil().getDayName(dateLong = today) == "Saturday" ||
                 TimeUtil().getDayName(dateLong = today) == "Sunday"
             ) {
                 Event(
@@ -406,6 +412,7 @@ class FoodSubHistoryActivity :
             currentDate += SINGLE_DAY_LONG
 
             if (
+                TimeUtil().getDayName(currentDate) != "Saturday" &&
                 TimeUtil().getDayName(currentDate) != "Sunday" &&
                 !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
             ) {

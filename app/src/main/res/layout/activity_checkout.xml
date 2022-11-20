@@ -386,41 +386,41 @@
                         app:layout_constraintTop_toTopOf="@id/tvSavingsInDiscount"
                         app:layout_constraintEnd_toEndOf="parent" />
 
-                    <TextView
-                        android:id="@+id/tvSavingsInCoupon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Coupon Discount"
-                        android:textStyle="normal"
-                        android:textColor="@color/gray700"
-                        style="@style/TextAppearance.MaterialComponents.Body1"
-                        android:layout_marginTop="@dimen/material_size_8"
-                        app:layout_constraintTop_toBottomOf="@id/tvSavingsInDiscount"
-                        app:layout_constraintStart_toStartOf="parent" />
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvSavingsInCoupon"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="Coupon Discount"-->
+<!--                        android:textStyle="normal"-->
+<!--                        android:textColor="@color/gray700"-->
+<!--                        style="@style/TextAppearance.MaterialComponents.Body1"-->
+<!--                        android:layout_marginTop="@dimen/material_size_8"-->
+<!--                        app:layout_constraintTop_toBottomOf="@id/tvSavingsInDiscount"-->
+<!--                        app:layout_constraintStart_toStartOf="parent" />-->
 
-                    <TextView
-                        android:id="@+id/tvCouponMinus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="-"
-                        android:textStyle="normal"
-                        android:textColor="@color/gray700"
-                        style="@style/TextAppearance.MaterialComponents.Body1"
-                        android:layout_marginEnd="@dimen/material_size_4"
-                        app:layout_constraintTop_toTopOf="@id/tvSavingsInCouponAmt"
-                        app:layout_constraintEnd_toStartOf="@id/tvSavingsInCouponAmt" />
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvCouponMinus"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="-"-->
+<!--                        android:textStyle="normal"-->
+<!--                        android:textColor="@color/gray700"-->
+<!--                        style="@style/TextAppearance.MaterialComponents.Body1"-->
+<!--                        android:layout_marginEnd="@dimen/material_size_4"-->
+<!--                        app:layout_constraintTop_toTopOf="@id/tvSavingsInCouponAmt"-->
+<!--                        app:layout_constraintEnd_toStartOf="@id/tvSavingsInCouponAmt" />-->
 
-                    <TextView
-                        android:id="@+id/tvSavingsInCouponAmt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0.0"
-                        android:textColor="@color/matteRed"
-                        android:textStyle="normal"
-                        style="@style/TextAppearance.MaterialComponents.Body1"
-                        android:layout_marginEnd="@dimen/material_size_16"
-                        app:layout_constraintTop_toTopOf="@id/tvSavingsInCoupon"
-                        app:layout_constraintEnd_toEndOf="parent" />
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvSavingsInCouponAmt"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="0.0"-->
+<!--                        android:textColor="@color/matteRed"-->
+<!--                        android:textStyle="normal"-->
+<!--                        style="@style/TextAppearance.MaterialComponents.Body1"-->
+<!--                        android:layout_marginEnd="@dimen/material_size_16"-->
+<!--                        app:layout_constraintTop_toTopOf="@id/tvSavingsInCoupon"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent" />-->
 
                     <TextView
                         android:id="@+id/tvGstText"
@@ -431,7 +431,7 @@
                         android:textStyle="normal"
                         style="@style/TextAppearance.MaterialComponents.Body1"
                         android:layout_marginTop="@dimen/material_size_8"
-                        app:layout_constraintTop_toBottomOf="@id/tvSavingsInCoupon"
+                        app:layout_constraintTop_toBottomOf="@id/tvSavingsInDiscount"
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <TextView

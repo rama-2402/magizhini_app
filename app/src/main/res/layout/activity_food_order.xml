@@ -381,7 +381,7 @@
                     android:layout_marginTop="@dimen/material_size_8"
                     android:gravity="start"
                     android:padding="@dimen/material_size_4"
-                    android:text="Include Banana Leaf with food (Rs: 5/Serving)"
+                    android:text="Include Palm Leaf plate (Rs: 10/Serving)"
                     android:textColor="@color/gray700"
                     android:textSize="16sp"
                     app:flow_verticalAlign="center"
