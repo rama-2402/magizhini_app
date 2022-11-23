@@ -60,7 +60,6 @@ import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
 import kotlin.math.roundToInt
 
-
 class InvoiceActivity :
     BaseActivity(),
     KodeinAware,
@@ -415,18 +414,18 @@ class InvoiceActivity :
                         showErrorSnackBar(event.message, true)
                     }
                 }
-                is CheckoutViewModel.UiUpdate.CouponApplied -> {
-                    this.hideKeyboard()
-                    if (event.message != "") {
-                        showErrorSnackBar(event.message, false)
-                        setDataToViews()
-                        applyUiChangesWithCoupon(true)
-                    } else {
-                        viewModel.currentCoupon?.let {
-                            applyUiChangesWithCoupon(false)
-                        }
-                    }
-                }
+//                is CheckoutViewModel.UiUpdate.CouponApplied -> {
+//                    this.hideKeyboard()
+//                    if (event.message != "") {
+//                        showErrorSnackBar(event.message, false)
+//                        setDataToViews()
+//                        applyUiChangesWithCoupon(true)
+//                    } else {
+//                        viewModel.currentCoupon?.let {
+//                            applyUiChangesWithCoupon(false)
+//                        }
+//                    }
+//                }
                 is CheckoutViewModel.UiUpdate.CartCleared -> {
                     cartAdapter.emptyCart()
                     setDataToViews()
@@ -519,8 +518,8 @@ class InvoiceActivity :
 //                ivCouponInfo.fadInAnimation()
 //                btnApplyCoupon.text = "Remove"
             } else {
-                viewModel.couponPrice = null
-                viewModel.currentCoupon = null
+//                viewModel.couponPrice = null
+//                viewModel.currentCoupon = null
                 setDataToViews()
 //                etCoupon.setText("")
 //                etCoupon.enable()
@@ -622,17 +621,19 @@ class InvoiceActivity :
         } else {
             viewModel.totalCartItems
         }
-        var detailsJob: Job? = null
-        detailsJob?.cancel()
-        detailsJob = lifecycleScope.launch {
-            delay(600)
-            viewModel.currentCoupon?.let {
-                viewModel.verifyCoupon(it.code, cartItems).invokeOnCompletion {
-                    populateInvoiceValues(cartItems)
-                }
-            } ?: populateInvoiceValues(cartItems)
-        }
-        detailsJob = null
+//        var detailsJob: Job? = null
+//        detailsJob?.cancel()
+//        detailsJob = lifecycleScope.launch {
+//            delay(600)
+//            viewModel.currentCoupon?.let {
+//                viewModel.verifyCoupon(it.code, cartItems).invokeOnCompletion {
+//                    populateInvoiceValues(cartItems)
+//                }
+//            } ?: populateInvoiceValues(cartItems)
+//        }
+//        detailsJob = null
+
+        populateInvoiceValues(cartItems)
     }
 
     private fun populateInvoiceValues(cartItems: MutableList<CartEntity>) = lifecycleScope.launch {
@@ -646,7 +647,8 @@ class InvoiceActivity :
             tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
 //            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
             tvGstAmount.text = "${viewModel.gstAmount ?: 0.0f}"
-            var totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
+//            var totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
+            var totalPrice = cartPrice
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
 //                viewModel.getDeliveryCharge()
@@ -795,7 +797,7 @@ class InvoiceActivity :
         viewModel.apply {
             userProfile = null
             wallet = null
-            currentCoupon = null
+//            currentCoupon = null
         }
         super.onDestroy()
     }

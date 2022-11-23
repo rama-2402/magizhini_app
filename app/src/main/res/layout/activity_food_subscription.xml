@@ -139,5 +139,36 @@
             </LinearLayout>
         </me.didik.component.StickyNestedScrollView>
 
+<!--            <TextView-->
+<!--                android:id="@+id/btnBudgetPlan"-->
+<!--                android:layout_width="0dp"-->
+<!--                app:layout_constraintWidth_percent=".5"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="1"-->
+<!--                android:background="@color/green_base"-->
+<!--                android:gravity="center"-->
+<!--                android:padding="@dimen/material_size_12"-->
+<!--                android:text="BUDGET PLAN"-->
+<!--                android:textSize="14sp"-->
+<!--                android:textStyle="bold"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toEndOf="@id/btnPremiumPlan" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/btnPremiumPlan"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="1"-->
+<!--                android:background="@color/matteRed"-->
+<!--                android:gravity="center"-->
+<!--                android:padding="@dimen/material_size_12"-->
+<!--                android:text="PREMIUM PLAN"-->
+<!--                android:textSize="14sp"-->
+<!--                android:textStyle="bold"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toStartOf="@id/btnBudgetPlan"-->
+<!--                app:layout_constraintStart_toStartOf="parent" />-->
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

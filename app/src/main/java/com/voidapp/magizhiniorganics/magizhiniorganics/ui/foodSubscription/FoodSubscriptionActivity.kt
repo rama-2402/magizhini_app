@@ -3,12 +3,14 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.FoodSubscriptionAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.FoodSubscriptionItemClickListener
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecial
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Banner
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityFoodSubscriptionBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
@@ -18,6 +20,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import java.util.function.DoubleToIntFunction
 
 class FoodSubscriptionActivity :
     BaseActivity(),
@@ -30,8 +33,9 @@ class FoodSubscriptionActivity :
     private val factory: FoodSubscriptionViewModelFactory by instance()
     private lateinit var viewModel: FoodSubscriptionViewModel
 
-    private var lunchPrice = 0.0
-    private var dinnerPrice = 0.0
+    private var lunchPrice: Double = 0.0
+    private var dinnerPrice: Double = 0.0
+//    private var currentPlan: String = "premium"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +57,16 @@ class FoodSubscriptionActivity :
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
+//            btnBudgetPlan.setOnClickListener {
+//                btnBudgetPlan.setBackgroundColor(ContextCompat.getColor(this@FoodSubscriptionActivity, R.color.matteRed))
+//                btnPremiumPlan.setBackgroundColor(ContextCompat.getColor(this@FoodSubscriptionActivity, R.color.green_base))
+//                populateRecipes(viewModel.budgetPlanRecipes)
+//            }
+//            btnPremiumPlan.setOnClickListener {
+//                btnPremiumPlan.setBackgroundColor(ContextCompat.getColor(this@FoodSubscriptionActivity, R.color.matteRed))
+//                btnBudgetPlan.setBackgroundColor(ContextCompat.getColor(this@FoodSubscriptionActivity, R.color.green_base))
+//                populateRecipes(viewModel.premiumPlanRecipes)
+//            }
         }
     }
 
@@ -84,10 +98,14 @@ class FoodSubscriptionActivity :
                         } else {
                             binding.tvFoodStatus.remove()
                             binding.svBody.visible()
-                            FoodSubscriptionAdapter(specials.sortedBy { it.displayOrder }, this).let { adapter ->
-                                binding.rvFoods.adapter = adapter
-                                binding.rvFoods.layoutManager = LinearLayoutManager(this)
-                            }
+
+                            populateRecipes(specials)
+
+//                            if (currentPlan == "budget") {
+//                                populateRecipes(viewModel.budgetPlanRecipes)
+//                            } else {
+//                                populateRecipes(viewModel.premiumPlanRecipes)
+//                            }
 
                             specials.forEach {
                                 if (it.foodTime.lowercase().contains("lunch")) {
@@ -112,6 +130,13 @@ class FoodSubscriptionActivity :
         }
     }
 
+    private fun populateRecipes(recipes: List<AmmaSpecial>) {
+        FoodSubscriptionAdapter(recipes.sortedBy { it.displayOrder }, this).let { adapter ->
+                                    binding.rvFoods.adapter = adapter
+                                    binding.rvFoods.layoutManager = LinearLayoutManager(this)
+                                }
+    }
+
     private fun populateBanners(banners: List<Banner>?) {
         val bannersCarousel: MutableList<CarouselItem> = mutableListOf()
         banners?.forEach { banner ->
@@ -123,7 +148,6 @@ class FoodSubscriptionActivity :
         }
         binding.cvBanner.addData(bannersCarousel)
         binding.cvBanner.registerLifecycle(this)
-
     }
 
     override fun itemClicked() {

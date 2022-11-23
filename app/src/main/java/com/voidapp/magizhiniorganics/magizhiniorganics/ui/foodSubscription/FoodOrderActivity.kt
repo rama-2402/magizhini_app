@@ -729,7 +729,6 @@ class FoodOrderActivity :
     override fun placeOrderWithWhatsapp() {
         lifecycleScope.launch {
             val message: String = generateOrderDetailsForWhatsapp()
-
             startActivity(
                 Intent(
                     Intent.ACTION_VIEW,

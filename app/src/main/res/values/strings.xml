@@ -59,6 +59,12 @@
         <item>Custom</item>
     </string-array>
 
+    <!--    Subscription plans-->
+    <string-array name="sub_plan">
+        <item>Premium Plan</item>
+        <item>Budget Plan</item>
+    </string-array>
+
     <!--    Food serving options-->
     <string-array name="food_serving_options">
         <item>Lunch Only</item>

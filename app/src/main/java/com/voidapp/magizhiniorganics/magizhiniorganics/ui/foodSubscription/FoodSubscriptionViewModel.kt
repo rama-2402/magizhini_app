@@ -39,6 +39,8 @@ class FoodSubscriptionViewModel(
 
     val ammaSpecials: MutableList<AmmaSpecial> = mutableListOf()
     var lunchMap: HashMap<String, Double> = hashMapOf()
+//    val budgetPlanRecipes: MutableList<AmmaSpecial> = mutableListOf()
+//    val premiumPlanRecipes: MutableList<AmmaSpecial> = mutableListOf()
 
     var nonDeliveryDatesLong: MutableList<Long>? = null
     var nonDeliveryDatesString: MutableList<String> = mutableListOf()
@@ -49,6 +51,7 @@ class FoodSubscriptionViewModel(
     var totalPrice: Double = 0.0
     var lunchPrice: Double = 0.0
     var dinnerPrice: Double = 0.0
+//    var selectedPlan: String = ""
 
     //the outer hashmap holds the data as key and the orderids as values
     //the inner hashmap has orderid as key and the status as value
@@ -69,6 +72,8 @@ class FoodSubscriptionViewModel(
         val banners = foodSubscriptionUseCase.getAllBanners()
 //        val specials = generateSampleSpecials()
         ammaSpecials.clear()
+//        budgetPlanRecipes.clear()
+//        premiumPlanRecipes.clear()
         specials?.let { specialsList ->
             ammaSpecials.addAll(specialsList)
             specialsList.forEach {
@@ -77,6 +82,12 @@ class FoodSubscriptionViewModel(
                 } else {
                     it.discountedPrice
                 }
+
+//                if (it.plan == "budget") {
+//                    budgetPlanRecipes.add(it)
+//                } else {
+//                    premiumPlanRecipes.add(it)
+//                }
             }
         }
         _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, banners)
@@ -108,6 +119,7 @@ class FoodSubscriptionViewModel(
                 startDate = orderDetailsMap["start"].toString().toLong(),
                 endDate = orderDetailsMap["end"].toString().toLong(),
                 price = totalPrice,
+//                plan = selectedPlan,
                 userName = orderDetailsMap["name"].toString(),
                 addressOne = orderDetailsMap["one"].toString(),
                 addressTwo = orderDetailsMap["two"].toString(),
@@ -197,6 +209,7 @@ class FoodSubscriptionViewModel(
                 startDate = orderDetailsMap["start"].toString().toLong(),
                 endDate = orderDetailsMap["end"].toString().toLong(),
                 price = totalPrice,
+//                plan = selectedPlan,
                 userName = orderDetailsMap["name"].toString(),
                 addressOne = orderDetailsMap["one"].toString(),
                 addressTwo = orderDetailsMap["two"].toString(),
@@ -496,21 +509,6 @@ class FoodSubscriptionViewModel(
                 nonDeliveryDatesString.addAll(nonDeliveryDatesLong!!.map { TimeUtil().getCustomDate(dateLong = it) })
                 _uiUpdate.value = UiUpdate.PopulateNonDeliveryDates(nonDeliveryDatesLong)
             }
-        }
-    }
-
-    suspend fun getDeliveryCharge(pincode: String): Float = withContext(Dispatchers.IO) {
-        dbRepository.getDeliveryCharge(pincode)?.let { pinCodes ->
-            if (pinCodes.isNullOrEmpty()) {
-                //                        deliveryAvailability(null)
-                30f
-            } else {
-                //                        deliveryAvailability(pinCodes[0])
-                pinCodes[0].deliveryCharge.toFloat()
-            }
-        } ?: let {
-            //                    deliveryAvailability(null)
-            30f
         }
     }
 

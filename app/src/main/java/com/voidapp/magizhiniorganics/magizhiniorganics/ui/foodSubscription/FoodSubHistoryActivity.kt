@@ -231,9 +231,6 @@ class FoodSubHistoryActivity :
                     if (event.status == null) {
                         if (!event.isOrdersAvailable) {
                             statusNotAvailableUI()
-                        } else {
-                            userNotLoggedIn()
-                            return@observe
                         }
                     }
 

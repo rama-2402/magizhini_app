@@ -36,8 +36,8 @@ class CheckoutViewModel(
     var wallet: Wallet? = null
     var tempAddress: Address? = null
 
-    var currentCoupon: CouponEntity? = null
-    var couponPrice: Float? = null
+//    var currentCoupon: CouponEntity? = null
+//    var couponPrice: Float? = null
     private var freeDeliveryLimit: Float = 0f
     var deliveryAvailable: Boolean = true
 
@@ -280,63 +280,63 @@ class CheckoutViewModel(
     }
 
     //Coupons
-    fun verifyCoupon(couponCode: String, cartItems: List<CartEntity>) =
-        viewModelScope.launch(Dispatchers.IO) {
-            if (couponCode == "") {
-                return@launch
-            } else {
-                val code: CouponEntity? = currentCoupon?.let {
-                    currentCoupon
-                } ?: dbRepository.getCouponByCode(couponCode)
-                code?.let { coupon ->
-                    val cartPrice = getCartPrice(cartItems)
-                    if (!coupon.categories.contains(Constants.ALL)) {
-                        withContext(Dispatchers.Main) {
-                            _uiEvent.value =
-                                UIEvent.Toast("Coupon Applies only for few product categories")
-                        }
-                        return@launch
-                    }
-                    if (cartPrice >= coupon.purchaseLimit) {
-                        if (couponPrice == null) {
-                            withContext(Dispatchers.Main) {
-                                _uiUpdate.value = UiUpdate.CouponApplied(
-                                    "Coupon Applied Successfully!"
-                                )
-                            }
-                        }
-                        withContext(Dispatchers.Main) {
-                            currentCoupon = coupon
-                            couponPrice = couponDiscount(coupon, cartPrice)
-                        }
-//                    couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            _uiUpdate.value = UiUpdate.CouponApplied("")
-                            _uiEvent.value =
-                                UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
-                        }
-                        return@launch
-                    }
-                } ?: withContext(Dispatchers.Main) {
-                    _uiEvent.value = UIEvent.Toast("Coupon Code does not exist.")
-                }
-            }
-        }
+//    fun verifyCoupon(couponCode: String, cartItems: List<CartEntity>) =
+//        viewModelScope.launch(Dispatchers.IO) {
+//            if (couponCode == "") {
+//                return@launch
+//            } else {
+//                val code: CouponEntity? = currentCoupon?.let {
+//                    currentCoupon
+//                } ?: dbRepository.getCouponByCode(couponCode)
+//                code?.let { coupon ->
+//                    val cartPrice = getCartPrice(cartItems)
+//                    if (!coupon.categories.contains(Constants.ALL)) {
+//                        withContext(Dispatchers.Main) {
+//                            _uiEvent.value =
+//                                UIEvent.Toast("Coupon Applies only for few product categories")
+//                        }
+//                        return@launch
+//                    }
+//                    if (cartPrice >= coupon.purchaseLimit) {
+//                        if (couponPrice == null) {
+//                            withContext(Dispatchers.Main) {
+//                                _uiUpdate.value = UiUpdate.CouponApplied(
+//                                    "Coupon Applied Successfully!"
+//                                )
+//                            }
+//                        }
+//                        withContext(Dispatchers.Main) {
+//                            currentCoupon = coupon
+//                            couponPrice = couponDiscount(coupon, cartPrice)
+//                        }
+////                    couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
+//                    } else {
+//                        withContext(Dispatchers.Main) {
+//                            _uiUpdate.value = UiUpdate.CouponApplied("")
+//                            _uiEvent.value =
+//                                UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
+//                        }
+//                        return@launch
+//                    }
+//                } ?: withContext(Dispatchers.Main) {
+//                    _uiEvent.value = UIEvent.Toast("Coupon Code does not exist.")
+//                }
+//            }
+//        }
 
-    private fun couponDiscount(coupon: CouponEntity, cartPrice: Float): Float {
-        var discountPrice = when (coupon.type) {
-            "percent" -> (cartPrice * coupon.amount / 100)
-            "rupees" -> coupon.amount
-            else -> 0f
-        }
-
-        if (discountPrice > coupon.maxDiscount) {
-            discountPrice = coupon.maxDiscount
-        }
-
-        return discountPrice
-    }
+//    private fun couponDiscount(coupon: CouponEntity, cartPrice: Float): Float {
+//        var discountPrice = when (coupon.type) {
+//            "percent" -> (cartPrice * coupon.amount / 100)
+//            "rupees" -> coupon.amount
+//            else -> 0f
+//        }
+//
+//        if (discountPrice > coupon.maxDiscount) {
+//            discountPrice = coupon.maxDiscount
+//        }
+//
+//        return discountPrice
+//    }
 
     suspend fun getFreeDeliveryLimit(): Float {
         if (freeDeliveryLimit == 0f) {
@@ -621,7 +621,7 @@ sealed class UiUpdate {
     object NoProfileFound : UiUpdate()
 
     //coupon
-    data class CouponApplied(val message: String) : UiUpdate()
+//    data class CouponApplied(val message: String) : UiUpdate()
 
     //wallet
     data class WalletData(val wallet: Wallet) : UiUpdate()

@@ -50,7 +50,7 @@ class UpdateTotalOrderItemService(
                 } else {
                     fireStore.runTransaction { transaction ->
                         val transactionDoc = transaction.get(path.document(id)).toObject(TotalOrder::class.java)
-                            if (status) {
+                            if (status == true) {
                                 transactionDoc!!.orderCount = transactionDoc.orderCount + cartItem.quantity
                             } else {
                                 transactionDoc!!.orderCount = transactionDoc.orderCount - cartItem.quantity
@@ -65,5 +65,4 @@ class UpdateTotalOrderItemService(
             return Result.retry()
         }
     }
-
 }
