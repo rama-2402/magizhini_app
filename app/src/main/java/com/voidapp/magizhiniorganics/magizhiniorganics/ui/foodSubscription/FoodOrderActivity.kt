@@ -63,8 +63,9 @@ class FoodOrderActivity :
         viewModel = ViewModelProvider(this, factory)[FoodSubscriptionViewModel::class.java]
 
 //        viewModel.lunchMap = intent.extras!!.get("lunch") as HashMap<String, Double>
-        viewModel.lunchPrice = intent.getDoubleExtra("lunch", Double.MAX_VALUE)
-        viewModel.dinnerPrice = intent.getDoubleExtra("dinner", Double.MAX_VALUE)
+        viewModel.lunchPrice = intent.getDoubleExtra("lunch", 118.0)
+        viewModel.dinnerPrice = intent.getDoubleExtra("dinner", 98.0)
+        Log.e("qwqwqw", "onCreate: ${viewModel.lunchPrice} ${viewModel.dinnerPrice}", )
 
         initData()
         initLiveData()

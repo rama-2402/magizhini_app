@@ -109,10 +109,10 @@ class FoodSubscriptionActivity :
 
                             specials.forEach {
                                 if (it.foodTime.lowercase().contains("lunch")) {
-                                    lunchPrice = it.price
+                                    lunchPrice = it.discountedPrice
                                 }
                                 if (it.foodTime.lowercase().contains("dinner")) {
-                                    dinnerPrice = it.price
+                                    dinnerPrice = it.discountedPrice
                                 }
                             }
                         }
