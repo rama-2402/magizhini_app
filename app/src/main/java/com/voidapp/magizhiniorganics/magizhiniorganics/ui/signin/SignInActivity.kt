@@ -485,13 +485,14 @@ class SignInActivity : BaseActivity(), KodeinAware {
             }
             else -> {
                 showToast(this, "Syncing your profile... Please wait... ")
-                mCurrentUserID = status
+                mCurrentUserID = viewModel.getCurrentUserId()!!
                 SharedPref(this).putData(USER_ID, STRING, mCurrentUserID)
                 SharedPref(this).putData(PHONE_NUMBER, STRING, mPhoneNumber)
                 startGetProfileDataService()
                 when(signInOption) {
                     "wallet" -> finish()
                     "newID" -> finish()
+                    "food" -> finish()
                     else -> startGetAllDataService("home")
                 }
             }

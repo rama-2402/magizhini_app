@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import kotlin.math.roundToInt
 
 class CheckoutViewModel(
     private val dbRepository: DatabaseRepository,
@@ -226,6 +227,7 @@ class CheckoutViewModel(
 
         for (item in cartItems) {
             gstAmount += ((item.price * item.couponName.toInt() / 100) * item.quantity)
+            gstAmount = ((gstAmount * 100.0).roundToInt() / 100.0).toFloat()
             price += item.price * item.quantity
         }
 

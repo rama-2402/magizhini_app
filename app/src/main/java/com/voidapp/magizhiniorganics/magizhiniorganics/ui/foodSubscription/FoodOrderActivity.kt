@@ -65,7 +65,6 @@ class FoodOrderActivity :
 //        viewModel.lunchMap = intent.extras!!.get("lunch") as HashMap<String, Double>
         viewModel.lunchPrice = intent.getDoubleExtra("lunch", 118.0)
         viewModel.dinnerPrice = intent.getDoubleExtra("dinner", 98.0)
-        Log.e("qwqwqw", "onCreate: ${viewModel.lunchPrice} ${viewModel.dinnerPrice}", )
 
         initData()
         initLiveData()
@@ -634,7 +633,9 @@ class FoodOrderActivity :
     }
 
     private fun populateProfileData(userProfile: UserProfileEntity) {
+        viewModel.userID = userProfile.id
         binding.apply {
+            etName.setText(userProfile.name)
             etAlternateNumber.setText(userProfile.phNumber)
             etEmailId.setText(userProfile.mailId)
             etAddressOne.setText(userProfile.address[0].addressLineOne)

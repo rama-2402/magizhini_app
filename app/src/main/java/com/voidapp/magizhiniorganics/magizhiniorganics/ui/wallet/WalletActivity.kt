@@ -42,6 +42,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
+import kotlin.math.roundToInt
 
 class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener,
     CalendarFilerDialogClickListener,
@@ -207,8 +208,8 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener,
                         tvTransactionText.text = "Referral Earnings: "
                         tvLastRecharge.text = "Total Referrals: "
                         event.data?.let {
-                            tvTransactionDate.text = "Rs: ${it.totalBonus}"
-                            tvLastRechargeDate.text = it.referrals.toString()
+                            tvTransactionDate.text = "Rs: ${(it.totalBonus * 100.0).roundToInt() / 100.0}"
+                            tvLastRechargeDate.text = if (it.referrals.isNullOrEmpty()) "None" else it.referrals.toString()
                         } ?: let {
                             tvTransactionDate.text = "Rs: 0.00"
                             tvLastRechargeDate.text = "0"
