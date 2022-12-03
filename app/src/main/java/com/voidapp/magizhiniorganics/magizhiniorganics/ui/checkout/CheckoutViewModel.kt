@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toUserProfile
@@ -24,8 +26,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.Util
 import java.io.IOException
-import kotlin.math.roundToInt
 
 class CheckoutViewModel(
     private val dbRepository: DatabaseRepository,
@@ -39,7 +41,7 @@ class CheckoutViewModel(
 
 //    var currentCoupon: CouponEntity? = null
 //    var couponPrice: Float? = null
-    private var freeDeliveryLimit: Float = 0f
+    var freeDeliveryLimit: Float? = null
     var deliveryAvailable: Boolean = true
 
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
@@ -150,10 +152,10 @@ class CheckoutViewModel(
             }
             return@launch
         }
-        dbRepository.getAllCartItem()?.let { cartItems ->
+        dbRepository.getAllCartItem()?.let { cart ->
             withContext(Dispatchers.Main) {
-                totalCartItems.addAll(cartItems.map { it.copy() })
-                _uiUpdate.value = UiUpdate.PopulateCartData(cartItems)
+                totalCartItems.addAll(cart.map { it.copy() })
+                _uiUpdate.value = UiUpdate.PopulateCartData(cart)
             }
         } ?: withContext(Dispatchers.Main) {
             _uiUpdate.value = UiUpdate.PopulateCartData(null)
@@ -189,8 +191,9 @@ class CheckoutViewModel(
                 } else {
                     dbRepository.updateCartItem(id, updatedCount)
                 }
+                totalCartItems[position].quantity = updatedCount
                 withContext(Dispatchers.Main) {
-                    totalCartItems[position].quantity = updatedCount
+//                    totalCartItems[position].quantity = updatedCount
                     _uiUpdate.value = UiUpdate.UpdateCartData("update", position, updatedCount)
                 }
             } catch (e: Exception) {
@@ -221,17 +224,23 @@ class CheckoutViewModel(
     }
 
     //extracting the sum of cart items price sent from shopping activity and cartitems observer
-    fun getCartPrice(cartItems: List<CartEntity>): Float {
+    suspend fun getCartPrice(cartItems: List<CartEntity>): MutableList<Float> {
         var price: Float = 0f
+        var originalPrice: Float = 0f
+        val priceList: MutableList<Float> = mutableListOf<Float>()
         gstAmount = 0f
 
         for (item in cartItems) {
             gstAmount += ((item.price * item.couponName.toInt() / 100) * item.quantity)
-            gstAmount = ((gstAmount * 100.0).roundToInt() / 100.0).toFloat()
+            gstAmount = Utils.roundPrice(gstAmount)
             price += item.price * item.quantity
+            originalPrice += item.originalPrice * item.quantity
         }
 
-        return price
+        priceList.add(price)
+        priceList.add(originalPrice)
+
+        return priceList
 //        return cartItems.indices
 //            .asSequence()
 //            .map { (cartItems[it].price * cartItems[it].quantity) }
@@ -239,11 +248,18 @@ class CheckoutViewModel(
     }
 
     //extracting the sum of cart items price sent from shopping activity and cartitems observer
-    fun getCartOriginalPrice(cartItems: List<CartEntity>): Float {
-        return cartItems.indices
-            .asSequence()
-            .map { (cartItems[it].originalPrice * cartItems[it].quantity) }
-            .sum()
+    suspend fun getCartOriginalPrice(cartItems: List<CartEntity>): Float = withContext(Dispatchers.Default) {
+         var price: Float = 0f
+
+        for (item in cartItems) {
+            price += item.originalPrice * item.quantity
+        }
+
+        return@withContext price
+//        return@withContext cartItems.indices
+//            .asSequence()
+//            .map { (cartItems[it].originalPrice * cartItems[it].quantity) }
+//            .sum()
     }
 
     //extracting the sum of cart items quantity sent from shopping activity and cartitems observer
@@ -341,16 +357,16 @@ class CheckoutViewModel(
 //    }
 
     suspend fun getFreeDeliveryLimit(): Float {
-        if (freeDeliveryLimit == 0f) {
-            freeDeliveryLimit = fbRepository.getFreeDeliveryLimit() ?: 1000f
+        if (freeDeliveryLimit == null) {
+            freeDeliveryLimit = fbRepository.getFreeDeliveryLimit() ?: 30f
         }
-        return freeDeliveryLimit
+        return freeDeliveryLimit!!
     }
 
     suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO) {
         return@withContext userProfile?.let {
             dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
-                if (pinCodes.isNullOrEmpty()) {
+                if (pinCodes.isEmpty()) {
 //                        deliveryAvailability(null)
                     30f
                 } else {
@@ -364,7 +380,7 @@ class CheckoutViewModel(
         } ?: let {
             tempAddress?.let {
                 dbRepository.getDeliveryCharge(it.LocationCode)?.let { pinCodes ->
-                    if (pinCodes.isNullOrEmpty()) {
+                    if (pinCodes.isEmpty()) {
                         //                        deliveryAvailability(null)
                         30f
                     } else {

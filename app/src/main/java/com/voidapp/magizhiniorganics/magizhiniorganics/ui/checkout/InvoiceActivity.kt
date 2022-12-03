@@ -5,15 +5,13 @@ import android.content.res.ColorStateList
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -53,12 +51,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import okhttp3.internal.Util
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import ru.nikartm.support.ImageBadgeView
-import kotlin.math.roundToInt
 
 class InvoiceActivity :
     BaseActivity(),
@@ -194,11 +192,12 @@ class InvoiceActivity :
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        val content = if (viewModel.isCWMCart) {
-                            "Rs: ${viewModel.getCartPrice(viewModel.cwmDish)}"
-                        } else {
-                            "Rs: ${viewModel.getCartPrice(viewModel.totalCartItems)}"
-                        }
+//                        val content = if (viewModel.isCWMCart) {
+//                            "Rs: ${viewModel.getCartPrice(viewModel.cwmDish)}"
+//                        } else {
+//                            "Rs: ${viewModel.getCartPrice(viewModel.totalCartItems)}"
+//                        }
+                        val content = "Rs: ${binding.tvTotalAmt.text}"
                         checkoutText.setTextAnimation(content)
                         setBottomSheetIcon("delete")
                     }
@@ -329,12 +328,14 @@ class InvoiceActivity :
                     event.cartItems?.let {
                         cartAdapter.setCartData(it as MutableList<CartEntity>)
                     } ?: showToast(this, "Looks like your cart is Empty")
+                    setDataToViews()
                 }
                 is CheckoutViewModel.UiUpdate.UpdateCartData -> {
-                    setDataToViews()
+//                    setDataToViews()
                     event.count?.let {
                         cartAdapter.updateItemsCount(event.position, event.count)
                     } ?: cartAdapter.deleteCartItem(event.position)
+                    setDataToViews()
                 }
                 is CheckoutViewModel.UiUpdate.StartingTransaction -> {
                     showLoadStatusDialog("", "Processing payment from Wallet...", "transaction")
@@ -388,8 +389,7 @@ class InvoiceActivity :
                 }
                 is CheckoutViewModel.UiUpdate.PopulateAddressData -> {
                     updateAddressInView(event.addressList[0])
-                    setDataToViews()
-                    updateDeliveryCharge()
+//                    updateDeliveryCharge()
                 }
                 is CheckoutViewModel.UiUpdate.NoProfileFound -> {
                     SharedPref(this).getData(ADDRESS, STRING, "").let { address ->
@@ -397,8 +397,8 @@ class InvoiceActivity :
                             viewModel.tempAddress =  Utils.toAddressDataClass(address as String)
                         }
                         updateAddressInView(viewModel.tempAddress)
-                        setDataToViews()
-                        updateDeliveryCharge()
+//                        setDataToViews()
+//                        updateDeliveryCharge()
                     }
                }
                 is CheckoutViewModel.UiUpdate.AddressUpdate -> {
@@ -408,11 +408,12 @@ class InvoiceActivity :
                             updateAddressInView(event.address!!)
                         } ?: updateAddressInView(viewModel.tempAddress)
 
-                        setDataToViews()
-                        updateDeliveryCharge()
+//                        setDataToViews()
+//                        updateDeliveryCharge()
                     } else {
                         showErrorSnackBar(event.message, true)
                     }
+                    setDataToViews()
                 }
 //                is CheckoutViewModel.UiUpdate.CouponApplied -> {
 //                    this.hideKeyboard()
@@ -429,7 +430,7 @@ class InvoiceActivity :
                 is CheckoutViewModel.UiUpdate.CartCleared -> {
                     cartAdapter.emptyCart()
                     setDataToViews()
-                    applyUiChangesWithCoupon(false)
+//                    applyUiChangesWithCoupon(false)
                 }
                 is CheckoutViewModel.UiUpdate.HowToVideo -> {
                     hideProgressDialog()
@@ -511,30 +512,30 @@ class InvoiceActivity :
         LoadStatusDialog.statusText.value = filter
     }
 
-    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
-        binding.apply {
-            if (isCouponApplied) {
-//                etCoupon.disable()
-//                ivCouponInfo.fadInAnimation()
-//                btnApplyCoupon.text = "Remove"
-            } else {
-//                viewModel.couponPrice = null
-//                viewModel.currentCoupon = null
-                setDataToViews()
-//                etCoupon.setText("")
-//                etCoupon.enable()
-//                ivCouponInfo.fadOutAnimation()
-//                ivCouponInfo.remove()
-//                btnApplyCoupon.text = "Apply"
-//                btnApplyCoupon.setBackgroundColor(
-//                    ContextCompat.getColor(
-//                        baseContext,
-//                        R.color.green_base
-//                    )
-//                )
-            }
-        }
-    }
+//    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
+//        binding.apply {
+//            if (isCouponApplied) {
+////                etCoupon.disable()
+////                ivCouponInfo.fadInAnimation()
+////                btnApplyCoupon.text = "Remove"
+//            } else {
+////                viewModel.couponPrice = null
+////                viewModel.currentCoupon = null
+//                setDataToViews()
+////                etCoupon.setText("")
+////                etCoupon.enable()
+////                ivCouponInfo.fadOutAnimation()
+////                ivCouponInfo.remove()
+////                btnApplyCoupon.text = "Apply"
+////                btnApplyCoupon.setBackgroundColor(
+////                    ContextCompat.getColor(
+////                        baseContext,
+////                        R.color.green_base
+////                    )
+////                )
+//            }
+//        }
+//    }
 
     fun selectedPaymentMode(paymentMethod: String) {
         if (!NetworkHelper.isOnline(this)) {
@@ -600,8 +601,7 @@ class InvoiceActivity :
         }
     }
 
-    private fun updateDeliveryCharge() {
-        lifecycleScope.launch {
+    private suspend fun updateDeliveryCharge() {
             viewModel.userProfile?.let {
                 binding.tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
             } ?: let {
@@ -611,7 +611,9 @@ class InvoiceActivity :
                     binding.tvDeliveryChargeAmt.setTextAnimation("0.00")
                 }
             }
-        }
+        binding.tvTotalAmt.setTextAnimation(
+            "${binding.tvTotalAmt.text.toString().toFloat() + binding.tvDeliveryChargeAmt.text.toString().toFloat()}"
+        )
         hideProgressDialog()
     }
 
@@ -637,40 +639,50 @@ class InvoiceActivity :
     }
 
     private fun populateInvoiceValues(cartItems: MutableList<CartEntity>) = lifecycleScope.launch {
-        val cartPrice = viewModel.getCartPrice(cartItems)
-        val cartOriginalPrice = viewModel.getCartOriginalPrice(cartItems)
-        val freeDeliveryLimit: Float = viewModel.getFreeDeliveryLimit()
-        with(binding) {
-            tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(cartItems).toString()
-            cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
-            tvMrpAmount.text = cartOriginalPrice.toString()
-            tvSavingsInDiscountAmt.text = "${cartOriginalPrice - viewModel.getCartPrice(cartItems)}"
-//            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
-            tvGstAmount.text = "${viewModel.gstAmount ?: 0.0f}"
-//            var totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
-            var totalPrice = cartPrice
+//        val cartOriginalPrice = viewModel.getCartOriginalPrice(cartItems)
+//        val cartPrice = viewModel.getCartPrice(cartItems)
+        val priceList = viewModel.getCartPrice(cartItems)
+        val freeDeliveryLimit: Float = viewModel.freeDeliveryLimit ?: viewModel.getFreeDeliveryLimit()
+            with(binding) {
+            var totalPrice = priceList[0]
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
+                hideProgressDialog()
 //                viewModel.getDeliveryCharge()
-                tvTotalAmt.setTextAnimation(totalPrice.toString())
+//                tvTotalAmt.setTextAnimation(totalPrice.toString())
             } else {
                 updateDeliveryCharge()
             }
+            tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(cartItems).toString()
+            cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
+//            tvMrpAmount.text = cartOriginalPrice.toString()
+            tvMrpAmount.text = priceList[1].toString()
+//            tvSavingsInDiscountAmt.text = "${cartOriginalPrice - cartPrice}"
+            tvSavingsInDiscountAmt.text = "${priceList[1] - priceList[0]}"
+//            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
+            tvGstAmount.text = "${viewModel.gstAmount ?: 0.0f}"
+//            var totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
+//            var totalPrice = cartPrice
             totalPrice += viewModel.gstAmount + binding.tvDeliveryChargeAmt.text.toString()
                 .toFloat()
             binding.tvTotalAmt.setTextAnimation(
                 "${
-                    (totalPrice * 100.0).roundToInt() / 100.0
+                    Utils.roundPrice(totalPrice)
+//                    (totalPrice * 100.0).roundToInt() / 100.0
                 }"
             )
 
             if (cartBottomSheet.state == BottomSheetBehavior.STATE_EXPANDED) {
-                checkoutText.setTextAnimation("Rs: $cartPrice")
+//                checkoutText.setTextAnimation("Rs: $cartPrice")
+                checkoutText.setTextAnimation("Rs: ${priceList[0]}")
             }
             tvFreeDelivery.text =
-                "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
-            tvFreeDeliveryNotif.text =
-                "Total Order above Rs: $freeDeliveryLimit is eligible Free Delivery"
+                "Discounted Price of Items in cart above Rs: $freeDeliveryLimit is eligible Free Delivery"
+            tvFreeDeliveryNotif.text = if (freeDeliveryLimit - priceList[0] < 0) {
+                "No delivery charge for your purchase!!"
+            } else {
+                "Add items worth ${freeDeliveryLimit - priceList[0]} and above to get free delivery!!"
+            }
         }
     }
 
@@ -841,7 +853,6 @@ class InvoiceActivity :
                 viewModel.tempAddress = address
                 SharedPref(this).putData(ADDRESS, STRING, Utils.toStringForSharedPref(address))
                 setDataToViews()
-                updateDeliveryCharge()
                 updateAddressInView(address)
             }
         }

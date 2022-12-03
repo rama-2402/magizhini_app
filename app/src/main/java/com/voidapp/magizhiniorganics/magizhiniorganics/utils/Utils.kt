@@ -2,6 +2,8 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 object Utils {
     fun String.addCharAtIndex(char: Char, index: Int) =
@@ -42,5 +44,11 @@ object Utils {
             it.LocationCode = addressSplitList[4]
         }
         return  address
+    }
+
+    fun roundPrice(price: Float): Float {
+        val df = DecimalFormat("#.##")
+        df.roundingMode = RoundingMode.CEILING
+        return df.format(price).toFloat()
     }
 }

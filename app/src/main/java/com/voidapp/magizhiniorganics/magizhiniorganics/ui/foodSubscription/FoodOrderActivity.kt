@@ -56,6 +56,8 @@ class FoodOrderActivity :
 
     val month = SimpleDateFormat("MMMM - yyyy")
     var loop = true
+    var isLunchTimeEnd: Boolean = false
+    var isDinnerTimeEnd: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -171,8 +173,11 @@ class FoodOrderActivity :
                         return
                     }
 
-                    if (instanceToGetLongDate.timeInMillis < System.currentTimeMillis()) {
-                        showToast(this@FoodOrderActivity, "Delivery only available from tomorrow.")
+                    if (
+                        instanceToGetLongDate.timeInMillis < System.currentTimeMillis() &&
+                        TimeUtil().getCustomDate(dateLong = instanceToGetLongDate.timeInMillis) != TimeUtil().getCurrentDate()
+                    ) {
+                        showToast(this@FoodOrderActivity, "Please pick a valid date")
                         return
                     }
 
@@ -331,6 +336,28 @@ class FoodOrderActivity :
                     return
                 }
             }
+            if (TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.min()) == TimeUtil().getCurrentDate()) {
+                when (viewModel.currentServingOption) {
+                    0 -> {
+                        if (isLunchTimeEnd) {
+                            showErrorSnackBar("Today's order intake for lunch is closed. You can select from Tomorrow", true)
+                            return@apply
+                        }
+                    }
+                    1 -> {
+                        if (isDinnerTimeEnd) {
+                            showErrorSnackBar("Today's order intake for dinner is closed. You can select from Tomorrow", true)
+                            return@apply
+                        }
+                    }
+                    else -> {
+                        if (isLunchTimeEnd || isDinnerTimeEnd) {
+                            showErrorSnackBar("Today's order intake for lunch and dinner is closed. You can select from Tomorrow", true)
+                            return@apply
+                        }
+                    }
+                }
+            }
             when {
                 etName.text.isNullOrEmpty() -> showErrorSnackBar(
                     "Please Enter a Valid Customer Name for contact",
@@ -377,7 +404,7 @@ class FoodOrderActivity :
                     }
                     showListBottomSheet(
                         this@FoodOrderActivity,
-                        arrayListOf("Online", "Magizhini Wallet")
+                        arrayListOf("Pay on Delivery", "Online", "Magizhini Wallet")
                     )
                 }
             }
@@ -389,7 +416,8 @@ class FoodOrderActivity :
             showErrorSnackBar("Please check your Internet Connection", true)
             return@launch
         }
-        if (paymentMode == "Online") {
+        when (paymentMode) {
+            "Online" -> {
             viewModel.userProfile?.let {
                 startPayment(
                     this@FoodOrderActivity,
@@ -408,7 +436,14 @@ class FoodOrderActivity :
                     }
                 }
             }
-        } else {
+        }
+            "Pay on Delivery" -> {
+                showProgressDialog(true)
+                val orderDetailsMap: HashMap<String, Any> = generateOrderDetailsMap()
+                orderDetailsMap["transactionID"] = "COD"
+                viewModel.placeOrderCOD(orderDetailsMap)
+            }
+            else -> {
             showProgressDialog(true)
             viewModel.fetchWallet()?.let {
                 hideProgressDialog()
@@ -418,6 +453,7 @@ class FoodOrderActivity :
                 }
                 showSwipeConfirmationDialog(this@FoodOrderActivity, "swipe right to make payment")
             } ?: showErrorSnackBar("Server Error! Failed to fetch Wallet", true)
+        }
         }
     }
 
@@ -666,30 +702,51 @@ class FoodOrderActivity :
     private fun checkTimeLimit() = lifecycleScope.launch(Dispatchers.IO) {
         while (loop) {
 //         var min: Long = 0
-            var difference: Long = 0
+            var lunchTime: Long = 0
+            var dinnerTime: Long = 0
             try {
                 val simpleDateFormat =
                     SimpleDateFormat("hh:mm aa") // for 12-hour system, hh should be used instead of HH
                 // There is no minute different between the two, only 8 hours difference. We are not considering Date, So minute will always remain 0
                 val date1: Date =
                     simpleDateFormat.parse(simpleDateFormat.format(System.currentTimeMillis()))
-                val date2: Date = simpleDateFormat.parse("11:59 PM")
+                val lunch: Date = simpleDateFormat.parse("08:00 AM")
+                val dinner: Date = simpleDateFormat.parse("04:00 PM")
 
-                difference = (date2.time - date1.time) / 1000
-                val hours: Long = difference % (24 * 3600) / 3600 // Calculating Hours
-                val minute: Long =
-                    difference % 3600 / 60 // Calculating minutes if there is any minutes difference
+                lunchTime = (lunch.time - date1.time) / 1000
+                dinnerTime = (dinner.time - date1.time) / 1000
+                val lunchHours: Long = lunchTime % (24 * 3600) / 3600 // Calculating Hours
+                val dinnerHours: Long = dinnerTime % (24 * 3600) / 3600 // Calculating Hours
+                 val lunchMinute: Long =
+                    lunchTime % 3600 / 60 // Calculating minutes if there is any minutes difference
+                val dinnerMinute: Long =
+                    dinnerTime % 3600 / 60 // Calculating minutes if there is any minutes difference
                 withContext(Dispatchers.Main) {
-                    if ((minute + hours * 60) < 0) {
-                        binding.tvTimeLimit.text =
+                    binding.tvTimeLimit.text = when {
+                        ((lunchMinute + lunchHours) * 60 > 0) && ((dinnerMinute + dinnerMinute) * 60 > 0) -> {
+                            isLunchTimeEnd = false
+                            isDinnerTimeEnd = false
+                            "Today's order intake for lunch closing in $lunchHours Hour $lunchMinute Minutes and Dinner closing in $dinnerHours Hour $dinnerMinute Minutes"
+                        }
+                         ((lunchMinute + lunchHours) * 60 < 0) && ((dinnerMinute + dinnerMinute) * 60 > 0) -> {
+                             isLunchTimeEnd = true
+                             isDinnerTimeEnd = false
+                             "Today's order intake for lunch is closed and Dinner closing in $dinnerHours:$dinnerMinute"
+                         }
+                        else -> {
+                            isLunchTimeEnd = true
+                            isDinnerTimeEnd = true
+                            loop = false
                             "Order Intake closed for today. You can still place order for tomorrow"
-                        loop = false
-                    } else {
-                        binding.tvTimeLimit.text =
-                            "Order Intake for tomorrow is closing in next $hours Hours and $minute Minutes"
+                        }
                     }
+//                    if ((minute + hours * 60) < 0) {
+//                    } else {
+//                        binding.tvTimeLimit.text =
+//                            "Order Intake for tomorrow is closing in next $hours Hours and $minute Minutes"
+//                    }
                 }
-                delay(10000)
+                delay(60000)
 //            min =
 //                minute + (hours * 60) // This will be our final minutes. Multiplying by 60 as 1 hour contains 60 mins
             } catch (e: Exception) {

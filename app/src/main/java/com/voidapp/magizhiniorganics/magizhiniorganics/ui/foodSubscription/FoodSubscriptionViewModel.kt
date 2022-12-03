@@ -142,7 +142,7 @@ class FoodSubscriptionViewModel(
                         when (result) {
                             is NetworkResult.Success -> {
                                 when (result.message) {
-                                    "placing" -> _uiUpdate.value = UiUpdate.PlacingOrder(
+                                    "validating" -> _uiUpdate.value = UiUpdate.PlacingOrder(
                                         "Validating Transaction...",
                                         "validating"
                                     )
@@ -342,6 +342,77 @@ class FoodSubscriptionViewModel(
         }
     }
 
+    fun placeOrderCOD(orderDetailsMap: HashMap<String, Any>) = viewModelScope.launch {
+        val deliveryDatesString = mutableListOf<String>()
+        selectedEventDates.forEach {
+            deliveryDatesString.add(TimeUtil().getCustomDate(dateLong = it))
+        }
+        userProfile?.let { profile ->
+            AmmaSpecialOrder(
+                id = "",
+                customerID = profile.id,
+                orderDate = TimeUtil().getCurrentDate(),
+                startDate = orderDetailsMap["start"].toString().toLong(),
+                endDate = orderDetailsMap["end"].toString().toLong(),
+                price = totalPrice,
+//                plan = selectedPlan,
+                userName = orderDetailsMap["name"].toString(),
+                addressOne = orderDetailsMap["one"].toString(),
+                addressTwo = orderDetailsMap["two"].toString(),
+                city = orderDetailsMap["city"].toString(),
+                code = orderDetailsMap["code"].toString(),
+                phoneNumber = orderDetailsMap["phoneNumber"].toString(),
+                mailID = orderDetailsMap["mailID"].toString(),
+                orderFoodTime = arrayListOf("lunch"),
+                leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
+                orderType = currentSubOption,
+                orderCount = currentCountOption,
+                deliveryDates = deliveryDatesString as ArrayList<String>
+            ).let {
+                _uiUpdate.value = UiUpdate.CreateStatusDialog(null, null)
+                foodSubscriptionUseCase.placeFoodSubscriptionOnlinePayment(
+                    it,
+                    orderDetailsMap["transactionID"]!!.toString()
+                ).onEach { result ->
+                    withContext(Dispatchers.Main) {
+                        when (result) {
+                            is NetworkResult.Success -> {
+                                when (result.message) {
+                                    "validating" -> _uiUpdate.value = UiUpdate.PlacingOrder(
+                                        "Validating Purchase...",
+                                        "validating"
+                                    )
+                                    "placed" -> {
+                                        _uiUpdate.value = UiUpdate.PlacedOrder(
+                                            "Subscription Placed Successfully!",
+                                            "success"
+                                        )
+                                        delay(1800)
+                                        _uiUpdate.value = UiUpdate.DismissStatusDialog(true)
+                                        sendPushNotification(it.customerID)
+                                    }
+                                }
+                            }
+                            is NetworkResult.Failed -> {
+                                _uiUpdate.value =
+                                    UiUpdate.UpdateStatusDialog(result.message, "fail")
+                                delay(1800)
+                                _uiUpdate.value = UiUpdate.DismissStatusDialog(false)
+                            }
+                            else -> Unit
+                        }
+                    }
+                }.launchIn(this)
+            }
+        } ?: run {
+            _uiEvent.value = UIEvent.ProgressBar(false)
+            _uiEvent.value = UIEvent.SnackBar(
+                "Couldn't fetch your profile. Please logout and log back in again to continue",
+                true
+            )
+        }
+    }
+
     fun renewSubWithOnlinePayment(transactionID: String) = viewModelScope.launch {
 
         _uiUpdate.value = UiUpdate.CreateStatusDialog(null, null)
@@ -511,6 +582,7 @@ class FoodSubscriptionViewModel(
             }
         }
     }
+
 
     sealed class UiUpdate {
         data class PopulateAmmaSpecials(
