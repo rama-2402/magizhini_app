@@ -39,7 +39,7 @@ data class AmmaSpecialOrder(
 
 data class AmmaSpecialDeliveryStatus(
     var id: String = "",
-    var status: String = "",
+    var status: String = "waiting",
     var refund: String = "no"
 )
 

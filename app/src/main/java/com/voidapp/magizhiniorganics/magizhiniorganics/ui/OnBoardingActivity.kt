@@ -18,6 +18,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityOnBoa
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadInAnimation
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.fadOutAnimation
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.setTextAnimation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -60,7 +61,8 @@ class OnBoardingActivity: BaseActivity() {
     private fun listeners() {
         binding.tvSignIn.setOnClickListener {
             lifecycleScope.launch {
-                binding.apply {
+                if(binding.tvSignIn.text == "SIGN IN") {
+                    binding.apply {
                     btnNext.fadOutAnimation()
                     imageView.hide()
                     ivBottomCircle.hide()
@@ -70,12 +72,15 @@ class OnBoardingActivity: BaseActivity() {
                     ivBackground.startAnimation(AnimationUtils.loadAnimation(this@OnBoardingActivity, R.anim.slide_out_top))
                     delay(810)
                     ivBackground.hide()
-                }
-                Intent(this@OnBoardingActivity, SignInActivity::class.java).also {
-                    startActivity(it)
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                    finish()
-                    finishAffinity()
+                    }
+                    Intent(this@OnBoardingActivity, SignInActivity::class.java).also {
+                        startActivity(it)
+                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                        finish()
+                        finishAffinity()
+                    }
+                } else {
+                    binding.viewPager.setCurrentItem(binding.viewPager.currentItem + 1, true)
                 }
             }
         }
@@ -87,22 +92,17 @@ class OnBoardingActivity: BaseActivity() {
                 positionOffsetPixels: Int
             ) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels)
-                if (position == 2) {
-                    binding.nextScreen.fadOutAnimation()
-                    binding.nextScreen.remove()
-                    binding.tvSignIn.fadInAnimation()
+                when(position) {
+                    2 -> binding.tvSignIn.setTextAnimation("SIGN IN")
+                    else -> {
+                        if (binding.tvSignIn.text != "NEXT") {
+                            binding.tvSignIn.setTextAnimation("NEXT")
+                        }
+                    }
                 }
             }
 
         })
-//
-//        binding.tvSignIn.setOnClickListener {
-//            Intent(this@OnBoardingActivity, SignInActivity::class.java).also {
-//                startActivity(it)
-//                finish()
-//                finishAffinity()
-//            }
-//        }
     }
 
     private fun activityInit() {
@@ -120,10 +120,7 @@ class OnBoardingActivity: BaseActivity() {
                 }
 
                 override fun nextPage(position: Int) {
-                    binding.nextScreen.fadOutAnimation()
-                    binding.nextScreen.remove()
-                    binding.tvSignIn.fadInAnimation()
-//                    binding.viewPager.currentItem = position + 1
+                    binding.tvSignIn.setTextAnimation("SIGN IN")
                 }
             }
         )

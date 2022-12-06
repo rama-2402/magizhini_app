@@ -79,16 +79,16 @@
         app:layout_constraintBottom_toBottomOf="@id/ivBackground"
         android:elevation="18dp">
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/next_screen"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/material_size_16"
-            android:clickable="true"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_speed="2"
-            app:lottie_rawRes="@raw/next_arrow" />
+<!--        <com.airbnb.lottie.LottieAnimationView-->
+<!--            android:id="@+id/next_screen"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:elevation="@dimen/material_size_16"-->
+<!--            android:clickable="true"-->
+<!--            app:lottie_autoPlay="true"-->
+<!--            app:lottie_loop="true"-->
+<!--            app:lottie_speed="2"-->
+<!--            app:lottie_rawRes="@raw/next_arrow" />-->
 
         <TextView
             android:id="@+id/tvSignIn"
@@ -96,10 +96,9 @@
             android:gravity="center"
             android:textColor="@color/white"
             android:layout_height="wrap_content"
-            android:text="SIGN IN"
+            android:text="NEXT"
             android:textSize="22sp"
             android:fontFamily="@font/baloo"
-            android:visibility="gone"
             android:textStyle="bold"
             />
 

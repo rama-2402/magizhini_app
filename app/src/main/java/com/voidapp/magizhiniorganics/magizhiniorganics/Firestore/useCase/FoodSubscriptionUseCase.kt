@@ -163,6 +163,11 @@ class FoodSubscriptionUseCase(
     ): Boolean = withContext(Dispatchers.IO) {
         ammaSpecialsOrder.paymentMode = paymentMode
         return@withContext try {
+            val statusDoc = fireStore
+                .collection(AMMASPECIAL)
+                .document("Status")
+
+
             val updateStore = async {
                 val doc = fireStore
                     .collection(AMMASPECIAL)
@@ -171,6 +176,20 @@ class FoodSubscriptionUseCase(
                     .document()
                 ammaSpecialsOrder.id = doc.id
                 doc.set(ammaSpecialsOrder, SetOptions.merge()).await()
+                true
+            }
+            val createStatusEntry = async {
+                AmmaSpecialDeliveryStatus(
+                    ammaSpecialsOrder.id,
+                    "waiting",
+                    "no"
+                ).let {
+                    for (date in ammaSpecialsOrder.deliveryDates) {
+                        statusDoc
+                        .collection(TimeUtil().changeStringDateFormat(date))
+                        .document(ammaSpecialsOrder.id).set(it, SetOptions.merge())
+                   }
+                }
                 true
             }
             val createGlobalTransactionEntry = async {
@@ -194,6 +213,7 @@ class FoodSubscriptionUseCase(
                 ""
             )
 
+            createStatusEntry.await() &&
             updateStore.await() &&
                     createGlobalTransactionEntry.await()
         } catch (e: Exception) {
@@ -225,7 +245,7 @@ class FoodSubscriptionUseCase(
         ammaSpecialsOrder: List<AmmaSpecialOrder>
     ): HashMap<String, String>? = withContext(Dispatchers.IO) {
         return@withContext try {
-            var statusMap: HashMap<String, String> = hashMapOf()
+            val statusMap: HashMap<String, String> = hashMapOf()
             val doc = fireStore
                 .collection(AMMASPECIAL)
                 .document("Status")
@@ -235,9 +255,7 @@ class FoodSubscriptionUseCase(
                     doc.document(order.id).get().await()
                         .toObject(AmmaSpecialDeliveryStatus::class.java)?.let {
                             statusMap[order.id] = it.status
-                        } ?: let {
-                        statusMap[order.id] = "na"
-                    }
+                        }
                 }
             }
             statusMap
@@ -331,16 +349,16 @@ class FoodSubscriptionUseCase(
         }
     }
 
-    suspend fun cancelSubscription(selectedOrder: AmmaSpecialOrder): Boolean {
-        return try {
+    suspend fun cancelSubscription(selectedOrder: AmmaSpecialOrder): Boolean = withContext(Dispatchers.IO){
+        return@withContext try {
             selectedOrder.status = "cancel"
 
-            fireStore
-                .collection(AMMASPECIAL)
-                .document("Status")
-                .collection(SimpleDateFormat("dd-MM-yyyy").format(System.currentTimeMillis()))
-                .document(selectedOrder.id)
-                .update("status", "cancel", "refund", "no").await()
+//            fireStore
+//                .collection(AMMASPECIAL)
+//                .document("Status")
+//                .collection(SimpleDateFormat("dd-MM-yyyy").format(System.currentTimeMillis()))
+//                .document(selectedOrder.id)
+//                .update("status", "cancel", "refund", "no").await()
 
             fireStore
                 .collection(AMMASPECIAL)
@@ -350,16 +368,15 @@ class FoodSubscriptionUseCase(
 
             fireStore
                 .collection(AMMASPECIAL)
-                .document("Order")
-                .collection("recentUnSub")
+                .document("RecentUnsub")
+                .collection("RecentUnSub")
                 .document(selectedOrder.id).set(selectedOrder, SetOptions.merge()).await()
 
             fireStore
                 .collection(AMMASPECIAL)
-                .document("Order")
+                .document("Unsub")
                 .collection("Unsub")
                 .document(selectedOrder.id).set(selectedOrder, SetOptions.merge()).await()
-
 
             RefundEntry(
                 customerID = selectedOrder.customerID,

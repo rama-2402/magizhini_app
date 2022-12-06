@@ -41,6 +41,7 @@ class FoodStatusAdapter (
 
             tvOrderStatus.isSelected = true
             tvOrderStatus.text = when(orderStatusMap[order.id]) {
+                "waiting" -> "Order received and your delicious food will be served on time. Sit back and relax :)"
                 "preparing" -> "Manual Quality check for all ingredients are complete and sent for cooking"
                 "cooking" -> "Your Food is being cooked right now"
                 "ready" -> "Your Food is packed and ready"

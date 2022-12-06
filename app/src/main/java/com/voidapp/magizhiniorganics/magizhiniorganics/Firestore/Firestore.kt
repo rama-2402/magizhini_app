@@ -1898,8 +1898,6 @@ class Firestore(
                 .document(where)
                 .get().await().toObject(HowToVideo::class.java)?.url
 
-            Log.e("aaa", "getHowToVideo: $url")
-
             if (url.isNullOrEmpty()) {
                 return@withContext ""
             } else {

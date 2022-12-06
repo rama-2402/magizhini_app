@@ -91,6 +91,7 @@ class FoodSubHistoryActivity :
                 calendarView.scrollRight()
             }
             tvFoodStatusText.setOnClickListener {
+                viewModel.selectedOrder = null
                 statusAdapter.selectedPosition = null
                 statusAdapter.notifyDataSetChanged()
                 btnGoToBox.remove()
@@ -254,6 +255,12 @@ class FoodSubHistoryActivity :
                     } else {
                         showToast(this, event.message, LONG)
                     }
+                    viewModel.selectedOrder = null
+                    viewModel.orderStatusMap = hashMapOf()
+                    viewModel.getAmmaSpecialsOrderDetails(date)
+                    statusAdapter.selectedPosition = null
+                    statusAdapter.notifyDataSetChanged()
+                    binding.btnGoToBox.remove()
                 }
                 is FoodSubscriptionViewModel.UiUpdate.PopulateNonDeliveryDates -> {
                     populateNonDeliveryDates(event.dates)
@@ -265,6 +272,9 @@ class FoodSubHistoryActivity :
                     } else {
                         showToast(this, event.message, LONG)
                     }
+                    viewModel.selectedOrder = null
+                    viewModel.orderStatusMap = hashMapOf()
+                    viewModel.getAmmaSpecialsOrderDetails(date)
                 }
                 is FoodSubscriptionViewModel.UiUpdate.CreateStatusDialog -> {
                     if (event.message == "wallet") {
@@ -445,7 +455,7 @@ class FoodSubHistoryActivity :
             btnGoToBox.remove()
             btnRenewSub.remove()
             FoodStatusAdapter(
-                viewModel.ammaSpecialOrders.filter { it.endDate >= date },
+                viewModel.ammaSpecialOrders.filter { it.endDate >= date && !status[it.id].isNullOrEmpty() },
                 status,
                 null,
                 this@FoodSubHistoryActivity
@@ -515,7 +525,13 @@ class FoodSubHistoryActivity :
     }
 
     override fun selectedOrder(order: AmmaSpecialOrder, position: Int) {
-        viewModel.selectedOrder = order
+        viewModel.selectedOrder?.let {
+                viewModel.selectedOrder = null
+                statusAdapter.selectedPosition = null
+                statusAdapter.notifyDataSetChanged()
+                binding.btnGoToBox.remove()
+        } ?:let {
+          viewModel.selectedOrder = order
         statusAdapter.selectedPosition = position
         statusAdapter.notifyDataSetChanged()
         binding.apply {
@@ -535,7 +551,8 @@ class FoodSubHistoryActivity :
                 btnGoToBox.text = "CANCEL SUBSCRIPTION"
             }
         }
-    }
+        }
+   }
 
     override fun cancelDelivery(order: AmmaSpecialOrder) {
         viewModel.selectedOrder = order

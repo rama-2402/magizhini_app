@@ -55,7 +55,7 @@ class FoodSubscriptionViewModel(
 
     //the outer hashmap holds the data as key and the orderids as values
     //the inner hashmap has orderid as key and the status as value
-    val orderStatusMap: HashMap<String, HashMap<String, String>?> = hashMapOf()
+    var orderStatusMap: HashMap<String, HashMap<String, String>?> = hashMapOf()
     var userID: String? = null
     var selectedOrder: AmmaSpecialOrder? = null
 
@@ -494,10 +494,14 @@ class FoodSubscriptionViewModel(
                     val status = foodSubscriptionUseCase.getFoodStatus(
                         date,
                         ammaSpecialOrders.filter { it.endDate >= date })
-                    orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)] =
+                    if (!status.isNullOrEmpty()) {
+                     orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)] =
                         status
                     UiUpdate.UpdateFoodDeliveryStatus(status, true)
-                } else {
+                    } else {
+                        UiUpdate.UpdateFoodDeliveryStatus(null, false)
+                    }
+               } else {
                     UiUpdate.UpdateFoodDeliveryStatus(
                         orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(
                             date

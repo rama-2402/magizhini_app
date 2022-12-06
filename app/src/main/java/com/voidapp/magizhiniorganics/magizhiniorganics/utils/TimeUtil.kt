@@ -36,6 +36,11 @@ class TimeUtil {
         }
     }
 
+    fun changeStringDateFormat(date: String): String {
+        val dateArray = date.split("/")
+        return "${dateArray[0]}-${dateArray[1]}-${dateArray[2]}"
+    }
+
     fun timeStamp(timeLong: Long): String {
         val simpleDateFormat = SimpleDateFormat("HH:mm:ss")
         return simpleDateFormat.format(timeLong)

@@ -19,7 +19,7 @@
         <rotate
             android:fromDegrees="-120">
             <shape android:shape="rectangle">
-                <solid android:color="#FFF" />
+                <solid android:color="#FFFFFF" />
             </shape>
         </rotate>
     </item>

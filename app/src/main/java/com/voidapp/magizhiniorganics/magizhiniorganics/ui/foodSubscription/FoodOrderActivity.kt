@@ -517,6 +517,7 @@ class FoodOrderActivity :
                     updateLoadStatusDialog(event.message, event.data)
                 }
                 is FoodSubscriptionViewModel.UiUpdate.DismissStatusDialog -> {
+                    hideProgressDialog()
                     (supportFragmentManager.findFragmentByTag(Constants.LOAD_DIALOG) as DialogFragment).dismiss()
                     if (event.dismiss) {
                         showExitSheet(
