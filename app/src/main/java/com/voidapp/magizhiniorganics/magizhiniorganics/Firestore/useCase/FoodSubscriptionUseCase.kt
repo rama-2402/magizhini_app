@@ -172,7 +172,7 @@ class FoodSubscriptionUseCase(
                 val doc = fireStore
                     .collection(AMMASPECIAL)
                     .document("Order")
-                    .collection("Order")
+                    .collection("NewOrder")
                     .document()
                 ammaSpecialsOrder.id = doc.id
                 doc.set(ammaSpecialsOrder, SetOptions.merge()).await()
@@ -275,7 +275,7 @@ class FoodSubscriptionUseCase(
                 val docs = fireStore
                     .collection(AMMASPECIAL)
                     .document("Order")
-                    .collection("Order")
+                    .collection("NewOrder")
                     .whereEqualTo("customerID", userID).get().await()
                 docs.documents.forEach { doc ->
                     doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
@@ -363,7 +363,7 @@ class FoodSubscriptionUseCase(
             fireStore
                 .collection(AMMASPECIAL)
                 .document("Order")
-                .collection("Order")
+                .collection("NewOrder")
                 .document(selectedOrder.id).delete().await()
 
             fireStore
@@ -512,7 +512,7 @@ class FoodSubscriptionUseCase(
                 fireStore
                     .collection(AMMASPECIAL)
                     .document("Order")
-                    .collection("Order")
+                    .collection("NewOrder")
                     .document(ammaSpecialsOrder.id)
                     .set(ammaSpecialsOrder, SetOptions.merge()).await()
                 true

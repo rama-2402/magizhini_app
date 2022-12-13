@@ -46,11 +46,12 @@ class FoodSubscriptionViewModel(
     var nonDeliveryDatesString: MutableList<String> = mutableListOf()
     val selectedEventDates: MutableList<Long> = mutableListOf()
     var currentSubOption: String = "single"
-    var currentCountOption: Int = 0
-    var currentServingOption: Int = 0
+//    var currentCountOption: Int = 0
+//    var currentServingOption: Int = 0
     var totalPrice: Double = 0.0
     var lunchPrice: Double = 0.0
     var dinnerPrice: Double = 0.0
+    var lunchWoRicePrice: Double = 0.0
 //    var selectedPlan: String = ""
 
     //the outer hashmap holds the data as key and the orderids as values
@@ -127,10 +128,10 @@ class FoodSubscriptionViewModel(
                 code = orderDetailsMap["code"].toString(),
                 phoneNumber = orderDetailsMap["phoneNumber"].toString(),
                 mailID = orderDetailsMap["mailID"].toString(),
-                orderFoodTime = arrayListOf("lunch"),
+                orderFoodTime = orderDetailsMap["orders"] as ArrayList<String>,
                 leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
                 orderType = currentSubOption,
-                orderCount = currentCountOption,
+                orderCount = 0,
                 deliveryDates = deliveryDatesString as ArrayList<String>
             ).let {
                 _uiUpdate.value = UiUpdate.CreateStatusDialog(null, null)
@@ -217,10 +218,10 @@ class FoodSubscriptionViewModel(
                 code = orderDetailsMap["code"].toString(),
                 phoneNumber = orderDetailsMap["phoneNumber"].toString(),
                 mailID = orderDetailsMap["mailID"].toString(),
-                orderFoodTime = arrayListOf("lunch"),
+                orderFoodTime = orderDetailsMap["orders"] as ArrayList<String>,
                 leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
                 orderType = currentSubOption,
-                orderCount = currentCountOption,
+                orderCount = 0,
                 deliveryDates = deliveryDatesString as ArrayList<String>
             ).let {
                 _uiUpdate.value = UiUpdate.CreateStatusDialog(null, null)
@@ -363,10 +364,10 @@ class FoodSubscriptionViewModel(
                 code = orderDetailsMap["code"].toString(),
                 phoneNumber = orderDetailsMap["phoneNumber"].toString(),
                 mailID = orderDetailsMap["mailID"].toString(),
-                orderFoodTime = arrayListOf("lunch"),
+                orderFoodTime = orderDetailsMap["orders"] as ArrayList<String>,
                 leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
                 orderType = currentSubOption,
-                orderCount = currentCountOption,
+                orderCount = 0,
                 deliveryDates = deliveryDatesString as ArrayList<String>
             ).let {
                 _uiUpdate.value = UiUpdate.CreateStatusDialog(null, null)

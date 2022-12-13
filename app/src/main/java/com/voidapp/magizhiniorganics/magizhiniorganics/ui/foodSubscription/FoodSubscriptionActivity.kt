@@ -35,6 +35,7 @@ class FoodSubscriptionActivity :
 
     private var lunchPrice: Double = 0.0
     private var dinnerPrice: Double = 0.0
+    private var lunchWoRicePrice: Double = 0.0
 //    private var currentPlan: String = "premium"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,10 +109,13 @@ class FoodSubscriptionActivity :
 //                            }
 
                             specials.forEach {
-                                if (it.foodTime.lowercase().contains("lunch")) {
+                                if (it.foodTime.lowercase().contains("rice")) {
+                                    lunchWoRicePrice = it.discountedPrice
+                                }
+                                if (it.foodTime.lowercase() == "lunch") {
                                     lunchPrice = it.discountedPrice
                                 }
-                                if (it.foodTime.lowercase().contains("dinner")) {
+                                if (it.foodTime.lowercase() == "dinner") {
                                     dinnerPrice = it.discountedPrice
                                 }
                             }
@@ -154,6 +158,7 @@ class FoodSubscriptionActivity :
         Intent(this, FoodOrderActivity::class.java).also {
             it.putExtra("lunch", lunchPrice)
             it.putExtra("dinner", dinnerPrice)
+            it.putExtra("lunchWoRice", lunchWoRicePrice)
             startActivity(it)
         }
     }

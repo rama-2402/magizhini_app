@@ -32,11 +32,16 @@ class FoodStatusAdapter (
                 "single" -> "Single Purchase"
                 else -> "Custom Subscription"
             }
-            tvOrderFor.text = if (order.orderCount == 1) {
-                "Serving for 1 Person only"
-            } else {
-                "Serving for ${order.orderCount} Persons"
+//            tvOrderFor.text = if (order.orderCount == 1) {
+//                "Serving for 1 Person only"
+//            } else {
+//                "Serving for ${order.orderCount} Persons"
+//            }
+            var serving = ""
+            order.orderFoodTime.forEach {
+                serving = "${serving}${it},\n"
             }
+            tvOrderFor.text = serving
             tvAddress.text = "${order.userName}, ${order.addressOne}, ${order.addressTwo}, ${order.city}, ${order.code}"
 
             tvOrderStatus.isSelected = true

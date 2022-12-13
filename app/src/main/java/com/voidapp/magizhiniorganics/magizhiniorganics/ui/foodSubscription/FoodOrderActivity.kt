@@ -67,6 +67,7 @@ class FoodOrderActivity :
 //        viewModel.lunchMap = intent.extras!!.get("lunch") as HashMap<String, Double>
         viewModel.lunchPrice = intent.getDoubleExtra("lunch", 118.0)
         viewModel.dinnerPrice = intent.getDoubleExtra("dinner", 98.0)
+        viewModel.lunchWoRicePrice = intent.getDoubleExtra("lunchWoRice", 100.0)
 
         initData()
         initLiveData()
@@ -86,7 +87,7 @@ class FoodOrderActivity :
 
             tvMonth.text = month.format(System.currentTimeMillis())
 //            ivPrevMonth.setColor(R.color.green_light)
-            ivMinusOnePerson.setColor(R.color.green_light)
+//            ivMinusOnePerson.setColor(R.color.green_light)
 
             tvRenewal.isSelected = true
             tvTimeLimit.isSelected = true
@@ -237,88 +238,149 @@ class FoodOrderActivity :
                 override fun onNothingSelected(p0: AdapterView<*>?) {
                 }
             }
-            spFoodOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    viewModel.currentServingOption = position
-                    setPrice()
-                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
-                }
-
-                override fun onNothingSelected(p0: AdapterView<*>?) {
-                }
-            }
-            spCountOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    viewModel.currentCountOption = when (position) {
-                        0 -> {
-                            tvPersonCount.setTextAnimation("Food For 1 Person")
-                            ivMinusOnePerson.setColor(R.color.green_light)
-                            1
-                        }
-                        1 -> {
-                            tvPersonCount.setTextAnimation("Food For 2 Persons")
-                            ivMinusOnePerson.setColor(R.color.green_base)
-                            2
-                        }
-                        else -> {
-                            tvPersonCount.setTextAnimation("Food For 3 Persons")
-                            ivMinusOnePerson.setColor(R.color.green_base)
-                            3
-                        }
-                    }
-                    setPrice()
-                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
-                }
-
-                override fun onNothingSelected(p0: AdapterView<*>?) {
-                }
-            }
-            ivAddOnePerson.setOnClickListener {
-                if (viewModel.currentCountOption == 10) {
+            ivAddLunch.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
-                viewModel.currentCountOption += 1
-                ivMinusOnePerson.setColor(R.color.green_base)
-                when (viewModel.currentCountOption) {
-                    1 -> spCountOptions.setSelection(0)
-                    2 -> spCountOptions.setSelection(1)
-                    3 -> {
-                        viewModel.currentCountOption -= 1
-                        spCountOptions.setSelection(2)
-                    }
-                    10 -> {
-                        ivAddOnePerson.setColor(R.color.green_light)
-                        tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
-                    }
-                    else -> {
-                        tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
-                    }
-                }
+                binding.tvLunchCount.text = "${binding.tvLunchCount.text.toString().toInt() + 1}"
                 setPrice()
             }
-            ivMinusOnePerson.setOnClickListener {
-                ivAddOnePerson.setColor(R.color.green_base)
-                if (viewModel.currentCountOption == 1) {
+            ivAddLunchWORice.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
-                viewModel.currentCountOption -= 1
-                tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
-                when (viewModel.currentCountOption) {
-                    1 -> {
-                        spCountOptions.setSelection(0)
-                        ivMinusOnePerson.setColor(R.color.green_light)
-                    }
-                    2 -> spCountOptions.setSelection(1)
-                    3 -> spCountOptions.setSelection(2)
-                    else -> setPrice()
-                }
+                binding.tvLunchWORiceCount.text = "${binding.tvLunchWORiceCount.text.toString().toInt() + 1}"
                 setPrice()
             }
+            ivAddDinner.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                binding.tvDinnerCount.text = "${binding.tvDinnerCount.text.toString().toInt() + 1}"
+                setPrice()
+            }
+            ivMinusLunch.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                if (binding.tvLunchCount.text.toString() == "0") {
+                    return@setOnClickListener
+                } else {
+                    binding.tvLunchCount.text = "${binding.tvLunchCount.text.toString().toInt() - 1}"
+                    setPrice()
+                }
+            }
+            ivMinusLunchWORice.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                if (binding.tvLunchWORiceCount.text.toString() == "0") {
+                    return@setOnClickListener
+                } else {
+                    binding.tvLunchWORiceCount.text = "${binding.tvLunchWORiceCount.text.toString().toInt() - 1}"
+                    setPrice()
+                }
+            }
+            ivMinusDinner.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                if (binding.tvDinnerCount.text.toString() == "0") {
+                    return@setOnClickListener
+                } else {
+                    binding.tvDinnerCount.text = "${binding.tvDinnerCount.text.toString().toInt() - 1}"
+                    setPrice()
+                }
+            }
+//            spFoodOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+//                    viewModel.currentServingOption = position
+//                    setPrice()
+//                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
+//                }
+//
+//                override fun onNothingSelected(p0: AdapterView<*>?) {
+//                }
+//            }
+//            spCountOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//                override fun onItemSelected(
+//                    parent: AdapterView<*>?,
+//                    view: View?,
+//                    position: Int,
+//                    id: Long
+//                ) {
+//                    viewModel.currentCountOption = when (position) {
+//                        0 -> {
+//                            tvPersonCount.setTextAnimation("Food For 1 Person")
+//                            ivMinusOnePerson.setColor(R.color.green_light)
+//                            1
+//                        }
+//                        1 -> {
+//                            tvPersonCount.setTextAnimation("Food For 2 Persons")
+//                            ivMinusOnePerson.setColor(R.color.green_base)
+//                            2
+//                        }
+//                        else -> {
+//                            tvPersonCount.setTextAnimation("Food For 3 Persons")
+//                            ivMinusOnePerson.setColor(R.color.green_base)
+//                            3
+//                        }
+//                    }
+//                    setPrice()
+//                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
+//                }
+//
+//                override fun onNothingSelected(p0: AdapterView<*>?) {
+//                }
+//            }
+//            ivAddOnePerson.setOnClickListener {
+//                if (viewModel.currentCountOption == 10) {
+//                    return@setOnClickListener
+//                }
+//                viewModel.currentCountOption += 1
+//                ivMinusOnePerson.setColor(R.color.green_base)
+//                when (viewModel.currentCountOption) {
+//                    1 -> spCountOptions.setSelection(0)
+//                    2 -> spCountOptions.setSelection(1)
+//                    3 -> {
+//                        viewModel.currentCountOption -= 1
+//                        spCountOptions.setSelection(2)
+//                    }
+//                    10 -> {
+//                        ivAddOnePerson.setColor(R.color.green_light)
+//                        tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
+//                    }
+//                    else -> {
+//                        tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
+//                    }
+//                }
+//                setPrice()
+//            }
+//            ivMinusOnePerson.setOnClickListener {
+//                ivAddOnePerson.setColor(R.color.green_base)
+//                if (viewModel.currentCountOption == 1) {
+//                    return@setOnClickListener
+//                }
+//                viewModel.currentCountOption -= 1
+//                tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
+//                when (viewModel.currentCountOption) {
+//                    1 -> {
+//                        spCountOptions.setSelection(0)
+//                        ivMinusOnePerson.setColor(R.color.green_light)
+//                    }
+//                    2 -> spCountOptions.setSelection(1)
+//                    3 -> spCountOptions.setSelection(2)
+//                    else -> setPrice()
+//                }
+//                setPrice()
+//            }
+
             tvPlaceOrder.setOnClickListener {
                 validateEntries()
             }
@@ -337,25 +399,31 @@ class FoodOrderActivity :
                 }
             }
             if (TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.min()) == TimeUtil().getCurrentDate()) {
-                when (viewModel.currentServingOption) {
-                    0 -> {
+                when {
+                    binding.tvLunchWORiceCount.text.toString() != "0" -> {
                         if (isLunchTimeEnd) {
                             showErrorSnackBar("Today's order intake for lunch is closed. You can select from Tomorrow", true)
                             return@apply
                         }
                     }
-                    1 -> {
+                    binding.tvLunchCount.text.toString() != "0" -> {
+                        if (isLunchTimeEnd) {
+                            showErrorSnackBar("Today's order intake for lunch is closed. You can select from Tomorrow", true)
+                            return@apply
+                        }
+                    }
+                    binding.tvDinnerCount.text.toString() != "0" -> {
                         if (isDinnerTimeEnd) {
                             showErrorSnackBar("Today's order intake for dinner is closed. You can select from Tomorrow", true)
                             return@apply
                         }
                     }
-                    else -> {
-                        if (isLunchTimeEnd || isDinnerTimeEnd) {
-                            showErrorSnackBar("Today's order intake for lunch and dinner is closed. You can select from Tomorrow", true)
-                            return@apply
-                        }
-                    }
+//                    else -> {
+//                        if (isLunchTimeEnd || isDinnerTimeEnd) {
+//                            showErrorSnackBar("Today's order intake for lunch and dinner is closed. You can select from Tomorrow", true)
+//                            return@apply
+//                        }
+//                    }
                 }
             }
             when {
@@ -387,6 +455,12 @@ class FoodOrderActivity :
                     "Please Enter a Valid Area Code",
                     true
                 )
+                tvLunchCount.text.toString() == "0" &&
+                tvLunchWORiceCount.text.toString() == "0" &&
+                tvDinnerCount.text.toString() == "0" -> {
+                    showErrorSnackBar("Please pick the number of Order from Order Options", true)
+                    return
+                }
                 viewModel.userID == null || viewModel.userID == "" -> {
                     CustomAlertDialog(
                         this@FoodOrderActivity,
@@ -459,6 +533,22 @@ class FoodOrderActivity :
 
     private fun generateOrderDetailsMap(): HashMap<String, Any> {
         val orderDetailsMap: HashMap<String, Any> = hashMapOf()
+        val orders = arrayListOf<String>()
+        if (binding.tvLunchCount.text.toString() == "0") {
+            orders.add("")
+        } else {
+            orders.add("Lunch-${binding.tvLunchCount.text}")
+        }
+        if (binding.tvLunchWORiceCount.text.toString() == "0") {
+            orders.add("")
+        } else {
+            orders.add("Lunch Without Rice-${binding.tvLunchWORiceCount.text}")
+        }
+        if (binding.tvDinnerCount.text.toString() == "0") {
+            orders.add("")
+        } else {
+            orders.add("Dinner-${binding.tvDinnerCount.text}")
+        }
         binding.apply {
             orderDetailsMap["start"] = viewModel.selectedEventDates.min()
             orderDetailsMap["end"] = viewModel.selectedEventDates.max()
@@ -470,6 +560,7 @@ class FoodOrderActivity :
             orderDetailsMap["two"] = etAddressTwo.text.toString().trim()
             orderDetailsMap["city"] = etCity.text.toString().trim()
             orderDetailsMap["code"] = etArea.text.toString().trim()
+            orderDetailsMap["orders"] = orders
         }
         return orderDetailsMap
     }
@@ -640,27 +731,36 @@ class FoodOrderActivity :
 
     private fun setPrice() {
 
-    var totalPrice: Double = when(viewModel.currentServingOption) {
-                0 -> {
-                    viewModel.selectedEventDates.size * viewModel.lunchPrice
-                }
-                1 -> {
-                    viewModel.selectedEventDates.size * viewModel.dinnerPrice
-                }
-                else -> {
-                    (viewModel.selectedEventDates.size * viewModel.lunchPrice) + (viewModel.selectedEventDates.size * viewModel.dinnerPrice)
-                }
-            }
+//    var totalPrice: Double = when(viewModel.currentServingOption) {
+//                0 -> {
+//                    viewModel.selectedEventDates.size * viewModel.lunchPrice
+//                }
+//                1 -> {
+//                    viewModel.selectedEventDates.size * viewModel.dinnerPrice
+//                }
+//                else -> {
+//                    (viewModel.selectedEventDates.size * viewModel.lunchPrice) + (viewModel.selectedEventDates.size * viewModel.dinnerPrice)
+//                }
+//            }
+        var totalPrice: Double = (binding.tvLunchCount.text.toString().toInt() * viewModel.lunchPrice) +
+                (binding.tvLunchWORiceCount.text.toString().toInt() * viewModel.lunchWoRicePrice) +
+                (binding.tvDinnerCount.text.toString().toInt() * viewModel.dinnerPrice)
             //we have to calculate the price based on if it is lunch or dinner or both for the total number of days selected by the user for delivery
 //            totalPrice += viewModel.lunchMap[TimeUtil().getDayName(dateLong)] ?: 0.0
-        totalPrice *= viewModel.currentCountOption
+//        totalPrice *= viewModel.currentCountOption
+
+        totalPrice *= viewModel.selectedEventDates.size
 
         if (binding.cbxLeaf.isChecked) {
-            totalPrice = if (viewModel.currentServingOption == 2) {
-                totalPrice + (20 * viewModel.selectedEventDates.size)
-            } else {
-                totalPrice + (10 * viewModel.selectedEventDates.size)
-            }
+            val leafPrice = (binding.tvLunchCount.text.toString().toInt() * 10) +
+                (binding.tvLunchWORiceCount.text.toString().toInt() * 10) +
+                (binding.tvDinnerCount.text.toString().toInt() * 10)
+            totalPrice += leafPrice
+//            totalPrice = if (viewModel.currentServingOption == 2) {
+//                totalPrice + (20 * viewModel.selectedEventDates.size)
+//            } else {
+//                totalPrice + (10 * viewModel.selectedEventDates.size)
+//            }
         }
 
 //        totalPrice = (totalPrice * 118)/100  //GST calculation
@@ -810,11 +910,15 @@ class FoodOrderActivity :
                     "$deliveryDates, ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates[item])}"
                 }
             }
-
-            val foodType = when (viewModel.currentServingOption) {
-                0 -> "Lunch Only"
-                1 -> "Dinner Only"
-                else -> "Lunch and Dinner"
+            var foodType: String = ""
+            if (binding.tvLunchCount.text.toString() != "0") {
+               foodType = "Lunch (${binding.tvLunchCount.text}),"
+            }
+            if (binding.tvLunchWORiceCount.text.toString() != "0") {
+                foodType = "$foodType Lunch without rice (${binding.tvLunchWORiceCount.text}),"
+            }
+            if (binding.tvDinnerCount.text.toString() != "0") {
+              foodType = "$foodType Dinner (${binding.tvDinnerCount.text})"
             }
 
             return "Subscription ID: ${System.currentTimeMillis()} \n" +
@@ -825,7 +929,7 @@ class FoodOrderActivity :
             "Subscription Status: New Subscription \n" +
             "Subscription Type: ${viewModel.currentSubOption} ${if (viewModel.currentSubOption == "custom") "- ${viewModel.selectedEventDates.size} days" else ""}\n" +
             "Food Type: $foodType \n" +
-            "No of Serving: ${viewModel.currentCountOption} \n" +
+//            "No of Serving: ${viewModel.currentCountOption} \n" +
             "Banana Leaf: ${if (cbxLeaf.isChecked) "Yes" else "No"} \n" +
                     "Total Price: ${viewModel.totalPrice} \n" +
             "Start Date: ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.min())} \n" +
