@@ -1,15 +1,9 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.purchaseHistory
 
-import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.*
-import android.graphics.pdf.PdfDocument
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -36,16 +30,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CANCELLED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.PermissionsUtil
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.SharedPref
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import kotlin.math.ceil
 
 class PurchaseHistoryActivity :
     BaseActivity(),

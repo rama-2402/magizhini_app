@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -40,7 +39,6 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 class FoodOrderActivity :
     BaseActivity(),

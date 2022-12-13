@@ -36,13 +36,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityDishB
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware

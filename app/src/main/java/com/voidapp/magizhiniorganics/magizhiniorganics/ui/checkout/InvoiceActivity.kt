@@ -5,13 +5,15 @@ import android.content.res.ColorStateList
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -47,11 +49,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STATUS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.STRING
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
-import okhttp3.internal.Util
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
@@ -82,7 +82,6 @@ class InvoiceActivity :
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_checkout)
         viewModel = ViewModelProvider(this, factory).get(CheckoutViewModel::class.java)
-        binding.viewmodel = viewModel
 
         title = ""
         setSupportActionBar(binding.tbToolbar)
@@ -660,7 +659,7 @@ class InvoiceActivity :
 //            tvSavingsInDiscountAmt.text = "${cartOriginalPrice - cartPrice}"
             tvSavingsInDiscountAmt.text = "${priceList[1] - priceList[0]}"
 //            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
-            tvGstAmount.text = "${viewModel.gstAmount ?: 0.0f}"
+            tvGstAmount.text = "${viewModel.gstAmount}"
 //            var totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
 //            var totalPrice = cartPrice
             totalPrice += viewModel.gstAmount + binding.tvDeliveryChargeAmt.text.toString()

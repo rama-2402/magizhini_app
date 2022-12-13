@@ -14,7 +14,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Review
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LIMITED
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SHORT
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

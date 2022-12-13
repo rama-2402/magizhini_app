@@ -41,7 +41,6 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 class FoodSubHistoryActivity :
     BaseActivity(),

@@ -218,7 +218,7 @@ class ProductActivity :
 
     private fun shareProductLink() {
         Intent(Intent.ACTION_SEND).also { i ->
-            i.setType("text/plain")
+            i.type = "text/plain"
             i.putExtra(Intent.EXTRA_SUBJECT, "Sharing URL")
             i.putExtra(Intent.EXTRA_TEXT, "https://magizhiniorganics.in/product/${viewModel.productID}/")
             startActivity(Intent.createChooser(i, "Share URL"))

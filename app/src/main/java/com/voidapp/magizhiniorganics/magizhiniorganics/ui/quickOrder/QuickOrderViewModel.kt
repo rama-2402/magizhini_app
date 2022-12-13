@@ -10,7 +10,10 @@ import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.LONG
@@ -20,7 +23,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkRe
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toCartEntity
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.io.File

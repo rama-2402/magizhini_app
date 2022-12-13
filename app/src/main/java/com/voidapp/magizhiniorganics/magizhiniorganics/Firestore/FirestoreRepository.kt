@@ -3,7 +3,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.PhoneAuthCredential
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.OrderEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.SubscriptionEntity

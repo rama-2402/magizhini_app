@@ -11,10 +11,8 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOr
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.SubscriptionUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.UserDatabase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityAllCwmBinding.bind
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.CheckoutViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModelFactory
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.CWMViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubscriptionViewModelFactory
@@ -64,7 +62,6 @@ class MagizhiniApplication: Application(), KodeinAware {
         bind() from provider { CheckoutViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { PurchaseHistoryViewModelFactory(instance(), instance()) }
         bind() from provider { ChatViewModelFactory(instance(), instance(), instance()) }
-        bind() from provider { ConversationViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { WalletViewModelFactory(instance(), instance()) }
         bind() from provider { SubscriptionProductViewModelFactory(instance(), instance(), instance()) }
         bind() from provider { SubscriptionViewModelFactory(instance(), instance()) }

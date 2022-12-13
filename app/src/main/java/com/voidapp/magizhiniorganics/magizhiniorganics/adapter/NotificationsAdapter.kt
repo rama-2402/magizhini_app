@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserNotificationEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvNotificationItemBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils.addCharAtIndex
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class NotificationsAdapter(

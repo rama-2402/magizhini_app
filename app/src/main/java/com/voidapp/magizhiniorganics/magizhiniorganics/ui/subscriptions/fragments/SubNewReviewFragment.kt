@@ -19,7 +19,6 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.FragmentNewRe
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModel
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptions.SubscriptionProductViewModelFactory
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.compressImageToNewFile
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.imageExtension
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg

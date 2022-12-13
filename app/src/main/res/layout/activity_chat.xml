@@ -5,12 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
 
-    <data>
-        <variable
-            name="viewmodel"
-            type="com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.ChatViewModel" />
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -66,39 +60,47 @@
                 android:lines="1" />
 
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llViewPager"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/shape_round_rectangle_8"
-            app:layout_constraintTop_toBottomOf="@id/llHeader"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            >
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tlTabLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:tabGravity="fill"
-                app:tabInlineLabel="true"
-                app:tabMode="fixed"
-                android:background="@color/green_base"
-                app:tabIndicatorColor="@color/matteRed"
-                app:tabRippleColor="@color/matteRed"
-                app:tabTextColor="@color/white"
-                app:tabIconTint="@color/white"
-                app:tabSelectedTextColor="@color/matteRed"
-                />
-        </LinearLayout>
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/vpFragmentContent"
-            android:layout_width="match_parent"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCustomerSupport"
+            android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/llViewPager"
+            app:layout_constraintTop_toBottomOf="@id/llHeader"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+<!--        <LinearLayout-->
+<!--            android:id="@+id/llViewPager"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical"-->
+<!--            android:background="@drawable/shape_round_rectangle_8"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/llHeader"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            >-->
+<!--            <com.google.android.material.tabs.TabLayout-->
+<!--                android:id="@+id/tlTabLayout"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                app:tabGravity="fill"-->
+<!--                app:tabInlineLabel="true"-->
+<!--                app:tabMode="fixed"-->
+<!--                android:background="@color/green_base"-->
+<!--                app:tabIndicatorColor="@color/matteRed"-->
+<!--                app:tabRippleColor="@color/matteRed"-->
+<!--                app:tabTextColor="@color/white"-->
+<!--                app:tabIconTint="@color/white"-->
+<!--                app:tabSelectedTextColor="@color/matteRed"-->
+<!--                />-->
+<!--        </LinearLayout>-->
+<!--        <androidx.viewpager2.widget.ViewPager2-->
+<!--            android:id="@+id/vpFragmentContent"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/llViewPager"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"/>-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

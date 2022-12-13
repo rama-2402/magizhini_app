@@ -377,7 +377,7 @@ class WalletActivity : BaseActivity(), KodeinAware, PaymentResultListener,
         viewModel.moneyToAddInWallet?.let {
             viewModel.makeTransactionFromWallet(
                 it,
-                viewModel.userID?:"Not Signed In",
+                viewModel.userID,
                 orderID!!,
                 "Add"
             )

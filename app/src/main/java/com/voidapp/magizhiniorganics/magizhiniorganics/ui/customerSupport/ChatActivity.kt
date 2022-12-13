@@ -1,26 +1,16 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport
 
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.ContactsAdapter
-import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.viewpager.ChatViewPager
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.SupportProfile
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityChatBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.signin.SignInActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -30,8 +20,7 @@ import org.kodein.di.generic.instance
 class ChatActivity :
     BaseActivity(),
     KodeinAware,
-    ContactsAdapter.ContactItemClickListener,
-    CustomAlertClickListener
+    ContactsAdapter.ContactItemClickListener
 {
 
     override val kodein: Kodein by kodein()
@@ -44,95 +33,72 @@ class ChatActivity :
         setTheme(R.style.Theme_MagizhiniOrganics_NoActionBar)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_chat)
         viewModel = ViewModelProvider(this, factory).get(ChatViewModel::class.java)
-        binding.viewmodel = viewModel
-
-        if (!NetworkHelper.isOnline(this)) {
-            showErrorSnackBar("Please check your Internet Connection", true)
-            onBackPressed()
-        }
 
         showProgressDialog(true)
 
         initData()
         initObservers()
-        initViewPager()
         clickListeners()
     }
 
     private fun initObservers() {
-        viewModel.navigateToConversation.observe(this) {
-            moveToConversationPage(it)
-        }
         viewModel.currentUserProfile.observe(this) { profile ->
             //setting the toolbar data - profile pic and user name
+            hideProgressDialog()
             profile?.let {
                  if (!it.profilePicUrl.isNullOrEmpty()) {
                     binding.ivProfileImage.loadImg(it.profilePicUrl) {}
                 }
                 binding.tvProfileName.text = it.name
             } ?: let {
-                hideProgressDialog()
-                CustomAlertDialog(
-                    this,
-                    "User Not Signed In",
-                    "Customer satisfaction is our top priority in Magizhini Organics. To avail Magizhini Organic's 24*7 customer support facility please signin with your Google Account. You can still avail customer support using direct whatsapp contact if you do not wish to signin",
-                    "Sign In",
-                    "support",
-                    this
-                ).show()
+               binding.tvProfileName.text = "Not Signed In"
             }
+            loadSupportProfiles()
        }
     }
 
-    private fun initViewPager() {
-        val adapter = ChatViewPager(supportFragmentManager, lifecycle)
-        binding.vpFragmentContent.adapter = adapter
-        TabLayoutMediator(binding.tlTabLayout, binding.vpFragmentContent) { tab, position ->
-            when (position) {
-                0 -> {
-                    tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_chat)
-                    tab.icon?.setTint(ContextCompat.getColor(this, R.color.matteRed))
-                     tab.text = "Messages"
-                }
-                1 -> {
-                    tab.icon = ContextCompat.getDrawable(baseContext, R.drawable.ic_contacts)
-//                    tab.icon!!.setTint(ContextCompat.getColor(this, R.color.white))
-                    tab.text = "Support"
-                }
-            }
-        }.attach()
+    private fun loadSupportProfiles() {
+        val supportProfiles = mutableListOf<SupportProfile>()
+        SupportProfile(
+            "Ganesh",
+            "7299827393"
+        ).let {
+            supportProfiles.add(it)
+        }
+        SupportProfile(
+            "Ramasubramanian",
+            "9486598819"
+        ).let {
+            supportProfiles.add(it)
+        }
+        SupportProfile(
+            "Vetri",
+            "8124360179"
+        ).let {
+            supportProfiles.add(it)
+        }
+        SupportProfile(
+            "Jagadeesh",
+            "7904939372"
+        ).let {
+            supportProfiles.add(it)
+        }
+        
+        ContactsAdapter(
+            this,
+            supportProfiles,
+            this
+        ).also {
+            binding.rvCustomerSupport.adapter = it
+            binding.rvCustomerSupport.layoutManager = LinearLayoutManager(this)
+        }
     }
-
 
     private fun clickListeners() {
         with(binding) {
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
-            binding.tlTabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
-                override fun onTabSelected(tab: TabLayout.Tab?) {
-                    when(tab?.position) {
-                        0 -> {
-                            tab.icon?.setTint(ContextCompat.getColor(this@ChatActivity, R.color.matteRed))
-                            binding.tlTabLayout.getTabAt(1)?.icon?.setTint(Color.WHITE)
-                        }
-                        1 -> {
-                            tab.icon?.setTint(ContextCompat.getColor(this@ChatActivity, R.color.matteRed))
-                            binding.tlTabLayout.getTabAt(0)?.icon?.setTint(Color.WHITE)
-                        }
-                    }
-                }
-
-                override fun onTabUnselected(tab: TabLayout.Tab?) {
-
-                }
-
-                override fun onTabReselected(tab: TabLayout.Tab?) {
-
-                }
-            })
-            //setting the filter action based on the data currently displayed.
-            //if we are currently displaying messages then we get all contacts and accordingly
         }
     }
 
@@ -140,65 +106,15 @@ class ChatActivity :
         viewModel.getProfileData()
     }
 
-    private fun moveToConversationPage(supportProfile: SupportProfile) {
-        if (!NetworkHelper.isOnline(this)) {
-            showErrorSnackBar("Please check your Internet Connection", true)
-            return
-        }
-        viewModel.profile?.let { profile ->
-            Intent(this, ConversationActivity::class.java).also {
-                it.putExtra(Constants.CUSTOMER_SUPPORT, supportProfile.id)
-                it.putExtra(Constants.PROFILE_NAME, profile.id)
-                startActivity(it)
-            }
-        }
-    }
-
-    override fun onPause() {
-        viewModel.updateProfileStatus(false, System.currentTimeMillis())
-        super.onPause()
-    }
-
-    override fun onDestroy() {
-        viewModel.updateProfileStatus(false, System.currentTimeMillis())
-        super.onDestroy()
-    }
-
-    override fun onResume() {
-        viewModel.updateProfileStatus(true)
-        super.onResume()
-    }
-
-    override fun onRestart() {
-        viewModel.updateProfileStatus(true)
-        super.onRestart()
-    }
-
-    override fun moveToConversations(supportProfile: SupportProfile) {
-        moveToConversationPage(supportProfile)
-    }
-
-    override fun onClick() {
-
-    }
-
-    override fun placeOrderWithWhatsapp() {
+    override fun getHelp(number: String) {
+        val message = ""
          startActivity(
             Intent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
-                    "https://api.whatsapp.com/send?phone=+917299827393&text=Hi, I'm having some trouble with the app. could you please help. Thanks."
+                    "https://api.whatsapp.com/send?phone=+91$number&text=$message"
                 )
             )
         )
-        finish()
-    }
-
-    override fun goToSignIn() {
-        Intent(this, SignInActivity::class.java).also {
-            it.putExtra("goto", "newID")
-            startActivity(it)
-            finish()
-        }
     }
 }

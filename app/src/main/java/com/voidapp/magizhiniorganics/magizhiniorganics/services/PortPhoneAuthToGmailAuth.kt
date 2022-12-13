@@ -2,12 +2,10 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.services
 
 import android.content.Context
 import androidx.work.CoroutineWorker
-import androidx.work.WorkInfo
 import androidx.work.WorkerParameters
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUB
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION

@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.MediaStore
 import android.provider.Settings
@@ -25,10 +24,8 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.snackbar.Snackbar
 import com.ncorti.slidetoact.SlideToActView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecialOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.*
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivity
-import com.voidapp.magizhiniorganics.magizhiniorganics.ui.customerSupport.chatConversation.ConversationActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodOrderActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubHistoryActivity
@@ -346,12 +343,6 @@ open class BaseActivity : AppCompatActivity() {
                         "setting" -> activity.proceedToRequestManualPermission()
                         "close" -> hideExitSheet()
                         "" -> activity.cancellationConfirmed()
-                    }
-                }
-                is ConversationActivity -> {
-                    when (data) {
-                        "permission" -> activity.proceedToRequestPermission()
-                        "setting" -> activity.proceedToRequestManualPermission()
                     }
                 }
                 is QuickOrderActivity -> {

@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
-import androidx.activity.contextaware.withContextAvailable
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2

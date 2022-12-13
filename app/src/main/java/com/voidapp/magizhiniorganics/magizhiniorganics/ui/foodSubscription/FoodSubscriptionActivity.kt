@@ -2,8 +2,6 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +18,6 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
-import java.util.function.DoubleToIntFunction
 
 class FoodSubscriptionActivity :
     BaseActivity(),

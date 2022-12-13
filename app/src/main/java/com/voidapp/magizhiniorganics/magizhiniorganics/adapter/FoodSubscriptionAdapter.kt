@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecial
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvFoodMenuItemsBinding
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.loadImg
 
 class FoodSubscriptionAdapter(
     var ammaSpecials: List<AmmaSpecial>,

@@ -1,6 +1,5 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,12 +8,9 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.PinCodesEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
-import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils
@@ -23,10 +19,12 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.toUserProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.Util
 import java.io.IOException
 
 class CheckoutViewModel(
@@ -39,16 +37,12 @@ class CheckoutViewModel(
     var wallet: Wallet? = null
     var tempAddress: Address? = null
 
-//    var currentCoupon: CouponEntity? = null
-//    var couponPrice: Float? = null
     var freeDeliveryLimit: Float? = null
     var deliveryAvailable: Boolean = true
 
     val totalCartItems: MutableList<CartEntity> = mutableListOf()
     val clearedProductIDs: MutableList<String> = mutableListOf()
 
-    //    private val _deliveryNotAvailableDialog: MutableLiveData<Long> = MutableLiveData()
-//    val deliveryNotAvailableDialog: LiveData<Long> = _deliveryNotAvailableDialog
     private val _uiUpdate: MutableLiveData<UiUpdate> = MutableLiveData()
     val uiUpdate: LiveData<UiUpdate> = _uiUpdate
     private val _uiEvent: MutableLiveData<UIEvent> = MutableLiveData()
