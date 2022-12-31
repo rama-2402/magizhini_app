@@ -103,7 +103,7 @@
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvOrderForTxt" />
+        app:layout_constraintTop_toBottomOf="@id/tvOrderFor" />
     <TextView
         android:id="@+id/tvAddress"
         android:layout_width="0dp"
@@ -116,7 +116,7 @@
         android:layout_marginStart="@dimen/material_size_8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/tvAddressTxt"
-        app:layout_constraintTop_toBottomOf="@id/tvOrderForTxt" />
+        app:layout_constraintTop_toBottomOf="@id/tvOrderFor" />
 
     <View
         android:id="@+id/view"

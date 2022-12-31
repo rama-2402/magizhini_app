@@ -1,179 +1,248 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    xmlns:tools="http://schemas.android.com/tools">-->
+<!--<androidx.constraintlayout.widget.ConstraintLayout-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:id="@+id/body"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:layout_margin="@dimen/material_size_4"-->
+<!--    android:elevation="@dimen/material_size_2"-->
+<!--    android:foreground="?android:selectableItemBackgroundBorderless"-->
+<!--    android:background="@drawable/shape_round_rectangle_8"
+
+<!- -  <com.google.android.material.imageview.ShapeableImageView-->
+<!--      android:id="@+id/ivProductThumbnail"-->
+<!--      android:layout_width="match_parent"-->
+<!--      android:layout_height="250dp"-->
+<!--      android:contentDescription="@string/product_thumbnail"-->
+<!--      android:scaleType="fitCenter"-->
+<!--      android:src="@drawable/ic_app_placeholder"-->
+<!--      app:layout_constraintTop_toTopOf="parent"-->
+<!--      app:layout_constraintStart_toStartOf="parent"-->
+<!--      app:layout_constraintEnd_toEndOf="parent"-->
+<!--      app:layout_constraintBottom_toBottomOf="parent"-->
+<!--      android:background="?android:attr/selectableItemBackground"-->
+<!--      app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"-->
+<!--      />-->
+<!--&lt;!&ndash;    <androidx.constraintlayout.widget.ConstraintLayout&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/clProductItem"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="150dp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:background="@drawable/shape_round_rectangle_8"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintTop_toTopOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        >&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <com.google.android.material.imageview.ShapeableImageView&ndash;&gt;-->
+<!--&lt;!&ndash;            android:id="@+id/ivProductThumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_height="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:background="?android:attr/selectableItemBackground"&ndash;&gt;-->
+<!--&lt;!&ndash;            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:contentDescription="@string/product_thumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:scaleType="fitCenter"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:src="@drawable/ic_app_placeholder"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:transitionName="thumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:layout_marginBottom="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;            android:elevation="@dimen/material_size_2"&ndash;&gt;-->
+<!--&lt;!&ndash;            />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <View&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_height="50dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_gravity="bottom"&ndash;&gt;-->
+<!--&lt;!&ndash;                    app:layout_constraintBottom_toBottomOf="@id/ivProductThumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;                    app:layout_constraintStart_toStartOf="@id/ivProductThumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;                    app:layout_constraintEnd_toEndOf="@id/ivProductThumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:elevation="@dimen/material_size_2"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:background="@drawable/bg_gradient_transparent" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:id="@+id/tvDay"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:textColor="@color/white"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:elevation="@dimen/material_size_2"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:fontFamily="@font/roboto"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:textSize="24sp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:singleLine="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:ellipsize="marquee"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_margin="@dimen/material_size_8"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:focusable="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:focusableInTouchMode="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:gravity="start"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:scrollHorizontally="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:marqueeRepeatLimit ="marquee_forever"&ndash;&gt;-->
+<!--&lt;!&ndash;                    app:layout_constraintBottom_toBottomOf="@id/ivProductThumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;                    app:layout_constraintStart_toStartOf="@id/ivProductThumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;                    app:layout_constraintEnd_toEndOf="@id/ivProductThumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_gravity="bottom"&ndash;&gt;-->
+<!--&lt;!&ndash;                    />&ndash;&gt;-->
+
+<!--&lt;!&ndash;    </androidx.constraintlayout.widget.ConstraintLayout>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/tvProductName"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="0dp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:text="somename"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textColor="@color/green_base"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:fontFamily="@font/roboto"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textSize="24sp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textStyle="bold"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:maxLines="2"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:ellipsize="end"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginStart="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginEnd="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginTop="@dimen/material_size_8"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintEnd_toEndOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintTop_toTopOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        />&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/tvIngredients"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="0dp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:text="somename"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textColor="@color/gray700"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:fontFamily="@font/roboto"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textSize="14sp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:ellipsize="end"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginStart="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginEnd="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginTop="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintEnd_toEndOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintTop_toBottomOf="@id/tvProductName"&ndash;&gt;-->
+<!--&lt;!&ndash;        />&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/tvRs"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginTop="@dimen/material_size_8"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:ellipsize="end"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:fontFamily="@font/roboto"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginStart="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:singleLine="true"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:text="Rs: "&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textColor="@color/complementary_orange"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textSize="14sp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textStyle="bold"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginBottom="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintTop_toTopOf="@id/ivCart"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintBottom_toBottomOf="@id/ivCart"/>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/tvPrice"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginStart="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:ellipsize="end"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:fontFamily="@font/roboto"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:singleLine="true"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:text="0"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textStyle="bold"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textColor="@color/complementary_orange"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textSize="14sp"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintStart_toEndOf="@id/tvRs"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintTop_toTopOf="@id/tvRs"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintBottom_toBottomOf="@id/tvRs"/>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/tvDiscount"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="0dp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:ellipsize="end"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:fontFamily="@font/roboto"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:singleLine="true"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:text="Rs: 0"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textColor="@color/grey"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textSize="14sp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:textStyle="italic"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginStart="@dimen/material_size_8"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintEnd_toStartOf="@id/ivCart"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintBottom_toBottomOf="@+id/tvPrice"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintStart_toEndOf="@+id/tvPrice"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintTop_toTopOf="@+id/tvPrice" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <com.google.android.material.imageview.ShapeableImageView&ndash;&gt;-->
+<!--&lt;!&ndash;        android:id="@+id/ivCart"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_width="40dp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_height="40dp"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:background="@drawable/shape_round_rectangle_8"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:backgroundTint="@color/green_base"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:contentDescription="@string/product_thumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:scaleType="centerInside"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:src="@drawable/ic_cart"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:padding="2dp"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:tint="@color/white"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:transitionName="thumbnail"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintEnd_toEndOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintBottom_toBottomOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;        app:layout_constraintTop_toBottomOf="@id/tvIngredients"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginEnd="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        android:layout_marginBottom="@dimen/material_size_4"&ndash;&gt;-->
+<!--&lt;!&ndash;        />&ndash;&gt;-->
+
+<!--</androidx.constraintlayout.widget.ConstraintLayout>-->
+
 <androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/body"
+    android:id="@+id/cvMenuItem"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/material_size_4"
-    android:elevation="@dimen/material_size_2"
-    android:foreground="?android:selectableItemBackgroundBorderless"
-    android:background="@drawable/shape_round_rectangle_8">
+    android:layout_height="260dp"
+    android:layout_marginBottom="@dimen/material_size_8"
+    android:layout_marginStart="@dimen/material_size_4"
+    android:layout_marginEnd="@dimen/material_size_4"
+    android:elevation="@dimen/material_size_4"
+    android:background="@drawable/shape_round_rectangle_8"
+    android:foreground="?android:attr/selectableItemBackgroundBorderless">
 
-<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--        android:id="@+id/clProductItem"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="150dp"-->
-<!--        android:background="@drawable/shape_round_rectangle_8"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        >-->
+  <com.google.android.material.imageview.ShapeableImageView
+      android:id="@+id/ivMenuThumbnail"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:contentDescription="@string/product_thumbnail"
+      android:scaleType="fitCenter"
+      android:src="@drawable/ic_app_placeholder"
+      android:background="?android:attr/selectableItemBackground"
+      app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
+      />
 
-<!--        <com.google.android.material.imageview.ShapeableImageView-->
-<!--            android:id="@+id/ivProductThumbnail"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:background="?android:attr/selectableItemBackground"-->
-<!--            app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"-->
-<!--            android:contentDescription="@string/product_thumbnail"-->
-<!--            android:scaleType="fitCenter"-->
-<!--            android:src="@drawable/ic_app_placeholder"-->
-<!--            android:transitionName="thumbnail"-->
-<!--            android:layout_marginBottom="@dimen/material_size_4"-->
-<!--            android:elevation="@dimen/material_size_2"-->
-<!--            />-->
+  <View
+      android:id="@+id/view"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      app:layout_constraintHeight_percent=".5"
+      android:background="@drawable/bg_gradient_transparent_rounded"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
 
-<!--                <View-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="50dp"-->
-<!--                    android:layout_gravity="bottom"-->
-<!--                    app:layout_constraintBottom_toBottomOf="@id/ivProductThumbnail"-->
-<!--                    app:layout_constraintStart_toStartOf="@id/ivProductThumbnail"-->
-<!--                    app:layout_constraintEnd_toEndOf="@id/ivProductThumbnail"-->
-<!--                    android:elevation="@dimen/material_size_2"-->
-<!--                    android:background="@drawable/bg_gradient_transparent" />-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/tvDay"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:textColor="@color/white"-->
-<!--                    android:elevation="@dimen/material_size_2"-->
-<!--                    android:fontFamily="@font/roboto"-->
-<!--                    android:textSize="24sp"-->
-<!--                    android:singleLine="true"-->
-<!--                    android:ellipsize="marquee"-->
-<!--                    android:layout_margin="@dimen/material_size_8"-->
-<!--                    android:focusable="true"-->
-<!--                    android:focusableInTouchMode="true"-->
-<!--                    android:gravity="start"-->
-<!--                    android:scrollHorizontally="true"-->
-<!--                    android:marqueeRepeatLimit ="marquee_forever"-->
-<!--                    app:layout_constraintBottom_toBottomOf="@id/ivProductThumbnail"-->
-<!--                    app:layout_constraintStart_toStartOf="@id/ivProductThumbnail"-->
-<!--                    app:layout_constraintEnd_toEndOf="@id/ivProductThumbnail"-->
-<!--                    android:layout_gravity="bottom"-->
-<!--                    />-->
-
-<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
-
-    <TextView
-        android:id="@+id/tvProductName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="somename"
-        android:textColor="@color/green_base"
-        android:fontFamily="@font/roboto"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:maxLines="2"
-        android:ellipsize="end"
-        android:layout_marginStart="@dimen/material_size_4"
-        android:layout_marginEnd="@dimen/material_size_4"
-        android:layout_marginTop="@dimen/material_size_8"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
-    <TextView
-        android:id="@+id/tvIngredients"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="somename"
-        android:textColor="@color/gray700"
-        android:fontFamily="@font/roboto"
-        android:textSize="14sp"
-        android:ellipsize="end"
-        android:layout_marginStart="@dimen/material_size_4"
-        android:layout_marginEnd="@dimen/material_size_4"
-        android:layout_marginTop="@dimen/material_size_4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvProductName"
-        />
-
-    <TextView
-        android:id="@+id/tvRs"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/material_size_8"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto"
-        android:layout_marginStart="@dimen/material_size_4"
-        android:singleLine="true"
-        android:text="Rs: "
-        android:textColor="@color/complementary_orange"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="@dimen/material_size_4"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/ivCart"
-        app:layout_constraintBottom_toBottomOf="@id/ivCart"/>
-
-    <TextView
-        android:id="@+id/tvPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/material_size_4"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto"
-        android:singleLine="true"
-        android:text="0"
-        android:textStyle="bold"
-        android:textColor="@color/complementary_orange"
-        android:textSize="14sp"
-        app:layout_constraintStart_toEndOf="@id/tvRs"
-        app:layout_constraintTop_toTopOf="@id/tvRs"
-        app:layout_constraintBottom_toBottomOf="@id/tvRs"/>
-
-    <TextView
-        android:id="@+id/tvDiscount"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto"
-        android:singleLine="true"
-        android:text="Rs: 0"
-        android:textColor="@color/grey"
-        android:textSize="14sp"
-        android:textStyle="italic"
-        android:layout_marginStart="@dimen/material_size_8"
-        app:layout_constraintEnd_toStartOf="@id/ivCart"
-        app:layout_constraintBottom_toBottomOf="@+id/tvPrice"
-        app:layout_constraintStart_toEndOf="@+id/tvPrice"
-        app:layout_constraintTop_toTopOf="@+id/tvPrice" />
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/ivCart"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@drawable/shape_round_rectangle_8"
-        android:backgroundTint="@color/green_base"
-        app:shapeAppearanceOverlay="@style/roundedImageViewRectangle"
-        android:contentDescription="@string/product_thumbnail"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_cart"
-        android:padding="2dp"
-        app:tint="@color/white"
-        android:transitionName="thumbnail"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvIngredients"
-        android:layout_marginEnd="@dimen/material_size_4"
-        android:layout_marginBottom="@dimen/material_size_4"
-        />
+  <TextView
+      android:id="@+id/tvMenuName"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:fontFamily="@font/roboto"
+      android:textColor="@color/white"
+      android:textSize="16sp"
+      android:text="Product Name"
+      android:layout_marginBottom="@dimen/material_size_2"
+      android:maxLines="2"
+      android:gravity="center|bottom"
+      android:layout_marginStart="2dp"
+      android:layout_marginEnd="2dp"
+      android:ellipsize="end"
+      app:layout_constraintTop_toTopOf="@id/view"
+      app:layout_constraintBottom_toBottomOf="@id/view"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

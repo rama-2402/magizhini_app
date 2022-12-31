@@ -276,7 +276,10 @@ class HomeActivity :
                 }
             }
             btnQuickOrder.setOnClickListener {
-                navigateToQuickOrder()
+                Intent(this@HomeActivity, FoodSubHistoryActivity::class.java).also {
+                    startActivity(it)
+                }
+//                navigateToQuickOrder()
             }
 //            ivLinkedIn.setOnClickListener {
 //                openInBrowser("https://www.linkedin.com/in/ramasubramanian-r-7557a59b?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BT1%2FqEmlxTEWb9fHPRfHpCw%3D%3D")
@@ -708,14 +711,14 @@ class HomeActivity :
 //                        }
 //                    }
 //                }
-                R.id.menuSubscriptions -> {
-                    lifecycleScope.launch {
-                        delay(200)
-                        Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
-                            startActivity(it)
-                        }
-                    }
-                }
+//                R.id.menuSubscriptions -> {
+//                    lifecycleScope.launch {
+//                        delay(200)
+//                        Intent(this@HomeActivity, SubscriptionHistoryActivity::class.java).also {
+//                            startActivity(it)
+//                        }
+//                    }
+//                }
                 R.id.menuCWM -> navigateToCWM()
                 R.id.menuAmmaspecial -> navigateToAmmaSpecial()
                 R.id.menuReferral -> {

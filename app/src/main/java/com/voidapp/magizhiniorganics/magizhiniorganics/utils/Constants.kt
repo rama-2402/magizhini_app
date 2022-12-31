@@ -77,6 +77,8 @@ object Constants {
     const val ALL_DISHES = "AllDishes"
     const val QUICK_ORDER: String = "QuickOrder"
     const val AMMASPECIAL: String = "AmmaSpecial"
+    const val NEW_MENU: String = "NewMenu"
+    const val FOOD_PRICE: String = "Price"
 
     //Dialogs
     const val LOAD_DIALOG = "loadDialog"

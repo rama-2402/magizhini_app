@@ -95,12 +95,12 @@
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
                     android:paddingStart="@dimen/material_size_8"
                     android:paddingTop="@dimen/material_size_8"
                     android:paddingEnd="@dimen/material_size_8"
                     android:paddingBottom="@dimen/material_size_8"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"
                     android:text=""
                     android:textColor="@color/matteRed"
                     android:textSize="18sp"
@@ -179,8 +179,8 @@
                     android:layout_marginTop="@dimen/material_size_16"
                     app:compactCalendarCurrentDayBackgroundColor="@color/white"
                     app:compactCalendarCurrentDayTextColor="@color/blue500"
-                    app:compactCalendarCurrentSelectedDayBackgroundColor="@color/green_base"
-                    app:compactCalendarCurrentSelectedDayTextColor="@color/white"
+                    app:compactCalendarCurrentSelectedDayBackgroundColor="@color/white"
+                    app:compactCalendarCurrentSelectedDayTextColor="@color/gray700"
                     app:compactCalendarMultiEventIndicatorColor="#fff"
                     app:compactCalendarOtherMonthDaysTextColor="@color/black"
                     app:compactCalendarShouldSelectFirstDayOfMonthOnScroll="false"
@@ -296,37 +296,175 @@
                 <TextView
                     android:id="@+id/tvLunch"
                     android:layout_width="0dp"
-                    android:singleLine="true"
                     android:layout_height="wrap_content"
                     android:text="Lunch Only"
                     android:textColor="@color/gray700"
                     android:layout_marginTop="@dimen/material_size_8"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
                     android:textSize="16sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/ivMinusLunch"
+                    app:layout_constraintEnd_toStartOf="@id/ivLunchMenu"
                     app:layout_constraintTop_toBottomOf="@id/tvOrderOptions" />
 
                 <TextView
                     android:id="@+id/tvLunchWithoutRice"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Lunch Without Rice"
                     android:textColor="@color/gray700"
                     android:layout_marginTop="@dimen/material_size_8"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
                     android:textSize="16sp"
+                    app:layout_constraintEnd_toStartOf="@id/ivLunchWORiceMenu"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvLunch" />
 
                 <TextView
                     android:id="@+id/tvDinner"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="Dinner Only"
                     android:textColor="@color/gray700"
                     android:layout_marginTop="@dimen/material_size_8"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
                     android:textSize="16sp"
+                    app:layout_constraintEnd_toStartOf="@id/ivDinnerMenu"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvLunchWithoutRice" />
+
+                <TextView
+                    android:id="@+id/tvDD1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="dd1 Only"
+                    android:textColor="@color/gray700"
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toStartOf="@id/ivDD1Menu"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvDinner" />
+
+                <TextView
+                    android:id="@+id/tvDD2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="dd 2 Only"
+                    android:textColor="@color/gray700"
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toStartOf="@id/ivDD2Menu"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvDD1" />
+
+                <TextView
+                    android:id="@+id/tvPlate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Pakku Mattai Plate (Rs: 9)"
+                    android:textColor="@color/gray700"
+                    android:layout_marginTop="@dimen/material_size_8"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toStartOf="@id/ivMinusPlate"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvDD2" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivLunchMenu"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_width="@dimen/material_size_32"
+                android:src="@drawable/ic_food"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/ivMinusLunch"
+                app:layout_constraintTop_toTopOf="@id/ivAddLunch"
+                app:layout_constraintBottom_toBottomOf="@id/ivAddLunch"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivLunchWORiceMenu"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_width="@dimen/material_size_32"
+                android:src="@drawable/ic_food"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/ivMinusLunchWORice"
+                app:layout_constraintTop_toTopOf="@id/ivAddLunchWORice"
+                app:layout_constraintBottom_toBottomOf="@id/ivAddLunchWORice"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivDinnerMenu"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_width="@dimen/material_size_32"
+                android:src="@drawable/ic_food"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/ivMinusDinner"
+                app:layout_constraintTop_toTopOf="@id/ivAddDinner"
+                app:layout_constraintBottom_toBottomOf="@id/ivAddDinner"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivDD1Menu"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_width="@dimen/material_size_32"
+                android:src="@drawable/ic_food"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/ivMinusDD1"
+                app:layout_constraintTop_toTopOf="@id/ivAddDD1"
+                app:layout_constraintBottom_toBottomOf="@id/ivAddDD1"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivDD2Menu"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_width="@dimen/material_size_32"
+                android:src="@drawable/ic_food"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/ivMinusDD2"
+                app:layout_constraintTop_toTopOf="@id/ivAddDD2"
+                app:layout_constraintBottom_toBottomOf="@id/ivAddDD2"/>
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivMinusLunch"
@@ -454,6 +592,132 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="@id/tvDinner"/>
 
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivMinusDD1"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_width="@dimen/material_size_32"
+                android:src="@drawable/ic_down_pointer"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/tvDD1Count"
+                app:layout_constraintTop_toTopOf="@id/tvDD1Count"
+                app:layout_constraintBottom_toBottomOf="@id/tvDD1Count"/>
+
+            <TextView
+                android:id="@+id/tvDD1Count"
+                android:layout_width="@dimen/material_size_32"
+                android:layout_height="@dimen/material_size_32"
+                android:text="0"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textColor="@color/gray700"
+                android:layout_marginStart="@dimen/material_size_8"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/ivAddDD1"
+                app:layout_constraintBottom_toBottomOf="@id/ivAddDD1"
+                app:layout_constraintTop_toTopOf="@id/ivAddDD1"
+        />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivAddDD1"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_width="@dimen/material_size_32"
+                    android:src="@drawable/ic_up_pointer"
+                    app:tint="@color/green_base"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    app:layout_constraintTop_toTopOf="@+id/tvDD1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/tvDD1"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivMinusDD2"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_width="@dimen/material_size_32"
+                android:src="@drawable/ic_down_pointer"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/tvDD2Count"
+                app:layout_constraintTop_toTopOf="@id/tvDD2Count"
+                app:layout_constraintBottom_toBottomOf="@id/tvDD2Count"/>
+
+            <TextView
+                android:id="@+id/tvDD2Count"
+                android:layout_width="@dimen/material_size_32"
+                android:layout_height="@dimen/material_size_32"
+                android:text="0"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textColor="@color/gray700"
+                android:layout_marginStart="@dimen/material_size_8"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/ivAddDD2"
+                app:layout_constraintBottom_toBottomOf="@id/ivAddDD2"
+                app:layout_constraintTop_toTopOf="@id/ivAddDD2"
+        />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivAddDD2"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_width="@dimen/material_size_32"
+                    android:src="@drawable/ic_up_pointer"
+                    app:tint="@color/green_base"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    app:layout_constraintTop_toTopOf="@+id/tvDD2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/tvDD2"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivMinusPlate"
+                android:layout_height="@dimen/material_size_32"
+                android:layout_width="@dimen/material_size_32"
+                android:src="@drawable/ic_down_pointer"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                app:tint="@color/green_base"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/tvPlateCount"
+                app:layout_constraintTop_toTopOf="@id/tvPlateCount"
+                app:layout_constraintBottom_toBottomOf="@id/tvPlateCount"/>
+
+            <TextView
+                android:id="@+id/tvPlateCount"
+                android:layout_width="@dimen/material_size_32"
+                android:layout_height="@dimen/material_size_32"
+                android:text="0"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textColor="@color/gray700"
+                android:layout_marginStart="@dimen/material_size_8"
+                android:layout_marginEnd="@dimen/material_size_8"
+                app:layout_constraintEnd_toStartOf="@id/ivAddPlate"
+                app:layout_constraintBottom_toBottomOf="@id/ivAddPlate"
+                app:layout_constraintTop_toTopOf="@id/ivAddPlate"
+        />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivAddPlate"
+                    android:layout_height="@dimen/material_size_32"
+                    android:layout_width="@dimen/material_size_32"
+                    android:src="@drawable/ic_up_pointer"
+                    app:tint="@color/green_base"
+                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:layout_marginEnd="@dimen/material_size_16"
+                    app:layout_constraintTop_toTopOf="@+id/tvPlate"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/tvPlate"/>
+
 <!--                <TextView-->
 <!--                    android:id="@+id/tvFoodOptions"-->
 <!--                    android:layout_width="wrap_content"-->
@@ -547,28 +811,29 @@
 <!--                    app:shapeAppearanceOverlay="@style/roundedImageViewRounded"-->
 <!--                    app:tint="@color/green_base" />-->
 
-                <CheckBox
-                    android:id="@+id/cbxLeaf"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/material_size_8"
-                    android:gravity="start"
-                    android:padding="@dimen/material_size_4"
-                    android:text="Include Palm Leaf plate (Rs: 10/Serving)"
-                    android:textColor="@color/gray700"
-                    android:textSize="16sp"
-                    app:flow_verticalAlign="center"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvDinner" />
+<!--                <CheckBox-->
+<!--                    android:id="@+id/cbxLeaf"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/material_size_8"-->
+<!--                    android:gravity="start"-->
+<!--                    android:padding="@dimen/material_size_4"-->
+<!--                    android:text="Include Palm Leaf plate (Rs: 10/Serving)"-->
+<!--                    android:textColor="@color/gray700"-->
+<!--                    android:textSize="16sp"-->
+<!--                    app:flow_verticalAlign="center"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/tvDinner" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:layout_marginTop="@dimen/material_size_12"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/cbxLeaf">
+                    app:layout_constraintTop_toBottomOf="@id/ivAddPlate">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/etlName"

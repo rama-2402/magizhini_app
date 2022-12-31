@@ -2,16 +2,24 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
+import android.view.Menu
+import androidx.core.app.ActivityOptionsCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.FoodSubscriptionAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.FoodSubscriptionItemClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecial
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Banner
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.MenuImage
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityFoodSubscriptionBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Converters
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
 import org.imaginativeworld.whynotimagecarousel.model.CarouselItem
 import org.kodein.di.Kodein
@@ -30,9 +38,9 @@ class FoodSubscriptionActivity :
     private val factory: FoodSubscriptionViewModelFactory by instance()
     private lateinit var viewModel: FoodSubscriptionViewModel
 
-    private var lunchPrice: Double = 0.0
-    private var dinnerPrice: Double = 0.0
-    private var lunchWoRicePrice: Double = 0.0
+//    private var lunchPrice: Double = 0.0
+//    private var dinnerPrice: Double = 0.0
+//    private var lunchWoRicePrice: Double = 0.0
 //    private var currentPlan: String = "premium"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +62,19 @@ class FoodSubscriptionActivity :
         binding.apply {
             ivBackBtn.setOnClickListener {
                 onBackPressed()
+            }
+            btnNext.setOnClickListener {
+                viewModel.ammaSpecials.sortedBy { it.displayOrder }
+
+                Intent(this@FoodSubscriptionActivity, FoodOrderActivity::class.java).also {
+                    it.putExtra("menu", Converters().menuToStringConverter(viewModel.ammaSpecials))
+                    startActivity(it)
+                }
+            }
+            ivHistory.setOnClickListener {
+                Intent(this@FoodSubscriptionActivity, FoodSubHistoryActivity::class.java).also {
+                    startActivity(it)
+                }
             }
 //            btnBudgetPlan.setOnClickListener {
 //                btnBudgetPlan.setBackgroundColor(ContextCompat.getColor(this@FoodSubscriptionActivity, R.color.matteRed))
@@ -105,17 +126,17 @@ class FoodSubscriptionActivity :
 //                                populateRecipes(viewModel.premiumPlanRecipes)
 //                            }
 
-                            specials.forEach {
-                                if (it.foodTime.lowercase().contains("rice")) {
-                                    lunchWoRicePrice = it.discountedPrice
-                                }
-                                if (it.foodTime.lowercase() == "lunch") {
-                                    lunchPrice = it.discountedPrice
-                                }
-                                if (it.foodTime.lowercase() == "dinner") {
-                                    dinnerPrice = it.discountedPrice
-                                }
-                            }
+//                            specials.forEach {
+//                                if (it.foodTime.lowercase().contains("rice")) {
+//                                    lunchWoRicePrice = it.discountedPrice
+//                                }
+//                                if (it.foodTime.lowercase() == "lunch") {
+//                                    lunchPrice = it.discountedPrice
+//                                }
+//                                if (it.foodTime.lowercase() == "dinner") {
+//                                    dinnerPrice = it.discountedPrice
+//                                }
+//                            }
                         }
                    }?: showErrorSnackBar("Server Error! Please try again later", true)
                     hideProgressDialog()
@@ -131,10 +152,10 @@ class FoodSubscriptionActivity :
         }
     }
 
-    private fun populateRecipes(recipes: List<AmmaSpecial>) {
+    private fun populateRecipes(recipes: List<MenuImage>) {
         FoodSubscriptionAdapter(recipes.sortedBy { it.displayOrder }, this).let { adapter ->
                                     binding.rvFoods.adapter = adapter
-                                    binding.rvFoods.layoutManager = LinearLayoutManager(this)
+                                    binding.rvFoods.layoutManager = GridLayoutManager(this, 2)
                                 }
     }
 
@@ -151,12 +172,14 @@ class FoodSubscriptionActivity :
         binding.cvBanner.registerLifecycle(this)
     }
 
-    override fun itemClicked() {
-        Intent(this, FoodOrderActivity::class.java).also {
-            it.putExtra("lunch", lunchPrice)
-            it.putExtra("dinner", dinnerPrice)
-            it.putExtra("lunchWoRice", lunchWoRicePrice)
-            startActivity(it)
+    override fun itemClicked(url: String, thumbnail: ShapeableImageView) {
+        Intent(this, PreviewActivity::class.java).also { intent ->
+            intent.putExtra("url", url)
+            intent.putExtra("contentType", "image")
+            val options: ActivityOptionsCompat =
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, "thumbnail")
+            startActivity(intent, options.toBundle())
+//            startActivity(it)
         }
     }
 }

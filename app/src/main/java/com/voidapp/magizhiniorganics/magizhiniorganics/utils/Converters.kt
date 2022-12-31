@@ -1,11 +1,13 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.utils
 
+import android.view.Menu
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.allCWM.CWMViewModel
 
 class Converters {
 //
@@ -270,6 +272,26 @@ class Converters {
 
     fun stringToCartConverter(value: String): MutableList<CartEntity> {
         val listType = object : TypeToken<MutableList<CartEntity>>() {}.type
+        return Gson().fromJson(value, listType)
+    }
+
+    //CWM to string converter to pass between activities
+    fun cwmToStringConverter(value: CWMFood): String {
+        return Gson().toJson(value)
+    }
+
+    fun stringToCwmConverter(value: String): CWMFood {
+        val listType = object : TypeToken<CWMFood>() {}.type
+        return Gson().fromJson(value, listType)
+    }
+
+    //Menu image to string converter to pass between activities
+    fun menuToStringConverter(value: MutableList<MenuImage>): String {
+        return Gson().toJson(value)
+    }
+
+    fun stringToMenuConverter(value: String): MutableList<MenuImage> {
+        val listType = object : TypeToken<MutableList<MenuImage>>() {}.type
         return Gson().fromJson(value, listType)
     }
 }

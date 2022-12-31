@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -37,8 +38,7 @@ class FoodSubscriptionViewModel(
     var ammaSpecialOrders: MutableList<AmmaSpecialOrder> = mutableListOf()
     var tempAddress: Address? = null
 
-    val ammaSpecials: MutableList<AmmaSpecial> = mutableListOf()
-    var lunchMap: HashMap<String, Double> = hashMapOf()
+    var ammaSpecials: MutableList<MenuImage> = mutableListOf()
 //    val budgetPlanRecipes: MutableList<AmmaSpecial> = mutableListOf()
 //    val premiumPlanRecipes: MutableList<AmmaSpecial> = mutableListOf()
 
@@ -46,12 +46,13 @@ class FoodSubscriptionViewModel(
     var nonDeliveryDatesString: MutableList<String> = mutableListOf()
     val selectedEventDates: MutableList<Long> = mutableListOf()
     var currentSubOption: String = "single"
-//    var currentCountOption: Int = 0
+
+    //    var currentCountOption: Int = 0
 //    var currentServingOption: Int = 0
     var totalPrice: Double = 0.0
-    var lunchPrice: Double = 0.0
-    var dinnerPrice: Double = 0.0
-    var lunchWoRicePrice: Double = 0.0
+//    var lunchPrice: Double = 0.0
+//    var dinnerPrice: Double = 0.0
+//    var lunchWoRicePrice: Double = 0.0
 //    var selectedPlan: String = ""
 
     //the outer hashmap holds the data as key and the orderids as values
@@ -68,7 +69,7 @@ class FoodSubscriptionViewModel(
         _uiUpdate.value = UiUpdate.Empty
     }
 
-    fun getAmmaSpecials() = viewModelScope.launch {
+    fun getAmmaSpecials() = viewModelScope.launch(Dispatchers.IO) {
         val specials = foodSubscriptionUseCase.getAllAmmaSpecials()
         val banners = foodSubscriptionUseCase.getAllBanners()
 //        val specials = generateSampleSpecials()
@@ -76,22 +77,24 @@ class FoodSubscriptionViewModel(
 //        budgetPlanRecipes.clear()
 //        premiumPlanRecipes.clear()
         specials?.let { specialsList ->
-            ammaSpecials.addAll(specialsList)
-            specialsList.forEach {
-                lunchMap[it.foodDay] = if (it.discountedPrice == 0.0) {
-                    it.price
-                } else {
-                    it.discountedPrice
-                }
+            ammaSpecials.addAll(specialsList.sortedBy { it.displayOrder })
+//            specialsList.forEach {
+//                lunchMap[it.foodDay] = if (it.discountedPrice == 0.0) {
+//                    it.price
+//                } else {
+//                    it.discountedPrice
+//                }
 
 //                if (it.plan == "budget") {
 //                    budgetPlanRecipes.add(it)
 //                } else {
 //                    premiumPlanRecipes.add(it)
 //                }
-            }
+//            }
         }
-        _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, banners)
+        withContext(Dispatchers.Main) {
+            _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, banners)
+        }
 //        _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, null)
     }
 
@@ -129,7 +132,7 @@ class FoodSubscriptionViewModel(
                 phoneNumber = orderDetailsMap["phoneNumber"].toString(),
                 mailID = orderDetailsMap["mailID"].toString(),
                 orderFoodTime = orderDetailsMap["orders"] as ArrayList<String>,
-                leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
+                leafNeeded = orderDetailsMap["leaf"].toString().toInt(),
                 orderType = currentSubOption,
                 orderCount = 0,
                 deliveryDates = deliveryDatesString as ArrayList<String>
@@ -219,7 +222,7 @@ class FoodSubscriptionViewModel(
                 phoneNumber = orderDetailsMap["phoneNumber"].toString(),
                 mailID = orderDetailsMap["mailID"].toString(),
                 orderFoodTime = orderDetailsMap["orders"] as ArrayList<String>,
-                leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
+                leafNeeded = orderDetailsMap["leaf"].toString().toInt(),
                 orderType = currentSubOption,
                 orderCount = 0,
                 deliveryDates = deliveryDatesString as ArrayList<String>
@@ -365,7 +368,7 @@ class FoodSubscriptionViewModel(
                 phoneNumber = orderDetailsMap["phoneNumber"].toString(),
                 mailID = orderDetailsMap["mailID"].toString(),
                 orderFoodTime = orderDetailsMap["orders"] as ArrayList<String>,
-                leafNeeded = orderDetailsMap["leaf"].toString().toBoolean(),
+                leafNeeded = orderDetailsMap["leaf"].toString().toInt(),
                 orderType = currentSubOption,
                 orderCount = 0,
                 deliveryDates = deliveryDatesString as ArrayList<String>
@@ -494,15 +497,16 @@ class FoodSubscriptionViewModel(
                 if (orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)].isNullOrEmpty()) {
                     val status = foodSubscriptionUseCase.getFoodStatus(
                         date,
-                        ammaSpecialOrders.filter { it.endDate >= date })
+                        ammaSpecialOrders.filter { it.endDate >= date }
+                    )
                     if (!status.isNullOrEmpty()) {
-                     orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)] =
-                        status
-                    UiUpdate.UpdateFoodDeliveryStatus(status, true)
+                        orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(date)] =
+                            status
+                        UiUpdate.UpdateFoodDeliveryStatus(status, true)
                     } else {
                         UiUpdate.UpdateFoodDeliveryStatus(null, false)
                     }
-               } else {
+                } else {
                     UiUpdate.UpdateFoodDeliveryStatus(
                         orderStatusMap[SimpleDateFormat("dd-MM-yyyy").format(
                             date
@@ -521,13 +525,18 @@ class FoodSubscriptionViewModel(
 //                "Failed to fetch user profile. Please Log out and Log back in to continue",
 //                true
 //            )
-            _uiUpdate.value = UiUpdate.UpdateFoodDeliveryStatus(null, true) //this case is when user not logged in but has opted for food
+            _uiUpdate.value = UiUpdate.UpdateFoodDeliveryStatus(
+                null,
+                true
+            ) //this case is when user not logged in but has opted for food
             return@launch
         } else {
             foodSubscriptionUseCase.getAmmaSpecialOrders(userID!!)?.let { orders ->
                 ammaSpecialOrders.clear()
-                ammaSpecialOrders.addAll(orders.filter { it.endDate >= System.currentTimeMillis() })
-                getFoodStatus(date)
+//                ammaSpecialOrders.addAll(orders.filter { it.endDate >= System.currentTimeMillis() })
+                ammaSpecialOrders.addAll(orders)
+                _uiUpdate.value = UiUpdate.UpdateFoodDeliveryStatus(null, true)
+//                getFoodStatus(date)
             } ?: let {
                 _uiUpdate.value = UiUpdate.UpdateFoodDeliveryStatus(null, false)
             }
@@ -577,12 +586,16 @@ class FoodSubscriptionViewModel(
     fun getNonDeliveryDays() = viewModelScope.launch {
         nonDeliveryDatesLong?.let {
             _uiUpdate.value = UiUpdate.PopulateNonDeliveryDates(it)
-        } ?:let {
+        } ?: let {
             foodSubscriptionUseCase.getNonDeliveryDays().let { dates ->
                 nonDeliveryDatesLong = mutableListOf()
                 nonDeliveryDatesLong!!.clear()
                 dates?.let { it -> nonDeliveryDatesLong!!.addAll(it) }
-                nonDeliveryDatesString.addAll(nonDeliveryDatesLong!!.map { TimeUtil().getCustomDate(dateLong = it) })
+                nonDeliveryDatesString.addAll(nonDeliveryDatesLong!!.map {
+                    TimeUtil().getCustomDate(
+                        dateLong = it
+                    )
+                })
                 _uiUpdate.value = UiUpdate.PopulateNonDeliveryDates(nonDeliveryDatesLong)
             }
         }
@@ -591,12 +604,12 @@ class FoodSubscriptionViewModel(
 
     sealed class UiUpdate {
         data class PopulateAmmaSpecials(
-            val ammaSpecials: List<AmmaSpecial>?,
+            val ammaSpecials: List<MenuImage>?,
             val banners: List<Banner>?
         ) : UiUpdate()
 
         data class PopulateUserProfile(val userProfile: UserProfileEntity?) : UiUpdate()
-        data class PopulateNonDeliveryDates(val dates: List<Long>?): UiUpdate()
+        data class PopulateNonDeliveryDates(val dates: List<Long>?) : UiUpdate()
 
         //placing order
         data class PlacingOrder(val message: String, val data: String) : UiUpdate()
@@ -614,7 +627,11 @@ class FoodSubscriptionViewModel(
         data class RenewSubscription(val status: Boolean, val message: String) : UiUpdate()
 
         //food delivery
-        data class UpdateFoodDeliveryStatus(val status: HashMap<String, String>?, val isOrdersAvailable: Boolean) : UiUpdate()
+        data class UpdateFoodDeliveryStatus(
+            val status: HashMap<String, String>?,
+            val isOrdersAvailable: Boolean
+        ) : UiUpdate()
+
         object Empty : UiUpdate()
     }
 }

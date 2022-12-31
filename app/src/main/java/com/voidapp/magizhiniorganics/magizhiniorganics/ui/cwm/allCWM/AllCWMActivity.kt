@@ -16,6 +16,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.CWMFood
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityAllCwmBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Converters
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.NetworkHelper
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import kotlinx.coroutines.delay
@@ -135,7 +136,7 @@ class AllCWMActivity :
 
     private fun navigateToDish(dish: CWMFood) {
         Intent(this@AllCWMActivity, DishActivity::class.java).also {
-            it.putExtra("dish", dish)
+            it.putExtra("dish", Converters().cwmToStringConverter(dish))
             startActivity(it)
         }
     }

@@ -3,8 +3,12 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish
 import android.app.Instrumentation
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbDevice
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.net.Uri
 import android.os.Build
+import android.os.Build.USER
+import android.os.Build.VERSION
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -20,10 +24,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.firebase.firestore.auth.User
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
@@ -73,7 +79,8 @@ class DishActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_dish)
         viewModel = ViewModelProvider(this, factory)[DishViewModel::class.java]
 
-        viewModel.dish = intent.getParcelableExtra<CWMFood>("dish")!!
+        viewModel.dish = Converters().stringToCwmConverter(intent.getStringExtra("dish")!!)
+
         checkoutText = findViewById<TextView>(R.id.tvCheckOut)
 
         showProgressDialog(true)

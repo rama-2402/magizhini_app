@@ -2,7 +2,9 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
 import android.content.Intent
 import android.graphics.Rect
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -10,17 +12,23 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.app.ActivityOptionsCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.github.sundeepk.compactcalendarview.CompactCalendarView
 import com.github.sundeepk.compactcalendarview.domain.Event
+import com.google.android.material.imageview.ShapeableImageView
+import com.google.firebase.firestore.auth.User
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecial
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.MenuImage
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityFoodOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertDialog
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.LoadStatusDialog
@@ -39,6 +47,7 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class FoodOrderActivity :
     BaseActivity(),
@@ -63,9 +72,9 @@ class FoodOrderActivity :
         viewModel = ViewModelProvider(this, factory)[FoodSubscriptionViewModel::class.java]
 
 //        viewModel.lunchMap = intent.extras!!.get("lunch") as HashMap<String, Double>
-        viewModel.lunchPrice = intent.getDoubleExtra("lunch", 118.0)
-        viewModel.dinnerPrice = intent.getDoubleExtra("dinner", 98.0)
-        viewModel.lunchWoRicePrice = intent.getDoubleExtra("lunchWoRice", 100.0)
+//        viewModel.lunchPrice = intent.getDoubleExtra("lunch", 118.0)
+//        viewModel.dinnerPrice = intent.getDoubleExtra("dinner", 98.0)
+//        viewModel.lunchWoRicePrice = intent.getDoubleExtra("lunchWoRice", 100.0)
 
         initData()
         initLiveData()
@@ -79,18 +88,30 @@ class FoodOrderActivity :
 
             checkTimeLimit()
 
+            viewModel.ammaSpecials = Converters().stringToMenuConverter(intent.getStringExtra("menu")!!)
+
             calendarView.setUseThreeLetterAbbreviation(true)
             calendarView.shouldDrawIndicatorsBelowSelectedDays(true)
             calendarView.shouldScrollMonth(false)
 
             tvMonth.text = month.format(System.currentTimeMillis())
-//            ivPrevMonth.setColor(R.color.green_light)
-//            ivMinusOnePerson.setColor(R.color.green_light)
+
+            tvLunch.text = viewModel.ammaSpecials[0].name
+            tvLunchWithoutRice.text = viewModel.ammaSpecials[1].name
+            tvDinner.text = viewModel.ammaSpecials[2].name
+            tvDD1.text = "${viewModel.ammaSpecials[3].name} - 1"
+            tvDD2.text = "${viewModel.ammaSpecials[3].name} - 2"
 
             tvRenewal.isSelected = true
             tvTimeLimit.isSelected = true
+            tvLunch.isSelected = true
+            tvLunchWithoutRice.isSelected = true
+            tvDinner.isSelected = true
+            tvDD1.isSelected = true
+            tvDD2.isSelected = true
 
             getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
+
         }
     }
 
@@ -126,9 +147,12 @@ class FoodOrderActivity :
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
-            cbxLeaf.setOnClickListener {
-                setPrice()
+            ivHistory.setOnClickListener {
+                navigateToOtherPage("")
             }
+//            cbxLeaf.setOnClickListener {
+//                setPrice()
+//            }
             ivPrevMonth.setOnClickListener {
 //                if (tvMonth.text == month.format(System.currentTimeMillis())) {
 //                    showToast(this@FoodOrderActivity, "Already in current month")
@@ -260,6 +284,30 @@ class FoodOrderActivity :
                 binding.tvDinnerCount.text = "${binding.tvDinnerCount.text.toString().toInt() + 1}"
                 setPrice()
             }
+            ivAddDD1.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                binding.tvDD1Count.text = "${binding.tvDD1Count.text.toString().toInt() + 1}"
+                setPrice()
+            }
+            ivAddDD2.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                binding.tvDD2Count.text = "${binding.tvDD2Count.text.toString().toInt() + 1}"
+                setPrice()
+            }
+            ivAddPlate.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                binding.tvPlateCount.text = "${binding.tvPlateCount.text.toString().toInt() + 1}"
+                setPrice()
+            }
             ivMinusLunch.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
                     showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
@@ -295,6 +343,59 @@ class FoodOrderActivity :
                     binding.tvDinnerCount.text = "${binding.tvDinnerCount.text.toString().toInt() - 1}"
                     setPrice()
                 }
+            }
+            ivMinusDD1.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                if (binding.tvDD1Count.text.toString() == "0") {
+                    return@setOnClickListener
+                } else {
+                    binding.tvDD1Count.text =
+                        "${binding.tvDD1Count.text.toString().toInt() - 1}"
+                    setPrice()
+                }
+            }
+            ivMinusDD2.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                if (binding.tvDD2Count.text.toString() == "0") {
+                    return@setOnClickListener
+                } else {
+                    binding.tvDD2Count.text =
+                        "${binding.tvDD2Count.text.toString().toInt() - 1}"
+                    setPrice()
+                }
+            }
+            ivMinusPlate.setOnClickListener {
+                if (viewModel.selectedEventDates.isEmpty()) {
+                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    return@setOnClickListener
+                }
+                if (binding.tvPlateCount.text.toString() == "0") {
+                    return@setOnClickListener
+                } else {
+                    binding.tvPlateCount.text = "${binding.tvPlateCount.text.toString().toInt() - 1}"
+                    setPrice()
+                }
+            }
+            ivLunchMenu.setOnClickListener {
+                previewImage(viewModel.ammaSpecials[0].thumbnailUrl, ivLunchMenu)
+            }
+            ivLunchWORiceMenu.setOnClickListener {
+                previewImage(viewModel.ammaSpecials[1].thumbnailUrl, ivLunchWORiceMenu)
+            }
+            ivDinnerMenu.setOnClickListener {
+                previewImage(viewModel.ammaSpecials[2].thumbnailUrl, ivDinnerMenu)
+            }
+            ivDD1Menu.setOnClickListener {
+                previewImage(viewModel.ammaSpecials[3].thumbnailUrl, ivDD1Menu)
+            }
+            ivDD2Menu.setOnClickListener {
+                previewImage(viewModel.ammaSpecials[3].thumbnailUrl, ivDD2Menu)
             }
 //            spFoodOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 //                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -383,6 +484,7 @@ class FoodOrderActivity :
                 validateEntries()
             }
         }
+
     }
 
     private fun validateEntries() {
@@ -411,6 +513,18 @@ class FoodOrderActivity :
                         }
                     }
                     binding.tvDinnerCount.text.toString() != "0" -> {
+                        if (isDinnerTimeEnd) {
+                            showErrorSnackBar("Today's order intake for dinner is closed. You can select from Tomorrow", true)
+                            return@apply
+                        }
+                    }
+                    binding.tvDD1Count.text.toString() != "0" -> {
+                        if (isDinnerTimeEnd) {
+                            showErrorSnackBar("Today's order intake for dinner is closed. You can select from Tomorrow", true)
+                            return@apply
+                        }
+                    }
+                    binding.tvDD2Count.text.toString() != "0" -> {
                         if (isDinnerTimeEnd) {
                             showErrorSnackBar("Today's order intake for dinner is closed. You can select from Tomorrow", true)
                             return@apply
@@ -535,22 +649,32 @@ class FoodOrderActivity :
         if (binding.tvLunchCount.text.toString() == "0") {
             orders.add("")
         } else {
-            orders.add("Lunch-${binding.tvLunchCount.text}")
+            orders.add("Lunch With Rice - ${binding.tvLunchCount.text}")
         }
         if (binding.tvLunchWORiceCount.text.toString() == "0") {
             orders.add("")
         } else {
-            orders.add("Lunch Without Rice-${binding.tvLunchWORiceCount.text}")
+            orders.add("Lunch Without Rice - ${binding.tvLunchWORiceCount.text}")
         }
         if (binding.tvDinnerCount.text.toString() == "0") {
             orders.add("")
         } else {
-            orders.add("Dinner-${binding.tvDinnerCount.text}")
+            orders.add("Dinner Combo - ${binding.tvDinnerCount.text}")
+        }
+        if (binding.tvDD1Count.text.toString() == "0") {
+            orders.add("")
+        } else {
+            orders.add("Delightful Dinner 1 - ${binding.tvDD1Count.text}")
+        }
+        if (binding.tvDD2Count.text.toString() == "0") {
+            orders.add("")
+        } else {
+            orders.add("Delightful Dinner 2 - ${binding.tvDD2Count.text}")
         }
         binding.apply {
             orderDetailsMap["start"] = viewModel.selectedEventDates.min()
             orderDetailsMap["end"] = viewModel.selectedEventDates.max()
-            orderDetailsMap["leaf"] = cbxLeaf.isChecked
+            orderDetailsMap["leaf"] = tvPlateCount.text.toString().toInt()
             orderDetailsMap["name"] = etName.text.toString().trim()
             orderDetailsMap["phoneNumber"] = etAlternateNumber.text.toString().trim()
             orderDetailsMap["mailID"] = etEmailId.text.toString().trim()
@@ -728,43 +852,19 @@ class FoodOrderActivity :
     }
 
     private fun setPrice() {
-
-//    var totalPrice: Double = when(viewModel.currentServingOption) {
-//                0 -> {
-//                    viewModel.selectedEventDates.size * viewModel.lunchPrice
-//                }
-//                1 -> {
-//                    viewModel.selectedEventDates.size * viewModel.dinnerPrice
-//                }
-//                else -> {
-//                    (viewModel.selectedEventDates.size * viewModel.lunchPrice) + (viewModel.selectedEventDates.size * viewModel.dinnerPrice)
-//                }
-//            }
-        var totalPrice: Double = (binding.tvLunchCount.text.toString().toInt() * viewModel.lunchPrice) +
-                (binding.tvLunchWORiceCount.text.toString().toInt() * viewModel.lunchWoRicePrice) +
-                (binding.tvDinnerCount.text.toString().toInt() * viewModel.dinnerPrice)
-            //we have to calculate the price based on if it is lunch or dinner or both for the total number of days selected by the user for delivery
-//            totalPrice += viewModel.lunchMap[TimeUtil().getDayName(dateLong)] ?: 0.0
-//        totalPrice *= viewModel.currentCountOption
+        var totalPrice: Double = (binding.tvLunchCount.text.toString().toInt() * viewModel.ammaSpecials[0].price) +
+                (binding.tvLunchWORiceCount.text.toString().toInt() * viewModel.ammaSpecials[1].price) +
+                (binding.tvDinnerCount.text.toString().toInt() * viewModel.ammaSpecials[2].price) +
+                (binding.tvDD1Count.text.toString().toInt() * viewModel.ammaSpecials[3].price) +
+                (binding.tvDD2Count.text.toString().toInt() * viewModel.ammaSpecials[3].price) +
+        (binding.tvPlateCount.text.toString().toInt() * 9)
 
         totalPrice *= viewModel.selectedEventDates.size
-
-        if (binding.cbxLeaf.isChecked) {
-            val leafPrice = (binding.tvLunchCount.text.toString().toInt() * 10) +
-                (binding.tvLunchWORiceCount.text.toString().toInt() * 10) +
-                (binding.tvDinnerCount.text.toString().toInt() * 10)
-            totalPrice += leafPrice
-//            totalPrice = if (viewModel.currentServingOption == 2) {
-//                totalPrice + (20 * viewModel.selectedEventDates.size)
-//            } else {
-//                totalPrice + (10 * viewModel.selectedEventDates.size)
-//            }
-        }
 
 //        totalPrice = (totalPrice * 118)/100  //GST calculation
 
         viewModel.totalPrice = totalPrice
-        binding.tvPlaceOrder.setTextAnimation("Order Box for Rs: $totalPrice")
+        binding.tvPlaceOrder.setTextAnimation("Place Order - Rs: $totalPrice")
     }
 
     private fun populateProfileData(userProfile: UserProfileEntity) {
@@ -910,13 +1010,19 @@ class FoodOrderActivity :
             }
             var foodType: String = ""
             if (binding.tvLunchCount.text.toString() != "0") {
-               foodType = "Lunch (${binding.tvLunchCount.text}),"
+               foodType = "Lunch With Rice (${binding.tvLunchCount.text}),"
             }
             if (binding.tvLunchWORiceCount.text.toString() != "0") {
                 foodType = "$foodType Lunch without rice (${binding.tvLunchWORiceCount.text}),"
             }
             if (binding.tvDinnerCount.text.toString() != "0") {
-              foodType = "$foodType Dinner (${binding.tvDinnerCount.text})"
+              foodType = "$foodType Dinner Combo (${binding.tvDinnerCount.text}),"
+            }
+            if (binding.tvDD1Count.text.toString() != "0") {
+              foodType = "$foodType Delightful Dinner 1 (${binding.tvDD1Count.text})"
+            }
+            if (binding.tvDD2Count.text.toString() != "0") {
+              foodType = "$foodType Delightful Dinner 2 (${binding.tvDD2Count.text})"
             }
 
             return "Subscription ID: ${System.currentTimeMillis()} \n" +
@@ -928,11 +1034,22 @@ class FoodOrderActivity :
             "Subscription Type: ${viewModel.currentSubOption} ${if (viewModel.currentSubOption == "custom") "- ${viewModel.selectedEventDates.size} days" else ""}\n" +
             "Food Type: $foodType \n" +
 //            "No of Serving: ${viewModel.currentCountOption} \n" +
-            "Banana Leaf: ${if (cbxLeaf.isChecked) "Yes" else "No"} \n" +
+            "Paaku Mattai Plate Leaf: ${tvPlateCount.text} \n" +
                     "Total Price: ${viewModel.totalPrice} \n" +
             "Start Date: ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.min())} \n" +
             "End Date: ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.max())} \n" +
             "Delivery Dates: $deliveryDates"
+        }
+    }
+
+   private fun previewImage(url: String, thumbnail: ShapeableImageView) {
+        Intent(this, PreviewActivity::class.java).also { intent ->
+            intent.putExtra("url", url)
+            intent.putExtra("contentType", "image")
+            val options: ActivityOptionsCompat =
+                ActivityOptionsCompat.makeSceneTransitionAnimation(this, thumbnail, "thumbnail")
+            startActivity(intent, options.toBundle())
+//            startActivity(it)
         }
     }
 

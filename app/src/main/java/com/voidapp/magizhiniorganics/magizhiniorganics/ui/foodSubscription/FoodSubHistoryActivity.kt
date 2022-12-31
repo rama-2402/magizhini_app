@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -49,6 +50,9 @@ class FoodSubHistoryActivity :
     PaymentResultListener,
     CustomAlertClickListener {
 
+    private val CALENDAR_VIEW: String = "calendar"
+    private val FULL_VIEW: String = "full"
+
     override val kodein: Kodein by kodein()
 
     private lateinit var binding: ActivityFoodSubHistoryBinding
@@ -57,6 +61,7 @@ class FoodSubHistoryActivity :
     private lateinit var statusAdapter: FoodStatusAdapter
 
     private var date: Long = System.currentTimeMillis()
+    private var currentView: String = FULL_VIEW
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,12 +79,6 @@ class FoodSubHistoryActivity :
 
     private fun initListeners() {
         binding.apply {
-            ivHistory.setOnClickListener {
-                Intent(this@FoodSubHistoryActivity, FoodSubscriptionActivity::class.java).also {
-                    startActivity(it)
-                    finish()
-                }
-            }
             ivBackBtn.setOnClickListener {
                 onBackPressed()
             }
@@ -100,6 +99,8 @@ class FoodSubHistoryActivity :
                     val instanceToGetLongDate = Calendar.getInstance()
                     instanceToGetLongDate.time = dateClicked!!
 
+                    removeEvent(date)
+
                     date = instanceToGetLongDate.timeInMillis
 
                     if (
@@ -113,6 +114,8 @@ class FoodSubHistoryActivity :
                         rvFoodStatus.remove()
                         return
                     }
+
+                    addEvent(date)
 
                     if (viewModel.ammaSpecialOrders.isNotEmpty()) {
                         showProgressDialog(true)
@@ -151,6 +154,33 @@ class FoodSubHistoryActivity :
                     "renew"
                 )
             }
+            ivViewFilter.setOnClickListener {
+                if (currentView == CALENDAR_VIEW) {
+                    currentView = FULL_VIEW
+                    ivViewFilter.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            ivViewFilter.context,
+                            R.drawable.ic_calendar
+                        )
+                    )
+                    populateDeliveryStatusGeneralView(hashMapOf())
+                } else {
+                    currentView = CALENDAR_VIEW
+                    ivViewFilter.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            ivViewFilter.context,
+                            R.drawable.ic_filter
+                        )
+                    )
+                    calendarView.showCalendarWithAnimation()
+                    ivPrevMonth.visible()
+                    ivNextMonth.visible()
+                    tvMonth.visible()
+                    tvFoodStatusText.visible()
+                    rvFoodStatus.remove()
+
+                }
+            }
         }
     }
 
@@ -181,12 +211,17 @@ class FoodSubHistoryActivity :
 
     private fun initData() {
         binding.tvMonth.text = SimpleDateFormat("MMMM - yyyy").format(date)
-
         viewModel.userID =
             SharedPref(this).getData(USER_ID, STRING, "").toString()
         viewModel.getAmmaSpecialsOrderDetails(date)
         viewModel.getNonDeliveryDays()
         getListOfSundays(binding.calendarView.firstDayOfCurrentMonth.time)
+        binding.apply {
+            calendarView.setUseThreeLetterAbbreviation(true)
+            calendarView.shouldDrawIndicatorsBelowSelectedDays(true)
+            calendarView.shouldScrollMonth(true)
+        }
+
     }
 
     private fun initLiveData() {
@@ -231,10 +266,12 @@ class FoodSubHistoryActivity :
                     if (event.status == null) {
                         if (!event.isOrdersAvailable) {
                             statusNotAvailableUI()
+                        } else {
+                            populateDeliveryStatusGeneralView(hashMapOf())
                         }
+                    } else {
+                        populateDeliveryStatusCalendarView(event.status)
                     }
-
-                    event.status?.let { populateDeliveryStatus(it) }
 
                     if (
                         TimeUtil().getDayName(date) == "Saturday" ||
@@ -244,7 +281,6 @@ class FoodSubHistoryActivity :
                             this@FoodSubHistoryActivity,
                             "Delivery not available on Saturdays and Sundays"
                         )
-                        binding.rvFoodStatus.remove()
                     }
                 }
                 is FoodSubscriptionViewModel.UiUpdate.CancelOrderStatus -> {
@@ -324,7 +360,7 @@ class FoodSubHistoryActivity :
                     }
                 }
                 is FoodSubscriptionViewModel.UiUpdate.Empty -> return@observe
-                else -> viewModel.setEmptyStatus()
+                else -> Unit
             }
             viewModel.setEmptyStatus()
         }
@@ -377,12 +413,12 @@ class FoodSubHistoryActivity :
                         theme
                     ), today, "leave"
                 ).let { event ->
-                 if (!binding.calendarView.getEvents(today).isNullOrEmpty()) {
-                    if (binding.calendarView.getEvents(today)[0].data == "leave") {
-                        binding.calendarView.removeEvents(today)
+                    if (!binding.calendarView.getEvents(today).isNullOrEmpty()) {
+                        if (binding.calendarView.getEvents(today)[0].data == "leave") {
+                            binding.calendarView.removeEvents(today)
+                        }
                     }
-                }
-                binding.calendarView.addEvent(event)
+                    binding.calendarView.addEvent(event)
                 }
             }
             if (TimeUtil().getDateNumber(dateLong = today) == "01") {
@@ -443,12 +479,44 @@ class FoodSubHistoryActivity :
         }
     }
 
-    private fun populateDeliveryStatus(status: HashMap<String, String>) {
+    private fun populateDeliveryStatusGeneralView(status: HashMap<String, String>) {
         binding.apply {
             if (viewModel.ammaSpecialOrders.isEmpty()) {
                 statusNotAvailableUI()
                 return
             }
+            calendarView.hideCalendarWithAnimation()
+            tvMonth.remove()
+            ivPrevMonth.remove()
+            ivNextMonth.remove()
+            tvFoodStatusText.remove()
+            tvFoodStatus.remove()
+            rvFoodStatus.visible()
+            btnGoToBox.remove()
+            btnRenewSub.remove()
+            FoodStatusAdapter(
+                viewModel.ammaSpecialOrders,
+                status,
+                null,
+                this@FoodSubHistoryActivity
+            ).let {
+                statusAdapter = it
+                rvFoodStatus.adapter = it
+                rvFoodStatus.layoutManager = LinearLayoutManager(this@FoodSubHistoryActivity)
+            }
+        }
+    }
+
+    private fun populateDeliveryStatusCalendarView(status: HashMap<String, String>) {
+        binding.apply {
+            if (viewModel.ammaSpecialOrders.isEmpty()) {
+                statusNotAvailableUI()
+                return
+            }
+            tvMonth.visible()
+            ivPrevMonth.visible()
+            ivNextMonth.visible()
+            tvFoodStatusText.visible()
             tvFoodStatus.remove()
             rvFoodStatus.visible()
             btnGoToBox.remove()
@@ -492,6 +560,28 @@ class FoodSubHistoryActivity :
         viewModel.getAmmaSpecials()
     }
 
+    private fun removeEvent(time: Long) {
+        Event(
+            resources.getColor(
+                R.color.green_base,
+                theme
+            ), time, "date"
+        ).let { event ->
+            binding.calendarView.removeEvent(event)
+        }
+    }
+
+    private fun addEvent(time: Long) {
+        Event(
+            resources.getColor(
+                R.color.green_base,
+                theme
+            ), time, "date"
+        ).let { event ->
+            binding.calendarView.addEvent(event)
+        }
+    }
+
     fun selectedPaymentMode(item: String) {
         if (item == "Use Magizhini Wallet") {
             showSwipeConfirmationDialog(this, "")
@@ -525,33 +615,33 @@ class FoodSubHistoryActivity :
 
     override fun selectedOrder(order: AmmaSpecialOrder, position: Int) {
         viewModel.selectedOrder?.let {
-                viewModel.selectedOrder = null
-                statusAdapter.selectedPosition = null
-                statusAdapter.notifyDataSetChanged()
-                binding.btnGoToBox.remove()
-        } ?:let {
-          viewModel.selectedOrder = order
-        statusAdapter.selectedPosition = position
-        statusAdapter.notifyDataSetChanged()
-        binding.apply {
-            btnGoToBox.visible()
-            if (
-                System.currentTimeMillis() > TimeUtil().getCustomDateFromDifference(
-                    order.endDate,
-                    -7
-                ) &&
-                order.orderType == "month"
-            ) {
-                btnRenewSub.visible()
-                btnGoToBox.text = "CANCEL \nSUBSCRIPTION"
-                btnRenewSub.text = "RENEW \nSUBSCRIPTION"
-            } else {
-                btnRenewSub.remove()
-                btnGoToBox.text = "CANCEL SUBSCRIPTION"
+            viewModel.selectedOrder = null
+            statusAdapter.selectedPosition = null
+            statusAdapter.notifyDataSetChanged()
+            binding.btnGoToBox.remove()
+        } ?: let {
+            viewModel.selectedOrder = order
+            statusAdapter.selectedPosition = position
+            statusAdapter.notifyDataSetChanged()
+            binding.apply {
+                btnGoToBox.visible()
+                if (
+                    System.currentTimeMillis() > TimeUtil().getCustomDateFromDifference(
+                        order.endDate,
+                        -7
+                    ) &&
+                    order.orderType == "month"
+                ) {
+                    btnRenewSub.visible()
+                    btnGoToBox.text = "CANCEL \nSUBSCRIPTION"
+                    btnRenewSub.text = "RENEW \nSUBSCRIPTION"
+                } else {
+                    btnRenewSub.remove()
+                    btnGoToBox.text = "CANCEL SUBSCRIPTION"
+                }
             }
         }
-        }
-   }
+    }
 
     override fun cancelDelivery(order: AmmaSpecialOrder) {
         viewModel.selectedOrder = order

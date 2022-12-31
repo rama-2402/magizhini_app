@@ -72,6 +72,17 @@
                             android:textSize="@dimen/text_size_small" />
                     </LinearLayout>
 
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivHistory"
+                        android:layout_width="@dimen/material_size_24"
+                        android:layout_height="@dimen/material_size_24"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="@dimen/material_size_16"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/favorites_icon"
+                        android:src="@drawable/ic_food"
+                        app:shapeAppearanceOverlay="@style/roundedImageViewRounded"
+                        app:tint="@color/white" />
                 </androidx.appcompat.widget.Toolbar>
             </com.google.android.material.appbar.AppBarLayout>
         </LinearLayout>
@@ -131,8 +142,40 @@
                     app:showIndicator="true"
                     app:showNavigationButtons="false"
                     app:showTopShadow="false" />
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/material_size_8">
 
-                <androidx.recyclerview.widget.RecyclerView
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvMenuHeader"
+                    android:text="Amma Samayal Special Menu"
+                    android:textColor="@color/gray700"
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/btnNext"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnNext"
+                    android:text="ORDER"
+                    android:textColor="@color/white"
+                    android:background="@drawable/shape_round_rectangle_8"
+                    android:backgroundTint="@color/matteRed"
+                    android:padding="@dimen/material_size_8"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+               <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvFoods"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />

@@ -1,5 +1,6 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
@@ -8,6 +9,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ADMINID
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_DISHES
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.AMMASPECIAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.BANNER
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.NEW_MENU
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUBSCRIPTION
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.SUCCESS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.WALLET_PAGE
@@ -45,13 +47,13 @@ class FoodSubscriptionUseCase(
         }
     }
 
-    suspend fun getAllAmmaSpecials(): List<AmmaSpecial>? = withContext(Dispatchers.IO) {
-        val specials = mutableListOf<AmmaSpecial>()
+    suspend fun getAllAmmaSpecials(): List<MenuImage>? = withContext(Dispatchers.IO) {
         return@withContext try {
-            fireStore.collection(AMMASPECIAL).document(AMMASPECIAL).collection(ALL_DISHES).get()
+            val specials = mutableListOf<MenuImage>()
+            fireStore.collection(AMMASPECIAL).document(AMMASPECIAL).collection(NEW_MENU).get()
                 .await().let { snap ->
                     snap.documents.forEach {
-                        specials.add(it.toObject(AmmaSpecial::class.java)!!)
+                        specials.add(it.toObject(MenuImage::class.java)!!)
                     }
                 }
             specials
@@ -66,7 +68,7 @@ class FoodSubscriptionUseCase(
     ): Flow<NetworkResult> = flow<NetworkResult> {
         try {
             emit(NetworkResult.Success("validating", "Placing Order for the selected days..."))
-            if (placeOrder(ammaSpecialsOrder, transactionID, "Online")) {
+            if (placeOrder(ammaSpecialsOrder, transactionID, if (transactionID != "COD") "Online" else "COD")) {
                 delay(1000)
                 emit(NetworkResult.Success("placed", null))
             } else {
@@ -269,14 +271,27 @@ class FoodSubscriptionUseCase(
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val orders = mutableListOf<AmmaSpecialOrder>()
-                val docs = fireStore
-                    .collection(AMMASPECIAL)
-                    .document("Order")
-                    .collection("NewOrder")
-                    .whereEqualTo("customerID", userID).get().await()
-                docs.documents.forEach { doc ->
-                    doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
+//                val old = async {
+//                    val oldDocs = fireStore
+//                    .collection(AMMASPECIAL)
+//                    .document("Order")
+//                    .collection("Order")
+//                    .whereEqualTo("customerID", userID).get().await()
+//                oldDocs.documents.forEach { doc ->
+//                    doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
+//                } }
+                val new = async {
+                    val docs = fireStore
+                        .collection(AMMASPECIAL)
+                        .document("Order")
+                        .collection("NewOrder")
+                        .whereEqualTo("customerID", userID).get().await()
+                    docs.documents.forEach { doc ->
+                        doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
+                    }
                 }
+//                old.await()
+                new.await()
                 if (orders.isNullOrEmpty()) {
                     null
                 } else {
@@ -315,13 +330,13 @@ class FoodSubscriptionUseCase(
                 }
             }
 
-            val leaf = if (selectedOrder.leafNeeded) "leaf" else "No leaf"
+            val leaf = if (selectedOrder.leafNeeded == 0) 0 else 9*selectedOrder.leafNeeded
             RefundEntry(
                 customerID = selectedOrder.customerID,
                 customerName = selectedOrder.userName,
                 orderID = selectedOrder.id,
                 cancelledDateTime = System.currentTimeMillis(),
-                refundAmount = "${selectedOrder.orderFoodTime} - ${TimeUtil().getDayName(date)} - $leaf",
+                refundAmount = "${selectedOrder.orderFoodTime} - ${TimeUtil().getDayName(date)} - $leaf for plate",
                 refunded = false,
                 modeOfRefund = "",
                 refundFor = AMMASPECIAL

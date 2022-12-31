@@ -41,7 +41,12 @@ class FoodStatusAdapter (
             order.orderFoodTime.forEach {
                 serving = "${serving}${it},\n"
             }
-            tvOrderFor.text = serving
+            tvOrderFor.text = if (order.leafNeeded == 0) {
+                "$serving \nand No Plates"
+            } else {
+                "$serving and \n${order.leafNeeded} Plates"
+            }
+
             tvAddress.text = "${order.userName}, ${order.addressOne}, ${order.addressTwo}, ${order.city}, ${order.code}"
 
             tvOrderStatus.isSelected = true
@@ -61,7 +66,7 @@ class FoodStatusAdapter (
                     "Failed to deliver your order. Please reach out to customer support for further details"
                 }
                 "na" -> "Food status not available yet!"
-                else -> ""
+                else -> "select calendar view to get order status"
             }
 
             clBody.setBackgroundColor(ContextCompat.getColor(clBody.context, R.color.white))

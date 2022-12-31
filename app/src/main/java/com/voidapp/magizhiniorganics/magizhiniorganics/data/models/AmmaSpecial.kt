@@ -1,5 +1,8 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.data.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 data class AmmaSpecial(
     var id: String = "",
     var foodName: String = "",
@@ -31,7 +34,7 @@ data class AmmaSpecialOrder(
     var orderFoodTime: ArrayList<String> = arrayListOf(),
     var orderType: String = "month",
     var orderCount: Int = 1,
-    var leafNeeded: Boolean = false,
+    var leafNeeded: Int = 0,
     var status: String = "success",
     var deliveryDates: ArrayList<String> = arrayListOf(),
     var cancelledDates: ArrayList<Long> = arrayListOf()
@@ -46,3 +49,13 @@ data class AmmaSpecialDeliveryStatus(
 data class NonDeliveryDates(
     val dates: ArrayList<Long> = arrayListOf()
 )
+
+@Parcelize
+data class MenuImage(
+    var id: String = "",
+    var name: String = "",
+    var thumbnailUrl: String = "",
+    var displayOrder: Int = 0,
+    var price: Double = 0.0
+): Parcelable
+

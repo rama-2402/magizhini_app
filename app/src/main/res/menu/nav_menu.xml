@@ -21,15 +21,15 @@
 <!--        android:icon="@drawable/ic_food"-->
 <!--        android:title="FOOD SUB" />-->
 
-    <item
-        android:id="@+id/menuSubscriptions"
-        android:icon="@drawable/ic_subscriptions"
-        android:title="SUBSCRIPTIONS" />
+<!--    <item-->
+<!--        android:id="@+id/menuSubscriptions"-->
+<!--        android:icon="@drawable/ic_subscriptions"-->
+<!--        android:title="SUBSCRIPTIONS" />-->
 
     <item
         android:id="@+id/menuAmmaspecial"
         android:icon="@drawable/ic_food"
-        android:title="AMMA SAMAYAL" />
+        android:title="FOOD STATUS" />
 
     <item
         android:id="@+id/menuCWM"
