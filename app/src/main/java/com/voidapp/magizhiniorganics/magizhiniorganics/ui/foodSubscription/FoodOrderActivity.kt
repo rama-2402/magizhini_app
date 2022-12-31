@@ -92,7 +92,7 @@ class FoodOrderActivity :
 
             calendarView.setUseThreeLetterAbbreviation(true)
             calendarView.shouldDrawIndicatorsBelowSelectedDays(true)
-            calendarView.shouldScrollMonth(false)
+            calendarView.shouldScrollMonth(true)
 
             tvMonth.text = month.format(System.currentTimeMillis())
 
@@ -925,12 +925,12 @@ class FoodOrderActivity :
                         ((lunchMinute + lunchHours) * 60 > 0) && ((dinnerMinute + dinnerMinute) * 60 > 0) -> {
                             isLunchTimeEnd = false
                             isDinnerTimeEnd = false
-                            "Today's order intake for lunch closing in $lunchHours Hour $lunchMinute Minutes and Dinner closing in $dinnerHours Hour $dinnerMinute Minutes"
+                            "Today's order intake for lunch closing in $lunchHours Hour $lunchMinute Minutes and Dinner closing in $dinnerHours hours $dinnerMinute Minutes"
                         }
                          ((lunchMinute + lunchHours) * 60 < 0) && ((dinnerMinute + dinnerMinute) * 60 > 0) -> {
                              isLunchTimeEnd = true
                              isDinnerTimeEnd = false
-                             "Today's order intake for lunch is closed and Dinner closing in $dinnerHours:$dinnerMinute"
+                             "Today's order intake for lunch is closed and Dinner closing in $dinnerHours hours and $dinnerMinute minutes"
                          }
                         else -> {
                             isLunchTimeEnd = true

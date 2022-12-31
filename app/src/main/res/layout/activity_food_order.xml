@@ -1076,6 +1076,20 @@
                                 android:textCursorDrawable="@null" />
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvInfo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackground"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:gravity="center"
+                android:padding="@dimen/material_size_16"
+                android:text="*Delivery charge of Rs.5 to Rs.40 may apply based on the distance and order value. Our executive will contact you once order is confirmed."
+                android:textStyle="italic"
+                android:textColor="@color/green_base"
+                android:textSize="16sp"/>
+
                 </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </me.didik.component.StickyNestedScrollView>

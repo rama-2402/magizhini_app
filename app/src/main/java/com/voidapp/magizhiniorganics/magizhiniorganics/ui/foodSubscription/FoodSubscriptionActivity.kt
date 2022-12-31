@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.Menu
+import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -65,7 +66,12 @@ class FoodSubscriptionActivity :
             }
             btnNext.setOnClickListener {
                 viewModel.ammaSpecials.sortedBy { it.displayOrder }
-
+                btnNext.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        binding.btnNext.context,
+                        R.anim.bounce
+                    )
+                )
                 Intent(this@FoodSubscriptionActivity, FoodOrderActivity::class.java).also {
                     it.putExtra("menu", Converters().menuToStringConverter(viewModel.ammaSpecials))
                     startActivity(it)
