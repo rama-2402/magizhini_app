@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecialOrder
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.RvFoodStatusBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 
 class FoodStatusAdapter (
     var orders: List<AmmaSpecialOrder>,
@@ -28,8 +29,8 @@ class FoodStatusAdapter (
         holder.binding.apply {
             tvOrderId.text = order.id
             tvOrderType.text = when(order.orderType) {
-                "month" -> "Monthly Subscription"
-                "single" -> "Single Purchase"
+                "month" -> "Monthly Subscription (${TimeUtil().getCustomDate(dateLong = order.startDate)} - ${TimeUtil().getCustomDate(dateLong = order.endDate)})"
+                "single" -> "Single Purchase - ${order.deliveryDates[0]}"
                 else -> "Custom Subscription"
             }
 //            tvOrderFor.text = if (order.orderCount == 1) {
@@ -38,13 +39,19 @@ class FoodStatusAdapter (
 //                "Serving for ${order.orderCount} Persons"
 //            }
             var serving = ""
+            for (status in order.orderFoodTime) {
+                if (status.isNullOrEmpty()) {
+                    continue
+                } else {
+                    serving = "${serving}${status},\n"
+                }
+            }
             order.orderFoodTime.forEach {
-                serving = "${serving}${it},\n"
             }
             tvOrderFor.text = if (order.leafNeeded == 0) {
-                "$serving \nand No Plates"
+                "${serving}and No Plates"
             } else {
-                "$serving and \n${order.leafNeeded} Plates"
+                "${serving}and ${order.leafNeeded} Plates"
             }
 
             tvAddress.text = "${order.userName}, ${order.addressOne}, ${order.addressTwo}, ${order.city}, ${order.code}"
@@ -56,7 +63,10 @@ class FoodStatusAdapter (
                 "cooking" -> "Your Food is being cooked right now"
                 "ready" -> "Your Food is packed and ready"
                 "delivery" -> "Your Food is out for delivery. Have a happy meal :)"
-                "success" -> "Your order has been delivered successfully"
+                "success" -> {
+//                    btnSend.visibility = View.GONE
+                    "Your order has been delivered successfully"
+                }
                 "cancel" -> {
                     btnSend.visibility = View.GONE
                     "Your order has been cancelled. Please reach out to customer support for further details"
@@ -66,7 +76,10 @@ class FoodStatusAdapter (
                     "Failed to deliver your order. Please reach out to customer support for further details"
                 }
                 "na" -> "Food status not available yet!"
-                else -> "select calendar view to get order status"
+                else -> {
+                    btnSend.visibility = View.GONE
+                    "select calendar view to get order status"
+                }
             }
 
             clBody.setBackgroundColor(ContextCompat.getColor(clBody.context, R.color.white))

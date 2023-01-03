@@ -322,6 +322,18 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="24dp"
+                android:src="@drawable/ic_filter"
+                app:backgroundTint="@color/matteRed"
+                app:fabSize="normal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:tint="@color/white" />
+
         <!--        </me.didik.component.StickyNestedScrollView>-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

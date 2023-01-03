@@ -271,15 +271,19 @@ class FoodSubscriptionUseCase(
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val orders = mutableListOf<AmmaSpecialOrder>()
-//                val old = async {
-//                    val oldDocs = fireStore
-//                    .collection(AMMASPECIAL)
-//                    .document("Order")
-//                    .collection("Order")
-//                    .whereEqualTo("customerID", userID).get().await()
-//                oldDocs.documents.forEach { doc ->
-//                    doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
-//                } }
+                val old = async {
+                    val oldDocs = fireStore
+                    .collection(AMMASPECIAL)
+                    .document("Order")
+                    .collection("Order")
+                    .whereEqualTo("customerID", userID).get().await()
+                oldDocs.documents.forEach { doc ->
+                    try {
+                        doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
+                    } catch (e: Exception) {
+                        doc.toObject(OldAmmaSpecialOrder::class.java)?.let { it -> orders.add(it.toNewAmmaSpecial()) }
+                    }
+                } }
                 val new = async {
                     val docs = fireStore
                         .collection(AMMASPECIAL)
@@ -287,10 +291,15 @@ class FoodSubscriptionUseCase(
                         .collection("NewOrder")
                         .whereEqualTo("customerID", userID).get().await()
                     docs.documents.forEach { doc ->
+                     try {
                         doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
+                    } catch (e: Exception) {
+                        doc.toObject(OldAmmaSpecialOrder::class.java)?.let { it -> orders.add(it.toNewAmmaSpecial()) }
+                    }
+//                        doc.toObject(AmmaSpecialOrder::class.java)?.let { it -> orders.add(it) }
                     }
                 }
-//                old.await()
+                old.await()
                 new.await()
                 if (orders.isNullOrEmpty()) {
                     null

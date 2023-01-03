@@ -163,7 +163,9 @@ class FoodSubHistoryActivity :
                             R.drawable.ic_calendar
                         )
                     )
+                    binding.tvToolbarTitle.text = "Pending..."
                     populateDeliveryStatusGeneralView(hashMapOf())
+                    fabFilter.visible()
                 } else {
                     currentView = CALENDAR_VIEW
                     ivViewFilter.setImageDrawable(
@@ -172,14 +174,18 @@ class FoodSubHistoryActivity :
                             R.drawable.ic_filter
                         )
                     )
+                    binding.tvToolbarTitle.text = "Food Delivery Status"
                     calendarView.showCalendarWithAnimation()
                     ivPrevMonth.visible()
                     ivNextMonth.visible()
                     tvMonth.visible()
                     tvFoodStatusText.visible()
                     rvFoodStatus.remove()
-
+                    fabFilter.remove()
                 }
+            }
+            fabFilter.setOnClickListener {
+                showListBottomSheet(this@FoodSubHistoryActivity, arrayListOf("Pending","Delivered","Cancelled","Failed"), "filter")
             }
         }
     }
@@ -220,8 +226,8 @@ class FoodSubHistoryActivity :
             calendarView.setUseThreeLetterAbbreviation(true)
             calendarView.shouldDrawIndicatorsBelowSelectedDays(true)
             calendarView.shouldScrollMonth(true)
+            tvToolbarTitle.text = "Pending..."
         }
-
     }
 
     private fun initLiveData() {
@@ -495,7 +501,7 @@ class FoodSubHistoryActivity :
             btnGoToBox.remove()
             btnRenewSub.remove()
             FoodStatusAdapter(
-                viewModel.ammaSpecialOrders,
+                viewModel.ammaSpecialOrders.filter { it.status != "success" && it.status != "fail" && it.status != "cancel" },
                 status,
                 null,
                 this@FoodSubHistoryActivity
@@ -741,6 +747,49 @@ class FoodSubHistoryActivity :
                 )
             )
         }
+    }
+
+    fun filterOrders(position: Int) {
+        showProgressDialog(true)
+        viewModel.selectedOrder = null
+        statusAdapter.selectedPosition = null
+        binding.btnRenewSub.remove()
+        binding.btnGoToBox.remove()
+        when(position) {
+            0 -> {
+                statusAdapter.orders = viewModel.ammaSpecialOrders.filter { it.status != "success" && it.status != "fail" && it.status != "cancel" }
+                if (statusAdapter.orders.isNullOrEmpty()) {
+                    showToast(this, "No current pending deliveries")
+                }
+                binding.tvToolbarTitle.text = "Pending..."
+                statusAdapter.notifyDataSetChanged()
+            }
+            1 -> {
+                statusAdapter.orders = viewModel.ammaSpecialOrders.filter { it.status == "success" }
+                if (statusAdapter.orders.isNullOrEmpty()) {
+                    showToast(this, "No successfully delivered orders available")
+                }
+                binding.tvToolbarTitle.text = "Delivered..."
+                statusAdapter.notifyDataSetChanged()
+            }
+            2 -> {
+                statusAdapter.orders = viewModel.ammaSpecialOrders.filter { it.status == "cancel" }
+                if (statusAdapter.orders.isNullOrEmpty()) {
+                    showToast(this, "No cancelled orders available")
+                }
+                binding.tvToolbarTitle.text = "Cancelled..."
+                statusAdapter.notifyDataSetChanged()
+            }
+            else -> {
+                statusAdapter.orders = viewModel.ammaSpecialOrders.filter { it.status == "fail" }
+                if (statusAdapter.orders.isNullOrEmpty()) {
+                    showToast(this, "No failed orders available")
+                }
+                binding.tvToolbarTitle.text = "Failed..."
+                statusAdapter.notifyDataSetChanged()
+            }
+        }
+        hideProgressDialog()
     }
 }
 

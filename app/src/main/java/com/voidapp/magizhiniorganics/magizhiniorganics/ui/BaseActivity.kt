@@ -518,7 +518,10 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     is FoodSubHistoryActivity -> {
                         hideListBottomSheet()
-                        activity.selectedPaymentMode(selectedItem)
+                        when (data) {
+                            "filter" -> activity.filterOrders(position)
+                            else -> activity.selectedPaymentMode(selectedItem)
+                        }
                     }
                     is FoodOrderActivity -> {
                         hideListBottomSheet()

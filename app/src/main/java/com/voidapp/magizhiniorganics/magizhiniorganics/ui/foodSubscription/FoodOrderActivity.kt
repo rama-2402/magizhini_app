@@ -99,8 +99,8 @@ class FoodOrderActivity :
             tvLunch.text = viewModel.ammaSpecials[0].name
             tvLunchWithoutRice.text = viewModel.ammaSpecials[1].name
             tvDinner.text = viewModel.ammaSpecials[2].name
-            tvDD1.text = "${viewModel.ammaSpecials[3].name} - 1"
-            tvDD2.text = "${viewModel.ammaSpecials[3].name} - 2"
+            tvDD1.text = "${viewModel.ammaSpecials[3].name}"
+            tvDD2.text = "${viewModel.ammaSpecials[4].name}"
 
             tvRenewal.isSelected = true
             tvTimeLimit.isSelected = true
@@ -111,7 +111,6 @@ class FoodOrderActivity :
             tvDD2.isSelected = true
 
             getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
-
         }
     }
 
@@ -395,7 +394,7 @@ class FoodOrderActivity :
                 previewImage(viewModel.ammaSpecials[3].thumbnailUrl, ivDD1Menu)
             }
             ivDD2Menu.setOnClickListener {
-                previewImage(viewModel.ammaSpecials[3].thumbnailUrl, ivDD2Menu)
+                previewImage(viewModel.ammaSpecials[4].thumbnailUrl, ivDD2Menu)
             }
 //            spFoodOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 //                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -569,7 +568,10 @@ class FoodOrderActivity :
                 )
                 tvLunchCount.text.toString() == "0" &&
                 tvLunchWORiceCount.text.toString() == "0" &&
-                tvDinnerCount.text.toString() == "0" -> {
+                tvDinnerCount.text.toString() == "0" &&
+                tvDD1Count.text.toString() == "0" &&
+                tvDD2Count.text.toString() == "0" ->
+            {
                     showErrorSnackBar("Please pick the number of Order from Order Options", true)
                     return
                 }
@@ -856,7 +858,7 @@ class FoodOrderActivity :
                 (binding.tvLunchWORiceCount.text.toString().toInt() * viewModel.ammaSpecials[1].price) +
                 (binding.tvDinnerCount.text.toString().toInt() * viewModel.ammaSpecials[2].price) +
                 (binding.tvDD1Count.text.toString().toInt() * viewModel.ammaSpecials[3].price) +
-                (binding.tvDD2Count.text.toString().toInt() * viewModel.ammaSpecials[3].price) +
+                (binding.tvDD2Count.text.toString().toInt() * viewModel.ammaSpecials[4].price) +
         (binding.tvPlateCount.text.toString().toInt() * 9)
 
         totalPrice *= viewModel.selectedEventDates.size
