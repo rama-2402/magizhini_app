@@ -9,8 +9,10 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.FoodSubscriptionUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.PushNotificationUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.*
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.NetworkResult
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.callbacks.UIEvent
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.text.SimpleDateFormat
 
 
@@ -46,14 +49,14 @@ class FoodSubscriptionViewModel(
     var nonDeliveryDatesString: MutableList<String> = mutableListOf()
     val selectedEventDates: MutableList<Long> = mutableListOf()
     var currentSubOption: String = "single"
+    var deliveryCharge: Double = 0.0
 
     //    var currentCountOption: Int = 0
 //    var currentServingOption: Int = 0
     var totalPrice: Double = 0.0
-//    var lunchPrice: Double = 0.0
-//    var dinnerPrice: Double = 0.0
-//    var lunchWoRicePrice: Double = 0.0
-//    var selectedPlan: String = ""
+
+    var couponPrice: Double? = null
+    var currentCoupon: CouponEntity? = null
 
     //the outer hashmap holds the data as key and the orderids as values
     //the inner hashmap has orderid as key and the status as value
@@ -100,7 +103,8 @@ class FoodSubscriptionViewModel(
 
     //order activity
     fun getProfile() = viewModelScope.launch(Dispatchers.IO) {
-        dbRepository.getProfileData()?.let { profile ->
+        try {
+         dbRepository.getProfileData()?.let { profile ->
             withContext(Dispatchers.Main) {
                 userProfile = profile
                 _uiUpdate.value = UiUpdate.PopulateUserProfile(profile)
@@ -108,7 +112,12 @@ class FoodSubscriptionViewModel(
         } ?: withContext(Dispatchers.Main) {
             _uiUpdate.value = UiUpdate.PopulateUserProfile(null)
         }
-    }
+        } catch (e: Exception) {
+             withContext(Dispatchers.Main) {
+            _uiUpdate.value = UiUpdate.PopulateUserProfile(null)
+             }
+        }
+   }
 
     fun placeOrderOnlinePayment(orderDetailsMap: HashMap<String, Any>) = viewModelScope.launch {
         val deliveryDatesString = mutableListOf<String>()
@@ -122,7 +131,7 @@ class FoodSubscriptionViewModel(
                 orderDate = TimeUtil().getCurrentDate(),
                 startDate = orderDetailsMap["start"].toString().toLong(),
                 endDate = orderDetailsMap["end"].toString().toLong(),
-                price = totalPrice,
+                price = totalPrice + deliveryCharge,
 //                plan = selectedPlan,
                 userName = orderDetailsMap["name"].toString(),
                 addressOne = orderDetailsMap["one"].toString(),
@@ -212,7 +221,7 @@ class FoodSubscriptionViewModel(
                 orderDate = TimeUtil().getCurrentDate(),
                 startDate = orderDetailsMap["start"].toString().toLong(),
                 endDate = orderDetailsMap["end"].toString().toLong(),
-                price = totalPrice,
+                price = totalPrice + deliveryCharge,
 //                plan = selectedPlan,
                 userName = orderDetailsMap["name"].toString(),
                 addressOne = orderDetailsMap["one"].toString(),
@@ -358,7 +367,7 @@ class FoodSubscriptionViewModel(
                 orderDate = TimeUtil().getCurrentDate(),
                 startDate = orderDetailsMap["start"].toString().toLong(),
                 endDate = orderDetailsMap["end"].toString().toLong(),
-                price = totalPrice,
+                price = totalPrice + deliveryCharge,
 //                plan = selectedPlan,
                 userName = orderDetailsMap["name"].toString(),
                 addressOne = orderDetailsMap["one"].toString(),
@@ -583,6 +592,65 @@ class FoodSubscriptionViewModel(
         }
     }
 
+    //Coupons
+    fun verifyCoupon(couponCode: String, totalPrice: Double) =
+        viewModelScope.launch(Dispatchers.IO) {
+            if (couponCode == "") {
+                return@launch
+            } else {
+                val code: CouponEntity? = currentCoupon?.let {
+                    it
+                } ?: dbRepository.getCouponByCode(couponCode)
+                code?.let { coupon ->
+                    if (!coupon.categories.contains(Constants.AMMASPECIAL)) {
+                        withContext(Dispatchers.Main) {
+                            _uiEvent.value =
+                                UIEvent.Toast("Coupon Applies only for product purchases")
+                        }
+                        return@launch
+                    }
+                    if (totalPrice >= coupon.purchaseLimit) {
+                        if (couponPrice == null) {
+                            withContext(Dispatchers.Main) {
+                                currentCoupon = coupon
+                                couponPrice = couponDiscount(coupon, totalPrice)
+                                _uiUpdate.value = UiUpdate.CouponApplied(
+                                    "Coupon Applied Successfully!"
+                                )
+                            }
+                        }
+//                        withContext(Dispatchers.Main) {
+//                        }
+//                    couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            _uiEvent.value =
+                                UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
+                            _uiUpdate.value = UiUpdate.CouponApplied("")
+                        }
+                        return@launch
+                    }
+                } ?: withContext(Dispatchers.Main) {
+                    _uiEvent.value = UIEvent.Toast("Coupon Code does not exist.")
+                    _uiUpdate.value = UiUpdate.CouponApplied("")
+                }
+            }
+        }
+
+    fun couponDiscount(coupon: CouponEntity, cartPrice: Double): Double {
+        var discountPrice: Double = when (coupon.type) {
+            "percent" -> (cartPrice * coupon.amount / 100)
+            "rupees" -> coupon.amount.toDouble()
+            else -> 0.0
+        }
+
+        if (discountPrice > coupon.maxDiscount) {
+            discountPrice = coupon.maxDiscount.toDouble()
+        }
+
+        return discountPrice
+    }
+
     fun getNonDeliveryDays() = viewModelScope.launch {
         nonDeliveryDatesLong?.let {
             _uiUpdate.value = UiUpdate.PopulateNonDeliveryDates(it)
@@ -598,6 +666,25 @@ class FoodSubscriptionViewModel(
                 })
                 _uiUpdate.value = UiUpdate.PopulateNonDeliveryDates(nonDeliveryDatesLong)
             }
+        }
+    }
+
+    suspend fun getDeliveryCharge(code: String): Double = withContext(Dispatchers.IO) {
+    return@withContext try {
+                dbRepository.getDeliveryCharge(code)?.let { pinCodes ->
+                    if (pinCodes.isEmpty()) {
+                        //                        deliveryAvailability(null)
+                        30.0
+                    } else {
+                        //                        deliveryAvailability(pinCodes[0])
+                        pinCodes[0].deliveryCharge.toDouble()
+                    }
+                } ?: let {
+                    //                    deliveryAvailability(null)
+                    30.0
+                }
+        } catch (E: IOException) {
+            30.0
         }
     }
 
@@ -625,6 +712,9 @@ class FoodSubscriptionViewModel(
         data class CancelOrderStatus(val status: Boolean, val message: String) : UiUpdate()
         data class CancelSubscription(val status: Boolean, val message: String) : UiUpdate()
         data class RenewSubscription(val status: Boolean, val message: String) : UiUpdate()
+
+        //coupon
+        data class CouponApplied(val message: String) : UiUpdate()
 
         //food delivery
         data class UpdateFoodDeliveryStatus(

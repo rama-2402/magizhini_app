@@ -72,6 +72,8 @@ class DatabaseRepository(
 
     fun getAllProductCategories() = db.getUserProfileDao().getAllProductCategories()
 
+    fun getAllCategoriesStatic() = db.getUserProfileDao().getAllCategoriesStatic()
+
     fun getAllCoupons() = db.getUserProfileDao().getAllCoupons()
 
     fun getAllBanners() = db.getUserProfileDao().getAllBanners()

@@ -293,7 +293,8 @@ open class ShoppingMainAdapter(
             "Gram" -> " g"
             "Liter" -> " l"
             "Unit" -> " Unit"
-            else -> " ml"
+            "Milliliter" -> " ml"
+            else -> " st Qlty"
         }
     }
 

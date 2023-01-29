@@ -147,13 +147,13 @@ class FoodSubHistoryActivity :
                     )
                 }
             }
-            btnRenewSub.setOnClickListener {
-                showExitSheet(
-                    this@FoodSubHistoryActivity,
-                    "You are about to renew your Monthly Subscription for Magizhini's Amma Samayal Authentic Home-made Food plan. \n \nClick PROCEED to renew your subscription for the next month",
-                    "renew"
-                )
-            }
+//            btnRenewSub.setOnClickListener {
+//                showExitSheet(
+//                    this@FoodSubHistoryActivity,
+//                    "You are about to renew your Monthly Subscription for Magizhini's Amma Samayal Authentic Home-made Food plan. \n \nClick PROCEED to renew your subscription for the next month",
+//                    "renew"
+//                )
+//            }
             ivViewFilter.setOnClickListener {
                 if (currentView == CALENDAR_VIEW) {
                     currentView = FULL_VIEW
@@ -250,22 +250,22 @@ class FoodSubHistoryActivity :
         viewModel.uiUpdate.observe(this) { event ->
             when (event) {
                 is FoodSubscriptionViewModel.UiUpdate.PopulateAmmaSpecials -> {
-                    viewModel.selectedOrder?.let {
-                        calculateRenewMonthDays(it.endDate).let { days ->
-                            CustomAlertDialog(
-                                this,
-                                "Monthly Subscription Renewal",
-                                "Your Subscription for Amma Samayal Authentic Home-made Food ends on ${
-                                    TimeUtil().getCustomDate(
-                                        dateLong = it.endDate
-                                    )
-                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: ${it.price} to renew your subscription for the next month. For further queries please contact customer support.",
-                                "RENEW SUBSCRIPTION",
-                                "food",
-                                this
-                            ).show()
-                        }
-                    }
+//                    viewModel.selectedOrder?.let {
+//                        calculateRenewMonthDays(it.endDate).let { days ->
+//                            CustomAlertDialog(
+//                                this,
+//                                "Monthly Subscription Renewal",
+//                                "Your Subscription for Amma Samayal Authentic Home-made Food ends on ${
+//                                    TimeUtil().getCustomDate(
+//                                        dateLong = it.endDate
+//                                    )
+//                                }. Please renew your subscription to continue your daily delivery for the next month. \n \nYou are required to pay Rs: ${it.price} to renew your subscription for the next month. For further queries please contact customer support.",
+//                                "RENEW SUBSCRIPTION",
+//                                "food",
+//                                this
+//                            ).show()
+//                        }
+//                    }
                 }
                 is FoodSubscriptionViewModel.UiUpdate.UpdateFoodDeliveryStatus -> {
                     hideProgressDialog()
@@ -629,23 +629,24 @@ class FoodSubHistoryActivity :
             viewModel.selectedOrder = order
             statusAdapter.selectedPosition = position
             statusAdapter.notifyDataSetChanged()
-            binding.apply {
-                btnGoToBox.visible()
-                if (
-                    System.currentTimeMillis() > TimeUtil().getCustomDateFromDifference(
-                        order.endDate,
-                        -7
-                    ) &&
-                    order.orderType == "month"
-                ) {
-                    btnRenewSub.visible()
-                    btnGoToBox.text = "CANCEL \nSUBSCRIPTION"
-                    btnRenewSub.text = "RENEW \nSUBSCRIPTION"
-                } else {
-                    btnRenewSub.remove()
-                    btnGoToBox.text = "CANCEL SUBSCRIPTION"
-                }
-            }
+//            binding.apply {
+//                btnGoToBox.visible()
+//                if (
+//                    System.currentTimeMillis() > TimeUtil().getCustomDateFromDifference(
+//                        order.endDate,
+//                        -7
+//                    ) &&
+//                    order.orderType == "month"
+//                ) {
+//                    btnRenewSub.visible()
+//                    btnGoToBox.text = "CANCEL \nSUBSCRIPTION"
+//                    btnRenewSub.text = "RENEW \nSUBSCRIPTION"
+//                } else {
+                    binding.btnRenewSub.remove()
+                    binding.btnGoToBox.visible()
+                    binding.btnGoToBox.text = "CANCEL SUBSCRIPTION"
+//                }
+//            }
         }
     }
 

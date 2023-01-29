@@ -110,7 +110,7 @@ class SplashActivity : BaseActivity(), KodeinAware {
             }
         }
         binding.tvStatus.visible()
-   }
+    }
 
     private fun backgroundCheck(
         isNewDay: String,
@@ -137,13 +137,19 @@ class SplashActivity : BaseActivity(), KodeinAware {
             WorkManager.getInstance(this).enqueue(updateDeliveryWorkRequest)
             lifecycleScope.launch {
                 when {
-                    abs(month - TimeUtil().getMonthNumber()) == 1 -> {
-                        val cleanDatabaseWorkRequest: WorkRequest =
-                            OneTimeWorkRequestBuilder<CleanDatabaseService>().build()
 
-                        WorkManager.getInstance(this@SplashActivity)
-                            .enqueue(cleanDatabaseWorkRequest)
-                        updateDatabaseWorkRequest(false, isNewDay, navigation)
+                    abs(month - TimeUtil().getMonthNumber()) == 1 -> {
+                        showToast(
+                            this@SplashActivity,
+                            "Updating the product catalog. Please Wait..."
+                        )
+//                        val cleanDatabaseWorkRequest: WorkRequest =
+//                            OneTimeWorkRequestBuilder<CleanDatabaseService>().build()
+//
+//                        WorkManager.getInstance(this@SplashActivity)
+//                            .enqueue(cleanDatabaseWorkRequest)
+//                        updateDatabaseWorkRequest(false, isNewDay, navigation)
+                        updateDatabaseWorkRequest(true, isNewDay, navigation)
                     }
                     abs(month - TimeUtil().getMonthNumber()) > 1 -> {
                         showToast(
@@ -172,8 +178,8 @@ class SplashActivity : BaseActivity(), KodeinAware {
                 startWork("", navigation)
             }
         } else {
-            startWork("", navigation)
-//            navigateToHomeScreen(false, navigation)
+//            startWork("", navigation)
+            navigateToHomeScreen(false, navigation)
         }
     }
 
@@ -181,35 +187,42 @@ class SplashActivity : BaseActivity(), KodeinAware {
         val userID = SharedPref(this).getData(USER_ID, STRING, "").toString()
 
         if (userID != "" && userID != "null") {
-         val workRequest: WorkRequest =
-            if (wipe == "wipe") {
-                 OneTimeWorkRequestBuilder<UpdateDataService>()
-                    .setInputData(
-                        workDataOf(
-                            "wipe" to wipe,
-                            "id" to userID
+            val workRequest: WorkRequest =
+                if (wipe == "wipe") {
+                    OneTimeWorkRequestBuilder<UpdateDataService>()
+                        .setInputData(
+                            workDataOf(
+                                "wipe" to wipe,
+                                "id" to userID
+                            )
                         )
-                    )
-                    .build()
-            } else {
-                PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
-                    .setInputData(
-                        workDataOf(
-                            "id" to userID
+                        .build()
+                } else {
+                    OneTimeWorkRequestBuilder<UpdateDataService>()
+                        .setInputData(
+                            workDataOf(
+                                "id" to userID
+                            )
                         )
-                    )
-                    .build()
-            }
-        WorkManager.getInstance(this).enqueue(workRequest)
-        navigateToHomeScreen(true, navigation)
+                        .build()
+//                    PeriodicWorkRequestBuilder<UpdateDataService>(12, TimeUnit.HOURS)
+//                        .setInputData(
+//                            workDataOf(
+//                                "id" to userID
+//                            )
+//                        )
+//                        .build()
+                }
+            WorkManager.getInstance(this).enqueue(workRequest)
+            navigateToHomeScreen(true, navigation)
         } else {
             val request = OneTimeWorkRequestBuilder<UpdateDataService>()
-                    .setInputData(
-                        workDataOf(
-                            "id" to ""
-                        )
+                .setInputData(
+                    workDataOf(
+                        "id" to ""
                     )
-                    .build()
+                )
+                .build()
 
             WorkManager.getInstance(this).enqueue(request)
 

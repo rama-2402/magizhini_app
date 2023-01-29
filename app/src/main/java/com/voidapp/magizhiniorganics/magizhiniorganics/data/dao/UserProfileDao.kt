@@ -109,11 +109,14 @@ interface UserProfileDao {
     @Query("SELECT * FROM ProductCategoryEntity WHERE activated AND status = :status")
     fun getAllProductCategories(status: String = "Available"): LiveData<List<ProductCategoryEntity>>
 
+    @Query("SELECT * FROM ProductCategoryEntity WHERE activated AND status = :status")
+    fun getAllCategoriesStatic(status: String = "Available"): List<ProductCategoryEntity>
+
     @Query("SELECT * FROM CouponEntity")
     fun getAllCoupons(): LiveData<List<CouponEntity>>
 
     @Query("SELECT * FROM BannerEntity")
-    fun getAllBanners(): LiveData<List<BannerEntity>>
+    fun getAllBanners(): List<BannerEntity>
 
     @Query("SELECT * FROM ProductEntity WHERE category = :category AND activated AND status = :status")
     fun getAllProductsInCategory(category: String, status: String = "Available"): LiveData<List<ProductEntity>>

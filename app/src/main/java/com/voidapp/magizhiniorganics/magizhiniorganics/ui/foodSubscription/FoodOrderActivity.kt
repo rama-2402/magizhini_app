@@ -1,6 +1,7 @@
 package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Rect
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.net.Uri
@@ -8,11 +9,13 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -65,6 +68,7 @@ class FoodOrderActivity :
     var loop = true
     var isLunchTimeEnd: Boolean = false
     var isDinnerTimeEnd: Boolean = false
+    var deliveryMealNumber: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -204,11 +208,11 @@ class FoodOrderActivity :
                     }
 
                     when (viewModel.currentSubOption) {
-                        "month" -> {
-                            viewModel.selectedEventDates.clear()
-                            calendarView.removeAllEvents()
-                            populateMonthEvents(instanceToGetLongDate.timeInMillis)
-                        }
+//                        "month" -> {
+//                            viewModel.selectedEventDates.clear()
+//                            calendarView.removeAllEvents()
+//                            populateMonthEvents(instanceToGetLongDate.timeInMillis)
+//                        }
                         "custom" -> {
                             if (viewModel.selectedEventDates.contains(instanceToGetLongDate.timeInMillis)) {
                                 removeEvent(instanceToGetLongDate.timeInMillis)
@@ -245,10 +249,10 @@ class FoodOrderActivity :
                     viewModel.selectedEventDates.clear()
                     viewModel.currentSubOption = when (position) {
                         0 -> "single"
-                        1 -> {
-                            populateMonthEvents(System.currentTimeMillis() + SINGLE_DAY_LONG)
-                            "month"
-                        }
+//                        1 -> {
+//                            populateMonthEvents(System.currentTimeMillis() + SINGLE_DAY_LONG)
+//                            "month"
+//                        }
                         else -> "custom"
                     }
                     setPrice()
@@ -396,89 +400,39 @@ class FoodOrderActivity :
             ivDD2Menu.setOnClickListener {
                 previewImage(viewModel.ammaSpecials[4].thumbnailUrl, ivDD2Menu)
             }
-//            spFoodOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-//                    viewModel.currentServingOption = position
-//                    setPrice()
-//                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
+            btnApplyCoupon.setOnClickListener {
+                if (btnApplyCoupon.text.toString() == "Apply") {
+                    val couponCode: String = binding.etCoupon.text.toString().trim()
+                    if (couponCode.isNullOrEmpty()) {
+                        showToast(this@FoodOrderActivity, "Enter a coupon code")
+                        return@setOnClickListener
+                    }
+                    viewModel.currentCoupon?.let {
+                        applyUiChangesWithCoupon(true)
+                    } ?: viewModel.verifyCoupon(
+                        etCoupon.text.toString().trim(),
+                        viewModel.totalPrice
+                    )
+                } else {
+                    applyUiChangesWithCoupon(false)
+                }
+            }
+            ivCouponInfo.setOnClickListener {
+                ivCouponInfo.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        ivCouponInfo.context,
+                        R.anim.bounce
+                    )
+                )
+                applyUiChangesWithCoupon(false)
+//                viewModel.currentCoupon?.let { coupon ->
+//                    val content =
+//                        "This Coupon can be used only for the following criteria: \n \n Minimum Purchase Amount: ${coupon.purchaseLimit} \n " +
+//                                "Maximum Discount Amount: ${coupon.maxDiscount}\n" +
+//                                "\n \n \n ${coupon.description}"
+//                    showDescriptionBs(content)
 //                }
-//
-//                override fun onNothingSelected(p0: AdapterView<*>?) {
-//                }
-//            }
-//            spCountOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-//                override fun onItemSelected(
-//                    parent: AdapterView<*>?,
-//                    view: View?,
-//                    position: Int,
-//                    id: Long
-//                ) {
-//                    viewModel.currentCountOption = when (position) {
-//                        0 -> {
-//                            tvPersonCount.setTextAnimation("Food For 1 Person")
-//                            ivMinusOnePerson.setColor(R.color.green_light)
-//                            1
-//                        }
-//                        1 -> {
-//                            tvPersonCount.setTextAnimation("Food For 2 Persons")
-//                            ivMinusOnePerson.setColor(R.color.green_base)
-//                            2
-//                        }
-//                        else -> {
-//                            tvPersonCount.setTextAnimation("Food For 3 Persons")
-//                            ivMinusOnePerson.setColor(R.color.green_base)
-//                            3
-//                        }
-//                    }
-//                    setPrice()
-//                    getListOfSundays(calendarView.firstDayOfCurrentMonth.time)
-//                }
-//
-//                override fun onNothingSelected(p0: AdapterView<*>?) {
-//                }
-//            }
-//            ivAddOnePerson.setOnClickListener {
-//                if (viewModel.currentCountOption == 10) {
-//                    return@setOnClickListener
-//                }
-//                viewModel.currentCountOption += 1
-//                ivMinusOnePerson.setColor(R.color.green_base)
-//                when (viewModel.currentCountOption) {
-//                    1 -> spCountOptions.setSelection(0)
-//                    2 -> spCountOptions.setSelection(1)
-//                    3 -> {
-//                        viewModel.currentCountOption -= 1
-//                        spCountOptions.setSelection(2)
-//                    }
-//                    10 -> {
-//                        ivAddOnePerson.setColor(R.color.green_light)
-//                        tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
-//                    }
-//                    else -> {
-//                        tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
-//                    }
-//                }
-//                setPrice()
-//            }
-//            ivMinusOnePerson.setOnClickListener {
-//                ivAddOnePerson.setColor(R.color.green_base)
-//                if (viewModel.currentCountOption == 1) {
-//                    return@setOnClickListener
-//                }
-//                viewModel.currentCountOption -= 1
-//                tvPersonCount.setTextAnimation("Food For ${viewModel.currentCountOption} Persons")
-//                when (viewModel.currentCountOption) {
-//                    1 -> {
-//                        spCountOptions.setSelection(0)
-//                        ivMinusOnePerson.setColor(R.color.green_light)
-//                    }
-//                    2 -> spCountOptions.setSelection(1)
-//                    3 -> spCountOptions.setSelection(2)
-//                    else -> setPrice()
-//                }
-//                setPrice()
-//            }
-
+            }
             tvPlaceOrder.setOnClickListener {
                 validateEntries()
             }
@@ -486,7 +440,38 @@ class FoodOrderActivity :
 
     }
 
+    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
+        binding.apply {
+            if (isCouponApplied) {
+                etCoupon.disable()
+                ivCouponInfo.fadInAnimation()
+                btnApplyCoupon.remove()
+                ivCouponInfo.visible()
+            } else {
+                viewModel.couponPrice = null
+                viewModel.currentCoupon = null
+                etCoupon.setText("")
+                etCoupon.enable()
+                btnApplyCoupon.visible()
+                ivCouponInfo.fadOutAnimation()
+                ivCouponInfo.remove()
+                btnApplyCoupon.text = "Apply"
+                btnApplyCoupon.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(btnApplyCoupon.context, R.color.matteRed)
+                )
+//                btnApplyCoupon.setBackgroundColor(
+//                    ContextCompat.getColor(
+//                        baseContext,
+//                        R.color.green_base
+//                    )
+//                )
+            }
+        }
+        setPrice()
+    }
+
     private fun validateEntries() {
+        viewModel.deliveryCharge = 0.0
         binding.apply {
             if (viewModel.currentSubOption == "single" || viewModel.currentSubOption == "custom") {
                 if (viewModel.selectedEventDates.isEmpty()) {
@@ -575,7 +560,45 @@ class FoodOrderActivity :
                     showErrorSnackBar("Please pick the number of Order from Order Options", true)
                     return
                 }
-                viewModel.userID == null || viewModel.userID == "" -> {
+
+                else -> {
+                    if (!NetworkHelper.isOnline(this@FoodOrderActivity)) {
+                        showErrorSnackBar("Please check your Internet Connection", true)
+                        return
+                    }
+                    lifecycleScope.launch {
+                        deliveryMealNumber = 0
+                        val deliveryCharge = viewModel.getDeliveryCharge(etArea.text.toString())
+                        if (
+                            tvLunchCount.text.toString() != "0" ||
+                            tvLunchWORiceCount.text.toString() != "0"
+                        ) {
+                            viewModel.deliveryCharge = viewModel.deliveryCharge + (deliveryCharge * viewModel.selectedEventDates.size)
+                            deliveryMealNumber += 1
+                        }
+                        if (
+                            tvDinnerCount.text.toString() != "0" ||
+                            tvDD1Count.text.toString() != "0" ||
+                            tvDD2Count.text.toString() != "0"
+                        ) {
+                            viewModel.deliveryCharge = viewModel.deliveryCharge + (deliveryCharge * viewModel.selectedEventDates.size)
+                            deliveryMealNumber += 1
+                        }
+                        if (viewModel.deliveryCharge != 0.0) {
+                             showExitSheet(
+                                this@FoodOrderActivity,
+                                "Total Delivery charge (Rs: ${(viewModel.deliveryCharge / deliveryMealNumber) / viewModel.selectedEventDates.size}) for ${viewModel.selectedEventDates.size} days is Rs:${viewModel.deliveryCharge} \n Separate delivery charge for Lunch and Dinner",
+                                "order"
+                            )
+                        }
+                   }
+               }
+            }
+        }
+    }
+
+    fun placeOrder() {
+        if (viewModel.userID == null || viewModel.userID == "") {
                     CustomAlertDialog(
                         this@FoodOrderActivity,
                         "User not Signed In",
@@ -584,20 +607,13 @@ class FoodOrderActivity :
                         "food",
                         this@FoodOrderActivity
                     ).show()
-                }
-                else -> {
-                    if (!NetworkHelper.isOnline(this@FoodOrderActivity)) {
-                        showErrorSnackBar("Please check your Internet Connection", true)
-                        return
-                    }
-                    showListBottomSheet(
-                        this@FoodOrderActivity,
-                        arrayListOf("Pay on Delivery", "Online", "Magizhini Wallet")
-                    )
-                }
-            }
+                } else {
+         showListBottomSheet(
+            this@FoodOrderActivity,
+            arrayListOf("Pay on Delivery", "Online", "Magizhini Wallet")
+        )
         }
-    }
+   }
 
     fun selectedPaymentMode(paymentMode: String) = lifecycleScope.launch {
         if (!NetworkHelper.isOnline(this@FoodOrderActivity)) {
@@ -610,7 +626,7 @@ class FoodOrderActivity :
                 startPayment(
                     this@FoodOrderActivity,
                     it.mailId,
-                    (viewModel.totalPrice * 100).toFloat(),
+                    ((viewModel.totalPrice + viewModel.deliveryCharge) * 100).toFloat(),
                     it.name,
                     it.id,
                     it.phNumber
@@ -635,7 +651,7 @@ class FoodOrderActivity :
             showProgressDialog(true)
             viewModel.fetchWallet()?.let {
                 hideProgressDialog()
-                if (it.amount < viewModel.totalPrice) {
+                if (it.amount < (viewModel.totalPrice + viewModel.deliveryCharge)) {
                     showErrorSnackBar("Insufficient Balance in Wallet.", true)
                     return@launch
                 }
@@ -746,6 +762,15 @@ class FoodOrderActivity :
                             "Server Error! Something went wrong while creating your subscription. \n \n If Money is already debited, Please contact customer support and the transaction will be reverted in 24 Hours",
                             "cs"
                         )
+                    }
+                }
+                 is FoodSubscriptionViewModel.UiUpdate.CouponApplied -> {
+                    this.hideKeyboard()
+                    if (event.message == "") {
+                        applyUiChangesWithCoupon(false)
+                    } else {
+                        showErrorSnackBar(event.message, false)
+                        applyUiChangesWithCoupon(true)
                     }
                 }
                 is FoodSubscriptionViewModel.UiUpdate.Empty -> return@observe
@@ -863,42 +888,50 @@ class FoodOrderActivity :
 
         totalPrice *= viewModel.selectedEventDates.size
 
+        viewModel.currentCoupon?.let {
+            viewModel.couponPrice = viewModel.couponDiscount(it, totalPrice)
+            if (totalPrice < it.purchaseLimit) {
+                showToast(this, "Coupon removed. Purchase value is less that minimum requirements.")
+                applyUiChangesWithCoupon(false)
+                return
+            }
+        }
 //        totalPrice = (totalPrice * 118)/100  //GST calculation
 
-        viewModel.totalPrice = totalPrice
-        binding.tvPlaceOrder.setTextAnimation("Place Order - Rs: $totalPrice")
+        viewModel.totalPrice = viewModel.couponPrice?.let { totalPrice - it } ?: totalPrice
+        binding.tvPlaceOrder.setTextAnimation("Place Order - Rs: ${viewModel.totalPrice}")
     }
 
     private fun populateProfileData(userProfile: UserProfileEntity) {
         viewModel.userID = userProfile.id
         binding.apply {
-            etName.setText(userProfile.name)
-            etAlternateNumber.setText(userProfile.phNumber)
-            etEmailId.setText(userProfile.mailId)
-            etAddressOne.setText(userProfile.address[0].addressLineOne)
-            etAddressTwo.setText(userProfile.address[0].addressLineTwo)
-            etCity.setText(userProfile.address[0].city)
-            etArea.setText(userProfile.address[0].LocationCode)
+            etName.setText(if (userProfile.name.isNullOrEmpty()) "" else userProfile.name)
+            etAlternateNumber.setText(if (userProfile.phNumber.isNullOrEmpty()) "" else userProfile.phNumber)
+            etEmailId.setText(if (userProfile.mailId.isNullOrEmpty()) "" else userProfile.mailId)
+            etAddressOne.setText(if (userProfile.address[0].addressLineOne.isNullOrEmpty()) "" else userProfile.address[0].addressLineOne)
+            etAddressTwo.setText(if (userProfile.address[0].addressLineTwo.isNullOrEmpty()) "" else userProfile.address[0].addressLineTwo)
+            etCity.setText(if (userProfile.address[0].city.isNullOrEmpty()) "" else userProfile.address[0].city)
+            etArea.setText(if (userProfile.address[0].LocationCode.isNullOrEmpty()) "" else userProfile.address[0].LocationCode)
         }
     }
 
-    private fun populateMonthEvents(startDate: Long) {
-        var dayCount = 1
-        var currentDate: Long = startDate
-
-        while (dayCount <= 30) {
-            if (
-                TimeUtil().getDayName(currentDate) != "Saturday" &&
-                TimeUtil().getDayName(currentDate) != "Sunday" &&
-                !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
-            ) {
-                addEvent(currentDate)
-            }
-
-            currentDate += SINGLE_DAY_LONG
-            dayCount += 1
-        }
-    }
+//    private fun populateMonthEvents(startDate: Long) {
+//        var dayCount = 1
+//        var currentDate: Long = startDate
+//
+//        while (dayCount <= 30) {
+//            if (
+//                TimeUtil().getDayName(currentDate) != "Saturday" &&
+//                TimeUtil().getDayName(currentDate) != "Sunday" &&
+//                !viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = currentDate))
+//            ) {
+//                addEvent(currentDate)
+//            }
+//
+//            currentDate += SINGLE_DAY_LONG
+//            dayCount += 1
+//        }
+//    }
 
     private fun checkTimeLimit() = lifecycleScope.launch(Dispatchers.IO) {
         while (loop) {
@@ -1037,7 +1070,8 @@ class FoodOrderActivity :
             "Food Type: $foodType \n" +
 //            "No of Serving: ${viewModel.currentCountOption} \n" +
             "Paaku Mattai Plate Leaf: ${tvPlateCount.text} \n" +
-                    "Total Price: ${viewModel.totalPrice} \n" +
+                    "Delivery Charge: ${viewModel.deliveryCharge} \n" +
+            "Total Price (incl delivery): ${viewModel.totalPrice + viewModel.deliveryCharge} \n" +
             "Start Date: ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.min())} \n" +
             "End Date: ${TimeUtil().getCustomDate(dateLong = viewModel.selectedEventDates.max())} \n" +
             "Delivery Dates: $deliveryDates"
@@ -1072,4 +1106,5 @@ class FoodOrderActivity :
         }
         return super.dispatchTouchEvent(event)
     }
+
 }

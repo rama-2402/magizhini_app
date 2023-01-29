@@ -71,6 +71,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HIS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ORDER_HISTORY_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PHONE_NUMBER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PRODUCTS
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUARTER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.QUICK_ORDER_PAGE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.REFERRAL
@@ -101,8 +102,7 @@ class HomeActivity :
     BestSellersAdapter.BestSellerItemClickListener,
     CategoryHomeAdapter.CategoryItemClickListener,
     HomeSpecialsAdapter.HomeSpecialsItemClickListener,
-        CustomAlertClickListener
-{
+    CustomAlertClickListener {
     override val kodein by kodein()
     private val factory: HomeViewModelFactory by instance()
 
@@ -168,11 +168,13 @@ class HomeActivity :
                 STRING,
                 TimeUtil().getCurrentDate()
             )
+            SharedPref(this).putData(QUARTER, STRING, TimeUtil().getQuarterOfTheDay().toString())
         }
     }
 
     private fun initData() {
-        viewModel.getDataToPopulate()
+//        viewModel.getDataToPopulate()
+        viewModel.getBannersAndCategories()
     }
 
     private fun navigateToPageFromNotification(filter: String) {
@@ -335,6 +337,22 @@ class HomeActivity :
     private fun observers() {
         viewModel.uiUpdate.observe(this) { event ->
             when (event) {
+                is HomeViewModel.UiUpdate.PopulateInit -> {
+                    val bannersCarousel: MutableList<CarouselItem> = mutableListOf()
+                    for (banner in event.banners) {
+                        //creating a mutable list banner carousel item
+                        bannersCarousel.add(
+                            CarouselItem(
+                                imageUrl = banner.url
+                            )
+                        )
+                    }
+                    generateBanners(bannersCarousel, event.banners)
+
+                    adapter.setCategoriesData(event.categories.sortedBy { it.name })
+
+                    viewModel.getDataToPopulate()
+                }
                 is HomeViewModel.UiUpdate.PopulateData -> {
 //                    binding.flShimmerPlaceholder.remove()
                     homeSpecialsAdapter.setBestSellerData(
@@ -384,21 +402,21 @@ class HomeActivity :
             }
         }
         //observing the banners data and setting the banners
-        viewModel.getAllBanners().observe(this, Observer {
-            val bannersCarousel: MutableList<CarouselItem> = mutableListOf()
-            for (banner in it) {
-                //creating a mutable list banner carousel item
-                bannersCarousel.add(
-                    CarouselItem(
-                        imageUrl = banner.url
-                    )
-                )
-            }
-            generateBanners(bannersCarousel, it)
-        })
-        viewModel.getALlCategories().observe(this, Observer {
-            adapter.setCategoriesData(it)
-        })
+//        viewModel.getAllBanners().observe(this, Observer {
+//            val bannersCarousel: MutableList<CarouselItem> = mutableListOf()
+//            for (banner in it) {
+//                //creating a mutable list banner carousel item
+//                bannersCarousel.add(
+//                    CarouselItem(
+//                        imageUrl = banner.url
+//                    )
+//                )
+//            }
+//            generateBanners(bannersCarousel, it)
+//        })
+//        viewModel.getALlCategories().observe(this, Observer {
+//            adapter.setCategoriesData(it)
+//        })
     }
 
     private fun showBirthDayCard(card: BirthdayCard?) {
@@ -588,8 +606,8 @@ class HomeActivity :
 
     private fun navigateToAmmaSpecial() {
         Intent(this@HomeActivity, FoodSubHistoryActivity::class.java).also {
-                    startActivity(it)
-                }
+            startActivity(it)
+        }
     }
 
     private fun navigateToProductDetails(

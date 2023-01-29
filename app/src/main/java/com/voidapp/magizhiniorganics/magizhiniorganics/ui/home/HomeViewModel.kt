@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.BannerEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductCategoryEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.ProductEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.BirthdayCard
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Partners
@@ -19,10 +20,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class HomeViewModel (
+class HomeViewModel(
     private val fbRepository: FirestoreRepository,
     private val dbRepository: DatabaseRepository
-): ViewModel() {
+) : ViewModel() {
 
     val specialsTitles: MutableList<String> = mutableListOf()
     val bestSellersList: MutableList<List<ProductEntity>> = mutableListOf()
@@ -39,9 +40,14 @@ class HomeViewModel (
         _uiUpdate.value = UiUpdate.Empty
     }
 
-    fun getAllBanners() = dbRepository.getAllBanners()
+    fun getBannersAndCategories() = viewModelScope.launch(Dispatchers.IO) {
+        val banners = dbRepository.getAllBanners()
+        val categories = dbRepository.getAllCategoriesStatic()
 
-    fun getALlCategories() = dbRepository.getAllProductCategories()
+        withContext(Dispatchers.Main) {
+            _uiUpdate.value = UiUpdate.PopulateInit(banners, categories as MutableList<ProductCategoryEntity>)
+        }
+    }
 
     fun signOut(context: Context) = viewModelScope.launch {
         fbRepository.signOut(context).let {
@@ -68,7 +74,7 @@ class HomeViewModel (
 
     }
 
-    private suspend fun getSpecialBanners(): Boolean = withContext(Dispatchers.IO){
+    private suspend fun getSpecialBanners(): Boolean = withContext(Dispatchers.IO) {
         try {
             dbRepository.getSpecialBanners().let { it ->
                 bannersList.clear()
@@ -105,6 +111,7 @@ class HomeViewModel (
             e.message?.let { fbRepository.logCrash("Home: populating best sellers from db", it) }
         }
     }
+
     private suspend fun getSpecialsOne() = withContext(Dispatchers.IO) {
         try {
             val one = dbRepository.getSpecialsOne()
@@ -112,7 +119,7 @@ class HomeViewModel (
             val products = arrayListOf<ProductEntity>()
             items.addAll(one.id)
             for (item in items.indices) {
-                dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
+                dbRepository.getProductWithIdForUpdate(items[item])?.let { products.add(it) }
             }
             bestSellersList.add(products)
             specialsTitles.add(one.name)
@@ -120,6 +127,7 @@ class HomeViewModel (
             e.message?.let { fbRepository.logCrash("Home: populating spl one from db", it) }
         }
     }
+
     private suspend fun getSpecialsTwo() = withContext(Dispatchers.IO) {
         try {
             val two = dbRepository.getSpecialsTwo()
@@ -127,7 +135,7 @@ class HomeViewModel (
             val products = arrayListOf<ProductEntity>()
             items.addAll(two.id)
             for (item in items.indices) {
-                dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
+                dbRepository.getProductWithIdForUpdate(items[item])?.let { products.add(it) }
             }
             bestSellersList.add(products)
             specialsTitles.add(two.name)
@@ -135,6 +143,7 @@ class HomeViewModel (
             e.message?.let { fbRepository.logCrash("Home: populating spl two from db", it) }
         }
     }
+
     private suspend fun getSpecialsThree() = withContext(Dispatchers.IO) {
         try {
             val three = dbRepository.getSpecialsThree()
@@ -142,7 +151,7 @@ class HomeViewModel (
             val products = arrayListOf<ProductEntity>()
             items.addAll(three.id)
             for (item in items.indices) {
-                dbRepository.getProductWithIdForUpdate(items[item])?.let{products.add(it)}
+                dbRepository.getProductWithIdForUpdate(items[item])?.let { products.add(it) }
             }
             bestSellersList.add(products)
             specialsTitles.add(three.name)
@@ -151,7 +160,7 @@ class HomeViewModel (
         }
     }
 
-    fun updateToken(token: String?)= viewModelScope.launch(Dispatchers.IO) {
+    fun updateToken(token: String?) = viewModelScope.launch(Dispatchers.IO) {
         token?.let {
             val birthdayCard: BirthdayCard? = fbRepository.updateToken(it)
             withContext(Dispatchers.Main) {
@@ -180,7 +189,7 @@ class HomeViewModel (
         val referralStatus = fbRepository.applyReferralNumber(currentUserID, code, true)
         withContext(Dispatchers.Main) {
             _uiUpdate.value =
-                UiUpdate.ReferralStatus(referralStatus, code,  null)
+                UiUpdate.ReferralStatus(referralStatus, code, null)
         }
     }
 
@@ -231,19 +240,34 @@ class HomeViewModel (
 
     sealed class UiUpdate {
         //populating data
-        object PopulateData: UiUpdate()
+        object PopulateData : UiUpdate()
+        data class PopulateInit(
+            val banners: List<BannerEntity>,
+            val categories: MutableList<ProductCategoryEntity>
+        ) : UiUpdate()
 
         //Notifications
-        data class ShowNotificationsCount(val count: Int?, val message: String?): UiUpdate()
+        data class ShowNotificationsCount(val count: Int?, val message: String?) : UiUpdate()
+
         //Testimonials
-        data class PopulateEnd(val testimonials: List<TestimonialsEntity>, val partners: List<Partners>?): UiUpdate()
-       //Birthday Card
-        data class ShowBirthDayCard(val birthdayCard: BirthdayCard?): UiUpdate()
+        data class PopulateEnd(
+            val testimonials: List<TestimonialsEntity>,
+            val partners: List<Partners>?
+        ) : UiUpdate()
+
+        //Birthday Card
+        data class ShowBirthDayCard(val birthdayCard: BirthdayCard?) : UiUpdate()
+
         //Referral
-        data class AllowReferral(val status: Boolean, val message: String?): UiUpdate()
-        data class ReferralStatus(val status: Boolean, val referralCode: String, val message: String?): UiUpdate()
+        data class AllowReferral(val status: Boolean, val message: String?) : UiUpdate()
+        data class ReferralStatus(
+            val status: Boolean,
+            val referralCode: String,
+            val message: String?
+        ) : UiUpdate()
+
         //signout
-        object SignOut: UiUpdate()
+        object SignOut : UiUpdate()
 
         object Empty : UiUpdate()
     }

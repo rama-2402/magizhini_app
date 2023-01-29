@@ -10,10 +10,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -63,8 +60,7 @@ class InvoiceActivity :
     KodeinAware,
     PaymentResultListener,
     AddressDialogClickListener,
-    CustomAlertClickListener
-{
+    CustomAlertClickListener {
     override val kodein: Kodein by kodein()
     private val factory: CheckoutViewModelFactory by instance()
     private lateinit var binding: ActivityCheckoutBinding
@@ -85,9 +81,6 @@ class InvoiceActivity :
 
         title = ""
         setSupportActionBar(binding.tbToolbar)
-        binding.ivBackBtn.setOnClickListener {
-            onBackPressed()
-        }
 
         showProgressDialog(true)
 
@@ -261,22 +254,23 @@ class InvoiceActivity :
                     arrayListOf<String>(
                         "Online",
                         "Wallet (Rs: ${viewModel.wallet?.amount})",
-                        "Cash On Delivery"
+                        "Cash On Delivery",
+                        "Place Order in Whatsapp"
                     )
                 )
-            } ?:let {
+            } ?: let {
                 viewModel.tempAddress?.let {
                     CustomAlertDialog(
                         this,
                         "User not Signed In",
-                    "To place order you should be Signed In with Google Account. If you do not wish to login you can still place order using Whatsapp. Select PLACE ORDER WITH WHATSAPP Option to place your order through whatsapp.",
+                        "To place order you should be Signed In with Google Account. If you do not wish to login you can still place order using Whatsapp. Select PLACE ORDER WITH WHATSAPP Option to place your order through whatsapp.",
                         "Sign In",
                         "order",
                         this
                     ).show()
                 } ?: showToast(this, "Enter address to place order")
-           }
-       }
+            }
+        }
     }
 
     private fun setBottomSheetIcon(content: String) {
@@ -393,13 +387,13 @@ class InvoiceActivity :
                 is CheckoutViewModel.UiUpdate.NoProfileFound -> {
                     SharedPref(this).getData(ADDRESS, STRING, "").let { address ->
                         if (address != "") {
-                            viewModel.tempAddress =  Utils.toAddressDataClass(address as String)
+                            viewModel.tempAddress = Utils.toAddressDataClass(address as String)
                         }
                         updateAddressInView(viewModel.tempAddress)
 //                        setDataToViews()
 //                        updateDeliveryCharge()
                     }
-               }
+                }
                 is CheckoutViewModel.UiUpdate.AddressUpdate -> {
                     if (event.isSuccess) {
                         showToast(this@InvoiceActivity, "Address Updated")
@@ -414,18 +408,15 @@ class InvoiceActivity :
                     }
                     setDataToViews()
                 }
-//                is CheckoutViewModel.UiUpdate.CouponApplied -> {
-//                    this.hideKeyboard()
-//                    if (event.message != "") {
-//                        showErrorSnackBar(event.message, false)
-//                        setDataToViews()
-//                        applyUiChangesWithCoupon(true)
-//                    } else {
-//                        viewModel.currentCoupon?.let {
-//                            applyUiChangesWithCoupon(false)
-//                        }
-//                    }
-//                }
+                is CheckoutViewModel.UiUpdate.CouponApplied -> {
+                    this.hideKeyboard()
+                    if (event.message == "") {
+                        showErrorSnackBar(event.message, false)
+                        applyUiChangesWithCoupon(false)
+                    } else {
+                        applyUiChangesWithCoupon(true)
+                    }
+                }
                 is CheckoutViewModel.UiUpdate.CartCleared -> {
                     cartAdapter.emptyCart()
                     setDataToViews()
@@ -441,6 +432,10 @@ class InvoiceActivity :
                     } else {
                         openInBrowser(event.url)
                     }
+                }
+                is CheckoutViewModel.UiUpdate.PlaceOrderWithWhatsapp -> {
+                    event.msg?.let { showToast(this, it) }
+                    placeOrderWithWhatsapp()
                 }
                 is CheckoutViewModel.UiUpdate.Empty -> return@observe
                 else -> Unit
@@ -463,10 +458,10 @@ class InvoiceActivity :
     private fun updateAddressInView(addressData: Address?) {
         binding.apply {
             addressData?.let { address ->
-                tvUserName.setTextAnimation(address.userId)
-                tvAddressOne.setTextAnimation(address.addressLineOne)
-                tvAddressTwo.setTextAnimation(address.addressLineTwo)
-                tvAddressCity.setTextAnimation("${address.city} - ${address.LocationCode}")
+                tvUserName.setTextAnimation(if (address.userId.isNullOrEmpty()) "" else address.userId)
+                tvAddressOne.setTextAnimation(if (address.addressLineOne.isNullOrEmpty()) "" else address.addressLineOne)
+                tvAddressTwo.setTextAnimation(if (address.addressLineTwo.isNullOrEmpty()) "" else address.addressLineTwo)
+                tvAddressCity.setTextAnimation("${if (address.city.isNullOrEmpty()) "" else address.city} - ${if (address.LocationCode.isNullOrEmpty()) "" else address.LocationCode}")
             } ?: let {
                 tvUserName.setTextAnimation("You have not Logged In")
                 tvAddressOne.setTextAnimation("Tap to update Address Details to place order")
@@ -511,30 +506,35 @@ class InvoiceActivity :
         LoadStatusDialog.statusText.value = filter
     }
 
-//    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
-//        binding.apply {
-//            if (isCouponApplied) {
-////                etCoupon.disable()
-////                ivCouponInfo.fadInAnimation()
-////                btnApplyCoupon.text = "Remove"
-//            } else {
-////                viewModel.couponPrice = null
-////                viewModel.currentCoupon = null
-//                setDataToViews()
-////                etCoupon.setText("")
-////                etCoupon.enable()
-////                ivCouponInfo.fadOutAnimation()
-////                ivCouponInfo.remove()
-////                btnApplyCoupon.text = "Apply"
-////                btnApplyCoupon.setBackgroundColor(
-////                    ContextCompat.getColor(
-////                        baseContext,
-////                        R.color.green_base
-////                    )
-////                )
-//            }
-//        }
-//    }
+    private fun applyUiChangesWithCoupon(isCouponApplied: Boolean) {
+        binding.apply {
+            if (isCouponApplied) {
+                etCoupon.disable()
+                ivCouponInfo.fadInAnimation()
+                btnApplyCoupon.remove()
+                ivCouponInfo.visible()
+            } else {
+                viewModel.couponPrice = null
+                viewModel.currentCoupon = null
+                etCoupon.setText("")
+                etCoupon.enable()
+                btnApplyCoupon.visible()
+                ivCouponInfo.fadOutAnimation()
+                ivCouponInfo.remove()
+                btnApplyCoupon.text = "Apply"
+                btnApplyCoupon.backgroundTintList = ColorStateList.valueOf(
+                    ContextCompat.getColor(btnApplyCoupon.context, R.color.matteRed)
+                )
+//                btnApplyCoupon.setBackgroundColor(
+//                    ContextCompat.getColor(
+//                        baseContext,
+//                        R.color.green_base
+//                    )
+//                )
+            }
+        }
+        setDataToViews()
+    }
 
     fun selectedPaymentMode(paymentMethod: String) {
         if (!NetworkHelper.isOnline(this)) {
@@ -572,6 +572,7 @@ class InvoiceActivity :
                         "cod"
                     )
                 }
+                "Place Order in Whatsapp" -> placeOrderWithWhatsapp()
                 else -> {
                     showSwipeConfirmationDialog(
                         this@InvoiceActivity,
@@ -601,17 +602,20 @@ class InvoiceActivity :
     }
 
     private suspend fun updateDeliveryCharge() {
-            viewModel.userProfile?.let {
+        viewModel.userProfile?.let {
+            binding.tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
+        } ?: let {
+            viewModel.tempAddress?.let {
                 binding.tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
             } ?: let {
-                viewModel.tempAddress?.let {
-                    binding.tvDeliveryChargeAmt.text = viewModel.getDeliveryCharge().toString()
-                } ?: let {
-                    binding.tvDeliveryChargeAmt.setTextAnimation("0.00")
-                }
+                binding.tvDeliveryChargeAmt.setTextAnimation("0.00")
             }
+        }
         binding.tvTotalAmt.setTextAnimation(
-            "${binding.tvTotalAmt.text.toString().toFloat() + binding.tvDeliveryChargeAmt.text.toString().toFloat()}"
+            "${
+                binding.tvTotalAmt.text.toString()
+                    .toFloat() + binding.tvDeliveryChargeAmt.text.toString().toFloat()
+            }"
         )
         hideProgressDialog()
     }
@@ -641,8 +645,9 @@ class InvoiceActivity :
 //        val cartOriginalPrice = viewModel.getCartOriginalPrice(cartItems)
 //        val cartPrice = viewModel.getCartPrice(cartItems)
         val priceList = viewModel.getCartPrice(cartItems)
-        val freeDeliveryLimit: Float = viewModel.freeDeliveryLimit ?: viewModel.getFreeDeliveryLimit()
-            with(binding) {
+        val freeDeliveryLimit: Float =
+            viewModel.freeDeliveryLimit ?: viewModel.getFreeDeliveryLimit()
+        with(binding) {
             var totalPrice = priceList[0]
             if (totalPrice >= freeDeliveryLimit) {
                 tvDeliveryChargeAmt.text = "0.00"
@@ -652,22 +657,25 @@ class InvoiceActivity :
             } else {
                 updateDeliveryCharge()
             }
+            viewModel.currentCoupon?.let {
+                viewModel.couponPrice = viewModel.couponDiscount(it, totalPrice.toDouble())
+                if (totalPrice < it.purchaseLimit) {
+                    showToast(this@InvoiceActivity, "Coupon removed. Purchase value is less that minimum requirements.")
+                    applyUiChangesWithCoupon(false)
+                    return@launch
+                }
+            }
             tvItemsOrderedCount.text = viewModel.getCartItemsQuantity(cartItems).toString()
             cartBtn.badgeValue = tvItemsOrderedCount.text.toString().toInt()
-//            tvMrpAmount.text = cartOriginalPrice.toString()
             tvMrpAmount.text = priceList[1].toString()
-//            tvSavingsInDiscountAmt.text = "${cartOriginalPrice - cartPrice}"
             tvSavingsInDiscountAmt.text = "${priceList[1] - priceList[0]}"
-//            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0f}"
+            tvSavingsInCouponAmt.text = "${viewModel.couponPrice ?: 0.0}"
             tvGstAmount.text = "${viewModel.gstAmount}"
-//            var totalPrice = cartPrice - (viewModel.couponPrice ?: 0.0f)
-//            var totalPrice = cartPrice
-            totalPrice += viewModel.gstAmount + binding.tvDeliveryChargeAmt.text.toString()
-                .toFloat()
+            totalPrice += (viewModel.gstAmount + binding.tvDeliveryChargeAmt.text.toString()
+                .toDouble() - tvSavingsInCouponAmt.text.toString().toDouble()).toFloat()
             binding.tvTotalAmt.setTextAnimation(
                 "${
                     Utils.roundPrice(totalPrice)
-//                    (totalPrice * 100.0).roundToInt() / 100.0
                 }"
             )
 
@@ -703,43 +711,60 @@ class InvoiceActivity :
             clAddress.setOnClickListener {
                 updateAddress()
             }
-//            btnApplyCoupon.setOnClickListener {
-//                val couponCode: String = binding.etCoupon.text.toString().trim()
-//                if (couponCode.isNullOrEmpty()) {
-//                    showToast(this@InvoiceActivity, "Enter a coupon code")
-//                    return@setOnClickListener
-//                }
-//                viewModel.couponPrice?.let {
-//                    applyUiChangesWithCoupon(false)
-//                } ?: viewModel.verifyCoupon(etCoupon.text.toString().trim(), viewModel.totalCartItems)
-//            }
-//            ivCouponInfo.setOnClickListener {
-//                ivCouponInfo.startAnimation(AnimationUtils.loadAnimation(ivCouponInfo.context, R.anim.bounce))
+
+            btnApplyCoupon.setOnClickListener {
+                if (btnApplyCoupon.text.toString() == "Apply") {
+                    val couponCode: String = binding.etCoupon.text.toString().trim()
+                    if (couponCode.isNullOrEmpty()) {
+                        showToast(this@InvoiceActivity, "Enter a coupon code")
+                        return@setOnClickListener
+                    }
+                    viewModel.currentCoupon?.let {
+                        applyUiChangesWithCoupon(true)
+                    } ?: viewModel.verifyCoupon(
+                        etCoupon.text.toString().trim(),
+                        viewModel.totalCartItems
+                    )
+                } else {
+                    applyUiChangesWithCoupon(false)
+                }
+            }
+
+            ivCouponInfo.setOnClickListener {
+                ivCouponInfo.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        ivCouponInfo.context,
+                        R.anim.bounce
+                    )
+                )
+                applyUiChangesWithCoupon(false)
 //                viewModel.currentCoupon?.let { coupon ->
-//                    val content = "This Coupon can be used only for the following criteria: \n \n Minimum Purchase Amount: ${coupon.purchaseLimit} \n " +
-//                            "Maximum Discount Amount: ${coupon.maxDiscount}\n" +
-//                            "\n \n \n ${coupon.description}"
+//                    val content =
+//                        "This Coupon can be used only for the following criteria: \n \n Minimum Purchase Amount: ${coupon.purchaseLimit} \n " +
+//                                "Maximum Discount Amount: ${coupon.maxDiscount}\n" +
+//                                "\n \n \n ${coupon.description}"
 //                    showDescriptionBs(content)
 //                }
-//            }
+            }
+
+            ivBackBtn.setOnClickListener {
+                onBackPressed()
+            }
+
+            ivCustomerSupport.setOnClickListener {
+                if (!NetworkHelper.isOnline(this@InvoiceActivity)) {
+                    showErrorSnackBar("Please check your Internet Connection", true)
+                    return@setOnClickListener
+                }
+                updatePreferenceData()
+                Intent(this@InvoiceActivity, ChatActivity::class.java).also {
+                    it.putExtra(NAVIGATION, CHECKOUT_PAGE)
+                    startActivity(it)
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+                }
+            }
         }
 
-        binding.ivBackBtn.setOnClickListener {
-            onBackPressed()
-        }
-
-        binding.ivCustomerSupport.setOnClickListener {
-            if (!NetworkHelper.isOnline(this)) {
-                showErrorSnackBar("Please check your Internet Connection", true)
-                return@setOnClickListener
-            }
-            updatePreferenceData()
-            Intent(this, ChatActivity::class.java).also {
-                it.putExtra(NAVIGATION, CHECKOUT_PAGE)
-                startActivity(it)
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-            }
-        }
 
 //        binding.ivHowTo.setOnClickListener {
 //            showProgressDialog(true)
@@ -848,7 +873,7 @@ class InvoiceActivity :
             viewModel.deliveryAvailable = true
             viewModel.userProfile?.let {
                 viewModel.updateAddress(address)
-            } ?:let {
+            } ?: let {
                 viewModel.tempAddress = address
                 SharedPref(this).putData(ADDRESS, STRING, Utils.toStringForSharedPref(address))
                 setDataToViews()
@@ -884,26 +909,36 @@ class InvoiceActivity :
     }
 
     override fun placeOrderWithWhatsapp() {
-            lifecycleScope.launch {
-                val cartItems = if (viewModel.isCWMCart) {
-                        viewModel.cwmDish
-                    } else {
-                        viewModel.totalCartItems
-                    }
+        lifecycleScope.launch {
+            val cartItems = if (viewModel.isCWMCart) {
+                viewModel.cwmDish
+            } else {
+                viewModel.totalCartItems
+            }
 
-                val message: String = "Order ID: ${System.currentTimeMillis()} \n Customer ID: Not Signed In \n Price: ${binding.tvTotalAmt.text} (Incl GST + Delivery Charge) \n Delivery Charge: ${binding.tvDeliveryChargeAmt.text} \n Transaction ID: COD \n Purchase Date: ${TimeUtil().getCurrentDate()} \n PaymentDone: False \n Payment Method: COD \n Delivery Preference: ${binding.spDeliveryPreference.selectedItem} \n Delivery Note: ${binding.etDeliveryNote.text} \n Address: ${viewModel.tempAddress!!.userId}, ${viewModel.tempAddress!!.addressLineOne}, ${viewModel.tempAddress!!.addressLineTwo}, ${viewModel.tempAddress!!.city}, ${viewModel.tempAddress!!.LocationCode} \n Cart Items: ${Utils.createOrderForWhatsapp(
-                    cartItems as ArrayList<CartEntity>
-                )}"
+            val message: String = viewModel.userProfile?.let {
+                "Order ID: ${System.currentTimeMillis()} \n Name: ${it.name} \n Phone Number: ${it.phNumber} \n Address: \n ${it.address[0].addressLineOne} \n ${it.address[0].addressLineTwo} \n ${it.address[0].city} - ${it.address[0].LocationCode} \n Price: ${binding.tvTotalAmt.text} (Incl GST + Delivery Charge) \n Delivery Charge: ${binding.tvDeliveryChargeAmt.text} \n Transaction ID: COD \n Purchase Date: ${TimeUtil().getCurrentDate()} \n PaymentDone: False \n Payment Method: COD \n Delivery Preference: ${binding.spDeliveryPreference.selectedItem} \n Delivery Note: ${binding.etDeliveryNote.text} \n Cart Items: ${
+                    Utils.createOrderForWhatsapp(
+                        cartItems as ArrayList<CartEntity>
+                    )
+                }"
+            } ?: let {
+                "Order ID: ${System.currentTimeMillis()} \n Customer ID: Not Signed In \n Price: ${binding.tvTotalAmt.text} (Incl GST + Delivery Charge) \n Delivery Charge: ${binding.tvDeliveryChargeAmt.text} \n Transaction ID: COD \n Purchase Date: ${TimeUtil().getCurrentDate()} \n PaymentDone: False \n Payment Method: COD \n Delivery Preference: ${binding.spDeliveryPreference.selectedItem} \n Delivery Note: ${binding.etDeliveryNote.text} \n Address: ${viewModel.tempAddress!!.userId}, ${viewModel.tempAddress!!.addressLineOne}, ${viewModel.tempAddress!!.addressLineTwo}, ${viewModel.tempAddress!!.city}, ${viewModel.tempAddress!!.LocationCode} \n Cart Items: ${
+                    Utils.createOrderForWhatsapp(
+                        cartItems as ArrayList<CartEntity>
+                    )
+                }"
+            }
 
-                 startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(
-                            "https://api.whatsapp.com/send?phone=+917299827393&text=$message"
-                        )
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(
+                        "https://api.whatsapp.com/send?phone=+917299827393&text=$message"
                     )
                 )
-            }
+            )
+        }
     }
 
     override fun onClick() {

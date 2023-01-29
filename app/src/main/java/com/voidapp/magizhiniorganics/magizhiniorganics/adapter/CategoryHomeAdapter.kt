@@ -64,7 +64,7 @@ class CategoryHomeAdapter(
     fun setCategoriesData(newList: List<ProductCategoryEntity>) {
         val diffUtil = CategoriesDiffUtil(categories, newList)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
-        categories = newList as ArrayList<ProductCategoryEntity>
+        categories = newList
         diffResult.dispatchUpdatesTo(this)
     }
 

@@ -63,7 +63,7 @@ class UpdateDataService (
             val getSpecialsThree = async { specialsThree() }
             val getSpecialsBanners = async { specialBanners() }
 //            val getAllNotifications = async { getAllData(USER_NOTIFICATIONS) }
-//            val couponData = async { getAllData(Constants.COUPON) }
+            val couponData = async { getAllData(Constants.COUPON) }
             val deliveryChargeData = async { getAllData(Constants.DELIVERY_CHARGE) }
             val testimonialsData = async { getAllData(TESTIMONIALS) }
 
@@ -77,7 +77,7 @@ class UpdateDataService (
             getSpecialsThree.await()
             getSpecialsBanners.await()
 //            val notificationSnapshot = getAllNotifications.await()
-//            val couponSnapshot = couponData.await()
+            val couponSnapshot = couponData.await()
             val deliveryChargeSnapshot = deliveryChargeData.await()
 
             val updateCategory =
@@ -88,8 +88,8 @@ class UpdateDataService (
                 async { filterDataAndUpdateRoom(Constants.PRODUCTS, productSnapshot) }
 //            val updateNotifications =
 //                async { filterDataAndUpdateRoom(Constants.USER_NOTIFICATIONS, notificationSnapshot) }
-//            val updateCoupon =
-//                async { filterDataAndUpdateRoom(Constants.COUPON, couponSnapshot) }
+            val updateCoupon =
+                async { filterDataAndUpdateRoom(Constants.COUPON, couponSnapshot) }
             val updateDeliveryCharge =
                 async { filterDataAndUpdateRoom(Constants.DELIVERY_CHARGE, deliveryChargeSnapshot) }
             val updateTestimonials =
@@ -100,7 +100,7 @@ class UpdateDataService (
             updateBanner.await()
 //            updateNotifications.await()
             updateTestimonials.await()
-//            updateCoupon.await()
+            updateCoupon.await()
             updateDeliveryCharge.await()
 
             updateEntityData()

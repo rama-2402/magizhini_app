@@ -8,9 +8,11 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.FirestoreReposi
 import com.voidapp.magizhiniorganics.magizhiniorganics.Firestore.useCase.QuickOrderUseCase
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.dao.DatabaseRepository
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CartEntity
+import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.CouponEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Address
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Wallet
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.PURCHASE
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.TimeUtil
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Utils
@@ -53,6 +55,9 @@ class CheckoutViewModel(
 
     var gstAmount: Float = 0f
 
+    var couponPrice: Double? = null
+    var currentCoupon: CouponEntity? = null
+
     private val _status: MutableStateFlow<NetworkResult> =
         MutableStateFlow<NetworkResult>(NetworkResult.Empty)
     val status: StateFlow<NetworkResult> = _status
@@ -80,6 +85,9 @@ class CheckoutViewModel(
                 }
             }
         } catch (e: IOException) {
+            withContext(Dispatchers.Main) {
+                _uiUpdate.value = UiUpdate.PlaceOrderWithWhatsapp("Failed to fetch user profile.")
+            }
             e.message?.let { fbRepository.logCrash("checkout: getting profile from db", it) }
         }
     }
@@ -139,7 +147,8 @@ class CheckoutViewModel(
         /*
         * we are making two different copies where one copy is passed initially and hard copy is made which is later used for recycler view
         * */
-        if (isCWMCart) {
+        try {
+         if (isCWMCart) {
             withContext(Dispatchers.Main) {
                 cwmDish.addAll(cartItems.map { it.copy() }) //making a hard copy to recyclerview update recycler view using diffUtil
                 _uiUpdate.value = UiUpdate.PopulateCartData(cartItems)
@@ -154,7 +163,12 @@ class CheckoutViewModel(
         } ?: withContext(Dispatchers.Main) {
             _uiUpdate.value = UiUpdate.PopulateCartData(null)
         }
-    }
+        } catch (e: IOException) {
+             withContext(Dispatchers.Main) {
+            _uiUpdate.value = UiUpdate.PlaceOrderWithWhatsapp("Failed to fetch the items in your cart.")
+        }
+        }
+   }
 
     fun deleteCartItem(id: Int, productId: String, variant: String, position: Int = 0) =
         viewModelScope.launch(Dispatchers.IO) {
@@ -292,73 +306,80 @@ class CheckoutViewModel(
     }
 
     //Coupons
-//    fun verifyCoupon(couponCode: String, cartItems: List<CartEntity>) =
-//        viewModelScope.launch(Dispatchers.IO) {
-//            if (couponCode == "") {
-//                return@launch
-//            } else {
-//                val code: CouponEntity? = currentCoupon?.let {
-//                    currentCoupon
-//                } ?: dbRepository.getCouponByCode(couponCode)
-//                code?.let { coupon ->
-//                    val cartPrice = getCartPrice(cartItems)
-//                    if (!coupon.categories.contains(Constants.ALL)) {
-//                        withContext(Dispatchers.Main) {
-//                            _uiEvent.value =
-//                                UIEvent.Toast("Coupon Applies only for few product categories")
-//                        }
-//                        return@launch
-//                    }
-//                    if (cartPrice >= coupon.purchaseLimit) {
+    fun verifyCoupon(couponCode: String, cartItems: List<CartEntity>) =
+        viewModelScope.launch(Dispatchers.IO) {
+            if (couponCode == "") {
+                return@launch
+            } else {
+                val code: CouponEntity? = currentCoupon?.let {
+                    it
+                } ?: dbRepository.getCouponByCode(couponCode)
+                code?.let { coupon ->
+                    val cartPrice = getCartPrice(cartItems)
+                    if (!coupon.categories.contains(Constants.ALL)) {
+                        withContext(Dispatchers.Main) {
+                            _uiEvent.value =
+                                UIEvent.Toast("Coupon Applies only for few product categories")
+                        }
+                        return@launch
+                    }
+                    if (cartPrice[1] >= coupon.purchaseLimit) {
 //                        if (couponPrice == null) {
 //                            withContext(Dispatchers.Main) {
-//                                _uiUpdate.value = UiUpdate.CouponApplied(
-//                                    "Coupon Applied Successfully!"
-//                                )
+//
 //                            }
 //                        }
-//                        withContext(Dispatchers.Main) {
-//                            currentCoupon = coupon
-//                            couponPrice = couponDiscount(coupon, cartPrice)
-//                        }
-////                    couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
-//                    } else {
-//                        withContext(Dispatchers.Main) {
-//                            _uiUpdate.value = UiUpdate.CouponApplied("")
-//                            _uiEvent.value =
-//                                UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
-//                        }
-//                        return@launch
-//                    }
-//                } ?: withContext(Dispatchers.Main) {
-//                    _uiEvent.value = UIEvent.Toast("Coupon Code does not exist.")
-//                }
-//            }
-//        }
-
-//    private fun couponDiscount(coupon: CouponEntity, cartPrice: Float): Float {
-//        var discountPrice = when (coupon.type) {
-//            "percent" -> (cartPrice * coupon.amount / 100)
-//            "rupees" -> coupon.amount
-//            else -> 0f
-//        }
-//
-//        if (discountPrice > coupon.maxDiscount) {
-//            discountPrice = coupon.maxDiscount
-//        }
-//
-//        return discountPrice
-//    }
-
-    suspend fun getFreeDeliveryLimit(): Float {
-        if (freeDeliveryLimit == null) {
-            freeDeliveryLimit = fbRepository.getFreeDeliveryLimit() ?: 30f
+                        withContext(Dispatchers.Main) {
+                            currentCoupon = coupon
+                            couponPrice = couponDiscount(coupon, cartPrice[1].toDouble())
+                            _uiUpdate.value = UiUpdate.CouponApplied(
+                                    "Coupon Applied Successfully!"
+                                )
+                        }
+//                    couponAppliedPrice = cartPrice - couponDiscount(coupon, cartPrice)
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            _uiEvent.value =
+                                UIEvent.Toast("Coupon Applies only for Purchase more than Rs: ${coupon.purchaseLimit}")
+                            _uiUpdate.value = UiUpdate.CouponApplied("")
+                        }
+                        return@launch
+                    }
+                } ?: withContext(Dispatchers.Main) {
+                    _uiEvent.value = UIEvent.Toast("Coupon Code does not exist.")
+                    _uiUpdate.value = UiUpdate.CouponApplied("")
+                }
+            }
         }
-        return freeDeliveryLimit!!
+
+    fun couponDiscount(coupon: CouponEntity, cartPrice: Double): Double {
+        var discountPrice: Double = when (coupon.type) {
+            "percent" -> (cartPrice * coupon.amount / 100)
+            "rupees" -> coupon.amount.toDouble()
+            else -> 0.0
+        }
+
+        if (discountPrice > coupon.maxDiscount) {
+            discountPrice = coupon.maxDiscount.toDouble()
+        }
+
+        return discountPrice
     }
 
+    suspend fun getFreeDeliveryLimit(): Float {
+        return  try {
+         if (freeDeliveryLimit == null) {
+            freeDeliveryLimit = fbRepository.getFreeDeliveryLimit() ?: 500f
+        }
+        freeDeliveryLimit!!
+        } catch (E: Exception) {
+            500f
+        }
+   }
+
     suspend fun getDeliveryCharge(): Float = withContext(Dispatchers.IO) {
-        return@withContext userProfile?.let {
+        return@withContext try {
+             userProfile?.let {
             dbRepository.getDeliveryCharge(it.address[0].LocationCode)?.let { pinCodes ->
                 if (pinCodes.isEmpty()) {
 //                        deliveryAvailability(null)
@@ -387,6 +408,9 @@ class CheckoutViewModel(
                 }
             }
         } ?: 30f
+        } catch (E: IOException) {
+            30f
+        }
     }
 
 //    private suspend fun deliveryAvailability(pinCodesEntity: PinCodesEntity?) = withContext(Dispatchers.Main){
@@ -602,8 +626,7 @@ fun placeOrderWithOnlinePayment(orderDetailsMap: HashMap<String, Any>) = viewMod
 private fun generateOrderID(): String {
     return userProfile?.let {
         TimeUtil().getOrderIDFormat(it.phNumber.takeLast(4))
-    }
-        ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
+    } ?: TimeUtil().getOrderIDFormat("${TimeUtil().getMonthNumber()}${TimeUtil().getDateNumber(0L)}")
 }
 
 fun updateReferralStatus() = viewModelScope.launch(Dispatchers.IO) {
@@ -631,9 +654,10 @@ sealed class UiUpdate {
     ) : UiUpdate()
 
     object NoProfileFound : UiUpdate()
+    data class PlaceOrderWithWhatsapp(val msg: String? = null): UiUpdate()
 
     //coupon
-//    data class CouponApplied(val message: String) : UiUpdate()
+    data class CouponApplied(val message: String) : UiUpdate()
 
     //wallet
     data class WalletData(val wallet: Wallet) : UiUpdate()

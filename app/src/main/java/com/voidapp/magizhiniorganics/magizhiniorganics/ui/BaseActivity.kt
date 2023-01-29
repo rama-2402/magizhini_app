@@ -308,6 +308,7 @@ open class BaseActivity : AppCompatActivity() {
                 is FoodOrderActivity -> {
                     when (data) {
                         "purchaseHistory" -> activity.navigateToOtherPage(data as String)
+                        "order" -> activity.placeOrder()
                     }
                 }
                 is FoodSubHistoryActivity -> {
