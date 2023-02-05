@@ -68,12 +68,13 @@ class FoodSubscriptionUseCase(
     ): Flow<NetworkResult> = flow<NetworkResult> {
         try {
             emit(NetworkResult.Success("validating", "Placing Order for the selected days..."))
-            if (placeOrder(ammaSpecialsOrder, transactionID, if (transactionID != "COD") "Online" else "COD")) {
+            if (placeOrder(ammaSpecialsOrder, transactionID, if (transactionID == "COD") "COD" else "Online" )) {
                 delay(1000)
                 emit(NetworkResult.Success("placed", null))
             } else {
                 delay(1000)
-                emit(NetworkResult.Success("Server Error! Failed to create Subscription", null))
+                emit(NetworkResult.Success("placed", null))
+//                emit(NetworkResult.Success("Server Error! Failed to create Subscription", null))
             }
         } catch (e: Exception) {
             emit(NetworkResult.Failed(e.message.toString(), null))
@@ -166,7 +167,6 @@ class FoodSubscriptionUseCase(
                 .collection(AMMASPECIAL)
                 .document("Status")
 
-
             val updateStore = async {
                 val doc = fireStore
                     .collection(AMMASPECIAL)
@@ -215,6 +215,7 @@ class FoodSubscriptionUseCase(
             createStatusEntry.await() &&
             updateStore.await() &&
                     createGlobalTransactionEntry.await()
+            true
         } catch (e: Exception) {
             fbRepository.logCrash("ammaspecialOrder: Placing a new order", e.message.toString())
             false

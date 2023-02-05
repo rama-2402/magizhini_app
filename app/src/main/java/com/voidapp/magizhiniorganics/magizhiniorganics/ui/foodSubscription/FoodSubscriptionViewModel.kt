@@ -72,33 +72,34 @@ class FoodSubscriptionViewModel(
         _uiUpdate.value = UiUpdate.Empty
     }
 
-    fun getAmmaSpecials() = viewModelScope.launch(Dispatchers.IO) {
-        val specials = foodSubscriptionUseCase.getAllAmmaSpecials()
+    fun getAmmaSpecials(menu: String) = viewModelScope.launch(Dispatchers.IO) {
+        var specials = foodSubscriptionUseCase.getAllAmmaSpecials()
         val banners = foodSubscriptionUseCase.getAllBanners()
-//        val specials = generateSampleSpecials()
+        var filteredBanners = mutableListOf<Banner>()
+        val filteredSpecials = mutableListOf<MenuImage>()
         ammaSpecials.clear()
-//        budgetPlanRecipes.clear()
-//        premiumPlanRecipes.clear()
-        specials?.let { specialsList ->
-            ammaSpecials.addAll(specialsList.sortedBy { it.displayOrder })
-//            specialsList.forEach {
-//                lunchMap[it.foodDay] = if (it.discountedPrice == 0.0) {
-//                    it.price
-//                } else {
-//                    it.discountedPrice
-//                }
-
-//                if (it.plan == "budget") {
-//                    budgetPlanRecipes.add(it)
-//                } else {
-//                    premiumPlanRecipes.add(it)
-//                }
-//            }
+       specials?.let { specialsList ->
+            if (menu == "amma") {
+                specials = specialsList.filter { it.menu == "v" }.sortedBy { it.displayOrder }
+                ammaSpecials.addAll(specials!!)
+                filteredBanners = banners?.filter { it.type == "v" } as MutableList<Banner>
+            } else {
+                specials = specialsList.filter { it.menu == "nv" }.sortedBy { it.displayOrder }
+                ammaSpecials.addAll(specials!!)
+                filteredBanners = banners?.filter { it.type == "nv" } as MutableList<Banner>
+            }
+            specials?.forEach {
+                if (it.name == "Lunch") {
+                    filteredSpecials.add(it)
+                }
+                if (it.name == "Dinner") {
+                    filteredSpecials.add(it)
+                }
+            }
         }
         withContext(Dispatchers.Main) {
-            _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, banners)
+            _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(filteredSpecials, filteredBanners)
         }
-//        _uiUpdate.value = UiUpdate.PopulateAmmaSpecials(specials, null)
     }
 
     //order activity

@@ -3,9 +3,7 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Rect
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -23,13 +21,10 @@ import androidx.lifecycle.lifecycleScope
 import com.github.sundeepk.compactcalendarview.CompactCalendarView
 import com.github.sundeepk.compactcalendarview.domain.Event
 import com.google.android.material.imageview.ShapeableImageView
-import com.google.firebase.firestore.auth.User
 import com.razorpay.PaymentResultListener
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.entities.UserProfileEntity
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecial
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.MenuImage
-import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityFoodOrderBinding
+import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityNvfoodOrderBinding
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.BaseActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.PreviewActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.dialogs.CustomAlertClickListener
@@ -50,9 +45,8 @@ import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
-class FoodOrderActivity :
+class NVFoodOrderActivity :
     BaseActivity(),
     PaymentResultListener,
     KodeinAware,
@@ -60,7 +54,7 @@ class FoodOrderActivity :
 {
 
     override val kodein: Kodein by kodein()
-    private lateinit var binding: ActivityFoodOrderBinding
+    private lateinit var binding: ActivityNvfoodOrderBinding
     private val factory: FoodSubscriptionViewModelFactory by instance()
     private lateinit var viewModel: FoodSubscriptionViewModel
 
@@ -72,7 +66,7 @@ class FoodOrderActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_food_order)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_nvfood_order)
         viewModel = ViewModelProvider(this, factory)[FoodSubscriptionViewModel::class.java]
 
 //        viewModel.lunchMap = intent.extras!!.get("lunch") as HashMap<String, Double>
@@ -140,7 +134,7 @@ class FoodOrderActivity :
     private fun initListeners() {
         binding.apply {
             KeyboardVisibilityEvent.setEventListener(
-                this@FoodOrderActivity
+                this@NVFoodOrderActivity
             ) { isOpen ->
                 if (isOpen) {
                     llPlaceOrder.remove()
@@ -183,7 +177,7 @@ class FoodOrderActivity :
 
                     if (viewModel.nonDeliveryDatesString.contains(TimeUtil().getCustomDate(dateLong = instanceToGetLongDate.timeInMillis))) {
                         showToast(
-                            this@FoodOrderActivity,
+                            this@NVFoodOrderActivity,
                             "Delivery not available on ${TimeUtil().getCustomDate(dateLong = instanceToGetLongDate.timeInMillis)}"
                         )
                         return
@@ -194,7 +188,7 @@ class FoodOrderActivity :
                         TimeUtil().getDayName(instanceToGetLongDate.timeInMillis) == "Sunday"
                     ) {
                         showToast(
-                            this@FoodOrderActivity,
+                            this@NVFoodOrderActivity,
                             "Delivery Not Available on Saturdays and Sundays"
                         )
                         return
@@ -204,7 +198,7 @@ class FoodOrderActivity :
                         instanceToGetLongDate.timeInMillis < System.currentTimeMillis() &&
                         TimeUtil().getCustomDate(dateLong = instanceToGetLongDate.timeInMillis) != TimeUtil().getCurrentDate()
                     ) {
-                        showToast(this@FoodOrderActivity, "Please pick a valid date")
+                        showToast(this@NVFoodOrderActivity, "Please pick a valid date")
                         return
                     }
 
@@ -266,7 +260,7 @@ class FoodOrderActivity :
             }
             ivAddLunch.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 binding.tvLunchCount.text = "${binding.tvLunchCount.text.toString().toInt() + 1}"
@@ -274,7 +268,7 @@ class FoodOrderActivity :
             }
             ivAddLunchWORice.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 binding.tvLunchWORiceCount.text = "${binding.tvLunchWORiceCount.text.toString().toInt() + 1}"
@@ -282,7 +276,7 @@ class FoodOrderActivity :
             }
             ivAddVD1.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 binding.tvVD1Count.text = "${binding.tvVD1Count.text.toString().toInt() + 1}"
@@ -290,7 +284,7 @@ class FoodOrderActivity :
             }
             ivAddVD2.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 binding.tvVD2Count.text = "${binding.tvVD2Count.text.toString().toInt() + 1}"
@@ -298,7 +292,7 @@ class FoodOrderActivity :
             }
             ivAddVD3.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 binding.tvVD3Count.text = "${binding.tvVD3Count.text.toString().toInt() + 1}"
@@ -306,7 +300,7 @@ class FoodOrderActivity :
             }
             ivAddVD4.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 binding.tvVD4Count.text = "${binding.tvVD4Count.text.toString().toInt() + 1}"
@@ -314,7 +308,7 @@ class FoodOrderActivity :
             }
             ivAddPlate.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 binding.tvPlateCount.text = "${binding.tvPlateCount.text.toString().toInt() + 1}"
@@ -322,7 +316,7 @@ class FoodOrderActivity :
             }
             ivMinusLunch.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 if (binding.tvLunchCount.text.toString() == "0") {
@@ -334,7 +328,7 @@ class FoodOrderActivity :
             }
             ivMinusLunchWORice.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 if (binding.tvLunchWORiceCount.text.toString() == "0") {
@@ -346,7 +340,7 @@ class FoodOrderActivity :
             }
             ivMinusVD1.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 if (binding.tvVD1Count.text.toString() == "0") {
@@ -358,7 +352,7 @@ class FoodOrderActivity :
             }
             ivMinusVD2.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 if (binding.tvVD2Count.text.toString() == "0") {
@@ -371,7 +365,7 @@ class FoodOrderActivity :
             }
             ivMinusVD3.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 if (binding.tvVD3Count.text.toString() == "0") {
@@ -384,7 +378,7 @@ class FoodOrderActivity :
             }
             ivMinusVD4.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 if (binding.tvVD4Count.text.toString() == "0") {
@@ -397,7 +391,7 @@ class FoodOrderActivity :
             }
             ivMinusPlate.setOnClickListener {
                 if (viewModel.selectedEventDates.isEmpty()) {
-                    showToast(this@FoodOrderActivity, "Please pick a start date from calendar")
+                    showToast(this@NVFoodOrderActivity, "Please pick a start date from calendar")
                     return@setOnClickListener
                 }
                 if (binding.tvPlateCount.text.toString() == "0") {
@@ -429,7 +423,7 @@ class FoodOrderActivity :
                 if (btnApplyCoupon.text.toString() == "Apply") {
                     val couponCode: String = binding.etCoupon.text.toString().trim()
                     if (couponCode.isNullOrEmpty()) {
-                        showToast(this@FoodOrderActivity, "Enter a coupon code")
+                        showToast(this@NVFoodOrderActivity, "Enter a coupon code")
                         return@setOnClickListener
                     }
                     viewModel.currentCoupon?.let {
@@ -543,12 +537,6 @@ class FoodOrderActivity :
                             return@apply
                         }
                     }
-                    binding.tvVD4Count.text.toString() != "0" -> {
-                        if (isDinnerTimeEnd) {
-                            showErrorSnackBar("Today's order intake for dinner is closed. You can select from Tomorrow", true)
-                            return@apply
-                        }
-                    }
 //                    else -> {
 //                        if (isLunchTimeEnd || isDinnerTimeEnd) {
 //                            showErrorSnackBar("Today's order intake for lunch and dinner is closed. You can select from Tomorrow", true)
@@ -590,15 +578,14 @@ class FoodOrderActivity :
                 tvLunchWORiceCount.text.toString() == "0" &&
                 tvVD1Count.text.toString() == "0" &&
                 tvVD2Count.text.toString() == "0" &&
-                tvVD3Count.text.toString() == "0" &&
-                tvVD4Count.text.toString() == "0" ->
+                tvVD3Count.text.toString() == "0" ->
             {
                     showErrorSnackBar("Please pick the number of Order from Order Options", true)
                     return
                 }
 
                 else -> {
-                    if (!NetworkHelper.isOnline(this@FoodOrderActivity)) {
+                    if (!NetworkHelper.isOnline(this@NVFoodOrderActivity)) {
                         showErrorSnackBar("Please check your Internet Connection", true)
                         return
                     }
@@ -615,15 +602,14 @@ class FoodOrderActivity :
                         if (
                             tvVD1Count.text.toString() != "0" ||
                             tvVD2Count.text.toString() != "0" ||
-                            tvVD3Count.text.toString() != "0" ||
-                            tvVD4Count.text.toString() != "0"
+                            tvVD3Count.text.toString() != "0"
                         ) {
                             viewModel.deliveryCharge = viewModel.deliveryCharge + (deliveryCharge * viewModel.selectedEventDates.size)
                             deliveryMealNumber += 1
                         }
                         if (viewModel.deliveryCharge != 0.0) {
                              showExitSheet(
-                                this@FoodOrderActivity,
+                                this@NVFoodOrderActivity,
                                 "Total Delivery charge (Rs: ${(viewModel.deliveryCharge / deliveryMealNumber) / viewModel.selectedEventDates.size}) for ${viewModel.selectedEventDates.size} days is Rs:${viewModel.deliveryCharge} \n Separate delivery charge for Lunch and Dinner",
                                 "order"
                             )
@@ -637,23 +623,23 @@ class FoodOrderActivity :
     fun placeOrder() {
         if (viewModel.userID == null || viewModel.userID == "") {
                     CustomAlertDialog(
-                        this@FoodOrderActivity,
+                        this@NVFoodOrderActivity,
                         "User not Signed In",
-                        "You have not Signed In to Magizhini Organics. To utilize the feature to fullest please consider Signing In. You can still subscribe to Amma Samayal Food via whatsapp. Click SIGN IN to login or SUBSCRIBE button to place subscription via whatsapp",
+                        "You have not Signed In to Magizhini Organics. To utilize the feature to fullest please consider Signing In. You can still subscribe to Amma Samayal (Non-Veg) Food via whatsapp. Click SIGN IN to login or SUBSCRIBE button to place subscription via whatsapp",
                         "Sign In",
                         "food",
-                        this@FoodOrderActivity
+                        this@NVFoodOrderActivity
                     ).show()
                 } else {
          showListBottomSheet(
-            this@FoodOrderActivity,
+            this@NVFoodOrderActivity,
             arrayListOf("Pay on Delivery", "Online", "Magizhini Wallet")
         )
         }
    }
 
     fun selectedPaymentMode(paymentMode: String) = lifecycleScope.launch {
-        if (!NetworkHelper.isOnline(this@FoodOrderActivity)) {
+        if (!NetworkHelper.isOnline(this@NVFoodOrderActivity)) {
             showErrorSnackBar("Please check your Internet Connection", true)
             return@launch
         }
@@ -661,7 +647,7 @@ class FoodOrderActivity :
             "Online" -> {
             viewModel.userProfile?.let {
                 startPayment(
-                    this@FoodOrderActivity,
+                    this@NVFoodOrderActivity,
                     it.mailId,
                     ((viewModel.totalPrice + viewModel.deliveryCharge) * 100).toFloat(),
                     it.name,
@@ -670,7 +656,7 @@ class FoodOrderActivity :
                 ).also { status ->
                     if (!status) {
                         Toast.makeText(
-                            this@FoodOrderActivity,
+                            this@NVFoodOrderActivity,
                             "Error in processing payment. Try Later ",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -692,7 +678,7 @@ class FoodOrderActivity :
                     showErrorSnackBar("Insufficient Balance in Wallet.", true)
                     return@launch
                 }
-                showSwipeConfirmationDialog(this@FoodOrderActivity, "swipe right to make payment")
+                showSwipeConfirmationDialog(this@NVFoodOrderActivity, "swipe right to make payment")
             } ?: showErrorSnackBar("Server Error! Failed to fetch Wallet", true)
         }
         }
@@ -729,7 +715,7 @@ class FoodOrderActivity :
         if (binding.tvVD4Count.text.toString() == "0") {
             orders.add("")
         } else {
-            orders.add("VD4 - ${binding.tvVD4Count.text}")
+            orders.add("Extra chicken gravy and egg - ${binding.tvVD4Count.text}")
         }
         binding.apply {
             orderDetailsMap["start"] = viewModel.selectedEventDates.min()
@@ -926,7 +912,7 @@ class FoodOrderActivity :
                 (binding.tvVD1Count.text.toString().toInt() * viewModel.ammaSpecials[2].price) +
                 (binding.tvVD2Count.text.toString().toInt() * viewModel.ammaSpecials[2].price) +
                 (binding.tvVD3Count.text.toString().toInt() * viewModel.ammaSpecials[2].price) +
-                (binding.tvVD4Count.text.toString().toInt() * viewModel.ammaSpecials[2].price) +
+                (binding.tvVD4Count.text.toString().toInt() * 65) +
         (binding.tvPlateCount.text.toString().toInt() * 9)
 
         totalPrice *= viewModel.selectedEventDates.size
@@ -1078,7 +1064,7 @@ class FoodOrderActivity :
 
     private fun requestToJoinCommunity() {
          lifecycleScope.launch {
-            val message: String = "Hi, I would like to join Amma Samayal Whatsapp Community!"
+            val message: String = "Hi, I would like to join Amma Samayal (Non-Veg) Whatsapp Community!"
             startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
@@ -1117,7 +1103,7 @@ class FoodOrderActivity :
               foodType = "$foodType VD3 - (${binding.tvVD3Count.text})"
             }
             if (binding.tvVD4Count.text.toString() != "0") {
-              foodType = "$foodType VD4 - (${binding.tvVD4Count.text})"
+              foodType = "$foodType Extra chicken gravy with egg - (${binding.tvVD4Count.text})"
             }
 
             return "Subscription ID: ${System.currentTimeMillis()} \n" +

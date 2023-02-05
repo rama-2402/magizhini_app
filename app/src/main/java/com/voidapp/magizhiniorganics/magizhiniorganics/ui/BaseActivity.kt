@@ -29,6 +29,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.checkout.InvoiceActivi
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.cwm.dish.DishActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodOrderActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.FoodSubHistoryActivity
+import com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription.NVFoodOrderActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.home.HomeActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.product.ProductActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.profile.ProfileActivity
@@ -311,6 +312,12 @@ open class BaseActivity : AppCompatActivity() {
                         "order" -> activity.placeOrder()
                     }
                 }
+                is NVFoodOrderActivity -> {
+                    when (data) {
+                        "purchaseHistory" -> activity.navigateToOtherPage(data as String)
+                        "order" -> activity.placeOrder()
+                    }
+                }
                 is FoodSubHistoryActivity -> {
                     when(data) {
                         "delivery" -> activity.cancelDeliveryConfirmed()
@@ -521,10 +528,15 @@ open class BaseActivity : AppCompatActivity() {
                         hideListBottomSheet()
                         when (data) {
                             "filter" -> activity.filterOrders(position)
+                            "menu" -> activity.selectedMenuType(position)
                             else -> activity.selectedPaymentMode(selectedItem)
                         }
                     }
                     is FoodOrderActivity -> {
+                        hideListBottomSheet()
+                        activity.selectedPaymentMode(selectedItem)
+                    }
+                    is NVFoodOrderActivity -> {
                         hideListBottomSheet()
                         activity.selectedPaymentMode(selectedItem)
                     }
@@ -573,6 +585,10 @@ open class BaseActivity : AppCompatActivity() {
             override fun onSlideComplete(view: SlideToActView) {
                 when (activity) {
                     is FoodOrderActivity -> {
+                        mSwipeConfirmationBottomSheet.dismiss()
+                        activity.approved(true)
+                    }
+                    is NVFoodOrderActivity -> {
                         mSwipeConfirmationBottomSheet.dismiss()
                         activity.approved(true)
                     }

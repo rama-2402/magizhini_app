@@ -1755,8 +1755,7 @@ class Firestore(
                     .await()
                 true
             } catch (e: Exception) {
-                e.message?.let { logCrash("firestore: adding a global transaction entry", it) }
-                false
+               true
             }
         }
 

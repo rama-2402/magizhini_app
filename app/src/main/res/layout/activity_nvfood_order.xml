@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        tools:context=".ui.foodSubscription.FoodOrderActivity">
+        tools:context=".ui.foodSubscription.NVFoodOrderActivity">
 
         <LinearLayout
             android:id="@+id/toolbar"
@@ -57,7 +57,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/material_size_8"
                             android:fontFamily="@font/roboto"
-                            android:text="Amma Samayal"
+                            android:text="Aachi Samayal"
                             android:textColor="@color/white"
                             android:textSize="18sp" />
 
@@ -67,7 +67,7 @@
                             android:layout_marginStart="@dimen/material_size_8"
                             android:layout_marginTop="@dimen/material_size_2"
                             android:fontFamily="@font/roboto"
-                            android:text="Authentic Home-Made Organic Food"
+                            android:text="Authentic Home-Made Non-Veg Food"
                             android:textColor="@color/white"
                             android:textSize="@dimen/text_size_small" />
                     </LinearLayout>
@@ -333,7 +333,7 @@
                     android:id="@+id/tvVD1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="VD - 1"
+                    android:text="ND - 1"
                     android:textColor="@color/gray700"
                     android:layout_marginTop="@dimen/material_size_8"
                     android:ellipsize="marquee"
@@ -351,7 +351,7 @@
                     android:id="@+id/tvVD2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="VD - 2"
+                    android:text="ND - 2"
                     android:textColor="@color/gray700"
                     android:layout_marginTop="@dimen/material_size_8"
                     android:ellipsize="marquee"
@@ -369,7 +369,7 @@
                     android:id="@+id/tvVD3"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="VD - 3"
+                    android:text="ND - 3"
                     android:textColor="@color/gray700"
                     android:layout_marginTop="@dimen/material_size_8"
                     android:ellipsize="marquee"
@@ -387,7 +387,7 @@
                     android:id="@+id/tvVD4"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="VD - 4"
+                    android:text="Extra Chicken Gravy and Egg (Rs: 65)"
                     android:textColor="@color/gray700"
                     android:layout_marginTop="@dimen/material_size_8"
                     android:ellipsize="marquee"

@@ -58,6 +58,7 @@ import com.voidapp.magizhiniorganics.magizhiniorganics.ui.shoppingItems.Shopping
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.subscriptionHistory.SubscriptionHistoryActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.ui.wallet.WalletActivity
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants
+import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.AACHISAMAYAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.ALL_PRODUCTS
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.AMMASPECIAL
 import com.voidapp.magizhiniorganics.magizhiniorganics.utils.Constants.CATEGORY
@@ -610,6 +611,12 @@ class HomeActivity :
         }
     }
 
+    private fun navigateToAachiSamayal() {
+        Intent(this@HomeActivity, FoodSubHistoryActivity::class.java).also {
+            startActivity(it)
+        }
+    }
+
     private fun navigateToProductDetails(
         productID: String,
         productName: String,
@@ -948,13 +955,24 @@ class HomeActivity :
 
     //from categories adapter
     override fun selectedCategory(categoryName: String) {
-        if (categoryName.lowercase().contains("amma samayal")) {
-            Intent(this, FoodSubscriptionActivity::class.java).also {
-                startActivity(it)
+        when {
+            categoryName.lowercase().contains("( veg )") -> {
+                Intent(this, FoodSubscriptionActivity::class.java).also {
+                    it.putExtra("food", "amma")
+                    startActivity(it)
+                }
             }
-        } else {
-            navigateToSelectedCategory(categoryName)
+            categoryName.lowercase().contains("(non-veg)") -> {
+                Intent(this, FoodSubscriptionActivity::class.java).also {
+                    it.putExtra("food", "aachi")
+                    startActivity(it)
+                }
+            }
+            else -> {
+                navigateToSelectedCategory(categoryName)
+            }
         }
+
     }
 
     //custom alert dialog

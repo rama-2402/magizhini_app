@@ -2,19 +2,15 @@ package com.voidapp.magizhiniorganics.magizhiniorganics.ui.foodSubscription
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
-import android.view.Menu
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.imageview.ShapeableImageView
 import com.voidapp.magizhiniorganics.magizhiniorganics.R
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.FoodSubscriptionAdapter
 import com.voidapp.magizhiniorganics.magizhiniorganics.adapter.FoodSubscriptionItemClickListener
-import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.AmmaSpecial
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.Banner
 import com.voidapp.magizhiniorganics.magizhiniorganics.data.models.MenuImage
 import com.voidapp.magizhiniorganics.magizhiniorganics.databinding.ActivityFoodSubscriptionBinding
@@ -38,6 +34,7 @@ class FoodSubscriptionActivity :
     private lateinit var binding: ActivityFoodSubscriptionBinding
     private val factory: FoodSubscriptionViewModelFactory by instance()
     private lateinit var viewModel: FoodSubscriptionViewModel
+    private var foodType: String = ""
 
 //    private var lunchPrice: Double = 0.0
 //    private var dinnerPrice: Double = 0.0
@@ -49,14 +46,20 @@ class FoodSubscriptionActivity :
         binding = DataBindingUtil.setContentView(this, R.layout.activity_food_subscription)
         viewModel = ViewModelProvider(this, factory)[FoodSubscriptionViewModel::class.java]
 
+        foodType = intent.getStringExtra("food")!!
+
         initData()
         initLiveData()
         initListeners()
     }
 
     private fun initData() {
+        if (foodType == "aachi") {
+            binding.tvToolbarTitle.text = "Amma Samayal (Non-Veg)"
+            binding.tvToolbarTitleSubText.text = "Authentic Home-Made Non-Veg Food"
+        }
         showProgressDialog(true)
-        viewModel.getAmmaSpecials()
+        viewModel.getAmmaSpecials(foodType)
     }
 
     private fun initListeners() {
@@ -72,11 +75,18 @@ class FoodSubscriptionActivity :
                         R.anim.bounce
                     )
                 )
-                Intent(this@FoodSubscriptionActivity, FoodOrderActivity::class.java).also {
-                    it.putExtra("menu", Converters().menuToStringConverter(viewModel.ammaSpecials))
-                    startActivity(it)
+                if (foodType == "amma") {
+                    Intent(this@FoodSubscriptionActivity, FoodOrderActivity::class.java).also {
+                        it.putExtra("menu", Converters().menuToStringConverter(viewModel.ammaSpecials))
+                        startActivity(it)
+                    }
+                } else {
+                    Intent(this@FoodSubscriptionActivity, NVFoodOrderActivity::class.java).also {
+                        it.putExtra("menu", Converters().menuToStringConverter(viewModel.ammaSpecials))
+                        startActivity(it)
+                    }
                 }
-            }
+           }
             ivHistory.setOnClickListener {
                 Intent(this@FoodSubscriptionActivity, FoodSubHistoryActivity::class.java).also {
                     startActivity(it)

@@ -647,6 +647,10 @@ class InvoiceActivity :
         val priceList = viewModel.getCartPrice(cartItems)
         val freeDeliveryLimit: Float =
             viewModel.freeDeliveryLimit ?: viewModel.getFreeDeliveryLimit()
+        if (freeDeliveryLimit >= 2000f) {
+            binding.tvFreeDeliveryNotif.remove()
+            binding.tvFreeDelivery.remove()
+        }
         with(binding) {
             var totalPrice = priceList[0]
             if (totalPrice >= freeDeliveryLimit) {

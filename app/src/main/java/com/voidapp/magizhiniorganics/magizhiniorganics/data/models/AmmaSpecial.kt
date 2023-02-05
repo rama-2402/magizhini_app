@@ -80,7 +80,8 @@ data class MenuImage(
     var name: String = "",
     var thumbnailUrl: String = "",
     var displayOrder: Int = 0,
-    var price: Double = 0.0
+    var price: Double = 0.0,
+    var menu: String = ""
 ): Parcelable
 
 

@@ -135,10 +135,11 @@ class FoodSubHistoryActivity :
             })
             btnGoToBox.setOnClickListener {
                 if (btnGoToBox.text == "OPEN MENU") {
-                    Intent(this@FoodSubHistoryActivity, FoodSubscriptionActivity::class.java).also {
-                        startActivity(it)
-                        finish()
-                    }
+                    showListBottomSheet(
+                        this@FoodSubHistoryActivity,
+                        arrayListOf("Amma Samayal (Veg)", "Amma Samayal (Non-Veg)"),
+                        "menu"
+                    )
                 } else {
                     showExitSheet(
                         this@FoodSubHistoryActivity,
@@ -185,7 +186,11 @@ class FoodSubHistoryActivity :
                 }
             }
             fabFilter.setOnClickListener {
-                showListBottomSheet(this@FoodSubHistoryActivity, arrayListOf("Pending","Delivered","Cancelled","Failed"), "filter")
+                showListBottomSheet(
+                    this@FoodSubHistoryActivity,
+                    arrayListOf("Pending", "Delivered", "Cancelled", "Failed"),
+                    "filter"
+                )
             }
         }
     }
@@ -563,7 +568,6 @@ class FoodSubHistoryActivity :
 
     fun renewSubscriptionConfirmed() {
         viewModel.getProfile()
-        viewModel.getAmmaSpecials()
     }
 
     private fun removeEvent(time: Long) {
@@ -642,9 +646,9 @@ class FoodSubHistoryActivity :
 //                    btnGoToBox.text = "CANCEL \nSUBSCRIPTION"
 //                    btnRenewSub.text = "RENEW \nSUBSCRIPTION"
 //                } else {
-                    binding.btnRenewSub.remove()
-                    binding.btnGoToBox.visible()
-                    binding.btnGoToBox.text = "CANCEL SUBSCRIPTION"
+            binding.btnRenewSub.remove()
+            binding.btnGoToBox.visible()
+            binding.btnGoToBox.text = "CANCEL SUBSCRIPTION"
 //                }
 //            }
         }
@@ -737,7 +741,7 @@ class FoodSubHistoryActivity :
     override fun placeOrderWithWhatsapp() {
         lifecycleScope.launch {
             val message: String =
-                "Hi, ${viewModel.tempAddress?.let { "I\'m ${it.userId}" } ?: "I haven't Logged In."}. I need support with my Amma\'s Special Subscription. I have provided my Name, Subscription ID and Reason below for further reference. Thank you."
+                "Hi, ${viewModel.tempAddress?.let { "I\'m ${it.userId}" } ?: "I haven't Logged In."}. I need support with my Amma Samayal Subscription. I have provided my Name, Subscription ID and Reason below for further reference. Thank you."
 
             startActivity(
                 Intent(
@@ -756,9 +760,10 @@ class FoodSubHistoryActivity :
         statusAdapter.selectedPosition = null
         binding.btnRenewSub.remove()
         binding.btnGoToBox.remove()
-        when(position) {
+        when (position) {
             0 -> {
-                statusAdapter.orders = viewModel.ammaSpecialOrders.filter { it.status != "success" && it.status != "fail" && it.status != "cancel" }
+                statusAdapter.orders =
+                    viewModel.ammaSpecialOrders.filter { it.status != "success" && it.status != "fail" && it.status != "cancel" }
                 if (statusAdapter.orders.isNullOrEmpty()) {
                     showToast(this, "No current pending deliveries")
                 }
@@ -791,6 +796,22 @@ class FoodSubHistoryActivity :
             }
         }
         hideProgressDialog()
+    }
+
+    fun selectedMenuType(position: Int) {
+        if (position == 0) {
+            Intent(this@FoodSubHistoryActivity, FoodSubscriptionActivity::class.java).also {
+                it.putExtra("food", "amma")
+                startActivity(it)
+                finish()
+            }
+        } else {
+Intent(this@FoodSubHistoryActivity, FoodSubscriptionActivity::class.java).also {
+                it.putExtra("food", "aachi")
+                startActivity(it)
+                finish()
+            }
+        }
     }
 }
 
