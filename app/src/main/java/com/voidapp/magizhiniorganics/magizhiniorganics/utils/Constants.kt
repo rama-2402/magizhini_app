@@ -201,11 +201,6 @@ object Constants {
     const val SATURDAY: String = "Saturday"
     const val SUNDAY: String = "Sunday"
 
-    //FCM
-    const val BASE_URL = "https://fcm.googleapis.com"
-    const val SERVER_KEY = "AAAAicvCZoA:APA91bGUQOWLoRac1IR6wlE3deLM-d4T8PBl9JRiJe9AesvbaN4WOQJjwgcLf8yQ6M5I-uDGKLF_PDA7E0R-qQfB14P1I97NHMCGOhHxB7p4HZpoYVtbqtnLl6ocUR6Y1gWX1iAMKvKl"
-    const val CONTENT_TYPE = "application/json"
-
     //notification
     const val BROADCAST: String = "/topics/magizhiniBroadcast"
     const val ONLINE_STATUS: String = "online"
